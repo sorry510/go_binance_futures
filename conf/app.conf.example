@@ -1,0 +1,38 @@
+# 切记不要使用单引号, 只能使用双引号或者不使用引号
+
+appname = binance_futures
+api_key = "your api key"
+api_secret = "your api secret"
+log = 1
+
+[coin]
+buy_timeOut = 300 # 挂单购买的超时时间, 秒级别
+exclude_symbols = ""
+max_count = 10
+sleep_time = 1
+websocket = 1
+order_type = LIMIT # 开仓的下单类型, MARKET 市价, LIMIT: 限价(根据价格深度取平均价挂单，有可能无法买入)
+allow_long = 1
+allow_short = 1
+hold_max_time = 1800 # 持仓的最长时间, 秒级别
+
+[trade]
+usdt = 10
+profit = 10
+loss = 10
+leverage = 15
+strategy_trade = trade1
+strategy_coin = coin1
+
+[web]
+port = 3333
+index = zmkm
+secret_key = sorry510
+username = admin
+password = admin
+commend_start = pm2 restart binance_futures
+commend_stop = pm2 restart binance_futures
+
+[dingding]
+dingding_token = ""
+dingding_word = ""
