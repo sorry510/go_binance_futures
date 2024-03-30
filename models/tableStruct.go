@@ -21,7 +21,6 @@ type Order struct {
 type Symbols struct {
 	ID int64 `orm:"column(id)" json:"id"`
 	Symbol string `orm:"column(symbol)" json:"symbol"`
-	Quantity string `orm:"column(quantity)" json:"quantity"`
 	PercentChange float64 `orm:"column(percentChange)" json:"percentChange"`
 	Close string `orm:"column(close)" json:"close"`
 	Open string `orm:"column(open)" json:"open"`
@@ -30,6 +29,12 @@ type Symbols struct {
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 	LastClose string `orm:"column(lastClose)" json:"lastClose"`
 	LastUpdateTime int64 `orm:"column(lastUpdateTime)" json:"lastUpdateTime"`
+	
+	Leverage int64 `orm:"column(leverage)" json:"leverage"` // 合约倍数
+	MarginType string `orm:"column(marginType)" json:"marginType"` // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
+	TickSize string `orm:"column(tickSize)" json:"tickSize"` // 交易金额精度
+	StepSize string `orm:"column(stepSize)" json:"stepSize"` // 交易数量精度
+	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
 }
 
 func (u *Order) TableName() string {

@@ -1,9 +1,12 @@
 # 切记不要使用单引号, 只能使用双引号或者不使用引号
 
 appname = binance_futures
+log = 1
+
+[binance]
 api_key = "your api key"
 api_secret = "your api secret"
-log = 1
+
 
 [coin]
 buy_timeOut = 300 # 挂单购买的超时时间, 秒级别
@@ -17,10 +20,8 @@ allow_short = 1
 hold_max_time = 1800 # 持仓的最长时间, 秒级别
 
 [trade]
-usdt = 10
 profit = 10
 loss = 10
-leverage = 15
 strategy_trade = trade1
 strategy_coin = coin1
 
