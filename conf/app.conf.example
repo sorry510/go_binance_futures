@@ -1,39 +1,50 @@
-# 切记不要使用单引号, 只能使用双引号或者不使用引号
-
+# 切记不要使用单引号, 只能使用双引号或者不使用引号, 注释需要单独一行
 appname = binance_futures
 log = 1
 
 [binance]
-api_key = "your api key"
-api_secret = "your api secret"
-
+api_key = ""
+api_secret = ""
 
 [coin]
-buy_timeOut = 300 # 挂单购买的超时时间, 秒级别
-exclude_symbols = ""
+# 挂单购买的超时时间, 秒级别
+buy_timeout = 300
+# 排除的币种,多个使用逗号分隔
+exclude_symbols = "1000SHIBUSDT"
+# 最大持仓数量
 max_count = 10
+# 轮训时间秒
 sleep_time = 1
-websocket = 1
-order_type = LIMIT # 开仓的下单类型, MARKET 市价, LIMIT: 限价(根据价格深度取平均价挂单，有可能无法买入)
+# 开仓的下单类型, MARKET 市价, LIMIT: 限价(根据价格深度取平均价挂单，有可能无法买入)
+order_type = LIMIT
+# 允许做多
 allow_long = 1
+# 允许做空
 allow_short = 1
-hold_max_time = 1800 # 持仓的最长时间, 秒级别
+# 持仓的最长时间, 秒级别
+hold_max_time = 1800
 
 [trade]
+# 是否开启交易的总开关
+enable = 1
+# 止盈百分比
 profit = 10
+# 止损百分比
 loss = 10
-strategy_trade = trade1
+# 购买策略
+strategy_trade = line1
+# 选币策略
 strategy_coin = coin1
 
 [web]
 port = 3333
 index = zmkm
-secret_key = sorry510
+secret_key = 12321
 username = admin
 password = admin
-commend_start = pm2 restart binance_futures
-commend_stop = pm2 restart binance_futures
+commend_start = "pm2 restart binance_futures"
+commend_stop = "pm2 restart binance_futures"
 
 [dingding]
 dingding_token = ""
-dingding_word = ""
+dingding_word = "报警"

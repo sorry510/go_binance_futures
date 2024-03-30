@@ -1,12 +1,12 @@
 package models
 
+// 切记需要注册model后才能使用
 type OrderTable struct {
 	Order
 	SideText string `orm:"column(sideText)" json:"sideText"`
 	PositionText string `orm:"column(positionText)" json:"positionText"`
 	UpdateDate string `orm:"column(updateDate)" json:"updateDate"`
 }
-
 type Order struct {
 	ID int64 `orm:"column(id)" json:"id,omitempty"`
 	Symbol string `orm:"column(symbol)" json:"symbol"`
@@ -37,10 +37,29 @@ type Symbols struct {
 	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
 }
 
+type NewSymbols struct {
+	ID int64 `orm:"column(id)" json:"id"`
+	Symbol string `orm:"column(symbol)" json:"symbol"`
+	Enable int `orm:"column(enable)" json:"enable"`
+	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
+	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+	Type int64 `orm:"column(type)" json:"type"` // 1:币币交易 2:合约交易
+	
+	Leverage int64 `orm:"column(leverage)" json:"leverage"` // 合约倍数
+	MarginType string `orm:"column(marginType)" json:"marginType"` // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
+	TickSize string `orm:"column(tickSize)" json:"tickSize"` // 交易金额精度
+	StepSize string `orm:"column(stepSize)" json:"stepSize"` // 交易数量精度
+	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
+}
+
 func (u *Order) TableName() string {
     return "order"
 }
 
 func (u *Symbols) TableName() string {
     return "symbols"
+}
+
+func (u *NewSymbols) TableName() string {
+    return "new_symbols"
 }

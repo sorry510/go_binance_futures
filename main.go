@@ -20,6 +20,7 @@ import (
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
 var taskSleepTime, _ = config.String("coin::sleep_time")
+var tradeEnable, _ = config.String("trade::enable")
 var taskSleepTimeInt, _ = strconv.Atoi(taskSleepTime)
 
 func init() {
@@ -34,6 +35,7 @@ func init() {
 func registerModels() {
 	orm.RegisterModel(new(models.Order))
 	orm.RegisterModel(new(models.Symbols))
+	orm.RegisterModel(new(models.NewSymbols))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db")
@@ -51,7 +53,7 @@ func main() {
 	go func() {
 		for {
 			feature.UpdateSymbolsTradePrecision()
-			time.Sleep(5 * time.Minute) // 5分钟更新一次精度
+			time.Sleep(12 * time.Hour) // 12小时更新一次
 		}
 	}()
 	
@@ -60,17 +62,20 @@ func main() {
 		binance.UpdateCoinByWs()
 	}()
 	
-	// trade script
-	go func() {
-		for {
-			feature.StartTrade()
+	if tradeEnable == "1" {
+		logs.Info("自动交易开启:", tradeEnable)
+		// trade script
+		go func() {
+			for {
+				feature.StartTrade()
 
-			// 等待 taskSleepTimeInt 秒再继续执行
-			time.Sleep(time.Duration(taskSleepTimeInt) * time.Second)
-		}
-	}()
+				// 等待 taskSleepTimeInt 秒再继续执行
+				time.Sleep(time.Duration(taskSleepTimeInt) * time.Second)
+			}
+		}()
+	}
 	
-	// // web
+	// web
 	web.Run(":" + webPort)
 }
 
