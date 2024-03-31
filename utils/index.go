@@ -30,6 +30,7 @@ func ToJson(data interface{}) string {
     return string(b)
 }
 
+// 根据 tickSize 或 stepSize 获取精度
 // e.i: (number "0.323443", size "0.01") => 0.32
 func GetTradePrecision(number_float64 float64, size string) float64 {
 	if size == "0.1" {
@@ -47,4 +48,42 @@ func GetTradePrecision(number_float64 float64, size string) float64 {
 	} else {
 		return math.Round(number_float64)
 	}
+}
+
+// 计算逻辑: ma(5)=(收盘价1+收盘价2+收盘价3+收盘价4+收盘价5)/5
+func MaN(closePrice []float64, n int) float64 {
+	allPrice := 0.0
+	for i := 0; i < n; i++ {
+		allPrice += closePrice[i]
+	}
+	return allPrice / float64(n)
+}
+
+
+// ma 的 n 条数据
+func MaNList(closePrice []float64, n int, count int) (maNList []float64) {
+	for i := 0; i < count; i++ {
+		maNList = append(maNList, MaN(closePrice[i:], n))
+	}
+	return maNList
+}
+
+// 是否是一个降序数组
+func IsDesc(arr []float64) bool {
+	for i := 1; i < len(arr); i++ {
+		if arr[i-1] <= arr[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// 是否是一个升序数组
+func IsAsc(arr []float64) bool {
+	for i := 1; i < len(arr); i++ {
+		if arr[i-1] >= arr[i] {
+			return false
+		}
+	}
+	return true
 }

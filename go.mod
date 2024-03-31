@@ -5,12 +5,13 @@ go 1.21
 require github.com/beego/beego/v2 v2.1.0
 
 require (
+	github.com/adshao/go-binance/v2 v2.5.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/smartystreets/goconvey v1.6.4
 )
 
 require (
-	github.com/adshao/go-binance/v2 v2.5.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -21,7 +22,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

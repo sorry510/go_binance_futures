@@ -51,6 +51,7 @@ func main() {
 	
 	// 更新币种交易精度
 	go func() {
+		logs.Info("更新币种交易精度")
 		for {
 			feature.UpdateSymbolsTradePrecision()
 			time.Sleep(12 * time.Hour) // 12小时更新一次
@@ -59,6 +60,7 @@ func main() {
 	
 	// websocket 订阅更新币种价格
 	go func() {
+		logs.Info("websocket 自动更新币种最新价格")
 		binance.UpdateCoinByWs()
 	}()
 	

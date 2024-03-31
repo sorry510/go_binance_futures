@@ -2,6 +2,7 @@ package feature
 
 import (
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/feature/notify"
 	"go_binance_futures/feature/strategy"
 	"go_binance_futures/feature/strategy/coin"
 	"go_binance_futures/feature/strategy/line"
@@ -44,7 +45,7 @@ var coinStrategy = GetCoinStrategy(strategy_coin)
 var lineStrategy = GetLineStrategy(strategy_trade)
 
 func StartTrade() {
-	logs.Info("StartTrade")
+	// logs.Info("StartTrade")
 	
 	/************************************************寻找交易币种 start******************************************************************* */
 	allCoins, err := GetAllSymbols()
@@ -52,7 +53,10 @@ func StartTrade() {
 		logs.Error("GetAllSymbols err:", err)
 	}
 	coins := coinStrategy.SelectCoins(allCoins)
-	// logs.Info("coins:", coins)
+	if coins == nil {
+		logs.Error("coins SelectCoins is nil")
+		return
+	}
 	/************************************************寻找交易币种 end******************************************************************* */
 	
 	
@@ -71,16 +75,12 @@ func StartTrade() {
 	
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 start************************************************************ */
 	exclude_symbols_map := GetExcludeSymbolsMap()
-	for _, coin := range coins {
-		exclude_symbols_map[coin.Symbol] = true
-	}
 	cancelTimeoutOrder(exclude_symbols_map, allOpenOrders)
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 end************************************************************ */
 	
 	
 	/*************************************************平仓(止盈或止损)已经有持仓的币(排除手动交易白名单) start************************************************************ */
 	positionCount := 0 // 当前仓位数量
-	exclude_symbols_map = GetExcludeSymbolsMap()
 	for _, position := range positions {
 		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
@@ -102,6 +102,9 @@ func StartTrade() {
 				if err == nil {
 					// 数据库写入订单
 					insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+					notify.SellOrderSuccess(position.Symbol, "风向改变,自动平仓", unRealizedProfit)
+				} else {
+					notify.SellOrderFail(position.Symbol, err.Error())
 				}
 			}
 			if position.PositionSide == "SHORT" {
@@ -109,6 +112,9 @@ func StartTrade() {
 				if err == nil {
 					// 数据库写入订单
 					insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+					notify.SellOrderSuccess(position.Symbol, "风向改变,自动平仓", unRealizedProfit)
+				} else {
+					notify.SellOrderFail(position.Symbol, err.Error())
 				}
 			}
 			logs.Info("%s:auto_stop_end", position.Symbol)
@@ -121,6 +127,9 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+						notify.SellOrderSuccess(position.Symbol, "止损,自动平仓", unRealizedProfit)
+					} else {
+						notify.SellOrderFail(position.Symbol, err.Error())
 					}
 				}
 				if position.PositionSide == "SHORT" {
@@ -128,6 +137,9 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+						notify.SellOrderSuccess(position.Symbol, "止损,自动平仓", unRealizedProfit)
+					} else {
+						notify.SellOrderFail(position.Symbol, err.Error())
 					}
 				}
 				continue
@@ -140,6 +152,9 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+						notify.SellOrderSuccess(position.Symbol, "止盈,自动平仓", unRealizedProfit)
+					} else {
+						notify.SellOrderFail(position.Symbol, err.Error())
 					}
 				}
 				if position.PositionSide == "SHORT" {
@@ -147,6 +162,9 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+						notify.SellOrderSuccess(position.Symbol, "止盈,自动平仓", unRealizedProfit)
+					} else {
+						notify.SellOrderFail(position.Symbol, err.Error())
 					}
 				}
 				continue
@@ -224,12 +242,18 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
+						notify.BuyOrderSuccess(symbol, quantity, buyPrice, "做多")
+					} else {
+						notify.BuyOrderFail(symbol, err.Error())
 					}
 				} else {
 					result, err := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
+						notify.BuyOrderSuccess(symbol, quantity, buyPrice, "做多")
+					} else {
+						notify.BuyOrderFail(symbol, err.Error())
 					}
 				}
 			}
@@ -247,12 +271,18 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
+						notify.BuyOrderSuccess(symbol, quantity, sellPrice, "做空")
+					} else {
+						notify.BuyOrderFail(symbol, err.Error())
 					}
 				} else {
 					result, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
+						notify.BuyOrderSuccess(symbol, quantity, sellPrice, "做空")
+					} else {
+						notify.BuyOrderFail(symbol, err.Error())
 					}
 				}
 			}
@@ -272,9 +302,10 @@ func GetExcludeSymbolsMap() (map[string]bool) {
 	return exclude_symbols_map
 }
 
+// 获取允许交易的币
 func GetAllSymbols() (symbols []*models.Symbols, err error) {
 	o := orm.NewOrm()
-	_, err = o.QueryTable("symbols").OrderBy("ID").All(&symbols)
+	_, err = o.QueryTable("symbols").Filter("enable", 1).OrderBy("ID").All(&symbols)
 	return symbols, err
 }
 
