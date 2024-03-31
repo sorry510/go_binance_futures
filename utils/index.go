@@ -60,10 +60,14 @@ func MaN(closePrice []float64, n int) float64 {
 }
 
 
-// ma 的 n 条数据
-func MaNList(closePrice []float64, n int, count int) (maNList []float64) {
+// ma(n) 的 count 条数据
+// @param 收盘价 klineClose 
+// @param ma(n) n
+// @param count 条数数据
+func MaNList(closePrice []float64, n int, count int) ([]float64) {
+	maNList := make([]float64, count)
 	for i := 0; i < count; i++ {
-		maNList = append(maNList, MaN(closePrice[i:], n))
+		maNList[i] = MaN(closePrice[i:], n)
 	}
 	return maNList
 }

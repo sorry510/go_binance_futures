@@ -10,9 +10,9 @@ api_secret = ""
 # 挂单购买的超时时间, 秒级别
 buy_timeout = 300
 # 排除的币种,多个使用逗号分隔
-exclude_symbols = "1000SHIBUSDT"
+exclude_symbols = "1000SHIBUSDT,ETHUSDT"
 # 最大持仓数量
-max_count = 10
+max_count = 4
 # 轮训时间秒
 sleep_time = 1
 # 开仓的下单类型, MARKET 市价, LIMIT: 限价(根据价格深度取平均价挂单，有可能无法买入)
@@ -21,29 +21,34 @@ order_type = LIMIT
 allow_long = 1
 # 允许做空
 allow_short = 1
-# 持仓的最长时间, 秒级别
+# 持仓的最长时间, 秒级别(暂废弃)
 hold_max_time = 1800
 
 [trade]
 # 是否开启交易的总开关
 enable = 1
 # 止盈百分比
-profit = 10
+profit = 3
 # 止损百分比
-loss = 10
+loss = 20
 # 购买策略
 strategy_trade = line1
 # 选币策略
 strategy_coin = coin1
 
 [web]
+# 监听端口
 port = 3333
+# 首页 path
 index = zmkm
-secret_key = 12321
+# jwt key
+secret_key = asd123jkl
+# 用户名
 username = admin
+# 密码
 password = admin
-commend_start = "pm2 restart binance_futures"
-commend_stop = "pm2 restart binance_futures"
+commend_start = pm2 restart binance_futures
+commend_stop = pm2 restart binance_futures
 
 [dingding]
 dingding_token = ""
