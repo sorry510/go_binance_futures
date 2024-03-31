@@ -57,10 +57,9 @@ func (ctrl *FeatureController) Edit() {
 		marginType = futures.MarginTypeCrossed
 	}
 	
-	binance.SetLeverage(symbols.Symbol, int(symbols.Leverage))  // 修改合约倍数
-	binance.SetMarginType(symbols.Symbol, marginType) // 修改仓位模式
-	
 	go func() {
+		binance.SetLeverage(symbols.Symbol, int(symbols.Leverage))  // 修改合约倍数
+		binance.SetMarginType(symbols.Symbol, marginType) // 修改仓位模式
 		feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
 	}()
 	
