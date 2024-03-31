@@ -89,7 +89,7 @@ func StartTrade() {
 		entryPrice, _ := strconv.ParseFloat(position.EntryPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * entryPrice)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		
-		if positionAmtFloatAbs < 0.00000000001 {// 没有持仓的
+		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
 			continue
 		}
 		if _, exist := exclude_symbols_map[position.Symbol]; exist { // 在白名单内
