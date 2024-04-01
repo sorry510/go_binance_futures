@@ -391,3 +391,26 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 	}
 	return lineStrategy
 }
+
+func GoTestFeature() {
+	coins, _ := GetAllSymbols()
+	for _, coin := range coins {
+		if coin.Symbol != "XVGUSDT" {
+			continue
+		}
+		// positionSideLong := "LONG"
+		// positionSideShort := "SHORT"
+		symbol := coin.Symbol
+		tickSize := coin.TickSize // 交易金额精度
+		stepSize := coin.StepSize // 交易数量精度
+		usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64) // 交易金额
+		leverage_float64 := float64(coin.Leverage) // 合约倍数
+		buyPrice, _, err := binance.GetDepthAvgPrice(symbol) // 平均买价
+		if err == nil {
+			buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
+			quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
+			quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
+			logs.Info(usdt_float64, buyPrice, leverage_float64, quantity, (usdt_float64 / buyPrice) * leverage_float64)
+		}
+	}
+}
