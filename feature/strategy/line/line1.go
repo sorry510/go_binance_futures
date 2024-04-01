@@ -52,7 +52,7 @@ func (tradeLine1 TradeLine1) GetCanLongOrShort(symbol string) (canLong bool, can
 func (tradeLine1 TradeLine1) CanOrderComplete(symbol string, positionSide string) (complete bool) {
 	lines, err := binance.GetKlineData(symbol, "1m", 2) // 1min 线最近2条
 	if err != nil {
-		return false
+		return true
 	}
 	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
 	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
@@ -158,7 +158,7 @@ func checkShortLine3m(lineData *LineData) bool {
 		upperLength := math.Abs(linePoint.High - linePoint.Close) // 上影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
 		if utils.IsAsc(ma3List[0:maxIndex]) &&
-			getRightLine(line[minIndex:minIndex+9], "LONG") && // 最低点到最低点+9个line里面至少7个是绿线
+			getRightLine(line[maxIndex:maxIndex+9], "LONG") && // 最低点到最低点+9个line里面至少7个是绿线
 			linePoint.Position == "LONG" && // 最低点的line是红线
 			(upperLength / entityLength) > 0.66 { // 上影线长度 > 实体长度
 				return true
