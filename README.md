@@ -67,10 +67,11 @@ cp conf/app.conf.example conf/app.conf
 > 使用 `go env GOPATH` 查看 `GOPATH` 路径
 
 ```
-go install
+go install github.com/beego/bee/v2@latest
 ```
 
 ### 安装依赖
+> 进入项目根目录下执行
 
 ```
 go mod tidy
