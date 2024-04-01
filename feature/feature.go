@@ -244,7 +244,7 @@ func StartTrade() {
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
 						notify.BuyOrderSuccess(symbol, quantity, buyPrice, "做多")
 					} else {
-						notify.BuyOrderFail(symbol, err.Error())
+						notify.BuyOrderFail(symbol, quantity, buyPrice, "做多", err.Error())
 					}
 				} else {
 					result, err := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
@@ -253,7 +253,7 @@ func StartTrade() {
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
 						notify.BuyOrderSuccess(symbol, quantity, buyPrice, "做多")
 					} else {
-						notify.BuyOrderFail(symbol, err.Error())
+						notify.BuyOrderFail(symbol, quantity, buyPrice, "做多", err.Error())
 					}
 				}
 			}
@@ -273,7 +273,7 @@ func StartTrade() {
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
 						notify.BuyOrderSuccess(symbol, quantity, sellPrice, "做空")
 					} else {
-						notify.BuyOrderFail(symbol, err.Error())
+						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
 					}
 				} else {
 					result, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeLong)
@@ -282,7 +282,7 @@ func StartTrade() {
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
 						notify.BuyOrderSuccess(symbol, quantity, sellPrice, "做空")
 					} else {
-						notify.BuyOrderFail(symbol, err.Error())
+						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
 					}
 				}
 			}
@@ -410,7 +410,7 @@ func GoTestFeature() {
 			buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
 			quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
 			quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
-			logs.Info(usdt_float64, buyPrice, leverage_float64, quantity, (usdt_float64 / buyPrice) * leverage_float64)
+			logs.Info(buyPrice, quantity)
 		}
 	}
 }
