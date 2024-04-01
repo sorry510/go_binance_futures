@@ -84,16 +84,19 @@ func BuyOrderSuccess(symbol string, quantity float64, price float64, side string
 	DingDing(fmt.Sprintf(text, symbol, symbol, price, side, quantity, time.Now().Format("2006-01-02 15:04:05")))
 }
 
-func BuyOrderFail(symbol string, info string) {
+func BuyOrderFail(symbol string, quantity float64, price float64, side string, info string) {
 	text := `
 ## %s交易通知
 #### **币种**：%s
+#### **方向**：<font color="#008000">%s</font>
+#### **买单价格**：<font color="#008000">%f</font>
+#### **买单数量**：<font color="#008000">%f</font>
 #### **类型**：<font color="#ff0000">挂买单失败</font>
 >%s
 #### **时间**：%s
 
 > author <sorry510sf@gmail.com>`
-	DingDing(fmt.Sprintf(text, symbol, symbol, info, time.Now().Format("2006-01-02 15:04:05")))
+	DingDing(fmt.Sprintf(text, symbol, symbol, side, price, quantity, info, time.Now().Format("2006-01-02 15:04:05")))
 }
 
 func SellOrderSuccess(symbol string, orderType string, profit float64) {
