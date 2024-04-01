@@ -49,6 +49,7 @@ username = admin
 password = admin
 commend_start = pm2 restart binance_futures
 commend_stop = pm2 restart binance_futures
+commend_log = pm2 log binance_futures
 
 [dingding]
 dingding_token = ""
