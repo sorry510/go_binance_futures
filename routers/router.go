@@ -22,6 +22,7 @@ func init() {
 	
 	web.Router("/start", &controllers.CommandController{}, "post:Start") // start
 	web.Router("/stop", &controllers.CommandController{}, "post:Stop") // stop
-	// web.Router("/pull", &controllers.CommandController{}, "post:GitPull") // git pull
+	web.Router("/pull", &controllers.CommandController{}, "post:GitPull") // git pull
+	web.Router("/pm2-log", &controllers.CommandController{}, "get:Pm2Log") // pm2-log
 }
 
