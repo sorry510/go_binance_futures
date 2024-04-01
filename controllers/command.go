@@ -13,10 +13,10 @@ type CommandController struct {
 
 // git pull
 func (ctrl *CommandController) GitPull() {
-	cmd := exec.Command("git", "pull")
+	cmd := exec.Command("bash", "-c", "git pull")
 
 	// 获取标准输出
-	output, err := cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
 		ctrl.Ctx.Resp(map[string]interface{} {
 			"code": 400,
@@ -35,22 +35,44 @@ func (ctrl *CommandController) GitPull() {
 // 开启后台任务
 func (ctrl *CommandController) Start() {
 	commend_start, _ := config.String("web::commend_start")
-	exec.Command(commend_start)
+	cmd := exec.Command("bash", "-c", commend_start)
+	
+	// 获取标准输出
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		ctrl.Ctx.Resp(map[string]interface{} {
+			"code": 400,
+			"data": err,
+			"msg": "error",
+		})
+	}
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
 		"msg": "success",
+		"data": string(output),
 	})
 }
 
 // 关闭后台任务
 func (ctrl *CommandController) Stop() {
-	commend_start, _ := config.String("web::commend_stop")
-	exec.Command(commend_start)
+	commend_stop, _ := config.String("web::commend_stop")
+	cmd := exec.Command("bash", "-c", commend_stop)
+	
+	// 获取标准输出
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		ctrl.Ctx.Resp(map[string]interface{} {
+			"code": 400,
+			"data": err,
+			"msg": "error",
+		})
+	}
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
 		"msg": "success",
+		"data": string(output),
 	})
 }
 
