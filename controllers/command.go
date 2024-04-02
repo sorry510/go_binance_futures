@@ -101,7 +101,9 @@ func (ctrl *CommandController) Pm2Log() {
 		return
 	}
 	
+	ctrl.EnableRender = false
 	ctrl.Ctx.ResponseWriter.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
 	// 开始执行命令
 	if err := cmd.Start(); err != nil {
 		ctrl.Ctx.Resp(map[string]interface{} {
@@ -110,6 +112,7 @@ func (ctrl *CommandController) Pm2Log() {
 		})
 		return
 	}
+	// ctrl.Ctx.Output.Body(stdout)
 	// 直接从命令输出流读取数据并写入响应
 	if _, err := io.Copy(ctrl.Ctx.ResponseWriter, stdout); err != nil {
 		ctrl.Ctx.Resp(map[string]interface{} {
