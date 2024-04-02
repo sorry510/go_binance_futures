@@ -184,6 +184,8 @@ func StartTrade() {
 	
 	
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
+	isOpen := false
+	
 	for _, coin := range coins {
 		positionSideLong := "LONG"
       	positionSideShort := "SHORT"
@@ -256,6 +258,7 @@ func StartTrade() {
 						notify.BuyOrderFail(symbol, quantity, buyPrice, "做多", err.Error())
 					}
 				}
+				isOpen = true
 			}
 		}
 		if allow_short == "1" && positionShort == nil && buyOrderShort == nil && canShort {
@@ -285,10 +288,13 @@ func StartTrade() {
 						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
 					}
 				}
+				isOpen = true
 			}
 		}
 	}
-	
+	if isOpen {
+		time.Sleep(30 * time.Second) // 如果开单了30 秒后再开启下一次
+	}
 	/*************************************************开仓 end************************************************************ */
 }
 
@@ -392,10 +398,11 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 	return lineStrategy
 }
 
+// 测试交易逻辑
 func GoTestFeature() {
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
-		if coin.Symbol != "XVGUSDT" {
+		if coin.Symbol != "ANKRUSDT" {
 			continue
 		}
 		// positionSideLong := "LONG"

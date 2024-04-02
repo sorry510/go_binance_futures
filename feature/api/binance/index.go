@@ -127,7 +127,7 @@ func BuyLimit(symbol string, quantity float64, price float64, positionSide futur
 		Side(futures.SideTypeBuy).
 		PositionSide(positionSide).
 		Type(futures.OrderTypeLimit).
-		TimeInForce(futures.TimeInForceTypeGTC).
+		// TimeInForce(futures.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Price(strconv.FormatFloat(price, 'f', -1, 64)).
 		Do(context.Background())
@@ -148,7 +148,7 @@ func SellLimit(symbol string, quantity float64, price float64, positionSide futu
 		Side(futures.SideTypeSell).
 		PositionSide(positionSide).
 		Type(futures.OrderTypeLimit).
-		TimeInForce(futures.TimeInForceTypeGTC).
+		// TimeInForce(futures.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Price(strconv.FormatFloat(price, 'f', -1, 64)).
 		Do(context.Background())
@@ -169,7 +169,7 @@ func BuyMarket(symbol string, quantity float64, positionSide futures.PositionSid
 		Side(futures.SideTypeBuy).
 		PositionSide(positionSide).
 		Type(futures.OrderTypeMarket).
-		TimeInForce(futures.TimeInForceTypeGTC).
+		// TimeInForce(futures.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
 	if err != nil {
@@ -189,7 +189,7 @@ func SellMarket(symbol string, quantity float64, positionSide futures.PositionSi
 		Side(futures.SideTypeSell).
 		PositionSide(positionSide).
 		Type(futures.OrderTypeMarket).
-		TimeInForce(futures.TimeInForceTypeGTC).
+		// TimeInForce(futures.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
 	if err != nil {

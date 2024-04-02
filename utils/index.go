@@ -2,8 +2,9 @@ package utils
 
 import (
 	"encoding/json"
-	"math"
+	"fmt"
 	"strconv"
+	"strings"
 )
 
 func ResJson(code int, data map[string]interface{}, msg ...string) interface{} {
@@ -34,9 +35,18 @@ func ToJson(data interface{}) string {
 // 根据 tickSize 或 stepSize 获取精度
 // e.i: (number "0.323443", size "0.01") => 0.32
 func GetTradePrecision(number_float64 float64, size string) float64 {
-	size_float64, _ := strconv.ParseFloat(size, 64)
-	base_float64 := 1 / size_float64 // 放大多少倍
-	return math.Round(number_float64 * base_float64) / base_float64
+	number_string := fmt.Sprintf("%."+strconv.Itoa(GetPow(size))+"f", number_float64)
+	number_float64_ok, _ := strconv.ParseFloat(number_string, 64)
+	return number_float64_ok
+}
+
+// >=1 的都等于0
+// <1 0.001 => 3
+func GetPow(lotsize string) int {
+	if strings.Index(lotsize, "1") == 0 {
+		return 0
+	}
+	return -(1 - strings.Index(lotsize, "1"))
 }
 
 // 计算逻辑: ma(5)=(收盘价1+收盘价2+收盘价3+收盘价4+收盘价5)/5
