@@ -304,3 +304,41 @@ func CalculateRSI2(prices []float64, period int) ([]float64, error) {
  
     return rsi, nil
 }
+
+
+/**
+ * 是否产生过金叉
+ * @param ma1 短线
+ * @param ma2 长线
+ * @param num 数据数
+ * @param string side 方向 
+ * @returns Boolean
+ */
+func Kdj(ma1 []float64, ma2[]float64, num int, side string) bool {
+	if (side == "LONG") {
+		if (ma1[0] < ma2[0]) {
+			// 最新数据的必须是短线在上
+			return false
+		}
+		for i := 1; i < num; i++ {
+			if (ma1[i] < ma2[i]) {
+				// 发生过短线在下，说明产生过金叉
+				return true
+			}
+		}
+		return false
+	} else if (side == "SHORT") {
+	  	if ma1[0] > ma2[0] {
+			// 最后的必须是短线在上
+			return false
+		}
+		for i := 1; i < num; i++ {
+			if (ma1[i] > ma2[i]) {
+				// 发生过短线在上，说明产生过死叉
+				return true
+			}
+		}
+	  	return false
+	}
+	return false
+}
