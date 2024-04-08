@@ -210,48 +210,6 @@ func CalculateBollingerBands(clonePrices []float64, period int, stdDevMultiplier
 	return up, mb, dn, nil
 }
 
-// Calculate the RSI (Relative Strength Index)
-func CalculateRSI(clonePrices []float64, period int) ([]float64, error) {
-	if len(clonePrices) < period {
-		return nil, fmt.Errorf("insufficient data for period %d", period)
-	}
-
-	gains := make([]float64, len(clonePrices)-period+1)
-	losses := make([]float64, len(clonePrices)-period+1)
-
-	for i := period; i < len(clonePrices); i++ {
-		priceChange := clonePrices[i] - clonePrices[i-period]
-		if priceChange > 0 {
-			gains[i-period] = priceChange
-			losses[i-period] = 0
-		} else {
-			gains[i-period] = 0
-			losses[i-period] = -priceChange
-		}
-	}
-
-	averageGain := make([]float64, len(gains))
-	averageLoss := make([]float64, len(losses))
-
-	averageGain[0], averageLoss[0] = calculateAverage(gains[:period]), calculateAverage(losses[:period])
-
-	for i := 1; i < len(gains); i++ {
-		averageGain[i] = (1 - 1/float64(period)) * averageGain[i-1] + (1/float64(period)) * gains[i]
-		averageLoss[i] = (1 - 1/float64(period)) * averageLoss[i-1] + (1/float64(period)) * losses[i]
-	}
-
-	rsi := make([]float64, len(gains))
-	for i := range rsi {
-		if averageLoss[i] == 0 {
-			rsi[i] = 100
-		} else {
-			rsi[i] = 100 - (100 / (1 + (averageGain[i] / averageLoss[i])))
-		}
-	}
-
-	return rsi, nil
-}
-
 // 平均数
 func calculateAverage(values []float64) float64 {
 	var sum float64
@@ -261,48 +219,52 @@ func calculateAverage(values []float64) float64 {
 	return sum / float64(len(values))
 }
 
-// 计算RSI指标
-func CalculateRSI2(prices []float64, period int) ([]float64, error) {
-    if len(prices) < period {
-        return nil, fmt.Errorf("insufficient data for RSI (period=%d, length=%d)", period, len(prices))
-    }
- 
-    var up, down []float64
-    for i := 1; i < len(prices); i++ {
-        if prices[i] > prices[i-1] {
-            up = append(up, prices[i]-prices[i-1])
-            down = append(down, 0.0)
-        } else {
-            up = append(up, 0.0)
-            down = append(down, prices[i-1]-prices[i])
-        }
-    }
- 
-    var avgGains, avgLosses float64
-    for i := 0; i < period; i++ {
-        avgGains += up[i]
-        avgLosses += down[i]
-    }
-    avgGains /= float64(period)
-    avgLosses /= float64(period)
- 
-    var rs []float64
-    for i := period; i < len(up); i++ {
-        avgGains = (avgGains*float64(period-1) + up[i]) / float64(period)
-        avgLosses = (avgLosses*float64(period-1) + down[i]) / float64(period)
-        if avgLosses == 0.0 {
-            rs = append(rs, 100.0)
-        } else {
-            rs = append(rs, avgGains / avgLosses * 100.0)
-        }
-    }
- 
-    var rsi []float64
-    for _, r := range rs {
-        rsi = append(rsi, 100.0 - (100.0/(1.0+r)))
-    }
- 
-    return rsi, nil
+// CalculateRSI 计算给定价格序列的 RSI 值
+func CalculateRSI(prices []float64, period int) ([]float64, error) {
+	if len(prices) < period+1 {
+		return nil, fmt.Errorf("insufficient data for RSI calculation (need at least %d periods, got %d)", period, len(prices))
+	}
+
+	rsiValues := make([]float64, len(prices)-period+1)
+
+	for i := period; i <= len(prices)-1; i++ {
+		// 计算前 period 个周期的平均收益和平均损失
+		gains := make([]float64, period)
+		losses := make([]float64, period)
+
+		for j := i - period + 1; j <= i; j++ {
+			change := prices[j] - prices[j-1]
+			if change > 0 {
+				gains[j-(i-period+1)] = change
+			} else {
+				losses[j-(i-period+1)] = math.Abs(change)
+			}
+		}
+
+		averageGain := sum(gains) / float64(period)
+		averageLoss := sum(losses) / float64(period)
+
+		// 防止除以零，当所有收益或损失为零时，使用 100 或 0 来计算 RSI
+		if averageLoss == 0 {
+			rsiValues[i-period+1] = 100
+		} else if averageGain == 0 {
+			rsiValues[i-period+1] = 0
+		} else {
+			rsi := 100 * (averageGain / (averageGain + averageLoss))
+			rsiValues[i-period+1] = rsi
+		}
+	}
+
+	return rsiValues, nil
+}
+
+// sum 计算浮点数切片的总和
+func sum(numbers []float64) float64 {
+	sum := 0.0
+	for _, num := range numbers {
+		sum += num
+	}
+	return sum
 }
 
 
