@@ -90,3 +90,18 @@ func IsAsc(arr []float64) bool {
 	}
 	return true
 }
+
+// 反转数组
+func ReverseArray(arr []float64) []float64 {
+	n := len(arr)
+	reversed := make([]float64, n)
+
+	left, right := 0, n-1
+	for left < right {
+		reversed[left], reversed[right] = arr[right], arr[left]
+		left++
+		right--
+	}
+
+	return reversed
+}

@@ -421,3 +421,35 @@ func GoTestFeature() {
 		}
 	}
 }
+
+func GoTestLine() {
+	symbol := "BTCUSDT"
+	interval := "1d"
+	limit := 50
+	lines, _ := binance.GetKlineData(symbol, interval, limit)
+	closePrices := line.GetLineClosePrices(lines)
+	
+	// ma3, _ := line.CalculateSimpleMovingAverage(closePrices, 3)
+	// ma7, _ := line.CalculateSimpleMovingAverage(closePrices, 7)
+	// ma15, _ := line.CalculateSimpleMovingAverage(closePrices, 15)
+	// ma30, _ := line.CalculateSimpleMovingAverage(closePrices, 30)
+	// logs.Info(ma3[0], ma7[0], ma15[0], ma30[0])
+	
+	
+	
+	ema3, _ := line.CalculateExponentialMovingAverage(closePrices, 3)
+	// ema7, _ := line.CalculateExponentialMovingAverage(closePrices, 7)
+	// ema15, _ := line.CalculateExponentialMovingAverage(closePrices, 15)
+	// ema30, _ := line.CalculateExponentialMovingAverage(closePrices, 30)
+	// logs.Info(ema3[0], ema7[0], ema15[0], ema30[0])
+	logs.Info(ema3)
+	
+	
+	
+	// mb, up, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
+	// logs.Info(mb[0], up[0], dn[0], len(mb))
+	
+	// closePrices = utils.ReverseArray(closePrices)
+	// rsi6, _ := line.CalculateRSI2(closePrices, 14)
+	// logs.Info(rsi6)
+}

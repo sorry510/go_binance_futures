@@ -2,8 +2,6 @@ package line
 
 import (
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/utils"
-	"math"
 	"strconv"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -16,19 +14,6 @@ import (
 
 // var loss, _ = config.String("trade::loss")
 // var loss_float64, _ = strconv.ParseFloat(loss, 64)
-type Line struct {
-	Position string
-	High float64
-	Low float64
-	Close float64
-	Open float64
-	TradeNum int64
-}
-type LineData struct {
-	MaxIndex int
-	MinIndex int
-	Line []*Line
-}
 
 type TradeLine1 struct {
 }
@@ -80,108 +65,4 @@ func (tradeLine1 TradeLine1) AutoStopOrder(position *futures.PositionRisk, nowPr
 	// 	}
 	// }
 	return false
-}
-
-// 归一化处理k线数据
-func normalizationLineData(data []*futures.Kline) (*LineData) {
-	maxIndex := 0
-	maxPrice := 0.0
-	minIndex := 0
-	minPrice := 0.0
-	line := make([]*Line, len(data))
-	for key, item := range data {
-		open, _ := strconv.ParseFloat(item.Open, 64)
-		high, _ := strconv.ParseFloat(item.High, 64)
-		low, _ := strconv.ParseFloat(item.Low, 64)
-		close, _ := strconv.ParseFloat(item.Close, 64)
-		if key == 0 {
-			maxPrice = high
-			minPrice = close
-		} else {
-			if (high > maxPrice) {
-				maxPrice = high
-				maxIndex = key
-			}
-			if (low < minPrice) {
-				minPrice = low
-				minIndex = key
-			}
-		}
-		position := "LONG"
-		if close < open {
-			position = "SHORT"
-		}
-		line[key] = &Line{
-			Position: position,
-			High: high,
-			Low: low,
-			Close: close,
-			Open: open,
-			TradeNum: item.TradeNum,
-		}
-	}
-	return &LineData{
-		MaxIndex: maxIndex,
-		MinIndex: minIndex,
-		Line: line,
-	}
-}
-
-func checkLongLine3m(lineData *LineData) bool {
-	maxIndex := lineData.MaxIndex
-	minIndex := lineData.MinIndex
-	line := lineData.Line
-	if minIndex >= 1 && minIndex <= 3 && maxIndex >= 8 {
-		// 最低点在3分前，最高点之前24分
-		ma3List := utils.MaNList(getClosePrices(line), 3, 20) // 3min kline 最近20条ma均线，时间从最新到最老
-		linePoint := line[minIndex] // 最低的那个line
-		underLength := math.Abs(linePoint.Close - linePoint.Low) // 下影线长度
-		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if utils.IsDesc(ma3List[0:minIndex]) && // 最低点到现在在涨
-			getRightLine(line[minIndex:minIndex+9], "SHORT") && // 最低点到最低点+9个line里面至少7个是红线
-			linePoint.Position == "SHORT" && // 最低点的line是红线
-			(underLength / entityLength) > 0.66 { // 下影线长度  实体长度
-				return true
-		}
-	}
-	return false
-}
-
-func checkShortLine3m(lineData *LineData) bool {
-	maxIndex := lineData.MaxIndex
-	minIndex := lineData.MinIndex
-	line := lineData.Line
-	if maxIndex >= 1 && maxIndex <= 3 && minIndex >= 8 {
-		// 最高点在3分前，最低点之前30分
-		ma3List := utils.MaNList(getClosePrices(line), 3, 20) // 3min kline 最近20条ma均线，时间从最新到最老
-		linePoint := line[maxIndex] // 最高的那个line
-		upperLength := math.Abs(linePoint.High - linePoint.Close) // 上影线长度
-		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if utils.IsAsc(ma3List[0:maxIndex]) &&
-			getRightLine(line[maxIndex:maxIndex+9], "LONG") && // 最低点到最低点+9个line里面至少7个是绿线
-			linePoint.Position == "LONG" && // 最低点的line是红线
-			(upperLength / entityLength) > 0.66 { // 上影线长度 > 实体长度
-				return true
-		}
-	}
-	return false
-}
-
-func getClosePrices(data []*Line) ([]float64) {
-	clonePrices := make([]float64, len(data))
-	for key, line := range data {
-		clonePrices[key] = line.Close
-	}
-	return clonePrices
-}
-
-// 得到适配的line
-func getRightLine(data []*Line, position string) bool {
-	positionCount := 0
-	for _, line := range data {
-		if line.Position == position {
-			positionCount++
-		}
-	}
-	return len(data) - positionCount <= 2
 }

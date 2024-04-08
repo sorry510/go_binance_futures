@@ -49,6 +49,7 @@ func registerMiddlewares() {
 
 func main() {
 	// feature.GoTestFeature()
+	// feature.GoTestLine()
 	// return
 	
 	// 更新币种交易精度
