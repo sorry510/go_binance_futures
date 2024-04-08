@@ -423,8 +423,8 @@ func GoTestFeature() {
 }
 
 func GoTestLine() {
-	symbol := "BTCUSDT"
-	interval := "1d"
+	symbol := "WIFUSDT"
+	interval := "6h"
 	limit := 50
 	lines, _ := binance.GetKlineData(symbol, interval, limit)
 	closePrices := line.GetLineClosePrices(lines)
@@ -438,18 +438,20 @@ func GoTestLine() {
 	
 	
 	ema3, _ := line.CalculateExponentialMovingAverage(closePrices, 3)
-	// ema7, _ := line.CalculateExponentialMovingAverage(closePrices, 7)
-	// ema15, _ := line.CalculateExponentialMovingAverage(closePrices, 15)
-	// ema30, _ := line.CalculateExponentialMovingAverage(closePrices, 30)
-	// logs.Info(ema3[0], ema7[0], ema15[0], ema30[0])
-	logs.Info(ema3)
+	ema7, _ := line.CalculateExponentialMovingAverage(closePrices, 7)
+	ema15, _ := line.CalculateExponentialMovingAverage(closePrices, 15)
+	ema30, _ := line.CalculateExponentialMovingAverage(closePrices, 30)
+	logs.Info(ema3[0], ema7[0], ema15[0], ema30[0])
+	// logs.Info(ema3)
 	
 	
 	
 	// mb, up, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
 	// logs.Info(mb[0], up[0], dn[0], len(mb))
 	
-	// closePrices = utils.ReverseArray(closePrices)
-	// rsi6, _ := line.CalculateRSI2(closePrices, 14)
-	// logs.Info(rsi6)
+	closePrices = utils.ReverseArray(closePrices)
+	rsi6, _ := line.CalculateRSI(closePrices, 6)
+	rsi14, _ := line.CalculateRSI(closePrices, 14)
+	logs.Info(rsi6[1])
+	logs.Info(rsi14[1])
 }

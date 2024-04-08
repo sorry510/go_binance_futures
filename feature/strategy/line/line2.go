@@ -28,10 +28,12 @@ func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, can
 	ema6h_3, _ := CalculateExponentialMovingAverage(kline_6h_close, 3) // ma3
 	ema6h_7, _ := CalculateExponentialMovingAverage(kline_6h_close, 7) // ma7
 	ema6h_15, _ := CalculateExponentialMovingAverage(kline_6h_close, 15) // ma15
-	if Kdj(ema6h_3, ema6h_7, 4, "LANG") && Kdj(ema6h_7, ema6h_15, 4, "LANG") { // 1天之内发生过金叉
+	rsi6, _ := CalculateRSI(kline_6h_close, 6) // rsi6
+	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
+	if Kdj(ema6h_3, ema6h_7, 4, "LANG") && Kdj(ema6h_7, ema6h_15, 4, "LANG") && rsi6[1] < 0.75 && rsi14[1] < 0.7 { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		return true, false
-	} else if (Kdj(ema6h_3, ema6h_7, 4, "SHORT") && Kdj(ema6h_7, ema6h_15, 4, "SHORT")) {
+	} else if (Kdj(ema6h_3, ema6h_7, 4, "SHORT") && Kdj(ema6h_7, ema6h_15, 4, "SHORT")) && rsi6[1] < 0.75 && rsi14[1] < 0.7 {
 		return false, true
 	}
 	return false, false
