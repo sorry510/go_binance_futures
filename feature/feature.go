@@ -102,7 +102,7 @@ func StartTrade() {
 				result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
 					// 数据库写入订单
-					insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
 					notify.SellOrderSuccess(position.Symbol, "风向改变,自动平仓", unRealizedProfit)
 				} else {
 					notify.SellOrderFail(position.Symbol, err.Error())
@@ -112,7 +112,7 @@ func StartTrade() {
 				result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
-					insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
 					notify.SellOrderSuccess(position.Symbol, "风向改变,自动平仓", unRealizedProfit)
 				} else {
 					notify.SellOrderFail(position.Symbol, err.Error())
@@ -127,7 +127,7 @@ func StartTrade() {
 					result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
 						notify.SellOrderSuccess(position.Symbol, "止损,自动平仓", unRealizedProfit)
 					} else {
 						notify.SellOrderFail(position.Symbol, err.Error())
@@ -137,7 +137,7 @@ func StartTrade() {
 					result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
 						notify.SellOrderSuccess(position.Symbol, "止损,自动平仓", unRealizedProfit)
 					} else {
 						notify.SellOrderFail(position.Symbol, err.Error())
@@ -152,7 +152,7 @@ func StartTrade() {
 					result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
 						notify.SellOrderSuccess(position.Symbol, "止盈,自动平仓", unRealizedProfit)
 					} else {
 						notify.SellOrderFail(position.Symbol, err.Error())
@@ -162,7 +162,7 @@ func StartTrade() {
 					result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
 						notify.SellOrderSuccess(position.Symbol, "止盈,自动平仓", unRealizedProfit)
 					} else {
 						notify.SellOrderFail(position.Symbol, err.Error())
@@ -244,7 +244,7 @@ func StartTrade() {
 					result, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
+						insertOpenOrder(symbol, quantity, result.AvgPrice, "LONG")
 						notify.BuyOrderSuccess(symbol, quantity, buyPrice, "做多")
 					} else {
 						notify.BuyOrderFail(symbol, quantity, buyPrice, "做多", err.Error())
@@ -253,7 +253,7 @@ func StartTrade() {
 					result, err := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
-						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
+						insertOpenOrder(symbol, quantity, result.AvgPrice, "LONG")
 						notify.BuyOrderSuccess(symbol, quantity, buyPrice, "做多")
 					} else {
 						notify.BuyOrderFail(symbol, quantity, buyPrice, "做多", err.Error())
@@ -274,7 +274,7 @@ func StartTrade() {
 					result, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
+						insertOpenOrder(symbol, quantity, result.AvgPrice, "SHORT")
 						notify.BuyOrderSuccess(symbol, quantity, sellPrice, "做空")
 					} else {
 						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
@@ -283,7 +283,7 @@ func StartTrade() {
 					result, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
-						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
+						insertOpenOrder(symbol, quantity, result.AvgPrice, "SHORT")
 						notify.BuyOrderSuccess(symbol, quantity, sellPrice, "做空")
 					} else {
 						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
@@ -334,7 +334,21 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futu
 	}
 }
 
-func insertOrder(position *futures.PositionRisk, positionAmtFloat float64, unRealizedProfit float64, avg_price string) {
+func insertOpenOrder(symbol string, quantity float64, avg_price string, positionSide string) {
+	order := new(models.Order)
+	order.Symbol = symbol
+	order.Amount = strconv.FormatFloat(quantity, 'f', -1, 64)
+	order.Avg_price = avg_price
+	order.PositionSide = positionSide
+	order.Inexact_profit = "0.0" // 预估收益
+	order.Side = "open"
+	order.UpdateTime = time.Now().Unix() * 1000 
+	
+	o := orm.NewOrm()
+	o.Insert(order)
+}
+
+func insertCloseOrder(position *futures.PositionRisk, positionAmtFloat float64, unRealizedProfit float64, avg_price string) {
 	// 数据库写入订单
 	order := new(models.Order)
 	order.Symbol = position.Symbol
