@@ -269,7 +269,7 @@ func sum(numbers []float64) float64 {
 
 
 /**
- * 是否产生过金叉
+ * 是否只产生过一次金叉
  * @param ma1 短线
  * @param ma2 长线
  * @param num 数据数
@@ -280,11 +280,19 @@ func Kdj(ma1 []float64, ma2[]float64, num int) bool {
 		// 最新数据的必须是短线在上
 		return false
 	}
+	k := 0
 	for i := 1; i < num; i++ {
 		if (ma1[i] < ma2[i]) {
-			// 发生过短线在下，说明产生过金叉
-			return true
+			// 发生过短线在下，说明产生过死叉
+			k = i
+			break
 		}
 	}
-	return false
+	// 之后数据不能再重新产生交叉
+	for i := k; i < num; i++ {
+		if (ma1[i] > ma2[i]) {
+			return false
+		}
+	}
+	return k > 0
 }
