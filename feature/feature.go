@@ -379,7 +379,7 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 		case "coin1":
 			coinStrategy = coin.TradeCoin1{}
 		case "coin2":
-			coinStrategy = coin.TradeCoin1{}
+			coinStrategy = coin.TradeCoin2{}
 		default:
 			coinStrategy = coin.TradeCoin1{}
 	}
@@ -392,7 +392,7 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 		case "line1":
 			lineStrategy = line.TradeLine1{}
 		case "line2":
-			lineStrategy = line.TradeLine1{}
+			lineStrategy = line.TradeLine2{}
 		default:
 			lineStrategy = line.TradeLine1{}
 	}
@@ -418,17 +418,18 @@ func GoTestFeature() {
 			buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
 			quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
 			quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
-			logs.Info(fmt.Sprintf("buyPrice:%s, quantity:%s", buyPrice, quantity), buyPrice, quantity)
+			logs.Info(fmt.Sprintf("buyPrice:%f, quantity:%f", buyPrice, quantity), buyPrice, quantity)
 		}
 	}
 }
 
 func GoTestLine() {
-	symbol := "WIFUSDT"
-	interval := "6h"
-	limit := 50
-	lines, _ := binance.GetKlineData(symbol, interval, limit)
-	closePrices := line.GetLineClosePrices(lines)
+	symbol := "HIGHUSDT"
+	// interval := "6h"
+	// limit := 50
+	// lines, _ := binance.GetKlineData(symbol, interval, limit)
+	// closePrices := line.GetLineClosePrices(lines)
+	
 	
 	// ma3, _ := line.CalculateSimpleMovingAverage(closePrices, 3)
 	// ma7, _ := line.CalculateSimpleMovingAverage(closePrices, 7)
@@ -437,11 +438,11 @@ func GoTestLine() {
 	// logs.Info(ma3[0], ma7[0], ma15[0], ma30[0])
 	
 	
-	ema3, _ := line.CalculateExponentialMovingAverage(closePrices, 3)
-	ema7, _ := line.CalculateExponentialMovingAverage(closePrices, 7)
-	ema15, _ := line.CalculateExponentialMovingAverage(closePrices, 15)
-	ema30, _ := line.CalculateExponentialMovingAverage(closePrices, 30)
-	logs.Info(ema3[0], ema7[0], ema15[0], ema30[0])
+	// ema3, _ := line.CalculateExponentialMovingAverage(closePrices, 3)
+	// ema7, _ := line.CalculateExponentialMovingAverage(closePrices, 7)
+	// ema15, _ := line.CalculateExponentialMovingAverage(closePrices, 15)
+	// ema30, _ := line.CalculateExponentialMovingAverage(closePrices, 30)
+	// logs.Info(ema3[0], ema7[0], ema15[0], ema30[0])
 	// logs.Info(ema3)
 	
 	
@@ -449,9 +450,43 @@ func GoTestLine() {
 	// mb, up, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
 	// logs.Info(mb[0], up[0], dn[0], len(mb))
 	
-	closePrices = utils.ReverseArray(closePrices)
-	rsi6, _ := line.CalculateRSI(closePrices, 6)
-	rsi14, _ := line.CalculateRSI(closePrices, 14)
-	logs.Info(rsi6[1])
-	logs.Info(rsi14[1])
+	// closePrices = utils.ReverseArray(closePrices)
+	// rsi6, _ := line.CalculateRSI(closePrices, 6)
+	// rsi14, _ := line.CalculateRSI(closePrices, 14)
+	// logs.Info(rsi6[1])
+	// logs.Info(rsi14[1])
+	
+	canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
+	logs.Info(canLang, canShort)
+}
+
+func GoTestOrder() {
+	coins, _ := GetAllSymbols()
+	for _, coin := range coins {
+		if coin.Symbol != "CKBUSDT" {
+			continue
+		}
+		// positionSideLong := "LONG"
+		// positionSideShort := "SHORT"
+		symbol := coin.Symbol
+		tickSize := coin.TickSize // 交易金额精度
+		stepSize := coin.StepSize // 交易数量精度
+		usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64) // 交易金额
+		leverage_float64 := float64(coin.Leverage) // 合约倍数
+		buyPrice, sellPrice, err := binance.GetDepthAvgPrice(symbol) // 平均买价
+		logs.Info(symbol, usdt_float64, leverage_float64, buyPrice, sellPrice)
+		if err == nil {
+			// buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
+			// quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
+			// quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
+			// result, _ := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
+			// logs.Info(result)
+			
+			sellPrice = utils.GetTradePrecision(sellPrice, tickSize) // 合理精度的价格
+			quantity := (usdt_float64 / sellPrice) * leverage_float64  // 购买数量
+			quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
+			result, _ := binance.BuyLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
+			logs.Info(result)
+		}
+	}
 }
