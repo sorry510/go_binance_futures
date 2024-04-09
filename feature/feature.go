@@ -1,6 +1,7 @@
 package feature
 
 import (
+	"fmt"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/notify"
 	"go_binance_futures/feature/strategy"
@@ -108,7 +109,7 @@ func StartTrade() {
 				}
 			}
 			if position.PositionSide == "SHORT" {
-				result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
 					insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
@@ -133,7 +134,7 @@ func StartTrade() {
 					}
 				}
 				if position.PositionSide == "SHORT" {
-					result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+					result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
@@ -158,7 +159,7 @@ func StartTrade() {
 					}
 				}
 				if position.PositionSide == "SHORT" {
-					result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+					result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
@@ -270,7 +271,7 @@ func StartTrade() {
 				quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
 				
 				if order_type == "market" {
-					result, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeLong)
+					result, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
@@ -279,7 +280,7 @@ func StartTrade() {
 						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
 					}
 				} else {
-					result, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeLong)
+					result, err := binance.BuyLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
@@ -402,7 +403,7 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 func GoTestFeature() {
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
-		if coin.Symbol != "ANKRUSDT" {
+		if coin.Symbol != "FLMUSDT" {
 			continue
 		}
 		// positionSideLong := "LONG"
@@ -417,7 +418,7 @@ func GoTestFeature() {
 			buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
 			quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
 			quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
-			logs.Info(buyPrice, quantity)
+			logs.Info(fmt.Sprintf("buyPrice:%s, quantity:%s", buyPrice, quantity), buyPrice, quantity)
 		}
 	}
 }
@@ -434,7 +435,6 @@ func GoTestLine() {
 	// ma15, _ := line.CalculateSimpleMovingAverage(closePrices, 15)
 	// ma30, _ := line.CalculateSimpleMovingAverage(closePrices, 30)
 	// logs.Info(ma3[0], ma7[0], ma15[0], ma30[0])
-	
 	
 	
 	ema3, _ := line.CalculateExponentialMovingAverage(closePrices, 3)
