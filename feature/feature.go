@@ -109,7 +109,7 @@ func StartTrade() {
 				}
 			}
 			if position.PositionSide == "SHORT" {
-				result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
 					insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
@@ -134,7 +134,7 @@ func StartTrade() {
 					}
 				}
 				if position.PositionSide == "SHORT" {
-					result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+					result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
@@ -159,7 +159,7 @@ func StartTrade() {
 					}
 				}
 				if position.PositionSide == "SHORT" {
-					result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+					result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
@@ -271,7 +271,7 @@ func StartTrade() {
 				quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
 				
 				if order_type == "market" {
-					result, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeShort)
+					result, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
@@ -280,7 +280,7 @@ func StartTrade() {
 						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
 					}
 				} else {
-					result, err := binance.BuyLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
+					result, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOrder(positionLong, quantity, 0.0, result.AvgPrice)
@@ -476,16 +476,18 @@ func GoTestOrder() {
 		buyPrice, sellPrice, err := binance.GetDepthAvgPrice(symbol) // 平均买价
 		logs.Info(symbol, usdt_float64, leverage_float64, buyPrice, sellPrice)
 		if err == nil {
+			// 开多
 			// buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
 			// quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
 			// quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
 			// result, _ := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
 			// logs.Info(result)
 			
+			// 开空
 			sellPrice = utils.GetTradePrecision(sellPrice, tickSize) // 合理精度的价格
 			quantity := (usdt_float64 / sellPrice) * leverage_float64  // 购买数量
 			quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
-			result, _ := binance.BuyLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
+			result, _ := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
 			logs.Info(result)
 		}
 	}
