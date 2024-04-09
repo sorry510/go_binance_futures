@@ -30,6 +30,7 @@ func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, can
 	ema6h_15, _ := CalculateExponentialMovingAverage(kline_6h_close, 15) // ma15
 	rsi6, _ := CalculateRSI(kline_6h_close, 6) // rsi6
 	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
+	// logs.Info(ema6h_3[:4], ema6h_7[:4], ema6h_15[:4], rsi6, rsi14)
 	if Kdj(ema6h_3, ema6h_7, 4) && Kdj(ema6h_7, ema6h_15, 4) && rsi6[1] < 0.75 && rsi14[1] < 0.7 { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		return true, false
