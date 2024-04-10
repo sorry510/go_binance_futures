@@ -276,6 +276,9 @@ func sum(numbers []float64) float64 {
  * @returns Boolean
  */
 func Kdj(ma1 []float64, ma2[]float64, num int) bool {
+	if (ma1 == nil || ma2 == nil) {
+		return false
+	}
 	if (len(ma1) < num || len(ma2) < num) {
 		return false
 	}
