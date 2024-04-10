@@ -276,6 +276,11 @@ func sum(numbers []float64) float64 {
  * @returns Boolean
  */
 func Kdj(ma1 []float64, ma2[]float64, num int) bool {
+	if (len(ma1) == 0 || len(ma2) == 0) {
+		return false
+	}
+	// count := num
+	// math.Min(len(ma1), len(ma2))
 	if (ma1[0] < ma2[0]) {
 		// 最新数据的必须是短线在上
 		return false

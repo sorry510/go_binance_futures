@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/adshao/go-binance/v2/futures"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 // var hold_max_time, _ = config.String("coin::hold_max_time")
@@ -27,13 +28,14 @@ func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, can
 	
 	ema6h_3, _ := CalculateExponentialMovingAverage(kline_6h_close, 3) // ma3
 	ema6h_7, _ := CalculateExponentialMovingAverage(kline_6h_close, 7) // ma7
-	// ema6h_15, _ := CalculateExponentialMovingAverage(kline_6h_close, 15) // ma15
+	ema6h_15, _ := CalculateExponentialMovingAverage(kline_6h_close, 15) // ma15
 	rsi6, _ := CalculateRSI(kline_6h_close, 6) // rsi6
 	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
-	if Kdj(ema6h_3, ema6h_7, 4) && rsi6[1] < 0.75 && rsi14[1] < 0.7 { // 1天之内发生过金叉, rsi 没有超买
+	logs.Info(Kdj(ema6h_3, ema6h_7, 4), Kdj(ema6h_7, ema6h_15, 6), rsi6[1] < 75, rsi14[1] < 70)
+	if Kdj(ema6h_3, ema6h_7, 4) && Kdj(ema6h_7, ema6h_15, 4) && rsi6[1] < 75 && rsi14[1] < 70 { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		return true, false
-	} else if Kdj(ema6h_7, ema6h_3, 4) && rsi6[1] < 0.75 && rsi14[1] < 0.7 {
+	} else if Kdj(ema6h_7, ema6h_3, 4) && Kdj(ema6h_15, ema6h_7, 6) && rsi6[1] < 75 && rsi14[1] < 70 {
 		return false, true
 	}
 	return false, false
