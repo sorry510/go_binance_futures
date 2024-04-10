@@ -83,10 +83,10 @@ func (ctrl *RushController) Post() {
 	symbols := new(models.NewSymbols)
 	ctrl.BindJSON(&symbols)
 	
-	symbols.Leverage = 10
+	symbols.Leverage = 3
 	symbols.MarginType = "ISOLATED"
-	symbols.StepSize = "0.1"
-	symbols.TickSize = "0.1"
+	symbols.StepSize = ""
+	symbols.TickSize = ""
 	symbols.Usdt = "10"
 	symbols.Type = 1
 	symbols.Enable = 0
