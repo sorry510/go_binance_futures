@@ -6,6 +6,7 @@ import (
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
 	_ "go_binance_futures/routers"
+	"go_binance_futures/spot"
 	"time"
 
 	"strconv"
@@ -21,6 +22,7 @@ var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
 var taskSleepTime, _ = config.String("coin::sleep_time")
 var tradeEnable, _ = config.String("trade::enable")
+var spotNewEnable, _ = config.String("spot::new_enable")
 var taskSleepTimeInt, _ = strconv.Atoi(taskSleepTime)
 
 func init() {
@@ -48,6 +50,7 @@ func registerMiddlewares() {
 }
 
 func main() {
+	// spot.TryBuyNewSymbols()
 	// feature.GoTestFeature()
 	// feature.GoTestLine()
 	// feature.GoTestOrder()
@@ -78,6 +81,18 @@ func main() {
 
 				// 等待 taskSleepTimeInt 秒再继续执行
 				time.Sleep(time.Duration(taskSleepTimeInt) * time.Second)
+			}
+		}()
+	}
+	
+	if spotNewEnable == "1" {
+		logs.Info("新币抢购开启")
+		go func() {
+			for {
+				spot.TryBuyNewSymbols()
+
+				// 等待 taskSleepTimeInt 秒再继续执行
+				time.Sleep(time.Millisecond * 100)
 			}
 		}()
 	}
