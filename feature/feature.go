@@ -438,7 +438,7 @@ func GoTestFeature() {
 }
 
 func GoTestLine() {
-	symbol := "HIGHUSDT"
+	symbol := "ENAUSDT"
 	// interval := "6h"
 	// limit := 50
 	// lines, _ := binance.GetKlineData(symbol, interval, limit)
