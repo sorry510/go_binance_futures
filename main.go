@@ -52,7 +52,7 @@ func main() {
 	// feature.GoTestLine()
 	// feature.GoTestOrder()
 	// feature.GoTestUtil()
-	// return
+	return
 	
 	// 更新币种交易精度
 	go func() {

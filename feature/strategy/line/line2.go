@@ -2,6 +2,7 @@ package line
 
 import (
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/utils"
 	"strconv"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -27,17 +28,18 @@ func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, can
 	
 	ema6h_3, _ := CalculateExponentialMovingAverage(kline_6h_close, 3) // ma3
 	ema6h_7, _ := CalculateExponentialMovingAverage(kline_6h_close, 7) // ma7
-	ema6h_15, _ := CalculateExponentialMovingAverage(kline_6h_close, 15) // ma15
+	// ema6h_15, _ := CalculateExponentialMovingAverage(kline_6h_close, 15) // ma15
 	rsi6, _ := CalculateRSI(kline_6h_close, 6) // rsi6
 	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
 	if (rsi6 == nil || rsi14 == nil || len(rsi6) < 2 || len(rsi14) < 2) {
+		// 开盘小于 4.5 天
 		return false, false
 	}
-	// logs.Info(Kdj(ema6h_3, ema6h_7, 4), Kdj(ema6h_7, ema6h_15, 6), rsi6[1] < 75, rsi14[1] < 70)
-	if Kdj(ema6h_3, ema6h_7, 4) && Kdj(ema6h_7, ema6h_15, 4) && rsi6[1] < 75 && rsi14[1] < 70 { // 1天之内发生过金叉, rsi 没有超买
+	// logs.Info(symbol, Kdj(ema6h_3, ema6h_7, 4), Kdj(ema6h_7, ema6h_3, 4), utils.IsDesc(ema6h_3[0:2]), rsi6[1], rsi14[1])
+	if Kdj(ema6h_3, ema6h_7, 4) && utils.IsDesc(ema6h_3[0:2]) && rsi6[1] < 80 && rsi14[1] < 75 { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		return true, false
-	} else if Kdj(ema6h_7, ema6h_3, 4) && Kdj(ema6h_15, ema6h_7, 6) && rsi6[1] < 75 && rsi14[1] < 70 {
+	} else if Kdj(ema6h_7, ema6h_3, 4) && utils.IsAsc(ema6h_3[0:2]) && rsi6[1] < 80 && rsi14[1] < 75 {
 		return false, true
 	}
 	return false, false
