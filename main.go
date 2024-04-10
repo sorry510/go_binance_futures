@@ -51,6 +51,7 @@ func main() {
 	// feature.GoTestFeature()
 	// feature.GoTestLine()
 	// feature.GoTestOrder()
+	// feature.GoTestUtil()
 	// return
 	
 	// 更新币种交易精度

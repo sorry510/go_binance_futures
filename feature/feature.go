@@ -506,3 +506,9 @@ func GoTestOrder() {
 		}
 	}
 }
+
+func GoTestUtil() {
+	ma1 := []float64{10, 9, 9.2, 6}
+	ma2 := []float64{9, 7, 9, 6.1}
+	logs.Info(line.Kdj(ma1, ma2, 4))
+}
