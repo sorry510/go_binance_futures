@@ -22,10 +22,12 @@ type TradeLine3 struct {
 // 6 小时ma线金叉
 func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
-	if err1 != nil {
+	kline_3m, err2 := binance.GetKlineData(symbol, "3m", 2) // 3min 线最近2条
+	if err1 != nil || err2 != nil {
 		return false, false
 	}
 	kline_6h_close := GetLineClosePrices(kline_6h)
+	kline_3m_close := GetLineClosePrices(kline_3m)
 	
 	ma6h_3, _ := CalculateSimpleMovingAverage(kline_6h_close, 3) // ma3
 	ma6h_7, _ := CalculateSimpleMovingAverage(kline_6h_close, 7) // ma7
@@ -38,11 +40,11 @@ func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, can
 	}
 	isRsi := rsi6[1] < 80 && rsi6[1] > 30 && rsi14[1] < 75 && rsi14[1] > 28
 	// logs.Info(symbol, Kdj(ma6h_3, ma6h_7, 4), Kdj(ma6h_7, ma6h_3, 4), utils.IsDesc(ma6h_3[0:2]), rsi6[1], rsi14[1])
-	if Kdj(ma6h_3, ma6h_7, 4) && Kdj(ma6h_3, ma6h_15, 4) && utils.IsDesc(ma6h_3[0:2]) && isRsi { // 1天之内发生过金叉, rsi 没有超买
+	if Kdj(ma6h_3, ma6h_7, 4) && Kdj(ma6h_3, ma6h_15, 4) && utils.IsDesc(kline_3m_close[0:2]) && isRsi { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		return true, false
 	}
-	if Kdj(ma6h_7, ma6h_3, 4) && Kdj(ma6h_15, ma6h_3, 4) && utils.IsAsc(ma6h_3[0:2]) && isRsi {
+	if Kdj(ma6h_7, ma6h_3, 4) && Kdj(ma6h_15, ma6h_3, 4) && utils.IsAsc(kline_3m_close[0:2]) && isRsi {
 		return false, true
 	}
 	return false, false
