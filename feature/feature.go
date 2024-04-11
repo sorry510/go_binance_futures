@@ -525,3 +525,29 @@ func GoTestUtil() {
 	ma2 := []float64{9, 7, 9, 6.1}
 	logs.Info(line.Kdj(ma1, ma2, 4))
 }
+
+// test 平仓
+func GoTestMarketOrder() {
+	positions, _ := binance.GetPosition()
+	for _, position := range positions {
+    	positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
+    	positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
+    	unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
+    	
+    	if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
+    		continue
+    	}
+    	if position.Symbol == "BELUSDT" {
+			if position.PositionSide == "SHORT" {
+				result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				if err == nil {
+					// 数据库写入订单
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+					notify.SellOrderSuccess(position.Symbol, "风向改变,自动平仓", unRealizedProfit)
+				} else {
+					notify.SellOrderFail(position.Symbol, err.Error())
+				}
+			}
+    	}
+	}
+}
