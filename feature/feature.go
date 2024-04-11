@@ -399,6 +399,8 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 			coinStrategy = coin.TradeCoin1{}
 		case "coin2":
 			coinStrategy = coin.TradeCoin2{}
+		case "coin3":
+			coinStrategy = coin.TradeCoin3{}
 		default:
 			coinStrategy = coin.TradeCoin1{}
 	}
@@ -412,6 +414,8 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 			lineStrategy = line.TradeLine1{}
 		case "line2":
 			lineStrategy = line.TradeLine2{}
+		case "line3":
+			lineStrategy = line.TradeLine3{}
 		default:
 			lineStrategy = line.TradeLine1{}
 	}
@@ -447,9 +451,13 @@ func GoTestLine() {
 	for _, coin := range coins {
 		symbol := coin.Symbol
 		
-		// if symbol != "XTZUSDT" {
-		// 	continue
-		// }
+		if symbol != "MTLUSDT" &&
+			symbol != "IOSTUSDT" &&
+			symbol != "TUSDT" &&
+			symbol != "TONUSDT" &&
+			symbol != "PERPUSDT" {
+			continue
+		}
 		
 		// interval := "6h"
 		// limit := 50
@@ -481,8 +489,11 @@ func GoTestLine() {
 		// logs.Info(rsi6[1])
 		// logs.Info(rsi14[1])
 		
-		canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
-		logs.Info(symbol, canLang, canShort)
+		// canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
+		// logs.Info(symbol, canLang, canShort)
+		
+		lineS := line.TradeLine3{}
+		logs.Info(symbol, lineS.MarketReversal(symbol, "LONG"), lineS.MarketReversal(symbol, "SHORT"))
 	}
 	
 }
