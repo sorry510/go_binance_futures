@@ -19,6 +19,7 @@ import (
 type TradeLine2 struct {
 }
 
+// 6小时线的ema金叉
 func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
 	if err1 != nil {
