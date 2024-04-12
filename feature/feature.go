@@ -67,7 +67,7 @@ func StartTrade() {
 		logs.Error("GetPosition err:", err)
 	}
 	
-	allOpenOrders, _ := binance.GetOpenOrder()
+	allOpenOrders, err := binance.GetOpenOrder()
 	if err != nil {
 		logs.Error("GetOpenOrder err:", err)
 	}
@@ -177,7 +177,7 @@ func StartTrade() {
 	/*************************************************平仓 end************************************************************ */
 	
 	/*************************************************检查当前仓位数量 start************************************************************ */
-	if positionCount >= max_count_int {
+	if positionCount + len(allOpenOrders) >= max_count_int {
 		logs.Info("当前仓位数量为%d, 已经达到当前仓位最大数量%d,暂时无法开启新的仓位", positionCount, max_count_int)
 		return
 	}
