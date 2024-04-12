@@ -26,8 +26,8 @@ jobs:
 
     - name: Build for multiple platforms
       env:
-        GOOS: linux darwin windows  # 指定目标操作系统
-        GOARCH: amd64 arm64 # 指定目标架构
+        GOOS: linux  # 指定目标操作系统
+        GOARCH: amd64 # 指定目标架构
       run: |
         for os in $GOOS; do
           for arch in $GOARCH; do
@@ -41,7 +41,7 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用内置的 GitHub token
+        GITHUB_TOKEN: ${{ WORKFLOW_PERSONAL_ACCESS_TOKEN }}  # 使用内置的 GitHub token
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
