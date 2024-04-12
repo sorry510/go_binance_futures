@@ -28,6 +28,7 @@ func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, can
 	}
 	kline_6h_close := GetLineClosePrices(kline_6h)
 	kline_3m_close := GetLineClosePrices(kline_3m)
+	// kline_6h_data := normalizationLineData(kline_6h)
 	
 	ma6h_3, _ := CalculateSimpleMovingAverage(kline_6h_close, 3) // ma3
 	ma6h_7, _ := CalculateSimpleMovingAverage(kline_6h_close, 7) // ma7
