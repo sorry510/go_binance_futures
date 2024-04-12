@@ -5,11 +5,9 @@ import (
 	"strconv"
 
 	"go_binance_futures/feature"
-	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
 	"go_binance_futures/utils"
 
-	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
 )
@@ -52,14 +50,8 @@ func (ctrl *FeatureController) Edit() {
 	intId, _ := strconv.ParseInt(id, 10, 64)
 	symbols.ID = intId
 	
-	marginType := futures.MarginTypeIsolated
-	if symbols.MarginType == "CROSSED" {
-		marginType = futures.MarginTypeCrossed
-	}
-	
 	go func() {
-		binance.SetLeverage(symbols.Symbol, int(symbols.Leverage))  // 修改合约倍数
-		binance.SetMarginType(symbols.Symbol, marginType) // 修改仓位模式
+		feature.UpdateSymbolTradeInfo(symbols) // 更新合约倍率和仓位模式
 		feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
 	}()
 	
@@ -114,6 +106,7 @@ func (ctrl *FeatureController) Post() {
 	id, err := o.Insert(symbols)
 	
 	go func() {
+		feature.UpdateSymbolTradeInfo(symbols) // 更新合约倍率和仓位模式
 		feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
 	}()
 	
