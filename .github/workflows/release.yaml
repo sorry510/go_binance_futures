@@ -41,13 +41,13 @@ jobs:
       run: |
         export GOOS=linux
         export GOARCH=amd64
-        bee pack -o linux_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
+        bee pack -a linux_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
 
     - name: Build and package for Windows
       run: |
         export GOOS=windows
         export GOARCH=amd64
-        bee pack -o windows_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
+        bee pack -a windows_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
         
     - name: Release
       uses: softprops/action-gh-release@v2
@@ -56,7 +56,7 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          linux_amd64_feature
-          windows_amd64_feature
+          linux_amd64_feature.tar.gz
+          windows_amd64_feature.tar.gz
       env:
         GITHUB_TOKEN: ${{ secrets.WORKFLOW_PERSONAL_ACCESS_TOKEN }}
