@@ -34,6 +34,9 @@ cp conf/app.conf.example conf/app.conf
 ./go_binance_futures
 ```
 
+#### 交易策略
+> 参考 `feature/strategy` 文件夹
+
 #### web 说明
 >访问地址: http://ip:host/zmkm/index.html # ip 为部署服务器ip，port 为 app.conf 中 web.port
 登录的账号密码为 app.conf 文件中的  web.username 和 web.password
