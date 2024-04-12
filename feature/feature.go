@@ -245,6 +245,8 @@ func StartTrade() {
 				quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
 				quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
 				
+				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
+				
 				if order_type == "market" {
 					result, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
 					if err == nil {
@@ -274,6 +276,8 @@ func StartTrade() {
 				sellPrice = utils.GetTradePrecision(sellPrice, tickSize) // 合理精度的价格
 				quantity := (usdt_float64 / sellPrice) * leverage_float64  // 购买数量
 				quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
+				
+				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 				
 				if order_type == "market" {
 					result, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
@@ -390,6 +394,16 @@ func UpdateSymbolsTradePrecision() {
 			})
 		}
 	}
+}
+
+// 更新币种信息
+func UpdateSymbolTradeInfo(symbols *models.Symbols) {
+	marginType := futures.MarginTypeIsolated
+	if symbols.MarginType == "CROSSED" {
+		marginType = futures.MarginTypeCrossed
+	}
+	binance.SetLeverage(symbols.Symbol, int(symbols.Leverage))  // 修改合约倍数
+	binance.SetMarginType(symbols.Symbol, marginType) // 修改仓位模式
 }
 
 // 获取币的策略
