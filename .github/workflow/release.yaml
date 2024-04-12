@@ -1,0 +1,59 @@
+name: Go Release
+
+on:
+  push:
+    # 触发条件：当推送到 master 分支或创建新标签时运行
+    branches:
+      - master
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.21.x  # 使用所需的 Go 版本
+    - name: Install Bee tool
+      run: | # 安装 Bee 工具
+        go install github.com/beego/bee/v2@latest
+
+    - name: Build for multiple platforms
+      env:
+        GOOS: linux darwin windows  # 指定目标操作系统
+        GOARCH: amd64 arm64 # 指定目标架构
+      run: |
+        for os in $GOOS; do
+          for arch in $GOARCH; do
+            output_name="myapp_${os}_${arch}"
+            echo "Building for $os/$arch..."
+            GOOS=$os GOARCH=$arch bee pack -o $output_name -be GOOS=$os GOARCH=$arch
+          done
+        done
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用内置的 GitHub token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./myapp_*  # 匹配所有生成的二进制文件
+        asset_name: myapp_$(echo "${{ github.ref }}" | cut -d'/' -f3)_$(uname -s)_$(uname -m)  # 根据实际需求命名资产文件
+        asset_content_type: application/octet-stream
