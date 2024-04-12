@@ -41,7 +41,7 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ WORKFLOW_PERSONAL_ACCESS_TOKEN }}  # 使用内置的 GitHub token
+        GITHUB_TOKEN: ${{ secrets.WORKFLOW_PERSONAL_ACCESS_TOKEN }}  # 使用内置的 GitHub token
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
@@ -51,7 +51,7 @@ jobs:
     - name: Upload release assets
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ WORKFLOW_PERSONAL_ACCESS_TOKEN }} 
+        GITHUB_TOKEN: ${{ secrets.WORKFLOW_PERSONAL_ACCESS_TOKEN }} 
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./myapp_*  # 匹配所有生成的二进制文件
