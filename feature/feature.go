@@ -318,10 +318,10 @@ func GetExcludeSymbolsMap() (map[string]bool) {
 	return exclude_symbols_map
 }
 
-// 获取允许交易的币
+// 获取所有交易的币
 func GetAllSymbols() (symbols []*models.Symbols, err error) {
 	o := orm.NewOrm()
-	_, err = o.QueryTable("symbols").Filter("enable", 1).OrderBy("ID").All(&symbols)
+	_, err = o.QueryTable("symbols").OrderBy("ID").All(&symbols)
 	return symbols, err
 }
 
@@ -461,17 +461,20 @@ func GoTestFeature() {
 }
 
 func GoTestLine() {
+	// logs.Info(line.BaseCheckCanLongOrShort())
+	// return
+		
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
 		symbol := coin.Symbol
 		
-		if symbol != "MTLUSDT" &&
-			symbol != "IOSTUSDT" &&
-			symbol != "TUSDT" &&
-			symbol != "TONUSDT" &&
-			symbol != "PERPUSDT" {
-			continue
-		}
+		// if symbol != "MTLUSDT" &&
+		// 	symbol != "IOSTUSDT" &&
+		// 	symbol != "TUSDT" &&
+		// 	symbol != "TONUSDT" &&
+		// 	symbol != "PERPUSDT" {
+		// 	continue
+		// }
 		
 		// interval := "6h"
 		// limit := 50

@@ -32,9 +32,9 @@ profit = 10
 # 止损百分比
 loss = 100
 # 购买策略
-strategy_trade = line2
+strategy_trade = line3
 # 选币策略
-strategy_coin = coin2
+strategy_coin = coin3
 
 [spot]
 # 是否开启新币抢购的开关
