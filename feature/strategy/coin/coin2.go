@@ -20,7 +20,7 @@ func (tradeCoin1 TradeCoin2) SelectCoins(allCoins []*models.Symbols) (coins []*m
 		if _, exist := exclude_symbols_map[coin.Symbol]; exist {
 			continue
 		} // 最近交易过的排除
-		if coin.Enable == 1 { // 非必要，allCoins 已经排除了这些
+		if coin.Enable == 1 { // 只获取允许交易的币
 			filterCoins = append(filterCoins, coin)
 		}
 	}

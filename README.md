@@ -19,7 +19,9 @@
 ### 使用前注意事项
 > 如果你的账号本身已经有合约仓位，请一定要在 `app.conf` 文件中配 `excludeSymbols`, 排出掉你不想使用本程序自动交易的币，否则默认所有的仓位都会根据交易策略规则自动平仓
 
-### 使用
+## 使用
+> 在 https://github.com/sorry510/go_binance_futures/releases 页面下载最新对应操作系统的发布版，解压
+> 或者自行编译
 
 #### 修改配置文件
 > 配置说明请参考 `app.conf.example` 每一项说明
@@ -28,7 +30,8 @@
 cp conf/app.conf.example conf/app.conf
 ```
 
-#### 运行
+#### 运行文件
+> !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
 
 ```
 ./go_binance_futures
@@ -41,7 +44,7 @@ cp conf/app.conf.example conf/app.conf
 >访问地址: http://ip:host/zmkm/index.html # ip 为部署服务器ip，port 为 app.conf 中 web.port
 登录的账号密码为 app.conf 文件中的  web.username 和 web.password
 
-##### 交易列表按钮说明
+##### 交易列表按钮说明(非必需，用来修改配置后的重新启动)
 ###### 开启服务
 > 对应的是 app.conf 中 web.commend_start 下的命令，需要自行配置
 
@@ -57,12 +60,13 @@ cp conf/app.conf.example conf/app.conf
 
 ### 注意事项
 - 由于币安交易所的 api 在大陆无法访问，请使用国外的服务器
-- 请保证账户里有足够的 bnb 用于交易手续费
-- 请保证现货账户有足够的 USDT
+- 请保证账户有足够的 USDT
 - 钉钉推送 1min 中内不要超过 20 条，否则会被封 ip
+- 调整过大参数可能会造成币安 api 请求超出限制，返回429
+- !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
 
 
-### 开发
+## 开发
 >安装最新版 golang
 
 ### 安装bee
