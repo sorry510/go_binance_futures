@@ -83,6 +83,19 @@ func StartTrade() {
 	/*************************************************平仓(止盈或止损)已经有持仓的币(排除手动交易白名单) start************************************************************ */
 	positionCount := 0 // 当前仓位数量
 	for _, position := range positions {
+		coin_profit_float64 := profit_float64 // 全局定义
+		coin_loss_float64 := loss_float64
+		for _, coin := range allCoins {
+			if coin.Symbol == position.Symbol {
+				// 自定义可以覆盖全局
+				if coin.Profit != "0" {
+					coin_profit_float64, _ = strconv.ParseFloat(coin.Profit, 64)
+				}
+				if coin.Loss != "0" {
+					coin_loss_float64, _ = strconv.ParseFloat(coin.Loss, 64)
+				}
+			}
+		}
 		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 		unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
@@ -121,7 +134,7 @@ func StartTrade() {
 			logs.Info("%s:auto_stop_end", position.Symbol)
 			continue
 		}
-		if nowProfit <= -loss_float64 { // 平仓(止损)
+		if nowProfit <= -coin_loss_float64 { // 平仓(止损)
 			if lineStrategy.CanOrderComplete(position.Symbol, position.PositionSide) { // 
 				if position.PositionSide == "LONG" {
 					result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
@@ -146,7 +159,7 @@ func StartTrade() {
 				continue
 			}
 		}
-		if nowProfit >= profit_float64 { // 平仓(止盈)
+		if nowProfit >= coin_profit_float64 { // 平仓(止盈)
 			if lineStrategy.CanOrderComplete(position.Symbol, position.PositionSide) {
 				if position.PositionSide == "LONG" {
 					result, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)

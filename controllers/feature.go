@@ -3,6 +3,7 @@ package controllers
 import (
 	"sort"
 	"strconv"
+	"strings"
 
 	"go_binance_futures/feature"
 	"go_binance_futures/models"
@@ -12,6 +13,12 @@ import (
 	"github.com/beego/beego/v2/server/web"
 )
 
+
+type BatchEditParams struct {
+	Usdt string `json:"usdt"`
+	Profit string `json:"profit"`
+	Loss string `json:"loss"`
+}
 type FeatureController struct {
 	web.Controller
 }
@@ -97,10 +104,12 @@ func (ctrl *FeatureController) Post() {
 	symbols.Low = "0"
 	
 	symbols.Leverage = 3
-	symbols.MarginType = "ISOLATED"
+	symbols.MarginType = "CROSSED" // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
 	symbols.StepSize = "0.1"
 	symbols.TickSize = "0.1"
 	symbols.Usdt = "10"
+	symbols.Profit = "20"
+	symbols.Loss = "20"
 	
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
@@ -135,4 +144,35 @@ func (ctrl *FeatureController) UpdateEnable() {
 		return
 	}
 	ctrl.Ctx.Resp(utils.ResJson(200, nil))
+}
+
+func (ctrl *FeatureController) BatchEdit() {
+	params := new(BatchEditParams)
+	ctrl.BindJSON(&params)
+	query := "UPDATE symbols SET"
+	
+	if params.Usdt != "" {
+		query += " usdt = " + params.Usdt + ","
+	}
+	if (params.Profit != "") {
+		query += " profit = " + params.Profit + ","	
+	}
+	if (params.Loss != "") {
+		query += " loss = " + params.Loss + ","
+	}
+	
+	if strings.HasSuffix(query, ",") {
+		query = strings.TrimSuffix(query, ",")
+		_, err := orm.NewOrm().Raw(query).Exec()
+		if err != nil {
+			// 处理错误
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, "更新错误"))
+			return
+		}
+	}
+	
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"msg": "success",
+	})
 }
