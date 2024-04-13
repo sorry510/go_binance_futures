@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"go_binance_futures/utils"
 	"io"
+	"os"
 	"os/exec"
+	"regexp"
 
 	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/server/web"
@@ -57,19 +60,29 @@ func (ctrl *CommandController) Start() {
 
 // 关闭后台任务
 func (ctrl *CommandController) Stop() {
+	content, err := os.ReadFile("./conf/app.conf")
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "获取错误"))
+		return
+	}
+	
+	pattern := "future_enable = 1"
+	replacement := "future_enable = 0"
+	r, err := regexp.Compile(pattern)
+	if err != nil {
+		panic(err)
+	}
+	result := r.ReplaceAllString(string(content), replacement)
+	err = os.WriteFile("./conf/app.conf", []byte(result), 0644)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "写入文件错误"))
+		return
+	}
+	
 	commend_stop, _ := config.String("web::commend_stop")
+	
 	cmd := exec.Command("bash", "-c", commend_stop)
 	cmd.Start() // 异步执行，不要获取结果，因为重启时此进程会挂掉导致http请求失败
-	
-	// // 获取标准输出
-	// output, err := cmd.CombinedOutput()
-	// if err != nil {
-	// 	ctrl.Ctx.Resp(map[string]interface{} {
-	// 		"code": 400,
-	// 		"data": err,
-	// 		"msg": "error",
-	// 	})
-	// }
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,

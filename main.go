@@ -21,7 +21,7 @@ import (
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
 var taskSleepTime, _ = config.String("coin::sleep_time")
-var tradeEnable, _ = config.String("trade::enable")
+var tradeEnable, _ = config.String("trade::future_enable")
 var spotNewEnable, _ = config.String("spot::new_enable")
 var taskSleepTimeInt, _ = strconv.Atoi(taskSleepTime)
 
