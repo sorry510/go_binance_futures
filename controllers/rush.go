@@ -85,8 +85,8 @@ func (ctrl *RushController) Post() {
 	
 	symbols.Leverage = 3
 	symbols.MarginType = "ISOLATED"
-	symbols.StepSize = ""
-	symbols.TickSize = ""
+	symbols.StepSize = "0"
+	symbols.TickSize = "0"
 	symbols.Usdt = "10"
 	symbols.Type = 1
 	symbols.Enable = 0

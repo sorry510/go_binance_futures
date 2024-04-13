@@ -18,62 +18,62 @@ func TryBuyNewSymbols() {
 	var coins []models.NewSymbols
 	o.QueryTable("new_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins) // 允许抢购的币
 	
-	countHasSize := 0
+	notHasSizeSymbols := []string{}
 	
 	for _, coin := range coins {
-		if coin.StepSize != "" {
-			countHasSize++
+		if coin.StepSize != "0" {
 			_, err := tryBuyMarket(coin.Symbol, coin.Usdt, coin.StepSize)
 			if err == nil {
 				coin.Enable = 0 // 更新为禁用
 			}
 			orm.NewOrm().Update(&coin)
+		} else {
+			notHasSizeSymbols = append(notHasSizeSymbols, coin.Symbol)
 		}
 	}
-	
-	if countHasSize == len(coins) {
-		// logs.Info("不需要更新精度")
+	if len(notHasSizeSymbols) == 0 {
+		// logs.Info("没有币需要更新交易精度")
 		return
 	}
 	
 	res, err := binance.GetExchangeInfo()
 	if err != nil {
-		logs.Error(err)
+		logs.Error("GetExchangeInfoError:", err)
+		return
 	}
+	symbolMap := make(map[string]string)
 	for _, item := range res.Symbols {
-		var stepSize string
 		lotSizeFilter := item.LotSizeFilter()
 		if lotSizeFilter != nil {
-			stepSize = lotSizeFilter.StepSize
+			symbolMap[item.Symbol] = lotSizeFilter.StepSize
 		}
-		if stepSize == "" {
-			continue
-		}
-		
-		for _, coin := range coins {
-			// 找到了币的精度，说明币可能上线了
-			if item.Symbol == coin.Symbol {
-				logs.Info("lotSize:", stepSize)
-				
-				_, err := tryBuyMarket(coin.Symbol, coin.Usdt, stepSize)
-				
-				if err == nil {
-					coin.Enable = 0 // 更新为禁用
-					logs.Info("抢购成功，关闭交易")
-				}
-				coin.StepSize = stepSize
-				orm.NewOrm().Update(&coin)
-			}
-		}
-		
+	}
+	
+	for _, coin := range coins {
+		// 找到了币的精度，说明币可能上线了
+		if stepSize, ok := symbolMap[coin.Symbol]; ok {
+			logs.Info("lotSize:", stepSize)
 			
+			_, err := tryBuyMarket(coin.Symbol, coin.Usdt, stepSize)
+			
+			if err == nil {
+				coin.Enable = 0 // 更新为禁用
+				logs.Info("抢购成功，关闭交易")
+			}
+			coin.StepSize = stepSize
+			orm.NewOrm().Update(&coin)
+		} else {
+			logs.Info("还未上线此币种,未确定交易价格数量精度:", coin.Symbol)
+		}
 	}
 }
 
 func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.CreateOrderResponse, err error) {
+	logs.Info("尝试开始抢币symbol:", symbol)
 	resPrice, err1 := binance.GetTickerPrice(symbol)
 	if err1 != nil {
-		logs.Error(err1)
+		logs.Info("还未上线此币种,未确定交易价格symbol:", symbol)
+		return nil, err1
 	}
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
 	price_float64, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
@@ -83,7 +83,10 @@ func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.Cr
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
 	
 	res, err = binance.BuyMarket(symbol, quantity)
-	if err == nil {
+	if err != nil {
+		logs.Info("购买失败symbol:", symbol)
+	} else {
+		// 购买成功
 		notify.BuyOrderSuccess(symbol, quantity, buyPrice)
 	}
 	return res, err
