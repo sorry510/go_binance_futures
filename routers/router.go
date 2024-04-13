@@ -12,6 +12,7 @@ func init() {
 	web.Router("/features", &controllers.FeatureController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/features/:id", &controllers.FeatureController{}, "delete:Delete;put:Edit") // 更新和删除
 	web.Router("/features/enable/:flag", &controllers.FeatureController{}, "put:UpdateEnable") // 修改所有的合约交易对开启关闭
+	web.Router("/features/batch", &controllers.FeatureController{}, "put:BatchEdit") // 修改所有的合约交易
 	
 	web.Router("/rush", &controllers.RushController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/rush/:id", &controllers.RushController{}, "delete:Delete;put:Edit") // 更新和删除

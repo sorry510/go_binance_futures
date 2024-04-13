@@ -35,6 +35,8 @@ type Symbols struct {
 	TickSize string `orm:"column(tickSize)" json:"tickSize"` // 交易金额精度
 	StepSize string `orm:"column(stepSize)" json:"stepSize"` // 交易数量精度
 	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
+	Profit string `orm:"column(profit)" json:"profit"` // 盈利率
+	Loss string `orm:"column(loss)" json:"loss"` // 损失率
 }
 
 type NewSymbols struct {
