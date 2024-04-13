@@ -27,8 +27,8 @@ func GetFuturesAccount() (res *binance.Account, err error) {
 }
 
 // @see https://binance-docs.github.io/apidocs/futures/cn/#0f3f2d5ee7
-func GetExchangeInfo()(res *binance.ExchangeInfo, err error) {
-	res, err = client.NewExchangeInfoService().Do(context.Background())
+func GetExchangeInfo(symbols ...string)(res *binance.ExchangeInfo, err error) {
+	res, err = client.NewExchangeInfoService().Symbols(symbols...).Do(context.Background())
 	if err != nil {
 		logs.Error(err)
 		return nil, err
