@@ -25,7 +25,7 @@ type TradeLine3 struct {
 // 3. rsi在一定范围内
 func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
-	kline_1h, err2 := binance.GetKlineData(symbol, "1h", 50)
+	kline_1h, err2 := binance.GetKlineData(symbol, "1h", 24)
 	if err1 != nil || err2 != nil {
 		return false, false
 	}
@@ -41,7 +41,7 @@ func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, can
 	}
 	baseCanLong, baseCanShort := BaseCheckCanLongOrShort() // 基本盘
 	isRsi := rsi6[1] < 80 && rsi6[1] > 30 && rsi14[1] < 75 && rsi14[1] > 28
-	// logs.Info(symbol, Kdj(ma6h_3, ma6h_7, 4), Kdj(ma6h_7, ma6h_3, 4), utils.IsDesc(ma6h_3[0:2]), rsi6[1], rsi14[1])
+	// logs.Info(symbol, Kdj(ma6h_3, ma6h_7, 4), Kdj(ma6h_7, ma6h_3, 4), rsi6[1], rsi14[1])
 	if Kdj(ma6h_3, ma6h_7, 4) && TradeLine3.checkLongLine(kline_1h) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		return true, false
@@ -104,17 +104,14 @@ func (TradeLine3 TradeLine3) MarketReversal(symbol string, positionSide string) 
 }
 
 func (TradeLine3 TradeLine3) checkLongLine(klines []*futures.Kline) bool {
-	lineData := normalizationLineData(klines)
-	maxIndex := lineData.MaxIndex
+	lineData := normalizationLineData(klines) // 24条线
 	minIndex := lineData.MinIndex
 	line := lineData.Line
-	if minIndex >= 1 && minIndex <= 4 && maxIndex >= 9 {
-		ma3List, _ := CalculateSimpleMovingAverage(GetClosePrices(line), 3) // ma3时间从最新到最老
+	if minIndex >= 1 && minIndex <= 9 {
 		linePoint := line[minIndex] // 最低的那个line
 		underLength := math.Abs(linePoint.Close - linePoint.Low) // 下影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if utils.IsDesc(ma3List[0:minIndex]) && // 最低点到现在在涨
-			getRightLine(line[minIndex:minIndex+8], "SHORT") && // 最低点到最低点+8个line里面至少6个是红线
+		if	getRightLine(line[minIndex:minIndex+8], "SHORT") && // 最低点到最低点+8个line里面至少6个是红线
 			linePoint.Position == "SHORT" && // 最低点的line是跌
 			(underLength / entityLength) > 0.5 { // 下影线长度  实体长度
 				return true
@@ -124,17 +121,14 @@ func (TradeLine3 TradeLine3) checkLongLine(klines []*futures.Kline) bool {
 }
 
 func (TradeLine3 TradeLine3) checkShortLine(klines []*futures.Kline) bool {
-	lineData := normalizationLineData(klines)
+	lineData := normalizationLineData(klines) // 24条线
 	maxIndex := lineData.MaxIndex
-	minIndex := lineData.MinIndex
 	line := lineData.Line
-	if maxIndex >= 1 && maxIndex <= 4 && minIndex >= 9 {
-		ma3List, _ := CalculateSimpleMovingAverage(GetClosePrices(line), 3) // ma3时间从最新到最老
+	if maxIndex >= 1 && maxIndex <= 9 {
 		linePoint := line[maxIndex] // 最高的那个line
 		upperLength := math.Abs(linePoint.High - linePoint.Close) // 上影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if utils.IsAsc(ma3List[0:maxIndex]) &&
-			getRightLine(line[maxIndex:maxIndex+8], "LONG") && // 最低点到最低点+8个line里面至少6个是绿线
+		if	getRightLine(line[maxIndex:maxIndex+8], "LONG") && // 最低点到最低点+8个line里面至少6个是绿线
 			linePoint.Position == "LONG" && // 最低点的line是涨
 			(upperLength / entityLength) > 0.5 { // 上影线长度 > 实体长度
 				return true
