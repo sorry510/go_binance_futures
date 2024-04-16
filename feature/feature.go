@@ -386,7 +386,7 @@ func insertCloseOrder(position *futures.PositionRisk, positionAmtFloat float64, 
 	o.Insert(order)
 }
 
-// 更新币种的交易精度
+// 更新币种的交易精度和插入新币
 func UpdateSymbolsTradePrecision() {
 	res, err := binance.GetExchangeInfo()
 	if err == nil {
@@ -406,6 +406,24 @@ func UpdateSymbolsTradePrecision() {
 				"tickSize": tickSize,
 				"stepSize": stepSize,
 			})
+			
+			if strings.HasSuffix(symbol.Symbol, "USDT") { // 非usdt结尾的不需要
+				if !o.QueryTable("symbols").Filter("symbol", symbol.Symbol).Exist() {
+					// 没有的币种插入
+					logs.Info("新增币种：", symbol.Symbol)
+					o.Insert(&models.Symbols{
+						Symbol: symbol.Symbol,
+						Enable: 0, // 默认不开启
+						Leverage: 3,
+						MarginType: "CROSSED", // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
+						TickSize: tickSize,
+						StepSize: stepSize,
+						Usdt: "10",
+						Profit: "20",
+						Loss: "20",
+					})
+				}
+			}
 		}
 	}
 }
