@@ -25,10 +25,23 @@ type FeatureController struct {
 
 func (ctrl *FeatureController) Get() {
 	paramsSort := ctrl.GetString("sort")
+	symbol := ctrl.GetString("symbol")
+	enable := ctrl.GetString("enable")
+	margin_type := ctrl.GetString("margin_type")
 	
 	o := orm.NewOrm()
 	var symbols []models.Symbols
-	_, err := o.QueryTable("symbols").OrderBy("ID").All(&symbols)
+	query := o.QueryTable("symbols")
+	if symbol != "" {
+		query = query.Filter("symbol__contains", symbol)
+	}
+	if enable != "" {
+		query = query.Filter("enable", enable)
+	}
+	if margin_type != "" {
+		query = query.Filter("marginType", margin_type)
+	}
+	_, err := query.OrderBy("ID").All(&symbols)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error"))
 	}
