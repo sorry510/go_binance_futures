@@ -25,7 +25,7 @@ type TradeLine3 struct {
 // 3. rsi在一定范围内
 func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
-	kline_1h, err2 := binance.GetKlineData(symbol, "1h", 24)
+	kline_1h, err2 := binance.GetKlineData(symbol, "2h", 24)
 	if err1 != nil || err2 != nil {
 		return false, false
 	}
@@ -107,7 +107,7 @@ func (TradeLine3 TradeLine3) checkLongLine(klines []*futures.Kline) bool {
 	lineData := normalizationLineData(klines) // 24条线
 	minIndex := lineData.MinIndex
 	line := lineData.Line
-	if minIndex >= 1 && minIndex <= 9 {
+	if minIndex >= 1 && minIndex <= 11 {
 		linePoint := line[minIndex] // 最低的那个line
 		underLength := math.Abs(linePoint.Close - linePoint.Low) // 下影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
@@ -124,7 +124,7 @@ func (TradeLine3 TradeLine3) checkShortLine(klines []*futures.Kline) bool {
 	lineData := normalizationLineData(klines) // 24条线
 	maxIndex := lineData.MaxIndex
 	line := lineData.Line
-	if maxIndex >= 1 && maxIndex <= 9 {
+	if maxIndex >= 1 && maxIndex <= 11 {
 		linePoint := line[maxIndex] // 最高的那个line
 		upperLength := math.Abs(linePoint.High - linePoint.Close) // 上影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度

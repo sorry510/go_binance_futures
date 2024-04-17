@@ -18,6 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
 var taskSleepTime, _ = config.String("coin::sleep_time")
@@ -50,17 +51,20 @@ func registerMiddlewares() {
 }
 
 func main() {
-	// spot.TryBuyNewSymbols()
-	// feature.GoTestFeature()
-	// feature.GoTestLine()
-	// feature.GoTestOrder()
-	// feature.GoTestUtil()
-	// feature.GoTestMarketOrder()
-	// return
+	// debug
+	if debug == "1" {
+		// spot.TryBuyNewSymbols()
+		// feature.GoTestFeature()
+		feature.GoTestLine()
+		// feature.GoTestOrder()
+		// feature.GoTestUtil()
+		// feature.GoTestMarketOrder()
+		return
+	}
 	
 	// 更新币种交易精度
 	go func() {
-		logs.Info("更新币种交易精度")
+		logs.Info("更新币种交易精度和增加新币")
 		for {
 			feature.UpdateSymbolsTradePrecision()
 			time.Sleep(12 * time.Hour) // 12小时更新一次
@@ -101,4 +105,5 @@ func main() {
 	// web
 	web.Run(":" + webPort)
 }
+
 
