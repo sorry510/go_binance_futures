@@ -52,7 +52,6 @@ func BuyMarket(symbol string, quantity float64) (res *binance.CreateOrderRespons
 		Symbol(symbol).
         Side(binance.SideTypeBuy).
 		Type(binance.OrderTypeMarket).
-        TimeInForce(binance.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
 	if err != nil {
