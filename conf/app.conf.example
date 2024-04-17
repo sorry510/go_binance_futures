@@ -1,6 +1,7 @@
 # 切记不要使用单引号, 只能使用双引号或者不使用引号, 注释需要单独一行
 appname = binance_futures
 log = 1
+debug = 0
 
 [binance]
 api_key = ""
