@@ -65,7 +65,7 @@ func GetDepth(symbol string, limits ...int) (res *futures.DepthResponse, err err
 }
 
 func GetDepthAvgPrice(symbol string, limits ...int) (buyPrice float64, sellPrice float64, err error) {
-	limit := 50 // 默认值
+	limit := 25 // 默认值
     if len(limits) != 0 {
         limit = limits[0]
     }
