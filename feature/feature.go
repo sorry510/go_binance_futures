@@ -446,6 +446,8 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 			coinStrategy = coin.TradeCoin2{}
 		case "coin3":
 			coinStrategy = coin.TradeCoin3{}
+		case "coin4":
+			coinStrategy = coin.TradeCoin4{}
 		default:
 			coinStrategy = coin.TradeCoin1{}
 	}
@@ -461,6 +463,8 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 			lineStrategy = line.TradeLine2{}
 		case "line3":
 			lineStrategy = line.TradeLine3{}
+		case "line4":
+			lineStrategy = line.TradeLine4{}
 		default:
 			lineStrategy = line.TradeLine1{}
 	}

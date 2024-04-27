@@ -76,7 +76,10 @@ func GoTestLine() {
 		// logs.Info(rsi14[1])
 		
 		canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
-		logs.Info(symbol, canLang, canShort)
+		if canLang || canShort {
+			logs.Info(symbol, canLang, canShort)
+		}
+		// logs.Info("count:", index + 1)
 		
 		// lineS := line.TradeLine3{}
 		// logs.Info(symbol, lineS.MarketReversal(symbol, "LONG"), lineS.MarketReversal(symbol, "SHORT"))
