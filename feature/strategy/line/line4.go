@@ -108,7 +108,7 @@ func (TradeLine4 TradeLine4) checkLongLine(klines []*futures.Kline) bool {
 	lineData := normalizationLineData(klines) // 24条线
 	minIndex := lineData.MinIndex
 	line := lineData.Line
-	if minIndex >= 1 && minIndex <= 9 {
+	if minIndex >= 1 && minIndex <= 10 {
 		linePoint := line[minIndex] // 最低的那个line
 		underLength := math.Abs(linePoint.Close - linePoint.Low) // 下影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
@@ -125,7 +125,7 @@ func (TradeLine4 TradeLine4) checkShortLine(klines []*futures.Kline) bool {
 	lineData := normalizationLineData(klines) // 24条线
 	maxIndex := lineData.MaxIndex
 	line := lineData.Line
-	if maxIndex >= 1 && maxIndex <= 9 {
+	if maxIndex >= 1 && maxIndex <= 10 {
 		linePoint := line[maxIndex] // 最高的那个line
 		upperLength := math.Abs(linePoint.High - linePoint.Close) // 上影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
