@@ -40,6 +40,7 @@ func GoTestFeature() {
 func GoTestLine() {
 	// logs.Info(line.BaseCheckCanLongOrShort())
 	// return
+	logs.Info("start test line")
 		
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
@@ -85,6 +86,7 @@ func GoTestLine() {
 		// logs.Info(symbol, lineS.MarketReversal(symbol, "LONG"), lineS.MarketReversal(symbol, "SHORT"))
 	}
 	
+	logs.Info("end test line")
 }
 
 func GoTestOrder() {
