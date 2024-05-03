@@ -31,6 +31,23 @@
 cp conf/app.conf.example conf/app.conf
 ```
 
+##### 策略配置参数说明
+> 自动买卖的策略需要看代码自行分析，有好的思路这可以提供建议方案我来实现
+
+```
+[trade]
+# 是否开启合约交易的总开关
+future_enable = 1
+# 止盈百分比
+profit = 100
+# 止损百分比
+loss = 100
+# 购买策略(目前可以写 line1, line2, line3, line4)
+strategy_trade = line4
+# 选币策略(目前可以写 coin1, coin2, coin3, coin4)
+strategy_coin = coin4
+```
+
 #### 运行文件
 > !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
 
