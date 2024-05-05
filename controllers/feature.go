@@ -18,6 +18,8 @@ type BatchEditParams struct {
 	Usdt string `json:"usdt"`
 	Profit string `json:"profit"`
 	Loss string `json:"loss"`
+	Leverage string `json:"leverage"`
+	MarginType string `json:"marginType"`
 }
 type FeatureController struct {
 	web.Controller
@@ -71,7 +73,7 @@ func (ctrl *FeatureController) Edit() {
 	symbols.ID = intId
 	
 	go func() {
-		feature.UpdateSymbolTradeInfo(symbols) // 更新合约倍率和仓位模式
+		// feature.UpdateSymbolTradeInfo(symbols) // 更新合约倍率和仓位模式
 		feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
 	}()
 	
@@ -121,14 +123,14 @@ func (ctrl *FeatureController) Post() {
 	symbols.StepSize = "0.1"
 	symbols.TickSize = "0.1"
 	symbols.Usdt = "10"
-	symbols.Profit = "20"
-	symbols.Loss = "20"
+	symbols.Profit = "100"
+	symbols.Loss = "100"
 	
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
 	
 	go func() {
-		feature.UpdateSymbolTradeInfo(symbols) // 更新合约倍率和仓位模式
+		// feature.UpdateSymbolTradeInfo(symbols) // 更新合约倍率和仓位模式
 		feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
 	}()
 	
@@ -173,6 +175,12 @@ func (ctrl *FeatureController) BatchEdit() {
 	if (params.Loss != "") {
 		query += " loss = " + params.Loss + ","
 	}
+	if (params.Leverage != "") {
+		query += " leverage = " + params.Leverage + ","
+	}
+	if (params.MarginType != "") {
+		query += " marginType = '" + params.MarginType + "',"
+	}
 	
 	if strings.HasSuffix(query, ",") {
 		query = strings.TrimSuffix(query, ",")
@@ -183,6 +191,10 @@ func (ctrl *FeatureController) BatchEdit() {
 			return
 		}
 	}
+	
+	go func() {
+		feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
+	}()
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
