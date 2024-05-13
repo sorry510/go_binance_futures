@@ -90,6 +90,8 @@ func (ctrl *RushController) Post() {
 	symbols.Usdt = "10"
 	symbols.Type = 1
 	symbols.Enable = 0
+	symbols.Side = "buy"
+	symbols.Quantity = "0"
 	
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
