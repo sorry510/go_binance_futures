@@ -60,3 +60,17 @@ func BuyMarket(symbol string, quantity float64) (res *binance.CreateOrderRespons
 	}
 	return res, err
 }
+
+func SellMarket(symbol string, quantity float64) (res *binance.CreateOrderResponse, err error) {
+	res, err = client.NewCreateOrderService().
+		Symbol(symbol).
+        Side(binance.SideTypeSell).
+		Type(binance.OrderTypeMarket).
+		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
+		Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return
+	}
+	return res, err
+}

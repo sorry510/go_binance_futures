@@ -22,11 +22,20 @@ func TryBuyNewSymbols() {
 	
 	for _, coin := range coins {
 		if coin.StepSize != "0" {
-			_, err := tryBuyMarket(coin.Symbol, coin.Usdt, coin.StepSize)
-			if err == nil {
-				coin.Enable = 0 // 更新为禁用
+			if coin.Side == "buy" {
+				_, err := tryBuyMarket(coin.Symbol, coin.Usdt, coin.StepSize)
+				if err == nil {
+					coin.Enable = 0 // 更新为禁用
+				}
+				orm.NewOrm().Update(&coin)
 			}
-			orm.NewOrm().Update(&coin)
+			if coin.Side == "sell" {
+				_, err := trySellMarket(coin.Symbol, coin.Quantity, coin.StepSize)
+				if err == nil {
+					coin.Enable = 0 // 更新为禁用
+				}
+				orm.NewOrm().Update(&coin)
+			}
 		} else {
 			notHasSizeSymbols = append(notHasSizeSymbols, coin.Symbol)
 		}
@@ -53,13 +62,23 @@ func TryBuyNewSymbols() {
 		// 找到了币的精度，说明币可能上线了
 		if stepSize, ok := symbolMap[coin.Symbol]; ok {
 			logs.Info("lotSize:", stepSize)
+			if coin.Side == "buy" {
+				_, err := tryBuyMarket(coin.Symbol, coin.Usdt, stepSize)
 			
-			_, err := tryBuyMarket(coin.Symbol, coin.Usdt, stepSize)
-			
-			if err == nil {
-				coin.Enable = 0 // 更新为禁用
-				logs.Info("抢购成功，关闭交易")
+				if err == nil {
+					coin.Enable = 0 // 更新为禁用
+					logs.Info("抢购成功，关闭交易")
+				}
 			}
+			if coin.Side == "sell" {
+				_, err := trySellMarket(coin.Symbol, coin.Usdt, stepSize)
+			
+				if err == nil {
+					coin.Enable = 0 // 更新为禁用
+					logs.Info("抢卖成功，关闭交易")
+				}
+			}
+			
 			coin.StepSize = stepSize
 			orm.NewOrm().Update(&coin)
 		} else {
@@ -88,6 +107,22 @@ func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.Cr
 	} else {
 		// 购买成功
 		notify.BuyOrderSuccess(symbol, quantity, buyPrice)
+	}
+	return res, err
+}
+
+func trySellMarket(symbol string, quantity string, stepSize string) (res *spot_api.CreateOrderResponse, err error) {
+	logs.Info("尝试开始抢卖symbol:", symbol)
+	quantity_float64, _ := strconv.ParseFloat(quantity, 64) // 卖单数量
+	quantity_float64 = utils.GetTradePrecision(quantity_float64, stepSize) // 合理精度的数量
+	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)]
+	
+	res, err = binance.SellMarket(symbol, quantity_float64)
+	if err != nil {
+		logs.Info("卖出失败symbol:", symbol)
+	} else {
+		// 卖出成功
+		notify.SellOrderSuccess(symbol, quantity_float64, res.Price)
 	}
 	return res, err
 }

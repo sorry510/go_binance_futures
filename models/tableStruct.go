@@ -52,6 +52,8 @@ type NewSymbols struct {
 	TickSize string `orm:"column(tickSize)" json:"tickSize"` // 交易金额精度
 	StepSize string `orm:"column(stepSize)" json:"stepSize"` // 交易数量精度
 	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
+	Side string `orm:"column(side)" json:"side"` // 买卖方向
+	Quantity string `orm:"column(quantity)" json:"quantity"` // 卖单数量
 }
 
 func (u *Order) TableName() string {
