@@ -6,6 +6,7 @@ import (
 	"go_binance_futures/spot/notify"
 	"go_binance_futures/utils"
 	"strconv"
+	"time"
 
 	spot_api "github.com/adshao/go-binance/v2"
 
@@ -112,10 +113,12 @@ func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.Cr
 }
 
 func trySellMarket(symbol string, quantity string, stepSize string) (res *spot_api.CreateOrderResponse, err error) {
+	time.Sleep(time.Millisecond * 500) // 暂停500毫秒，开始卖
 	logs.Info("尝试开始抢卖symbol:", symbol)
 	quantity_float64, _ := strconv.ParseFloat(quantity, 64) // 卖单数量
 	quantity_float64 = utils.GetTradePrecision(quantity_float64, stepSize) // 合理精度的数量
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)]
+	
 	
 	res, err = binance.SellMarket(symbol, quantity_float64)
 	if err != nil {
