@@ -64,6 +64,16 @@ func GetDepth(symbol string, limits ...int) (res *futures.DepthResponse, err err
 	return res, err
 }
 
+// 获取交易价格
+func GetTickerPrice(symbol string) (res []*futures.SymbolPrice, err error) {
+	res, err = futuresClient.NewListPricesService().Symbol(symbol).Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return nil, err
+	}
+	return res, err
+}
+
 func GetDepthAvgPrice(symbol string, limits ...int) (buyPrice float64, sellPrice float64, err error) {
 	limit := 50 // 默认值
     if len(limits) != 0 {

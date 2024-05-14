@@ -88,8 +88,8 @@ func SellOrderSuccess(symbol string, quantity float64, price string) {
 ## %s挖矿抢卖交易通知
 #### **币种**：%s
 #### **类型**：<font color="#008000">币币交易新币上市抢卖</font>
-#### **卖单预计价格**：<font color="#008000">%f</font>
-#### **卖单数量**：<font color="#008000">%s</font>
+#### **卖单预计价格**：<font color="#008000">%s</font>
+#### **卖单数量**：<font color="#008000">%f</font>
 #### **时间**：%s
 
 > author <sorry510sf@gmail.com>`
