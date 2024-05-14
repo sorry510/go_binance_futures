@@ -123,3 +123,17 @@ func SellOrderFail(symbol string, info string) {
 > author <sorry510sf@gmail.com>`
 	DingDing(fmt.Sprintf(text, symbol, symbol, info, time.Now().Format("2006-01-02 15:04:05")))
 }
+
+func RushOrderSuccess(symbol string, quantity float64, price float64, side string) {
+	text := `
+## %s交易通知
+#### **币种**：%s
+#### **类型**：<font color="#008000">买单</font>
+#### **买单价格**：<font color="#008000">%f</font>
+#### **方向**：<font color="#008000">%s</font>
+#### **买单数量**：<font color="#008000">%f</font>
+#### **时间**：%s
+
+> author <sorry510sf@gmail.com>`
+	DingDing(fmt.Sprintf(text, symbol, symbol, price, side, quantity, time.Now().Format("2006-01-02 15:04:05")))
+}

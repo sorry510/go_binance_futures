@@ -23,6 +23,7 @@ var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
 var taskSleepTime, _ = config.String("coin::sleep_time")
 var tradeEnable, _ = config.String("trade::future_enable")
+var tradeNewEnable, _ = config.String("trade::new_enable")
 var spotNewEnable, _ = config.String("spot::new_enable")
 var taskSleepTimeInt, _ = strconv.Atoi(taskSleepTime)
 
@@ -53,7 +54,7 @@ func registerMiddlewares() {
 func main() {
 	// debug
 	if debug == "1" {
-		// spot.TryBuyNewSymbols()
+		// spot.TryRush()
 		// feature.GoTestFeature()
 		feature.GoTestLine()
 		// feature.GoTestOrder()
@@ -94,7 +95,19 @@ func main() {
 		logs.Info("新币抢购开启")
 		go func() {
 			for {
-				spot.TryBuyNewSymbols()
+				spot.TryRush()
+
+				// 等待 taskSleepTimeInt 秒再继续执行
+				time.Sleep(time.Millisecond * 100)
+			}
+		}()
+	}
+	
+	if tradeNewEnable == "1" {
+		logs.Info("合约新币抢购开启")
+		go func() {
+			for {
+				feature.TryRush()
 
 				// 等待 taskSleepTimeInt 秒再继续执行
 				time.Sleep(time.Millisecond * 100)
