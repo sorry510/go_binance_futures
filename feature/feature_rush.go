@@ -85,6 +85,10 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
 	buyPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
+	if buyPrice < 0.00000001 {
+		logs.Info("还未正式上线此合约币种,没有交易盘价格", symbol)
+	}
+	logs.Info("尝试开始合约抢币,价格为:", symbol)
 	leverage_float64 := float64(coin.Leverage) // 合约倍数
 	quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
 	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
