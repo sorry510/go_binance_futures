@@ -82,7 +82,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		return nil, errors.New("无交易价格")
 	}
 	logs.Info("尝试开始合约抢币symbol:", symbol)
-	logs.Info("价格为:", symbol)
+	logs.Info("预计交易价格为:", buyPrice)
 	// 修改仓位模式
 	if coin.MarginType == "ISOLATED" {
 		binance.SetMarginType(symbol, futures.MarginTypeIsolated)
