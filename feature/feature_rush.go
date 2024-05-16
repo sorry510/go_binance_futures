@@ -1,6 +1,7 @@
 package feature
 
 import (
+	"errors"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/notify"
 	"go_binance_futures/models"
@@ -74,6 +75,14 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		logs.Info("还未上线此合约币种,未确定交易价格symbol:", symbol)
 		return nil, err1
 	}
+	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
+	buyPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
+	if buyPrice < 0.000000001 {
+		logs.Info("还未正式上线此合约币种,没有交易盘价格", symbol)
+		return nil, errors.New("无交易价格")
+	}
+	logs.Info("尝试开始合约抢币symbol:", symbol)
+	logs.Info("价格为:", symbol)
 	// 修改仓位模式
 	if coin.MarginType == "ISOLATED" {
 		binance.SetMarginType(symbol, futures.MarginTypeIsolated)
@@ -81,14 +90,6 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		binance.SetMarginType(symbol, futures.MarginTypeCrossed)
 	}
 	binance.SetLeverage(symbol, int(coin.Leverage))  // 修改合约倍数
-	logs.Info("尝试开始合约抢币symbol:", symbol)
-	
-	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
-	buyPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
-	if buyPrice < 0.00000001 {
-		logs.Info("还未正式上线此合约币种,没有交易盘价格", symbol)
-	}
-	logs.Info("尝试开始合约抢币,价格为:", symbol)
 	leverage_float64 := float64(coin.Leverage) // 合约倍数
 	quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
 	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
