@@ -69,6 +69,11 @@ func TryRush() {
 func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateOrderResponse, err error) {
 	symbol := coin.Symbol
 	usdt := coin.Usdt
+	resPrice, err1 := binance.GetTickerPrice(symbol)
+	if err1 != nil {
+		logs.Info("还未上线此合约币种,未确定交易价格symbol:", symbol)
+		return nil, err1
+	}
 	// 修改仓位模式
 	if coin.MarginType == "ISOLATED" {
 		binance.SetMarginType(symbol, futures.MarginTypeIsolated)
@@ -77,11 +82,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	}
 	binance.SetLeverage(symbol, int(coin.Leverage))  // 修改合约倍数
 	logs.Info("尝试开始合约抢币symbol:", symbol)
-	resPrice, err1 := binance.GetTickerPrice(symbol)
-	if err1 != nil {
-		logs.Info("还未上线此合约币种,未确定交易价格symbol:", symbol)
-		return nil, err1
-	}
+	
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
 	buyPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
 	leverage_float64 := float64(coin.Leverage) // 合约倍数
