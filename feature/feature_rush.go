@@ -83,8 +83,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		return nil, err1
 	}
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
-	price_float64, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
-	buyPrice := utils.GetTradePrecision(price_float64, stepSize) // 合理精度的价格
+	buyPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
 	leverage_float64 := float64(coin.Leverage) // 合约倍数
 	quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
 	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
