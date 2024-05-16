@@ -95,8 +95,8 @@ func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.Cr
 		return nil, err1
 	}
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
-	price_float64, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
-	buyPrice := utils.GetTradePrecision(price_float64, stepSize) // 合理精度的价格
+	buyPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
+	logs.Info("尝试开始抢币预计价格为:", buyPrice)
 	quantity := usdt_float64 / buyPrice  // 购买数量
 	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
