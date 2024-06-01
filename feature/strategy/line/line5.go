@@ -37,7 +37,7 @@ func (TradeLine5 TradeLine5) GetCanLongOrShort(symbol string) (canLong bool, can
 // 达到止盈或止损后判断是否可以平仓
 // 5min 最新价格是否跌破前一个5min的收盘价
 func (TradeLine5 TradeLine5) CanOrderComplete(symbol string, positionSide string) (complete bool) {
-	lines, err := binance.GetKlineData(symbol, "3m", 2)
+	lines, err := binance.GetKlineData(symbol, "1m", 2)
 	if err != nil {
 		return true
 	}
