@@ -260,7 +260,7 @@ func StartTrade() {
 				
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 				
-				if order_type == "market" {
+				if order_type == "MARKET" {
 					result, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
@@ -292,7 +292,7 @@ func StartTrade() {
 				
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 				
-				if order_type == "market" {
+				if order_type == "MARKET" {
 					result, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
