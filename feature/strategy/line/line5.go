@@ -25,7 +25,7 @@ func (TradeLine5 TradeLine5) GetCanLongOrShort(symbol string) (canLong bool, can
 	lastOpenPrice, _ := strconv.ParseFloat(kline_1[0].Open, 64) // 1min 前的价格
 	nowPrice, _ := strconv.ParseFloat(kline_1[0].Close, 64)
 	
-	percentLimit := 0.008 // 变化幅度
+	percentLimit := 0.0075 // 变化幅度
 	
 	if (nowPrice > lastOpenPrice) && (nowPrice - lastOpenPrice) / lastOpenPrice >= percentLimit {
 		return true, false
@@ -94,7 +94,7 @@ func checkLine(kLines []*futures.Kline) bool {
 		open, _ := strconv.ParseFloat(item.Open, 64)
 		high, _ := strconv.ParseFloat(item.High, 64)
 		low, _ := strconv.ParseFloat(item.Low, 64)
-		if (high - low) / open >= 0.015 {
+		if (high - low) / open >= 0.011 {
 			return true
 		}
 	}

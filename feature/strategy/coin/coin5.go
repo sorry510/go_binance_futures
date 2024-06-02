@@ -25,6 +25,6 @@ func (tradeCoin5 TradeCoin5) SelectCoins(allCoins []*models.Symbols) (coins []*m
 		}
 	}
 
-	coins = GetRandArr(filterCoins, 6)
+	coins = GetRandArr(filterCoins, 8)
 	return coins
 }
