@@ -22,7 +22,7 @@ func (TradeLine5 TradeLine5) GetCanLongOrShort(symbol string) (canLong bool, can
 		return false, false
 	}
 	
-	lastOpenPrice, _ := strconv.ParseFloat(kline_1[1].Open, 64) // 1min 前的价格
+	lastOpenPrice, _ := strconv.ParseFloat(kline_1[0].Open, 64) // 1min 前的价格
 	nowPrice, _ := strconv.ParseFloat(kline_1[0].Close, 64)
 	
 	percentLimit := 0.0088 // 变化幅度
