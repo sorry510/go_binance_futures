@@ -469,6 +469,8 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 			lineStrategy = line.TradeLine4{}
 		case "line5":
 			lineStrategy = line.TradeLine5{}
+		case "line6":
+			lineStrategy = line.TradeLine6{}
 		default:
 			lineStrategy = line.TradeLine1{}
 	}
