@@ -8,30 +8,27 @@ import (
 	"github.com/adshao/go-binance/v2/futures"
 )
 
-type TradeLine5 struct {
+type TradeLine6 struct {
 }
 
-// 适合单边行情，一直上涨或下跌
-// 检查最后的价格于上一个1min线的平均价格的变化幅度是否大于2%
-func (TradeLine5 TradeLine5) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	kline_1, err1 := binance.GetKlineData(symbol, "1m", 30)
+// 适合震荡行情
+// 检查最后的价格于上一个3min线的平均价格的变化幅度是否大于2%,进行反买
+func (TradeLine6 TradeLine6) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
+	kline_1, err1 := binance.GetKlineData(symbol, "3m", 20)
 	if err1 != nil {
 		return false, false
 	}
-	if TradeLine5.checkLine(kline_1) {
-		return false, false
-	}
 	
-	lastOpenPrice, _ := strconv.ParseFloat(kline_1[1].Open, 64) // 1min 前的价格
+	lastOpenPrice, _ := strconv.ParseFloat(kline_1[0].Open, 64)
 	nowPrice, _ := strconv.ParseFloat(kline_1[0].Close, 64)
 	
-	percentLimit := 0.009 // 变化幅度
+	percentLimit := 0.012 // 变化幅度
 	
 	if (nowPrice > lastOpenPrice) && (nowPrice - lastOpenPrice) / lastOpenPrice >= percentLimit {
-		return true, false
+		return false, true
 	}
 	if (nowPrice < lastOpenPrice) && (lastOpenPrice - nowPrice) / lastOpenPrice >= percentLimit {
-		return false, true
+		return true, false
 	}
 
 	return false, false
@@ -39,7 +36,7 @@ func (TradeLine5 TradeLine5) GetCanLongOrShort(symbol string) (canLong bool, can
 
 // 达到止盈或止损后判断是否可以平仓
 // 3min 最新价格是否跌破前一个3min的收盘价
-func (TradeLine5 TradeLine5) CanOrderComplete(symbol string, positionSide string) (complete bool) {
+func (TradeLine6 TradeLine6) CanOrderComplete(symbol string, positionSide string) (complete bool) {
 	lines, err := binance.GetKlineData(symbol, "3m", 2)
 	if err != nil {
 		return true
@@ -57,14 +54,14 @@ func (TradeLine5 TradeLine5) CanOrderComplete(symbol string, positionSide string
 
 // 达到止盈或止损前判定是否可以平仓
 // 1. 1天的kline线，ma7和ma3金叉，ma15和ma3金叉，ma3线3连跌
-func (TradeLine5 TradeLine5) AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool) {
+func (TradeLine6 TradeLine6) AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool) {
 	if nowProfit < 3 || nowProfit > -3 {
 		return false
 	}
-	return TradeLine5.MarketReversal(position.Symbol, position.PositionSide)
+	return TradeLine6.MarketReversal(position.Symbol, position.PositionSide)
 }
 
-func (TradeLine5 TradeLine5) MarketReversal(symbol string, positionSide string) (isReversal bool) {
+func (TradeLine6 TradeLine6) MarketReversal(symbol string, positionSide string) (isReversal bool) {
 	kline_1d, err1 := binance.GetKlineData(symbol, "1d", 50)
 	if err1 != nil {
 		return false
@@ -82,20 +79,6 @@ func (TradeLine5 TradeLine5) MarketReversal(symbol string, positionSide string) 
 	}
 	if positionSide == "SHORT" {
 		if Kdj(ma1d_3, ma1d_7, 4) && Kdj(ma1d_3, ma1d_15, 4) && utils.IsDesc(ma1d_3[0:3]) {
-			return true
-		}
-	}
-	return false
-}
-
-
-func (TradeLine5 TradeLine5) checkLine(kLines []*futures.Kline) bool {
-	// 判定是否最近有个一次突变
-	for _, item := range kLines {
-		open, _ := strconv.ParseFloat(item.Open, 64)
-		high, _ := strconv.ParseFloat(item.High, 64)
-		low, _ := strconv.ParseFloat(item.Low, 64)
-		if (high - low) / open >= 0.015 {
 			return true
 		}
 	}
