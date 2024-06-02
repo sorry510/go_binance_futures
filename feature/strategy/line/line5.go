@@ -14,7 +14,7 @@ type TradeLine5 struct {
 // 检查最后的价格于上一个1min线的平均价格的变化幅度是否大于2%
 // todo 判断当前是否是涨幅过高，短暂回调
 func (TradeLine5 TradeLine5) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	kline_1, err1 := binance.GetKlineData(symbol, "1m", 30)
+	kline_1, err1 := binance.GetKlineData(symbol, "1m", 20)
 	if err1 != nil {
 		return false, false
 	}
@@ -25,7 +25,7 @@ func (TradeLine5 TradeLine5) GetCanLongOrShort(symbol string) (canLong bool, can
 	lastOpenPrice, _ := strconv.ParseFloat(kline_1[0].Open, 64) // 1min 前的价格
 	nowPrice, _ := strconv.ParseFloat(kline_1[0].Close, 64)
 	
-	percentLimit := 0.0088 // 变化幅度
+	percentLimit := 0.008 // 变化幅度
 	
 	if (nowPrice > lastOpenPrice) && (nowPrice - lastOpenPrice) / lastOpenPrice >= percentLimit {
 		return true, false
