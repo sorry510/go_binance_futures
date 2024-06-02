@@ -42,10 +42,12 @@ future_enable = 1
 profit = 100
 # 止损百分比
 loss = 100
-# 购买策略(目前可以写 line1, line2, line3, line4)
-strategy_trade = line4
-# 选币策略(目前可以写 coin1, coin2, coin3, coin4)
-strategy_coin = coin4
+# 购买策略(目前可以写 line1, line2, line3, line4, line5, line6, line0)
+# line0 只负责止盈和止损
+# line5 只适合单边行情，建议配合allow_long = 1 或者 allow_short = 1 只开启其中一个
+strategy_trade = line0
+# 选币策略(目前可以写 coin1, coin2, coin3, coin4, line5)
+strategy_coin = coin5
 ```
 
 #### 运行文件

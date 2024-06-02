@@ -459,6 +459,8 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 // 获取交易策略
 func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 	switch (name) {
+		case "line0":
+			lineStrategy = line.TradeLine0{}
 		case "line1":
 			lineStrategy = line.TradeLine1{}
 		case "line2":
@@ -472,7 +474,7 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 		case "line6":
 			lineStrategy = line.TradeLine6{}
 		default:
-			lineStrategy = line.TradeLine1{}
+			lineStrategy = line.TradeLine0{}
 	}
 	return lineStrategy
 }
