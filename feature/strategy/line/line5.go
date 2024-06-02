@@ -94,7 +94,7 @@ func checkLine(kLines []*futures.Kline) bool {
 		open, _ := strconv.ParseFloat(item.Open, 64)
 		high, _ := strconv.ParseFloat(item.High, 64)
 		low, _ := strconv.ParseFloat(item.Low, 64)
-		if (high - low) / open >= 0.02 {
+		if (high - low) / open >= 0.015 {
 			return true
 		}
 	}
