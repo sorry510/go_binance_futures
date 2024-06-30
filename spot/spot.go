@@ -137,18 +137,21 @@ func NoticeAndAutoOrder() {
 				} else {
 					// 购买成功
 					notify.BuyOrderSuccess(coin.Symbol, quantity, nowPrice)
-					if (coin.ProfitPrice != "0") {
-						// 挂一个止盈单
-						profit_price_float64, _ := strconv.ParseFloat(coin.ProfitPrice, 64) // 交易金额
-						profit_price_float64 = utils.GetTradePrecision(profit_price_float64, coin.TickSize) // 合理精度价格
-						binance.OrderTakeProfit(coin.Symbol, quantity, profit_price_float64)
-					}
-					if (coin.LossPrice != "0") {
-						// 挂一个止损单
-						loss_price_float64, _ := strconv.ParseFloat(coin.LossPrice, 64) // 交易金额
-						loss_price_float64 = utils.GetTradePrecision(loss_price_float64, coin.TickSize) // 合理精度价格
-						binance.OrderStopLoss(coin.Symbol, quantity, loss_price_float64)
-					}
+					
+					// 现货不支持挂单止盈止损
+					// if (coin.ProfitPrice != "0") {
+					// 	// 挂一个止盈单
+					// 	profit_price_float64, _ := strconv.ParseFloat(coin.ProfitPrice, 64) // 交易金额
+					// 	profit_price_float64 = utils.GetTradePrecision(profit_price_float64, coin.TickSize) // 合理精度价格
+					// 	binance.OrderTakeProfit(coin.Symbol, quantity, profit_price_float64)
+					// }
+					// if (coin.LossPrice != "0") {
+					// 	// 挂一个止损单
+					// 	loss_price_float64, _ := strconv.ParseFloat(coin.LossPrice, 64) // 交易金额
+					// 	loss_price_float64 = utils.GetTradePrecision(loss_price_float64, coin.TickSize) // 合理精度价格
+					// 	binance.OrderStopLoss(coin.Symbol, quantity, loss_price_float64)
+					// }
+					
 					coin.Quantity = strconv.FormatFloat(quantity, 'f', -1, 64) // 更新数量，为卖出时使用
 					orm.NewOrm().Update(&coin)
 				}
