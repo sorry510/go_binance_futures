@@ -122,10 +122,10 @@ func main() {
 		go func() {
 			for {
 				spot.NoticeAndAutoOrder()
-				// feature.NoticeCoin()
+				feature.NoticeAndAutoOrder()
 
 				// 等待 taskSleepTimeInt 秒再继续执行
-				time.Sleep(time.Millisecond * 1000)
+				time.Sleep(time.Millisecond * 500)
 			}
 		}()
 	}
