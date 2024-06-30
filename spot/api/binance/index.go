@@ -75,7 +75,7 @@ func SellMarket(symbol string, quantity float64) (res *binance.CreateOrderRespon
 	return res, err
 }
 
-// 挂止盈单
+// 挂止盈单(现货不支持)
 // @see https://binance-docs.github.io/apidocs/spot/cn/#trade-3
 // @returns /doc/order.js
 func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order *binance.CreateOrderResponse, err error) {
@@ -95,7 +95,7 @@ func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order 
 	return order, err
 }
 
-// 挂单止损
+// 挂单止损(现货不支持)
 // @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
 // @returns /doc/order.js
 func OrderStopLoss(symbol string, quantity float64, stopPrice float64) (order *binance.CreateOrderResponse, err error) {
