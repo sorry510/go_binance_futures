@@ -65,6 +65,7 @@ func NoticeAndAutoOrder() {
 				_, err := binance.BuyMarket(coin.Symbol, quantity, futures.PositionSideTypeLong)
 				if err != nil {
 					logs.Info("合约做多失败symbol:", coin.Symbol)
+					notify.BuyOrderFail(coin.Symbol, quantity, nowPrice, "做多", err.Error())
 				} else {
 					notify.BuyOrderSuccess(coin.Symbol, quantity, nowPrice, "做多")
 					if (coin.ProfitPrice != "0") {
@@ -84,6 +85,7 @@ func NoticeAndAutoOrder() {
 				_, err := binance.SellMarket(coin.Symbol, quantity, futures.PositionSideTypeShort)
 				if err != nil {
 					logs.Info("合约做空失败symbol:", coin.Symbol)
+					notify.BuyOrderFail(coin.Symbol, quantity, nowPrice, "做空", err.Error())
 				} else {
 					notify.BuyOrderSuccess(coin.Symbol, quantity, nowPrice, "做空")
 					if (coin.ProfitPrice != "0") {
