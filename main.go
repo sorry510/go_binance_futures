@@ -25,6 +25,7 @@ var taskSleepTime, _ = config.String("coin::sleep_time")
 var tradeEnable, _ = config.String("trade::future_enable")
 var tradeNewEnable, _ = config.String("trade::new_enable")
 var spotNewEnable, _ = config.String("spot::new_enable")
+var noticeCoinEnable, _ = config.String("notice_coin::enable")
 var taskSleepTimeInt, _ = strconv.Atoi(taskSleepTime)
 
 func init() {
@@ -40,6 +41,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.Order))
 	orm.RegisterModel(new(models.Symbols))
 	orm.RegisterModel(new(models.NewSymbols))
+	orm.RegisterModel(new(models.NoticeSymbols))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db")
@@ -79,7 +81,7 @@ func main() {
 	}()
 	
 	if tradeEnable == "1" {
-		logs.Info("自动交易开启:", tradeEnable)
+		logs.Info("自动合约交易开启:", tradeEnable)
 		// trade script
 		go func() {
 			for {
@@ -111,6 +113,19 @@ func main() {
 
 				// 等待 taskSleepTimeInt 秒再继续执行
 				time.Sleep(time.Millisecond * 100)
+			}
+		}()
+	}
+	
+	if noticeCoinEnable == "1" {
+		logs.Info("币种通知开启")
+		go func() {
+			for {
+				spot.NoticeAndAutoOrder()
+				// feature.NoticeCoin()
+
+				// 等待 taskSleepTimeInt 秒再继续执行
+				time.Sleep(time.Millisecond * 1000)
 			}
 		}()
 	}
