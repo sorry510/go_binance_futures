@@ -85,7 +85,7 @@ func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order 
 		Type(binance.OrderTypeTakeProfit). // 类型是止盈
 		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 当触发stopPrice时，STOP_LOSS和TAKE_PROFIT将执行MARKET订单。
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		TimeInForce(binance.TimeInForceTypeGTC).
+		// TimeInForce(binance.TimeInForceTypeGTC).
 		Do(context.Background())
 	if err != nil {
 		logs.Error(err)
@@ -105,7 +105,7 @@ func OrderStopLoss(symbol string, quantity float64, stopPrice float64) (order *b
 		Type(binance.OrderTypeStopLoss). // 类型是止损
 		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 当触发stopPrice时，STOP_LOSS和TAKE_PROFIT将执行MARKET订单。
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		TimeInForce(binance.TimeInForceTypeGTC).
+		// TimeInForce(binance.TimeInForceTypeGTC).
 		Do(context.Background())
 	if err != nil {
 		logs.Error(err)
