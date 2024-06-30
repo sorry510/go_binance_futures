@@ -107,12 +107,12 @@ func NoticeAndAutoOrder() {
 				autoOrderText = "是"
 			}
 			if (nowPrice <= noticePrice && coin.Side == "buy") {
-				// 如果是买币，价格低于预警价格，进行通知
+				// 买币，价格低于预警价格，进行通知
 				canOrder = true
 				notify.NoticeSpotCoin(coin.Symbol, "买入", coin.NoticePrice, autoOrderText)
 			}
 			if (nowPrice >= noticePrice && coin.Side == "sell") {
-				// 如果是买币，价格高于预警价格，进行通知
+				// 卖币，价格高于预警价格，进行通知
 				canOrder = true
 				notify.NoticeSpotCoin(coin.Symbol, "卖出", coin.NoticePrice, autoOrderText)
 			}

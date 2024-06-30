@@ -3,6 +3,7 @@ package controllers
 import (
 	"strconv"
 
+	"go_binance_futures/feature"
 	"go_binance_futures/models"
 	"go_binance_futures/spot"
 	"go_binance_futures/utils"
@@ -98,9 +99,17 @@ func (ctrl *NoticeCoinController) Post() {
 	symbols.Side = "buy"
 	symbols.Quantity = "0"
 	
-	tickSize, stepSize := spot.GetCoinOrderSize(symbols.Symbol)
-	symbols.TickSize = tickSize
-	symbols.StepSize = stepSize
+	if symbols.Type == 1 {
+		// 现货
+		tickSize, stepSize := spot.GetCoinOrderSize(symbols.Symbol)
+		symbols.TickSize = tickSize
+		symbols.StepSize = stepSize
+	} else {
+		// 合约
+		tickSize, stepSize := feature.GetCoinOrderSize(symbols.Symbol)
+		symbols.TickSize = tickSize
+		symbols.StepSize = stepSize
+	}
 	
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)

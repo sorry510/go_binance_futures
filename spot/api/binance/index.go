@@ -96,7 +96,7 @@ func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order 
 }
 
 // 挂单止损(现货不支持)
-// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
+// @see https://binance-docs.github.io/apidocs/spot/cn/#trade-3
 // @returns /doc/order.js
 func OrderStopLoss(symbol string, quantity float64, stopPrice float64) (order *binance.CreateOrderResponse, err error) {
 	order, err = client.NewCreateOrderService().
