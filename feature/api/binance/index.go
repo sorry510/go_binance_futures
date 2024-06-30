@@ -312,6 +312,50 @@ func GetExchangeInfo()(res *futures.ExchangeInfo, err error) {
 	return res, err
 }
 
+// 挂止盈单
+// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
+// @returns /doc/order.js
+func OrderTakeProfit(symbol string, stopPrice float64, side futures.SideType, positionSide futures.PositionSideType) (order *futures.CreateOrderResponse, err error) {
+	order, err = futuresClient.NewCreateOrderService().
+		Symbol(symbol).
+		Side(side).
+		PositionSide(positionSide).
+		Type(futures.OrderTypeTakeProfitMarket). // 止盈市价单
+		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 触发价格
+		ClosePosition(true). // 是否市价全平(和quantity参数互斥)
+		// Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
+		// TimeInForce(binance.TimeInForceTypeGTC).
+		Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return nil, err
+	}
+		
+	return order, err
+}
+
+// 挂单止损
+// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
+// @returns /doc/order.js
+func OrderStopLoss(symbol string, stopPrice float64, side futures.SideType, positionSide futures.PositionSideType) (order *futures.CreateOrderResponse, err error) {
+	order, err = futuresClient.NewCreateOrderService().
+		Symbol(symbol).
+		Side(side).
+		PositionSide(positionSide).
+		Type(futures.OrderTypeStopMarket). // 止损限价单
+		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 触发价格
+		ClosePosition(true). // 是否市价全平(和quantity参数互斥)
+		// Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
+		// TimeInForce(binance.TimeInForceTypeGTC).
+		Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return nil, err
+	}
+		
+	return order, err
+}
+
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送
 func UpdateCoinByWs() {
 	var lock = false

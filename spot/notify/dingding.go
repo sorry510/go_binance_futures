@@ -98,7 +98,7 @@ func SellOrderSuccess(symbol string, quantity float64, price string) {
 
 func NoticeSpotCoin(symbol string, side string, price string, autoOrder string) {
 	text := `
-## %s通知
+## %s币币通知
 #### **币种**：%s
 #### **买卖类型**：<font color="#008000">%s</font>
 #### **通知时价格**：<font color="#008000">%s</font>
@@ -108,3 +108,4 @@ func NoticeSpotCoin(symbol string, side string, price string, autoOrder string) 
 > author <sorry510sf@gmail.com>`
 	DingDing(fmt.Sprintf(text, symbol, symbol, side, price, autoOrder, time.Now().Format("2006-01-02 15:04:05")))
 }
+
