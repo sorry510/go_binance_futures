@@ -56,6 +56,29 @@ type NewSymbols struct {
 	Quantity string `orm:"column(quantity)" json:"quantity"` // 卖单数量
 }
 
+type NoticeSymbols struct {
+	ID int64 `orm:"column(id)" json:"id"`
+	Symbol string `orm:"column(symbol)" json:"symbol"`
+	Enable int `orm:"column(enable)" json:"enable"` // 是否开启
+	Type int64 `orm:"column(type)" json:"type"` // 1:币币交易 2:合约交易
+	NoticePrice string `orm:"column(notice_price)" json:"notice_price"` // 设定的预警价格
+	HasNotice int64 `orm:"column(has_notice)" json:"has_notice"` // 1:已通知 0:未通知
+	AutoOrder int64 `orm:"column(auto_order)" json:"auto_order"` // 1:自动下单 0:手动下单
+	ProfitPrice string `orm:"column(profit_price)" json:"profit_price"` // 止盈价格
+	LossPrice string `orm:"column(loss_price)" json:"loss_price"` // 止损价格
+	
+	// 以下为合约交易所需字段
+	Leverage int64 `orm:"column(leverage)" json:"leverage"` // 合约倍数
+	MarginType string `orm:"column(marginType)" json:"marginType"` // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
+	TickSize string `orm:"column(tickSize)" json:"tickSize"` // 交易金额精度
+	StepSize string `orm:"column(stepSize)" json:"stepSize"` // 交易数量精度
+	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
+	Side string `orm:"column(side)" json:"side"` // 买卖方向 buy/sell
+	Quantity string `orm:"column(quantity)" json:"quantity"` // 卖单数量
+	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
+	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+}
+
 func (u *Order) TableName() string {
     return "order"
 }
@@ -66,4 +89,8 @@ func (u *Symbols) TableName() string {
 
 func (u *NewSymbols) TableName() string {
     return "new_symbols"
+}
+
+func (u *NoticeSymbols) TableName() string {
+    return "notice_symbols"
 }
