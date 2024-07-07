@@ -237,7 +237,7 @@ func ListenCoin() {
 			coin.LastNoticeType = "up"
 			orm.NewOrm().Update(&coin)
 			
-			notify.ListenSpotCoin(coin.Symbol, "极速上涨", (nowPrice - lastOpenPrice) / lastOpenPrice)
+			notify.ListenSpotCoin(coin.Symbol, "极速上涨", (nowPrice - lastOpenPrice) / lastOpenPrice, nowPrice)
 		}
 		if (nowPrice < lastOpenPrice) && 
 			(lastOpenPrice - nowPrice) / lastOpenPrice >= percentLimit &&
@@ -247,7 +247,7 @@ func ListenCoin() {
 			coin.LastNoticeType = "down"
 			orm.NewOrm().Update(&coin)
 			
-			notify.ListenSpotCoin(coin.Symbol, "极速下跌", (lastOpenPrice - nowPrice) / lastOpenPrice)
+			notify.ListenSpotCoin(coin.Symbol, "极速下跌", (lastOpenPrice - nowPrice) / lastOpenPrice, nowPrice)
 		}
 	}
 }
