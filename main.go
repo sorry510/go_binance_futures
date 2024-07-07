@@ -26,6 +26,7 @@ var tradeEnable, _ = config.String("trade::future_enable")
 var tradeNewEnable, _ = config.String("trade::new_enable")
 var spotNewEnable, _ = config.String("spot::new_enable")
 var noticeCoinEnable, _ = config.String("notice_coin::enable")
+var listenCoinEnable, _ = config.String("listen_coin::enable")
 var taskSleepTimeInt, _ = strconv.Atoi(taskSleepTime)
 
 func init() {
@@ -42,6 +43,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.Symbols))
 	orm.RegisterModel(new(models.NewSymbols))
 	orm.RegisterModel(new(models.NoticeSymbols))
+	orm.RegisterModel(new(models.ListenSymbols))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db")
@@ -123,6 +125,19 @@ func main() {
 			for {
 				spot.NoticeAndAutoOrder()
 				feature.NoticeAndAutoOrder()
+
+				// 等待 taskSleepTimeInt 秒再继续执行
+				time.Sleep(time.Millisecond * 500)
+			}
+		}()
+	}
+	
+	if listenCoinEnable == "1" {
+		logs.Info("行情监听通知开启")
+		go func() {
+			for {
+				spot.ListenCoin()
+				feature.ListenCoin()
 
 				// 等待 taskSleepTimeInt 秒再继续执行
 				time.Sleep(time.Millisecond * 500)

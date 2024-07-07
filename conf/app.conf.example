@@ -47,6 +47,10 @@ new_enable = 0
 # 设定的价格提醒币种
 enable = 0
 
+[listen_coin]
+# 监听的币种
+enable = 0
+
 [web]
 # 监听端口
 port = 3333

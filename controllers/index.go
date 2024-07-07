@@ -27,6 +27,8 @@ func (ctrl *IndexController) GetServiceConfig() {
 	
 	var noticeCoinEnable, _ = config.String("notice_coin::enable")
 	
+	var listenCoinEnable, _ = config.String("listen_coin::enable")
+	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
 		"data": map[string]interface{} {
@@ -46,6 +48,8 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"spotNewEnable": spotNewEnable,
 			
 			"noticeCoinEnable": noticeCoinEnable,
+			
+			"listenCoinEnable": listenCoinEnable,
 		},
 		"msg": "success",
 	})

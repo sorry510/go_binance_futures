@@ -3,25 +3,23 @@ package controllers
 import (
 	"strconv"
 
-	"go_binance_futures/feature"
 	"go_binance_futures/models"
-	"go_binance_futures/spot"
 	"go_binance_futures/utils"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
 )
 
-type NoticeCoinController struct {
+type ListenCoinController struct {
 	web.Controller
 }
 
-func (ctrl *NoticeCoinController) Get() {
+func (ctrl *ListenCoinController) Get() {
 	paramsType := ctrl.GetString("type", "")
 	
 	o := orm.NewOrm()
-	var symbols []models.NoticeSymbols
-	query := o.QueryTable("notice_symbols")
+	var symbols []models.ListenSymbols
+	query := o.QueryTable("listen_symbols")
 	if paramsType != "" {
 		query = query.Filter("Type", paramsType)
 	}
@@ -37,19 +35,15 @@ func (ctrl *NoticeCoinController) Get() {
 	})
 }
 	
-func (ctrl *NoticeCoinController) Edit() {
+func (ctrl *ListenCoinController) Edit() {
 	id := ctrl.Ctx.Input.Param(":id")
-	symbols := new(models.NoticeSymbols)
-	ctrl.BindJSON(&symbols)
-	intId, _ := strconv.ParseInt(id, 10, 64)
-	symbols.ID = intId
-	
-	// tickSize, stepSize := spot.GetCoinOrderSize(symbols.Symbol)
-	// symbols.TickSize = tickSize
-	// symbols.StepSize = stepSize
-	
+	var symbols models.ListenSymbols
 	o := orm.NewOrm()
-	_, err := o.Update(symbols) // _ 是受影响的条数
+	o.QueryTable("listen_symbols").Filter("Id", id).One(&symbols)
+	
+	ctrl.BindJSON(&symbols)
+	
+	_, err := o.Update(&symbols) // _ 是受影响的条数
     if err != nil {
         // 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "修改失败"))
@@ -62,9 +56,9 @@ func (ctrl *NoticeCoinController) Edit() {
 	})
 }
 
-func (ctrl *NoticeCoinController) Delete() {
+func (ctrl *ListenCoinController) Delete() {
 	id := ctrl.Ctx.Input.Param(":id")
-	symbols := new(models.NoticeSymbols)
+	symbols := new(models.ListenSymbols)
 	intId, _ := strconv.ParseInt(id, 10, 64)
 	symbols.ID = intId
 	o := orm.NewOrm()
@@ -81,36 +75,16 @@ func (ctrl *NoticeCoinController) Delete() {
 	})
 }
 
-func (ctrl *NoticeCoinController) Post() {
-	symbols := new(models.NoticeSymbols)
+func (ctrl *ListenCoinController) Post() {
+	symbols := new(models.ListenSymbols)
 	ctrl.BindJSON(&symbols)
 	
 	symbols.Enable = 0 // 默认不开启
-	symbols.HasNotice = 0 // 默认未通知
-	symbols.AutoOrder = 1 // 默认自动下单
-	symbols.ProfitPrice = "0" // 默认止盈价格(0表示不止盈)
-	symbols.LossPrice = "0" // 默认止损价格(0表示不止损)
-	
-	symbols.Leverage = 3
-	symbols.MarginType = "ISOLATED"
-	symbols.StepSize = "0"
-	symbols.TickSize = "0"
-	symbols.Usdt = "10"
-	symbols.Side = "buy"
-	symbols.Quantity = "0"
-	
-	if symbols.Type == 1 {
-		// 现货
-		tickSize, stepSize := spot.GetCoinOrderSize(symbols.Symbol)
-		symbols.TickSize = tickSize
-		symbols.StepSize = stepSize
-	} else {
-		// 合约
-		tickSize, stepSize := feature.GetCoinOrderSize(symbols.Symbol)
-		symbols.TickSize = tickSize
-		symbols.StepSize = stepSize
-	}
-	
+	symbols.KlineInterval = "1m" // 默认k线周期
+	symbols.ChangePercent = "1.1" // 1.1% 默认变化幅度
+	symbols.LastNoticeTime = 0 // 最后一次通知时间
+	symbols.NoticeLimitMin = 5 // 最小通知间隔
+
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
 	
@@ -128,11 +102,11 @@ func (ctrl *NoticeCoinController) Post() {
 	})
 }
 
-func (ctrl *NoticeCoinController) UpdateEnable() {
+func (ctrl *ListenCoinController) UpdateEnable() {
 	flag := ctrl.Ctx.Input.Param(":flag")
 	
 	o := orm.NewOrm()
-	_, err := o.Raw("UPDATE notice_symbols SET enable = ?", flag).Exec()
+	_, err := o.Raw("UPDATE listen_symbols SET enable = ?", flag).Exec()
 	if err != nil {
 		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "更新错误"))

@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"go_binance_futures/utils"
+	"sort"
 	"strconv"
 
 	"github.com/adshao/go-binance/v2"
@@ -35,6 +36,23 @@ func GetExchangeInfo(symbols ...string)(res *binance.ExchangeInfo, err error) {
 	}
 	// logs.Info(utils.ToJson(res))
 	return res, err
+}
+
+// @param symbol 交易对名称，例如：BTCUSDT
+// @param interval K线的时间间隔，例如：1m, 3m, 5m, 15m, 30m, 1h等
+// @param limit 返回的K线数据条数
+// @returns /doc/kine.js
+func GetKlineData(symbol string, interval string, limit int) (klines []*binance.Kline, err error) {
+	klines, err = client.NewKlinesService().Symbol(symbol).Interval(interval).Limit(limit).Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return nil, err
+	}
+	sort.Slice(klines, func(i, j int) bool {
+		return klines[i].OpenTime > klines[j].OpenTime // 按照时间降序()
+	})
+	// logs.Info(utils.ToJson(klines))
+	return klines, err
 }
 
 // 获取交易价格
