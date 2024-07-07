@@ -79,6 +79,20 @@ type NoticeSymbols struct {
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
 
+type ListenSymbols struct {
+	ID int64 `orm:"column(id)" json:"id"`
+	Symbol string `orm:"column(symbol)" json:"symbol"`
+	Enable int `orm:"column(enable)" json:"enable"` // 是否开启
+	Type int64 `orm:"column(type)" json:"type"` // 1:币币交易 2:合约交易
+	KlineInterval string `orm:"column(kline_interval)" json:"kline_interval"` // 选定的k线周期
+	ChangePercent string `orm:"column(change_percent)" json:"change_percent"` // 通知的变化百分比阈值
+	LastNoticeTime int64 `orm:"column(last_notice_time)" json:"last_notice_time"` // 上一次通知的时间
+	LastNoticeType string `orm:"column(last_notice_type)" json:"last_notice_type"` // 上一次通知的类型(up/down)
+	NoticeLimitMin int64 `orm:"column(notice_limit_min)" json:"notice_limit_min"` // 通知频率限制(分钟)
+	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
+	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+}
+
 func (u *Order) TableName() string {
     return "order"
 }
@@ -93,4 +107,8 @@ func (u *NewSymbols) TableName() string {
 
 func (u *NoticeSymbols) TableName() string {
     return "notice_symbols"
+}
+
+func (u *ListenSymbols) TableName() string {
+    return "listen_symbols"
 }

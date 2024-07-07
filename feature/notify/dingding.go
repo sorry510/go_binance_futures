@@ -150,3 +150,15 @@ func NoticeFutureCoin(symbol string, side string, price string, autoOrder string
 > author <sorry510sf@gmail.com>`
 	DingDing(fmt.Sprintf(text, symbol, symbol, side, price, autoOrder, time.Now().Format("2006-01-02 15:04:05")))
 }
+
+func ListenFutureCoin(symbol string, listenType string, percent float64) {
+	text := `
+## %s合约k线监控通知
+#### **币种**：%s
+#### **类型**：<font color="#008000">%s</font>
+#### **当前变化率**：<font color="#008000">%f</font>
+#### **时间**：%s
+
+> author <sorry510sf@gmail.com>`
+	DingDing(fmt.Sprintf(text, symbol, symbol, listenType, percent, time.Now().Format("2006-01-02 15:04:05")))
+}
