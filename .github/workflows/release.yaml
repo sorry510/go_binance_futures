@@ -1,7 +1,6 @@
 name: Go Release
 
 on:
-  workflow_dispatch:
   push:
     # 触发条件：当推送到 master 分支或创建新标签时运行
     # branches:
@@ -16,11 +15,17 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+    
+    - name: Install MinGW-w64
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mingw-w64
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: 1.21.x  # 使用所需的 Go 版本
+        cache: true
     - name: Install Bee tool
       run: | # 安装 Bee 工具
         go install github.com/beego/bee/v2@latest
@@ -40,13 +45,14 @@ jobs:
         
     - name: Build and package for Linux
       run: |
-        export CGO_ENABLED=1
         export GOOS=linux
         export GOARCH=amd64
         bee pack -a linux_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
 
     - name: Build and package for Windows
       run: |
+        export CC=x86_64-w64-mingw32-gcc
+        export CXX=x86_64-w64-mingw32-g++
         export CGO_ENABLED=1
         export GOOS=windows
         export GOARCH=amd64
