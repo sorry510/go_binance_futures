@@ -14,8 +14,17 @@ import (
 
 var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
+var proxy_url, _ = config.String("binance::proxy_url")
 
-var client = binance.NewClient(api_key, api_secret)
+var client *binance.Client
+
+func init() {
+	if proxy_url == "" {
+		client = binance.NewClient(api_key, api_secret)
+	} else {
+		client = binance.NewProxiedClient(api_key, api_secret, proxy_url)
+	}
+}
 
 func GetFuturesAccount() (res *binance.Account, err error) {
 	res, err = client.NewGetAccountService().Do(context.Background())

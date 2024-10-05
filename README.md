@@ -39,16 +39,17 @@
 
 
 #### 行情监听
-TODO
+- k线变化监听
+- 肯纳特通道信号监听
 
 ### 使用注意事项
-- 网络必须处于大陆之外(因为币安接口大陆正常无法访问)
+- 网络必须处于大陆之外(因为币安接口大陆正常无法访问), 已添加币安 api 的代理配置，如果有可用代理也可以正常使用
 - 申请api_key地址: [币安API管理页面](https://www.binance.com/cn/usercenter/settings/api-management)
 - 如果你的账号本身已经有合约仓位，请一定要在 `app.conf` 文件中配 `excludeSymbols`, 排出掉你不想使用本程序自动交易的币，否则默认所有的仓位都会根据交易策略规则自动平仓
 - !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
 - 请保证账户有足够的 USDT
 - 钉钉推送 1min 中内不要超过 20 条，否则会被封 ip
-- 调整过大的参数可能会造成币安 api 请求频率超出限制，会禁用一段时间ip
+- 调整过大的参数可能会造成币安 api 请求频率超出限制，会禁用一段时间 ip
 
 ### 相关技术指标函数
 >feature/strategy/line/technology.go
@@ -74,9 +75,7 @@ future_enable = 1
 profit = 100
 # 止损百分比
 loss = 100
-# 购买策略(目前可以写 line1, line2, line3, line4, line5, line6, line0)
-# line0 只负责止盈和止损
-# line5 只适合单边行情，建议配合allow_long = 1 或者 allow_short = 1 只开启其中一个
+# 购买策略(目前可以写 line1, line2, line3, line4, line5, line6, line7) 数字越大，策略越新
 strategy_trade = line0
 # 选币策略(目前可以写 coin1, coin2, coin3, coin4, line5)
 strategy_coin = coin5
@@ -178,8 +177,18 @@ bee pack -be GOOS=windows
 - [X] 添加独立的币种配置收益率
 - [X] 添加一键修改所有币种的配置
 - [X] 系统首页显示(那些服务开启和关闭)
+- [X] 监听币种的价格突变情况，报警通知
+- [X] 学习蜡烛图结合其它数据，报警通知
 - [ ] 添加新的自动交易策略
 - [ ] 添加定时自动交易(现货买入和一倍合约等价格对冲，吃资金费用)
-- [ ] 监听币种的价格突变情况，报警通知
-- [ ] 学习蜡烛图结合其它数据，报警通知
 - [ ] 监控资金流入流出，报警通知
+
+
+### Change Log
+
+## v0.0.14
+- 添加 line7 策略
+- 添加新的监听策略
+- 更新 conf 说明
+- 添加 binance api proxy 配置
+

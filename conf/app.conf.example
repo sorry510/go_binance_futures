@@ -6,11 +6,13 @@ debug = 0
 [binance]
 api_key = ""
 api_secret = ""
+# 本地代理(如果不需要改为"")
+proxy_url = "http://127.0.0.1:7890"
 
 [coin]
 # 挂单购买的超时时间, 秒级别
 buy_timeout = 300
-# 排除的币种,多个使用逗号分隔
+# 排除的自动交易币种,多个使用逗号分隔
 exclude_symbols = "1000SHIBUSDT,ETHUSDT"
 # 最大持仓数量
 max_count = 4
@@ -28,44 +30,49 @@ hold_max_time = 1800
 [trade]
 # 是否开启合约交易的总开关
 future_enable = 1
-# 是否开启合约新币抢购的开关
+# 是否开启合约新币抢购
 new_enable = 0
-# 止盈百分比(如果当前币种设置为0时，使用全局的止盈设置)
+# 止盈百分比(如果当前币种设置为0时，使用这个全局的止盈设置)
 profit = 10
-# 止损百分比(如果当前币种设置为0时，使用全局的止损设置)
+# 止损百分比(如果当前币种设置为0时，使用这个全局的止损设置)
 loss = 100
-# 购买策略
-strategy_trade = line3
-# 选币策略
-strategy_coin = coin3
+# 购买策略(line1~line7),数字越大代表最新策略
+strategy_trade = line7
+# 选币策略(coin1~coin5)
+strategy_coin = coin5
 
 [spot]
-# 是否开启新币抢购的开关
+# 是否开启新币抢购
 new_enable = 0
 
 [notice_coin]
-# 设定的价格提醒币种
+# 是否开启币种通知
 enable = 0
 
 [listen_coin]
-# 监听的币种
+# 是否开启行情监听
 enable = 0
 
 [web]
-# 监听端口
+# web端口
 port = 3333
 # 首页 path
 index = zmkm
 # jwt key
-secret_key = asd123jkl
+secret_key = 12321
 # 用户名
 username = admin
 # 密码
 password = admin
+# 重启服务按钮命令
 commend_start = pm2 restart binance_futures
-commend_stop = pm2 restart binance_futures
+# 停止合约服务命令
+commend_stop = pm2 stop binance_futures
+# 查看 web 日志的命令 /pm2-log
 commend_log = pm2 log binance_futures
 
 [dingding]
+# token
 dingding_token = ""
+# 触发关键词
 dingding_word = "报警"

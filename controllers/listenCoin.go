@@ -84,6 +84,7 @@ func (ctrl *ListenCoinController) Post() {
 	symbols.ChangePercent = "1.1" // 1.1% 默认变化幅度
 	symbols.LastNoticeTime = 0 // 最后一次通知时间
 	symbols.NoticeLimitMin = 5 // 最小通知间隔
+	symbols.ListenType = "kline_base"
 
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
