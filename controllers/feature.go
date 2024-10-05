@@ -125,6 +125,7 @@ func (ctrl *FeatureController) Post() {
 	symbols.Usdt = "10"
 	symbols.Profit = "100"
 	symbols.Loss = "100"
+	symbols.KlineInterval = "1d"
 	
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)

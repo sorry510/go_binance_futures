@@ -145,7 +145,7 @@ func sum(numbers []float64) float64 {
 
 
 /**
- * 是否只产生过一次金叉
+ * 是否只产生过一次金叉(短线穿越长线一次，没有反复穿越)
  * @param ma1 短线
  * @param ma2 长线
  * @param num 数据数

@@ -45,16 +45,16 @@ func GoTestLine() {
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
 		symbol := coin.Symbol
-		if symbol != "BTCUSDT" {
-			continue
-		}
+		// if symbol != "BTCUSDT" {
+		// 	continue
+		// }
 		
-		interval := "1d"
-		limit := 150
-		lines, _ := binance.GetKlineData(symbol, interval, limit)
-		// closePrices := line.GetLineClosePrices(lines)
-		high, low, close := line.GetLineFloatPrices(lines)
-		logs.Info(high[0], low[0], close[0])
+		// interval := "1d"
+		// limit := 150
+		// lines, _ := binance.GetKlineData(symbol, interval, limit)
+		// // closePrices := line.GetLineClosePrices(lines)
+		// high, low, close := line.GetLineFloatPrices(lines)
+		// logs.Info(high[0], low[0], close[0])
 		
 		// ma3, _ := line.CalculateSimpleMovingAverage(closePrices, 3)
 		// ma7, _ := line.CalculateSimpleMovingAverage(closePrices, 7)
@@ -88,6 +88,7 @@ func GoTestLine() {
 		// logs.Info(rsi14[1])
 		
 		canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
+		// logs.Info(symbol, canLang, canShort)
 		if canLang || canShort {
 			logs.Info(symbol, canLang, canShort)
 		}
