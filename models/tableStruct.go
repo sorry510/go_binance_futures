@@ -37,6 +37,7 @@ type Symbols struct {
 	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
 	Profit string `orm:"column(profit)" json:"profit"` // 盈利率
 	Loss string `orm:"column(loss)" json:"loss"` // 损失率
+	KlineInterval string `orm:"column(kline_interval)" json:"kline_interval"` // 选定的k线周期
 }
 
 type NewSymbols struct {

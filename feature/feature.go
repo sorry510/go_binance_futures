@@ -420,6 +420,7 @@ func UpdateSymbolsTradePrecision() {
 						Usdt: "10",
 						Profit: "20",
 						Loss: "20",
+						KlineInterval: "1d",
 					})
 				}
 			}
@@ -473,6 +474,8 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 			lineStrategy = line.TradeLine5{}
 		case "line6":
 			lineStrategy = line.TradeLine6{}
+		case "line7":
+			lineStrategy = line.TradeLine7{}
 		default:
 			lineStrategy = line.TradeLine0{}
 	}
