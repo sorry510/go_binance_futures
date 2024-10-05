@@ -192,3 +192,6 @@ bee pack -be GOOS=windows
 - 更新 conf 说明
 - 添加 binance api proxy 配置
 
+## v0.0.13
+- 修复 window 下打包程序不能正常运行的问题
+
