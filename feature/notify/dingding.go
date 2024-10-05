@@ -70,6 +70,10 @@ func DingDing(content string) {
 	} ()
 }
 
+func nowTime() string {
+	return time.Now().Format("2006-01-02 15:04:05")
+}
+
 func BuyOrderSuccess(symbol string, quantity float64, price float64, side string) {
 	text := `
 ## %s交易通知
@@ -161,5 +165,21 @@ func ListenFutureCoin(symbol string, listenType string, percent float64, price f
 #### **时间**：%s
 
 > author <sorry510sf@gmail.com>`
-	DingDing(fmt.Sprintf(text, symbol, symbol, listenType, percent, price, time.Now().Format("2006-01-02 15:04:05")))
+	DingDing(fmt.Sprintf(text, symbol, symbol, listenType, percent, price, nowTime()))
+}
+
+func ListenFutureCoinKlineKc(symbol string, listenType string, nowPrice, lossPrice, profitPrice1, profitPrice2, profitPrice3 float64) {
+	text := `
+## %s合约肯纳特通道监控通知
+#### **币种**：%s
+#### **类型**：<font color="#008000">%s</font>
+#### **当前价格**：<font color="#008000">%f</font>
+#### **推荐止损价格**：<font color="#008000">%f</font>
+#### **推荐半仓止盈价格**：<font color="#008000">%f</font>
+#### **推荐全部止盈价格**：<font color="#008000">%f</font>
+#### **展望止盈价格**：<font color="#008000">%f</font>
+#### **时间**：%s
+
+> author <sorry510sf@gmail.com>`
+	DingDing(fmt.Sprintf(text, symbol, symbol, listenType, nowPrice, lossPrice, profitPrice1, profitPrice2, profitPrice3, nowTime()))
 }

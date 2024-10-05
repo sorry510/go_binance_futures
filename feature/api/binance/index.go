@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/adapter/logs"
 	"github.com/beego/beego/v2/client/orm"
@@ -16,10 +15,17 @@ import (
 
 var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
+var proxy_url, _ = config.String("binance::proxy_url")
 
-// var client = binance.NewClient(api_key, api_secret)
-var futuresClient = binance.NewFuturesClient(api_key, api_secret)
+var futuresClient *futures.Client
 
+func init() {
+	if proxy_url == "" {
+		futuresClient = futures.NewClient(api_key, api_secret)
+	} else {
+		futuresClient = futures.NewProxiedClient(api_key, api_secret, proxy_url)
+	}
+}
 
 type ListOrderParams struct {
 	Symbol    string

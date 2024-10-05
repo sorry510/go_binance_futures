@@ -85,6 +85,7 @@ type ListenSymbols struct {
 	Symbol string `orm:"column(symbol)" json:"symbol"`
 	Enable int `orm:"column(enable)" json:"enable"` // 是否开启
 	Type int64 `orm:"column(type)" json:"type"` // 1:币币交易 2:合约交易
+	ListenType string `orm:"column(listen_type)" json:"listen_type"` // 监听类型 kline_base:K线变化 kline_kc:肯纳特通道
 	KlineInterval string `orm:"column(kline_interval)" json:"kline_interval"` // 选定的k线周期
 	ChangePercent string `orm:"column(change_percent)" json:"change_percent"` // 通知的变化百分比阈值
 	LastNoticeTime int64 `orm:"column(last_notice_time)" json:"last_notice_time"` // 上一次通知的时间

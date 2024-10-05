@@ -45,9 +45,9 @@ func GoTestLine() {
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
 		symbol := coin.Symbol
-		// if symbol != "BTCUSDT" {
-		// 	continue
-		// }
+		if symbol != "BTCUSDT" {
+			continue
+		}
 		
 		// interval := "1d"
 		// limit := 150
@@ -65,8 +65,11 @@ func GoTestLine() {
 		// ema50, _ := line.CalculateExponentialMovingAverage(close, 50)
 		// logs.Info(ema50)
 		
-		// upper, ma, lower := line.CalculateKeltnerChannels(high, low, close, 50, 2.75)
-		// logs.Info(upper[0], ma[0], lower[0])
+		// upper1, ma1, lower1 := line.CalculateKeltnerChannels(high, low, close, 50, 2.75)
+		// upper2, _, lower2 := line.CalculateKeltnerChannels(high, low, close, 50, 3.75)
+		// // logs.Info(upper[0], ma[0], lower[0])
+		// notify.ListenFutureCoinKlineKc(coin.Symbol, "做多信号", close[0], close[0] * (1 - 0.03), ma1[0], upper1[0], upper2[0])
+		// notify.ListenFutureCoinKlineKc(coin.Symbol, "做空信号", close[0], close[0] * (1 + 0.03), ma1[0], lower1[0], lower2[0])
 		
 		
 		// ema3, _ := line.CalculateExponentialMovingAverage(closePrices, 3)
@@ -88,7 +91,7 @@ func GoTestLine() {
 		// logs.Info(rsi14[1])
 		
 		canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
-		// logs.Info(symbol, canLang, canShort)
+		logs.Info(symbol, canLang, canShort)
 		if canLang || canShort {
 			logs.Info(symbol, canLang, canShort)
 		}
