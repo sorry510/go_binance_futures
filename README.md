@@ -50,6 +50,9 @@ TODO
 - 钉钉推送 1min 中内不要超过 20 条，否则会被封 ip
 - 调整过大的参数可能会造成币安 api 请求频率超出限制，会禁用一段时间ip
 
+### 相关技术指标函数
+>feature/strategy/line/technology.go
+
 ### 如何使用
 > 在 https://github.com/sorry510/go_binance_futures/releases 页面下载最新对应操作系统的发布版解压后配置运行或者使用`golang`自行编译
 

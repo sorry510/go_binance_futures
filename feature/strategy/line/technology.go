@@ -3,40 +3,48 @@ package line
 // 技术指标
 import (
 	"fmt"
+	"go_binance_futures/utils"
 	"math"
 )
 
-// 简单移动平均（MA）返回一个数组从时间最近到最远
-func CalculateSimpleMovingAverage(clonePrices []float64, period int) ([]float64, error) {
-	if len(clonePrices) < period {
+// 简单移动平均（SMA）price数据从时间最近到最远 ma = (p1 + p2 + ... + pn) / n
+func CalculateSimpleMovingAverage(price []float64, period int) ([]float64, error) {
+	if len(price) < period * 2 {
 		return nil, fmt.Errorf("insufficient data for period %d", period)
 	}
-
-	maValues := make([]float64, len(clonePrices)-period+1)
-	for i := period - 1; i < len(clonePrices); i++ {
-		sum := 0.0
-		for j := i - period + 1; j <= i; j++ {
-			sum += clonePrices[j]
-		}
-		maValues[i-period+1] = sum / float64(period)
+	
+	sma := make([]float64, period)
+	
+	sum := 0.0
+	for i := 0; i < period; i++ {
+		sum += price[i]
 	}
-	return maValues, nil
+	sma[0] = sum / float64(period)
+	
+	for i := 1; i < period; i++ {
+		sum += price[period + i - 1] - price[i - 1] // 删掉前一个添加后一个
+		sma[i] = sum / float64(period)
+	}
+	
+	return sma, nil
 }
 
-// 指数移动平均（EMA）
-func CalculateExponentialMovingAverage(clonePrices []float64, period int) ([]float64, error) {
-	if len(clonePrices) < period {
+// 指数移动平均（EMA）price数据从时间最近到最远 ema[t] = α * price[t] + (1 - α) * ema[t-1]; α = 2 / (n + 1)
+func CalculateExponentialMovingAverage(price []float64, period int) ([]float64, error) {
+	if len(price) < period {
 		return nil, fmt.Errorf("insufficient data for period %d", period)
 	}
+	
+	price = utils.ReverseArray(price) // 时间由远到近
 
 	alpha := 2.0 / (float64(period) + 1)
-	emaValues := make([]float64, len(clonePrices))
-	emaValues[0] = calculateAverage(clonePrices[0:period])
-	for i := 1; i < len(clonePrices); i++ {
-		emaValues[i] = alpha * clonePrices[i] + (1.0-alpha)*emaValues[i-1]
+	ema := make([]float64, len(price))
+	ema[0] = calculateAverage(price[0:period])
+	for i := 1; i < len(price); i++ {
+		ema[i] = alpha * price[i] + (1.0 - alpha) * ema[i-1]
 	}
 
-	return emaValues, nil // Return EMA values after the initial period is "warmed up"
+	return utils.ReverseArray(ema), nil
 }
 
 // 布林带(boll) 中轨线（MB，通常为移动平均线）、上轨线（UP，通常为中轨线加上一定倍数的标准差）和下轨线（DN，通常为中轨线减去相同倍数的标准差）
@@ -169,4 +177,60 @@ func Kdj(ma1 []float64, ma2[]float64, num int) bool {
 		}
 	}
 	return k > 0
+}
+
+// 计算真实范围 TR= max(High−Low,∣High−PreviousClose∣,∣Low−PreviousClose∣) 数据时间由近到远
+func calculateTrueRange(high, low, close []float64) []float64 {
+	tr := make([]float64, len(high))
+	if len(high) == 0 {
+		return tr
+	}
+
+	for i := 0; i < len(high) - 1; i++ {
+		hl := high[i] - low[i]
+		hpc := math.Abs(high[i] - close[i+1])
+		lpc := math.Abs(low[i] - close[i+1])
+		tr[i] = math.Max(hl, math.Max(hpc, lpc))
+	}
+	tr[len(high)-1] = high[len(high)-1] - low[len(high)-1]
+
+	return tr
+}
+
+// 肯纳特通道
+func CalculateKeltnerChannels(high, low, close []float64, period int, multiplier float64) ([]float64, []float64, []float64) {
+	ma, _ := CalculateExponentialMovingAverage(close, period)
+	tr := calculateTrueRange(high, low, close)
+	atr, _ := CalculateExponentialMovingAverage(tr, period)
+
+	upper := make([]float64, len(ma))
+	lower := make([]float64, len(ma))
+
+	for i := 0; i < len(ma); i++ {
+		upper[i] = ma[i] + multiplier * atr[i]
+		lower[i] = ma[i] - multiplier * atr[i]
+	}
+
+	return upper, ma, lower
+}
+
+type Candle struct {
+    Open  float64
+    Close float64
+    High  float64
+    Low   float64
+}
+
+// 根据日本蜡烛图帮我写一个黑云压顶的函数
+func IsDarkCloudCover(first, second Candle) bool {
+    // First candle is bullish
+    isFirstBullish := first.Close > first.Open
+    // Second candle is bearish
+    isSecondBearish := second.Close < second.Open
+    // Second candle opens above the first candle's close
+    opensAboveFirstClose := second.Open > first.Close
+    // Second candle closes inside the body of the first candle
+    closesInsideFirstBody := second.Close < first.Open && second.Close > first.Close * 0.5 + first.Open * 0.5
+
+    return isFirstBullish && isSecondBearish && opensAboveFirstClose && closesInsideFirstBody
 }
