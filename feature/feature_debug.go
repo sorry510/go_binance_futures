@@ -45,17 +45,28 @@ func GoTestLine() {
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
 		symbol := coin.Symbol
+		if symbol != "BTCUSDT" {
+			continue
+		}
 		
-		// interval := "6h"
-		// limit := 50
-		// lines, _ := binance.GetKlineData(symbol, interval, limit)
+		interval := "1d"
+		limit := 150
+		lines, _ := binance.GetKlineData(symbol, interval, limit)
 		// closePrices := line.GetLineClosePrices(lines)
+		high, low, close := line.GetLineFloatPrices(lines)
+		logs.Info(high[0], low[0], close[0])
 		
 		// ma3, _ := line.CalculateSimpleMovingAverage(closePrices, 3)
 		// ma7, _ := line.CalculateSimpleMovingAverage(closePrices, 7)
 		// ma15, _ := line.CalculateSimpleMovingAverage(closePrices, 15)
 		// ma30, _ := line.CalculateSimpleMovingAverage(closePrices, 30)
-		// logs.Info(ma3[0], ma7[0], ma15[0], ma30[0])
+		// ma50, _ := line.CalculateSimpleMovingAverage(close, 50)
+		// logs.Info(ma50)
+		// ema50, _ := line.CalculateExponentialMovingAverage(close, 50)
+		// logs.Info(ema50)
+		
+		// upper, ma, lower := line.CalculateKeltnerChannels(high, low, close, 50, 2.75)
+		// logs.Info(upper[0], ma[0], lower[0])
 		
 		
 		// ema3, _ := line.CalculateExponentialMovingAverage(closePrices, 3)
@@ -63,7 +74,7 @@ func GoTestLine() {
 		// ema15, _ := line.CalculateExponentialMovingAverage(closePrices, 15)
 		// ema30, _ := line.CalculateExponentialMovingAverage(closePrices, 30)
 		// logs.Info(ema3[0], ema7[0], ema15[0], ema30[0])
-		// logs.Info(ema3)
+		// logs.Info(ma50, high[0], low[0], close[0])
 		
 		
 		
