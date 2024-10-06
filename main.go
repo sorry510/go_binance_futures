@@ -44,6 +44,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.NewSymbols))
 	orm.RegisterModel(new(models.NoticeSymbols))
 	orm.RegisterModel(new(models.ListenSymbols))
+	orm.RegisterModel(new(models.SymbolFundingRates))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db")
@@ -58,9 +59,11 @@ func registerMiddlewares() {
 func main() {
 	// debug
 	if debug == "1" {
+		// feature.GoTestApi()
 		// spot.TryRush()
 		// feature.GoTestFeature()
 		feature.GoTestLine()
+		// feature.UpdateSymbolsFundingRates()
 		// feature.GoTestOrder()
 		// feature.GoTestUtil()
 		// feature.GoTestMarketOrder()
@@ -82,6 +85,7 @@ func main() {
 		binance.UpdateCoinByWs()
 	}()
 	
+	// 自动合约交易
 	if tradeEnable == "1" {
 		logs.Info("自动合约交易开启:", tradeEnable)
 		// trade script
@@ -95,6 +99,7 @@ func main() {
 		}()
 	}
 	
+	// 新币抢购
 	if spotNewEnable == "1" {
 		logs.Info("新币抢购开启")
 		go func() {
@@ -107,6 +112,7 @@ func main() {
 		}()
 	}
 	
+	// 新币合约抢购
 	if tradeNewEnable == "1" {
 		logs.Info("合约新币抢购开启")
 		go func() {
@@ -119,6 +125,7 @@ func main() {
 		}()
 	}
 	
+	// 币种通知
 	if noticeCoinEnable == "1" {
 		logs.Info("币种通知开启")
 		go func() {
@@ -132,8 +139,20 @@ func main() {
 		}()
 	}
 	
+	// 行情监听
 	if listenCoinEnable == "1" {
 		logs.Info("行情监听通知开启")
+		go func() {
+			for {
+				// 更新所有币种的资金费率
+				feature.UpdateSymbolsFundingRates()
+				// 监听费率报警信息
+				feature.ListenCoinFundingRate()
+
+				// 等待 taskSleepTimeInt 秒再继续执行
+				time.Sleep(time.Millisecond * 60 * 10)
+			}
+		}()
 		go func() {
 			for {
 				spot.ListenCoin()
