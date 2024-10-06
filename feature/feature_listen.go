@@ -145,3 +145,31 @@ func klineKcListen(coin models.ListenSymbols) {
 		}
 	}
 }
+
+func ListenCoinFundingRate() {
+	o := orm.NewOrm()
+	var coins []models.SymbolFundingRates
+	o.QueryTable("symbol_funding_rates").OrderBy("ID").Filter("enable", 1).All(&coins) // 通知币列表
+	for _, coin := range coins {
+		nowFundingRate, _ := strconv.ParseFloat(coin.NowFundingRate, 64)
+		lastNoticeFundingRate, _ := strconv.ParseFloat(coin.NowFundingRate, 64)
+		diff := nowFundingRate - lastNoticeFundingRate
+		if (diff > 0.01 && nowFundingRate > 0.008) {
+			// 正资金费率，做空可以吃资金费用
+			coin.LastNoticeFundingRate = coin.NowFundingRate
+			coin.LastNoticeFundingTime = coin.NowFundingTime
+			coin.LastNoticePrice = coin.NowPrice
+			orm.NewOrm().Update(&coin)
+			
+			notify.ListenFutureCoinFundingRate(coin.Symbol, "做空吃资金费费率", nowFundingRate * 100, coin.NowPrice)
+		} else if (diff < -0.01 && nowFundingRate < -0.008) {
+			// 负资金费率，做多可以吃资金费用
+			coin.LastNoticeFundingRate = coin.NowFundingRate
+			coin.LastNoticeFundingTime = coin.NowFundingTime
+			coin.LastNoticePrice = coin.NowPrice
+			orm.NewOrm().Update(&coin)
+			
+			notify.ListenFutureCoinFundingRate(coin.Symbol, "做多吃资金费费率", nowFundingRate * 100, coin.NowPrice)
+		}
+	}
+}

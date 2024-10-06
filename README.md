@@ -186,11 +186,14 @@ bee pack -be GOOS=windows
 
 ### Change Log
 
+## v0.0.15
+- 添加资金费率的监听
+
 ## v0.0.14
 - 添加 line7 策略
 - 添加新的监听策略
 - 更新 conf 说明
-- 添加 binance api proxy 配置
+- 添加 binance api proxy 配置(不含 websocket 的代理)
 
 ## v0.0.13
 - 修复 window 下打包程序不能正常运行的问题

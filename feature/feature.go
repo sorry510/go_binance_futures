@@ -438,6 +438,42 @@ func UpdateSymbolTradeInfo(symbols *models.Symbols) {
 	binance.SetMarginType(symbols.Symbol, marginType) // 修改仓位模式
 }
 
+// 更新币种的资金费率信息
+func UpdateSymbolsFundingRates() {
+	res, err := binance.GetFundingRate(binance.FundingRateParams{
+		StartTime: (time.Now().Unix() - 60 * 60 * 12) * 1000, // 12 个小时内的数据(正常8小时计算一次资金费率)
+		Limit: 1000,
+	})
+	if err == nil {
+		o := orm.NewOrm()
+		for _, symbol := range res {
+			// 非usdt结尾的不需要
+			if strings.HasSuffix(symbol.Symbol, "USDT") {
+				var fundingRate models.SymbolFundingRates
+				o.QueryTable("symbol_funding_rates").Filter("symbol", symbol.Symbol).One(&fundingRate)
+				if (fundingRate.Symbol == "") {
+					// add
+					o.Insert(&models.SymbolFundingRates{
+						Symbol: symbol.Symbol,
+						Enable: 1,
+						NowFundingRate: symbol.FundingRate,
+						NowFundingTime: symbol.FundingTime,
+						NowPrice: symbol.MarkPrice,
+						LastNoticeFundingRate: "0.0",
+						LastNoticeFundingTime: 0,
+					})
+				} else {
+					// edit
+					fundingRate.NowFundingRate = symbol.FundingRate
+					fundingRate.NowFundingTime = symbol.FundingTime
+					fundingRate.NowPrice = symbol.MarkPrice
+					orm.NewOrm().Update(&fundingRate)
+				}
+			}
+		}
+	}
+}
+
 // 获取币的策略
 func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 	switch (name) {

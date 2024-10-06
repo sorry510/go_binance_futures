@@ -362,6 +362,35 @@ func OrderStopLoss(symbol string, stopPrice float64, side futures.SideType, posi
 	return order, err
 }
 
+type FundingRateParams struct {
+	Symbol    string
+	StartTime int64
+	EndTime   int64
+	Limit     int
+}
+
+// 资金费率 限制 500/5min/IP
+// @see https://binance-docs.github.io/apidocs/futures/cn/#31dbeb24c4
+// @returns /doc/fundingRate.js
+// 根据时间变化而来的数据，交易对可能不唯一有多条，数据顺序是时间由旧到新
+func GetFundingRate(params FundingRateParams) (res []*futures.FundingRate, err error) {
+	service := futuresClient.NewFundingRateService()
+	if params.Symbol != "" {
+		service = service.Symbol(params.Symbol)
+	}
+	if params.StartTime != 0 {
+		service = service.StartTime(params.StartTime)
+	}
+	if params.EndTime != 0 {
+		service = service.EndTime(params.EndTime)
+	}
+	if params.Limit != 0 {
+		service = service.Limit(params.Limit)
+	}
+	res, err = service.Do(context.Background())
+	return res, err
+}
+
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送
 func UpdateCoinByWs() {
 	var lock = false

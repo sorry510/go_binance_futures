@@ -95,6 +95,20 @@ type ListenSymbols struct {
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
 
+type SymbolFundingRates struct {
+	ID int64 `orm:"column(id)" json:"id"`
+	Symbol string `orm:"column(symbol)" json:"symbol"`
+	Enable int `orm:"column(enable)" json:"enable"` // 是否开启
+	NowFundingRate string `orm:"column(now_funding_rate)" json:"now_funding_rate"` // 当前资金费率
+	NowFundingTime int64 `orm:"column(now_funding_time)" json:"now_funding_time"` // 当前资金费率时间
+	NowPrice string `orm:"column(now_price)" json:"now_price"` // 当前价格
+	LastNoticeFundingRate string `orm:"column(last_notice_funding_rate)" json:"last_notice_funding_rate"` // 上次报警时的资金费率
+	LastNoticeFundingTime int64 `orm:"column(last_notice_funding_time)" json:"last_notice_funding_time"` // 上次报警时资金费率时间
+	LastNoticePrice string `orm:"column(last_notice_price)" json:"last_notice_price"` // 上次报警时价格
+	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
+	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+}
+
 func (u *Order) TableName() string {
     return "order"
 }
@@ -113,4 +127,8 @@ func (u *NoticeSymbols) TableName() string {
 
 func (u *ListenSymbols) TableName() string {
     return "listen_symbols"
+}
+
+func (u *SymbolFundingRates) TableName() string {
+    return "symbol_funding_rates"
 }

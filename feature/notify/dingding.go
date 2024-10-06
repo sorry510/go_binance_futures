@@ -25,8 +25,8 @@ type MarkDownData struct {
 }
 
 func DingDing(content string) {
-	// 放到单独执行，避免住进程报错
-	go func () {
+	// 放到单独执行，避免主进程阻塞(未知原因突然不能在 goroutine 中执行了)
+	// go func () {
 		url := "https://oapi.dingtalk.com/robot/send?access_token=" + dingding_token
 	
 		requestBody := DingDingData{
@@ -67,7 +67,7 @@ func DingDing(content string) {
 		if resp.StatusCode != http.StatusOK {
 			fmt.Println("Unexpected status code:", resp.StatusCode)
 		}
-	} ()
+	// }()
 }
 
 func nowTime() string {
@@ -182,4 +182,17 @@ func ListenFutureCoinKlineKc(symbol string, listenType string, nowPrice, lossPri
 
 > author <sorry510sf@gmail.com>`
 	DingDing(fmt.Sprintf(text, symbol, symbol, listenType, nowPrice, lossPrice, profitPrice1, profitPrice2, profitPrice3, nowTime()))
+}
+
+func ListenFutureCoinFundingRate(symbol string, listenType string, rate float64, price string) {
+	text := `
+## %s合约资金费率
+#### **币种**：%s
+#### **类型**：<font color="#008000">%s</font>
+#### **当前资金费率**：<font color="#008000">%f%%</font>
+#### **当前价格**：<font color="#008000">%s</font>
+#### **时间**：%s
+
+> author <sorry510sf@gmail.com>`
+	DingDing(fmt.Sprintf(text, symbol, symbol, listenType, rate, price, nowTime()))
 }
