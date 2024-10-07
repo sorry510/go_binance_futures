@@ -23,7 +23,7 @@ func ListenCoin() {
 		logs.Info("监听合约币种:", coin.Symbol)
 		if nowTime - coin.LastNoticeTime < 60 * 1000 * coin.NoticeLimitMin {
 			// 通知频率限制
-			return
+			continue
 		}
 		if coin.ListenType == "kline_base" {
 			klineBaseListen(coin)
