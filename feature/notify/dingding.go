@@ -189,7 +189,7 @@ func ListenFutureCoinFundingRate(symbol string, listenType string, rate float64,
 ## %s合约资金费率
 #### **币种**：%s
 #### **类型**：<font color="#008000">%s</font>
-#### **当前资金费率**：<font color="#008000">%f%%</font>
+#### **当前资金费率**：<font color="#008000">%.2f%%</font>
 #### **当前价格**：<font color="#008000">%s</font>
 #### **时间**：%s
 
