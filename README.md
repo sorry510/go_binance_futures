@@ -186,6 +186,9 @@ bee pack -be GOOS=windows
 
 ### Change Log
 
+## v0.0.16
+- fixed: listen bug
+
 ## v0.0.15
 - 添加资金费率的监听
 
