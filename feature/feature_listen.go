@@ -7,6 +7,7 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/utils"
 	"strconv"
+	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -17,8 +18,13 @@ func ListenCoin() {
 	var coins []models.ListenSymbols
 	o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).All(&coins) // 通知币列表
 	
+	nowTime := time.Now().Unix()
 	for _, coin := range coins {
 		logs.Info("监听合约币种:", coin.Symbol)
+		if nowTime - coin.LastNoticeTime < 60 * 1000 * coin.NoticeLimitMin {
+			// 通知频率限制
+			return
+		}
 		if coin.ListenType == "kline_base" {
 			klineBaseListen(coin)
 		} else if coin.ListenType == "kline_kc" {
@@ -90,6 +96,11 @@ func klineKcListen(coin models.ListenSymbols) {
 		logs.Error("k线错误, 合约币种是:", coin.Symbol)
 		return
 	}
+	if kline_1[0].CloseTime - coin.LastNoticeTime < 60 * 1000 * coin.NoticeLimitMin {
+		// 通知频率限制
+		return
+	}
+	
 	kline_2, err := binance.GetKlineData(symbol, interval2, limit)
 	if err != nil {
 		logs.Error("k线错误, 合约币种是:", coin.Symbol)
@@ -108,9 +119,10 @@ func klineKcListen(coin models.ListenSymbols) {
 	close2 := line.GetLineClosePrices(kline_2)
 	limitPeriod := 12 // 最近n根k线
 	lossPercent := 0.03
-	
+
 	// 之前的最低价格跌破了 kc2 的下轨，然后当前价格超越了 kc1 下轨，止损位置在 kc1 下轨附近位置，止盈50%位置在 kc1 中规附近位置，剩余 50% 止盈50%位置在 kc1 上轨附近位置
 	// 大级别看起来是上升通道
+	
 	if (close1[0] > lower1[0] && close1[1] < lower1[1]) {
 		for i := 2; i < limitPeriod; i++ {
 			// 最近10根k线最低价格在kc2下轨之下
@@ -126,7 +138,6 @@ func klineKcListen(coin models.ListenSymbols) {
 			}
 		}
 	}
-	
 	// 之前的最高价格超越了 kc2 的上轨，然后当前价格跌破了 kc1 上轨，止损位置在 kc1 上轨附近位置，止盈50%位置在 kc1 中规附近位置，剩余 50% 止盈50%位置在 kc1 下轨附近位置
 	// 大级别看起来是下降通道
 	if (close1[0] < upper1[0] && close1[1] > upper1[1]) {
