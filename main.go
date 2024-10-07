@@ -67,6 +67,7 @@ func main() {
 		// feature.GoTestOrder()
 		// feature.GoTestUtil()
 		// feature.GoTestMarketOrder()
+		// feature.GoTestNotify()
 		return
 	}
 	

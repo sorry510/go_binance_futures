@@ -172,3 +172,7 @@ func GoTestApi() {
 	logs.Info(utils.ToJson(res))
 	logs.Info((time.Now().Unix() - 60 * 60))
 }
+
+func GoTestNotify() {
+	notify.ListenFutureCoinFundingRate("BTCUSDT", "做多吃资金费费率", -2, "66666")
+}
