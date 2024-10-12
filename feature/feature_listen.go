@@ -5,7 +5,6 @@ import (
 	"go_binance_futures/feature/notify"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
-	"go_binance_futures/utils"
 	"strconv"
 	"time"
 
@@ -101,7 +100,7 @@ func klineKcListen(coin models.ListenSymbols) {
 		return
 	}
 	
-	kline_2, err := binance.GetKlineData(symbol, interval2, limit)
+	kline_2, err := binance.GetKlineData(symbol, interval2, limit) // 通知时暂不启用大级别的影响
 	if err != nil {
 		logs.Error("k线错误, 合约币种是:", coin.Symbol)
 		return
@@ -116,42 +115,34 @@ func klineKcListen(coin models.ListenSymbols) {
 	upper1, ma1, lower1 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
 	upper2, _, lower2 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
 	
-	close2 := line.GetLineClosePrices(kline_2)
 	limitPeriod := 12 // 最近n根k线
 	lossPercent := 0.03
 
 	// 之前的最低价格跌破了 kc2 的下轨，然后当前价格超越了 kc1 下轨，止损位置在 kc1 下轨附近位置，止盈50%位置在 kc1 中规附近位置，剩余 50% 止盈50%位置在 kc1 上轨附近位置
-	// 大级别看起来是上升通道
-	
 	if (close1[0] > lower1[0] && close1[1] < lower1[1]) {
 		for i := 2; i < limitPeriod; i++ {
 			// 最近10根k线最低价格在kc2下轨之下
 			if low1[i] < lower2[i] {
-				// 大级别看起来是上升通道
-				if (utils.IsDesc(close2[0:3])) {
-					coin.LastNoticeTime = kline_1[0].CloseTime
-					coin.LastNoticeType = "up"
-					orm.NewOrm().Update(&coin)
-					
-					notify.ListenFutureCoinKlineKc(coin.Symbol, "做多信号", close1[0], close1[0] * (1 - lossPercent), ma1[0], upper1[0], upper2[0])
-				}
+				coin.LastNoticeTime = kline_1[0].CloseTime
+				coin.LastNoticeType = "up"
+				orm.NewOrm().Update(&coin)
+				
+				notify.ListenFutureCoinKlineKc(coin.Symbol, "做多信号", close1[0], close1[0] * (1 - lossPercent), ma1[0], upper1[0], upper2[0])
+				break
 			}
 		}
 	}
 	// 之前的最高价格超越了 kc2 的上轨，然后当前价格跌破了 kc1 上轨，止损位置在 kc1 上轨附近位置，止盈50%位置在 kc1 中规附近位置，剩余 50% 止盈50%位置在 kc1 下轨附近位置
-	// 大级别看起来是下降通道
 	if (close1[0] < upper1[0] && close1[1] > upper1[1]) {
 		for i := 1; i < limitPeriod; i++ {
 			// 最近10根k线最高价格在kc2上轨之上
 			if high1[i] > upper2[i] {
-				// 大级别看起来是下降通道
-				if (utils.IsAsc(close2[0:3])) {
-					coin.LastNoticeTime = kline_1[0].CloseTime
-					coin.LastNoticeType = "down"
-					orm.NewOrm().Update(&coin)
-					
-					notify.ListenFutureCoinKlineKc(coin.Symbol, "做空信号", close1[0], close1[0] * (1 + lossPercent), ma1[0], lower1[0], lower2[0])
-				}
+				coin.LastNoticeTime = kline_1[0].CloseTime
+				coin.LastNoticeType = "down"
+				orm.NewOrm().Update(&coin)
+				
+				notify.ListenFutureCoinKlineKc(coin.Symbol, "做空信号", close1[0], close1[0] * (1 + lossPercent), ma1[0], lower1[0], lower2[0])
+				break
 			}
 		}
 	}
