@@ -186,6 +186,9 @@ bee pack -be GOOS=windows
 
 ### Change Log
 
+## v0.0.17
+- fixed: listen bug
+
 ## v0.0.16
 - fixed: listen bug
 
