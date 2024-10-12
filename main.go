@@ -107,8 +107,7 @@ func main() {
 			for {
 				spot.TryRush()
 
-				// 等待 taskSleepTimeInt 秒再继续执行
-				time.Sleep(time.Millisecond * 100)
+				time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
 			}
 		}()
 	}
@@ -120,8 +119,7 @@ func main() {
 			for {
 				feature.TryRush()
 
-				// 等待 taskSleepTimeInt 秒再继续执行
-				time.Sleep(time.Millisecond * 100)
+				time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
 			}
 		}()
 	}
@@ -134,8 +132,7 @@ func main() {
 				spot.NoticeAndAutoOrder()
 				feature.NoticeAndAutoOrder()
 
-				// 等待 taskSleepTimeInt 秒再继续执行
-				time.Sleep(time.Millisecond * 500)
+				time.Sleep(time.Second * 5) // 5 秒间隔
 			}
 		}()
 	}
@@ -150,8 +147,7 @@ func main() {
 				// 监听费率报警信息
 				feature.ListenCoinFundingRate()
 
-				// 等待 taskSleepTimeInt 秒再继续执行
-				time.Sleep(time.Millisecond * 60 * 10)
+				time.Sleep(time.Second * 60 * 10) // 10 分钟间隔
 			}
 		}()
 		go func() {
@@ -159,8 +155,7 @@ func main() {
 				spot.ListenCoin()
 				feature.ListenCoin()
 
-				// 等待 taskSleepTimeInt 秒再继续执行
-				time.Sleep(time.Millisecond * 500)
+				time.Sleep(time.Second * 5) // 5 秒间隔
 			}
 		}()
 	}
