@@ -3,6 +3,8 @@ package controllers
 import (
 	"strconv"
 
+	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
 	"go_binance_futures/utils"
 
@@ -114,4 +116,45 @@ func (ctrl *ListenCoinController) UpdateEnable() {
 		return
 	}
 	ctrl.Ctx.Resp(utils.ResJson(200, nil))
+}
+
+func (ctrl *ListenCoinController) GetKcLineChart() {
+	id := ctrl.Ctx.Input.Param(":id")
+	var symbols models.ListenSymbols
+	o := orm.NewOrm()
+	o.QueryTable("listen_symbols").Filter("Id", id).One(&symbols)
+	
+	symbol := symbols.Symbol
+	limit := 150
+	period := 50
+	interval1 := symbols.KlineInterval
+	multiplier1 := 2.75 // 窄通道
+	multiplier2 := 3.75 // 宽通道
+	kline_1, err := binance.GetKlineData(symbol, interval1, limit)
+	if err != nil {
+		ctrl.Ctx.Resp(map[string]interface{} {
+			"code": 500,
+			"msg": "kline error",
+		})
+		return
+	}
+	
+	high1, low1, close1 := line.GetLineFloatPrices(kline_1)
+	upper1, ma1, lower1 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
+	upper2, _, lower2 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
+	
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": map[string]interface{} {
+			"upper1": upper1,
+			"ma1": ma1,
+			"lower1": lower1,
+			"upper2": upper2,
+			"lower2": lower2,
+			"close1": close1,
+			"high1": high1,
+			"low1": low1,
+		},
+		"msg": "success",
+	})
 }

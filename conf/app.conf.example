@@ -76,3 +76,7 @@ commend_log = pm2 log binance_futures
 dingding_token = ""
 # 触发关键词
 dingding_word = "报警"
+
+[external]
+# 外部链接
+links = [{"url": "url1", "title": "title1"}]
