@@ -28,6 +28,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 	var noticeCoinEnable, _ = config.String("notice_coin::enable")
 	
 	var listenCoinEnable, _ = config.String("listen_coin::enable")
+	var externalLinks, _ = config.String("external::links")
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
@@ -50,6 +51,8 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"noticeCoinEnable": noticeCoinEnable,
 			
 			"listenCoinEnable": listenCoinEnable,
+			
+			"externalLinks": externalLinks,
 		},
 		"msg": "success",
 	})

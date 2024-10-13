@@ -26,6 +26,7 @@ func init() {
 	
 	web.Router("/listen/coin", &controllers.ListenCoinController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/listen/coin/:id", &controllers.ListenCoinController{}, "delete:Delete;put:Edit") // 更新和删除
+	web.Router("/listen/coin/kc-chart/:id", &controllers.ListenCoinController{}, "get:GetKcLineChart") // kcChart
 	web.Router("/listen/coin/enable/:flag", &controllers.ListenCoinController{}, "put:UpdateEnable") // 修改所有的交易对开启关闭
 	
 	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll") // order list 和 删除所有 order
