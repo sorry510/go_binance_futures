@@ -441,7 +441,6 @@ func UpdateSymbolTradeInfo(symbols *models.Symbols) {
 // 更新币种的资金费率信息
 func UpdateSymbolsFundingRates() {
 	res, err := binance.GetFundingRate(binance.FundingRateParams{
-		StartTime: (time.Now().Unix() - 60 * 60 * 12) * 1000, // 12 个小时内的数据(正常8小时计算一次资金费率)
 		Limit: 1000,
 	})
 	if err == nil {
