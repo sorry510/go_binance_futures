@@ -204,6 +204,9 @@ bee pack -be GOOS=windows
 
 ### Change Log
 
+## v0.0.19
+- 修复资金费率的监控逻辑
+
 ## v0.0.18
 - 首页调整
 - 增加合约监听页面的 kc 通道图的查看
