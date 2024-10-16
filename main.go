@@ -64,6 +64,7 @@ func main() {
 		// feature.GoTestFeature()
 		feature.GoTestLine()
 		// feature.UpdateSymbolsFundingRates()
+		// feature.ListenCoinFundingRate()
 		// feature.GoTestOrder()
 		// feature.GoTestUtil()
 		// feature.GoTestMarketOrder()
