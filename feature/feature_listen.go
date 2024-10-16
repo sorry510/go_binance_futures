@@ -154,9 +154,9 @@ func ListenCoinFundingRate() {
 	var coins []models.SymbolFundingRates
 	o.QueryTable("symbol_funding_rates").OrderBy("ID").Filter("enable", 1).All(&coins) // 通知币列表
 	for _, coin := range coins {
-		if coin.Symbol != "CHZUSDT" {
-			continue
-		}
+		// if coin.Symbol != "CHZUSDT" {
+		// 	continue
+		// }
 		nowFundingRate, _ := strconv.ParseFloat(coin.NowFundingRate, 64)
 		lastNoticeFundingRate, _ := strconv.ParseFloat(coin.LastNoticeFundingRate, 64)
 		diff := nowFundingRate - lastNoticeFundingRate
