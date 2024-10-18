@@ -52,6 +52,8 @@ enable = 0
 [listen_coin]
 # 是否开启行情监听
 enable = 0
+# 监听合约资金费率变化
+funding_rate = 0
 
 [web]
 # web端口

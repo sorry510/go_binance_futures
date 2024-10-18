@@ -28,6 +28,8 @@ func init() {
 	web.Router("/listen/coin/:id", &controllers.ListenCoinController{}, "delete:Delete;put:Edit") // 更新和删除
 	web.Router("/listen/coin/kc-chart/:id", &controllers.ListenCoinController{}, "get:GetKcLineChart") // kcChart
 	web.Router("/listen/coin/enable/:flag", &controllers.ListenCoinController{}, "put:UpdateEnable") // 修改所有的交易对开启关闭
+	web.Router("/listen/funding-rates", &controllers.ListenCoinController{}, "get:GetFundingRates") // 合约费率列表
+	web.Router("/listen/funding-rate/history", &controllers.ListenCoinController{}, "get:GetFundingRateHistory") // 合约费率历史
 	
 	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll") // order list 和 删除所有 order
 	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit") // config get and edit

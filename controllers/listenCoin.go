@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"sort"
 	"strconv"
 
 	"go_binance_futures/feature/api/binance"
@@ -155,6 +156,63 @@ func (ctrl *ListenCoinController) GetKcLineChart() {
 			"high1": high1,
 			"low1": low1,
 		},
+		"msg": "success",
+	})
+}
+
+func (ctrl *ListenCoinController) GetFundingRates() {
+	paramsSort := ctrl.GetString("sort")
+	symbol := ctrl.GetString("symbol")
+	
+	o := orm.NewOrm()
+	var symbols []models.SymbolFundingRates
+	query := o.QueryTable("symbol_funding_rates")
+	if symbol != "" {
+		query = query.Filter("symbol__contains", symbol)
+	}
+	_, err := query.OrderBy("ID").All(&symbols)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error"))
+	}
+	
+	sort.SliceStable(symbols, func(i, j int) bool {
+		nowFundingRate1, _ := strconv.ParseFloat(symbols[i].NowFundingRate, 64)
+		nowFundingRate2, _ := strconv.ParseFloat(symbols[j].NowFundingRate, 64)
+		if paramsSort == "+" {
+			return nowFundingRate1 >= nowFundingRate2 // 涨幅从大到小排序
+		} else if paramsSort == "-" {
+			return nowFundingRate1 < nowFundingRate2 // 涨幅从小到大排序
+		} else {
+			return true
+		}
+	})
+
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": symbols,
+		"msg": "success",
+	})
+}
+
+func (ctrl *ListenCoinController) GetFundingRateHistory() {
+	symbol := ctrl.GetString("symbol")
+	
+	histories, err := binance.GetFundingRateHistory(binance.FundingRateParams{
+		Symbol: symbol,
+		Limit: 200,
+	})
+	
+	if err != nil {
+		ctrl.Ctx.Resp(map[string]interface{} {
+			"code": 500,
+			"msg": "binance api error",
+		})
+		return
+	}
+
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": histories,
 		"msg": "success",
 	})
 }

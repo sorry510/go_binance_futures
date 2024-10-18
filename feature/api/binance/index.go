@@ -369,11 +369,23 @@ type FundingRateParams struct {
 	Limit     int
 }
 
-// 资金费率 限制 500/5min/IP
-// @see https://binance-docs.github.io/apidocs/futures/cn/#31dbeb24c4
+// 最新标记价格和资金费率
+// @see https://binance-docs.github.io/apidocs/futures/cn/#69f9b0b2f3
 // @returns /doc/fundingRate.js
+func GetFundingRate(params FundingRateParams) (res []*futures.PremiumIndex, err error) {
+	service := futuresClient.NewPremiumIndexService()
+	if params.Symbol != "" {
+		service = service.Symbol(params.Symbol)
+	}
+	res, err = service.Do(context.Background())
+	return res, err
+}
+
+// 资金费率历史记录(整点时刻4或8h的历史记录) 限制 500/5min/IP
+// @see https://binance-docs.github.io/apidocs/futures/cn/#31dbeb24c4
+// @returns /doc/fundingRateHistory.js
 // 根据时间变化而来的数据，交易对可能不唯一有多条，数据顺序是时间由旧到新
-func GetFundingRate(params FundingRateParams) (res []*futures.FundingRate, err error) {
+func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate, err error) {
 	service := futuresClient.NewFundingRateService()
 	if params.Symbol != "" {
 		service = service.Symbol(params.Symbol)

@@ -27,6 +27,7 @@ var tradeNewEnable, _ = config.String("trade::new_enable")
 var spotNewEnable, _ = config.String("spot::new_enable")
 var noticeCoinEnable, _ = config.String("notice_coin::enable")
 var listenCoinEnable, _ = config.String("listen_coin::enable")
+var listenFundingRate, _ = config.String("listen_coin::funding_rate")
 var taskSleepTimeInt, _ = strconv.Atoi(taskSleepTime)
 
 func init() {
@@ -143,20 +144,25 @@ func main() {
 		logs.Info("行情监听通知开启")
 		go func() {
 			for {
+				spot.ListenCoin()
+				feature.ListenCoin()
+
+				time.Sleep(time.Second * 5) // 5 秒间隔
+			}
+		}()
+	}
+	
+	// 合约费率监听
+	if listenFundingRate == "1" {
+		logs.Info("合约费率监听开启")
+		go func() {
+			for {
 				// 更新所有币种的资金费率
 				feature.UpdateSymbolsFundingRates()
 				// 监听费率报警信息
 				feature.ListenCoinFundingRate()
 
-				time.Sleep(time.Second * 60 * 10) // 10 分钟间隔
-			}
-		}()
-		go func() {
-			for {
-				spot.ListenCoin()
-				feature.ListenCoin()
-
-				time.Sleep(time.Second * 5) // 5 秒间隔
+				time.Sleep(time.Second * 30) // 30 秒更新一次
 			}
 		}()
 	}
