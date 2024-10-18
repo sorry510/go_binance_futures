@@ -165,9 +165,9 @@ func GoTestMarketOrder() {
 }
 
 func GoTestApi() {
-	res, _ := binance.GetFundingRate(binance.FundingRateParams{
+	res, _ := binance.GetFundingRateHistory(binance.FundingRateParams{
 		Limit: 1000,
-		StartTime: (time.Now().Unix() - 60 * 60 * 12) * 1000,
+		// StartTime: (time.Now().Unix() - 60 * 60 * 12) * 1000,
 	})
 	logs.Info(utils.ToJson(res))
 	logs.Info((time.Now().Unix() - 60 * 60))

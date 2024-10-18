@@ -438,11 +438,9 @@ func UpdateSymbolTradeInfo(symbols *models.Symbols) {
 	binance.SetMarginType(symbols.Symbol, marginType) // 修改仓位模式
 }
 
-// 更新币种的资金费率信息
+// 更新所有币种的资金费率信息
 func UpdateSymbolsFundingRates() {
-	res, err := binance.GetFundingRate(binance.FundingRateParams{
-		Limit: 1000,
-	})
+	res, err := binance.GetFundingRate(binance.FundingRateParams{})
 	if err == nil {
 		o := orm.NewOrm()
 		for _, symbol := range res {
@@ -455,16 +453,16 @@ func UpdateSymbolsFundingRates() {
 					o.Insert(&models.SymbolFundingRates{
 						Symbol: symbol.Symbol,
 						Enable: 1,
-						NowFundingRate: symbol.FundingRate,
-						NowFundingTime: symbol.FundingTime,
+						NowFundingRate: symbol.LastFundingRate,
+						NowFundingTime: symbol.Time,
 						NowPrice: symbol.MarkPrice,
 						LastNoticeFundingRate: "0.0",
 						LastNoticeFundingTime: 0,
 					})
 				} else {
 					// edit
-					fundingRate.NowFundingRate = symbol.FundingRate
-					fundingRate.NowFundingTime = symbol.FundingTime
+					fundingRate.NowFundingRate = symbol.LastFundingRate
+					fundingRate.NowFundingTime = symbol.Time
 					fundingRate.NowPrice = symbol.MarkPrice
 					orm.NewOrm().Update(&fundingRate)
 				}
