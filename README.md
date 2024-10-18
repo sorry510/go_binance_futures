@@ -49,6 +49,12 @@
 ![合约监听chart1](./img/listen_chat_kc.jpg)
 ![合约监听通知1](./img/listen_dingding.jpg)
 
+#### 资金费率
+- 资金费率查询和历史记录
+- 资金费率变化监听
+![资金费率](./img/fundingrate.jpg)
+![资金费率历史](./img/fundingrate_history.jpg)
+
 #### 系统配置
 - 交易的基本相关的配置(conf)
 ![交易配置](./img/config.jpg)
@@ -203,6 +209,10 @@ bee pack -be GOOS=windows
 
 
 ### Change Log
+
+## v0.0.20
+- 合约资金费率监听调整为单独开关
+- 增加合约资金费率页面，可以查询当前所有币种的资金费率和资金费率历史记录
 
 ## v0.0.19
 - 修复资金费率的监控逻辑
