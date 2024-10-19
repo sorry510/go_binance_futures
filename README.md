@@ -1,241 +1,279 @@
-## 币安自动交易
-> auto coin
+<p align="center">
+    <a href="./README.md">english </a>
+    ·
+    <a href="./README.CN.md">简体中文</a>
+</p>
 
-### 免责申明
->！！！本项目不构成任何投资建议，投资者应独立决策并自行承担风险！！！
+# Binance-trade-bot
 
-### 菜单和功能
+# DISCLAIMER
 
-#### 合约交易
-- 合约自动化交易的列表和配置
-- 支持每个币种的单独配置(合约模式,购买金额,合约倍率,是否开启)
+```
+I am not responsible for anything done with this bot.
+You use it at your own risk.
+There are no warranties or guarantees expressed or implied.
+You assume all responsibility and liability.
+```
+
+# Features <!-- omit in toc -->
+
+- [Feature Trade](#feature-trade)
+- [Feature Trade Order](#feature-trade-order)
+- [New Coin Rush](#new-coin-rush)
+- [Coin Notice](#coin-notice)
+    - [Spot Notice](#spot-notice)
+    - [Feature Notice](feature-notice)
+- [Market Listen](#market-listen)
+    - [Spot Listen](#spot-listen)
+    - [Feature Listen](#feature-listen)
+
+## feature-trade
+- Independent configuration for each coin
 ![交易币种](./img/coins.jpg)
 ![钉钉推送1](./img/dingding.jpeg)
 
-#### 合约订单
-- 合约自动交易的订单历史(收益是根据下单预估的，没有查询币安的接口，与实际收益会有稍微不同)
+## feature-trade-order
+- Order history (revenue is estimated based on orders placed, without a Binance query interface, and may differ slightly from actual revenue)
 ![交易订单](./img/order.jpg)
 
-#### 新币抢购
-- 币币抢买
-- 币币挖矿抢卖
-- 合约抢买做多
-- 合约抢买做空
+## new-coin-rush
+- spot rush buy
+- mining rush sell
+- feature rush long
+- feature rush short
 ![新币抢购](./img/rush.jpg)
 
-
-#### 币种通知
-##### 现货通知
-- 达到预设价格报警通知
-- 自动买入或卖出
+## coin-notice
+### spot-notice
+- alarm notification for reaching the preset price
+- automatic buying or selling
 ![现货通知](./img/spot_notice.jpg)
 
-##### 合约通知
-- 达到预设价格报警通知
-- 自动买入并自动挂止盈止损单
+### feature-notice
+- alarm notification for reaching the preset price
+- automatic buying or selling
 ![合约通知](./img/feature_notice.jpg)
 
+## market-listen
 
-#### 行情监听
-
-##### 现货监听
-- k线变化监听
+### spot-listen
+- kline change listen
 ![现货监听](./img/listen_spot.jpg)
 
-##### 合约监听
-- k线变化监听
-- 肯纳特通道信号监听
+### feature-listen
+- kline change listen
+- kline keltner channels listen
 ![合约监听](./img/listen_feature.jpg)
 ![合约监听chart1](./img/listen_chat_kc.jpg)
 ![合约监听通知1](./img/listen_dingding.jpg)
 
-#### 资金费率
-- 资金费率查询和历史记录
-- 资金费率变化监听
+## funding-rate
+- funding rate search and history
+- funding rate change listen
 ![资金费率](./img/fundingrate.jpg)
 ![资金费率历史](./img/fundingrate_history.jpg)
 
-#### 系统配置
-- 交易的基本相关的配置(conf)
+## system config
+- app.conf
+
+```
+# Remember not to use single quotes, only double quotes or no quotes, comments need to be on a separate line
+appname = binance_futures
+log = 1
+debug = 0
+
+[binance]
+api_key = ""
+api_secret = ""
+# Local proxy (if not needed to be changed to "")
+proxy_url = "http://127.0.0.1:7890"
+
+[coin]
+# The timeout period for placing a purchase order, in seconds
+buy_timeout = 300
+# Excluded automatic trading currencies, multiple separated by commas
+exclude_symbols = "1000SHIBUSDT,ETHUSDT"
+# Maximum Position Quantity
+max_count = 4
+# Rotation training time in seconds
+sleep_time = 1
+# MARKET, LIMIT: (Based on the depth of the price, the average price is taken as the average for placing orders, and it may not be possible to buy)
+order_type = LIMIT
+# can buy long
+allow_long = 1
+# can buy short
+allow_short = 1
+# The longest holding time, in seconds (temporarily abandoned)
+hold_max_time = 1800
+
+[trade]
+# whether or not feature trade
+future_enable = 1
+# whether or not new feature rush
+new_enable = 0
+# Profit taking percentage (if the current currency is set to 0, use this global profit taking setting)
+profit = 10
+# Stop loss percentage (if the current currency is set to 0, use this global stop loss setting)
+loss = 100
+# Trading Strategy(line1~line7
+strategy_trade = line7
+# Coin selection strategy(coin1~coin5)
+strategy_coin = coin5
+
+[spot]
+# whether or not new spot rush
+new_enable = 0
+
+[notice_coin]
+# whether or not coin notice
+enable = 0
+
+[listen_coin]
+# whether or not coin listen
+enable = 0
+# whether or not funding rate listen
+funding_rate = 0
+
+[web]
+# web port
+port = 3333
+# index path
+index = zmkm
+# jwt key
+secret_key = 12321
+# username
+username = admin
+# password
+password = admin
+# restart command
+commend_start = pm2 restart binance_futures
+# stop command
+commend_stop = pm2 stop binance_futures
+# log command
+commend_log = pm2 log binance_futures
+
+[dingding]
+# token
+dingding_token = ""
+# trigger keywords
+dingding_word = "报警"
+
+[external]
+# external links
+links = [{"url": "url1", "title": "title1"}]
+```
 ![交易配置](./img/config.jpg)
 
-### 使用注意事项
-- 网络必须处于大陆之外(因为币安接口大陆正常无法访问), 已添加币安 api 的代理配置(websocket 因为使用组件问题，暂无代理配置， websocket 只是用于后台更新合约币种最新价格)，如果有可用代理也可以正常使用
-- 申请api_key地址: [币安API管理页面](https://www.binance.com/cn/usercenter/settings/api-management)
-- 如果你的账号本身已经有合约仓位，请一定要在 `app.conf` 文件中配置 `excludeSymbols`, 排出掉你不想使用本程序自动交易的币，否则默认所有的仓位都会根据交易策略规则自动平仓
-- !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
-- 请保证账户有足够的 USDT，否则下单会报错
-- 钉钉推送 1min 中内不要超过 20 条，否则会被封 ip 一段时间，无法推送成功
-- 调整过大的参数(例如同一个 ip 下使用多种组合功能)可能会造成币安 api 请求频率超出限制，会禁用一段时间 ip
+## important
+- The network must be located outside the mainland (as the Binance interface cannot be accessed normally in mainland China). The proxy configuration for Binance API has been added (websocket has no proxy configuration due to component usage issues, and is only used to update the latest contract currency prices in the background). If there are available proxies, they can also be used normally
+-Apply for api_key address: [Binance API Management Page]（ https://www.binance.com/cn/usercenter/settings/api-management )
+- If your account already has contract positions, please be sure to configure 'excludeSymbols' in the' app. conf 'file to exclude coins that you do not want to use this program for automatic trading. Otherwise, all positions will be automatically closed according to the trading strategy rules by default
+- !!! Please note that after modifying the app.cnf configuration, the program must be restarted, otherwise the configuration will not take effect!!!
+-Please ensure that your account has sufficient USDT, otherwise placing an order will result in an error
+- Do not exceed 20 notifications within 1 minute of DingTalk push, otherwise the IP address will be blocked for a period of time and the push will not be successful
+-Adjusting too many parameters (such as using multiple combinations of functions under the same IP) may cause the Binance API request frequency to exceed the limit and disable the IP for a period of time
 
-### 相关技术指标函数
->feature/strategy/line/technology.go
+## how to use
+> in https://github.com/sorry510/go_binance_futures/releases page download or use `golang` compile
 
-### 如何使用
-> 在 https://github.com/sorry510/go_binance_futures/releases 页面下载最新对应操作系统的发布版解压后配置运行或者使用`golang`自行编译
-
-#### 修改配置文件
-> 配置说明请参考 `app.conf.example` 中每一项的说明，复制修改文件名为 `app.conf`
+### edit config
 
 ```
 cp conf/app.conf.example conf/app.conf
 ```
 
-##### 策略配置参数说明
-> 自动买卖的策略需要看代码自行分析，有好的思路可以提供建议方案我来实现
-
-```
-[trade]
-# 是否开启合约交易的总开关
-future_enable = 1
-# 止盈百分比
-profit = 100
-# 止损百分比
-loss = 100
-# 购买策略(目前可以写 line1, line2, line3, line4, line5, line6, line7) 数字越大，策略越新
-strategy_trade = line0
-# 选币策略(目前可以写 coin1, coin2, coin3, coin4, line5)
-strategy_coin = coin5
-```
-
-#### 程序运行
-> !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
+### how to run
+> !!!Please note that after modifying the `app.conf` configuration, the program must be restarted, otherwise the configuration will not take effect!!!
 
 ```
 ./go_binance_futures
 ```
 
-##### web 界面说明
->访问地址: http://ip:host/zmkm/index.html # ip 为部署服务器ip，port 为 app.conf 中 web.port
-登录的账号密码为 app.conf 文件中的  web.username 和 web.password
+### web page
+> access address: http://ip:host/zmkm/index.html# The IP is the deployment server IP, and the port is the web. port in app.cnf
+The login account password is the `web.username` and `web.password` in the `app.conf` file
 
-#### 交易策略
-> 参考 `feature/strategy` 文件夹
+### Trading Strategy
+> Refer to the 'features/rate' folder
 
 
-##### 交易列表按钮说明(非必需，用来修改配置后的重新启动)
-###### 重启所有服务
-> 对应的是 app.conf 中 web.commend_start 下的命令，需要自行配置
+### description of the feature-trade list button (optional, used for restarting after modifying the configuration)
+#### service restart
+> will run `web.commend_start`
 
-###### 停止合约服务
-> 对应的是 app.conf 中 web.commend_stop 下的命令，需要自行配置
+#### service stop
+> will run `web.commend_stop`
 
-###### 开启所有
-> 开启所有币种
+#### open all coin
+> open all feature coin
 
-###### 停用所有
-> 停用所有币种
+#### close all coin
+> close all feature coin
 
-### 新币抢购配置说明
+### new coin rush config
 
-#### 币币抢买功能配置例子
+#### spot rush buy
 
-| 币种  |  买卖类型 | 类型  | usdt  |数量精度  | 开启  |
+| coin  |  trade_type | type  | usdt  | step_size  | enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
-| ABCUSDT(切记带着USDT后缀)   | 买币  | 币币  | 10  |0.1(手动设定会减少一次api请求，不知道时设置为0会在上线时查询接口自动获取)   | 开启   |
+| ABCUSDT  | buy  | spot  | 10  |0.1(if you don't know, please fill in 0)   | open   |
 
-#### 币币挖矿抢卖功能配置例子
-> ps: 如果挖矿的总价值小于5usdt，不能进行交易
+#### spot mining rush sell
+> ps:Binance has a minimum transaction limit, and if the quantity is too small (such as 5 USDT), it cannot be conducted
 
-| 币种  |  买卖类型 | 类型  | 数量精度  | 卖出数量 | 开启  |
+| coin  |  trade_type | type  | step_size  | amount  | enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
-| ABCUSDT(切记带着USDT后缀)   | 卖币  | 币币  | 0.1(手动设定会减少一次api请求，不知道时设置为0会在上线时查询接口自动获取)   | 80(挖矿所得数量) |开启   |
+| ABCUSDT  | sell  | spot  | 0.1(if you don't know, please fill in 0)   | 80(Quantity of mining income) | open  |
 
-#### 合约抢买做多配置例子
+#### feature rush buy long
 
-| 币种  |  买卖类型 | 类型  |模式| usdt|  倍率| 数量精度  |  开启  |
+| coin  |  trade_type | type  | margin_type | usdt|  leverage | step_size  |  enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
-| ABCUSDT(切记带着USDT后缀)   | 买币  | 合约  | 逐仓或全仓| 10|3 |0.1(手动设定会减少一次api请求，不知道时设置为0会在上线时查询接口自动获取)  |开启   |
+| ABCUSDT  | buy_long  | feature  | ISOLATED or CROSSED| 10|3 | 0.1(if you don't know, please fill in 0)  | open   |
 
 #### 合约抢买做空配置例子
-| 币种  |  买卖类型 | 类型  |模式| usdt|  倍率| 数量精度  |  开启  |
+| coin  |  trade_type | type  |margin_type| usdt|  leverage| step_size  |  enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
-| ABCUSDT(切记带着USDT后缀)   | 卖币  | 合约  | 逐仓或全仓| 10|3 |0.1(手动设定会减少一次api请求，不知道时设置为0会在上线时查询接口自动获取)  |开启   |
+| ABCUSDT   | buy_short  | feature  | ISOLATED or CROSSED | 10|3 | 0.1(if you don't know, please fill in 0)   | open   |
 
 
-## 开发
->安装最新版 golang
+## how to develop
+>install golang
 
-## 配置文件
+## technology function
+>feature/strategy/line/technology.go
+
+## config file
 
 ```
 cp ./conf/app.conf.example app.conf
 ```
 
-### 安装 bee
-> 记得将`GOPATH/bin`添加到环境变量`PATH`，否则 `bee` 命令无法全局使用
-> 使用 `go env GOPATH` 查看 `GOPATH` 路径
+### install bee
+> Remember to add `GOPAT/bin` to the environment variable `PATH`, otherwise the `bee` command cannot be used globally
+> Use `go env GOPATH` to view the `GOPATH` path
 
 ```
 go install github.com/beego/bee/v2@latest
 ```
 
-### 安装依赖
-> 进入项目根目录下执行
+### Install dependencies
 
 ```
 go mod tidy
 ```
 
-### 启动
-> http://localhost:3333/zmkm/index.html
+### how to run
+> go to http://localhost:3333/zmkm/index.html
 
 ```
 bee run
 ```
 
-### 打包
+### pack
 
-#### 打包到`windows`平台
-> 其它平台需要参考 bee 文档
-> 此项目的 github 的 workflows 实现了 linux amd64 和 window amd64 下的编译打包
+#### pack to `windows`
 
 ```
 bee pack -be GOOS=windows
 ```
-
-### TODO
-
-- [X] 完成新币抢购功能
-- [X] 完成挖矿新币抛售功能
-- [X] 添加独立的币种配置收益率
-- [X] 添加一键修改所有币种的配置
-- [X] 系统首页显示(那些服务开启和关闭)
-- [X] 监听币种的价格突变情况，报警通知
-- [X] 学习蜡烛图结合其它数据，报警通知
-- [ ] 添加新的自动交易策略
-- [ ] 添加定时自动交易(现货买入和一倍合约等价格对冲，吃资金费用)
-- [ ] 监控资金流入流出，报警通知
-
-
-### Change Log
-
-## v0.0.20
-- 合约资金费率监听调整为单独开关
-- 增加合约资金费率页面，可以查询当前所有币种的资金费率和资金费率历史记录
-
-## v0.0.19
-- 修复资金费率的监控逻辑
-
-## v0.0.18
-- 首页调整
-- 增加合约监听页面的 kc 通道图的查看
-
-## v0.0.17
-- fixed: listen bug
-
-## v0.0.16
-- fixed: listen bug
-
-## v0.0.15
-- 添加资金费率的监听
-
-## v0.0.14
-- 添加 line7 策略
-- 添加新的监听策略
-- 更新 conf 说明
-- 添加 binance api proxy 配置(不含 websocket 的代理)
-
-## v0.0.13
-- 修复 window 下打包程序不能正常运行的问题
-
