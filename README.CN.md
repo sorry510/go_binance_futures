@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="./README.md">english </a>
+    <a href="./README.md">English </a>
     ·
     <a href="./README.CN.md">简体中文</a>
 </p>
@@ -27,53 +27,53 @@
 
 ## 合约交易
 - 每个币种的单独配置
-![交易币种](./img/coins.jpg)
-![钉钉推送1](./img/dingding.jpeg)
+![交易币种](./img/cn/coins.jpg)
+![钉钉推送1](./img/cn/dingding.jpeg)
 
 ## 合约订单
 - 合约自动交易的订单历史(收益是根据下单预估的，没有查询币安的接口，与实际收益会有稍微不同)
-![交易订单](./img/order.jpg)
+![交易订单](./img/cn/order.jpg)
 
 ## 新币抢购
 - 币币抢买
 - 币币挖矿抢卖
 - 合约抢买做多
 - 合约抢买做空
-![新币抢购](./img/rush.jpg)
+![新币抢购](./img/cn/rush.jpg)
 
 ## 币种通知
 ### 现货通知
 - 达到预设价格报警通知
 - 自动买入或卖出
-![现货通知](./img/spot_notice.jpg)
+![现货通知](./img/cn/spot_notice.jpg)
 
 ### 合约通知
 - 达到预设价格报警通知
 - 自动买入并自动挂止盈止损单
-![合约通知](./img/feature_notice.jpg)
+![合约通知](./img/cn/feature_notice.jpg)
 
 ## 行情监听
 
 ### 现货监听
 - k线变化监听
-![现货监听](./img/listen_spot.jpg)
+![现货监听](./img/cn/listen_spot.jpg)
 
 ### 合约监听
 - k线变化监听
 - 肯纳特通道信号监听
-![合约监听](./img/listen_feature.jpg)
-![合约监听chart1](./img/listen_chat_kc.jpg)
-![合约监听通知1](./img/listen_dingding.jpg)
+![合约监听](./img/cn/listen_feature.jpg)
+![合约监听chart1](./img/cn/listen_chat_kc.jpg)
+![合约监听通知1](./img/cn/listen_dingding.jpg)
 
 ## 资金费率
 - 资金费率查询和历史记录
 - 资金费率变化监听
-![资金费率](./img/fundingrate.jpg)
-![资金费率历史](./img/fundingrate_history.jpg)
+![资金费率](./img/cn/fundingrate.jpg)
+![资金费率历史](./img/cn/fundingrate_history.jpg)
 
 ## 系统设置
 - 交易的基本相关的配置(conf)
-![交易配置](./img/config.jpg)
+![交易配置](./img/cn/config.jpg)
 
 ## 使用注意事项
 - 网络必须处于大陆之外(因为币安接口大陆正常无法访问), 已添加币安 api 的代理配置(websocket 因为使用组件问题，暂无代理配置， websocket 只是用于后台更新合约币种最新价格)，如果有可用代理也可以正常使用
@@ -142,14 +142,14 @@ strategy_coin = coin5
 
 #### 币币抢买功能配置例子
 
-| 币种  |  买卖类型 | 类型  | usdt  |数量精度  | 开启  |
+| 币种  |  买卖类型 | 类型  | usdt  | 数量精度  | 开启  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | ABCUSDT(切记带着USDT后缀)   | 买币  | 币币  | 10  |0.1(手动设定会减少一次api请求，不知道时设置为0会在上线时查询接口自动获取)   | 开启   |
 
 #### 币币挖矿抢卖功能配置例子
 > ps: 如果挖矿的总价值小于5usdt，不能进行交易
 
-| 币种  |  买卖类型 | 类型  | 数量精度  | 卖出数量 | 开启  |
+| 币种  |  买卖类型 | 类型  | 数量精度  | 数量 | 开启  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | ABCUSDT(切记带着USDT后缀)   | 卖币  | 币币  | 0.1(手动设定会减少一次api请求，不知道时设置为0会在上线时查询接口自动获取)   | 80(挖矿所得数量) |开启   |
 
