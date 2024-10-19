@@ -75,7 +75,7 @@ func main() {
 	
 	// 更新币种交易精度
 	go func() {
-		logs.Info("更新币种交易精度和增加新币")
+		logs.Info("update symbols trade precision and add new symbols, every 12 hours")
 		for {
 			feature.UpdateSymbolsTradePrecision()
 			time.Sleep(12 * time.Hour) // 12小时更新一次
@@ -84,13 +84,13 @@ func main() {
 	
 	// websocket 订阅更新币种价格
 	go func() {
-		logs.Info("websocket 自动更新币种最新价格")
+		logs.Info("websocket start: auto update symbols price")
 		binance.UpdateCoinByWs()
 	}()
 	
 	// 自动合约交易
 	if tradeEnable == "1" {
-		logs.Info("自动合约交易开启:", tradeEnable)
+		logs.Info("feature trade bot start")
 		// trade script
 		go func() {
 			for {
@@ -104,7 +104,7 @@ func main() {
 	
 	// 新币抢购
 	if spotNewEnable == "1" {
-		logs.Info("新币抢购开启")
+		logs.Info("new spot rush bot start")
 		go func() {
 			for {
 				spot.TryRush()
@@ -116,7 +116,7 @@ func main() {
 	
 	// 新币合约抢购
 	if tradeNewEnable == "1" {
-		logs.Info("合约新币抢购开启")
+		logs.Info("new feature rush bot start")
 		go func() {
 			for {
 				feature.TryRush()
@@ -128,7 +128,7 @@ func main() {
 	
 	// 币种通知
 	if noticeCoinEnable == "1" {
-		logs.Info("币种通知开启")
+		logs.Info("coin notice bot start")
 		go func() {
 			for {
 				spot.NoticeAndAutoOrder()
@@ -141,7 +141,7 @@ func main() {
 	
 	// 行情监听
 	if listenCoinEnable == "1" {
-		logs.Info("行情监听通知开启")
+		logs.Info("market listen bot start")
 		go func() {
 			for {
 				spot.ListenCoin()
@@ -154,7 +154,7 @@ func main() {
 	
 	// 合约费率监听
 	if listenFundingRate == "1" {
-		logs.Info("合约费率监听开启")
+		logs.Info("funding rate listen bot start")
 		go func() {
 			for {
 				// 更新所有币种的资金费率
