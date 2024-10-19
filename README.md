@@ -17,32 +17,32 @@ You assume all responsibility and liability.
 
 # Features <!-- omit in toc -->
 
-- [Feature Trade](#feature-trade)
-- [Feature Trade Order](#feature-trade-order)
+- [Futures Trade](#futures-trade)
+- [Futures Trade Order](#futures-trade-order)
 - [New Coin Rush](#new-coin-rush)
 - [Coin Notice](#coin-notice)
     - [Spot Notice](#spot-notice)
-    - [Feature Notice](feature-notice)
+    - [Futures Notice](futures-notice)
 - [Market Listen](#market-listen)
     - [Spot Listen](#spot-listen)
-    - [Feature Listen](#feature-listen)
+    - [Futures Listen](#futures-listen)
 - [Funding Rate](#funding-rate)
 - [System Config](#system-config)
 
-## feature-trade
+## futures-trade
 - Independent configuration for each coin
 ![交易币种](./img/coins.jpg)
 ![钉钉推送1](./img/dingding.jpeg)
 
-## feature-trade-order
+## futures-trade-order
 - Order history (revenue is estimated based on orders placed, without a Binance query interface, and may differ slightly from actual revenue)
 ![交易订单](./img/order.jpg)
 
 ## new-coin-rush
 - spot rush buy
 - mining rush sell
-- feature rush long
-- feature rush short
+- futures rush long
+- futures rush short
 ![新币抢购](./img/rush.jpg)
 
 ## coin-notice
@@ -51,10 +51,10 @@ You assume all responsibility and liability.
 - automatic buying or selling
 ![现货通知](./img/spot_notice.jpg)
 
-### feature-notice
+### futures-notice
 - alarm notification for reaching the preset price
 - automatic buying or selling
-![合约通知](./img/feature_notice.jpg)
+![合约通知](./img/futures_notice.jpg)
 
 ## market-listen
 
@@ -62,10 +62,10 @@ You assume all responsibility and liability.
 - kline change listen
 ![现货监听](./img/listen_spot.jpg)
 
-### feature-listen
+### futures-listen
 - kline change listen
 - kline keltner channels listen
-![合约监听](./img/listen_feature.jpg)
+![合约监听](./img/listen_futures.jpg)
 ![合约监听chart1](./img/listen_chat_kc.jpg)
 ![合约监听通知1](./img/listen_dingding.jpg)
 
@@ -109,9 +109,9 @@ allow_short = 1
 hold_max_time = 1800
 
 [trade]
-# whether or not feature trade
+# whether or not futures trade
 future_enable = 1
-# whether or not new feature rush
+# whether or not new futures rush
 new_enable = 0
 # Profit taking percentage (if the current currency is set to 0, use this global profit taking setting)
 profit = 10
@@ -196,10 +196,10 @@ cp conf/app.conf.example conf/app.conf
 The login account password is the `web.username` and `web.password` in the `app.conf` file
 
 ### Trading Strategy
-> Refer to the 'features/rate' folder
+> Refer to the 'futuress/rate' folder
 
 
-### description of the feature-trade list button (optional, used for restarting after modifying the configuration)
+### description of the futures-trade list button (optional, used for restarting after modifying the configuration)
 #### service restart
 > will run `web.commend_start`
 
@@ -207,10 +207,10 @@ The login account password is the `web.username` and `web.password` in the `app.
 > will run `web.commend_stop`
 
 #### open all coin
-> open all feature coin
+> open all futures coin
 
 #### close all coin
-> close all feature coin
+> close all futures coin
 
 ### new coin rush config
 
@@ -227,23 +227,23 @@ The login account password is the `web.username` and `web.password` in the `app.
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | ABCUSDT  | sell  | spot  | 0.1(if you don't know, please fill in 0)   | 80(Quantity of mining income) | open  |
 
-#### feature rush buy long
+#### futures rush buy long
 
 | coin  |  trade_type | type  | margin_type | usdt|  leverage | step_size  |  enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
-| ABCUSDT  | buy_long  | feature  | ISOLATED or CROSSED| 10|3 | 0.1(if you don't know, please fill in 0)  | open   |
+| ABCUSDT  | buy_long  | futures  | ISOLATED or CROSSED| 10|3 | 0.1(if you don't know, please fill in 0)  | open   |
 
 #### 合约抢买做空配置例子
 | coin  |  trade_type | type  |margin_type| usdt|  leverage| step_size  |  enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
-| ABCUSDT   | buy_short  | feature  | ISOLATED or CROSSED | 10|3 | 0.1(if you don't know, please fill in 0)   | open   |
+| ABCUSDT   | buy_short  | futures  | ISOLATED or CROSSED | 10|3 | 0.1(if you don't know, please fill in 0)   | open   |
 
 
 ## how to develop
 >install golang
 
 ## technology function
->feature/strategy/line/technology.go
+>futures/strategy/line/technology.go
 
 ## config file
 
