@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="./README.md">english </a>
+    <a href="./README.md">English </a>
     ·
     <a href="./README.CN.md">简体中文</a>
 </p>
@@ -31,49 +31,49 @@ You assume all responsibility and liability.
 
 ## futures-trade
 - Independent configuration for each coin
-![交易币种](./img/coins.jpg)
-![钉钉推送1](./img/dingding.jpeg)
+![交易币种](./img/en/coins.jpg)
+![钉钉推送1](./img/en/dingding.jpeg)
 
 ## futures-trade-order
 - Order history (revenue is estimated based on orders placed, without a Binance query interface, and may differ slightly from actual revenue)
-![交易订单](./img/order.jpg)
+![交易订单](./img/en/order.jpg)
 
 ## new-coin-rush
 - spot rush buy
 - mining rush sell
 - futures rush long
 - futures rush short
-![新币抢购](./img/rush.jpg)
+![新币抢购](./img/en/rush.jpg)
 
 ## coin-notice
 ### spot-notice
 - alarm notification for reaching the preset price
 - automatic buying or selling
-![现货通知](./img/spot_notice.jpg)
+![现货通知](./img/en/spot_notice.jpg)
 
 ### futures-notice
 - alarm notification for reaching the preset price
 - automatic buying or selling
-![合约通知](./img/futures_notice.jpg)
+![合约通知](./img/en/futures_notice.jpg)
 
 ## market-listen
 
 ### spot-listen
 - kline change listen
-![现货监听](./img/listen_spot.jpg)
+![现货监听](./img/en/listen_spot.jpg)
 
 ### futures-listen
 - kline change listen
 - kline keltner channels listen
-![合约监听](./img/listen_futures.jpg)
-![合约监听chart1](./img/listen_chat_kc.jpg)
-![合约监听通知1](./img/listen_dingding.jpg)
+![合约监听](./img/en/listen_futures.jpg)
+![合约监听chart1](./img/en/listen_chat_kc.jpg)
+![合约监听通知1](./img/en/listen_dingding.jpg)
 
 ## funding-rate
 - funding rate search and history
 - funding rate change listen
-![资金费率](./img/fundingrate.jpg)
-![资金费率历史](./img/fundingrate_history.jpg)
+![资金费率](./img/en/fundingrate.jpg)
+![资金费率历史](./img/en/fundingrate_history.jpg)
 
 ## system-config
 - app.conf
@@ -164,7 +164,7 @@ dingding_word = "报警"
 # external links
 links = [{"url": "url1", "title": "title1"}]
 ```
-![交易配置](./img/config.jpg)
+![交易配置](./img/en/config.jpg)
 
 ## important
 - The network must be located outside the mainland (as the Binance interface cannot be accessed normally in mainland China). The proxy configuration for Binance API has been added (websocket has no proxy configuration due to component usage issues, and is only used to update the latest contract currency prices in the background). If there are available proxies, they can also be used normally
@@ -216,25 +216,25 @@ The login account password is the `web.username` and `web.password` in the `app.
 
 #### spot rush buy
 
-| coin  |  trade_type | type  | usdt  | step_size  | enable  |
+| coin  |  trade_type | coin_type  | usdt  | step_size  | enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | ABCUSDT  | buy  | spot  | 10  |0.1(if you don't know, please fill in 0)   | open   |
 
 #### spot mining rush sell
 > ps:Binance has a minimum transaction limit, and if the quantity is too small (such as 5 USDT), it cannot be conducted
 
-| coin  |  trade_type | type  | step_size  | amount  | enable  |
+| coin  |  trade_type | coin_type  | step_size  | amount  | enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | ABCUSDT  | sell  | spot  | 0.1(if you don't know, please fill in 0)   | 80(Quantity of mining income) | open  |
 
 #### futures rush buy long
 
-| coin  |  trade_type | type  | margin_type | usdt|  leverage | step_size  |  enable  |
+| coin  |  trade_type | coin_type  | margin_type | usdt|  leverage | step_size  |  enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
 | ABCUSDT  | buy_long  | futures  | ISOLATED or CROSSED| 10|3 | 0.1(if you don't know, please fill in 0)  | open   |
 
 #### 合约抢买做空配置例子
-| coin  |  trade_type | type  |margin_type| usdt|  leverage| step_size  |  enable  |
+| coin  |  trade_type | coin_type  |margin_type| usdt|  leverage | step_size  |  enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
 | ABCUSDT   | buy_short  | futures  | ISOLATED or CROSSED | 10|3 | 0.1(if you don't know, please fill in 0)   | open   |
 
