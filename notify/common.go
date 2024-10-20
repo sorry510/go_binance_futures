@@ -28,8 +28,8 @@ func GetNotifyChannel() (pusher Pusher) {
 	switch (notification_channel) {
 		case "dingding":
 			pusher = DingDing{}
-		// case "slack":
-		// 	pusher = Slack{}
+		case "slack":
+			pusher = Slack{}
 		default:
 			pusher = DingDing{}
 	}

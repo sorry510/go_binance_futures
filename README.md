@@ -15,6 +15,16 @@ There are no warranties or guarantees expressed or implied.
 You assume all responsibility and liability.
 ```
 
+# Notification
+> dingding, slack
+
+- dingding
+![钉钉推送1](./img/en/dinding_future1.jpg)
+
+- slack
+![slack](./img/en/listen_slack.jpg)
+
+
 # Features <!-- omit in toc -->
 
 - [Futures Trade](#futures-trade)
@@ -157,7 +167,7 @@ commend_stop = pm2 stop binance_futures
 commend_log = pm2 log binance_futures
 
 [notification]
-# dingding, slack(Not currently supported)
+# dingding, slack
 channel = dingding
 
 [dingding]
@@ -165,6 +175,10 @@ channel = dingding
 dingding_token = ""
 # trigger keywords
 dingding_word = "报警"
+
+[slack]
+slack_token = ""
+slack_channel_id = ""
 
 [external]
 # external links

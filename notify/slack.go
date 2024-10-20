@@ -4,40 +4,58 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go_binance_futures/lang"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/beego/beego/v2/core/config"
 )
 
-var slack_token, _ = config.String("dingding::dingding_token")
-var slack_word, _ = config.String("dingding::dingding_word")
+var slack_token, _ = config.String("slack::slack_token")
+var slack_channel_id, _ = config.String("slack::slack_channel_id")
 
 type Slack struct {
 }
 
-type SlackData struct {
-	Msgtype string `json:"msgtype"`
-	Markdown SlackApiMarkDownData `json:"markdown"`
+type SlackMessage struct {
+    Channel string  `json:"channel"`
+	Blocks  []Block `json:"blocks"`
+    // Text    string `json:"text"`
+	// Mrkdwn  bool   `json:"mrkdwn"`
 }
 
-type SlackApiMarkDownData struct {
-	Title string `json:"title"`
-	Text string `json:"text"`
+type Block struct {
+    Type string   `json:"type"`
+    Text *Text    `json:"text,omitempty"`
+    Fields []Text `json:"fields,omitempty"`
+    Elements []Text `json:"elements,omitempty"`
+}
+
+type Text struct {
+    Type string `json:"type"`
+    Text string `json:"text"`
 }
 
 func SlackApi(content string) {
 	// 放到单独执行，避免主进程阻塞(未知原因突然不能在 goroutine 中执行了)
 	// go func () {
-		url := "https://oapi.dingtalk.com/robot/send?access_token=" + dingding_token
-	
-		requestBody := SlackData{
-			Msgtype: "markdown",
-			Markdown: SlackApiMarkDownData {
-				Title: dingding_word,
-				Text: content,
+		url := "https://slack.com/api/chat.postMessage"
+		
+		blocks := []Block{
+			{
+				Type: "context",
+				Elements: []Text{
+					{
+						Type: "mrkdwn",
+						Text: content,
+					},
+				},
 			},
+		}
+	
+		requestBody := SlackMessage{
+			Channel: slack_channel_id,
+			Blocks: blocks,
 		}
 		jsonData, _ := json.Marshal(requestBody)
 		fmt.Println(string(jsonData))
@@ -48,6 +66,8 @@ func SlackApi(content string) {
 		}
 		// 设置请求头，比如 Content-Type
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer " + slack_token)
+		
 		// 发送请求
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -73,203 +93,213 @@ func SlackApi(content string) {
 	// }()
 }
 
-func (pusher Slack) BuyOrderSuccess(symbol string, quantity float64, price float64, side string) {
+func (pusher Slack) FuturesOpenOrder(params FuturesOrderParams) {
 	text := `
-## %s交易通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">买单</font>
-#### **买单价格**：<font color="#008000">%f</font>
-#### **方向**：<font color="#008000">%s</font>
-#### **买单数量**：<font color="#008000">%f</font>
-#### **时间**：%s
-
-> author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, price, side, quantity, time.Now().Format("2006-01-02 15:04:05")))
-}
-
-func (pusher Slack) BuyOrderFail(symbol string, quantity float64, price float64, side string, info string) {
-	text := `
-## %s交易通知
-#### **币种**：%s
-#### **方向**：<font color="#008000">%s</font>
-#### **买单价格**：<font color="#008000">%f</font>
-#### **买单数量**：<font color="#008000">%f</font>
-#### **类型**：<font color="#ff0000">挂买单失败</font>
 >%s
-#### **时间**：%s
+>{futures.side}：%s
+>{futures.position_side}：%s
+>{futures.price}：%f
+>{futures.quantity}：%f
+>{futures.status}：%s
+>{futures.error}：%s
+>{futures.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, side, price, quantity, info, time.Now().Format("2006-01-02 15:04:05")))
+
+	text = fmt.Sprintf(lang.LangMatch(text),
+		params.Symbol + params.Title,
+		lang.Lang("futures." + params.Side),
+		lang.Lang("futures." + params.PositionSide),
+    params.Price,
+    params.Quantity,
+    lang.Lang("futures." + params.Status),
+    params.Error,
+		nowTime(),
+	)
+	SlackApi(text)
 }
 
-func (pusher Slack) SellOrderSuccess(symbol string, orderType string, profit float64) {
+func (pusher Slack) FuturesCloseOrder(params FuturesOrderParams) {
 	text := `
-## %s交易通知
-#### **币种**：%s
-#### **类型**：<font color="#ff0000">卖单</font>
-#### **子类型**：<font color="#ff0000">%s</font>
-#### **预计收益**：<font color="#008000">%f</font>
-#### **时间**：%s
-
-> author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, orderType, profit, time.Now().Format("2006-01-02 15:04:05")))
-}
-
-func (pusher Slack) SellOrderFail(symbol string, info string) {
-	text := `
-## %s交易通知
-#### **币种**：%s
-#### **类型**：<font color="#ff0000">卖单失败</font>
 >%s
-#### **时间**：%s
+>{futures.side}：%s
+>{futures.position_side}：%s
+>{futures.price}：%f
+>{futures.quantity}：%f
+>{futures.profit}：%f
+>{futures.remarks}：%s
+>{futures.status}：%s
+>{futures.error}：%s
+>{futures.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, info, time.Now().Format("2006-01-02 15:04:05")))
+
+	text = fmt.Sprintf(lang.LangMatch(text),
+		params.Symbol + params.Title,
+		lang.Lang("futures." + params.Side),
+		lang.Lang("futures." + params.PositionSide),
+    params.Price,
+    params.Quantity,
+    params.Profit,
+    params.Remarks,
+    lang.Lang("futures." + params.Status),
+    params.Error,
+		nowTime(),
+	)
+	SlackApi(text)
 }
 
-func (pusher Slack) RushOrderSuccess(symbol string, quantity float64, price float64, side string) {
+func (pusher Slack) FuturesNotice(params FuturesNoticeParams) {
 	text := `
-## %s交易通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">买单</font>
-#### **买单价格**：<font color="#008000">%f</font>
-#### **方向**：<font color="#008000">%s</font>
-#### **买单数量**：<font color="#008000">%f</font>
-#### **时间**：%s
+>%s
+>{futures.side}：%s
+>{futures.position_side}：%s
+>{futures.price}：%f
+>{futures.auto_order}：%s
+>{futures.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, price, side, quantity, time.Now().Format("2006-01-02 15:04:05")))
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.Side),
+    lang.Lang("futures." + params.PositionSide),
+    params.Price,
+    params.AutoOrder,
+    nowTime(),
+  )
+  SlackApi(text)
 }
 
-func (pusher Slack) NoticeFutureCoin(symbol string, side string, price string, autoOrder string) {
+func (pusher Slack) FuturesListenKlineBase(params FuturesListenParams) {
 	text := `
-## %s合约通知
-#### **币种**：%s
-#### **买卖类型**：<font color="#008000">%s</font>
-#### **通知时价格**：<font color="#008000">%s</font>
-#### **是否自动下单**：<font color="#008000">%s</font>
-#### **时间**：%s
+>%s
+>{futures.change_percent}：%.6f
+>{futures.price}：%f
+>{futures.remarks}：%s
+>{futures.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, side, price, autoOrder, time.Now().Format("2006-01-02 15:04:05")))
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    params.ChangePercent,
+    params.Price,
+    params.Remarks,
+    nowTime(),
+  )
+  SlackApi(text)
 }
 
-func (pusher Slack) ListenFutureCoin(symbol string, listenType string, percent float64, price float64) {
+func (pusher Slack) FuturesListenKlineKc(params FuturesListenParams) {
 	text := `
-## %s合约k线监控通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">%s</font>
-#### **当前变化率**：<font color="#008000">%f</font>
-#### **当前价格**：<font color="#008000">%f</font>
-#### **时间**：%s
+>%s
+>{futures.side}：%s
+>{futures.now_price}：%f
+>{futures.stop_loss_price}：%f
+>{futures.target_half_profit_price}：%f
+>{futures.target_all_profit_price}：%f
+>{futures.desired_price}：%f
+>{futures.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, listenType, percent, price, nowTime()))
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.PositionSide),
+    params.NowPrice,
+    params.StopLossPrice,
+    params.TargetHalfProfitPrice,
+    params.TargetAllProfitPrice,
+    params.DesiredPrice,
+    nowTime(),
+  )
+  SlackApi(text)
 }
 
-func (pusher Slack) ListenFutureCoinKlineKc(symbol string, listenType string, nowPrice, lossPrice, profitPrice1, profitPrice2, profitPrice3 float64) {
+func (pusher Slack) FuturesListenFundingRate(params FuturesListenParams) {
 	text := `
-## %s合约肯纳特通道监控通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">%s</font>
-#### **当前价格**：<font color="#008000">%f</font>
-#### **推荐止损价格**：<font color="#008000">%f</font>
-#### **推荐半仓止盈价格**：<font color="#008000">%f</font>
-#### **推荐全部止盈价格**：<font color="#008000">%f</font>
-#### **展望止盈价格**：<font color="#008000">%f</font>
-#### **时间**：%s
+>%s
+>{futures.side}：%s
+>{futures.funding_rate}：%.2f%%
+>{futures.price}：%f
+>{futures.remarks}：%s
+>{futures.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, listenType, nowPrice, lossPrice, profitPrice1, profitPrice2, profitPrice3, nowTime()))
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.PositionSide),
+    params.FundingRate,
+    params.Price,
+    params.Remarks,
+    nowTime(),
+  )
+  SlackApi(text)
 }
 
-func (pusher Slack) ListenFutureCoinFundingRate(symbol string, listenType string, rate float64, price string) {
+func (pusher Slack) SpotOrder(params SpotOrderParams) {
 	text := `
-## %s合约资金费率
-#### **币种**：%s
-#### **类型**：<font color="#008000">%s</font>
-#### **当前资金费率**：<font color="#008000">%.2f%%</font>
-#### **当前价格**：<font color="#008000">%s</font>
-#### **时间**：%s
+>%s
+>{spot.side}：%s
+>{spot.price}：%f
+>{spot.quantity}：%f
+>{spot.remarks}：%s
+>{spot.status}：%s
+>{spot.error}：%s
+>{spot.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	SlackApi(fmt.Sprintf(text, symbol, symbol, listenType, rate, price, nowTime()))
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("spot." + params.Side),
+    params.Price,
+    params.Quantity,
+    params.Remarks,
+    lang.Lang("spot." + params.Status),
+    params.Error,
+    nowTime(),
+  )
+  SlackApi(text)
 }
 
-func (pusher Slack) RushSpotBuyOrderSuccess(symbol string, quantity float64, price float64) {
+func (pusher Slack) SpotNotice(params SpotNoticeParams) {
 	text := `
-## %s新币抢购交易通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">币币交易新币上市抢购</font>
-#### **买单预计价格**：<font color="#008000">%f</font>
-#### **买单数量**：<font color="#008000">%f</font>
-#### **时间**：%s
+>%s
+>{spot.side}：%s
+>{spot.price}：%f
+>{spot.auto_order}：%s
+>{spot.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	DingDingApi(fmt.Sprintf(text, symbol, symbol, price, quantity, time.Now().Format("2006-01-02 15:04:05")))
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("spot." + params.Side),
+    params.Price,
+    params.AutoOrder,
+    nowTime(),
+  )
+  SlackApi(text)
 }
 
-func (pusher Slack) RushSpotSellOrderSuccess(symbol string, quantity float64, price float64) {
+func (pusher Slack) SpotListenKlineBase(params SpotListenParams) {
 	text := `
-## %s挖矿抢卖交易通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">币币交易新币上市抢卖</font>
-#### **卖单预计价格**：<font color="#008000">%f</font>
-#### **卖单数量**：<font color="#008000">%f</font>
-#### **时间**：%s
+>%s
+>{spot.change_percent}：%.6f
+>{spot.price}：%f
+>{spot.remarks}：%s
+>{spot.time}：%s
 
 > author <sorry510sf@gmail.com>`
-	DingDingApi(fmt.Sprintf(text, symbol, symbol, price, quantity, time.Now().Format("2006-01-02 15:04:05")))
-}
 
-func (pusher Slack) BuySpotOrderSuccess(symbol string, quantity float64, price float64) {
-	text := `
-## %s现货交易通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">买入</font>
-#### **买单预计价格**：<font color="#008000">%f</font>
-#### **买单数量**：<font color="#008000">%f</font>
-#### **时间**：%s
-
-> author <sorry510sf@gmail.com>`
-	DingDingApi(fmt.Sprintf(text, symbol, symbol, price, quantity, time.Now().Format("2006-01-02 15:04:05")))
-}
-
-func (pusher Slack) SellSpotOrderSuccess(symbol string, quantity float64, price float64) {
-	text := `
-## %s现货交易通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">卖出</font>
-#### **卖单预计价格**：<font color="#008000">%f</font>
-#### **卖单数量**：<font color="#008000">%f</font>
-#### **时间**：%s
-
-> author <sorry510sf@gmail.com>`
-	DingDingApi(fmt.Sprintf(text, symbol, symbol, price, quantity, time.Now().Format("2006-01-02 15:04:05")))
-}
-
-func (pusher Slack) NoticeSpotCoin(symbol string, side string, price string, autoOrder string) {
-	text := `
-## %s币币通知
-#### **币种**：%s
-#### **买卖类型**：<font color="#008000">%s</font>
-#### **通知时价格**：<font color="#008000">%s</font>
-#### **是否自动下单**：<font color="#008000">%s</font>
-#### **时间**：%s
-
-> author <sorry510sf@gmail.com>`
-	DingDingApi(fmt.Sprintf(text, symbol, symbol, side, price, autoOrder, time.Now().Format("2006-01-02 15:04:05")))
-}
-
-func (pusher Slack) ListenSpotCoin(symbol string, listenType string, percent float64, price float64) {
-	text := `
-## %s现货k线监控通知
-#### **币种**：%s
-#### **类型**：<font color="#008000">%s</font>
-#### **当前变化率**：<font color="#008000">%f</font>
-#### **当前价格**：<font color="#008000">%f</font>
-#### **时间**：%s
-
-> author <sorry510sf@gmail.com>`
-	DingDingApi(fmt.Sprintf(text, symbol, symbol, listenType, percent, price, time.Now().Format("2006-01-02 15:04:05")))
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    params.ChangePercent,
+    params.Price,
+    params.Remarks,
+    nowTime(),
+  )
+  SlackApi(text)
 }
