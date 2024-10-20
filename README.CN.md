@@ -9,6 +9,15 @@
 # 免责申明
 >！！！本项目不构成任何投资建议，投资者应独立决策并自行承担风险！！！
 
+# 实时推送
+> dingding, slack
+
+- 钉钉
+![钉钉推送1](./img/zh/dingding_future1.jpg)
+
+- slack
+![slack](./img/zh/listen_slack.jpg)
+
 # 功能
 
 # Features <!-- omit in toc -->

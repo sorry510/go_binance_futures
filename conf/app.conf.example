@@ -85,6 +85,10 @@ dingding_token = ""
 # 触发关键词
 dingding_word = "报警"
 
+[slack]
+slack_token = ""
+slack_channel_id = ""
+
 [external]
 # 外部链接
 links = [{"url": "url1", "title": "title1"}]
