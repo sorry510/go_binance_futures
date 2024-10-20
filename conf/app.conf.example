@@ -1,5 +1,7 @@
 # 切记不要使用单引号, 只能使用双引号或者不使用引号, 注释需要单独一行
 appname = binance_futures
+# zh, en
+language = zh
 log = 1
 debug = 0
 
@@ -72,6 +74,10 @@ commend_start = pm2 restart binance_futures
 commend_stop = pm2 stop binance_futures
 # 查看 web 日志的命令 /pm2-log
 commend_log = pm2 log binance_futures
+
+[notification]
+# dingding, slack
+channel = dingding
 
 [dingding]
 # token

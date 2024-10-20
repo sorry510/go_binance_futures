@@ -2,9 +2,10 @@ package feature
 
 import (
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/feature/notify"
 	"go_binance_futures/feature/strategy/line"
+	"go_binance_futures/lang"
 	"go_binance_futures/models"
+	"go_binance_futures/notify"
 	"strconv"
 	"time"
 
@@ -54,7 +55,13 @@ func klineBaseListen(coin models.ListenSymbols) {
 		coin.LastNoticeType = "up"
 		orm.NewOrm().Update(&coin)
 		
-		notify.ListenFutureCoin(coin.Symbol, "极速上涨", (nowPrice - lastOpenPrice) / lastOpenPrice, nowPrice)
+		pusher.FuturesListenKlineBase(notify.FuturesListenParams{
+			Title: lang.Lang("futures.listen_kline_base_title"),
+			Symbol: coin.Symbol,
+			ChangePercent: (nowPrice - lastOpenPrice) / lastOpenPrice,
+			Price: nowPrice,
+			Remarks: lang.Lang("futures.fast_up"),
+		})
 	}
 	if (nowPrice < lastOpenPrice) && 
 		(lastOpenPrice - nowPrice) / lastOpenPrice >= percentLimit &&
@@ -64,7 +71,13 @@ func klineBaseListen(coin models.ListenSymbols) {
 		coin.LastNoticeType = "down"
 		orm.NewOrm().Update(&coin)
 		
-		notify.ListenFutureCoin(coin.Symbol, "极速下跌", (lastOpenPrice - nowPrice) / lastOpenPrice, nowPrice)
+		pusher.FuturesListenKlineBase(notify.FuturesListenParams{
+			Title: lang.Lang("futures.listen_kline_base_title"),
+			Symbol: coin.Symbol,
+			ChangePercent: (lastOpenPrice - nowPrice) / lastOpenPrice,
+			Price: nowPrice,
+			Remarks: lang.Lang("futures.fast_down"),
+		})
 	}
 }
 
@@ -116,7 +129,7 @@ func klineKcListen(coin models.ListenSymbols) {
 	upper2, _, lower2 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
 	
 	limitPeriod := 12 // 最近n根k线
-	lossPercent := 0.03
+	lossPercent := 0.015
 
 	// 之前的最低价格跌破了 kc2 的下轨，然后当前价格超越了 kc1 下轨，止损位置在 kc1 下轨附近位置，止盈50%位置在 kc1 中规附近位置，剩余 50% 止盈50%位置在 kc1 上轨附近位置
 	if (close1[0] > lower1[0] && close1[1] < lower1[1]) {
@@ -127,7 +140,16 @@ func klineKcListen(coin models.ListenSymbols) {
 				coin.LastNoticeType = "up"
 				orm.NewOrm().Update(&coin)
 				
-				notify.ListenFutureCoinKlineKc(coin.Symbol, "做多信号", close1[0], close1[0] * (1 - lossPercent), ma1[0], upper1[0], upper2[0])
+				pusher.FuturesListenKlineKc(notify.FuturesListenParams{
+					Title: lang.Lang("futures.listen_keltner_channels_title"),
+					PositionSide: "long",
+					Symbol: coin.Symbol,
+					NowPrice: close1[0],
+					StopLossPrice: close1[0] * (1 - lossPercent),
+					TargetHalfProfitPrice: ma1[0],
+					TargetAllProfitPrice: upper1[0],
+					DesiredPrice: upper2[0],
+				}) 
 				break
 			}
 		}
@@ -141,7 +163,16 @@ func klineKcListen(coin models.ListenSymbols) {
 				coin.LastNoticeType = "down"
 				orm.NewOrm().Update(&coin)
 				
-				notify.ListenFutureCoinKlineKc(coin.Symbol, "做空信号", close1[0], close1[0] * (1 + lossPercent), ma1[0], lower1[0], lower2[0])
+				pusher.FuturesListenKlineKc(notify.FuturesListenParams{
+					Title: lang.Lang("futures.listen_keltner_channels_title"),
+					PositionSide: "short",
+					Symbol: coin.Symbol,
+					NowPrice: close1[0],
+					StopLossPrice: close1[0] * (1 - lossPercent),
+					TargetHalfProfitPrice: ma1[0],
+					TargetAllProfitPrice: lower1[0],
+					DesiredPrice: lower2[0],
+				})
 				break
 			}
 		}
@@ -167,7 +198,16 @@ func ListenCoinFundingRate() {
 			coin.LastNoticePrice = coin.NowPrice
 			orm.NewOrm().Update(&coin)
 			
-			notify.ListenFutureCoinFundingRate(coin.Symbol, "做空吃资金费费率", nowFundingRate * 100, coin.NowPrice)
+			price, _ := strconv.ParseFloat(coin.NowPrice, 64)
+			pusher.FuturesListenFundingRate(notify.FuturesListenParams{
+				Title: lang.Lang("futures.listen_funding_rate_title"),
+				Symbol: coin.Symbol,
+				PositionSide: "short",
+				FundingRate: nowFundingRate * 100,
+				Price: price,
+				Remarks: lang.Lang("futures.profit_by_funding_rate"),
+			})
+			
 		} else if (diff < -0.01 && nowFundingRate < -0.008) {
 			// 负资金费率，小于 -1%, 做多可以吃资金费用
 			coin.LastNoticeFundingRate = coin.NowFundingRate
@@ -175,7 +215,15 @@ func ListenCoinFundingRate() {
 			coin.LastNoticePrice = coin.NowPrice
 			orm.NewOrm().Update(&coin)
 			
-			notify.ListenFutureCoinFundingRate(coin.Symbol, "做多吃资金费费率", nowFundingRate * 100, coin.NowPrice)
+			price, _ := strconv.ParseFloat(coin.NowPrice, 64)
+			pusher.FuturesListenFundingRate(notify.FuturesListenParams{
+				Title: lang.Lang("futures.listen_funding_rate_title"),
+				Symbol: coin.Symbol,
+				PositionSide: "long",
+				FundingRate: nowFundingRate * 100,
+				Price: price,
+				Remarks: lang.Lang("futures.profit_by_funding_rate"),
+			})
 		}
 	}
 }

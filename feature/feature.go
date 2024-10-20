@@ -2,11 +2,12 @@ package feature
 
 import (
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/feature/notify"
 	"go_binance_futures/feature/strategy"
 	"go_binance_futures/feature/strategy/coin"
 	"go_binance_futures/feature/strategy/line"
+	"go_binance_futures/lang"
 	"go_binance_futures/models"
+	"go_binance_futures/notify"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
@@ -43,6 +44,8 @@ var strategy_coin, _ = config.String("trade::strategy_coin") // 选币策略
 
 var coinStrategy = GetCoinStrategy(strategy_coin)
 var lineStrategy = GetLineStrategy(strategy_trade)
+
+var pusher = notify.GetNotifyChannel()
 
 func StartTrade() {
 	// logs.Info("StartTrade")
@@ -115,9 +118,31 @@ func StartTrade() {
 				if err == nil {
 					// 数据库写入订单
 					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
-					notify.SellOrderSuccess(position.Symbol, "风向改变,自动平仓", unRealizedProfit)
+					
+					avgPrice, _ := strconv.ParseFloat(result.AvgPrice, 64)
+					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.close_notice_title"),
+						Symbol: position.Symbol,
+						Side: "sell",
+						PositionSide: "long",
+						Price: avgPrice,
+						Quantity: positionAmtFloat,
+						Profit: unRealizedProfit,
+						Remarks: lang.Lang("futures.wind_of_change"),
+						Status: "success",
+					})
 				} else {
-					notify.SellOrderFail(position.Symbol, err.Error())
+					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.close_notice_title"),
+						Symbol: position.Symbol,
+						Side: "sell",
+						PositionSide: "long",
+						Quantity: positionAmtFloat,
+						Profit: unRealizedProfit,
+						Remarks: lang.Lang("futures.wind_of_change"),
+						Status: "fail",
+						Error: err.Error(),
+					})
 				}
 			}
 			if position.PositionSide == "SHORT" {
@@ -125,9 +150,31 @@ func StartTrade() {
 				if err == nil {
 					// 数据库写入订单
 					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
-					notify.SellOrderSuccess(position.Symbol, "风向改变,自动平仓", unRealizedProfit)
+					
+					avgPrice, _ := strconv.ParseFloat(result.AvgPrice, 64)
+					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.close_notice_title"),
+						Symbol: position.Symbol,
+						Side: "buy",
+						PositionSide: "short",
+						Price: avgPrice,
+						Quantity: positionAmtFloat,
+						Profit: unRealizedProfit,
+						Remarks: lang.Lang("futures.wind_of_change"),
+						Status: "success",
+					})
 				} else {
-					notify.SellOrderFail(position.Symbol, err.Error())
+					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.close_notice_title"),
+						Symbol: position.Symbol,
+						Side: "buy",
+						PositionSide: "short",
+						Quantity: positionAmtFloat,
+						Profit: unRealizedProfit,
+						Remarks: lang.Lang("futures.wind_of_change"),
+						Status: "fail",
+						Error: err.Error(),
+					})
 				}
 			}
 			logs.Info("%s:auto_stop_end", position.Symbol)
@@ -140,9 +187,31 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
-						notify.SellOrderSuccess(position.Symbol, "止损,自动平仓", unRealizedProfit)
+						
+						avgPrice, _ := strconv.ParseFloat(result.AvgPrice, 64)
+						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.close_notice_title"),
+							Symbol: position.Symbol,
+							Side: "sell",
+							PositionSide: "long",
+							Price: avgPrice,
+							Quantity: positionAmtFloat,
+							Profit: unRealizedProfit,
+							Remarks: lang.Lang("futures.stop_loss"),
+							Status: "success",
+						})
 					} else {
-						notify.SellOrderFail(position.Symbol, err.Error())
+						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.close_notice_title"),
+							Symbol: position.Symbol,
+							Side: "sell",
+							PositionSide: "long",
+							Quantity: positionAmtFloat,
+							Profit: unRealizedProfit,
+							Remarks: lang.Lang("futures.stop_loss"),
+							Status: "fail",
+							Error: err.Error(),
+						})
 					}
 				}
 				if position.PositionSide == "SHORT" {
@@ -150,9 +219,31 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
-						notify.SellOrderSuccess(position.Symbol, "止损,自动平仓", unRealizedProfit)
+						
+						avgPrice, _ := strconv.ParseFloat(result.AvgPrice, 64)
+						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.close_notice_title"),
+							Symbol: position.Symbol,
+							Side: "buy",
+							PositionSide: "short",
+							Price: avgPrice,
+							Quantity: positionAmtFloat,
+							Profit: unRealizedProfit,
+							Remarks: lang.Lang("futures.stop_loss"),
+							Status: "success",
+						})
 					} else {
-						notify.SellOrderFail(position.Symbol, err.Error())
+						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.close_notice_title"),
+							Symbol: position.Symbol,
+							Side: "buy",
+							PositionSide: "short",
+							Quantity: positionAmtFloat,
+							Profit: unRealizedProfit,
+							Remarks: lang.Lang("futures.stop_loss"),
+							Status: "fail",
+							Error: err.Error(),
+						})
 					}
 				}
 				continue
@@ -165,9 +256,31 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
-						notify.SellOrderSuccess(position.Symbol, "止盈,自动平仓", unRealizedProfit)
+						
+						avgPrice, _ := strconv.ParseFloat(result.AvgPrice, 64)
+						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.close_notice_title"),
+							Symbol: position.Symbol,
+							Side: "sell",
+							PositionSide: "long",
+							Price: avgPrice,
+							Quantity: positionAmtFloat,
+							Profit: unRealizedProfit,
+							Remarks: lang.Lang("futures.target_profit"),
+							Status: "success",
+						})
 					} else {
-						notify.SellOrderFail(position.Symbol, err.Error())
+						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.close_notice_title"),
+							Symbol: position.Symbol,
+							Side: "sell",
+							PositionSide: "long",
+							Quantity: positionAmtFloat,
+							Profit: unRealizedProfit,
+							Remarks: lang.Lang("futures.target_profit"),
+							Status: "fail",
+							Error: err.Error(),
+						})
 					}
 				}
 				if position.PositionSide == "SHORT" {
@@ -175,9 +288,31 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
-						notify.SellOrderSuccess(position.Symbol, "止盈,自动平仓", unRealizedProfit)
+						
+						avgPrice, _ := strconv.ParseFloat(result.AvgPrice, 64)
+						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.close_notice_title"),
+							Symbol: position.Symbol,
+							Side: "buy",
+							PositionSide: "short",
+							Price: avgPrice,
+							Quantity: positionAmtFloat,
+							Profit: unRealizedProfit,
+							Remarks: lang.Lang("futures.target_profit"),
+							Status: "success",
+						})
 					} else {
-						notify.SellOrderFail(position.Symbol, err.Error())
+						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.close_notice_title"),
+							Symbol: position.Symbol,
+							Side: "buy",
+							PositionSide: "short",
+							Quantity: positionAmtFloat,
+							Profit: unRealizedProfit,
+							Remarks: lang.Lang("futures.target_profit"),
+							Status: "fail",
+							Error: err.Error(),
+						})
 					}
 				}
 				continue
@@ -265,18 +400,52 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertOpenOrder(symbol, quantity, result.AvgPrice, "LONG")
-						notify.BuyOrderSuccess(symbol, quantity, buyPrice, "做多")
+						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.open_notice_title"),
+							Symbol: symbol,
+							Side: "buy",
+							PositionSide: "long",
+							Price: buyPrice,
+							Quantity: quantity,
+							Status: "success",
+						})
 					} else {
-						notify.BuyOrderFail(symbol, quantity, buyPrice, "做多", err.Error())
+						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.open_notice_title"),
+							Symbol: symbol,
+							Side: "buy",
+							PositionSide: "long",
+							Price: buyPrice,
+							Quantity: quantity,
+							Status: "fail",
+							Error: err.Error(),
+						})
 					}
 				} else {
 					result, err := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, result.AvgPrice, "LONG")
-						notify.BuyOrderSuccess(symbol, quantity, buyPrice, "做多")
+						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.open_notice_title"),
+							Symbol: symbol,
+							Side: "buy",
+							PositionSide: "long",
+							Price: buyPrice,
+							Quantity: quantity,
+							Status: "success",
+						})
 					} else {
-						notify.BuyOrderFail(symbol, quantity, buyPrice, "做多", err.Error())
+						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.open_notice_title"),
+							Symbol: symbol,
+							Side: "buy",
+							PositionSide: "long",
+							Price: buyPrice,
+							Quantity: quantity,
+							Status: "fail",
+							Error: err.Error(),
+						})
 					}
 				}
 				isOpen = true
@@ -297,18 +466,52 @@ func StartTrade() {
 					if err == nil {
 						// 数据库写入订单
 						insertOpenOrder(symbol, quantity, result.AvgPrice, "SHORT")
-						notify.BuyOrderSuccess(symbol, quantity, sellPrice, "做空")
+						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.open_notice_title"),
+							Symbol: symbol,
+							Side: "sell",
+							PositionSide: "short",
+							Price: sellPrice,
+							Quantity: quantity,
+							Status: "success",
+						})
 					} else {
-						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
+						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.open_notice_title"),
+							Symbol: symbol,
+							Side: "sell",
+							PositionSide: "short",
+							Price: sellPrice,
+							Quantity: quantity,
+							Status: "fail",
+							Error: err.Error(),
+						})
 					}
 				} else {
 					result, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, result.AvgPrice, "SHORT")
-						notify.BuyOrderSuccess(symbol, quantity, sellPrice, "做空")
+						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.open_notice_title"),
+							Symbol: symbol,
+							Side: "sell",
+							PositionSide: "short",
+							Price: sellPrice,
+							Quantity: quantity,
+							Status: "success",
+						})
 					} else {
-						notify.BuyOrderFail(symbol, quantity, sellPrice, "做空", err.Error())
+						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+							Title: lang.Lang("futures.open_notice_title"),
+							Symbol: symbol,
+							Side: "sell",
+							PositionSide: "short",
+							Price: sellPrice,
+							Quantity: quantity,
+							Status: "fail",
+							Error: err.Error(),
+						})
 					}
 				}
 				isOpen = true
