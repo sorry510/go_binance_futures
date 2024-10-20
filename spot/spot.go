@@ -1,9 +1,10 @@
 package spot
 
 import (
+	"go_binance_futures/lang"
 	"go_binance_futures/models"
+	"go_binance_futures/notify"
 	"go_binance_futures/spot/api/binance"
-	"go_binance_futures/spot/notify"
 	"go_binance_futures/utils"
 	"strconv"
 
@@ -12,6 +13,8 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 )
+
+var pusher = notify.GetNotifyChannel()
 
 func TryRush() {
 	o := orm.NewOrm()
@@ -102,19 +105,31 @@ func NoticeAndAutoOrder() {
 		nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
 		noticePrice, _ := strconv.ParseFloat(coin.NoticePrice, 64) // 预警价格	
 		if (coin.HasNotice == 0) {
-			var autoOrderText = "否"
+			var autoOrderText = "no"
 			if coin.AutoOrder == 1 {
-				autoOrderText = "是"
+				autoOrderText = "yes"
 			}
 			if (nowPrice <= noticePrice && coin.Side == "buy") {
 				// 买币，价格低于预警价格，进行通知
 				canOrder = true
-				notify.NoticeSpotCoin(coin.Symbol, "买入", coin.NoticePrice, autoOrderText)
+				pusher.SpotNotice(notify.SpotNoticeParams{
+					Title: lang.Lang("spot.notice_price_title"),
+					Symbol: coin.Symbol,
+					Side: "buy",
+					Price: noticePrice,
+					AutoOrder: autoOrderText,
+				})
 			}
 			if (nowPrice >= noticePrice && coin.Side == "sell") {
 				// 卖币，价格高于预警价格，进行通知
 				canOrder = true
-				notify.NoticeSpotCoin(coin.Symbol, "卖出", coin.NoticePrice, autoOrderText)
+				pusher.SpotNotice(notify.SpotNoticeParams{
+					Title: lang.Lang("spot.notice_price_title"),
+					Symbol: coin.Symbol,
+					Side: "sell",
+					Price: noticePrice,
+					AutoOrder: autoOrderText,
+				})
 			}
 			if canOrder {
 				coin.HasNotice = 1
@@ -133,10 +148,30 @@ func NoticeAndAutoOrder() {
 			if (coin.Side == "buy") {
 				_, err := binance.BuyMarket(coin.Symbol, quantity)
 				if err != nil {
-					logs.Info("购买失败symbol:", coin.Symbol)
+					logs.Error("购买失败symbol:", coin.Symbol)
+					logs.Error("err:", err.Error())
+					pusher.SpotOrder(notify.SpotOrderParams{
+						Title: lang.Lang("spot.notice_title"),
+						Symbol: coin.Symbol,
+						Side: "sell",
+						Price: nowPrice,
+						Quantity: quantity,
+						Remarks: lang.Lang("spot.notice_auto_order"),
+						Status: "fail",
+						Error: err.Error(),
+					})
 				} else {
 					// 购买成功
-					notify.BuyOrderSuccess(coin.Symbol, quantity, nowPrice)
+					pusher.SpotOrder(notify.SpotOrderParams{
+						Title: lang.Lang("spot.notice_title"),
+						Symbol: coin.Symbol,
+						Side: "sell",
+						Price: nowPrice,
+						Quantity: quantity,
+						Remarks: lang.Lang("spot.notice_auto_order"),
+						Status: "success",
+						Error: "",
+					})
 					
 					// 现货不支持挂单止盈止损
 					// if (coin.ProfitPrice != "0") {
@@ -160,9 +195,29 @@ func NoticeAndAutoOrder() {
 				_, err := binance.SellMarket(coin.Symbol, quantity)
 				if err != nil {
 					logs.Info("卖出失败symbol:", coin.Symbol)
+					
+					pusher.SpotOrder(notify.SpotOrderParams{
+						Title: lang.Lang("spot.notice_title"),
+						Symbol: coin.Symbol,
+						Side: "sell",
+						Quantity: quantity,
+						Remarks: lang.Lang("spot.notice_auto_order"),
+						Status: "fail",
+						Error: err.Error(),
+					})
 				} else {
 					// 卖出成功
-					notify.SellOrderSuccess(coin.Symbol, quantity, resPrice[0].Price)
+					price_float64, _:= strconv.ParseFloat(resPrice[0].Price, 64) // 卖单数量
+					pusher.SpotOrder(notify.SpotOrderParams{
+						Title: lang.Lang("spot.notice_title"),
+						Symbol: coin.Symbol,
+						Side: "sell",
+						Price: price_float64,
+						Quantity: quantity,
+						Remarks: lang.Lang("spot.notice_auto_order"),
+						Status: "success",
+						Error: "",
+					})
 				}
 			}
 		}
@@ -185,10 +240,30 @@ func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.Cr
 	
 	res, err = binance.BuyMarket(symbol, quantity)
 	if err != nil {
-		logs.Info("购买失败symbol:", symbol)
+		logs.Error("购买失败symbol:", symbol)
+		logs.Error("err:", err.Error())
+		pusher.SpotOrder(notify.SpotOrderParams{
+			Title: lang.Lang("spot.new_coin_rush_notice_title"),
+			Symbol: symbol,
+			Side: "buy",
+			Price: buyPrice,
+			Quantity: quantity,
+			Remarks: lang.Lang("spot.new_coin_rush_buy"),
+			Status: "fail",
+			Error: err.Error(),
+		})
 	} else {
 		// 购买成功
-		notify.BuyOrderSuccess(symbol, quantity, buyPrice)
+		pusher.SpotOrder(notify.SpotOrderParams{
+			Title: lang.Lang("spot.new_coin_rush_notice_title"),
+			Symbol: symbol,
+			Side: "buy",
+			Price: buyPrice,
+			Quantity: quantity,
+			Remarks: lang.Lang("spot.new_coin_rush_buy"),
+			Status: "success",
+			Error: "",
+		})
 	}
 	return res, err
 }
@@ -202,10 +277,30 @@ func trySellMarket(symbol string, quantity string, stepSize string) (res *spot_a
 	
 	res, err = binance.SellMarket(symbol, quantity_float64)
 	if err != nil {
-		logs.Info("卖出失败symbol:", symbol)
+		logs.Error("卖出失败symbol:", symbol)
+		logs.Error("err:", err.Error())
+		pusher.SpotOrder(notify.SpotOrderParams{
+			Title: lang.Lang("spot.new_coin_rush_notice_title"),
+			Symbol: symbol,
+			Side: "sell",
+			Quantity: quantity_float64,
+			Remarks: lang.Lang("spot.new_coin_rush_sell"),
+			Status: "fail",
+			Error: err.Error(),
+		})
 	} else {
 		// 卖出成功
-		notify.SellOrderSuccess(symbol, quantity_float64, res.Price)
+		price_float64, _:= strconv.ParseFloat(res.Price, 64) // 卖单数量
+		pusher.SpotOrder(notify.SpotOrderParams{
+			Title: lang.Lang("spot.new_coin_rush_notice_title"),
+			Symbol: symbol,
+			Side: "sell",
+			Price: price_float64,
+			Quantity: quantity_float64,
+			Remarks: lang.Lang("spot.new_coin_rush_sell"),
+			Status: "success",
+			Error: "",
+		})
 	}
 	return res, err
 }
@@ -237,7 +332,13 @@ func ListenCoin() {
 			coin.LastNoticeType = "up"
 			orm.NewOrm().Update(&coin)
 			
-			notify.ListenSpotCoin(coin.Symbol, "极速上涨", (nowPrice - lastOpenPrice) / lastOpenPrice, nowPrice)
+			pusher.SpotListenKlineBase(notify.SpotListenParams{
+				Title: lang.Lang("spot.kline_listen_base_title"),
+				Symbol: coin.Symbol,
+				ChangePercent: (nowPrice - lastOpenPrice) / lastOpenPrice,
+				Price: nowPrice,
+				Remarks: lang.Lang("spot.fast_up"),
+			})
 		}
 		if (nowPrice < lastOpenPrice) && 
 			(lastOpenPrice - nowPrice) / lastOpenPrice >= percentLimit &&
@@ -247,7 +348,13 @@ func ListenCoin() {
 			coin.LastNoticeType = "down"
 			orm.NewOrm().Update(&coin)
 			
-			notify.ListenSpotCoin(coin.Symbol, "极速下跌", (lastOpenPrice - nowPrice) / lastOpenPrice, nowPrice)
+			pusher.SpotListenKlineBase(notify.SpotListenParams{
+				Title: lang.Lang("spot.kline_listen_base_title"),
+				Symbol: coin.Symbol,
+				ChangePercent: (nowPrice - lastOpenPrice) / lastOpenPrice,
+				Price: nowPrice,
+				Remarks: lang.Lang("spot.fast_down"),
+			})
 		}
 	}
 }

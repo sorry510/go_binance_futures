@@ -3,8 +3,9 @@ package feature
 import (
 	"errors"
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/feature/notify"
+	"go_binance_futures/lang"
 	"go_binance_futures/models"
+	"go_binance_futures/notify"
 	"go_binance_futures/utils"
 	"strconv"
 
@@ -95,19 +96,40 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
 	
-	var side string
 	if coin.Side == "buy" {
-		side = "做多"
 		res, err = binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
 	} else if coin.Side == "sell" {
-		side = "做空"
 		res, err = binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
+	}
+	
+	positionSide := "long"
+	if coin.Side == "sell" {
+		positionSide = "short"
 	}
 	if err != nil {
 		logs.Info("购买失败symbol:", symbol)
+		logs.Info("err:", err.Error())
+		
+		pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+			Title: lang.Lang("futures.new_coin_rush_notice_title"),
+			Symbol: symbol,
+			Side: coin.Side,
+			PositionSide: positionSide,
+			Price: buyPrice,
+			Quantity: quantity,
+			Status: "fail",
+			Error: err.Error(),
+		})
 	} else {
-		// 购买成功
-		notify.RushOrderSuccess(symbol, quantity, buyPrice, side)
+		pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+			Title: lang.Lang("futures.new_coin_rush_notice_title"),
+			Symbol: symbol,
+			Side: coin.Side,
+			PositionSide: positionSide,
+			Price: buyPrice,
+			Quantity: quantity,
+			Status: "success",
+		})
 	}
 	return res, err
 }

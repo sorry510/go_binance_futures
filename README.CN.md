@@ -27,57 +27,57 @@
 
 ## 合约交易
 - 每个币种的单独配置
-![交易币种](./img/cn/coins.jpg)
-![钉钉推送1](./img/cn/dingding.jpeg)
+![交易币种](./img/zh/coins.jpg)
+![钉钉推送1](./img/zh/dingding_future1.jpg)
 
 ## 合约订单
 - 合约自动交易的订单历史(收益是根据下单预估的，没有查询币安的接口，与实际收益会有稍微不同)
-![交易订单](./img/cn/order.jpg)
+![交易订单](./img/zh/order.jpg)
 
 ## 新币抢购
 - 币币抢买
 - 币币挖矿抢卖
 - 合约抢买做多
 - 合约抢买做空
-![新币抢购](./img/cn/rush.jpg)
+![新币抢购](./img/zh/rush.jpg)
 
 ## 币种通知
 ### 现货通知
 - 达到预设价格报警通知
 - 自动买入或卖出
-![现货通知](./img/cn/spot_notice.jpg)
+![现货通知](./img/zh/spot_notice.jpg)
 
 ### 合约通知
 - 达到预设价格报警通知
 - 自动买入并自动挂止盈止损单
-![合约通知](./img/cn/feature_notice.jpg)
+![合约通知](./img/zh/feature_notice.jpg)
 
 ## 行情监听
 
 ### 现货监听
 - k线变化监听
-![现货监听](./img/cn/listen_spot.jpg)
+![现货监听](./img/zh/listen_spot.jpg)
 
 ### 合约监听
 - k线变化监听
 - 肯纳特通道信号监听
-![合约监听](./img/cn/listen_feature.jpg)
-![合约监听chart1](./img/cn/listen_chat_kc.jpg)
-![合约监听通知1](./img/cn/listen_dingding.jpg)
+![合约监听](./img/zh/listen_feature.jpg)
+![合约监听chart1](./img/zh/listen_chat_kc.jpg)
+![合约监听通知1](./img/zh/dingding_listen1.jpg)
 
 ## 资金费率
 - 资金费率查询和历史记录
 - 资金费率变化监听
-![资金费率](./img/cn/fundingrate.jpg)
-![资金费率历史](./img/cn/fundingrate_history.jpg)
+![资金费率](./img/zh/fundingrate.jpg)
+![资金费率历史](./img/zh/fundingrate_history.jpg)
 
 ## 系统设置
 - 交易的基本相关的配置(conf)
-![交易配置](./img/cn/config.jpg)
+![交易配置](./img/zh/config.jpg)
 
 ## 使用注意事项
 - 网络必须处于大陆之外(因为币安接口大陆正常无法访问), 已添加币安 api 的代理配置(websocket 因为使用组件问题，暂无代理配置， websocket 只是用于后台更新合约币种最新价格)，如果有可用代理也可以正常使用
-- 申请api_key地址: [币安API管理页面](https://www.binance.com/cn/usercenter/settings/api-management)
+- 申请api_key地址: [币安API管理页面](https://www.binance.com/zh/usercenter/settings/api-management)
 - 如果你的账号本身已经有合约仓位，请一定要在 `app.conf` 文件中配置 `excludeSymbols`, 排出掉你不想使用本程序自动交易的币，否则默认所有的仓位都会根据交易策略规则自动平仓
 - !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
 - 请保证账户有足够的 USDT，否则下单会报错

@@ -32,7 +32,7 @@ You assume all responsibility and liability.
 ## futures-trade
 - Independent configuration for each coin
 ![交易币种](./img/en/coins.jpg)
-![钉钉推送1](./img/en/dingding.jpeg)
+![钉钉推送1](./img/en/dinding_future1.jpg)
 
 ## futures-trade-order
 - Order history (revenue is estimated based on orders placed, without a Binance query interface, and may differ slightly from actual revenue)
@@ -67,7 +67,7 @@ You assume all responsibility and liability.
 - kline keltner channels listen
 ![合约监听](./img/en/listen_futures.jpg)
 ![合约监听chart1](./img/en/listen_chat_kc.jpg)
-![合约监听通知1](./img/en/listen_dingding.jpg)
+![合约监听通知1](./img/en/dingding_listen1.jpg)
 
 ## funding-rate
 - funding rate search and history
@@ -81,6 +81,8 @@ You assume all responsibility and liability.
 ```
 # Remember not to use single quotes, only double quotes or no quotes, comments need to be on a separate line
 appname = binance_futures
+# zh, en
+language = en
 log = 1
 debug = 0
 
@@ -153,6 +155,10 @@ commend_start = pm2 restart binance_futures
 commend_stop = pm2 stop binance_futures
 # log command
 commend_log = pm2 log binance_futures
+
+[notification]
+# dingding, slack(Not currently supported)
+channel = dingding
 
 [dingding]
 # token

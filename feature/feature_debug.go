@@ -3,8 +3,9 @@ package feature
 import (
 	"fmt"
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/feature/notify"
 	"go_binance_futures/feature/strategy/line"
+	"go_binance_futures/lang"
+	"go_binance_futures/notify"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
@@ -155,9 +156,31 @@ func GoTestMarketOrder() {
 				if err == nil {
 					// 数据库写入订单
 					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
-					notify.SellOrderSuccess(position.Symbol, "风向改变,自动平仓", unRealizedProfit)
+					
+					avgPrice, _ := strconv.ParseFloat(result.AvgPrice, 64)
+					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.close_notice_title"),
+						Symbol: position.Symbol,
+						Side: "buy",
+						PositionSide: "short",
+						Price: avgPrice,
+						Quantity: positionAmtFloat,
+						Profit: unRealizedProfit,
+						Remarks: lang.Lang("futures.stop_loss"),
+						Status: "success",
+					})
 				} else {
-					notify.SellOrderFail(position.Symbol, err.Error())
+					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.close_notice_title"),
+						Symbol: position.Symbol,
+						Side: "buy",
+						PositionSide: "short",
+						Quantity: positionAmtFloat,
+						Profit: unRealizedProfit,
+						Remarks: lang.Lang("futures.stop_loss"),
+						Status: "fail",
+						Error: err.Error(),
+					})
 				}
 			}
     	}
@@ -174,5 +197,147 @@ func GoTestApi() {
 }
 
 func GoTestNotify() {
-	notify.ListenFutureCoinFundingRate("BTCUSDT", "做多吃资金费费率", -2, "66666")
+	// var langText, _ = lang.ReadLangJsonFile("") 
+	// logs.Info(utils.ToJson(langText))
+	// str := lang.Lang("futures.notice_title")
+	// str = str + "1213"
+	// logs.Info(str)
+	// pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+	// 	Title: lang.Lang("futures.open_notice_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "buy",
+	// 	PositionSide: "long",
+	// 	Price: 66666,
+	// 	Quantity: 1,
+	// 	Status: "success",
+	// })
+	// pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+	// 	Title: lang.Lang("futures.open_notice_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "buy",
+	// 	PositionSide: "short",
+	// 	Price: 66666,
+	// 	Quantity: 1,
+	// 	Status: "fail",
+	// 	Error: "error message error message error message error message",
+	// })
+	// pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+	// 	Title: lang.Lang("futures.close_notice_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "buy",
+	// 	PositionSide: "short",
+	// 	Price: 66666,
+	// 	Quantity: 1,
+	// 	Profit: 8.2,
+	// 	Remarks: lang.Lang("futures.wind_of_change"),
+	// 	Status: "success",
+	// })
+	// pusher.FuturesCloseOrder(notify.FuturesOrderParams{
+	// 	Title: lang.Lang("futures.close_notice_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "sell",
+	// 	PositionSide: "long",
+	// 	Quantity: 1,
+	// 	Profit: 8.2,
+	// 	Remarks: "",
+	// 	Status: "fail",
+	// 	Error: "error message error message error message error message",
+	// })
+	// pusher.FuturesNotice(notify.FuturesNoticeParams{
+	// 	Title: lang.Lang("futures.notice_price_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "sell",
+	// 	PositionSide: "long",
+	// 	Price: 66666,
+	// 	AutoOrder: lang.Lang("futures.yes"),
+	// })
+	// pusher.FuturesNotice(notify.FuturesNoticeParams{
+	// 	Title: lang.Lang("futures.notice_price_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "buy",
+	// 	PositionSide: "long",
+	// 	Price: 66666,
+	// 	AutoOrder: lang.Lang("futures.no"),
+	// })
+	// pusher.FuturesListenKlineBase(notify.FuturesListenParams{
+	// 	Title: lang.Lang("futures.listen_kline_base_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	ChangePercent: 0.01,
+	// 	Price: 66666,
+	// 	Remarks: lang.Lang("futures.fast_up"),
+	// })
+	// pusher.FuturesListenKlineBase(notify.FuturesListenParams{
+	// 	Title: lang.Lang("futures.listen_kline_base_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	ChangePercent: 0.05,
+	// 	Price: 66666,
+	// 	Remarks: lang.Lang("futures.fast_down"),
+	// })
+	// pusher.FuturesListenKlineKc(notify.FuturesListenParams{
+	// 	Title: lang.Lang("futures.listen_keltner_channels_title"),
+	// 	PositionSide: "long",
+	// 	Symbol: "BTCUSDT",
+	// 	NowPrice: 66666,
+	// 	StopLossPrice: 66000,
+	// 	TargetHalfProfitPrice: 67000,
+	// 	TargetAllProfitPrice: 68000,
+	// 	DesiredPrice: 69000,
+	// })
+	// pusher.FuturesListenFundingRate(notify.FuturesListenParams{
+	// 	Title: lang.Lang("futures.listen_funding_rate_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	PositionSide: "long",
+	// 	FundingRate: 0.12,
+	// 	Price: 66666,
+	// 	Remarks: lang.Lang("futures.profit_by_funding_rate"),
+	// })
+	
+	// pusher.SpotOrder(notify.SpotOrderParams{
+	// 	Title: lang.Lang("spot.notice_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "buy",
+	// 	Price: 66666,
+	// 	Quantity: 1,
+	// 	Remarks: lang.Lang("spot.notice_auto_order"),
+	// 	Status: "success",
+	// 	Error: "",
+	// })
+	// pusher.SpotOrder(notify.SpotOrderParams{
+	// 	Title: lang.Lang("spot.new_coin_rush_notice_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "buy",
+	// 	Price: 66666,
+	// 	Quantity: 1,
+	// 	Remarks: lang.Lang("spot.new_coin_rush_buy"),
+	// 	Status: "success",
+	// 	Error: "",
+	// })
+	// pusher.SpotNotice(notify.SpotNoticeParams{
+	// 	Title: lang.Lang("spot.notice_price_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "buy",
+	// 	Price: 66666,
+	// 	AutoOrder: "yes",
+	// })
+	// pusher.SpotNotice(notify.SpotNoticeParams{
+	// 	Title: lang.Lang("spot.notice_price_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	Side: "sell",
+	// 	Price: 66666,
+	// 	AutoOrder: "no",
+	// })
+	// pusher.SpotListenKlineBase(notify.SpotListenParams{
+	// 	Title: lang.Lang("spot.kline_listen_base_title"),
+	// 	Symbol: "BTCUSDT",
+	// 	ChangePercent: 0.05,
+	// 	Price: 66666,
+	// 	Remarks: lang.Lang("spot.fast_down"),
+	// })
+	pusher.SpotListenKlineBase(notify.SpotListenParams{
+		Title: lang.Lang("spot.kline_listen_base_title"),
+		Symbol: "BTCUSDT",
+		ChangePercent: 0.05,
+		Price: 66666,
+		Remarks: lang.Lang("spot.fast_up"),
+	})
 }

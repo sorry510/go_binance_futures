@@ -2,8 +2,9 @@ package feature
 
 import (
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/feature/notify"
+	"go_binance_futures/lang"
 	"go_binance_futures/models"
+	"go_binance_futures/notify"
 	"go_binance_futures/utils"
 	"strconv"
 
@@ -27,19 +28,33 @@ func NoticeAndAutoOrder() {
 		nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
 		noticePrice, _ := strconv.ParseFloat(coin.NoticePrice, 64) // 预警价格
 		if (coin.HasNotice == 0) {
-			var autoOrderText = "否"
+			var autoOrderText = "no"
 			if coin.AutoOrder == 1 {
-				autoOrderText = "是"
+				autoOrderText = "yes"
 			}
 			if (nowPrice <= noticePrice && coin.Side == "buy") {
 				// 做多，价格低于预警价格，进行通知
 				canOrder = true
-				notify.NoticeFutureCoin(coin.Symbol, "做多", coin.NoticePrice, autoOrderText)
+				pusher.FuturesNotice(notify.FuturesNoticeParams{
+					Title: lang.Lang("futures.notice_price_title"),
+					Symbol: coin.Symbol,
+					Side: coin.Side,
+					PositionSide: "long",
+					Price: noticePrice,
+					AutoOrder: lang.Lang("futures." + autoOrderText),
+				})
 			}
 			if (nowPrice >= noticePrice && coin.Side == "sell") {
 				// 做空，价格高于预警价格，进行通知
 				canOrder = true
-				notify.NoticeFutureCoin(coin.Symbol, "做空", coin.NoticePrice, autoOrderText)
+				pusher.FuturesNotice(notify.FuturesNoticeParams{
+					Title: lang.Lang("futures.notice_price_title"),
+					Symbol: coin.Symbol,
+					Side: coin.Side,
+					PositionSide: "short",
+					Price: noticePrice,
+					AutoOrder: lang.Lang("futures." + autoOrderText),
+				})
 			}
 			if canOrder {
 				coin.HasNotice = 1
@@ -65,9 +80,26 @@ func NoticeAndAutoOrder() {
 				_, err := binance.BuyMarket(coin.Symbol, quantity, futures.PositionSideTypeLong)
 				if err != nil {
 					logs.Info("合约做多失败symbol:", coin.Symbol)
-					notify.BuyOrderFail(coin.Symbol, quantity, nowPrice, "做多", err.Error())
+					pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.open_notice_title"),
+						Symbol: coin.Symbol,
+						Side: "buy",
+						PositionSide: "long",
+						Price: nowPrice,
+						Quantity: quantity,
+						Status: "fail",
+						Error: err.Error(),
+					})
 				} else {
-					notify.BuyOrderSuccess(coin.Symbol, quantity, nowPrice, "做多")
+					pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.open_notice_title"),
+						Symbol: coin.Symbol,
+						Side: "buy",
+						PositionSide: "long",
+						Price: nowPrice,
+						Quantity: quantity,
+						Status: "success",
+					})
 					if (coin.ProfitPrice != "0") {
 						// 挂一个止盈单
 						profit_price_float64, _ := strconv.ParseFloat(coin.ProfitPrice, 64) // 交易金额
@@ -85,9 +117,26 @@ func NoticeAndAutoOrder() {
 				_, err := binance.SellMarket(coin.Symbol, quantity, futures.PositionSideTypeShort)
 				if err != nil {
 					logs.Info("合约做空失败symbol:", coin.Symbol)
-					notify.BuyOrderFail(coin.Symbol, quantity, nowPrice, "做空", err.Error())
+					pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.open_notice_title"),
+						Symbol: coin.Symbol,
+						Side: "sell",
+						PositionSide: "short",
+						Price: nowPrice,
+						Quantity: quantity,
+						Status: "fail",
+						Error: err.Error(),
+					})
 				} else {
-					notify.BuyOrderSuccess(coin.Symbol, quantity, nowPrice, "做空")
+					pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+						Title: lang.Lang("futures.open_notice_title"),
+						Symbol: coin.Symbol,
+						Side: "sell",
+						PositionSide: "short",
+						Price: nowPrice,
+						Quantity: quantity,
+						Status: "success",
+					})
 					if (coin.ProfitPrice != "0") {
 						// 挂一个止盈单
 						profit_price_float64, _ := strconv.ParseFloat(coin.ProfitPrice, 64) // 交易金额
