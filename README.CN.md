@@ -206,6 +206,9 @@ bee run
 bee pack -be GOOS=windows
 ```
 
+## web ui 开发
+> https://github.com/sorry510/go_binance_futures_ui
+
 ### TODO
 
 - [X] 完成新币抢购功能

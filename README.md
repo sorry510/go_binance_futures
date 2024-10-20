@@ -279,3 +279,6 @@ bee run
 ```
 bee pack -be GOOS=windows
 ```
+
+## web ui
+> https://github.com/sorry510/go_binance_futures_ui
