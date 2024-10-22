@@ -150,16 +150,16 @@ func NoticeAndAutoOrder() {
 				if err != nil {
 					logs.Error("购买失败symbol:", coin.Symbol)
 					logs.Error("err:", err.Error())
-					pusher.SpotOrder(notify.SpotOrderParams{
-						Title: lang.Lang("spot.notice_title"),
-						Symbol: coin.Symbol,
-						Side: "sell",
-						Price: nowPrice,
-						Quantity: quantity,
-						Remarks: lang.Lang("spot.notice_auto_order"),
-						Status: "fail",
-						Error: err.Error(),
-					})
+					// pusher.SpotOrder(notify.SpotOrderParams{
+					// 	Title: lang.Lang("spot.notice_title"),
+					// 	Symbol: coin.Symbol,
+					// 	Side: "sell",
+					// 	Price: nowPrice,
+					// 	Quantity: quantity,
+					// 	Remarks: lang.Lang("spot.notice_auto_order"),
+					// 	Status: "fail",
+					// 	Error: err.Error(),
+					// })
 				} else {
 					// 购买成功
 					pusher.SpotOrder(notify.SpotOrderParams{
@@ -194,17 +194,17 @@ func NoticeAndAutoOrder() {
 			if (coin.Side == "sell") {
 				_, err := binance.SellMarket(coin.Symbol, quantity)
 				if err != nil {
-					logs.Info("卖出失败symbol:", coin.Symbol)
-					
-					pusher.SpotOrder(notify.SpotOrderParams{
-						Title: lang.Lang("spot.notice_title"),
-						Symbol: coin.Symbol,
-						Side: "sell",
-						Quantity: quantity,
-						Remarks: lang.Lang("spot.notice_auto_order"),
-						Status: "fail",
-						Error: err.Error(),
-					})
+					logs.Error("卖出失败symbol:", coin.Symbol)
+					logs.Error("err:", err.Error())
+					// pusher.SpotOrder(notify.SpotOrderParams{
+					// 	Title: lang.Lang("spot.notice_title"),
+					// 	Symbol: coin.Symbol,
+					// 	Side: "sell",
+					// 	Quantity: quantity,
+					// 	Remarks: lang.Lang("spot.notice_auto_order"),
+					// 	Status: "fail",
+					// 	Error: err.Error(),
+					// })
 				} else {
 					// 卖出成功
 					price_float64, _:= strconv.ParseFloat(resPrice[0].Price, 64) // 卖单数量
@@ -242,16 +242,16 @@ func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.Cr
 	if err != nil {
 		logs.Error("购买失败symbol:", symbol)
 		logs.Error("err:", err.Error())
-		pusher.SpotOrder(notify.SpotOrderParams{
-			Title: lang.Lang("spot.new_coin_rush_notice_title"),
-			Symbol: symbol,
-			Side: "buy",
-			Price: buyPrice,
-			Quantity: quantity,
-			Remarks: lang.Lang("spot.new_coin_rush_buy"),
-			Status: "fail",
-			Error: err.Error(),
-		})
+		// pusher.SpotOrder(notify.SpotOrderParams{
+		// 	Title: lang.Lang("spot.new_coin_rush_notice_title"),
+		// 	Symbol: symbol,
+		// 	Side: "buy",
+		// 	Price: buyPrice,
+		// 	Quantity: quantity,
+		// 	Remarks: lang.Lang("spot.new_coin_rush_buy"),
+		// 	Status: "fail",
+		// 	Error: err.Error(),
+		// })
 	} else {
 		// 购买成功
 		pusher.SpotOrder(notify.SpotOrderParams{
@@ -279,15 +279,15 @@ func trySellMarket(symbol string, quantity string, stepSize string) (res *spot_a
 	if err != nil {
 		logs.Error("卖出失败symbol:", symbol)
 		logs.Error("err:", err.Error())
-		pusher.SpotOrder(notify.SpotOrderParams{
-			Title: lang.Lang("spot.new_coin_rush_notice_title"),
-			Symbol: symbol,
-			Side: "sell",
-			Quantity: quantity_float64,
-			Remarks: lang.Lang("spot.new_coin_rush_sell"),
-			Status: "fail",
-			Error: err.Error(),
-		})
+		// pusher.SpotOrder(notify.SpotOrderParams{
+		// 	Title: lang.Lang("spot.new_coin_rush_notice_title"),
+		// 	Symbol: symbol,
+		// 	Side: "sell",
+		// 	Quantity: quantity_float64,
+		// 	Remarks: lang.Lang("spot.new_coin_rush_sell"),
+		// 	Status: "fail",
+		// 	Error: err.Error(),
+		// })
 	} else {
 		// 卖出成功
 		price_float64, _:= strconv.ParseFloat(res.Price, 64) // 卖单数量
