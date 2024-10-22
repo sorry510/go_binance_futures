@@ -110,16 +110,16 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		logs.Info("购买失败symbol:", symbol)
 		logs.Info("err:", err.Error())
 		
-		pusher.FuturesOpenOrder(notify.FuturesOrderParams{
-			Title: lang.Lang("futures.new_coin_rush_notice_title"),
-			Symbol: symbol,
-			Side: coin.Side,
-			PositionSide: positionSide,
-			Price: buyPrice,
-			Quantity: quantity,
-			Status: "fail",
-			Error: err.Error(),
-		})
+		// pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+		// 	Title: lang.Lang("futures.new_coin_rush_notice_title"),
+		// 	Symbol: symbol,
+		// 	Side: coin.Side,
+		// 	PositionSide: positionSide,
+		// 	Price: buyPrice,
+		// 	Quantity: quantity,
+		// 	Status: "fail",
+		// 	Error: err.Error(),
+		// })
 	} else {
 		pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 			Title: lang.Lang("futures.new_coin_rush_notice_title"),
