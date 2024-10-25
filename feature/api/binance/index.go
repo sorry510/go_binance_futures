@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/adshao/go-binance/v2/delivery"
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/adapter/logs"
 	"github.com/beego/beego/v2/client/orm"
@@ -18,12 +19,15 @@ var api_secret, _ = config.String("binance::api_secret")
 var proxy_url, _ = config.String("binance::proxy_url")
 
 var futuresClient *futures.Client
+var deliveryClient *delivery.Client
 
 func init() {
 	if proxy_url == "" {
 		futuresClient = futures.NewClient(api_key, api_secret)
+		deliveryClient = delivery.NewClient(api_key, api_secret)
 	} else {
 		futuresClient = futures.NewProxiedClient(api_key, api_secret, proxy_url)
+		deliveryClient = delivery.NewClient(api_key, api_secret) // 暂不支持代理
 	}
 }
 
