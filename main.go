@@ -63,13 +63,14 @@ func main() {
 		// feature.GoTestApi()
 		// spot.TryRush()
 		// feature.GoTestFeature()
-		feature.GoTestLine()
 		// feature.UpdateSymbolsFundingRates()
 		// feature.ListenCoinFundingRate()
 		// feature.GoTestOrder()
 		// feature.GoTestUtil()
 		// feature.GoTestMarketOrder()
 		// feature.GoTestNotify()
+		// feature.GoTestLine()
+		feature.GoTestDeliveryAccount()
 		return
 	}
 	
