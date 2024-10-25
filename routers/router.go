@@ -34,6 +34,8 @@ func init() {
 	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll") // order list 和 删除所有 order
 	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit") // config get and edit
 	
+	web.Router("/futures/account", &controllers.AccountController{}, "get:GetBinanceFuturesAccount") // 获取合约账户信息
+	
 	web.Router("/start", &controllers.CommandController{}, "post:Start") // start
 	web.Router("/stop", &controllers.CommandController{}, "post:Stop") // stop
 	web.Router("/pull", &controllers.CommandController{}, "post:GitPull") // git pull
