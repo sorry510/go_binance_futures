@@ -2,7 +2,6 @@ package binance
 
 import (
 	"context"
-	"go_binance_futures/utils"
 	"sort"
 	"strconv"
 
@@ -46,7 +45,6 @@ func GetFuturesAccount() (res *futures.Account, err error) {
 		logs.Error(err)
 		return nil, err
 	}
-	logs.Info(utils.ToJson(res))
 	return res, err
 }
 
