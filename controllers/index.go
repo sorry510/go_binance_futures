@@ -16,7 +16,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 	var coinMaxCount, _ = config.String("coin::max_count")
 	var coinOrderType, _ = config.String("coin::order_type")
 	var coinAllowLong, _ = config.String("coin::allow_long")
-	var coinAllShort, _ = config.String("coin::allow_short")
+	var coinAllowShort, _ = config.String("coin::allow_short")
 	
 	var tradeFutureEnable, _ = config.String("trade::future_enable")
 	var tradeStrategyTrade, _ = config.String("trade::strategy_trade")
@@ -40,7 +40,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"coinMaxCount": coinMaxCount,
 			"coinOrderType": coinOrderType,
 			"coinAllowLong": coinAllowLong,
-			"coinAllShort": coinAllShort,
+			"coinAllowShort": coinAllowShort,
 			
 			"tradeFutureEnable": tradeFutureEnable,
 			"tradeStrategyTrade": tradeStrategyTrade,

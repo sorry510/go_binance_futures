@@ -95,43 +95,73 @@ func calculateAverage(values []float64) float64 {
 	return sum / float64(len(values))
 }
 
-// CalculateRSI 计算给定价格序列的 RSI 值
+// 所选周期 = 14
+// 平均收益 = 前 14 天所有正向差额之和 / 14
+// 平均损失 = 前 14 天所有负向差额之和 / 14
+// RS = 平均收益 / 平均损失
+// RSI = 100 - (100 / (1 + RS))
+// 对于后续周期，可以使用平滑移动平均法来更新平均收益和平均损失。
+// 新平均收益 = [(前一个周期的平均收益 × (周期 - 1)) + 当前周期的收益] / 周期
+// 新平均损失 = [(前一个周期的平均损失 × (周期 - 1)) + 当前周期的损失] / 周期
 func CalculateRSI(prices []float64, period int) ([]float64, error) {
-	if len(prices) < period+1 {
-		return nil, fmt.Errorf("insufficient data for RSI calculation (need at least %d periods, got %d)", period, len(prices))
+	if len(prices) < period {
+		return nil, fmt.Errorf("price slice too short for period %d", period)
 	}
 
+	prices = utils.ReverseArray(prices) // 时间由远到近
+	
+	// 初始化收益和损失切片
+	gains := make([]float64, len(prices)-1)
+	losses := make([]float64, len(prices)-1)
+
+	// 计算每日的差额
+	for i := 1; i < len(prices); i++ {
+		diff := prices[i] - prices[i-1]
+		if diff > 0 {
+			gains[i-1] = diff
+		} else {
+			losses[i-1] = math.Abs(diff)
+		}
+	}
+
+	// 计算前 period 天的平均收益和平均损失
+	var sumGains, sumLosses float64
+	for i := 0; i < period; i++ {
+		sumGains += gains[i]
+		sumLosses += losses[i]
+	}
+
+	avgGain := sumGains / float64(period)
+	avgLoss := sumLosses / float64(period)
+
+	// 初始化 RSI 切片
 	rsiValues := make([]float64, len(prices)-period+1)
 
-	for i := period; i <= len(prices)-1; i++ {
-		// 计算前 period 个周期的平均收益和平均损失
-		gains := make([]float64, period)
-		losses := make([]float64, period)
+	// 计算第一个 RSI 值
+	if avgLoss == 0 {
+		rsiValues[0] = 100.0
+	} else {
+		rs := avgGain / avgLoss
+		rsiValues[0] = 100 - (100 / (1 + rs))
+	}
 
-		for j := i - period + 1; j <= i; j++ {
-			change := prices[j] - prices[j-1]
-			if change > 0 {
-				gains[j-(i-period+1)] = change
-			} else {
-				losses[j-(i-period+1)] = math.Abs(change)
-			}
-		}
+	// 计算后续的 RSI 值
+	for i := period; i < len(prices); i++ {
+		newGain := gains[i-1]
+		newLoss := losses[i-1]
 
-		averageGain := sum(gains) / float64(period)
-		averageLoss := sum(losses) / float64(period)
+		avgGain = ((avgGain * float64(period - 1)) + newGain) / float64(period)
+		avgLoss = ((avgLoss * float64(period - 1)) + newLoss) / float64(period)
 
-		// 防止除以零，当所有收益或损失为零时，使用 100 或 0 来计算 RSI
-		if averageLoss == 0 {
-			rsiValues[i-period+1] = 100
-		} else if averageGain == 0 {
-			rsiValues[i-period+1] = 0
+		if avgLoss == 0 {
+			rsiValues[i-period+1] = 100.0
 		} else {
-			rsi := 100 * (averageGain / (averageGain + averageLoss))
-			rsiValues[i-period+1] = rsi
+			rs := avgGain / avgLoss
+			rsiValues[i-period+1] = 100 - (100 / (1 + rs))
 		}
 	}
 
-	return rsiValues, nil
+	return utils.ReverseArray(rsiValues), nil
 }
 
 // sum 计算浮点数切片的总和
