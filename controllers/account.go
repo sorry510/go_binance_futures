@@ -60,7 +60,8 @@ func (ctrl *AccountController) GetBinanceFuturesPositions() {
 	
 	var positions []*futures.PositionRisk
 	for _, position := range allPositions {
-		if position.PositionAmt == "0" {
+		positionAmt, _ := strconv.ParseFloat(position.PositionAmt, 64)
+		if positionAmt < 0.0000001 {
 			continue
 		}
 		positions = append(positions, position)
