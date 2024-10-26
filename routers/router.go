@@ -35,6 +35,8 @@ func init() {
 	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit") // config get and edit
 	
 	web.Router("/futures/account", &controllers.AccountController{}, "get:GetBinanceFuturesAccount") // 获取合约账户信息
+	web.Router("/futures/positions", &controllers.AccountController{}, "get:GetBinanceFuturesPositions") // 获取合约持仓信息
+	web.Router("/futures/open-orders", &controllers.AccountController{}, "get:GetBinanceFuturesOpenOrders") // 获取合约挂单信息
 	
 	web.Router("/start", &controllers.CommandController{}, "post:Start") // start
 	web.Router("/stop", &controllers.CommandController{}, "post:Stop") // stop
