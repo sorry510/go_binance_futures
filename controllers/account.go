@@ -50,13 +50,20 @@ func (ctrl *AccountController) GetBinanceFuturesAccount() {
 }
 
 func (ctrl *AccountController) GetBinanceFuturesPositions() {
-	positions, err := binance.GetPosition()
-	
+	allPositions, err := binance.GetPosition()
 	if err != nil {
 		ctrl.Ctx.Resp(map[string]interface{} {
 			"code": 400,
 			"msg": err.Error(),
 		})
+	}
+	
+	var positions []*futures.PositionRisk
+	for _, position := range allPositions {
+		if position.PositionAmt == "0" {
+			continue
+		}
+		positions = append(positions, position)
 	}
 
 	ctrl.Ctx.Resp(map[string]interface{} {
