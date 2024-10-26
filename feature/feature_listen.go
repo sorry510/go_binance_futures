@@ -20,7 +20,7 @@ func ListenCoin() {
 	
 	nowTime := time.Now().Unix()
 	for _, coin := range coins {
-		logs.Info("监听合约币种:", coin.Symbol)
+		logs.Info("listen futures:", coin.Symbol)
 		if nowTime - coin.LastNoticeTime < 60 * 1000 * coin.NoticeLimitMin {
 			// 通知频率限制
 			continue
@@ -34,7 +34,7 @@ func ListenCoin() {
 }
 
 func klineBaseListen(coin models.ListenSymbols) {
-	logs.Info("listen kline_base")
+	// logs.Info("listen type: kline_base")
 	kline_1, err1 := binance.GetKlineData(coin.Symbol, coin.KlineInterval, 10)
 	if err1 != nil {
 		logs.Error("k线错误, 合约币种是:", coin.Symbol)
@@ -82,7 +82,7 @@ func klineBaseListen(coin models.ListenSymbols) {
 }
 
 func klineKcListen(coin models.ListenSymbols) {
-	logs.Info("listen kline_kc")
+	// logs.Info("listen type: kline_kc")
 	
 	internals := []string{"15m", "1h", "4h", "1d", "3d", "1w", "1M"}
 	symbol := coin.Symbol

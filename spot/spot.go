@@ -311,7 +311,7 @@ func ListenCoin() {
 	o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins) // 通知币列表
 	
 	for _, coin := range coins {
-		logs.Info("监听现货币种:", coin.Symbol)
+		logs.Info("listen spot:", coin.Symbol)
 		kline_1, err1 := binance.GetKlineData(coin.Symbol, coin.KlineInterval, 10)
 		if err1 != nil {
 			logs.Error("k线错误, 现货币种是:", coin.Symbol)

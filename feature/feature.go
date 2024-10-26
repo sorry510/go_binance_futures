@@ -326,7 +326,7 @@ func StartTrade() {
 	/*************************************************检查当前仓位数量 start************************************************************ */
 	allMyCount := positionCount + len(allOpenOrders)
 	if allMyCount >= max_count_int {
-		logs.Info("当前仓位+挂单数量为%d, 已经达到当前仓位最大数量%d,暂时无法开启新的仓位", allMyCount, max_count_int)
+		logs.Info("position+open order: %d, is over max%d, stop open new order", allMyCount, max_count_int)
 		return
 	}
 	/*************************************************检查当前仓位数量  end************************************************************ */
@@ -334,7 +334,7 @@ func StartTrade() {
 	
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
 	if allow_long != "1" && allow_short != "1" {
-		logs.Info("当前策略不允许开多和开空")
+		logs.Info("this stratgy don't allow long and all short")
 		return
 	}
 	
