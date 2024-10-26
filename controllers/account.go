@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"go_binance_futures/feature/api/binance"
+	"math"
 	"strconv"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -33,7 +34,9 @@ func (ctrl *AccountController) GetBinanceFuturesAccount() {
 	
 	var positions []*futures.AccountPosition
 	for _, position := range account.Positions {
-		if position.PositionAmt == "0" {
+		positionAmt, _ := strconv.ParseFloat(position.PositionAmt, 64)
+		positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
+		if positionAmtFloatAbs < 0.0000001 {
 			continue
 		}
 		positions = append(positions, position)
@@ -61,7 +64,8 @@ func (ctrl *AccountController) GetBinanceFuturesPositions() {
 	var positions []*futures.PositionRisk
 	for _, position := range allPositions {
 		positionAmt, _ := strconv.ParseFloat(position.PositionAmt, 64)
-		if positionAmt < 0.0000001 {
+		positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
+		if positionAmtFloatAbs < 0.0000001 {
 			continue
 		}
 		positions = append(positions, position)
