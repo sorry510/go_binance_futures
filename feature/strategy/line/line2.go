@@ -37,10 +37,10 @@ func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, can
 		return false, false
 	}
 	// logs.Info(symbol, Kdj(ema6h_3, ema6h_7, 4), Kdj(ema6h_7, ema6h_3, 4), utils.IsDesc(ema6h_3[0:2]), rsi6[1], rsi14[1])
-	if Kdj(ema6h_3, ema6h_7, 4) && Kdj(ema6h_7, ema6h_15, 4) && utils.IsDesc(ema6h_3[0:2]) && rsi6[1] < 80 && rsi14[1] < 75 { // 1天之内发生过金叉, rsi 没有超买
+	if Kdj(ema6h_3, ema6h_7, 4) && Kdj(ema6h_7, ema6h_15, 4) && utils.IsDesc(ema6h_3[0:2]) && rsi6[0] < 80 && rsi14[0] < 75 { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		return true, false
-	} else if Kdj(ema6h_7, ema6h_3, 4) && Kdj(ema6h_15, ema6h_7, 4) && utils.IsAsc(ema6h_3[0:2]) && rsi6[1] < 80 && rsi14[1] < 75 {
+	} else if Kdj(ema6h_7, ema6h_3, 4) && Kdj(ema6h_15, ema6h_7, 4) && utils.IsAsc(ema6h_3[0:2]) && rsi6[0] < 80 && rsi14[0] < 75 {
 		return false, true
 	}
 	return false, false

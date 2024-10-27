@@ -100,6 +100,7 @@ func (pusher Slack) FuturesOpenOrder(params FuturesOrderParams) {
 >{futures.position_side}：%s
 >{futures.price}：%f
 >{futures.quantity}：%f
+>{futures.leverage}：%f
 >{futures.status}：%s
 >{futures.error}：%s
 >{futures.time}：%s
@@ -112,6 +113,7 @@ func (pusher Slack) FuturesOpenOrder(params FuturesOrderParams) {
 		lang.Lang("futures." + params.PositionSide),
     params.Price,
     params.Quantity,
+    params.Leverage,
     lang.Lang("futures." + params.Status),
     params.Error,
 		nowTime(),
@@ -126,6 +128,7 @@ func (pusher Slack) FuturesCloseOrder(params FuturesOrderParams) {
 >{futures.position_side}：%s
 >{futures.price}：%f
 >{futures.quantity}：%f
+>{futures.leverage}：%f
 >{futures.profit}：%f
 >{futures.remarks}：%s
 >{futures.status}：%s
@@ -140,6 +143,7 @@ func (pusher Slack) FuturesCloseOrder(params FuturesOrderParams) {
 		lang.Lang("futures." + params.PositionSide),
     params.Price,
     params.Quantity,
+    params.Leverage,
     params.Profit,
     params.Remarks,
     lang.Lang("futures." + params.Status),

@@ -1,17 +1,21 @@
 package feature
 
 import (
+	"encoding/json"
 	"fmt"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/lang"
+	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
 	"time"
 
 	"github.com/adshao/go-binance/v2/futures"
+	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 )
 
@@ -47,14 +51,15 @@ func GoTestLine() {
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
 		symbol := coin.Symbol
-		// if symbol != "BTCUSDT" {
-		// 	continue
-		// }
+		if symbol != "BTCUSDT" {
+			continue
+		}
 		
-		// interval := "1d"
-		// limit := 150
-		// lines, _ := binance.GetKlineData(symbol, interval, limit)
-		// // closePrices := line.GetLineClosePrices(lines)
+		interval := "1d"
+		limit := 150
+		lines, _ := binance.GetKlineData(symbol, interval, limit)
+		closePrices := line.GetLineClosePrices(lines)
+		
 		// high, low, close := line.GetLineFloatPrices(lines)
 		// logs.Info(high[0], low[0], close[0])
 		
@@ -67,24 +72,9 @@ func GoTestLine() {
 		// upper2, _, lower2 := line.CalculateKeltnerChannels(high, low, close, 50, 3.75)
 		// // logs.Info(upper[0], ma[0], lower[0])
 		
+		up, mb, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
+		logs.Info(up[0], mb[0], dn[0])
 		
-		// ema3, _ := line.CalculateExponentialMovingAverage(closePrices, 3)
-		// ema7, _ := line.CalculateExponentialMovingAverage(closePrices, 7)
-		// ema15, _ := line.CalculateExponentialMovingAverage(closePrices, 15)
-		// ema30, _ := line.CalculateExponentialMovingAverage(closePrices, 30)
-		// logs.Info(ema3[0], ema7[0], ema15[0], ema30[0])
-		// logs.Info(ma50, high[0], low[0], close[0])
-		
-		
-		
-		// mb, up, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
-		// logs.Info(mb[0], up[0], dn[0], len(mb))
-		
-		// closePrices = utils.ReverseArray(closePrices)
-		// rsi6, _ := line.CalculateRSI(closePrices, 6)
-		// rsi14, _ := line.CalculateRSI(closePrices, 14)
-		// logs.Info(rsi6[1])
-		// logs.Info(rsi14[1])
 		
 		canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
 		// logs.Info(symbol, canLang, canShort)
@@ -92,9 +82,6 @@ func GoTestLine() {
 			logs.Info(symbol, canLang, canShort)
 		}
 		// logs.Info("count:", index + 1)
-		
-		// lineS := line.TradeLine3{}
-		// logs.Info(symbol, lineS.MarketReversal(symbol, "LONG"), lineS.MarketReversal(symbol, "SHORT"))
 	}
 	
 	logs.Info("end test line")
@@ -152,19 +139,20 @@ func GoTestMarketOrder() {
     	}
     	if position.Symbol == "BELUSDT" {
 			if position.PositionSide == "SHORT" {
-				result, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				_, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
-					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, result.AvgPrice)
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice)
 					
-					avgPrice, _ := strconv.ParseFloat(result.AvgPrice, 64)
+					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
 						Title: lang.Lang("futures.close_notice_title"),
 						Symbol: position.Symbol,
 						Side: "buy",
 						PositionSide: "short",
-						Price: avgPrice,
+						Price: markPrice,
 						Quantity: positionAmtFloat,
+						Leverage: 10,
 						Profit: unRealizedProfit,
 						Remarks: lang.Lang("futures.stop_loss"),
 						Status: "success",
@@ -176,6 +164,7 @@ func GoTestMarketOrder() {
 						Side: "buy",
 						PositionSide: "short",
 						Quantity: positionAmtFloat,
+						Leverage: 10,
 						Profit: unRealizedProfit,
 						Remarks: lang.Lang("futures.stop_loss"),
 						Status: "fail",
@@ -209,6 +198,7 @@ func GoTestNotify() {
 	// 	PositionSide: "long",
 	// 	Price: 66666,
 	// 	Quantity: 1,
+	//  Leverage: 10,
 	// 	Status: "success",
 	// })
 	// pusher.FuturesOpenOrder(notify.FuturesOrderParams{
@@ -218,6 +208,7 @@ func GoTestNotify() {
 	// 	PositionSide: "short",
 	// 	Price: 66666,
 	// 	Quantity: 1,
+	//  Leverage: 10,
 	// 	Status: "fail",
 	// 	Error: "error message error message error message error message",
 	// })
@@ -228,6 +219,7 @@ func GoTestNotify() {
 	// 	PositionSide: "short",
 	// 	Price: 66666,
 	// 	Quantity: 1,
+	//  Leverage: 10,
 	// 	Profit: 8.2,
 	// 	Remarks: lang.Lang("futures.wind_of_change"),
 	// 	Status: "success",
@@ -238,6 +230,7 @@ func GoTestNotify() {
 	// 	Side: "sell",
 	// 	PositionSide: "long",
 	// 	Quantity: 1,
+	//  Leverage: 10,
 	// 	Profit: 8.2,
 	// 	Remarks: "",
 	// 	Status: "fail",
@@ -340,4 +333,23 @@ func GoTestNotify() {
 		Price: 66666,
 		Remarks: lang.Lang("spot.fast_up"),
 	})
+}
+
+func GoTestListen() {
+	o := orm.NewOrm()
+	var coins []models.ListenSymbols
+	o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).All(&coins) // 通知币列表
+	
+	for _, coin := range coins {
+		if coin.Symbol != "WLDUSDT" {
+			continue
+		}
+		var config technology.TechnologyConfig
+		err := json.Unmarshal([]byte(coin.Technology), &config)
+		if err != nil {
+			fmt.Println("Error unmarshalling JSON:", err)
+			return
+		}
+		logs.Info(config)
+	}
 }

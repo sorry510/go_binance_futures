@@ -20,6 +20,7 @@
     "fail": "fail",
     "price": "price",
     "quantity": "quantity",
+    "leverage": "leverage",
     "status": "status",
     "error": "error",
     "remarks": "remarks",

@@ -80,6 +80,7 @@ func (pusher DingDing) FuturesOpenOrder(params FuturesOrderParams) {
 #### **{futures.position_side}**：<font color="#008000">%s</font>
 #### **{futures.price}**：<font color="#008000">%f</font>
 #### **{futures.quantity}**：<font color="#008000">%f</font>
+#### **{futures.leverage}**：<font color="#008000">%f</font>
 #### **{futures.status}**：<font color="%s">%s</font>
 #### **{futures.error}**：<font color="#FF0000">%s</font>
 #### **{futures.time}**：%s
@@ -92,6 +93,7 @@ func (pusher DingDing) FuturesOpenOrder(params FuturesOrderParams) {
 		lang.Lang("futures." + params.PositionSide),
     params.Price,
     params.Quantity,
+    params.Leverage,
     getStatusColor(params.Status), lang.Lang("futures." + params.Status),
     params.Error,
 		nowTime(),
@@ -106,6 +108,7 @@ func (pusher DingDing) FuturesCloseOrder(params FuturesOrderParams) {
 #### **{futures.position_side}**：<font color="#008000">%s</font>
 #### **{futures.price}**：<font color="#008000">%f</font>
 #### **{futures.quantity}**：<font color="#008000">%f</font>
+#### **{futures.leverage}**：<font color="#008000">%f</font>
 #### **{futures.profit}**：<font color="#008000">%f</font>
 #### **{futures.remarks}**：<font color="#FF0000">%s</font>
 #### **{futures.status}**：<font color="%s">%s</font>
@@ -120,6 +123,7 @@ func (pusher DingDing) FuturesCloseOrder(params FuturesOrderParams) {
 		lang.Lang("futures." + params.PositionSide),
     params.Price,
     params.Quantity,
+    params.Leverage,
     params.Profit,
     params.Remarks,
     getStatusColor(params.Status), lang.Lang("futures." + params.Status),
