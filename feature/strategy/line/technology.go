@@ -53,6 +53,8 @@ func CalculateBollingerBands(clonePrices []float64, period int, stdDevMultiplier
 	if len(clonePrices) < period {
 		return nil, nil, nil, fmt.Errorf("insufficient data for period %d", period)
 	}
+	
+	clonePrices = utils.ReverseArray(clonePrices) // 时间由远到近
 
 	// Calculate the simple moving average (SMA) as the middle band (MB)
 	mb = make([]float64, len(clonePrices)-period+1)
@@ -83,7 +85,7 @@ func CalculateBollingerBands(clonePrices []float64, period int, stdDevMultiplier
 		dn[i] = mb[i] - stdDevMultiplier*sd[i]
 	}
 
-	return up, mb, dn, nil
+	return utils.ReverseArray(up), utils.ReverseArray(mb), utils.ReverseArray(dn), nil
 }
 
 // 平均数
@@ -100,7 +102,7 @@ func calculateAverage(values []float64) float64 {
 // 平均损失 = 前 14 天所有负向差额之和 / 14
 // RS = 平均收益 / 平均损失
 // RSI = 100 - (100 / (1 + RS))
-// 对于后续周期，可以使用平滑移动平均法来更新平均收益和平均损失。
+// 对于后续 RSI 周期，可以使用平滑移动平均法来更新平均收益和平均损失。
 // 新平均收益 = [(前一个周期的平均收益 × (周期 - 1)) + 当前周期的收益] / 周期
 // 新平均损失 = [(前一个周期的平均损失 × (周期 - 1)) + 当前周期的损失] / 周期
 func CalculateRSI(prices []float64, period int) ([]float64, error) {

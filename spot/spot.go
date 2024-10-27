@@ -93,9 +93,10 @@ func TryRush() {
 func NoticeAndAutoOrder() {
 	o := orm.NewOrm()
 	var coins []models.NoticeSymbols
-	o.QueryTable("notice_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins) // 通知币列表
+	o.QueryTable("notice_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).Filter("has_notice", 0).All(&coins) // 通知币列表
 	
 	for _, coin := range coins {
+		logs.Info("notice_futures: ", coin.Symbol)
 		resPrice, errPrice := binance.GetTickerPrice(coin.Symbol)
 		if errPrice != nil {
 			logs.Info("无法进行通知, 还未上线此币种: ", coin.Symbol)

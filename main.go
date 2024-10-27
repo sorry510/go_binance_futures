@@ -69,8 +69,9 @@ func main() {
 		// feature.GoTestUtil()
 		// feature.GoTestMarketOrder()
 		// feature.GoTestNotify()
-		feature.GoTestLine()
 		// feature.GoTestDeliveryAccount()
+		feature.GoTestListen()
+		// feature.GoTestLine()
 		return
 	}
 	

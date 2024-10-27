@@ -16,9 +16,10 @@ import (
 func NoticeAndAutoOrder() {
 	o := orm.NewOrm()
 	var coins []models.NoticeSymbols
-	o.QueryTable("notice_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).All(&coins) // 通知币列表
+	o.QueryTable("notice_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).Filter("has_notice", 0).All(&coins) // 通知币列表
 	
 	for _, coin := range coins {
+		logs.Info("notice_futures: ", coin.Symbol)
 		resPrice, errPrice := binance.GetTickerPrice(coin.Symbol)
 		if errPrice != nil {
 			logs.Info("无法进行通知, 还未上线此币种: ", coin.Symbol)
@@ -27,40 +28,38 @@ func NoticeAndAutoOrder() {
 		var canOrder = false
 		nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
 		noticePrice, _ := strconv.ParseFloat(coin.NoticePrice, 64) // 预警价格
-		if (coin.HasNotice == 0) {
-			var autoOrderText = "no"
-			if coin.AutoOrder == 1 {
-				autoOrderText = "yes"
-			}
-			if (nowPrice <= noticePrice && coin.Side == "buy") {
-				// 做多，价格低于预警价格，进行通知
-				canOrder = true
-				pusher.FuturesNotice(notify.FuturesNoticeParams{
-					Title: lang.Lang("futures.notice_price_title"),
-					Symbol: coin.Symbol,
-					Side: coin.Side,
-					PositionSide: "long",
-					Price: noticePrice,
-					AutoOrder: lang.Lang("futures." + autoOrderText),
-				})
-			}
-			if (nowPrice >= noticePrice && coin.Side == "sell") {
-				// 做空，价格高于预警价格，进行通知
-				canOrder = true
-				pusher.FuturesNotice(notify.FuturesNoticeParams{
-					Title: lang.Lang("futures.notice_price_title"),
-					Symbol: coin.Symbol,
-					Side: coin.Side,
-					PositionSide: "short",
-					Price: noticePrice,
-					AutoOrder: lang.Lang("futures." + autoOrderText),
-				})
-			}
-			if canOrder {
-				coin.HasNotice = 1
-				coin.Enable = 0 // 更新为关闭
-				orm.NewOrm().Update(&coin)
-			}
+		var autoOrderText = "no"
+		if coin.AutoOrder == 1 {
+			autoOrderText = "yes"
+		}
+		if (nowPrice <= noticePrice && coin.Side == "buy") {
+			// 做多，价格低于预警价格，进行通知
+			canOrder = true
+			pusher.FuturesNotice(notify.FuturesNoticeParams{
+				Title: lang.Lang("futures.notice_price_title"),
+				Symbol: coin.Symbol,
+				Side: coin.Side,
+				PositionSide: "long",
+				Price: noticePrice,
+				AutoOrder: lang.Lang("futures." + autoOrderText),
+			})
+		}
+		if (nowPrice >= noticePrice && coin.Side == "sell") {
+			// 做空，价格高于预警价格，进行通知
+			canOrder = true
+			pusher.FuturesNotice(notify.FuturesNoticeParams{
+				Title: lang.Lang("futures.notice_price_title"),
+				Symbol: coin.Symbol,
+				Side: coin.Side,
+				PositionSide: "short",
+				Price: noticePrice,
+				AutoOrder: lang.Lang("futures." + autoOrderText),
+			})
+		}
+		if canOrder {
+			coin.HasNotice = 1
+			coin.Enable = 0 // 更新为关闭
+			orm.NewOrm().Update(&coin)
 		}
 		if coin.AutoOrder == 1 && canOrder {
 			// 修改仓位模式
@@ -87,6 +86,7 @@ func NoticeAndAutoOrder() {
 						PositionSide: "long",
 						Price: nowPrice,
 						Quantity: quantity,
+						Leverage: leverage_float64,
 						Status: "fail",
 						Error: err.Error(),
 					})
@@ -98,6 +98,7 @@ func NoticeAndAutoOrder() {
 						PositionSide: "long",
 						Price: nowPrice,
 						Quantity: quantity,
+						Leverage: leverage_float64,
 						Status: "success",
 					})
 					if (coin.ProfitPrice != "0") {
@@ -124,6 +125,7 @@ func NoticeAndAutoOrder() {
 						PositionSide: "short",
 						Price: nowPrice,
 						Quantity: quantity,
+						Leverage: leverage_float64,
 						Status: "fail",
 						Error: err.Error(),
 					})
@@ -135,6 +137,7 @@ func NoticeAndAutoOrder() {
 						PositionSide: "short",
 						Price: nowPrice,
 						Quantity: quantity,
+						Leverage: leverage_float64,
 						Status: "success",
 					})
 					if (coin.ProfitPrice != "0") {

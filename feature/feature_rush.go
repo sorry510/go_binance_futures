@@ -117,6 +117,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		// 	PositionSide: positionSide,
 		// 	Price: buyPrice,
 		// 	Quantity: quantity,
+		//  Leverage: leverage_float64,
 		// 	Status: "fail",
 		// 	Error: err.Error(),
 		// })
@@ -128,6 +129,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 			PositionSide: positionSide,
 			Price: buyPrice,
 			Quantity: quantity,
+			Leverage: leverage_float64,
 			Status: "success",
 		})
 	}

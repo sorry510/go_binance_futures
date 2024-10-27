@@ -91,6 +91,7 @@ type ListenSymbols struct {
 	LastNoticeTime int64 `orm:"column(last_notice_time)" json:"last_notice_time"` // 上一次通知的时间
 	LastNoticeType string `orm:"column(last_notice_type)" json:"last_notice_type"` // 上一次通知的类型(up/down)
 	NoticeLimitMin int64 `orm:"column(notice_limit_min)" json:"notice_limit_min"` // 通知频率限制(分钟)
+	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置
 	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }

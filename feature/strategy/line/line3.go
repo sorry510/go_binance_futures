@@ -40,7 +40,7 @@ func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, can
 		return false, false
 	}
 	baseCanLong, baseCanShort := BaseCheckCanLongOrShort() // 基本盘
-	isRsi := rsi6[1] < 80 && rsi6[1] > 30 && rsi14[1] < 75 && rsi14[1] > 28
+	isRsi := rsi6[0] < 80 && rsi6[0] > 30 && rsi14[0] < 75 && rsi14[0] > 28
 	// logs.Info(symbol, Kdj(ma6h_3, ma6h_7, 4), Kdj(ma6h_7, ma6h_3, 4), rsi6[1], rsi14[1])
 	if Kdj(ma6h_3, ma6h_7, 4) && TradeLine3.checkLongLine(kline_1h) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉

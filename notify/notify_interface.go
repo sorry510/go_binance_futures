@@ -7,6 +7,7 @@ type FuturesOrderParams struct {
 	PositionSide string // long, short
 	Price float64
 	Quantity float64
+	Leverage float64
 	Profit float64
 	ChangePercent float64
 	Remarks string
