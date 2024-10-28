@@ -20,9 +20,13 @@ import (
 type TradeLine3 struct {
 }
 
-// 1. 6小时线产生金叉
-// 2. 1小时线是否是一个近期的v型结构，最后一根的下影线长度 / 实体长度 > 0.66
-// 3. rsi在一定范围内
+// 交易逻辑: 看的是 6h k线 和 2h k线
+// 做多逻辑
+// 1. 在4个line线之内，6小时线产生金叉
+// 2. 2小时线最低点在 11个之内，最低点到最低点+8个line里面至少6个是红线，最低点事红线，(下影线长度 / 实体长度) > 0.5
+// 3. rsi6 < 80, rsi14 < 75
+// 4. 基本盘逻辑: btc 的跌幅大于 5%，当前所有币种跌的数量>= 75% 时禁止做多，反之禁止做空
+// 做空相反
 func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
 	kline_1h, err2 := binance.GetKlineData(symbol, "2h", 24)

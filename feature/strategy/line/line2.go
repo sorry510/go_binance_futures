@@ -16,6 +16,12 @@ import (
 // var loss, _ = config.String("trade::loss")
 // var loss_float64, _ = strconv.ParseFloat(loss, 64)
 
+// 交易逻辑: 看的是 6h k线
+// 买入逻辑
+// 1. 在4个line线之内，只发生一次金叉，7日 ema 金叉 15日 ema， 3 日 ema 金叉 7 日 ema
+// 2. rsi6 < 80, rsi14 < 75
+// 3. 3日 ema 最近3条线是上涨的
+// 做空相反
 type TradeLine2 struct {
 }
 
@@ -32,7 +38,7 @@ func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, can
 	ema6h_15, _ := CalculateExponentialMovingAverage(kline_6h_close, 15) // ma15
 	rsi6, _ := CalculateRSI(kline_6h_close, 6) // rsi6
 	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
-	if (rsi6 == nil || rsi14 == nil || len(rsi6) < 2 || len(rsi14) < 2) {
+	if (rsi6 == nil || rsi14 == nil) {
 		// 开盘小于 4.5 天
 		return false, false
 	}

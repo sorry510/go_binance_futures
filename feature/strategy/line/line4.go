@@ -20,9 +20,10 @@ import (
 type TradeLine4 struct {
 }
 
-// 1. 12小时线产生金叉
-// 2. 1小时线是否是一个近期的v型结构，最后一根的下影线长度 / 实体长度 > 0.66
-// 3. rsi在一定范围内
+// 交易逻辑: 看的是 1d k线 和 1h k线
+// 做多逻辑
+// 跟 line3 一样，只是变了 k线类型
+// 做空相反
 func (TradeLine4 TradeLine4) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	kline_1, err1 := binance.GetKlineData(symbol, "1d", 50)
 	kline_2, err2 := binance.GetKlineData(symbol, "1h", 24)
