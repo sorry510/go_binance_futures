@@ -11,9 +11,12 @@ import (
 type TradeLine7 struct {
 }
 
-// 根据肯纳特通道判断是否可以开仓
+// 交易逻辑: 根据肯纳特通道判断是否可以开仓
 // kc1(50, 2.75)
 // kc2(50, 3.75)
+// 做多逻辑
+// 1. 价格跌破最低轨道(kc2下轨)，然后突破到次低轨道(kc1下轨)时，做多，建议止盈50%位置在 kc1 中轨附近位置，剩余 50% 止盈50%位置在 kc1 上轨附近位置
+// 做空相反
 func (TradeLine TradeLine7) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	limit := 150
 	period := 50 

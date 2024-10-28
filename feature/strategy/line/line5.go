@@ -11,8 +11,11 @@ import (
 type TradeLine5 struct {
 }
 
-// 适合单边行情，一直上涨或下跌
-// 检查最后的价格于上一个1min线的平均价格的变化幅度是否大于2%
+// 交易逻辑: 看的是 1min 线，高频逻辑，适合单边行情，右侧交易，猛涨时追涨，反之依然
+// 做多逻辑
+// 1. 当前价格 > 1min前k线的开盘价格
+// 2. 最近一分钟的变化幅度大于 0.9%
+// 做空相反
 func (TradeLine5 TradeLine5) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	kline_1, err1 := binance.GetKlineData(symbol, "1m", 30)
 	if err1 != nil {

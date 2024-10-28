@@ -17,6 +17,11 @@ import (
 // var loss, _ = config.String("trade::loss")
 // var loss_float64, _ = strconv.ParseFloat(loss, 64)
 
+// 策略逻辑: 看的是 3min k线，高频交易
+// 做多逻辑
+// 1. 最低点在最近3个line，最高点在8个line之前
+// 2. 最低点到现在在涨, 最低点之前9个line里面至少7个是红线，最低点的line是红线，（下影线长度 / 实体长度）/ 0.66
+// 做空相反逻辑
 type TradeLine1 struct {
 }
 

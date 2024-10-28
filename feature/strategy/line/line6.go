@@ -11,8 +11,11 @@ import (
 type TradeLine6 struct {
 }
 
-// 适合震荡行情
-// 检查最后的价格于上一个3min线的平均价格的变化幅度是否大于2%,进行反买
+// 交易逻辑: 看的是 3min 线，高频交易，适合震荡行情，猛涨时做空，反之做多
+// 做多逻辑
+// 1. 当前价格 < 3min前k线的开盘价格
+// 2. 最近3钟的变化幅度大于 0.15%
+// 做空相反
 func (TradeLine6 TradeLine6) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
 	kline_1, err1 := binance.GetKlineData(symbol, "3m", 20)
 	if err1 != nil {
