@@ -20,39 +20,44 @@ import (
 type TradeLine3 struct {
 }
 
-// 交易逻辑: 看的是 6h k线 和 2h k线
+// 交易逻辑: 主要看 4h 线
 // 做多逻辑
-// 1. 在4个line线之内，6小时线产生金叉
+// 1. rsi < 70
 // 2. 2小时线最低点在 11个之内，最低点到最低点+8个line里面至少6个是红线，最低点事红线，(下影线长度 / 实体长度) > 0.5
 // 3. rsi6 < 80, rsi14 < 75
-// 4. 基本盘逻辑: btc 的跌幅大于 5%，当前所有币种跌的数量>= 75% 时禁止做多，反之禁止做空
+// 4. 4个line之内，4小时线产生金叉
 // 做空相反
 func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
-	kline_1h, err2 := binance.GetKlineData(symbol, "2h", 24)
-	if err1 != nil || err2 != nil {
-		return false, false
-	}
-	kline_6h_close := GetLineClosePrices(kline_6h)
+	limit := 50
+	kline_interval1 := "4h"
+	rsi_period1 := 14
+	ema_period1 := 3
+	ema_period2 := 7
 	
-	ma6h_3, _ := CalculateSimpleMovingAverage(kline_6h_close, 3) // ma3
-	ma6h_7, _ := CalculateSimpleMovingAverage(kline_6h_close, 7) // ma7
-	rsi6, _ := CalculateRSI(kline_6h_close, 6) // rsi6
-	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
-	if (rsi6 == nil || rsi14 == nil || len(rsi6) < 2 || len(rsi14) < 2) {
-		// 开盘小于 4.5 天
+	kline_1, err := binance.GetKlineData(symbol, kline_interval1, limit)
+	if err != nil {
 		return false, false
 	}
-	baseCanLong, baseCanShort := BaseCheckCanLongOrShort() // 基本盘
-	isRsi := rsi6[0] < 80 && rsi6[0] > 30 && rsi14[0] < 75 && rsi14[0] > 28
-	// logs.Info(symbol, Kdj(ma6h_3, ma6h_7, 4), Kdj(ma6h_7, ma6h_3, 4), rsi6[1], rsi14[1])
-	if Kdj(ma6h_3, ma6h_7, 4) && TradeLine3.checkLongLine(kline_1h) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
-		// 短线穿越长线金叉
-		return true, false
+	_, _, close1 := GetLineFloatPrices(kline_1) // high, low, close
+	
+	ema1, _ := CalculateExponentialMovingAverage(close1, ema_period1)
+	ema2, _ := CalculateExponentialMovingAverage(close1, ema_period2)
+	
+	lineData := normalizationLineData(kline_1) // 归一化处理数据
+	
+	rsi1, _ := CalculateRSI(close1, rsi_period1) // 获取 rsi
+	
+	if ((Kdj(ema1, ema2, 3) && rsi1[0] < 42) || (lineData.Line[0].Position == "LONG" && rsi1[0] < 28)) &&
+		TradeLine3.checkLongLine(lineData) {
+		// 产生金叉 或 rsi 超卖了
+		return true, false		
 	}
-	if Kdj(ma6h_7, ma6h_3, 4) && TradeLine3.checkShortLine(kline_1h)&& isRsi && baseCanShort {
+	if ((Kdj(ema2, ema1, 3) && rsi1[0] < 42) || (lineData.Line[0].Position == "SHORT" && rsi1[0] > 72)) &&
+		// 产生金叉 或 rsi 超卖了
+		TradeLine3.checkShortLine(lineData) {
 		return false, true
 	}
+	
 	return false, false
 }
 
@@ -107,37 +112,34 @@ func (TradeLine3 TradeLine3) MarketReversal(symbol string, positionSide string) 
 	return false
 }
 
-func (TradeLine3 TradeLine3) checkLongLine(klines []*futures.Kline) bool {
-	lineData := normalizationLineData(klines) // 24条线
+func (TradeLine3 TradeLine3) checkLongLine(lineData *LineData) bool {
 	minIndex := lineData.MinIndex
 	line := lineData.Line
-	if minIndex >= 1 && minIndex <= 11 {
+	if minIndex >= 0 && minIndex <= 8 {
 		linePoint := line[minIndex] // 最低的那个line
 		underLength := math.Abs(linePoint.Close - linePoint.Low) // 下影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if	getRightLine(line[minIndex:minIndex+8], "SHORT") && // 最低点到最低点+8个line里面至少6个是红线
-			linePoint.Position == "SHORT" && // 最低点的line是跌
-			(underLength / entityLength) > 0.5 { // 下影线长度  实体长度
-				return true
+		if entityLength / linePoint.Close > 0.02 && // 涨跌幅度 2% 以上
+		   ((underLength / entityLength) < 0.15 || (underLength / entityLength) > 0.6) { // 十字形形态或者大跌形态
+			return true
 		}
 	}
 	return false
 }
 
-func (TradeLine3 TradeLine3) checkShortLine(klines []*futures.Kline) bool {
-	lineData := normalizationLineData(klines) // 24条线
+func (TradeLine3 TradeLine3) checkShortLine(lineData *LineData) bool {
 	maxIndex := lineData.MaxIndex
 	line := lineData.Line
-	if maxIndex >= 1 && maxIndex <= 11 {
+	if maxIndex >= 0 && maxIndex <= 8 {
 		linePoint := line[maxIndex] // 最高的那个line
 		upperLength := math.Abs(linePoint.High - linePoint.Close) // 上影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if	getRightLine(line[maxIndex:maxIndex+8], "LONG") && // 最低点到最低点+8个line里面至少6个是绿线
-			linePoint.Position == "LONG" && // 最低点的line是涨
-			(upperLength / entityLength) > 0.5 { // 上影线长度 > 实体长度
-				return true
+		if	entityLength / linePoint.Close > 0.02 && // 涨跌幅度 2% 以上
+			((upperLength / entityLength) < 0.15 || (upperLength / entityLength) > 0.6) { // 十字形形态或者大跌形态
+			return true
 		}
 	}
 	return false
 }
+
 

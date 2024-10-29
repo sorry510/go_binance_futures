@@ -696,6 +696,7 @@ func UpdateSymbolsFundingRates() {
 
 // 获取币的策略
 func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
+	logs.Info("GetCoinStrategy:", name)
 	switch (name) {
 		case "coin1":
 			coinStrategy = coin.TradeCoin1{}
@@ -715,6 +716,7 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 
 // 获取交易策略
 func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
+	logs.Info("GetLineStrategy:", name)
 	switch (name) {
 		case "line0":
 			lineStrategy = line.TradeLine0{}

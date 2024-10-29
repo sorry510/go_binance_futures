@@ -51,14 +51,17 @@ func GoTestLine() {
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
 		symbol := coin.Symbol
-		if symbol != "BTCUSDT" {
-			continue
-		}
+		// if symbol != "SXPUSDT" {
+		// 	continue
+		// }
 		
-		interval := "1d"
-		limit := 150
-		lines, _ := binance.GetKlineData(symbol, interval, limit)
-		closePrices := line.GetLineClosePrices(lines)
+		// interval := "3m"
+		// limit := 150
+		// lines, _ := binance.GetKlineData(symbol, interval, limit)
+		// closePrices := line.GetLineClosePrices(lines)
+		
+		// res, _ := line.CalculateRSI(closePrices, 6)
+		// logs.Info(res)
 		
 		// high, low, close := line.GetLineFloatPrices(lines)
 		// logs.Info(high[0], low[0], close[0])
@@ -72,9 +75,8 @@ func GoTestLine() {
 		// upper2, _, lower2 := line.CalculateKeltnerChannels(high, low, close, 50, 3.75)
 		// // logs.Info(upper[0], ma[0], lower[0])
 		
-		up, mb, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
-		logs.Info(up[0], mb[0], dn[0])
-		
+		// up, mb, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
+		// logs.Info(up[0], mb[0], dn[0])
 		
 		canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
 		// logs.Info(symbol, canLang, canShort)

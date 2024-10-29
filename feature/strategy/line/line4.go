@@ -20,35 +20,37 @@ import (
 type TradeLine4 struct {
 }
 
-// 交易逻辑: 看的是 1d k线 和 1h k线
+// 交易逻辑: 看的是 6h k线 和 2h k线
 // 做多逻辑
-// 跟 line3 一样，只是变了 k线类型
+// 1. 在4个line线之内，6小时线产生金叉
+// 2. 2小时线最低点在 11个之内，最低点到最低点+8个line里面至少6个是红线，最低点事红线，(下影线长度 / 实体长度) > 0.5
+// 3. rsi6 < 80, rsi14 < 75
+// 4. 基本盘逻辑: btc 的跌幅大于 5%，当前所有币种跌的数量>= 75% 时禁止做多，反之禁止做空
 // 做空相反
 func (TradeLine4 TradeLine4) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	kline_1, err1 := binance.GetKlineData(symbol, "1d", 50)
-	kline_2, err2 := binance.GetKlineData(symbol, "1h", 24)
+	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
+	kline_1h, err2 := binance.GetKlineData(symbol, "2h", 24)
 	if err1 != nil || err2 != nil {
 		return false, false
 	}
-	kline_1_close := GetLineClosePrices(kline_1)
-	kline_2_close := GetLineClosePrices(kline_2)
+	kline_6h_close := GetLineClosePrices(kline_6h)
 	
-	ma1_3, _ := CalculateSimpleMovingAverage(kline_1_close, 2) // ma3
-	ma1_7, _ := CalculateSimpleMovingAverage(kline_1_close, 7) // ma7
-	rsi6, _ := CalculateRSI(kline_2_close, 6) // rsi6
-	rsi14, _ := CalculateRSI(kline_2_close, 14) // rsi14
+	ma6h_3, _ := CalculateSimpleMovingAverage(kline_6h_close, 3) // ma3
+	ma6h_7, _ := CalculateSimpleMovingAverage(kline_6h_close, 7) // ma7
+	rsi6, _ := CalculateRSI(kline_6h_close, 6) // rsi6
+	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
 	if (rsi6 == nil || rsi14 == nil || len(rsi6) < 2 || len(rsi14) < 2) {
-		// 开盘小于 7 天
+		// 开盘小于 4.5 天
 		return false, false
 	}
 	baseCanLong, baseCanShort := BaseCheckCanLongOrShort() // 基本盘
 	isRsi := rsi6[0] < 80 && rsi6[0] > 30 && rsi14[0] < 75 && rsi14[0] > 28
-	// logs.Info(symbol, Kdj(ma1_3, ma1_7, 4), Kdj(ma1_7, ma1_3, 4), rsi6[1], rsi14[1])
-	if Kdj(ma1_3, ma1_7, 9) && TradeLine4.checkLongLine(kline_2) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
+	// logs.Info(symbol, Kdj(ma6h_3, ma6h_7, 4), Kdj(ma6h_7, ma6h_3, 4), rsi6[1], rsi14[1])
+	if Kdj(ma6h_3, ma6h_7, 4) && TradeLine4.checkLongLine(kline_1h) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		return true, false
 	}
-	if Kdj(ma1_7, ma1_3, 9) && TradeLine4.checkShortLine(kline_2) && isRsi && baseCanShort {
+	if Kdj(ma6h_7, ma6h_3, 4) && TradeLine4.checkShortLine(kline_1h)&& isRsi && baseCanShort {
 		return false, true
 	}
 	return false, false
@@ -109,11 +111,11 @@ func (TradeLine4 TradeLine4) checkLongLine(klines []*futures.Kline) bool {
 	lineData := normalizationLineData(klines) // 24条线
 	minIndex := lineData.MinIndex
 	line := lineData.Line
-	if minIndex >= 1 && minIndex <= 10 {
+	if minIndex >= 1 && minIndex <= 11 {
 		linePoint := line[minIndex] // 最低的那个line
 		underLength := math.Abs(linePoint.Close - linePoint.Low) // 下影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if getRightLine(line[minIndex:minIndex+8], "SHORT") && // 最低点到最低点+8个line里面至少6个是红线
+		if	getRightLine(line[minIndex:minIndex+8], "SHORT") && // 最低点到最低点+8个line里面至少6个是红线
 			linePoint.Position == "SHORT" && // 最低点的line是跌
 			(underLength / entityLength) > 0.5 { // 下影线长度  实体长度
 				return true
@@ -126,11 +128,11 @@ func (TradeLine4 TradeLine4) checkShortLine(klines []*futures.Kline) bool {
 	lineData := normalizationLineData(klines) // 24条线
 	maxIndex := lineData.MaxIndex
 	line := lineData.Line
-	if maxIndex >= 1 && maxIndex <= 10 {
+	if maxIndex >= 1 && maxIndex <= 11 {
 		linePoint := line[maxIndex] // 最高的那个line
 		upperLength := math.Abs(linePoint.High - linePoint.Close) // 上影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if getRightLine(line[maxIndex:maxIndex+8], "LONG") && // 最低点到最低点+8个line里面至少6个是绿线
+		if	getRightLine(line[maxIndex:maxIndex+8], "LONG") && // 最低点到最低点+8个line里面至少6个是绿线
 			linePoint.Position == "LONG" && // 最低点的line是涨
 			(upperLength / entityLength) > 0.5 { // 上影线长度 > 实体长度
 				return true

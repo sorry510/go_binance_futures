@@ -109,7 +109,7 @@ func CalculateRSI(prices []float64, period int) ([]float64, error) {
 	if len(prices) < period {
 		return nil, fmt.Errorf("price slice too short for period %d", period)
 	}
-
+	
 	prices = utils.ReverseArray(prices) // 时间由远到近
 	
 	// 初始化收益和损失切片
@@ -175,7 +175,6 @@ func sum(numbers []float64) float64 {
 	return sum
 }
 
-
 /**
  * 是否只产生过一次金叉(短线穿越长线一次，没有反复穿越)
  * @param ma1 短线
@@ -211,7 +210,7 @@ func Kdj(ma1 []float64, ma2[]float64, num int) bool {
 	return k > 0
 }
 
-// 计算真实范围 TR= max(High−Low,∣High−PreviousClose∣,∣Low−PreviousClose∣) 数据时间由近到远
+// 计算真实范围 TR= max(High−Low,∣High−PreviousClose∣,∣Low−PreviousClose∣) 数据时间由新到旧
 func calculateTrueRange(high, low, close []float64) []float64 {
 	tr := make([]float64, len(high))
 	if len(high) == 0 {
@@ -227,6 +226,16 @@ func calculateTrueRange(high, low, close []float64) []float64 {
 	tr[len(high)-1] = high[len(high)-1] - low[len(high)-1]
 
 	return tr
+}
+
+// 平均真实波幅
+func CalculateAtr(high, low, close []float64, period int) ([]float64, error) {
+	tr := calculateTrueRange(high, low, close)
+	atr, err := CalculateExponentialMovingAverage(tr, period)
+	if err != nil {
+		return nil, err
+	}
+	return atr, nil
 }
 
 // 肯纳特通道

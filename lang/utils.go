@@ -22,8 +22,8 @@ func GetLanguage() string {
 func ReadLangJsonFile(filePath string) (langTextMap map[string]interface{}, err error) {
 	if filePath == "" {
 		lang := GetLanguage()
+		logs.Info("use lang:", lang)
 		filePath = fmt.Sprintf("./lang/config/%s.json", lang)
-		logs.Info(filePath)
 	}
 	jsonFile, err := os.Open(filePath)
     if err != nil {
