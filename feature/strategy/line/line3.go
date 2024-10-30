@@ -47,12 +47,12 @@ func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, can
 	
 	rsi1, _ := CalculateRSI(close1, rsi_period1) // 获取 rsi
 	
-	if ((Kdj(ema1, ema2, 3) && rsi1[0] < 42) || (lineData.Line[0].Position == "LONG" && rsi1[0] < 28)) &&
+	if ((Kdj(ema1, ema2, 3) && rsi1[0] < 42) || (lineData.Line[0].Position == "LONG" && rsi1[0] < 23)) &&
 		TradeLine3.checkLongLine(lineData) {
 		// 产生金叉 或 rsi 超卖了
 		return true, false		
 	}
-	if ((Kdj(ema2, ema1, 3) && rsi1[0] < 42) || (lineData.Line[0].Position == "SHORT" && rsi1[0] > 72)) &&
+	if ((Kdj(ema2, ema1, 3) && rsi1[0] < 42) || (lineData.Line[0].Position == "SHORT" && rsi1[0] > 77)) &&
 		// 产生金叉 或 rsi 超卖了
 		TradeLine3.checkShortLine(lineData) {
 		return false, true
