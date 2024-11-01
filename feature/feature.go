@@ -42,8 +42,8 @@ var allow_short, _ = config.String("coin::allow_short")
 var strategy_trade, _ = config.String("trade::strategy_trade") // 交易策略
 var strategy_coin, _ = config.String("trade::strategy_coin") // 选币策略
 
-var coinStrategy = GetCoinStrategy(strategy_coin)
-var lineStrategy = GetLineStrategy(strategy_trade)
+var globalCoinStrategy = GetCoinStrategy(strategy_coin)
+var globalLineStrategy = GetLineStrategy(strategy_trade)
 
 var pusher = notify.GetNotifyChannel()
 
@@ -55,7 +55,7 @@ func StartTrade() {
 	if err != nil {
 		logs.Error("GetAllSymbols err:", err)
 	}
-	coins := coinStrategy.SelectCoins(allCoins)
+	coins := globalCoinStrategy.SelectCoins(allCoins)
 	if coins == nil {
 		logs.Error("coins SelectCoins is nil")
 		return
@@ -85,8 +85,15 @@ func StartTrade() {
 	/*************************************************平仓(止盈或止损)已经有持仓的币(排除手动交易白名单) start************************************************************ */
 	positionCount := 0 // 当前仓位数量
 	for _, position := range positions {
+		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
+		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
+		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
+			continue
+		}
+		
 		coin_profit_float64 := profit_float64 // 全局定义
 		coin_loss_float64 := loss_float64
+		coin_line_strategy := globalLineStrategy // 默认为全局
 		for _, coin := range allCoins {
 			if coin.Symbol == position.Symbol {
 				// 自定义可以覆盖全局
@@ -96,22 +103,24 @@ func StartTrade() {
 				if coin.Loss != "0" {
 					coin_loss_float64, _ = strconv.ParseFloat(coin.Loss, 64)
 				}
+				if coin.StrategyType != "global" {
+					// 独立的策略
+					coin_line_strategy = GetLineStrategy(coin.StrategyType)
+				}
+				break
 			}
 		}
-		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
-		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
+		
 		unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
 		leverage_float64, _ := strconv.ParseFloat(position.Leverage, 64)
 		entryPrice, _ := strconv.ParseFloat(position.EntryPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * entryPrice)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		
-		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
-			continue
-		}
+		
 		if _, exist := exclude_symbols_map[position.Symbol]; exist { // 在白名单内
 			continue
 		}
-		if lineStrategy.AutoStopOrder(position, nowProfit) { // 触发策略,风向改变,强制平仓
+		if coin_line_strategy.AutoStopOrder(position, nowProfit) { // 触发策略,风向改变,强制平仓
 			logs.Info("%s:auto_stop_start", position.Symbol)
 			if position.PositionSide == "LONG" {
 				_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
@@ -185,7 +194,7 @@ func StartTrade() {
 			continue
 		}
 		if nowProfit <= -coin_loss_float64 { // 平仓(止损)
-			if lineStrategy.CanOrderComplete(position.Symbol, position.PositionSide) { // 
+			if coin_line_strategy.CanOrderComplete(position.Symbol, position.PositionSide) { // 
 				if position.PositionSide == "LONG" {
 					_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
@@ -258,7 +267,7 @@ func StartTrade() {
 			}
 		}
 		if nowProfit >= coin_profit_float64 { // 平仓(止盈)
-			if lineStrategy.CanOrderComplete(position.Symbol, position.PositionSide) {
+			if coin_line_strategy.CanOrderComplete(position.Symbol, position.PositionSide) {
 				if position.PositionSide == "LONG" {
 					_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
@@ -360,7 +369,12 @@ func StartTrade() {
 		stepSize := coin.StepSize // 交易数量精度
 		usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64) // 交易金额
 		leverage_float64 := float64(coin.Leverage) // 合约倍数
-		canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
+		coin_line_strategy := globalLineStrategy // 默认为全局
+		if coin.StrategyType != "global" {
+			// 独立的策略
+			coin_line_strategy = GetLineStrategy(coin.StrategyType)
+		}
+		canLang, canShort := coin_line_strategy.GetCanLongOrShort(symbol)
 		if !canLang && !canShort {
 			logs.Info("%s:没有达到条件不可开仓", symbol)
 			continue
@@ -696,7 +710,6 @@ func UpdateSymbolsFundingRates() {
 
 // 获取币的策略
 func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
-	logs.Info("GetCoinStrategy:", name)
 	switch (name) {
 		case "coin1":
 			coinStrategy = coin.TradeCoin1{}
@@ -716,8 +729,9 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 
 // 获取交易策略
 func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
-	logs.Info("GetLineStrategy:", name)
 	switch (name) {
+		case "custom":
+			lineStrategy = line.TradeLineCustom{}
 		case "line0":
 			lineStrategy = line.TradeLine0{}
 		case "line1":

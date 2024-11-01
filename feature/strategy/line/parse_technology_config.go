@@ -1,9 +1,8 @@
-package feature
+package line
 
 import (
 	"encoding/json"
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/technology"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -50,8 +49,8 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (
 				klineMap[item.KlineInterval] = kline
 			}
 			
-			close := line.GetLineClosePrices(kline)
-			maArr, err := line.CalculateSimpleMovingAverage(close, item.Period)
+			close := GetLineClosePrices(kline)
+			maArr, err := CalculateSimpleMovingAverage(close, item.Period)
 			if err != nil {
 				logs.Error("CalculateSimpleMovingAverage error:", err.Error())
 				continue
@@ -71,8 +70,8 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (
 				klineMap[item.KlineInterval] = kline
 			}
 			
-			close := line.GetLineClosePrices(kline)
-			emaArr, err := line.CalculateExponentialMovingAverage(close, item.Period)
+			close := GetLineClosePrices(kline)
+			emaArr, err := CalculateExponentialMovingAverage(close, item.Period)
 			if err != nil {
 				logs.Error("CalculateExponentialMovingAverage error:", err.Error())
 				continue
@@ -92,8 +91,8 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (
 				klineMap[item.KlineInterval] = kline
 			}
 			
-			close := line.GetLineClosePrices(kline)
-			rsiArr, err := line.CalculateRSI(close, item.Period)
+			close := GetLineClosePrices(kline)
+			rsiArr, err := CalculateRSI(close, item.Period)
 			if err != nil {
 				logs.Error("CalculateRSI error:", err.Error())
 				continue
@@ -113,8 +112,8 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (
 				klineMap[item.KlineInterval] = kline
 			}
 			
-			high, low, close := line.GetLineFloatPrices(kline)
-			high, low, close = line.CalculateKeltnerChannels(high, low, close, item.Period, item.Multiplier)
+			high, low, close := GetLineFloatPrices(kline)
+			high, low, close = CalculateKeltnerChannels(high, low, close, item.Period, item.Multiplier)
 			kc[item.Name] = Channel{
 				High: high,
 				Low: low,
@@ -134,8 +133,8 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (
 				klineMap[item.KlineInterval] = kline
 			}
 			
-			close := line.GetLineClosePrices(kline)
-			up, mid, dn, err := line.CalculateBollingerBands(close, item.Period, item.StdDevMultiplier)
+			close := GetLineClosePrices(kline)
+			up, mid, dn, err := CalculateBollingerBands(close, item.Period, item.StdDevMultiplier)
 			if err != nil {
 				logs.Error("CalculateBollingerBands error:", err.Error())
 				continue

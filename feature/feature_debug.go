@@ -79,7 +79,11 @@ func GoTestLine() {
 		// up, mb, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
 		// logs.Info(up[0], mb[0], dn[0])
 		
-		canLang, canShort := lineStrategy.GetCanLongOrShort(symbol)
+		coin_line_strategy := globalLineStrategy
+		if coin.StrategyType != "global" {
+			coin_line_strategy = GetLineStrategy(coin.StrategyType)
+		}
+		canLang, canShort := coin_line_strategy.GetCanLongOrShort(symbol)
 		// logs.Info(symbol, canLang, canShort)
 		if canLang || canShort {
 			logs.Info(symbol, canLang, canShort)
@@ -348,7 +352,7 @@ func GoTestListen() {
 			continue
 		}
 		logs.Info("listen futures: %s, type: %s ", coin.Symbol, coin.ListenType)
-		ma, ema, rsi, kc, boll := ParseTechnologyConfig(coin.Symbol, coin.Technology)
+		ma, ema, rsi, kc, boll := line.ParseTechnologyConfig(coin.Symbol, coin.Technology)
 		
 		var strategyConfig technology.StrategyConfig
 		err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
@@ -375,7 +379,7 @@ func GoTestListen() {
 					logs.Error("Error Strategy Run:", err.Error())
 					return
 				}
-				if output.(bool) {
+				if !output.(bool) {
 					resPrice, _ := binance.GetTickerPrice(coin.Symbol)
 					price, _ :=  strconv.ParseFloat(resPrice[0].Price, 64)
 					if strategy.Type == "long" {

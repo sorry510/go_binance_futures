@@ -70,10 +70,9 @@ func main() {
 		// feature.GoTestMarketOrder()
 		// feature.GoTestNotify()
 		// feature.GoTestDeliveryAccount()
-		feature.GoTestListen()
 		// feature.GoTestParse()
-		// feature.GoTestLine()
-		
+		// feature.GoTestListen()
+		feature.GoTestLine()
 		
 		// web
 		web.Run(":" + webPort)

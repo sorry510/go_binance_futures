@@ -37,7 +37,10 @@ type Symbols struct {
 	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
 	Profit string `orm:"column(profit)" json:"profit"` // 盈利率
 	Loss string `orm:"column(loss)" json:"loss"` // 损失率
-	KlineInterval string `orm:"column(kline_interval)" json:"kline_interval"` // 选定的k线周期
+	KlineInterval string `orm:"column(kline_interval)" json:"kline_interval"` // 选定的k线周期 (废弃)
+	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置 json
+	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
+	StrategyType string `orm:"column(strategy_type)" json:"strategy_type"` // 策略类型 // global, line_x, custom
 }
 
 type NewSymbols struct {
