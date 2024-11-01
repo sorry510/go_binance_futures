@@ -201,6 +201,29 @@ func (pusher DingDing) FuturesListenKlineKc(params FuturesListenParams) {
   DingDingApi(text)
 }
 
+func (pusher DingDing) FuturesListenKlineCustom(params FuturesListenParams) {
+	text := `
+## %s
+#### **{futures.side}**：<font color="#008000">%s</font>
+#### **{futures.now_price}**：<font color="#008000">%f</font>
+#### **{futures.strategy_name}**：<font color="#008000">%s</font>
+#### **{futures.time}**：%s
+
+> <font color="#008000">%s</font>
+
+> author <sorry510sf@gmail.com>`
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.PositionSide),
+    params.NowPrice,
+    params.StrategyName,
+    nowTime(),
+    params.Remarks,
+  )
+  DingDingApi(text)
+}
+
 func (pusher DingDing) FuturesListenFundingRate(params FuturesListenParams) {
 	text := `
 ## %s

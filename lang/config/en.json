@@ -24,6 +24,7 @@
     "status": "status",
     "error": "error",
     "remarks": "remarks",
+    "strategy_name": "strategy name",
     
     "open_notice_title": "futures open notice",
     "close_notice_title": "futures close notice",
@@ -31,6 +32,7 @@
     "notice_price_title": "futures notice price",
     "listen_kline_base_title": "futures kline listen",
     "listen_keltner_channels_title": "futures keltner channels listen",
+    "listen_custom_title": "futures custom listen",
     "listen_funding_rate_title": "funding rate listen",
     "wind_of_change": "wind of change",
     "stop_loss": "stop loss",

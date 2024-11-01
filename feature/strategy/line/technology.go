@@ -8,25 +8,29 @@ import (
 )
 
 // 简单移动平均（SMA）price数据从时间最近到最远 ma = (p1 + p2 + ... + pn) / n
-func CalculateSimpleMovingAverage(price []float64, period int) ([]float64, error) {
-	if len(price) < period * 2 {
+func CalculateSimpleMovingAverage(prices []float64, period int) ([]float64, error) {
+	if len(prices) < period {
 		return nil, fmt.Errorf("insufficient data for period %d", period)
 	}
+
+	prices = utils.ReverseArray(prices) // 时间由远到近
 	
-	sma := make([]float64, period)
-	
+	sma := make([]float64, len(prices)-period+1)
+
+	// 计算第一个 SMA 值
 	sum := 0.0
 	for i := 0; i < period; i++ {
-		sum += price[i]
+		sum += prices[i]
 	}
 	sma[0] = sum / float64(period)
-	
-	for i := 1; i < period; i++ {
-		sum += price[period + i - 1] - price[i - 1] // 删掉前一个添加后一个
-		sma[i] = sum / float64(period)
+
+	// 计算后续的 SMA 值
+	for i := period; i < len(prices); i++ {
+		sum += prices[i] - prices[i-period]
+		sma[i-period+1] = sum / float64(period)
 	}
-	
-	return sma, nil
+
+	return utils.ReverseArray(sma), nil
 }
 
 // 指数移动平均（EMA）price数据从时间最近到最远 ema[t] = α * price[t] + (1 - α) * ema[t-1]; α = 2 / (n + 1)

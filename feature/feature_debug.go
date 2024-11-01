@@ -17,6 +17,7 @@ import (
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/expr-lang/expr"
 )
 
 // 测试交易逻辑
@@ -51,11 +52,11 @@ func GoTestLine() {
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
 		symbol := coin.Symbol
-		// if symbol != "SXPUSDT" {
-		// 	continue
-		// }
+		if symbol != "BTCUSDT" {
+			continue
+		}
 		
-		// interval := "3m"
+		// interval := "4h"
 		// limit := 150
 		// lines, _ := binance.GetKlineData(symbol, interval, limit)
 		// closePrices := line.GetLineClosePrices(lines)
@@ -66,7 +67,7 @@ func GoTestLine() {
 		// high, low, close := line.GetLineFloatPrices(lines)
 		// logs.Info(high[0], low[0], close[0])
 		
-		// ma50, _ := line.CalculateSimpleMovingAverage(close, 50)
+		// ma50, _ := line.CalculateSimpleMovingAverage(closePrices, 50)
 		// logs.Info(ma50)
 		// ema50, _ := line.CalculateExponentialMovingAverage(close, 50)
 		// logs.Info(ema50)
@@ -343,15 +344,87 @@ func GoTestListen() {
 	o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).All(&coins) // 通知币列表
 	
 	for _, coin := range coins {
-		if coin.Symbol != "WLDUSDT" {
+		if coin.Symbol != "BTCUSDT" {
 			continue
 		}
-		var config technology.TechnologyConfig
-		err := json.Unmarshal([]byte(coin.Technology), &config)
+		logs.Info("listen futures: %s, type: %s ", coin.Symbol, coin.ListenType)
+		ma, ema, rsi, kc, boll := ParseTechnologyConfig(coin.Symbol, coin.Technology)
+		
+		var strategyConfig technology.StrategyConfig
+		err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
 		if err != nil {
 			fmt.Println("Error unmarshalling JSON:", err)
 			return
 		}
-		logs.Info(config)
+		for _, strategy := range strategyConfig {
+			if strategy.Enable {
+				env := map[string]interface{}{
+					"ma": ma,
+					"ema": ema,
+					"rsi": rsi,
+					"kc": kc,
+					"boll": boll,
+				}
+				program, err := expr.Compile(strategy.Code, expr.Env(env))
+				if err != nil {
+					logs.Error("Error Strategy Compile:", err.Error())
+					return
+				}
+				output, err := expr.Run(program, env)
+				if err != nil {
+					logs.Error("Error Strategy Run:", err.Error())
+					return
+				}
+				if output.(bool) {
+					resPrice, _ := binance.GetTickerPrice(coin.Symbol)
+					price, _ :=  strconv.ParseFloat(resPrice[0].Price, 64)
+					if strategy.Type == "long" {
+						coin.LastNoticeTime = time.Now().Unix() * 1000 
+						coin.LastNoticeType = "up"
+						orm.NewOrm().Update(&coin)
+						
+						pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
+							Title: lang.Lang("futures.listen_custom_title"),
+							NowPrice: price,
+							Symbol: coin.Symbol,
+							PositionSide: strategy.Type,
+							StrategyName: strategy.Name,
+							Remarks: strategy.Code,
+						}) 
+					} else if strategy.Type == "short" {
+						coin.LastNoticeTime = time.Now().Unix() * 1000 
+						coin.LastNoticeType = "down"
+						orm.NewOrm().Update(&coin)
+						
+						pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
+							Title: lang.Lang("futures.listen_custom_title"),
+							NowPrice: price,
+							Symbol: coin.Symbol,
+							PositionSide: strategy.Type,
+							StrategyName: strategy.Name,
+							Remarks: strategy.Code,
+						}) 
+					}
+				}
+			}
+		}
 	}
+}
+
+func GoTestParse() {
+	
+	env := map[string]interface{}{
+		"ma":   [][]float64{{1, 2, 3}, {4, 5, 6}},
+	}
+	code := "ma[0][2] * (5.2 - 2.0) > 4.0"
+
+	program, err := expr.Compile(code, expr.Env(env))
+	if err != nil {
+		logs.Error(err.Error())
+	}
+	output, err := expr.Run(program, env)
+	if err != nil {
+		logs.Error(err.Error())
+	}
+	fmt.Println(output)
 }
