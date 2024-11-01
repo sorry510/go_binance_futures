@@ -25,6 +25,7 @@ func ListenCoin() {
 	for _, coin := range coins {
 		if nowTime - coin.LastNoticeTime < 60 * 1000 * coin.NoticeLimitMin {
 			// 通知频率限制
+			logs.Info("listen futures: %s, type: %s, notice limit time < %d Min", coin.Symbol, coin.ListenType, coin.NoticeLimitMin)
 			continue
 		}
 		logs.Info("listen futures: %s, type: %s", coin.Symbol, coin.ListenType)
