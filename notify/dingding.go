@@ -20,16 +20,25 @@ type DingDing struct {
 type DingDingData struct {
 	Msgtype string `json:"msgtype"`
 	Markdown DingDingApiMarkDownData `json:"markdown"`
+  At At `json:"at"`
+}
+
+type At struct {
+  AtMobiles []string `json:"atMobiles,omitempty"`
+  IsAtAll   bool     `json:"isAtAll"`
 }
 
 type DingDingApiMarkDownData struct {
-	Title string `json:"title"`
-	Text string `json:"text"`
+	Title string  `json:"title"`
+	Text string   `json:"text"`
+ 
 }
 
+// 钉钉通知, 频率限制 1分钟20次
+// https://open.dingtalk.com/document/orgapp/the-robot-sends-a-group-message
 func DingDingApi(content string) {
-	// 放到单独执行，避免主进程阻塞(未知原因突然不能在 goroutine 中执行了)
-	// go func () {
+	// 放到单独执行，避免主进程阻塞(没有 block 程序时不会执行)
+	go func () {
 		url := "https://oapi.dingtalk.com/robot/send?access_token=" + dingding_token
 	
 		requestBody := DingDingData{
@@ -38,6 +47,10 @@ func DingDingApi(content string) {
 				Title: dingding_word,
 				Text: content,
 			},
+      At: At {
+        AtMobiles: []string{},
+        IsAtAll: true,
+      },
 		}
 		jsonData, _ := json.Marshal(requestBody)
 		fmt.Println(string(jsonData))
@@ -70,7 +83,7 @@ func DingDingApi(content string) {
 		if resp.StatusCode != http.StatusOK {
 			fmt.Println("Unexpected status code:", resp.StatusCode)
 		}
-	// }()
+	}()
 }
 
 func (pusher DingDing) FuturesOpenOrder(params FuturesOrderParams) {
