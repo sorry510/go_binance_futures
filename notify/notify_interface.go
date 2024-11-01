@@ -32,6 +32,7 @@ type FuturesListenParams struct {
 	Side string // buy,sell
 	PositionSide string // long, short
 	Price float64
+	StrategyName string
 	Remarks string
 	ChangePercent float64
 	FundingRate float64
@@ -86,6 +87,7 @@ type Pusher interface {
 	FuturesNotice(params FuturesNoticeParams)
 	FuturesListenKlineBase(params FuturesListenParams)
 	FuturesListenKlineKc(params FuturesListenParams)
+	FuturesListenKlineCustom(params FuturesListenParams)
 	FuturesListenFundingRate(params FuturesListenParams)
 	
 	SpotOrder(params SpotOrderParams)

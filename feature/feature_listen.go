@@ -1,16 +1,19 @@
 package feature
 
 import (
+	"encoding/json"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/technology"
 	"strconv"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/expr-lang/expr"
 )
 
 func ListenCoin() {
@@ -20,21 +23,88 @@ func ListenCoin() {
 	
 	nowTime := time.Now().Unix()
 	for _, coin := range coins {
-		logs.Info("listen futures:", coin.Symbol)
 		if nowTime - coin.LastNoticeTime < 60 * 1000 * coin.NoticeLimitMin {
 			// 通知频率限制
 			continue
 		}
-		if coin.ListenType == "kline_base" {
-			klineBaseListen(coin)
-		} else if coin.ListenType == "kline_kc" {
-			klineKcListen(coin)
+		logs.Info("listen futures: %s, type: %s", coin.Symbol, coin.ListenType)
+		switch coin.ListenType {
+			case "kline_base":
+				klineBaseListen(coin)
+			case "kline_kc":
+				klineKcListen(coin)
+			case "custom":
+				klineCustomListen(coin)
+			default:
+				logs.Error("listen type error:", coin.ListenType)
+		}
+	}
+}
+
+// 自定义规则的监听
+func klineCustomListen(coin models.ListenSymbols) {
+	ma, ema, rsi, kc, boll := ParseTechnologyConfig(coin.Symbol, coin.Technology)
+	var strategyConfig technology.StrategyConfig
+	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
+	if err != nil {
+		logs.Error("Error unmarshalling JSON:", err.Error())
+		return
+	}
+	for _, strategy := range strategyConfig {
+		if strategy.Enable {
+			env := map[string]interface{}{
+				"ma": ma,
+				"ema": ema,
+				"rsi": rsi,
+				"kc": kc,
+				"boll": boll,
+			}
+			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			if err != nil {
+				logs.Error("Error Strategy Compile:", err.Error())
+				return
+			}
+			output, err := expr.Run(program, env)
+			if err != nil {
+				logs.Error("Error Strategy Run:", err.Error())
+				return
+			}
+			if output.(bool) {
+				resPrice, _ := binance.GetTickerPrice(coin.Symbol)
+				price, _ :=  strconv.ParseFloat(resPrice[0].Price, 64)
+				if strategy.Type == "long" {
+					coin.LastNoticeTime = time.Now().Unix() * 1000
+					coin.LastNoticeType = "up"
+					orm.NewOrm().Update(&coin)
+					
+					pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
+						Title: lang.Lang("futures.listen_custom_title"),
+						NowPrice: price,
+						Symbol: coin.Symbol,
+						PositionSide: strategy.Type,
+						StrategyName: strategy.Name,
+						Remarks: strategy.Code,
+					}) 
+				} else if strategy.Type == "short" {
+					coin.LastNoticeTime = time.Now().Unix() * 1000
+					coin.LastNoticeType = "down"
+					orm.NewOrm().Update(&coin)
+					
+					pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
+						Title: lang.Lang("futures.listen_custom_title"),
+						NowPrice: price,
+						Symbol: coin.Symbol,
+						PositionSide: strategy.Type,
+						StrategyName: strategy.Name,
+						Remarks: strategy.Code,
+					}) 
+				}
+			}
 		}
 	}
 }
 
 func klineBaseListen(coin models.ListenSymbols) {
-	// logs.Info("listen type: kline_base")
 	kline_1, err1 := binance.GetKlineData(coin.Symbol, coin.KlineInterval, 10)
 	if err1 != nil {
 		logs.Error("k线错误, 合约币种是:", coin.Symbol)
@@ -82,8 +152,6 @@ func klineBaseListen(coin models.ListenSymbols) {
 }
 
 func klineKcListen(coin models.ListenSymbols) {
-	// logs.Info("listen type: kline_kc")
-	
 	internals := []string{"15m", "1h", "4h", "1d", "3d", "1w", "1M"}
 	symbol := coin.Symbol
 	limit := 150

@@ -221,6 +221,29 @@ func (pusher Slack) FuturesListenKlineKc(params FuturesListenParams) {
   SlackApi(text)
 }
 
+func (pusher Slack) FuturesListenKlineCustom(params FuturesListenParams) {
+  text := `
+>%s
+>{futures.side}：%s
+>{futures.now_price}：%f
+>{futures.strategy_name}：%s
+>{futures.time}：%s
+
+>%s
+
+> author <sorry510sf@gmail.com>`
+  
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.PositionSide),
+    params.NowPrice,
+    params.StrategyName,
+    nowTime(),
+    params.Remarks,
+  )
+  SlackApi(text)
+}
+
 func (pusher Slack) FuturesListenFundingRate(params FuturesListenParams) {
 	text := `
 >%s
