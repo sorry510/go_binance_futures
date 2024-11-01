@@ -70,10 +70,13 @@ func main() {
 		// feature.GoTestMarketOrder()
 		// feature.GoTestNotify()
 		// feature.GoTestDeliveryAccount()
-		// feature.GoTestListen()
+		feature.GoTestListen()
 		// feature.GoTestParse()
-		feature.GoTestLine()
-		return
+		// feature.GoTestLine()
+		
+		
+		// web
+		web.Run(":" + webPort)
 	}
 	
 	// 更新币种交易精度

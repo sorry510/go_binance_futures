@@ -390,7 +390,8 @@ func GoTestListen() {
 							PositionSide: strategy.Type,
 							StrategyName: strategy.Name,
 							Remarks: strategy.Code,
-						}) 
+						})
+						return
 					} else if strategy.Type == "short" {
 						coin.LastNoticeTime = time.Now().Unix() * 1000 
 						coin.LastNoticeType = "down"

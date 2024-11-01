@@ -36,7 +36,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (
 		return ma, ema, rsi, kc, boll
 	}
 	
-	limit := 50
+	limit := 150
 	klineMap := make(map[string][]*futures.Kline)
 	for _, item := range technologyConfig.MA {
 		if item.Enable {
