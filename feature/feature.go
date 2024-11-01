@@ -646,7 +646,7 @@ func UpdateSymbolsTradePrecision() {
 			if strings.HasSuffix(symbol.Symbol, "USDT") { // 非usdt结尾的不需要
 				if !o.QueryTable("symbols").Filter("symbol", symbol.Symbol).Exist() {
 					// 没有的币种插入
-					logs.Info("新增币种：", symbol.Symbol)
+					logs.Info("add new futures symbol", symbol.Symbol)
 					o.Insert(&models.Symbols{
 						Symbol: symbol.Symbol,
 						Enable: 0, // 默认不开启
@@ -658,6 +658,7 @@ func UpdateSymbolsTradePrecision() {
 						Profit: "20",
 						Loss: "20",
 						KlineInterval: "1d",
+						StrategyType: "global",
 					})
 				}
 			}
