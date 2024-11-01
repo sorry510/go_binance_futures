@@ -5,7 +5,6 @@ import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/technology"
-	"go_binance_futures/utils"
 
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/core/logs"
@@ -149,7 +148,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (
 		}
 	}
 	
-	logs.Info(utils.ToJson(rsi))
+	// logs.Info(utils.ToJson(rsi))
 	
 	return ma, ema, rsi, kc, boll
 }
