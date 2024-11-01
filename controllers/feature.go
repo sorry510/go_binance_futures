@@ -20,6 +20,7 @@ type BatchEditParams struct {
 	Loss string `json:"loss"`
 	Leverage string `json:"leverage"`
 	MarginType string `json:"marginType"`
+	StrategyType string `json:"strategyType"`
 }
 type FeatureController struct {
 	web.Controller
@@ -67,21 +68,21 @@ func (ctrl *FeatureController) Get() {
 
 func (ctrl *FeatureController) Edit() {
 	id := ctrl.Ctx.Input.Param(":id")
-	symbols := new(models.Symbols)
-	ctrl.BindJSON(&symbols)
-	intId, _ := strconv.ParseInt(id, 10, 64)
-	symbols.ID = intId
+	var symbols models.Symbols
+	o := orm.NewOrm()
+	o.QueryTable("symbols").Filter("Id", id).One(&symbols)
 	
 	go func() {
 		// feature.UpdateSymbolTradeInfo(symbols) // 更新合约倍率和仓位模式
 		feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
 	}()
 	
-	o := orm.NewOrm()
-	_, err := o.Update(symbols) // _ 是受影响的条数
+	ctrl.BindJSON(&symbols)
+	
+	_, err := o.Update(&symbols) // _ 是受影响的条数
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "修改失败"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
 		return
     }
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -101,7 +102,7 @@ func (ctrl *FeatureController) Delete() {
 	_, err := o.Delete(symbols)
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "删除错误"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "delete failed"))
 		return
     }
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -137,7 +138,7 @@ func (ctrl *FeatureController) Post() {
 	
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "新增失败"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "create failed"))
 		return
     }
 	symbols.ID = id
@@ -156,7 +157,7 @@ func (ctrl *FeatureController) UpdateEnable() {
 	_, err := o.Raw("UPDATE symbols SET enable = ?", flag).Exec()
 	if err != nil {
 		// 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "更新错误"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
 		return
 	}
 	ctrl.Ctx.Resp(utils.ResJson(200, nil))
@@ -181,6 +182,12 @@ func (ctrl *FeatureController) BatchEdit() {
 	}
 	if (params.MarginType != "") {
 		query += " marginType = '" + params.MarginType + "',"
+	}
+	if (params.MarginType != "") {
+		query += " marginType = '" + params.MarginType + "',"
+	}
+	if (params.StrategyType != "") {
+		query += " strategy_type = '" + params.StrategyType + "',"
 	}
 	
 	if strings.HasSuffix(query, ",") {

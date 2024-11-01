@@ -44,7 +44,10 @@ func ListenCoin() {
 
 // 自定义规则的监听
 func klineCustomListen(coin models.ListenSymbols) {
-	ma, ema, rsi, kc, boll := ParseTechnologyConfig(coin.Symbol, coin.Technology)
+	resPrice, _ := binance.GetTickerPrice(coin.Symbol)
+	nowPrice, _ :=  strconv.ParseFloat(resPrice[0].Price, 64)
+	
+	ma, ema, rsi, kc, boll := line.ParseTechnologyConfig(coin.Symbol, coin.Technology)
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
 	if err != nil {
@@ -54,6 +57,7 @@ func klineCustomListen(coin models.ListenSymbols) {
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
 			env := map[string]interface{}{
+				"nowPrice": nowPrice,
 				"ma": ma,
 				"ema": ema,
 				"rsi": rsi,
@@ -71,8 +75,6 @@ func klineCustomListen(coin models.ListenSymbols) {
 				return
 			}
 			if output.(bool) {
-				resPrice, _ := binance.GetTickerPrice(coin.Symbol)
-				price, _ :=  strconv.ParseFloat(resPrice[0].Price, 64)
 				if strategy.Type == "long" {
 					coin.LastNoticeTime = time.Now().Unix() * 1000
 					coin.LastNoticeType = "up"
@@ -80,7 +82,7 @@ func klineCustomListen(coin models.ListenSymbols) {
 					
 					pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
 						Title: lang.Lang("futures.listen_custom_title"),
-						NowPrice: price,
+						NowPrice: nowPrice,
 						Symbol: coin.Symbol,
 						PositionSide: strategy.Type,
 						StrategyName: strategy.Name,
@@ -93,7 +95,7 @@ func klineCustomListen(coin models.ListenSymbols) {
 					
 					pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
 						Title: lang.Lang("futures.listen_custom_title"),
-						NowPrice: price,
+						NowPrice: nowPrice,
 						Symbol: coin.Symbol,
 						PositionSide: strategy.Type,
 						StrategyName: strategy.Name,
