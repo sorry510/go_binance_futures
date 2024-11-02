@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"go_binance_futures/notify"
+
 	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/server/web"
 )
@@ -56,6 +58,15 @@ func (ctrl *IndexController) GetServiceConfig() {
 			
 			"externalLinks": externalLinks,
 		},
+		"msg": "success",
+	})
+}
+
+func (ctrl *IndexController) TestPusher() {
+	var pusher = notify.GetNotifyChannel()
+	pusher.TestPusher()
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
 		"msg": "success",
 	})
 }

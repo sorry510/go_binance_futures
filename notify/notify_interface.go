@@ -82,6 +82,8 @@ type SpotListenParams struct {
 }
 
 type Pusher interface {
+	TestPusher()
+	
 	FuturesOpenOrder(params FuturesOrderParams)
 	FuturesCloseOrder(params FuturesOrderParams)
 	FuturesNotice(params FuturesNoticeParams)

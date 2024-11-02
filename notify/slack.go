@@ -18,9 +18,9 @@ type Slack struct {
 }
 
 type SlackMessage struct {
-    Channel string  `json:"channel"`
+  Channel string  `json:"channel"`
 	Blocks  []Block `json:"blocks"`
-    // Text    string `json:"text"`
+  // Text    string `json:"text"`
 	// Mrkdwn  bool   `json:"mrkdwn"`
 }
 
@@ -38,7 +38,7 @@ type Text struct {
 
 func SlackApi(content string) {
 	// 放到单独执行，避免主进程阻塞(未知原因突然不能在 goroutine 中执行了)
-	// go func () {
+	go func () {
 		url := "https://slack.com/api/chat.postMessage"
 		
 		blocks := []Block{
@@ -90,7 +90,15 @@ func SlackApi(content string) {
 		if resp.StatusCode != http.StatusOK {
 			fmt.Println("Unexpected status code:", resp.StatusCode)
 		}
-	// }()
+	}()
+}
+
+func (pusher Slack) TestPusher() {
+  text := `
+> Test
+> push test success
+> author <sorry510sf@gmail.com>`
+  DingDingApi(text)
 }
 
 func (pusher Slack) FuturesOpenOrder(params FuturesOrderParams) {

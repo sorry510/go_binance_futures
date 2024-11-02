@@ -86,6 +86,15 @@ func DingDingApi(content string) {
 	}()
 }
 
+func (pusher DingDing) TestPusher() {
+  text := `
+## Test
+#### push test success
+
+> author <sorry510sf@gmail.com>`
+  DingDingApi(text)
+}
+
 func (pusher DingDing) FuturesOpenOrder(params FuturesOrderParams) {
 	text := `
 ## %s

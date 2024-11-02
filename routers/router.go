@@ -10,6 +10,7 @@ func init() {
 	web.Router("/login", &controllers.LoginController{}, "post:Post") // 登录
 	
 	web.Router("/service/config", &controllers.IndexController{}, "get:GetServiceConfig") // 服务配置信息
+	web.Router("/test-pusher", &controllers.IndexController{}, "post:TestPusher") // 测试推送
 	
 	web.Router("/features", &controllers.FeatureController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/features/:id", &controllers.FeatureController{}, "delete:Delete;put:Edit") // 更新和删除
