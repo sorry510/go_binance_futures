@@ -2,8 +2,8 @@
 
 ## 首先类型需要选择为自定义
 
-![alt text](./img/zh/custom_type1.jpg)
-![alt text](./img/zh/custom_type2.jpg)
+![alt text](./img/zh/custom_type1.png)
+![alt text](./img/zh/custom_type2.png)
 
 ## 然后需要定义技术指标
 > 目前支持的指标有 `ma`, `ema`, `rsi`, `kc(肯纳特通道)`, `boll(布林带)`
