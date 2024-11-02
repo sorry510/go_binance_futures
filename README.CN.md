@@ -6,10 +6,9 @@
 
 # 币安交易机器人
 
-# 免责申明
->！！！本项目不构成任何投资建议，投资者应独立决策并自行承担风险！！！
+## 特色
 
-# 实时推送
+## 实时推送
 > dingding, slack
 
 - 钉钉
@@ -17,6 +16,15 @@
 
 - slack
 ![slack](./img/zh/listen_slack.jpg)
+
+## 自定义交易策略
+> ![img1](./img/zh/te_001.jpg)
+> ![alt text](./img/zh/strategy_001.png)
+
+<a href="./STRATEGY.CN.md">自定义详情</a>
+
+# 免责申明
+>！！！本项目不构成任何投资建议，投资者应独立决策并自行承担风险！！！
 
 # 功能
 
@@ -35,7 +43,7 @@
 - [系统设置](#系统设置)
 
 ## 合约交易
-- 每个币种的单独配置
+- 每个币种的单独配置(策略，数量，止盈，止损)
 ![交易币种](./img/zh/coins.jpg)
 ![钉钉推送1](./img/zh/dingding_future1.jpg)
 
@@ -70,7 +78,8 @@
 ### 合约监听
 - k线变化监听
 - 肯纳特通道信号监听
-![合约监听](./img/zh/listen_feature.jpg)
+- 自定义策略
+![合约监听](./img/zh/listen_futures.jpg)
 ![合约监听chart1](./img/zh/listen_chat_kc.jpg)
 ![合约监听通知1](./img/zh/dingding_listen1.jpg)
 

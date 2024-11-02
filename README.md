@@ -6,6 +6,23 @@
 
 # Binance-trade-bot
 
+## peculiarity
+
+## Pusher
+> dingding, slack
+
+- dingding
+![钉钉推送1](./img/en/dinding_future1.jpg)
+
+- slack
+![slack](./img/en/listen_slack.jpg)
+
+## custom strategy
+> ![img1](./img/en/te_001.jpg)
+> ![alt text](./img/en/strategy_001.png)
+
+<a href="./STRATEGY.md">custom strategy details</a>
+
 # DISCLAIMER
 
 ```
@@ -14,15 +31,6 @@ You use it at your own risk.
 There are no warranties or guarantees expressed or implied.
 You assume all responsibility and liability.
 ```
-
-# Notification
-> dingding, slack
-
-- dingding
-![钉钉推送1](./img/en/dinding_future1.jpg)
-
-- slack
-![slack](./img/en/listen_slack.jpg)
 
 
 # Features <!-- omit in toc -->
@@ -41,6 +49,7 @@ You assume all responsibility and liability.
 
 ## futures-trade
 - Independent configuration for each coin
+-  <a href="./README.CN.md">custom strategy</a>
 ![交易币种](./img/en/coins.jpg)
 ![钉钉推送1](./img/en/dinding_future1.jpg)
 
@@ -75,6 +84,7 @@ You assume all responsibility and liability.
 ### futures-listen
 - kline change listen
 - kline keltner channels listen
+- custom strategy
 ![合约监听](./img/en/listen_futures.jpg)
 ![合约监听chart1](./img/en/listen_chat_kc.jpg)
 ![合约监听通知1](./img/en/dingding_listen1.jpg)
@@ -253,7 +263,7 @@ The login account password is the `web.username` and `web.password` in the `app.
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
 | ABCUSDT  | buy_long  | futures  | ISOLATED or CROSSED| 10|3 | 0.1(if you don't know, please fill in 0)  | open   |
 
-#### 合约抢买做空配置例子
+#### futures rush buy short
 | coin  |  trade_type | coin_type  |margin_type| usdt|  leverage | step_size  |  enable  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
 | ABCUSDT   | buy_short  | futures  | ISOLATED or CROSSED | 10|3 | 0.1(if you don't know, please fill in 0)   | open   |

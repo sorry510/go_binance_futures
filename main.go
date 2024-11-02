@@ -72,7 +72,7 @@ func main() {
 		// feature.GoTestDeliveryAccount()
 		// feature.GoTestParse()
 		// feature.GoTestListen()
-		feature.GoTestLine()
+		// feature.GoTestLine()
 		
 		// web
 		web.Run(":" + webPort)
