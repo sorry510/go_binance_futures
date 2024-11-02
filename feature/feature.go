@@ -362,6 +362,9 @@ func StartTrade() {
 	isOpen := false
 	
 	for _, coin := range coins {
+		if _, exist := exclude_symbols_map[coin.Symbol]; exist { // 在白名单内
+			continue
+		}
 		positionSideLong := "LONG"
       	positionSideShort := "SHORT"
 		symbol := coin.Symbol
