@@ -19,30 +19,19 @@ type TradeLineCustom struct {
 
 // 交易逻辑: 自定义逻辑
 func (TradeLine TradeLineCustom) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	resPrice, _ := binance.GetTickerPrice(symbol)
-	nowPrice, _ :=  strconv.ParseFloat(resPrice[0].Price, 64)
-	
 	var coin models.Symbols
 	o := orm.NewOrm()
 	o.QueryTable("symbols").Filter("Symbol", symbol).One(&coin)
 	
-	ma, ema, rsi, kc, boll := ParseTechnologyConfig(coin.Symbol, coin.Technology)
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
 	if err != nil {
 		logs.Error("Error unmarshalling JSON:", err.Error())
 		return false, false
 	}
+	env := InitParseEnv(coin.Symbol, coin.Technology)
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
-			env := map[string]interface{}{
-				"nowPrice": nowPrice, // 当前价格
-				"ma": ma,
-				"ema": ema,
-				"rsi": rsi,
-				"kc": kc,
-				"boll": boll,
-			}
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
 			if err != nil {
 				logs.Error("Error Strategy Compile:", err.Error())

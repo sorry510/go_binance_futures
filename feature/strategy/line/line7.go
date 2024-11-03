@@ -39,7 +39,7 @@ func (TradeLine TradeLine7) GetCanLongOrShort(symbol string) (canLong bool, canS
 		return false, false
 	}
 	
-	high1, low1, close1 := GetLineFloatPrices(kline_1)
+	high1, low1, close1, _ := GetLineFloatPrices(kline_1)
 	upper1, _, lower1 := CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
 	upper2, _, lower2 := CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
 	

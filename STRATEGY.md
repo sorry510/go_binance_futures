@@ -65,6 +65,7 @@ ema["ema_4h_3"][1] < ema["ema_4h_7"][1] && ema["ema_4h_3"][0] > ema["ema_4h_7"][
 >Let's explain that `ema_4h_3` is a short line of `ema`, and `ema_4h_7` is a long line of `ema` (relative to `ema_4h_3`). Therefore, the meaning of the above strategy is that the `short line` at the previous moment is below the `long line`, and the `short line` at the current moment is above the `long line`. In terms of terminology, this is a golden cross and a trend strategy of `long`
 
 ### Explanation of all technology indicator examples
+> code definition，detail: https://expr-lang.org/docs/language-definition#now
 
 #### nowPrice
 > Built in variable: `nowPrice` can be used in the strategy to refer to the current price of a coin
