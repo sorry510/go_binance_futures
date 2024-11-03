@@ -1,14 +1,12 @@
 package feature
 
 import (
-	"encoding/json"
 	"fmt"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
-	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
@@ -64,7 +62,7 @@ func GoTestLine() {
 		// res, _ := line.CalculateRSI(closePrices, 6)
 		// logs.Info(res)
 		
-		// high, low, close := line.GetLineFloatPrices(lines)
+		// high, low, close, _ := line.GetLineFloatPrices(lines)
 		// logs.Info(high[0], low[0], close[0])
 		
 		// ma50, _ := line.CalculateSimpleMovingAverage(closePrices, 50)
@@ -352,66 +350,15 @@ func GoTestListen() {
 			continue
 		}
 		logs.Info("listen futures: %s, type: %s ", coin.Symbol, coin.ListenType)
-		ma, ema, rsi, kc, boll := line.ParseTechnologyConfig(coin.Symbol, coin.Technology)
-		
-		var strategyConfig technology.StrategyConfig
-		err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
-		if err != nil {
-			fmt.Println("Error unmarshalling JSON:", err)
-			return
-		}
-		for _, strategy := range strategyConfig {
-			if strategy.Enable {
-				env := map[string]interface{}{
-					"ma": ma,
-					"ema": ema,
-					"rsi": rsi,
-					"kc": kc,
-					"boll": boll,
-				}
-				program, err := expr.Compile(strategy.Code, expr.Env(env))
-				if err != nil {
-					logs.Error("Error Strategy Compile:", err.Error())
-					return
-				}
-				output, err := expr.Run(program, env)
-				if err != nil {
-					logs.Error("Error Strategy Run:", err.Error())
-					return
-				}
-				if !output.(bool) {
-					resPrice, _ := binance.GetTickerPrice(coin.Symbol)
-					price, _ :=  strconv.ParseFloat(resPrice[0].Price, 64)
-					if strategy.Type == "long" {
-						coin.LastNoticeTime = time.Now().Unix() * 1000 
-						coin.LastNoticeType = "up"
-						orm.NewOrm().Update(&coin)
-						
-						pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
-							Title: lang.Lang("futures.listen_custom_title"),
-							NowPrice: price,
-							Symbol: coin.Symbol,
-							PositionSide: strategy.Type,
-							StrategyName: strategy.Name,
-							Remarks: strategy.Code,
-						})
-						return
-					} else if strategy.Type == "short" {
-						coin.LastNoticeTime = time.Now().Unix() * 1000 
-						coin.LastNoticeType = "down"
-						orm.NewOrm().Update(&coin)
-						
-						pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
-							Title: lang.Lang("futures.listen_custom_title"),
-							NowPrice: price,
-							Symbol: coin.Symbol,
-							PositionSide: strategy.Type,
-							StrategyName: strategy.Name,
-							Remarks: strategy.Code,
-						}) 
-					}
-				}
-			}
+		switch coin.ListenType {
+			case "kline_base":
+				klineBaseListen(coin)
+			case "kline_kc":
+				klineKcListen(coin)
+			case "custom":
+				klineCustomListen(coin)
+			default:
+				logs.Error("listen type error:", coin.ListenType)
 		}
 	}
 }
@@ -421,7 +368,17 @@ func GoTestParse() {
 	env := map[string]interface{}{
 		"ma":   [][]float64{{1, 2, 3}, {4, 5, 6}},
 	}
-	code := "ma[0][2] * (5.2 - 2.0) > 4.0"
+	// https://expr-lang.org/docs/language-definition#variables
+	// 可以添加注释，使用 // 或者 /* */
+	// 可以写多行的语句
+	// 可以定义变量 let x = 1
+	// 可以调用(内置和自定义)函数
+	// 可以调用(自定义)变量
+	code := `
+		// 买入条件
+		let x = ma[0][0] + ma[1][0];
+		x + 2
+	`
 
 	program, err := expr.Compile(code, expr.Env(env))
 	if err != nil {

@@ -355,7 +355,7 @@ func StartTrade() {
 	
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
 	if allow_long != "1" && allow_short != "1" {
-		logs.Info("this stratgy don't allow long and all short")
+		logs.Info("the base config don't allow long and all short")
 		return
 	}
 	
@@ -379,7 +379,7 @@ func StartTrade() {
 		}
 		canLang, canShort := coin_line_strategy.GetCanLongOrShort(symbol)
 		if !canLang && !canShort {
-			logs.Info("%s:没有达到条件不可开仓", symbol)
+			logs.Info("%s:not meeting the order conditions", symbol)
 			continue
 		}
 		var buyOrderLong *futures.Order // 此币种开多的单
@@ -591,7 +591,7 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futu
 			continue
 		}
 		res, _ := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderID)
-		logs.Info("撤销超时的开仓订单")
+		logs.Info("Revoke overdue warehouse opening orders")
 		logs.Info("response:", res)
 	}
 }

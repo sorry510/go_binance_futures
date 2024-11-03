@@ -87,19 +87,22 @@ func GetLineClosePrices(data []*futures.Kline) ([]float64) {
 }
 
 // 从k线获取最高价、最低价、收盘价列表
-func GetLineFloatPrices(data []*futures.Kline) (high, low, close []float64) {
+func GetLineFloatPrices(data []*futures.Kline) (high, low, close, open []float64) {
 	high = make([]float64, len(data))
 	low = make([]float64, len(data))
 	close = make([]float64, len(data))
+	open = make([]float64, len(data))
 	for key, item := range data {
 		highPrice, _ := strconv.ParseFloat(item.High, 64)
 		lowPrice, _ := strconv.ParseFloat(item.Low, 64)
 		closePrice, _ := strconv.ParseFloat(item.Close, 64)
+		openPrice, _ := strconv.ParseFloat(item.Open, 64)
 		high[key] = highPrice
 		low[key] = lowPrice
 		close[key] = closePrice
+		open[key] = openPrice
 	}
-	return high, low, close
+	return high, low, close, open
 }
 
 // 获取某中类型的line的数量是否超过阈值

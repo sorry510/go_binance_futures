@@ -16,6 +16,7 @@ type TechnologyConfig struct {
 	RSI      []IndicatorConfig     `json:"rsi"`  // 相对强弱指数
 	KC       []IndicatorConfig     `json:"kc"`   // 肯特纳通道
 	BOLL     []IndicatorConfig     `json:"boll"` // 布林带
+	ATR      []IndicatorConfig     `json:"atr"` // 平均真实波幅
 }
 
 type StrategyConfig [] struct {

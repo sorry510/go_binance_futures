@@ -1,16 +1,20 @@
 package controllers
 
 import (
+	"encoding/json"
 	"sort"
 	"strconv"
 
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
+	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
+	"github.com/expr-lang/expr"
 )
 
 type ListenCoinController struct {
@@ -140,7 +144,7 @@ func (ctrl *ListenCoinController) GetKcLineChart() {
 		return
 	}
 	
-	high1, low1, close1 := line.GetLineFloatPrices(kline_1)
+	high1, low1, close1, _ := line.GetLineFloatPrices(kline_1)
 	upper1, ma1, lower1 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
 	upper2, _, lower2 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
 	
@@ -215,4 +219,46 @@ func (ctrl *ListenCoinController) GetFundingRateHistory() {
 		"data": histories,
 		"msg": "success",
 	})
+}
+
+func (ctrl *ListenCoinController) TestStrategyRule() {
+	id := ctrl.Ctx.Input.Param(":id")
+	var symbols models.ListenSymbols
+	o := orm.NewOrm()
+	o.QueryTable("listen_symbols").Filter("Id", id).One(&symbols)
+	
+	ctrl.BindJSON(&symbols)
+	
+	var strategyConfig technology.StrategyConfig
+	err := json.Unmarshal([]byte(symbols.Strategy), &strategyConfig)
+	if err != nil {
+		logs.Error("Error unmarshalling JSON:", err.Error())
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	env := line.InitParseEnv(symbols.Symbol, symbols.Technology)
+	for _, strategy := range strategyConfig {
+		if strategy.Enable {
+			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			if err != nil {
+				logs.Error("Error Strategy Compile:", err.Error())
+				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+				return
+			}
+			output, err := expr.Run(program, env)
+			if err != nil {
+				logs.Error("Error Strategy Run:", err.Error())
+				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+				return
+			}
+			ctrl.Ctx.Resp(map[string]interface{} {
+				"code": 200,
+				"data": map[string]interface{} {
+					"pass": output,
+					"type": strategy.Type,
+				},
+				"msg": "success",
+			})
+		}
+	}
 }

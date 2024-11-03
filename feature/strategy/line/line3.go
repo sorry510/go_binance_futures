@@ -38,7 +38,7 @@ func (TradeLine3 TradeLine3) GetCanLongOrShort(symbol string) (canLong bool, can
 	if err != nil {
 		return false, false
 	}
-	_, _, close1 := GetLineFloatPrices(kline_1) // high, low, close
+	_, _, close1, _ := GetLineFloatPrices(kline_1) // high, low, close
 	
 	ema1, _ := CalculateExponentialMovingAverage(close1, ema_period1)
 	ema2, _ := CalculateExponentialMovingAverage(close1, ema_period2)

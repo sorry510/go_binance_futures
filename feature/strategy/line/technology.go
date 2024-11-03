@@ -171,7 +171,7 @@ func CalculateRSI(prices []float64, period int) ([]float64, error) {
 }
 
 // sum 计算浮点数切片的总和
-func sum(numbers []float64) float64 {
+func Sum(numbers []float64) float64 {
 	sum := 0.0
 	for _, num := range numbers {
 		sum += num
