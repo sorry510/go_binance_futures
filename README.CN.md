@@ -20,6 +20,7 @@
 ## 自定义交易策略
 > ![img1](./img/zh/te_001.jpg)
 > ![alt text](./img/zh/strategy_001.png)
+> ![alt text](./img/zh/strategy_002.png)
 
 <a href="./STRATEGY.CN.md">自定义详情</a>
 

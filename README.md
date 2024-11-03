@@ -20,6 +20,7 @@
 ## custom strategy
 > ![img1](./img/en/te_001.jpg)
 > ![alt text](./img/en/strategy_001.png)
+> ![alt text](./img/en/strategy_002.png)
 
 <a href="./STRATEGY.md">custom strategy details</a>
 
