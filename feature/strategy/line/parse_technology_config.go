@@ -255,6 +255,6 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 		env["kline_" + k] = v
 	}
 	
-	// logs.Info(utils.ToJson(env))
+	// logs.Info(utils.ToJson(klineMap))
 	return env
 }
