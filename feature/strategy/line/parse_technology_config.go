@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/technology"
+	"go_binance_futures/utils"
 	"strconv"
 	"time"
 
@@ -242,7 +243,9 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 		"NowTime": time.Now().Unix() * 1000, // 毫秒时间戳
 		
 		// function
-		"Kdj": Kdj, // 计算是否是金叉
+		"Kdj": Kdj, // 计算是否是金叉,
+		"IsAsc": utils.IsAsc, // 是否是升序数组
+		"IsDesc": utils.IsDesc, // 是否是降序数组,
 	}
 	
 	// technology
