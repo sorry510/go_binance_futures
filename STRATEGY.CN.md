@@ -94,10 +94,33 @@ ema_4h_3.Data[0] > ema_4h_7.Data[0] && ema_4h_3.Data[1] < ema_4h_7.Data[1]
 #### 内置函数
 > https://expr-lang.org/docs/language-definition#array-functions
 
-##### 其它
+##### 其它函数
+
+###### Kdj
 
 ```
-todo
+/**
+ * 是否只产生过一次金叉(短线穿越长线一次，没有反复穿越)
+ * @param ma1 短线
+ * @param ma2 长线
+ * @param num 检查数量
+ * @returns Boolean
+ */
+func Kdj(ma1 []float64, ma2[]float64, num int) bool 
+```
+
+###### IsDesc
+
+```
+// 是否是一个降序数组
+func IsDesc(arr []float64) bool
+```
+
+###### IsAsc
+
+```
+// 是否是一个升序数组
+func IsAsc(arr []float64) bool
 ```
 
 #### 技术指标生成的变量

@@ -26,7 +26,7 @@ func (TradeLine TradeLine7) GetCanLongOrShort(symbol string) (canLong bool, canS
 	if err != nil {
 		return false, false
 	}
-	kline_2, err := binance.GetKlineData(symbol, "1d", limit)
+	kline_2, err := binance.GetKlineData(symbol, "12h", limit)
 	if err != nil {
 		return false, false
 	}
@@ -53,7 +53,7 @@ func (TradeLine TradeLine7) GetCanLongOrShort(symbol string) (canLong bool, canS
 			// 最近10根k线最低价格在kc2下轨之下
 			if low1[i] < lower2[i] {
 				// 大级别看起来是上升通道
-				if (utils.IsDesc(close2[0:3])) {
+				if (utils.IsDesc(close2[0:2])) {
 					return true, false
 				}
 			}
