@@ -152,7 +152,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				klineMap[item.KlineInterval] = klinePrice
 			}
 			
-			high, low, mid := CalculateKeltnerChannels(klinePrice.High, klinePrice.Low, klinePrice.Close, item.Period, item.Multiplier)
+			high, mid, low := CalculateKeltnerChannels(klinePrice.High, klinePrice.Low, klinePrice.Close, item.Period, item.Multiplier)
 			
 			config[item.Name] = ConfigData{
 				KlineInterval: item.KlineInterval,
