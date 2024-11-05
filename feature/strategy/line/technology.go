@@ -243,13 +243,13 @@ func CalculateAtr(high, low, close []float64, period int) ([]float64, error) {
 }
 
 // 肯纳特通道
-func CalculateKeltnerChannels(high, low, close []float64, period int, multiplier float64) ([]float64, []float64, []float64) {
-	ma, _ := CalculateExponentialMovingAverage(close, period)
+func CalculateKeltnerChannels(high, low, close []float64, period int, multiplier float64) (upper, ma, lower []float64) {
+	ma, _ = CalculateExponentialMovingAverage(close, period)
 	tr := calculateTrueRange(high, low, close)
 	atr, _ := CalculateExponentialMovingAverage(tr, period)
 
-	upper := make([]float64, len(ma))
-	lower := make([]float64, len(ma))
+	upper = make([]float64, len(ma))
+	lower = make([]float64, len(ma))
 
 	for i := 0; i < len(ma); i++ {
 		upper[i] = ma[i] + multiplier * atr[i]
@@ -258,7 +258,6 @@ func CalculateKeltnerChannels(high, low, close []float64, period int, multiplier
 
 	return upper, ma, lower
 }
-
 type Candle struct {
     Open  float64
     Close float64
