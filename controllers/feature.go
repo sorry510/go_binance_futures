@@ -26,6 +26,7 @@ type BatchEditParams struct {
 	Leverage string `json:"leverage"`
 	MarginType string `json:"marginType"`
 	StrategyType string `json:"strategyType"`
+	StrategyTemplateId int64 `json:"strategyTemplateId"`
 }
 type FeatureController struct {
 	web.Controller
@@ -194,9 +195,16 @@ func (ctrl *FeatureController) BatchEdit() {
 	if (params.StrategyType != "") {
 		query += " strategy_type = '" + params.StrategyType + "',"
 	}
+	if (params.StrategyTemplateId != 0) {
+		var template models.StrategyTemplates
+		orm.NewOrm().QueryTable("strategy_templates").Filter("Id", params.StrategyTemplateId).One(&template)
+		query += " technology = '" + template.Technology + "',"
+		query += " strategy = '" + template.Strategy + "',"
+	}
 	
 	if strings.HasSuffix(query, ",") {
 		query = strings.TrimSuffix(query, ",")
+		query += " WHERE enable = 1" // 只更新开启的交易对
 		_, err := orm.NewOrm().Raw(query).Exec()
 		if err != nil {
 			// 处理错误

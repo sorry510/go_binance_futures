@@ -41,6 +41,15 @@ func init() {
 	web.Router("/futures/positions", &controllers.AccountController{}, "get:GetBinanceFuturesPositions") // 获取合约持仓信息
 	web.Router("/futures/open-orders", &controllers.AccountController{}, "get:GetBinanceFuturesOpenOrders") // 获取合约挂单信息
 	
+	web.Router("/fund-rate/eat", &controllers.EatRateController{}, "get:Get;post:Post") // 列表查询和新增
+	web.Router("/fund-rate/eat/:id", &controllers.EatRateController{}, "delete:Delete;put:Edit") // 更新和删除
+	web.Router("/fund-rate/eat/start/:id", &controllers.EatRateController{}, "post:Start") // start
+	web.Router("/fund-rate/eat/end/:id", &controllers.EatRateController{}, "post:End") // end
+	
+	web.Router("/strategy-templates", &controllers.StrategyTemplateController{}, "get:Get;post:Post") // 策略模板
+	web.Router("/strategy-templates/:id", &controllers.StrategyTemplateController{}, "delete:Delete;put:Edit") // 策略模板更新
+	web.Router("/strategy-templates/test/:symbol", &controllers.StrategyTemplateController{}, "post:TestStrategyRule") // 测试策略规则
+	
 	web.Router("/start", &controllers.CommandController{}, "post:Start") // start
 	web.Router("/stop", &controllers.CommandController{}, "post:Stop") // stop
 	web.Router("/pull", &controllers.CommandController{}, "post:GitPull") // git pull

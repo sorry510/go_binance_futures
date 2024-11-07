@@ -54,6 +54,7 @@ func StartTrade() {
 	allCoins, err := GetAllSymbols()
 	if err != nil {
 		logs.Error("GetAllSymbols err:", err)
+		return
 	}
 	coins := globalCoinStrategy.SelectCoins(allCoins)
 	if coins == nil {
@@ -64,9 +65,10 @@ func StartTrade() {
 	
 	
 	/************************************************获取账户信息 start******************************************************************* */
-	positions, _ := binance.GetPosition()
+	positions, err := binance.GetPosition()
 	if err != nil {
 		logs.Error("GetPosition err:", err)
+		return
 	}
 	
 	allOpenOrders, err := binance.GetOpenOrder()

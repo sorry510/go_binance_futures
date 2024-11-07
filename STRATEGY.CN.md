@@ -207,6 +207,8 @@ atr1.Data = [67.2, 70.3, ..] // 150 count
 ```
 
 #### 其它
+
+##### k 线数据
 > 每当你定义了一个任意k线类型的指标时，会额外生成对应的k线数据的变量 `kline_{xx}`
 
 | 名称  |  k线类型 | 周期  | 启用  |
@@ -218,4 +220,24 @@ kline_4h.High = [67.2, 70.3, ..] // 150 count
 kline_4h.Low = [27.2, 20.3, ..] // 150 count
 kline_4h.Open = [37.2, 30.3, ..] // 150 count
 kline_4h.Close = [47.2, 34.3, ..] // 150 count
+```
+
+##### BTCUSDT 数据
+
+```
+BTCUSDT.PercentChange = 1.1 // 涨跌幅
+BTCUSDT.Close = 70000.2 // 当前价格
+BTCUSDT.Open = 71000.4 // 开盘价
+BTCUSDT.Low = 65000.4 // 最低价
+BTCUSDT.High = 75000.2 // 最高价
+```
+
+##### ETHUSDT 数据
+
+```
+ETHUSDT.PercentChange = -1.1 // 涨跌幅
+ETHUSDT.Close = 2500.2 // 当前价格
+ETHUSDT.Open = 2400.45 // 开盘价
+ETHUSDT.Low = 2456.2 // 最低价
+ETHUSDT.High = 2840.3 // 最高价
 ```

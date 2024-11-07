@@ -207,6 +207,9 @@ atr1.Data = [67.2, 70.3, ..] // 150 count
 ```
 
 #### other
+
+##### kline data
+
 > whenever you define an indicator of any kline type, additional variables corresponding to the candlestick data will be generated as `kline_{xx}`
 
 | name  |  kline_interval | period  | enable  |
@@ -218,4 +221,25 @@ kline_4h.High = [67.2, 70.3, ..] // 150 count
 kline_4h.Low = [27.2, 20.3, ..] // 150 count
 kline_4h.Open = [37.2, 30.3, ..] // 150 count
 kline_4h.Close = [47.2, 34.3, ..] // 150 count
+```
+
+
+##### BTCUSDT data
+
+```
+BTCUSDT.PercentChange = 1.1 // 涨跌幅
+BTCUSDT.Close = 70000.2 // 当前价格
+BTCUSDT.Open = 71000.4 // 开盘价
+BTCUSDT.Low = 65000.4 // 最低价
+BTCUSDT.High = 75000.2 // 最高价
+```
+
+##### ETHUSDT data
+
+```
+ETHUSDT.PercentChange = -1.1 // 涨跌幅
+ETHUSDT.Close = 2500.2 // 当前价格
+ETHUSDT.Open = 2400.45 // 开盘价
+ETHUSDT.Low = 2456.2 // 最低价
+ETHUSDT.High = 2840.3 // 最高价
 ```

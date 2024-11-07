@@ -46,6 +46,8 @@ func registerModels() {
 	orm.RegisterModel(new(models.NoticeSymbols))
 	orm.RegisterModel(new(models.ListenSymbols))
 	orm.RegisterModel(new(models.SymbolFundingRates))
+	orm.RegisterModel(new(models.EatRateSymbols))
+	orm.RegisterModel(new(models.StrategyTemplates))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db")
