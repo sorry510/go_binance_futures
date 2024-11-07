@@ -25,6 +25,7 @@ type Symbols struct {
 	Close string `orm:"column(close)" json:"close"`
 	Open string `orm:"column(open)" json:"open"`
 	Low string `orm:"column(low)" json:"low"`
+	High string `orm:"column(high)" json:"high"`
 	Enable int `orm:"column(enable)" json:"enable"`
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 	LastClose string `orm:"column(lastClose)" json:"lastClose"`
@@ -114,6 +115,42 @@ type SymbolFundingRates struct {
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
 
+// 吃资金费率
+type EatRateSymbols struct {
+	ID int64 `orm:"column(id)" json:"id"`
+	Type int64 `orm:"column(type)" json:"type"` // 1:正向套利 2:反向套利, 目前只有正向套利
+	Enable int `orm:"column(enable)" json:"enable"`
+	Symbol string `orm:"column(symbol)" json:"symbol"` // 交易对(usdt)
+	SpotSymbol string `orm:"column(spot_symbol)" json:"spot_symbol"` // 现货的交易对
+	FuturesSymbol string `orm:"column(futures_symbol)" json:"futures_symbol"` // 合约的交易对
+	TotalAmount string `orm:"column(total_amount)" json:"total_amount"` // 总交易金额
+	SpotAmount string `orm:"column(spot_amount)" json:"spot_amount"` // 现货交易金额
+	FuturesAmount string `orm:"column(futures_amount)" json:"futures_amount"` // 合约交易金额 (没有乘杠杆倍率)
+	SpotPrice string `orm:"column(spot_price)" json:"spot_price"` // 现货的买入价格
+	FuturesPrice string `orm:"column(futures_price)" json:"futures_price"` // 合约做空的价格
+	Leverage int64 `orm:"column(leverage)" json:"leverage"` // 合约杠杆倍率
+	MarginType string `orm:"column(marginType)" json:"marginType"` // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
+	TickSize string `orm:"column(tickSize)" json:"tickSize"` // 交易金额精度
+	StepSize string `orm:"column(stepSize)" json:"stepSize"` // 交易数量精度
+	
+	Profit string `orm:"column(profit)" json:"profit"` // 盈利(usdt)，不带交易买卖的手续费
+	StartTime int64 `orm:"column(start_time)" json:"start_time"` // 套利开始时间
+	EndTime int64 `orm:"column(end_time)" json:"end_time"` // 套利结束时间
+	
+	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
+	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+}
+
+// 策略模板
+type StrategyTemplates struct {
+	ID int64 `orm:"column(id)" json:"id"`
+	Name string `orm:"column(name)" json:"name"`
+	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置 json
+	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
+	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
+	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+}
+
 func (u *Order) TableName() string {
     return "order"
 }
@@ -137,3 +174,12 @@ func (u *ListenSymbols) TableName() string {
 func (u *SymbolFundingRates) TableName() string {
     return "symbol_funding_rates"
 }
+
+func (u *EatRateSymbols) TableName() string {
+    return "eat_rate_symbols"
+}
+
+func (u *StrategyTemplates) TableName() string {
+    return "strategy_templates"
+}
+

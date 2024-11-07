@@ -414,11 +414,12 @@ func UpdateCoinByWs() {
 			lock = true
 			for _, ticker := range event {
 				o.Raw(
-					"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `updateTime` = ?, `lastClose` = low, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
+					"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
 					ticker.PriceChangePercent,
 					ticker.ClosePrice,
 					ticker.OpenPrice,
 					ticker.LowPrice,
+					ticker.HighPrice,
 					ticker.Time,
 					
 					ticker.Symbol,

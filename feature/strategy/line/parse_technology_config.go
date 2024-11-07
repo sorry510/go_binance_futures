@@ -3,11 +3,13 @@ package line
 import (
 	"encoding/json"
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/models"
 	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 	"strconv"
 	"time"
 
+	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 )
 
@@ -234,18 +236,45 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 }
 
 func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) {
-	resPrice, _ := binance.GetTickerPrice(symbol)
-	nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64)
+	o := orm.NewOrm()
+	var symbols []models.Symbols
+	
+	sql := "SELECT * FROM symbols WHERE symbol = ? OR symbol = ? OR symbol = ?"
+	_, err := o.Raw(sql, "BTCUSDT", "ETHUSDT", symbol).QueryRows(&symbols)
+	if err != nil {
+		logs.Error("error", err.Error())
+	}
+	
+	// resPrice, _ := binance.GetTickerPrice(symbol)
+	// nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64)
 	config, klineMap := ParseTechnologyConfig(symbol, strTechnology)
 	env := map[string]interface{} {
 		// build-in
-		"NowPrice": nowPrice, // 当前价格
+		// "NowPrice": nowPrice, // 当前价格
 		"NowTime": time.Now().Unix() * 1000, // 毫秒时间戳
 		
 		// function
 		"Kdj": Kdj, // 计算是否是金叉,
 		"IsAsc": utils.IsAsc, // 是否是升序数组
 		"IsDesc": utils.IsDesc, // 是否是降序数组,
+	}
+	
+	for _, v := range symbols {
+		close, _ := strconv.ParseFloat(v.Close, 64)
+		open, _ := strconv.ParseFloat(v.Open, 64)
+		low, _ := strconv.ParseFloat(v.Low, 64)
+		high, _ := strconv.ParseFloat(v.High, 64)
+		item := map[string]interface{}{
+			"PercentChange": v.PercentChange,
+			"Close": close,
+			"Open": open,
+			"Low": low,
+			"High": high,
+		}
+		env[v.Symbol] = item
+		if (v.Symbol == symbol) {
+			env["NowPrice"] = close // 当前价格
+		}
 	}
 	
 	// technology
