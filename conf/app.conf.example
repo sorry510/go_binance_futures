@@ -68,8 +68,6 @@ secret_key = 12321
 username = admin
 # 密码
 password = admin
-# 密码
-password = admin
 # 过期时间(hour)
 expires = 24
 # 重启服务按钮命令
