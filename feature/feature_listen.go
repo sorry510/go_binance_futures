@@ -8,6 +8,7 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/technology"
+	"go_binance_futures/utils"
 	"strconv"
 	"time"
 
@@ -16,7 +17,26 @@ import (
 	"github.com/expr-lang/expr"
 )
 
+var flagFuturesListen = 0
 func ListenCoin() {
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
+	if (systemConfig.ListenCoinEnable == 1) {
+		if (flagFuturesListen == 0) {
+			logs.Info("futures listen bot start")
+			flagFuturesListen = 1
+		}
+	} else {
+		if (flagFuturesListen == 1) {
+			logs.Info("futures listen bot stop")
+			flagFuturesListen = 0
+		}
+		return
+	}
+	
 	o := orm.NewOrm()
 	var coins []models.ListenSymbols
 	o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).All(&coins) // 通知币列表
@@ -240,7 +260,26 @@ func klineKcListen(coin models.ListenSymbols) {
 }
 
 // 监控资金费率
+var flagListenFundingRate = 0
 func ListenCoinFundingRate() {
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
+	if (systemConfig.ListenFundingRateEnable == 1) {
+		if (flagListenFundingRate == 0) {
+			logs.Info("listen funding rate bot start")
+			flagListenFundingRate = 1
+		}
+	} else {
+		if (flagListenFundingRate == 1) {
+			logs.Info("listen funding rate bot stop")
+			flagListenFundingRate = 0
+		}
+		return
+	}
+	
 	o := orm.NewOrm()
 	var coins []models.SymbolFundingRates
 	o.QueryTable("symbol_funding_rates").OrderBy("ID").Filter("enable", 1).All(&coins) // 通知币列表

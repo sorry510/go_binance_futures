@@ -14,7 +14,25 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
+var flagFuturesRush = 0
 func TryRush() {
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
+	if (systemConfig.FutureNewEnable == 1) {
+		if (flagFuturesRush == 0) {
+			logs.Info("futures rush bot start")
+			flagFuturesRush = 1
+		}
+	} else {
+		if (flagFuturesRush == 1) {
+			logs.Info("futures rush bot stop")
+			flagFuturesRush = 0
+		}
+		return
+	}
 	o := orm.NewOrm()
 	var coins []models.NewSymbols
 	o.QueryTable("new_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).All(&coins) // 允许抢购的合约币

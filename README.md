@@ -113,52 +113,6 @@ api_secret = ""
 # Local proxy (if not needed to be changed to "")
 proxy_url = "http://127.0.0.1:7890"
 
-[coin]
-# The timeout period for placing a purchase order, in seconds
-buy_timeout = 300
-# Excluded automatic trading currencies, multiple separated by commas
-exclude_symbols = "1000SHIBUSDT,ETHUSDT"
-# Maximum Position Quantity
-max_count = 4
-# Rotation training time in seconds
-sleep_time = 1
-# MARKET, LIMIT: (Based on the depth of the price, the average price is taken as the average for placing orders, and it may not be possible to buy)
-order_type = LIMIT
-# can buy long
-allow_long = 1
-# can buy short
-allow_short = 1
-# The longest holding time, in seconds (temporarily abandoned)
-hold_max_time = 1800
-
-[trade]
-# whether or not futures trade
-future_enable = 1
-# whether or not new futures rush
-new_enable = 0
-# Profit taking percentage (if the current currency is set to 0, use this global profit taking setting)
-profit = 10
-# Stop loss percentage (if the current currency is set to 0, use this global stop loss setting)
-loss = 100
-# Trading Strategy(line1~line7
-strategy_trade = line7
-# Coin selection strategy(coin1~coin5)
-strategy_coin = coin5
-
-[spot]
-# whether or not new spot rush
-new_enable = 0
-
-[notice_coin]
-# whether or not coin notice
-enable = 0
-
-[listen_coin]
-# whether or not coin listen
-enable = 0
-# whether or not funding rate listen
-funding_rate = 0
-
 [web]
 # web port
 port = 3333

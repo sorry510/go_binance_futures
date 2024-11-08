@@ -9,8 +9,6 @@ import (
 	"go_binance_futures/spot"
 	"time"
 
-	"strconv"
-
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/core/logs"
@@ -21,14 +19,6 @@ import (
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
-var taskSleepTime, _ = config.String("coin::sleep_time")
-var tradeEnable, _ = config.String("trade::future_enable")
-var tradeNewEnable, _ = config.String("trade::new_enable")
-var spotNewEnable, _ = config.String("spot::new_enable")
-var noticeCoinEnable, _ = config.String("notice_coin::enable")
-var listenCoinEnable, _ = config.String("listen_coin::enable")
-var listenFundingRate, _ = config.String("listen_coin::funding_rate")
-var taskSleepTimeInt, _ = strconv.Atoi(taskSleepTime)
 
 func init() {
 	web.BConfig.CopyRequestBody = true // post 参数
@@ -40,6 +30,7 @@ func init() {
 }
 
 func registerModels() {
+	orm.RegisterModel(new(models.Config))
 	orm.RegisterModel(new(models.Order))
 	orm.RegisterModel(new(models.Symbols))
 	orm.RegisterModel(new(models.NewSymbols))
@@ -96,83 +87,60 @@ func main() {
 	}()
 	
 	// 自动合约交易
-	if tradeEnable == "1" {
-		logs.Info("feature trade bot start")
-		// trade script
-		go func() {
-			for {
-				feature.StartTrade()
-
-				// 等待 taskSleepTimeInt 秒再继续执行
-				time.Sleep(time.Duration(taskSleepTimeInt) * time.Second)
-			}
-		}()
-	}
+	go func() {
+		for {
+			feature.StartTrade()
+			time.Sleep(time.Second * 1) // 1秒间隔
+		}
+	}()
 	
 	// 新币抢购
-	if spotNewEnable == "1" {
-		logs.Info("new spot rush bot start")
-		go func() {
-			for {
-				spot.TryRush()
-
-				time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
-			}
-		}()
-	}
+	go func() {
+		for {
+			spot.TryRush()
+			time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
+		}
+	}()
 	
 	// 新币合约抢购
-	if tradeNewEnable == "1" {
-		logs.Info("new feature rush bot start")
-		go func() {
-			for {
-				feature.TryRush()
-
-				time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
-			}
-		}()
-	}
+	go func() {
+		for {
+			feature.TryRush()
+			time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
+		}
+	}()
 	
 	// 币种通知
-	if noticeCoinEnable == "1" {
-		logs.Info("coin notice bot start")
-		go func() {
-			for {
-				spot.NoticeAndAutoOrder()
-				feature.NoticeAndAutoOrder()
+	go func() {
+		for {
+			spot.NoticeAndAutoOrder()
+			feature.NoticeAndAutoOrder()
 
-				time.Sleep(time.Second * 5) // 5 秒间隔
-			}
-		}()
-	}
+			time.Sleep(time.Second * 3) // 3 秒间隔
+		}
+	}()
 	
 	// 行情监听
-	if listenCoinEnable == "1" {
-		logs.Info("market listen bot start")
-		go func() {
-			for {
-				spot.ListenCoin()
-				feature.ListenCoin()
+	go func() {
+		for {
+			spot.ListenCoin()
+			feature.ListenCoin()
 
-				time.Sleep(time.Second * 5) // 5 秒间隔
-			}
-		}()
-	}
+			time.Sleep(time.Second * 3) // 3 秒间隔
+		}
+	}()
 	
 	// 合约费率监听
-	if listenFundingRate == "1" {
-		logs.Info("funding rate listen bot start")
-		go func() {
-			for {
-				// 更新所有币种的资金费率
-				feature.UpdateSymbolsFundingRates()
-				// 监听费率报警信息
-				feature.ListenCoinFundingRate()
+	go func() {
+		for {
+			// 更新所有币种的资金费率
+			feature.UpdateSymbolsFundingRates()
+			// 监听费率报警信息
+			feature.ListenCoinFundingRate()
 
-				time.Sleep(time.Second * 30) // 30 秒更新一次
-			}
-		}()
-	}
+			time.Sleep(time.Second * 30) // 30 秒更新一次
+		}
+	}()
 	
 	// web
 	web.Run(":" + webPort)

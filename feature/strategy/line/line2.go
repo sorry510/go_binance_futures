@@ -8,14 +8,6 @@ import (
 	"github.com/adshao/go-binance/v2/futures"
 )
 
-// var hold_max_time, _ = config.String("coin::hold_max_time")
-// var hold_max_time_float64, _ = strconv.ParseFloat(hold_max_time, 64)
-// var profit, _ = config.String("trade::profit")
-// var profit_float64, _ = strconv.ParseFloat(profit, 64)
-
-// var loss, _ = config.String("trade::loss")
-// var loss_float64, _ = strconv.ParseFloat(loss, 64)
-
 // 交易逻辑: 看的是 6h k线
 // 买入逻辑
 // 1. 在4个line线之内，只发生一次金叉，7日 ema 金叉 15日 ema， 3 日 ema 金叉 7 日 ema

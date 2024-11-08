@@ -2,8 +2,11 @@ package controllers
 
 import (
 	"go_binance_futures/notify"
+	"go_binance_futures/utils"
 
+	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 )
 
@@ -13,24 +16,29 @@ type IndexController struct {
 
 func (ctrl *IndexController) GetServiceConfig() {
 	var debug, _ = config.String("debug")
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
 	
-	var coinExcludeSymbols, _ = config.String("coin::exclude_symbols")
-	var coinMaxCount, _ = config.String("coin::max_count")
-	var coinOrderType, _ = config.String("coin::order_type")
-	var coinAllowLong, _ = config.String("coin::allow_long")
-	var coinAllowShort, _ = config.String("coin::allow_short")
+	var coinExcludeSymbols = systemConfig.FutureExcludeSymbols
+	var coinMaxCount = systemConfig.FutureMaxCount
+	var coinOrderType = systemConfig.FutureOrderType
+	var coinAllowLong = systemConfig.FutureAllowLong
+	var coinAllowShort = systemConfig.FutureAllowShort
 	
-	var tradeFutureEnable, _ = config.String("trade::future_enable")
-	var tradeStrategyTrade, _ = config.String("trade::strategy_trade")
-	var tradeStrategyCoin, _ = config.String("trade::strategy_coin")
-	var tradeNewEnable, _ = config.String("trade::new_enable")
+	var tradeFutureEnable = systemConfig.FutureEnable
+	var tradeStrategyTrade = systemConfig.FutureStrategyTrade
+	var tradeStrategyCoin = systemConfig.FutureStrategyCoin
+	var tradeNewEnable = systemConfig.FutureNewEnable
 	
-	var spotNewEnable, _ = config.String("spot::new_enable")
+	var spotNewEnable = systemConfig.SpotNewEnable
 	
-	var noticeCoinEnable, _ = config.String("notice_coin::enable")
+	var noticeCoinEnable = systemConfig.NoticeCoinEnable
 	
-	var listenCoinEnable, _ = config.String("listen_coin::enable")
-	var listenFundingRate, _ = config.String("listen_coin::funding_rate")
+	var listenCoinEnable = systemConfig.ListenCoinEnable
+	var listenFundingRate = systemConfig.ListenFundingRateEnable
 	var externalLinks, _ = config.String("external::links")
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -58,6 +66,24 @@ func (ctrl *IndexController) GetServiceConfig() {
 			
 			"externalLinks": externalLinks,
 		},
+		"msg": "success",
+	})
+}
+
+func (ctrl *IndexController) EditServiceConfig() {
+	systemConfig, _ := utils.GetSystemConfig()
+	
+	ctrl.BindJSON(&systemConfig)
+	
+	_, err := orm.NewOrm().Update(&systemConfig) // _ 是受影响的条数
+    if err != nil {
+        // 处理错误
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
+		return
+    }
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": systemConfig,
 		"msg": "success",
 	})
 }

@@ -46,6 +46,12 @@ func GoTestLine() {
 	// logs.Info(line.BaseCheckCanLongOrShort())
 	// return
 	logs.Info("start test line")
+	systemConfig, err := utils.GetSystemConfig()
+	globalLineStrategy := GetLineStrategy(systemConfig.FutureStrategyTrade) // 选币策略
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
 		
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {

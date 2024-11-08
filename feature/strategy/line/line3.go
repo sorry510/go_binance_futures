@@ -9,14 +9,6 @@ import (
 	"github.com/adshao/go-binance/v2/futures"
 )
 
-// var hold_max_time, _ = config.String("coin::hold_max_time")
-// var hold_max_time_float64, _ = strconv.ParseFloat(hold_max_time, 64)
-// var profit, _ = config.String("trade::profit")
-// var profit_float64, _ = strconv.ParseFloat(profit, 64)
-
-// var loss, _ = config.String("trade::loss")
-// var loss_float64, _ = strconv.ParseFloat(loss, 64)
-
 type TradeLine3 struct {
 }
 

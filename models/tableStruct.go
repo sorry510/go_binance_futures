@@ -1,5 +1,23 @@
 package models
 
+type Config struct {
+	ID int64 `orm:"column(id)" json:"id"`
+	FutureEnable int `orm:"column(future_enable)" json:"future_enable"`
+	FutureBuyTimeout int `orm:"column(future_buy_timeout)" json:"future_buy_timeout"`
+	FutureExcludeSymbols string `orm:"column(future_exclude_symbols)" json:"future_exclude_symbols"`
+	FutureMaxCount int `orm:"column(future_max_count)" json:"future_max_count"`
+	FutureOrderType string `orm:"column(future_order_type)" json:"future_order_type"`
+	FutureAllowLong int `orm:"column(future_allow_long)" json:"future_allow_long"`
+	FutureAllowShort int `orm:"column(future_allow_short)" json:"future_allow_short"`
+	FutureStrategyTrade string `orm:"column(future_strategy_trade)" json:"future_strategy_trade"`
+	FutureStrategyCoin string `orm:"column(future_strategy_coin)" json:"future_strategy_coin"`
+	FutureNewEnable int `orm:"column(future_new_enable)" json:"future_new_enable"`
+	SpotNewEnable int `orm:"column(spot_new_enable)" json:"spot_new_enable"`
+	NoticeCoinEnable int `orm:"column(notice_coin_enable)" json:"notice_coin_enable"`
+	ListenCoinEnable int `orm:"column(listen_coin_enable)" json:"listen_coin_enable"`
+	ListenFundingRateEnable int `orm:"column(listen_funding_rate_enable)" json:"listen_funding_rate_enable"`
+}
+
 // 切记需要注册model后才能使用
 type OrderTable struct {
 	Order
@@ -149,6 +167,10 @@ type StrategyTemplates struct {
 	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
 	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+}
+
+func (u *Config) TableName() string {
+    return "config"
 }
 
 func (u *Order) TableName() string {
