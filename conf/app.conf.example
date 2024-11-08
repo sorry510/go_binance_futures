@@ -68,6 +68,10 @@ secret_key = 12321
 username = admin
 # 密码
 password = admin
+# 密码
+password = admin
+# 过期时间(hour)
+expires = 24
 # 重启服务按钮命令
 commend_start = pm2 restart binance_futures
 # 停止合约服务命令

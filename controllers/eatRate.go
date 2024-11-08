@@ -4,6 +4,7 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/utils"
 	"strconv"
+	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
@@ -105,29 +106,25 @@ func (ctrl *EatRateController) Delete() {
 
 // 开启吃资金费率
 func (ctrl *EatRateController) Start() {
-	// flag := ctrl.Ctx.Input.Param(":flag")
-	
-	// o := orm.NewOrm()
-	// _, err := o.Raw("UPDATE eat_rate_symbols SET enable = ?", flag).Exec()
-	// if err != nil {
-	// 	// 处理错误
-	// 	ctrl.Ctx.Resp(utils.ResJson(400, nil, "eat failed"))
-	// 	return
-	// }
-	// ctrl.Ctx.Resp(utils.ResJson(200, nil))
+	o := orm.NewOrm()
+	_, err := o.Raw("UPDATE eat_rate_symbols SET enable = ?, start_time = ?", 1, time.Now().Unix() * 1000).Exec()
+	if err != nil {
+		// 处理错误
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "eat failed"))
+		return
+	}
+	ctrl.Ctx.Resp(utils.ResJson(200, nil))
 }
 
 // 平仓关闭
 func (ctrl *EatRateController) End() {
-	// flag := ctrl.Ctx.Input.Param(":flag")
-	
-	// o := orm.NewOrm()
-	// _, err := o.Raw("UPDATE eat_rate_symbols SET enable = ?", flag).Exec()
-	// if err != nil {
-	// 	// 处理错误
-	// 	ctrl.Ctx.Resp(utils.ResJson(400, nil, "close failed"))
-	// 	return
-	// }
-	// ctrl.Ctx.Resp(utils.ResJson(200, nil))
+	o := orm.NewOrm()
+	_, err := o.Raw("UPDATE eat_rate_symbols SET enable = ?, end_time = ?", 0, time.Now().Unix() * 1000).Exec()
+	if err != nil {
+		// 处理错误
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "close failed"))
+		return
+	}
+	ctrl.Ctx.Resp(utils.ResJson(200, nil))
 }
 

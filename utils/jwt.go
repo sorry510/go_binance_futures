@@ -12,13 +12,13 @@ import (
 var secretKey, _ = config.String("web::secret_key")
 var key = []byte(secretKey)
 
-func GenerateToken(username string) (string, error) {
+func GenerateToken(username string, expires int) (string, error) {
   var t = jwt.NewWithClaims(jwt.SigningMethodHS256, 
     jwt.MapClaims{ 
       "Username": username,
       "jti": strconv.FormatInt(time.Now().UnixNano(), 10),
       "iat": time.Now().Unix(),
-      "exp": time.Now().Add(time.Hour * 24 * 30).Unix(), // 设置JWT的有效期为30天
+      "exp": time.Now().Add(time.Hour * time.Duration(expires)).Unix(), // 设置JWT的有效期为30天
     })
     signedToken, err := t.SignedString(key)
     if err != nil {
