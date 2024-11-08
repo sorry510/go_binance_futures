@@ -16,7 +16,27 @@ import (
 
 var pusher = notify.GetNotifyChannel()
 
+var flagSpotNew = 0
 func TryRush() {
+	
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
+	if (systemConfig.SpotNewEnable == 1) {
+		if (flagSpotNew == 0) {
+			logs.Info("spot rush bot start")
+			flagSpotNew = 1
+		}
+	} else {
+		if (flagSpotNew == 1) {
+			logs.Info("spot rush bot stop")
+			flagSpotNew = 0
+		}
+		return
+	}
+	
 	o := orm.NewOrm()
 	var coins []models.NewSymbols
 	o.QueryTable("new_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins) // 允许抢购的币
@@ -90,7 +110,26 @@ func TryRush() {
 	}
 }
 
+var flagSpotNotice = 0
 func NoticeAndAutoOrder() {
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
+	if (systemConfig.NoticeCoinEnable == 1) {
+		if (flagSpotNotice == 0) {
+			logs.Info("spot notice bot start")
+			flagSpotNotice = 1
+		}
+	} else {
+		if (flagSpotNotice == 1) {
+			logs.Info("spot notice bot stop")
+			flagSpotNotice = 0
+		}
+		return
+	}
+	
 	o := orm.NewOrm()
 	var coins []models.NoticeSymbols
 	o.QueryTable("notice_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).Filter("has_notice", 0).All(&coins) // 通知币列表
@@ -306,7 +345,26 @@ func trySellMarket(symbol string, quantity string, stepSize string) (res *spot_a
 	return res, err
 }
 
+var flagSpotListen = 0
 func ListenCoin() {
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
+	if (systemConfig.ListenCoinEnable == 1) {
+		if (flagSpotListen == 0) {
+			logs.Info("spot listen bot start")
+			flagSpotListen = 1
+		}
+	} else {
+		if (flagSpotListen == 1) {
+			logs.Info("spot listen bot stop")
+			flagSpotListen = 0
+		}
+		return
+	}
+	
 	o := orm.NewOrm()
 	var coins []models.ListenSymbols
 	o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins) // 通知币列表

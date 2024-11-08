@@ -13,7 +13,26 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
+var flagFuturesNotice = 0
 func NoticeAndAutoOrder() {
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
+	if (systemConfig.NoticeCoinEnable == 1) {
+		if (flagFuturesNotice == 0) {
+			logs.Info("futures notice bot start")
+			flagFuturesNotice = 1
+		}
+	} else {
+		if (flagFuturesNotice == 1) {
+			logs.Info("futures notice bot stop")
+			flagFuturesNotice = 0
+		}
+		return
+	}
+	
 	o := orm.NewOrm()
 	var coins []models.NoticeSymbols
 	o.QueryTable("notice_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).Filter("has_notice", 0).All(&coins) // 通知币列表

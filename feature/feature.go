@@ -16,39 +16,33 @@ import (
 
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
-	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/core/logs"
 )
 
-var profit, _ = config.String("trade::profit")
-var profit_float64, _ = strconv.ParseFloat(profit, 64)
-
-var loss, _ = config.String("trade::loss")
-var loss_float64, _ = strconv.ParseFloat(loss, 64)
-
-// var leverage_int, _ = strconv.Atoi(leverage)
-
-var buy_timeout, _ = config.String("coin::buy_timeout") // 秒级别
-var buy_timeout_int, _ = strconv.Atoi(buy_timeout)
-var buy_timeout_int64 = int64(buy_timeout_int)
-
-var max_count, _ = config.String("coin::max_count")
-var max_count_int, _ = strconv.Atoi(max_count)
-
-var order_type, _ = config.String("coin::order_type")
-var allow_long, _ = config.String("coin::allow_long")
-var allow_short, _ = config.String("coin::allow_short")
-
-var strategy_trade, _ = config.String("trade::strategy_trade") // 交易策略
-var strategy_coin, _ = config.String("trade::strategy_coin") // 选币策略
-
-var globalCoinStrategy = GetCoinStrategy(strategy_coin)
-var globalLineStrategy = GetLineStrategy(strategy_trade)
-
 var pusher = notify.GetNotifyChannel()
 
+var flagFutures = 0
 func StartTrade() {
-	// logs.Info("StartTrade")
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err)
+		return
+	}
+	if (systemConfig.FutureEnable == 1) {
+		if (flagFutures == 0) {
+			logs.Info("futures trade bot start")
+			flagFutures = 1
+		}
+	} else {
+		if (flagFutures == 1) {
+			logs.Info("futures trade bot stop")
+			flagFutures = 0
+		}
+		return
+	}
+	
+	globalCoinStrategy := GetCoinStrategy(systemConfig.FutureStrategyCoin) // 交易策略
+	globalLineStrategy := GetLineStrategy(systemConfig.FutureStrategyTrade) // 选币策略
 	
 	/************************************************寻找交易币种 start******************************************************************* */
 	allCoins, err := GetAllSymbols()
@@ -79,8 +73,8 @@ func StartTrade() {
 	
 	
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 start************************************************************ */
-	exclude_symbols_map := GetExcludeSymbolsMap()
-	cancelTimeoutOrder(exclude_symbols_map, allOpenOrders)
+	exclude_symbols_map := GetExcludeSymbolsMap(systemConfig.FutureExcludeSymbols)
+	cancelTimeoutOrder(exclude_symbols_map, allOpenOrders, int64(systemConfig.FutureBuyTimeout))
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 end************************************************************ */
 	
 	
@@ -93,8 +87,8 @@ func StartTrade() {
 			continue
 		}
 		
-		coin_profit_float64 := profit_float64 // 全局定义
-		coin_loss_float64 := loss_float64
+		coin_profit_float64 := 10000.0 // 全局定义
+		coin_loss_float64 := 10000.0 // 全局定义
 		coin_line_strategy := globalLineStrategy // 默认为全局
 		for _, coin := range allCoins {
 			if coin.Symbol == position.Symbol {
@@ -348,15 +342,15 @@ func StartTrade() {
 	
 	/*************************************************检查当前仓位数量 start************************************************************ */
 	allMyCount := positionCount + len(allOpenOrders)
-	if allMyCount >= max_count_int {
-		logs.Info("position+open order: %d, is over max%d, stop open new order", allMyCount, max_count_int)
+	if allMyCount >= systemConfig.FutureMaxCount {
+		logs.Info("position+open order: %d, is over max%d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
 		return
 	}
 	/*************************************************检查当前仓位数量  end************************************************************ */
 	
 	
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
-	if allow_long != "1" && allow_short != "1" {
+	if systemConfig.FutureAllowLong != 1 && systemConfig.FutureAllowShort != 1 {
 		logs.Info("the base config don't allow long and all short")
 		return
 	}
@@ -416,7 +410,7 @@ func StartTrade() {
 			}
 		}
 		
-		if allow_long == "1" && positionLong == nil && buyOrderLong == nil && canLang {
+		if systemConfig.FutureAllowLong == 1 && positionLong == nil && buyOrderLong == nil && canLang {
 			
 			buyPrice, _, err := binance.GetDepthAvgPrice(symbol) // 平均买价
 			if err == nil {
@@ -426,7 +420,7 @@ func StartTrade() {
 				
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 				
-				if order_type == "MARKET" {
+				if systemConfig.FutureOrderType == "MARKET" {
 					_, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
@@ -486,7 +480,7 @@ func StartTrade() {
 				isOpen = true
 			}
 		}
-		if allow_short == "1" && positionShort == nil && buyOrderShort == nil && canShort {
+		if systemConfig.FutureAllowShort == 1 && positionShort == nil && buyOrderShort == nil && canShort {
 			
 			_, sellPrice, err := binance.GetDepthAvgPrice(symbol) // 平均卖价
 			if err == nil {
@@ -496,7 +490,7 @@ func StartTrade() {
 				
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 				
-				if order_type == "MARKET" {
+				if systemConfig.FutureOrderType == "MARKET" {
 					_, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
@@ -563,10 +557,10 @@ func StartTrade() {
 	/*************************************************开仓 end************************************************************ */
 }
 
-func GetExcludeSymbolsMap() (map[string]bool) {
+// 排除自动交易的币
+func GetExcludeSymbolsMap(exclude_symbols_str string) (map[string]bool) {
 	exclude_symbols_map := make(map[string]bool)
-	exclude_symbolsStr , _ := config.String("coin::exclude_symbols") // 排除自动交易的币
-	exclude_symbols := strings.Split(exclude_symbolsStr, ",")
+	exclude_symbols := strings.Split(exclude_symbols_str, ",")
 	for _, symbol := range exclude_symbols {
 		exclude_symbols_map[symbol] = true
 	}
@@ -581,14 +575,14 @@ func GetAllSymbols() (symbols []*models.Symbols, err error) {
 }
 
 // 挂单已经超过设置的超时时间，撤销挂单
-func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futures.Order) {
+func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futures.Order, buy_timeout int64) {
 	nowTime := time.Now().Unix() * 1000 // 毫秒时间戳
 	for _, buyOrder := range allOpenOrders {
 		if _, exist := explodeSymbolsMap[buyOrder.Symbol]; exist {
 			// 在白名单内
 			continue
 		}
-		if nowTime < (buyOrder.UpdateTime + buy_timeout_int64 * 1000) {
+		if nowTime < (buyOrder.UpdateTime + buy_timeout * 1000) {
 			// 没有超过设置的超时
 			continue
 		}
@@ -683,6 +677,10 @@ func UpdateSymbolTradeInfo(symbols *models.Symbols) {
 
 // 更新所有币种的资金费率信息
 func UpdateSymbolsFundingRates() {
+	systemConfig, _ := utils.GetSystemConfig()
+	if (systemConfig.ListenFundingRateEnable == 0) {
+		return
+	}
 	res, err := binance.GetFundingRate(binance.FundingRateParams{})
 	if err == nil {
 		o := orm.NewOrm()
