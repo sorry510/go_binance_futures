@@ -170,6 +170,8 @@ secret_key = 12321
 username = admin
 # password
 password = admin
+# expires hours
+expires = 24
 # restart command
 commend_start = pm2 restart binance_futures
 # stop command
