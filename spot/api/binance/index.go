@@ -141,3 +141,59 @@ func OrderStopLoss(symbol string, quantity float64, stopPrice float64) (order *b
 		
 	return order, err
 }
+
+type OrderParams struct {
+	Symbol    string
+	OrderID   int64
+}
+
+type ListOrderParams struct {
+	OrderParams
+	StartTime int64
+	EndTime   int64
+	Limit     int
+}
+
+// 获取历史订单
+// @see https://binance-docs.github.io/apidocs/spot/cn/#user_data-36
+func GetOrders(listOrderParams ListOrderParams) (res []*binance.Order, err error) {
+	service := client.NewListOrdersService()
+	if listOrderParams.Symbol != "" {
+		service = service.Symbol(listOrderParams.Symbol)
+	}
+	if listOrderParams.OrderID != 0 {
+		service = service.OrderID(listOrderParams.OrderID)
+	}
+	if listOrderParams.StartTime != 0 {
+		service = service.StartTime(listOrderParams.StartTime)
+	}
+	if listOrderParams.EndTime != 0 {
+		service = service.EndTime(listOrderParams.EndTime)
+	}
+	if listOrderParams.Limit != 0 {
+		service = service.Limit(listOrderParams.Limit)
+	}
+	res, err = service.Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return nil, err
+	}
+	return res, err
+}
+
+// 获取某个订单
+func GetOrder(orderParams OrderParams) (res *binance.Order, err error) {
+	service := client.NewGetOrderService()
+	if orderParams.Symbol != "" {
+		service = service.Symbol(orderParams.Symbol)
+	}
+	if orderParams.OrderID != 0 {
+		service = service.OrderID(orderParams.OrderID)
+	}
+	res, err = service.Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return nil, err
+	}
+	return res, err
+}
