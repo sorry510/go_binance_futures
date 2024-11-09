@@ -5,6 +5,7 @@ import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
+	"go_binance_futures/rate"
 	_ "go_binance_futures/routers"
 	"go_binance_futures/spot"
 	"time"
@@ -140,6 +141,14 @@ func main() {
 
 			time.Sleep(time.Second * 30) // 30 秒更新一次
 		}
+	}()
+	
+	// 监听套利情况
+	go func() {
+		for {
+			rate.ListenRateEat()
+			time.Sleep(time.Hour * 1) // 1 小时更新一次
+		}	
 	}()
 	
 	// web

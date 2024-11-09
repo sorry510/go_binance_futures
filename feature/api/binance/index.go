@@ -30,9 +30,13 @@ func init() {
 	}
 }
 
-type ListOrderParams struct {
+type OrderParams struct {
 	Symbol    string
 	OrderID   int64
+}
+
+type ListOrderParams struct {
+	OrderParams
 	StartTime int64
 	EndTime   int64
 	Limit     int
@@ -51,6 +55,41 @@ func GetFuturesAccount() (res *futures.Account, err error) {
 // @returns /doc/position.js
 func GetPosition() (res []*futures.PositionRisk, err error){
 	res, err = futuresClient.NewGetPositionRiskService().Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return nil, err
+	}
+	// logs.Info(utils.ToJson(res))
+	return res, err
+}
+
+type IncomeParams struct {
+	Symbol     string
+	IncomeType string
+	StartTime  int64
+	EndTime    int64
+	Limit      int64
+}
+
+// @returns /doc/income.js
+func GetIncome(incomeParams IncomeParams) (res []*futures.IncomeHistory, err error){
+	query := futuresClient.NewGetIncomeHistoryService()
+	if (incomeParams.Symbol != "") {
+		query = query.Symbol(incomeParams.Symbol)
+	}
+	if (incomeParams.IncomeType != "") {
+		query = query.IncomeType(incomeParams.IncomeType)
+	}
+	if (incomeParams.StartTime != 0) {
+		query = query.StartTime(incomeParams.StartTime)
+	}
+	if (incomeParams.EndTime != 0) {
+		query = query.EndTime(incomeParams.EndTime)
+	}
+	if (incomeParams.Limit != 0) {
+		query = query.Limit(incomeParams.Limit)
+	}
+	res, err = query.Do(context.Background())
 	if err != nil {
 		logs.Error(err)
 		return nil, err
@@ -272,6 +311,23 @@ func GetOrders(listOrderParams ListOrderParams) (res []*futures.Order, err error
 	}
 	if listOrderParams.Limit != 0 {
 		service = service.Limit(listOrderParams.Limit)
+	}
+	res, err = service.Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return nil, err
+	}
+	return res, err
+}
+
+// 获取某个订单
+func GetOrder(orderParams OrderParams) (res *futures.Order, err error) {
+	service := futuresClient.NewGetOrderService()
+	if orderParams.Symbol != "" {
+		service = service.Symbol(orderParams.Symbol)
+	}
+	if orderParams.OrderID != 0 {
+		service = service.OrderID(orderParams.OrderID)
 	}
 	res, err = service.Do(context.Background())
 	if err != nil {
