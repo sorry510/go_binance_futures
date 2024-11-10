@@ -227,11 +227,11 @@ kline_4h.Close = [47.2, 34.3, ..] // 150 count
 ##### BTCUSDT data
 
 ```
-BTCUSDT.PercentChange = 1.1 // 涨跌幅
-BTCUSDT.Close = 70000.2 // 当前价格
-BTCUSDT.Open = 71000.4 // 开盘价
-BTCUSDT.Low = 65000.4 // 最低价
-BTCUSDT.High = 75000.2 // 最高价
+BTCUSDT.PercentChange = 1.1
+BTCUSDT.Close = 70000.2
+BTCUSDT.Open = 71000.4
+BTCUSDT.Low = 65000.4
+BTCUSDT.High = 75000.2
 ```
 
 ##### ETHUSDT data
@@ -242,4 +242,14 @@ ETHUSDT.Close = 2500.2 // 当前价格
 ETHUSDT.Open = 2400.45 // 开盘价
 ETHUSDT.Low = 2456.2 // 最低价
 ETHUSDT.High = 2840.3 // 最高价
+```
+
+##### now symbol data
+
+```
+NowSymbolPercentChange = -1.1
+NowSymbolClose = 2500.2
+NowSymbolOpen = 2400.45
+NowSymbolLow = 2456.2
+NowSymbolHigh = 2840.3
 ```

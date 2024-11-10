@@ -274,6 +274,11 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 		env[v.Symbol] = item
 		if (v.Symbol == symbol) {
 			env["NowPrice"] = close // 当前价格
+			env["NowSymbolPercentChange"] = v.PercentChange // 当前涨跌幅
+			env["NowSymbolClose"] = close
+			env["NowSymbolOpen"] = open
+			env["NowSymbolLow"] = low
+			env["NowSymbolHigh"] = high
 		}
 	}
 	
