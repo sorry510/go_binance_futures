@@ -338,3 +338,24 @@ func (pusher Slack) SpotListenKlineBase(params SpotListenParams) {
   )
   SlackApi(text)
 }
+
+func (pusher Slack) FuturesCustomStrategyTest(params FuturesTestParams) {
+	text := `
+>%s
+>{futures.side}：%s
+>{futures.strategy_name}：%s
+>{futures.time}：%s
+
+>%s
+
+> author <sorry510sf@gmail.com>`
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.PositionSide),
+    params.StrategyName,
+    nowTime(),
+    params.Remarks,
+  )
+  SlackApi(text)
+}

@@ -27,7 +27,7 @@ func (ctrl *StrategyTemplateController) Post() {
 	
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "add failed"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	templates.ID = id
@@ -71,7 +71,7 @@ func (ctrl *StrategyTemplateController) Edit() {
 	_, err := o.Update(&templates) // _ 是受影响的条数
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -91,7 +91,7 @@ func (ctrl *StrategyTemplateController) Delete() {
 	_, err := o.Delete(templates)
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "delete failed"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	ctrl.Ctx.Resp(map[string]interface{} {

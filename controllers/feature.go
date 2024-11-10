@@ -204,7 +204,7 @@ func (ctrl *FeatureController) BatchEdit() {
 	
 	if strings.HasSuffix(query, ",") {
 		query = strings.TrimSuffix(query, ",")
-		query += " WHERE enable = 1" // 只更新开启的交易对
+		// query += " WHERE enable = 1" // 只更新开启的交易对
 		_, err := orm.NewOrm().Raw(query).Exec()
 		if err != nil {
 			// 处理错误

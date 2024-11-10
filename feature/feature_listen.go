@@ -76,12 +76,12 @@ func klineCustomListen(coin models.ListenSymbols) {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
 			if err != nil {
 				logs.Error("Error Strategy Compile:", err.Error())
-				return
+				continue
 			}
 			output, err := expr.Run(program, env)
 			if err != nil {
 				logs.Error("Error Strategy Run:", err.Error())
-				return
+				continue
 			}
 			if output.(bool) {
 				if strategy.Type == "long" {

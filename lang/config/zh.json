@@ -25,6 +25,7 @@
     "error": "错误信息",
     "remarks": "备注",
     "strategy_name": "策略名称",
+    "custom_strategy_test": "合约自定义策略测试",
     
     "open_notice_title": "开仓合约交易通知",
     "close_notice_title": "平仓合约交易通知",
