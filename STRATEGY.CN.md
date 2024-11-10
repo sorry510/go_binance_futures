@@ -241,3 +241,13 @@ ETHUSDT.Open = 2400.45 // 开盘价
 ETHUSDT.Low = 2456.2 // 最低价
 ETHUSDT.High = 2840.3 // 最高价
 ```
+
+##### 所选币种的 数据
+
+```
+NowSymbolPercentChange = -1.1 // 涨跌幅
+NowSymbolClose = 2500.2 // 当前价格
+NowSymbolOpen = 2400.45 // 开盘价
+NowSymbolLow = 2456.2 // 最低价
+NowSymbolHigh = 2840.3 // 最高价
+```
