@@ -29,29 +29,31 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(symbol string) (canLong bool,
 		logs.Error("Error unmarshalling JSON:", err.Error())
 		return false, false
 	}
+	canLong = false
+	canShort = false
 	env := InitParseEnv(coin.Symbol, coin.Technology)
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
 			if err != nil {
 				logs.Error("Error Strategy Compile:", err.Error())
-				return false, false
+				continue
 			}
 			output, err := expr.Run(program, env)
 			if err != nil {
 				logs.Error("Error Strategy Run:", err.Error())
-				return false, false
+				continue
 			}
 			if output.(bool) {
 				if strategy.Type == "long" {
-					return true, false
+					canLong = true
 				} else if strategy.Type == "short" {
-					return false, true
+					canShort = true
 				}
 			}
 		}
 	}
-	return false, false
+	return canLong, canShort
 }
 
 func (TradeLine TradeLineCustom) CanOrderComplete(symbol string, positionSide string) (complete bool) {

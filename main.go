@@ -95,6 +95,14 @@ func main() {
 		}
 	}()
 	
+	// 轮训测试所有合约交易的币种策略(没轮10个)
+	go func() {
+		for {
+			feature.NoticeAllSymbolByStrategy()
+			time.Sleep(time.Second * 1) // 1秒间隔
+		}
+	}()
+	
 	// 新币抢购
 	go func() {
 		for {

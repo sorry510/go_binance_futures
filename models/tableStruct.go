@@ -16,6 +16,7 @@ type Config struct {
 	NoticeCoinEnable int `orm:"column(notice_coin_enable)" json:"notice_coin_enable"`
 	ListenCoinEnable int `orm:"column(listen_coin_enable)" json:"listen_coin_enable"`
 	ListenFundingRateEnable int `orm:"column(listen_funding_rate_enable)" json:"listen_funding_rate_enable"`
+	FutureTest int `orm:"column(future_test)" json:"future_test"`
 }
 
 // 切记需要注册model后才能使用

@@ -332,3 +332,24 @@ func (pusher DingDing) SpotListenKlineBase(params SpotListenParams) {
   )
   DingDingApi(text)
 }
+
+func (pusher DingDing) FuturesCustomStrategyTest(params FuturesTestParams) {
+	text := `
+## %s
+#### **{futures.side}**：<font color="#008000">%s</font>
+#### **{futures.strategy_name}**：<font color="#008000">%s</font>
+#### **{futures.time}**：%s
+
+> <font color="#008000">%s</font>
+
+> author <sorry510sf@gmail.com>`
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.PositionSide),
+    params.StrategyName,
+    nowTime(),
+    params.Remarks,
+  )
+  DingDingApi(text)
+}

@@ -25,6 +25,7 @@
     "error": "error",
     "remarks": "remarks",
     "strategy_name": "strategy name",
+    "custom_strategy_test": "custom strategy test",
     
     "open_notice_title": "futures open notice",
     "close_notice_title": "futures close notice",

@@ -81,8 +81,18 @@ type SpotListenParams struct {
 	DesiredPrice float64
 }
 
+type FuturesTestParams struct {
+	Title string
+	Symbol string
+	PositionSide string // long, short
+	Price float64
+	StrategyName string
+	Remarks string
+}
+
 type Pusher interface {
 	TestPusher()
+	FuturesCustomStrategyTest(params FuturesTestParams)
 	
 	FuturesOpenOrder(params FuturesOrderParams)
 	FuturesCloseOrder(params FuturesOrderParams)
