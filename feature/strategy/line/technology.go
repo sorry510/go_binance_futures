@@ -110,7 +110,7 @@ func calculateAverage(values []float64) float64 {
 // 新平均收益 = [(前一个周期的平均收益 × (周期 - 1)) + 当前周期的收益] / 周期
 // 新平均损失 = [(前一个周期的平均损失 × (周期 - 1)) + 当前周期的损失] / 周期
 func CalculateRSI(prices []float64, period int) ([]float64, error) {
-	if len(prices) < period {
+	if len(prices) <= period {
 		return nil, fmt.Errorf("price slice too short for period %d", period)
 	}
 	

@@ -228,6 +228,7 @@ func NoticeAllSymbolByStrategy() {
 		var strategyConfig technology.StrategyConfig
 		err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
 		if err != nil {
+			logs.Error("Error unmarshalling JSON Symbol: ", coin.Symbol)
 			logs.Error("Error unmarshalling JSON:", err.Error())
 			continue
 		}
@@ -237,11 +238,13 @@ func NoticeAllSymbolByStrategy() {
 			if strategy.Enable {
 				program, err := expr.Compile(strategy.Code, expr.Env(env))
 				if err != nil {
+					logs.Error("Error Strategy Compile Symbol: ", coin.Symbol)
 					logs.Error("Error Strategy Compile:", err.Error())
 					continue
 				}
 				output, err := expr.Run(program, env)
 				if err != nil {
+					logs.Error("Error Strategy Run Symbol: ", coin.Symbol)
 					logs.Error("Error Strategy Run:", err.Error())
 					continue
 				}
