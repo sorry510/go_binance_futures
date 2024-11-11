@@ -209,6 +209,9 @@ func NoticeAllSymbolByStrategy() {
 	
 	for _, coin := range coins {
 		nowTime := time.Now().Unix() * 1000 // 毫秒时间戳
+		if coin.Enable != 1 {
+			continue
+		}
 		
 		lastNoticeTime, exist := coinNoticeLastTimeMap[coin.Symbol]
 		if exist {

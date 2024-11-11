@@ -95,7 +95,7 @@ func main() {
 		}
 	}()
 	
-	// 轮训测试所有合约交易的币种策略(没轮10个)
+	// 轮训测试所有开启合约交易的币种策略(每轮10个)
 	go func() {
 		for {
 			feature.NoticeAllSymbolByStrategy()
