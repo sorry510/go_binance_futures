@@ -113,23 +113,6 @@
 cp conf/app.conf.example conf/app.conf
 ```
 
-### 策略配置参数说明
-> 自动买卖的策略需要看代码自行分析，有好的思路可以提供建议方案我来实现
-
-```
-[trade]
-# 是否开启合约交易的总开关
-future_enable = 1
-# 止盈百分比
-profit = 100
-# 止损百分比
-loss = 100
-# 购买策略(目前可以写 line1, line2, line3, line4, line5, line6, line7) 数字越大，策略越新
-strategy_trade = line0
-# 选币策略(目前可以写 coin1, coin2, coin3, coin4, line5)
-strategy_coin = coin5
-```
-
 ### 程序运行
 > !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
 
@@ -240,6 +223,6 @@ bee pack -be GOOS=windows
 - [X] 添加新的自动交易策略
 - [X] 批量配置自定义策略，使用模板方式导入，增加一个模板页面(可以导入策略模板)
 - [X] 更新代码提示功能
-- [ ] 将配置从 `conf` 缩减，改为可视化配置实时生效
+- [X] 将配置从 `conf` 缩减，改为可视化配置实时生效
 - [ ] 添加定时自动交易(现货买入和x倍合约等值对冲，吃资金费用)
 - [ ] 监控资金流入流出，报警通知
