@@ -29,6 +29,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 	var coinAllowShort = systemConfig.FutureAllowShort
 	
 	var tradeFutureTest = systemConfig.FutureTest
+	var tradeFutureTestNoticeLimitMin = systemConfig.FutureTestNoticeLimitMin
 	var tradeFutureEnable = systemConfig.FutureEnable
 	var tradeStrategyTrade = systemConfig.FutureStrategyTrade
 	var tradeStrategyCoin = systemConfig.FutureStrategyCoin
@@ -54,6 +55,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"coinAllowShort": coinAllowShort,
 			
 			"tradeFutureTest": tradeFutureTest,
+			"tradeFutureTestNoticeLimitMin": tradeFutureTestNoticeLimitMin,
 			"tradeFutureEnable": tradeFutureEnable,
 			"tradeStrategyTrade": tradeStrategyTrade,
 			"tradeStrategyCoin": tradeStrategyCoin,

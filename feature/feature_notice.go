@@ -215,8 +215,8 @@ func NoticeAllSymbolByStrategy() {
 		
 		lastNoticeTime, exist := coinNoticeLastTimeMap[coin.Symbol]
 		if exist {
-			if (nowTime - lastNoticeTime) < 10 * 60 * 1000 {
-				// 10min 通知一次
+			if (nowTime - lastNoticeTime) < int64(systemConfig.FutureTestNoticeLimitMin) * 60 * 1000 {
+				// x min 通知一次
 				continue
 			}
 		}
@@ -235,7 +235,7 @@ func NoticeAllSymbolByStrategy() {
 		logs.Info("futures custom strategy test, symbol: ", coin.Symbol)
 		env := line.InitParseEnv(coin.Symbol, coin.Technology)
 		for _, strategy := range strategyConfig {
-			if strategy.Enable {
+			if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
 				program, err := expr.Compile(strategy.Code, expr.Env(env))
 				if err != nil {
 					logs.Error("Error Strategy Compile Symbol: ", coin.Symbol)
