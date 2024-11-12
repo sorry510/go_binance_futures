@@ -23,5 +23,5 @@ type StrategyConfig [] struct {
 	Name   string `json:"name"`   // 策略名称
 	Enable bool   `json:"enable"` // 是否启用 
 	Code   string `json:"code"`   // 自定义规则的表达式
-	Type   string `json:"type"`   // long or short
+	Type   string `json:"type"`   // long,short,close_long,close_short
 }

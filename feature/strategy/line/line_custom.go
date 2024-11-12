@@ -5,7 +5,6 @@ import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
 	"go_binance_futures/technology"
-	"go_binance_futures/utils"
 	"strconv"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -34,7 +33,7 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(symbol string) (canLong bool,
 	canShort = false
 	env := InitParseEnv(coin.Symbol, coin.Technology)
 	for _, strategy := range strategyConfig {
-		if strategy.Enable {
+		if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
 			if err != nil {
 				logs.Error("Error Strategy Compile Symbol: ", coin.Symbol)
@@ -53,14 +52,66 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(symbol string) (canLong bool,
 				} else if strategy.Type == "short" {
 					canShort = true
 				}
+				break
 			}
 		}
 	}
 	return canLong, canShort
 }
 
+// 达到止盈或止损率之后的判定是否可以平仓
 func (TradeLine TradeLineCustom) CanOrderComplete(symbol string, positionSide string) (complete bool) {
-	lines, err := binance.GetKlineData(symbol, "3m", 2)
+	var coin models.Symbols
+	o := orm.NewOrm()
+	o.QueryTable("symbols").Filter("Symbol", symbol).One(&coin)
+	
+	var strategyConfig technology.StrategyConfig
+	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
+	if err != nil {
+		logs.Error("Error unmarshalling JSON Symbol: ", coin.Symbol)
+		logs.Error("Error unmarshalling JSON:", err.Error())
+		return false
+	}
+	findStrategy := false
+	env := InitParseEnv(coin.Symbol, coin.Technology)
+	for _, strategy := range strategyConfig {
+		if strategy.Enable && (strategy.Type == "close_long" || strategy.Type == "close_short") {
+			if strategy.Type == "close_long" && positionSide != "LONG" {
+				// 平多仓的策略，当前仓位不是多仓，跳过
+				continue
+			}
+			if strategy.Type == "close_short" && positionSide != "SHORT" {
+				// 平空仓的策略，当前仓位不是空仓，跳过
+				continue
+			}
+			
+			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			if err != nil {
+				logs.Error("Error Strategy Compile Symbol: ", coin.Symbol)
+				logs.Error("Error Strategy Compile:", err.Error())
+				continue
+			}
+			output, err := expr.Run(program, env)
+			if err != nil {
+				logs.Error("Error Strategy Run Symbol: ", coin.Symbol)
+				logs.Error("Error Strategy Run:", err.Error())
+				continue
+			}
+			findStrategy = true // 发现有正常能执行的平仓策略
+			if output.(bool) {
+				return true
+			}
+		}
+	}
+	if !findStrategy {
+		// 没有定义平仓策略，使用简单的策略平仓
+		return TradeLine.SimpleCloseStrategy(symbol, positionSide)
+	}
+	return false
+}
+
+func (TradeLine TradeLineCustom) SimpleCloseStrategy(symbol string, positionSide string) (stop bool) {
+	lines, err := binance.GetKlineData(symbol, "5m", 2)
 	if err != nil {
 		return true
 	}
@@ -75,35 +126,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(symbol string, positionSide st
 	}
 }
 
-// 达到止盈或止损前判定是否可以平仓
-// 1. 1天的kline线，ma7和ma3金叉，ma15和ma3金叉，ma3线3连跌
+// 达到止盈或止损止前的判定是否可以平仓
 func (TradeLine TradeLineCustom) AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool) {
-	if nowProfit < 3 || nowProfit > -3 {
-		return false
-	}
-	return TradeLine.MarketReversal(position.Symbol, position.PositionSide)
-}
-
-func (TradeLine3 TradeLineCustom) MarketReversal(symbol string, positionSide string) (isReversal bool) {
-	kline_1d, err1 := binance.GetKlineData(symbol, "1d", 50)
-	if err1 != nil {
-		return false
-	}
-	kline_1d_close := GetLineClosePrices(kline_1d)
-	
-	ma1d_3, _ := CalculateSimpleMovingAverage(kline_1d_close, 3) // ma3
-	ma1d_7, _ := CalculateSimpleMovingAverage(kline_1d_close, 7) // ma7
-	ma1d_15, _ := CalculateSimpleMovingAverage(kline_1d_close, 15) // ma15
-	
-	if positionSide== "LONG" {
-		if Kdj(ma1d_7, ma1d_3, 4) && Kdj(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
-			return true
-		}
-	}
-	if positionSide == "SHORT" {
-		if Kdj(ma1d_3, ma1d_7, 4) && Kdj(ma1d_3, ma1d_15, 4) && utils.IsDesc(ma1d_3[0:3]) {
-			return true
-		}
-	}
 	return false
 }
