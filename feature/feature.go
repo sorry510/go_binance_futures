@@ -109,8 +109,8 @@ func StartTrade() {
 		
 		unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
 		leverage_float64, _ := strconv.ParseFloat(position.Leverage, 64)
-		entryPrice, _ := strconv.ParseFloat(position.EntryPrice, 64)
-		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * entryPrice)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
+		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
+		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		
 		
 		if _, exist := exclude_symbols_map[position.Symbol]; exist { // 在白名单内
