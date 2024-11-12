@@ -215,8 +215,8 @@ func NoticeAllSymbolByStrategy() {
 		
 		lastNoticeTime, exist := coinNoticeLastTimeMap[coin.Symbol]
 		if exist {
-			if (nowTime - lastNoticeTime) < 3 * 60 * 1000 {
-				// 5min 通知一次
+			if (nowTime - lastNoticeTime) < 10 * 60 * 1000 {
+				// 10min 通知一次
 				continue
 			}
 		}
@@ -255,7 +255,8 @@ func NoticeAllSymbolByStrategy() {
 						PositionSide: strategy.Type,
 						StrategyName: strategy.Name,
 						Remarks: strategy.Code,
-					}) 
+					})
+					coinNoticeLastTimeMap[coin.Symbol] = nowTime
 				}
 			}
 		}
