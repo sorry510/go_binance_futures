@@ -46,7 +46,7 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(symbol string) (canLong bool,
 				logs.Error("Error Strategy Run:", err.Error())
 				continue
 			}
-			if output.(bool) {
+			if result, ok := output.(bool); ok && result {
 				if strategy.Type == "long" {
 					canLong = true
 				} else if strategy.Type == "short" {
@@ -98,7 +98,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(symbol string, positionSide st
 				continue
 			}
 			findStrategy = true // 发现有正常能执行的平仓策略
-			if output.(bool) {
+			if result, ok := output.(bool); ok && result {
 				return true
 			}
 		}

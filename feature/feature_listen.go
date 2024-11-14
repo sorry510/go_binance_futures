@@ -83,7 +83,7 @@ func klineCustomListen(coin models.ListenSymbols) {
 				logs.Error("Error Strategy Run:", err.Error())
 				continue
 			}
-			if output.(bool) {
+			if result, ok := output.(bool); ok && result {
 				if strategy.Type == "long" {
 					coin.LastNoticeTime = time.Now().Unix() * 1000
 					coin.LastNoticeType = "up"

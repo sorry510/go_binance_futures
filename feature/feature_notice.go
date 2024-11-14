@@ -248,7 +248,7 @@ func NoticeAllSymbolByStrategy() {
 					logs.Error("Error Strategy Run:", err.Error())
 					continue
 				}
-				if output.(bool) {
+				if result, ok := output.(bool); ok && result {
 					pusher.FuturesCustomStrategyTest(notify.FuturesTestParams{
 						Title: lang.Lang("futures.custom_strategy_test"),
 						Symbol: coin.Symbol,
