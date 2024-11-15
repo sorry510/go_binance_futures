@@ -151,12 +151,12 @@ slack_channel_id = ""
 # external links
 links = [{"url": "url1", "title": "title1"}]
 ```
-![交易配置](./img/en/config.jpg)
+![交易配置](./img/en/config.png)
 
 ## important
 - The network must be located outside the mainland (as the Binance interface cannot be accessed normally in mainland China). The proxy configuration for Binance API has been added (websocket has no proxy configuration due to component usage issues, and is only used to update the latest contract currency prices in the background). If there are available proxies, they can also be used normally
 -Apply for api_key address: [Binance API Management Page]（ https://www.binance.com/cn/usercenter/settings/api-management )
-- If your account already has contract positions, please be sure to configure 'excludeSymbols' in the' app. conf 'file to exclude coins that you do not want to use this program for automatic trading. Otherwise, all positions will be automatically closed according to the trading strategy rules by default
+- If your account already has contract positions, please be sure to exclude coins that you do not want to use this program for automatic trading on index page. Otherwise, all positions will be automatically closed according to the trading strategy rules by default
 - !!! Please note that after modifying the app.cnf configuration, the program must be restarted, otherwise the configuration will not take effect!!!
 -Please ensure that your account has sufficient USDT, otherwise placing an order will result in an error
 - Do not exceed 20 notifications within 1 minute of DingTalk push, otherwise the IP address will be blocked for a period of time and the push will not be successful
