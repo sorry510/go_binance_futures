@@ -3,7 +3,7 @@ appname = binance_futures
 # zh, en
 language = zh
 log = 1
-debug = 1
+debug = 0
 
 [binance]
 api_key = ""

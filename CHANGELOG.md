@@ -1,5 +1,8 @@
 ### Change Log
 
+## v0.0.43
+- update conf
+
 ## v0.0.42
 - fixed bug
 
