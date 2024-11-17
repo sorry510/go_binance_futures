@@ -3,7 +3,6 @@ package feature
 import (
 	"encoding/json"
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/feature/strategy/coin"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
@@ -183,12 +182,13 @@ func NoticeAndAutoOrder() {
 	}
 }
 
-var coinNoticeLastTimeMap = make(map[string]int64) // 3min 通知一次
+var coinNoticeLastTimeMap = make(map[string]int64) // limit 通知一次
 var FuturesTestNotice = 0
+var offsetId = 0
 func NoticeAllSymbolByStrategy() {
 	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
-		logs.Error("GetSystemConfig:", err)
+		logs.Error("GetSystemConfig:", err.Error())
 		return
 	}
 	if (systemConfig.FutureTest == 1) {
@@ -204,8 +204,22 @@ func NoticeAllSymbolByStrategy() {
 		return
 	}
 	
-	coins, _ := GetAllSymbols()
-	coins = coin.GetRandArr(coins, 10) // 随机10个
+	logs.Info("offsetId: ", offsetId)
+	var coins []*models.Symbols
+	coins, err = getSymbols(offsetId) // 按照顺序 10 个币
+	if err != nil {
+		logs.Error("NoticeAllSymbolByStrategy:", err.Error())
+		return
+	}
+	if len(coins) == 0 {
+		offsetId = 0
+		coins, _ = getSymbols(offsetId)
+	}
+	if (len(coins) > 0) {
+		offsetId = int(coins[len(coins) - 1].ID)
+	} else {
+		offsetId += 10 // 避免无限处于循环
+	}
 	
 	for _, coin := range coins {
 		nowTime := time.Now().Unix() * 1000 // 毫秒时间戳
@@ -261,4 +275,15 @@ func NoticeAllSymbolByStrategy() {
 			}
 		}
 	}
+}
+
+func getSymbols(offsetId int) (coins []*models.Symbols, err error) {
+	_, err = orm.NewOrm().
+		QueryTable("symbols").
+		Filter("enable", 1).
+		Filter("ID__gt", offsetId).
+		OrderBy("ID").
+		Limit(10).
+		All(&coins) // 按照顺序 10个币
+	return coins, err
 }
