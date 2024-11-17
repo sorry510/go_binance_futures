@@ -257,10 +257,10 @@ func (ctrl *FeatureController) TestStrategyRule() {
 		leverage_float64, _ := strconv.ParseFloat(position.Leverage, 64)
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
-		env["ORI"] = nowProfit
+		env["ROI"] = nowProfit
 		env["Position"] = positions[0]
 	} else {
-		env["ORI"] = 10.2
+		env["ROI"] = 10.2
 		env["Position"] = futures.PositionRisk{
 			EntryPrice: "68000.0",
 			MarkPrice: "72000.0",

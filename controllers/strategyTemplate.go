@@ -117,7 +117,7 @@ func (ctrl *StrategyTemplateController) TestStrategyRule() {
 		return
 	}
 	env := line.InitParseEnv(symbols.Symbol, symbols.Technology)
-	env["ORI"] = 10.2
+	env["ROI"] = 10.2
 	env["Position"] = futures.PositionRisk{
 		EntryPrice: "68000.0",
 		MarkPrice: "72000.0",
