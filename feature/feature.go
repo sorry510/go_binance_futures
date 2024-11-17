@@ -59,7 +59,7 @@ func StartTrade() {
 	
 	
 	/************************************************获取账户信息 start******************************************************************* */
-	positions, err := binance.GetPosition()
+	positions, err := binance.GetPosition(binance.PositionParams{})
 	if err != nil {
 		logs.Error("GetPosition err:", err)
 		return
@@ -90,8 +90,10 @@ func StartTrade() {
 		coin_profit_float64 := 10000.0 // 全局定义
 		coin_loss_float64 := 10000.0 // 全局定义
 		coin_line_strategy := globalLineStrategy // 默认为全局
+		var findCoin *models.Symbols
 		for _, coin := range allCoins {
 			if coin.Symbol == position.Symbol {
+				findCoin = coin
 				// 自定义可以覆盖全局
 				if coin.Profit != "0" {
 					coin_profit_float64, _ = strconv.ParseFloat(coin.Profit, 64)
@@ -112,11 +114,15 @@ func StartTrade() {
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		
-		
 		if _, exist := exclude_symbols_map[position.Symbol]; exist { // 在白名单内
 			continue
 		}
-		if coin_line_strategy.AutoStopOrder(position, nowProfit) { // 触发策略,风向改变,强制平仓
+		closeResult := coin_line_strategy.AutoStopOrder(strategy.CloseParams{
+			Symbols: findCoin,
+			Position: position,
+			NowProfit: nowProfit,
+		})
+		if closeResult.Complete { // 触发策略,风向改变,强制平仓
 			logs.Info("%s:auto_stop_start", position.Symbol)
 			if position.PositionSide == "LONG" {
 				_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
@@ -190,7 +196,13 @@ func StartTrade() {
 			continue
 		}
 		if nowProfit <= -coin_loss_float64 { // 平仓(止损)
-			if coin_line_strategy.CanOrderComplete(position.Symbol, position.PositionSide) { // 
+			// position.Symbol, position.PositionSide
+			closeResult := coin_line_strategy.CanOrderComplete(strategy.CloseParams{
+				Symbols: findCoin,
+				Position: position,
+				NowProfit: nowProfit,
+			})
+			if closeResult.Complete { // 
 				if position.PositionSide == "LONG" {
 					_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
@@ -263,7 +275,12 @@ func StartTrade() {
 			}
 		}
 		if nowProfit >= coin_profit_float64 { // 平仓(止盈)
-			if coin_line_strategy.CanOrderComplete(position.Symbol, position.PositionSide) {
+			closeResult := coin_line_strategy.CanOrderComplete(strategy.CloseParams{
+				Symbols: findCoin,
+				Position: position,
+				NowProfit: nowProfit,
+			})
+			if closeResult.Complete {
 				if position.PositionSide == "LONG" {
 					_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
@@ -373,8 +390,10 @@ func StartTrade() {
 			// 独立的策略
 			coin_line_strategy = GetLineStrategy(coin.StrategyType)
 		}
-		canLang, canShort := coin_line_strategy.GetCanLongOrShort(symbol)
-		if !canLang && !canShort {
+		openResult := coin_line_strategy.GetCanLongOrShort(strategy.OpenParams{
+			Symbols: coin,
+		})
+		if !openResult.CanLong && !openResult.CanShort {
 			logs.Info("%s:not meeting the order conditions", symbol)
 			continue
 		}
@@ -410,8 +429,7 @@ func StartTrade() {
 			}
 		}
 		
-		if systemConfig.FutureAllowLong == 1 && positionLong == nil && buyOrderLong == nil && canLang {
-			
+		if systemConfig.FutureAllowLong == 1 && positionLong == nil && buyOrderLong == nil && openResult.CanLong {
 			buyPrice, _, err := binance.GetDepthAvgPrice(symbol) // 平均买价
 			if err == nil {
 				buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
@@ -480,7 +498,7 @@ func StartTrade() {
 				isOpen = true
 			}
 		}
-		if systemConfig.FutureAllowShort == 1 && positionShort == nil && buyOrderShort == nil && canShort {
+		if systemConfig.FutureAllowShort == 1 && positionShort == nil && buyOrderShort == nil && openResult.CanShort {
 			
 			_, sellPrice, err := binance.GetDepthAvgPrice(symbol) // 平均卖价
 			if err == nil {
@@ -736,8 +754,6 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 	switch (name) {
 		case "custom":
 			lineStrategy = line.TradeLineCustom{}
-		case "line0":
-			lineStrategy = line.TradeLine0{}
 		case "line1":
 			lineStrategy = line.TradeLine1{}
 		case "line2":
@@ -753,7 +769,7 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 		case "line7":
 			lineStrategy = line.TradeLine7{}
 		default:
-			lineStrategy = line.TradeLine0{}
+			lineStrategy = line.TradeLine1{}
 	}
 	return lineStrategy
 }

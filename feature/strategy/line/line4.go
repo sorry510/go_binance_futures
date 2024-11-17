@@ -2,6 +2,7 @@ package line
 
 import (
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/feature/strategy"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
@@ -19,11 +20,15 @@ type TradeLine4 struct {
 // 3. rsi6 < 80, rsi14 < 75
 // 4. 基本盘逻辑: btc 的跌幅大于 5%，当前所有币种跌的数量>= 75% 时禁止做多，反之禁止做空
 // 做空相反
-func (TradeLine4 TradeLine4) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
-	kline_1h, err2 := binance.GetKlineData(symbol, "2h", 24)
+func (TradeLine4 TradeLine4) GetCanLongOrShort(openParams strategy.OpenParams) (openResult strategy.OpenResult) {
+	symbols := openParams.Symbols
+	openResult.CanLong = false
+	openResult.CanShort = false
+	
+	kline_6h, err1 := binance.GetKlineData(symbols.Symbol, "6h", 50)
+	kline_1h, err2 := binance.GetKlineData(symbols.Symbol, "2h", 24)
 	if err1 != nil || err2 != nil {
-		return false, false
+		return openResult
 	}
 	kline_6h_close := GetLineClosePrices(kline_6h)
 	
@@ -33,46 +38,59 @@ func (TradeLine4 TradeLine4) GetCanLongOrShort(symbol string) (canLong bool, can
 	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
 	if (rsi6 == nil || rsi14 == nil || len(rsi6) < 2 || len(rsi14) < 2) {
 		// 开盘小于 4.5 天
-		return false, false
+		return openResult
 	}
 	baseCanLong, baseCanShort := BaseCheckCanLongOrShort() // 基本盘
 	isRsi := rsi6[0] < 80 && rsi6[0] > 30 && rsi14[0] < 75 && rsi14[0] > 28
 	// logs.Info(symbol, Kdj(ma6h_3, ma6h_7, 4), Kdj(ma6h_7, ma6h_3, 4), rsi6[1], rsi14[1])
 	if Kdj(ma6h_3, ma6h_7, 4) && TradeLine4.checkLongLine(kline_1h) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
-		return true, false
+		openResult.CanLong = true
+		return openResult
 	}
 	if Kdj(ma6h_7, ma6h_3, 4) && TradeLine4.checkShortLine(kline_1h)&& isRsi && baseCanShort {
-		return false, true
+		openResult.CanShort = true
+		return openResult
 	}
-	return false, false
+	return openResult
 }
 
 // 达到止盈或止损后判断是否可以平仓
 // 5min 最新价格是否跌破前一个5min的收盘价
-func (TradeLine4 TradeLine4) CanOrderComplete(symbol string, positionSide string) (complete bool) {
-	lines, err := binance.GetKlineData(symbol, "5m", 2)
+func (TradeLine4 TradeLine4) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	symbols := closeParams.Symbols // 交易对
+	position := closeParams.Position // 当前仓位
+	closeResult.Complete = false
+	
+	lines, err := binance.GetKlineData(symbols.Symbol, "5m", 2)
 	if err != nil {
-		return true
+		closeResult.Complete = true
+		return closeResult
 	}
 	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
 	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
-	if positionSide == "LONG" {
-		return close0 < close1 // 价格在下跌中
-	} else if positionSide == "SHORT" {
-		return close0 > close1 // 价格在上涨中
+	if position.PositionSide == "LONG" {
+		closeResult.Complete = close0 < close1 // 价格在下跌中
+	} else if position.PositionSide == "SHORT" {
+		closeResult.Complete = close0 > close1 // 价格在上涨中
 	} else {
-		return false
+		closeResult.Complete = true
 	}
+	return closeResult
 }
 
 // 达到止盈或止损前判定是否可以平仓
 // 1. 1天的kline线，ma7和ma3金叉，ma15和ma3金叉，ma3线3连跌
-func (TradeLine4 TradeLine4) AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool) {
-	if nowProfit < 3 || nowProfit > -3 {
-		return false
+func (TradeLine4 TradeLine4) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	position := closeParams.Position // 当前仓位
+	closeResult.Complete = false
+	
+	if closeParams.NowProfit < 3 || closeParams.NowProfit > -3 {
+		closeResult.Complete = false
+		return closeResult
 	}
-	return TradeLine4.MarketReversal(position.Symbol, position.PositionSide)
+	closeResult.Complete = TradeLine4.MarketReversal(position.Symbol, position.PositionSide)
+	return closeResult
 }
 
 func (TradeLine4 TradeLine4) MarketReversal(symbol string, positionSide string) (isReversal bool) {

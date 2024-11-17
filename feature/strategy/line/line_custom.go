@@ -3,12 +3,10 @@ package line
 import (
 	"encoding/json"
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/models"
+	"go_binance_futures/feature/strategy"
 	"go_binance_futures/technology"
 	"strconv"
 
-	"github.com/adshao/go-binance/v2/futures"
-	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/expr-lang/expr"
 )
@@ -17,20 +15,18 @@ type TradeLineCustom struct {
 }
 
 // 交易逻辑: 自定义逻辑
-func (TradeLine TradeLineCustom) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	var coin models.Symbols
-	o := orm.NewOrm()
-	o.QueryTable("symbols").Filter("Symbol", symbol).One(&coin)
+func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParams) (openResult strategy.OpenResult) {
+	coin := openParams.Symbols
+	openResult.CanLong = false
+	openResult.CanShort = false
 	
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
 	if err != nil {
 		logs.Error("Error unmarshalling JSON Symbol: ", coin.Symbol)
 		logs.Error("Error unmarshalling JSON:", err.Error())
-		return false, false
+		return openResult
 	}
-	canLong = false
-	canShort = false
 	env := InitParseEnv(coin.Symbol, coin.Technology)
 	for _, strategy := range strategyConfig {
 		if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
@@ -48,39 +44,41 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(symbol string) (canLong bool,
 			}
 			if result, ok := output.(bool); ok && result {
 				if strategy.Type == "long" {
-					canLong = true
+					openResult.CanLong = true
 				} else if strategy.Type == "short" {
-					canShort = true
+					openResult.CanShort = true
 				}
 				break
 			}
 		}
 	}
-	return canLong, canShort
+	return openResult
 }
 
 // 达到止盈或止损率之后的判定是否可以平仓
-func (TradeLine TradeLineCustom) CanOrderComplete(symbol string, positionSide string) (complete bool) {
-	var coin models.Symbols
-	o := orm.NewOrm()
-	o.QueryTable("symbols").Filter("Symbol", symbol).One(&coin)
+func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	coin := closeParams.Symbols // 交易对
+	position := closeParams.Position // 当前仓位
+	closeResult.Complete = false
 	
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
 	if err != nil {
 		logs.Error("Error unmarshalling JSON Symbol: ", coin.Symbol)
 		logs.Error("Error unmarshalling JSON:", err.Error())
-		return false
+		return closeResult
 	}
 	findStrategy := false
 	env := InitParseEnv(coin.Symbol, coin.Technology)
+	env["ROI"] = closeParams.NowProfit // 当前收益率
+	env["Position"] = position // 当前仓位信息
 	for _, strategy := range strategyConfig {
 		if strategy.Enable && (strategy.Type == "close_long" || strategy.Type == "close_short") {
-			if strategy.Type == "close_long" && positionSide != "LONG" {
+			if strategy.Type == "close_long" && position.PositionSide != "LONG" {
 				// 平多仓的策略，当前仓位不是多仓，跳过
 				continue
 			}
-			if strategy.Type == "close_short" && positionSide != "SHORT" {
+			if strategy.Type == "close_short" && position.PositionSide != "SHORT" {
 				// 平空仓的策略，当前仓位不是空仓，跳过
 				continue
 			}
@@ -99,34 +97,48 @@ func (TradeLine TradeLineCustom) CanOrderComplete(symbol string, positionSide st
 			}
 			findStrategy = true // 发现有正常能执行的平仓策略
 			if result, ok := output.(bool); ok && result {
-				return true
+				closeResult.Complete = true
 			}
 		}
 	}
 	if !findStrategy {
 		// 没有定义平仓策略，使用简单的策略平仓
-		return TradeLine.SimpleCloseStrategy(symbol, positionSide)
+		return TradeLine.simpleCloseStrategy(closeParams)
 	}
-	return false
-}
-
-func (TradeLine TradeLineCustom) SimpleCloseStrategy(symbol string, positionSide string) (stop bool) {
-	lines, err := binance.GetKlineData(symbol, "5m", 2)
-	if err != nil {
-		return true
-	}
-	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
-	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
-	if positionSide == "LONG" {
-		return close0 < close1 // 价格在下跌中
-	} else if positionSide == "SHORT" {
-		return close0 > close1 // 价格在上涨中
-	} else {
-		return false
-	}
+	return closeResult
 }
 
 // 达到止盈或止损止前的判定是否可以平仓
-func (TradeLine TradeLineCustom) AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool) {
-	return false
+func (TradeLine TradeLineCustom) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	closeResult.Complete = false
+	return closeResult
+}
+
+func (TradeLine TradeLineCustom) simpleCloseStrategy(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	coin := closeParams.Symbols // 交易对
+	position := closeParams.Position // 当前仓位
+	closeResult.Complete = false
+	
+	if closeParams.NowProfit < 3 || closeParams.NowProfit > -3 {
+		// 收益率小于3%或者大于-3%, 不平仓
+		closeResult.Complete = false
+		return closeResult
+	}
+	
+	lines, err := binance.GetKlineData(coin.Symbol, "5m", 2)
+	if err != nil {
+		closeResult.Complete = true
+		return closeResult
+	}
+	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
+	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
+	if position.PositionSide == "LONG" {
+		closeResult.Complete = close0 < close1 // 价格在下跌中
+	} else if position.PositionSide == "SHORT" {
+		closeResult.Complete = close0 > close1 // 价格在上涨中
+	} else {
+		// BOTH 不处理双向持仓类型
+		closeResult.Complete = true
+	}
+	return closeResult
 }

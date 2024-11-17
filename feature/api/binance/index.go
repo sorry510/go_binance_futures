@@ -52,9 +52,17 @@ func GetFuturesAccount() (res *futures.Account, err error) {
 	return res, err
 }
 
+type PositionParams struct {
+	Symbol string
+}
+
 // @returns /doc/position.js
-func GetPosition() (res []*futures.PositionRisk, err error){
-	res, err = futuresClient.NewGetPositionRiskService().Do(context.Background())
+func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, err error){
+	query := futuresClient.NewGetPositionRiskService()
+	if (positionParams.Symbol != "") {
+		query = query.Symbol(positionParams.Symbol)
+	}
+	res, err = query.Do(context.Background())
 	if err != nil {
 		logs.Error(err)
 		return nil, err

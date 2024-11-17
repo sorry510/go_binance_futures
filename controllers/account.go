@@ -53,7 +53,7 @@ func (ctrl *AccountController) GetBinanceFuturesAccount() {
 }
 
 func (ctrl *AccountController) GetBinanceFuturesPositions() {
-	allPositions, err := binance.GetPosition()
+	allPositions, err := binance.GetPosition(binance.PositionParams{})
 	if err != nil {
 		ctrl.Ctx.Resp(map[string]interface{} {
 			"code": 400,

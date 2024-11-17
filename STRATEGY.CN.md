@@ -251,3 +251,17 @@ NowSymbolOpen = 2400.45 // 开盘价
 NowSymbolLow = 2456.2 // 最低价
 NowSymbolHigh = 2840.3 // 最高价
 ```
+
+##### 当前仓位的持仓信息
+> string -> float: float(Position.xxx)
+
+```
+ORI = 10.2 // 收益率%
+Position.EntryPrice = "2500.2" // 持仓价格
+Position.MarkPrice = "2400.2" // 当前的标记价格
+Position.PositionAmt = "100.2" // 当前的持仓数量，做空是负数
+Position.UnRealizedProfit = "32.2" // 当前收益 usdt, 亏损是负数
+Position.Leverage = "3" // 杠杆
+Position.PositionSide = "LONG" // 合约方向
+Position.MarginType = "CROSS" // 逐仓
+```
