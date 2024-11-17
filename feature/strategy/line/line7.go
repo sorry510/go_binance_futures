@@ -2,10 +2,9 @@ package line
 
 import (
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/feature/strategy"
 	"go_binance_futures/utils"
 	"strconv"
-
-	"github.com/adshao/go-binance/v2/futures"
 )
 
 type TradeLine7 struct {
@@ -17,18 +16,22 @@ type TradeLine7 struct {
 // 做多逻辑
 // 1. 价格跌破最低轨道(kc2下轨)，然后突破到次低轨道(kc1下轨)时，做多，建议止盈50%位置在 kc1 中轨附近位置，剩余 50% 止盈50%位置在 kc1 上轨附近位置
 // 做空相反
-func (TradeLine TradeLine7) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
+func (TradeLine TradeLine7) GetCanLongOrShort(openParams strategy.OpenParams) (openResult strategy.OpenResult) {
+	symbols := openParams.Symbols
+	openResult.CanLong = false
+	openResult.CanShort = false
+	
 	limit := 150
 	period := 50 
 	multiplier1 := 2.75 // 窄通道
 	multiplier2 := 3.75 // 宽通道
-	kline_1, err := binance.GetKlineData(symbol, "4h", limit)
+	kline_1, err := binance.GetKlineData(symbols.Symbol, "4h", limit)
 	if err != nil {
-		return false, false
+		return openResult
 	}
-	kline_2, err := binance.GetKlineData(symbol, "12h", limit)
+	kline_2, err := binance.GetKlineData(symbols.Symbol, "12h", limit)
 	if err != nil {
-		return false, false
+		return openResult
 	}
 	// kline_3, err := binance.GetKlineData(symbol, "1d", limit)
 	// if err != nil {
@@ -36,7 +39,7 @@ func (TradeLine TradeLine7) GetCanLongOrShort(symbol string) (canLong bool, canS
 	// }
 	
 	if len(kline_1) < limit || len(kline_2) < limit {
-		return false, false
+		return openResult
 	}
 	
 	high1, low1, close1, _ := GetLineFloatPrices(kline_1)
@@ -54,7 +57,8 @@ func (TradeLine TradeLine7) GetCanLongOrShort(symbol string) (canLong bool, canS
 			if low1[i] < lower2[i] {
 				// 大级别看起来是上升通道
 				if (utils.IsDesc(close2[0:2])) {
-					return true, false
+					openResult.CanLong = true
+					return openResult
 				}
 			}
 		}
@@ -68,38 +72,50 @@ func (TradeLine TradeLine7) GetCanLongOrShort(symbol string) (canLong bool, canS
 			if high1[i] > upper2[i] {
 				// 大级别看起来是下降通道
 				if (utils.IsAsc(close2[0:3])) {
-					return false, true
+					openResult.CanShort = true
+					return openResult
 				}
 			}
 		}
 	}
 
-	return false, false
+	return openResult
 }
 
-func (TradeLine TradeLine7) CanOrderComplete(symbol string, positionSide string) (complete bool) {
-	lines, err := binance.GetKlineData(symbol, "3m", 2)
+func (TradeLine TradeLine7) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	symbols := closeParams.Symbols // 交易对
+	position := closeParams.Position // 当前仓位
+	closeResult.Complete = false
+	
+	lines, err := binance.GetKlineData(symbols.Symbol, "3m", 2)
 	if err != nil {
-		return true
+		closeResult.Complete = true
+		return closeResult
 	}
 	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
 	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
-	if positionSide == "LONG" {
-		return close0 < close1 // 价格在下跌中
-	} else if positionSide == "SHORT" {
-		return close0 > close1 // 价格在上涨中
+	if position.PositionSide == "LONG" {
+		closeResult.Complete = close0 < close1 // 价格在下跌中
+	} else if position.PositionSide == "SHORT" {
+		closeResult.Complete = close0 > close1 // 价格在上涨中
 	} else {
-		return false
+		closeResult.Complete = true
 	}
+	return closeResult
 }
 
 // 达到止盈或止损前判定是否可以平仓
 // 1. 1天的kline线，ma7和ma3金叉，ma15和ma3金叉，ma3线3连跌
-func (TradeLine TradeLine7) AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool) {
-	if nowProfit < 3 || nowProfit > -3 {
-		return false
+func (TradeLine TradeLine7) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	position := closeParams.Position // 当前仓位
+	closeResult.Complete = false
+	
+	if closeParams.NowProfit < 3 || closeParams.NowProfit > -3 {
+		closeResult.Complete = false
+		return closeResult
 	}
-	return TradeLine.MarketReversal(position.Symbol, position.PositionSide)
+	closeResult.Complete = TradeLine.MarketReversal(position.Symbol, position.PositionSide)
+	return closeResult
 }
 
 func (TradeLine TradeLine7) MarketReversal(symbol string, positionSide string) (isReversal bool) {

@@ -3,6 +3,7 @@ package feature
 import (
 	"fmt"
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/feature/strategy"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
@@ -87,10 +88,12 @@ func GoTestLine() {
 		if coin.StrategyType != "global" {
 			coin_line_strategy = GetLineStrategy(coin.StrategyType)
 		}
-		canLang, canShort := coin_line_strategy.GetCanLongOrShort(symbol)
+		openResult := coin_line_strategy.GetCanLongOrShort(strategy.OpenParams{
+			Symbols: coin,
+		})
 		// logs.Info(symbol, canLang, canShort)
-		if canLang || canShort {
-			logs.Info(symbol, canLang, canShort)
+		if openResult.CanLong || openResult.CanShort {
+			logs.Info(symbol, openResult.CanLong, openResult.CanShort)
 		}
 		// logs.Info("count:", index + 1)
 	}
@@ -139,7 +142,7 @@ func GoTestUtil() {
 
 // test 平仓
 func GoTestMarketOrder() {
-	positions, _ := binance.GetPosition()
+	positions, _ := binance.GetPosition(binance.PositionParams{})
 	for _, position := range positions {
     	positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
     	positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值

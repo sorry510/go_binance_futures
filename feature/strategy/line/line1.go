@@ -2,11 +2,10 @@ package line
 
 import (
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/feature/strategy"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
-
-	"github.com/adshao/go-binance/v2/futures"
 )
 
 // 策略逻辑: 看的是 3min k线，高频交易
@@ -17,39 +16,49 @@ import (
 type TradeLine1 struct {
 }
 
-func (tradeLine1 TradeLine1) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	kline_3m, err := binance.GetKlineData(symbol, "3m", 50)
+func (tradeLine1 TradeLine1) GetCanLongOrShort(openParams strategy.OpenParams) (openResult strategy.OpenResult) {
+	symbols := openParams.Symbols
+	openResult.CanLong = false
+	openResult.CanShort = false
+	
+	kline_3m, err := binance.GetKlineData(symbols.Symbol, "3m", 50)
 	if err != nil {
-		return false, false
+		return openResult
 	}
 	line3m_result := normalizationLineData(kline_3m)
 	if checkLongLine3m(line3m_result) {
-		return true, false
+		openResult.CanLong = true
 	}
 	if checkShortLine3m(line3m_result) {
-		return false, true
+		openResult.CanShort = true
 	}
-	return false, false
+	return openResult
 }
 
 // 达到止盈或止损后判断是否可以平仓
-func (tradeLine1 TradeLine1) CanOrderComplete(symbol string, positionSide string) (complete bool) {
-	lines, err := binance.GetKlineData(symbol, "1m", 2) // 1min 线最近2条
+func (tradeLine1 TradeLine1) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	symbols := closeParams.Symbols // 交易对
+	position := closeParams.Position // 当前仓位
+	closeResult.Complete = false
+	
+	lines, err := binance.GetKlineData(symbols.Symbol, "1m", 2) // 1min 线最近2条
 	if err != nil {
-		return true
+		return closeResult
 	}
 	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
 	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
-	if positionSide == "LONG" {
-		return close0 < close1 // 价格在下跌中
-	} else if positionSide == "SHORT" {
-		return close0 > close1 // 价格在上涨中
+	if position.PositionSide == "LONG" {
+		closeResult.Complete = close0 < close1 // 价格在下跌中
+	} else if position.PositionSide == "SHORT" {
+		closeResult.Complete = close0 > close1 // 价格在上涨中
 	} else {
-		return false
+		closeResult.Complete = true
 	}
+	return closeResult
 }
 
-func (tradeLine1 TradeLine1) AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool) {
+func (tradeLine1 TradeLine1) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	closeResult.Complete = false
 	// symbol := position.Symbol
 	// side := position.PositionSide
 	// // if hold_max_time_float64 > 0 {
@@ -63,7 +72,7 @@ func (tradeLine1 TradeLine1) AutoStopOrder(position *futures.PositionRisk, nowPr
 	// 		return true
 	// 	}
 	// }
-	return false
+	return closeResult
 }
 
 func checkLongLine3m(lineData *LineData) bool {

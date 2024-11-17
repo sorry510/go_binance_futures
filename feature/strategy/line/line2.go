@@ -2,10 +2,9 @@ package line
 
 import (
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/feature/strategy"
 	"go_binance_futures/utils"
 	"strconv"
-
-	"github.com/adshao/go-binance/v2/futures"
 )
 
 // 交易逻辑: 看的是 6h k线
@@ -18,10 +17,14 @@ type TradeLine2 struct {
 }
 
 // 6小时线的ema金叉
-func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, canShort bool) {
-	kline_6h, err1 := binance.GetKlineData(symbol, "6h", 50)
+func (TradeLine2 TradeLine2) GetCanLongOrShort(openParams strategy.OpenParams) (openResult strategy.OpenResult) {
+	symbols := openParams.Symbols
+	openResult.CanLong = false
+	openResult.CanShort = false
+	
+	kline_6h, err1 := binance.GetKlineData(symbols.Symbol, "6h", 50)
 	if err1 != nil {
-		return false, false
+		return openResult
 	}
 	kline_6h_close := GetLineClosePrices(kline_6h)
 	
@@ -32,48 +35,44 @@ func (TradeLine2 TradeLine2) GetCanLongOrShort(symbol string) (canLong bool, can
 	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
 	if (rsi6 == nil || rsi14 == nil) {
 		// 开盘小于 4.5 天
-		return false, false
+		return openResult
 	}
 	// logs.Info(symbol, Kdj(ema6h_3, ema6h_7, 4), Kdj(ema6h_7, ema6h_3, 4), utils.IsDesc(ema6h_3[0:2]), rsi6[1], rsi14[1])
 	if Kdj(ema6h_3, ema6h_7, 4) && Kdj(ema6h_7, ema6h_15, 4) && utils.IsDesc(ema6h_3[0:2]) && rsi6[0] < 80 && rsi14[0] < 75 { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
-		return true, false
+		openResult.CanLong = true
+		return openResult
 	} else if Kdj(ema6h_7, ema6h_3, 4) && Kdj(ema6h_15, ema6h_7, 4) && utils.IsAsc(ema6h_3[0:2]) && rsi6[0] < 80 && rsi14[0] < 75 {
-		return false, true
+		openResult.CanShort = true
+		return openResult
 	}
-	return false, false
+	return openResult
 }
 
 // 达到止盈或止损后判断是否可以平仓
-func (TradeLine2 TradeLine2) CanOrderComplete(symbol string, positionSide string) (complete bool) {
-	lines, err := binance.GetKlineData(symbol, "1m", 2) // 1min 线最近2条
+func (TradeLine2 TradeLine2) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	symbols := closeParams.Symbols // 交易对
+	position := closeParams.Position // 当前仓位
+	closeResult.Complete = false
+	
+	lines, err := binance.GetKlineData(symbols.Symbol, "1m", 2) // 1min 线最近2条
 	if err != nil {
-		return true
+		closeResult.Complete = true
+		return closeResult
 	}
 	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
 	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
-	if positionSide == "LONG" {
-		return close0 < close1 // 价格在下跌中
-	} else if positionSide == "SHORT" {
-		return close0 > close1 // 价格在上涨中
+	if position.PositionSide == "LONG" {
+		closeResult.Complete = close0 < close1 // 价格在下跌中
+	} else if position.PositionSide == "SHORT" {
+		closeResult.Complete = close0 > close1 // 价格在上涨中
 	} else {
-		return false
+		closeResult.Complete = true
 	}
+	return closeResult
 }
 
-func (TradeLine2 TradeLine2) AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool) {
-	// symbol := position.Symbol
-	// side := position.PositionSide
-	// // if hold_max_time_float64 > 0 {
-	// // 	// 最大持仓时间(api的bug，没有UpdateTime字段)
-	// // 	// if position.UpdateTime+hold_max_time_float64*60*60*1000 < time.Now().UnixNano()/1e6 {
-	// // 	// 	return true
-	// // 	// }
-	// // }
-	// if side == "LONG" {xw
-	// 	if (nowProfit < profit_float64 * 0.6 && nowProfit > 0) || nowProfit < -profit_float64 {
-	// 		return true
-	// 	}
-	// }
-	return false
+func (TradeLine2 TradeLine2) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
+	closeResult.Complete = false
+	return closeResult
 }

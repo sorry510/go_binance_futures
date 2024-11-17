@@ -253,3 +253,17 @@ NowSymbolOpen = 2400.45
 NowSymbolLow = 2456.2
 NowSymbolHigh = 2840.3
 ```
+
+##### symbol position
+> string -> float: float(Position.xxx)
+
+```
+ORI = 10.2
+Position.EntryPrice = "2500.2"
+Position.MarkPrice = "2400.2"
+Position.PositionAmt = "100.2" 
+Position.UnRealizedProfit = "32.2"
+Position.Leverage = "3"
+Position.PositionSide = "LONG"
+Position.MarginType = "CROSS"
+```

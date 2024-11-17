@@ -1,14 +1,37 @@
 package strategy
 
-import "github.com/adshao/go-binance/v2/futures"
+import (
+	"go_binance_futures/models"
+
+	"github.com/adshao/go-binance/v2/futures"
+)
+
+
+type OpenParams struct {
+    Symbols *models.Symbols
+}
+
+type OpenResult struct {
+    CanLong bool
+    CanShort bool
+}
+
+type CloseParams struct {
+    Symbols *models.Symbols
+    Position *futures.PositionRisk
+    NowProfit float64 // 当前收益率%
+}
+
+type CloseResult struct {
+    Complete bool
+}
 
 type LineStrategy interface {
     // 是否可以买多或者买空
-    GetCanLongOrShort(symbol string) (canLong bool, canShort bool)
+    GetCanLongOrShort(openParams OpenParams) (openResult OpenResult)
     // 达到止盈或止损点后判断是否可以平仓
-    // positionSide: LONG or SHORT
-    CanOrderComplete(symbol string, positionSide string) (complete bool)
+    CanOrderComplete(closeParams CloseParams) (closeResult CloseResult)
     // 达到止盈或止损前判定是否可以平仓
-    AutoStopOrder(position *futures.PositionRisk, nowProfit float64) (stop bool)
+    AutoStopOrder(closeParams CloseParams) (closeResult CloseResult)
 }
 
