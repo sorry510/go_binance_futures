@@ -53,6 +53,7 @@ func CalculateExponentialMovingAverage(price []float64, period int) ([]float64, 
 
 // 布林带(boll) 中轨线（MB，通常为移动平均线）、上轨线（UP，通常为中轨线加上一定倍数的标准差）和下轨线（DN，通常为中轨线减去相同倍数的标准差）
 // 默认 period = 21, stdDevMultiplier = 2, 返回的切片长度 len(clonePrices)-period+1
+// bbw = (UP - DN) / MB * 100
 func CalculateBollingerBands(clonePrices []float64, period int, stdDevMultiplier float64) (up, mb, dn []float64, err error) {
 	if len(clonePrices) < period {
 		return nil, nil, nil, fmt.Errorf("insufficient data for period %d", period)
