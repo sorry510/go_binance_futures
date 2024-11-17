@@ -219,9 +219,9 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				}
 				klineMap[item.KlineInterval] = klinePrice
 			}
-			atrArr, err := CalculateSimpleMovingAverage(klinePrice.Close, item.Period)
+			atrArr, err := CalculateAtr(klinePrice.High, klinePrice.Low, klinePrice.Close, item.Period)
 			if err != nil {
-				logs.Error("CalculateSimpleMovingAverage error:", err.Error())
+				logs.Error("CalculateAtr error:", err.Error())
 				continue
 			}
 			config[item.Name] = ConfigData{
