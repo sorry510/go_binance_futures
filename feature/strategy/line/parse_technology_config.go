@@ -239,8 +239,8 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 	o := orm.NewOrm()
 	var symbols []models.Symbols
 	
-	sql := "SELECT * FROM symbols WHERE symbol = ? OR symbol = ? OR symbol = ?"
-	_, err := o.Raw(sql, "BTCUSDT", "ETHUSDT", symbol).QueryRows(&symbols)
+	sql := "SELECT * FROM symbols WHERE symbol = ? OR symbol = ? OR symbol = ? OR symbol = ? OR symbol = ?"
+	_, err := o.Raw(sql, "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", symbol).QueryRows(&symbols)
 	if err != nil {
 		logs.Error("error", err.Error())
 	}
@@ -257,9 +257,20 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 		"Kdj": Kdj, // 计算是否是金叉,
 		"IsAsc": utils.IsAsc, // 是否是升序数组
 		"IsDesc": utils.IsDesc, // 是否是降序数组,
+		"BasicTrend": 0.0, // 基础趋势涨跌幅 (btc * 0.6 + eth * 0.3 + sol * 0.05 + bnb * 0.05)
 	}
+	basicTrend := 0.0
 	
 	for _, v := range symbols {
+		if v.Symbol == "BTCUSDT" {
+			basicTrend += v.PercentChange * 0.6
+		} else if v.Symbol == "ETHUSDT" {
+			basicTrend += v.PercentChange * 0.3
+		} else if v.Symbol == "SOLUSDT" {
+			basicTrend += v.PercentChange * 0.05
+		} else if v.Symbol == "BNBUSDT" {
+			basicTrend += v.PercentChange * 0.05
+		}
 		close, _ := strconv.ParseFloat(v.Close, 64)
 		open, _ := strconv.ParseFloat(v.Open, 64)
 		low, _ := strconv.ParseFloat(v.Low, 64)
@@ -281,6 +292,7 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 			env["NowSymbolHigh"] = high
 		}
 	}
+	env["BasicTrend"] = basicTrend
 	
 	// technology
 	for k, v := range config {

@@ -242,6 +242,26 @@ ETHUSDT.Low = 2456.2 // 最低价
 ETHUSDT.High = 2840.3 // 最高价
 ```
 
+##### SOLUSDT data
+
+```
+SOLUSDT.PercentChange = -1.1 // 涨跌幅
+SOLUSDT.Close = 200.2 // 当前价格
+SOLUSDT.Open = 230.45 // 开盘价
+SOLUSDT.Low = 143.2 // 最低价
+SOLUSDT.High = 244.3 // 最高价
+```
+
+##### BNBUSDT data
+
+```
+BNBUSDT.PercentChange = -1.1 // 涨跌幅
+BNBUSDT.Close = 600.2 // 当前价格
+BNBUSDT.Open = 580.45 // 开盘价
+BNBUSDT.Low = 578.2 // 最低价
+BNBUSDT.High = 640.3 // 最高价
+```
+
 ##### 所选币种的 数据
 
 ```
@@ -264,4 +284,11 @@ Position.UnRealizedProfit = "32.2" // 当前收益 usdt, 亏损是负数
 Position.Leverage = "3" // 杠杆
 Position.PositionSide = "LONG" // 合约方向
 Position.MarginType = "CROSS" // 逐仓
+```
+
+##### 基本趋势涨跌幅
+>btc * 0.6 + eth * 0.3 + sol * 0.05 + bnb * 0.05
+
+```
+BasicTrend = 0.3
 ```
