@@ -743,6 +743,8 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 			coinStrategy = coin.TradeCoin4{}
 		case "coin5":
 			coinStrategy = coin.TradeCoin5{}
+		case "coin6":
+			coinStrategy = coin.TradeCoin6{}
 		default:
 			coinStrategy = coin.TradeCoin1{}
 	}

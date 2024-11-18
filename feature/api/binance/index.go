@@ -469,7 +469,7 @@ func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate
 	return res, err
 }
 
-// websocket 订阅全市场最新价格变化，只有币价格变化才会推送
+// websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
 func UpdateCoinByWs() {
 	var lock = false
 	var o = orm.NewOrm()
@@ -478,13 +478,17 @@ func UpdateCoinByWs() {
 			lock = true
 			for _, ticker := range event {
 				o.Raw(
-					"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
+					"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
 					ticker.PriceChangePercent,
 					ticker.ClosePrice,
 					ticker.OpenPrice,
 					ticker.LowPrice,
 					ticker.HighPrice,
 					ticker.Time,
+					ticker.BaseVolume, // 成交量
+					ticker.QuoteVolume, // 成交额
+					ticker.CloseQty, // 最新成交价格上的成交量
+					ticker.TradeCount, // 成交数
 					
 					ticker.Symbol,
 				).Exec()
