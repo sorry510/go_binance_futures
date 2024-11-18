@@ -42,14 +42,18 @@ func (TradeLine3 TradeLine3) GetCanLongOrShort(openParams strategy.OpenParams) (
 	
 	rsi1, _ := CalculateRSI(close1, rsi_period1) // 获取 rsi
 	
-	if ((Kdj(ema1, ema2, 3) && rsi1[0] < 42) || (lineData.Line[0].Position == "LONG" && rsi1[0] < 23)) &&
+	baseTrend := BaseTrend() // 基础趋势涨跌幅
+	
+	if ((Kdj(ema1, ema2, 3) && rsi1[0] > 40) || (lineData.Line[0].Position == "LONG" && rsi1[0] < 18)) &&
+		baseTrend > -3 && // 基础趋势不是大幅下跌
 		TradeLine3.checkLongLine(lineData) {
 		// 产生金叉 或 rsi 超卖了
 		openResult.CanLong = true
 		return openResult
 	}
-	if ((Kdj(ema2, ema1, 3) && rsi1[0] < 42) || (lineData.Line[0].Position == "SHORT" && rsi1[0] > 77)) &&
-		// 产生金叉 或 rsi 超卖了
+	if ((Kdj(ema2, ema1, 3) && rsi1[0] < 60) || (lineData.Line[0].Position == "SHORT" && rsi1[0] > 82)) &&
+		baseTrend < 3 && // 基础趋势不是大幅上涨
+		// 产生死叉 或 rsi 超买了
 		TradeLine3.checkShortLine(lineData) {
 		openResult.CanShort = true
 		return openResult
