@@ -244,6 +244,26 @@ ETHUSDT.Low = 2456.2 // 最低价
 ETHUSDT.High = 2840.3 // 最高价
 ```
 
+##### SOLUSDT data
+
+```
+SOLUSDT.PercentChange = -1.1
+SOLUSDT.Close = 200.2
+SOLUSDT.Open = 230.45
+SOLUSDT.Low = 143.2
+SOLUSDT.High = 244.3
+```
+
+##### BNBUSDT data
+
+```
+BNBUSDT.PercentChange = -1.1
+BNBUSDT.Close = 600.2
+BNBUSDT.Open = 580.45
+BNBUSDT.Low = 578.2
+BNBUSDT.High = 640.3
+```
+
 ##### now symbol data
 
 ```
@@ -266,4 +286,11 @@ Position.UnRealizedProfit = "32.2"
 Position.Leverage = "3"
 Position.PositionSide = "LONG"
 Position.MarginType = "CROSS"
+```
+
+##### basic trend(change percent)
+>btc * 0.6 + eth * 0.3 + sol * 0.05 + bnb * 0.05
+
+```
+BasicTrend = 0.3
 ```
