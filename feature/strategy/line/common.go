@@ -161,3 +161,24 @@ func BaseCheckCanLongOrShort() (canLong bool, canShort bool) {
 	}
 	return canLong, canShort
 }
+
+func BaseTrend() float64 {
+	o := orm.NewOrm()
+	var symbols []models.Symbols
+	sql := "SELECT * FROM symbols WHERE symbol = ? OR symbol = ? OR symbol = ? OR symbol = ?"
+	o.Raw(sql, "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT").QueryRows(&symbols)
+	
+	basicTrend := 0.0
+	for _, v := range symbols {
+		if v.Symbol == "BTCUSDT" {
+			basicTrend += v.PercentChange * 0.6
+		} else if v.Symbol == "ETHUSDT" {
+			basicTrend += v.PercentChange * 0.3
+		} else if v.Symbol == "SOLUSDT" {
+			basicTrend += v.PercentChange * 0.05
+		} else if v.Symbol == "BNBUSDT" {
+			basicTrend += v.PercentChange * 0.05
+		}
+	}
+	return basicTrend
+}
