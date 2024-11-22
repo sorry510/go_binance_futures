@@ -35,6 +35,7 @@ type Order struct {
 	Inexact_profit string `orm:"column(inexact_profit)" json:"inexact_profit"`
 	Side string `orm:"column(side)" json:"side"`
 	PositionSide string `orm:"column(positionSide)" json:"positionSide"`
+	OrderId int64 `orm:"column(order_id)" json:"order_id"`
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
 
