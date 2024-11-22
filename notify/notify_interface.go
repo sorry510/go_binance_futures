@@ -84,8 +84,13 @@ type SpotListenParams struct {
 type FuturesTestParams struct {
 	Title string
 	Symbol string
+	Type string // open, close
 	PositionSide string // long, short
 	Price float64
+	ClosePrice float64
+	Quantity float64
+	Leverage float64
+	Profit float64
 	StrategyName string
 	Remarks string
 }

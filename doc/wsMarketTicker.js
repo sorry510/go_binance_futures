@@ -1,3 +1,4 @@
+// https://binance-docs.github.io/apidocs/futures/cn/#ticker
 const data = [
     {
         "e": "24hrTicker",  // 事件类型

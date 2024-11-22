@@ -343,6 +343,12 @@ func (pusher Slack) FuturesCustomStrategyTest(params FuturesTestParams) {
 	text := `
 >%s
 >{futures.side}：%s
+>{futures.position_side}：%s
+>{futures.price}：%f
+>{futures.close_price}：%f
+>{futures.quantity}：%f
+>{futures.leverage}：%f
+>{futures.profit}：%f
 >{futures.strategy_name}：%s
 >{futures.time}：%s
 
@@ -352,7 +358,13 @@ func (pusher Slack) FuturesCustomStrategyTest(params FuturesTestParams) {
 
   text = fmt.Sprintf(lang.LangMatch(text),
     params.Symbol + params.Title,
+    lang.Lang("futures." + params.Type),
     lang.Lang("futures." + params.PositionSide),
+    params.Price,
+    params.ClosePrice,
+    params.Quantity,
+    params.Leverage,
+    params.Profit,
     params.StrategyName,
     nowTime(),
     params.Remarks,
