@@ -181,6 +181,28 @@ type StrategyTemplates struct {
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
 
+type TestStrategyResults struct {
+	ID int64 `orm:"column(id)" json:"id"`
+	Symbol string `orm:"column(symbol)" json:"symbol"`
+	Price string `orm:"column(price)" json:"price"` // 触发开仓策略时通知价格
+	Leverage int64 `orm:"column(leverage)" json:"leverage"` // 合约倍数
+	TickSize string `orm:"column(tickSize)" json:"tickSize"` // 交易金额精度
+	StepSize string `orm:"column(stepSize)" json:"stepSize"` // 交易数量精度
+	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
+	Profit string `orm:"column(profit)" json:"profit"` // 盈利率
+	Loss string `orm:"column(loss)" json:"loss"` // 损失率
+	PositionAmt string `orm:"column(position_amt)" json:"position_amt"` // 买入的数量, 做多为正, 做空为负
+	PositionSide string `orm:"column(position_side)" json:"position_side"` // LONG, SHORT
+	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置 json
+	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
+	OpenStrategy string `orm:"column(open_strategy)" json:"open_strategy"` // 开仓策略
+	CloseStrategy string `orm:"column(close_strategy)" json:"close_strategy"` // 平仓策略
+	ClosePrice string `orm:"column(close_price)" json:"close_price"` // 触发平仓策略时通知价格
+	CloseProfit string `orm:"column(close_profit)" json:"close_profit"` // 触发平仓策略时收益 usdt
+	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
+	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+}
+
 func (u *Config) TableName() string {
     return "config"
 }
@@ -217,3 +239,6 @@ func (u *StrategyTemplates) TableName() string {
     return "strategy_templates"
 }
 
+func (u *TestStrategyResults) TableName() string {
+    return "test_strategy_results"
+}

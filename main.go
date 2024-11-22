@@ -40,6 +40,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.SymbolFundingRates))
 	orm.RegisterModel(new(models.EatRateSymbols))
 	orm.RegisterModel(new(models.StrategyTemplates))
+	orm.RegisterModel(new(models.TestStrategyResults))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db")
@@ -67,6 +68,7 @@ func main() {
 		// feature.GoTestParse()
 		// feature.GoTestListen()
 		// feature.GoTestLine()
+		feature.CheckTestResults()
 		
 		// web
 		web.Run(":" + webPort)
@@ -99,6 +101,13 @@ func main() {
 	go func() {
 		for {
 			feature.NoticeAllSymbolByStrategy()
+			time.Sleep(time.Second * 1) // 1秒间隔
+		}
+	}()
+	// 监听测试的开仓是否需要平仓
+	go func() {
+		for {
+			feature.CheckTestResults()
 			time.Sleep(time.Second * 1) // 1秒间隔
 		}
 	}()

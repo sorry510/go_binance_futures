@@ -1,21 +1,16 @@
 package feature
 
 import (
-	"encoding/json"
 	"go_binance_futures/feature/api/binance"
-	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
-	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 	"strconv"
-	"time"
 
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"github.com/expr-lang/expr"
 )
 
 var flagFuturesNotice = 0
@@ -180,110 +175,4 @@ func NoticeAndAutoOrder() {
 			}
 		}
 	}
-}
-
-var coinNoticeLastTimeMap = make(map[string]int64) // limit 通知一次
-var FuturesTestNotice = 0
-var offsetId = 0
-func NoticeAllSymbolByStrategy() {
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err.Error())
-		return
-	}
-	if (systemConfig.FutureTest == 1) {
-		if (FuturesTestNotice == 0) {
-			logs.Info("futures all symbol notice_strategy bot start")
-			FuturesTestNotice = 1
-		}
-	} else {
-		if (flagFuturesNotice == 1) {
-			logs.Info("futures all symbol notice_strategy bot end")
-			FuturesTestNotice = 0
-		}
-		return
-	}
-	
-	logs.Info("offsetId: ", offsetId)
-	var coins []*models.Symbols
-	coins, err = getSymbols(offsetId) // 按照顺序 10 个币
-	if err != nil {
-		logs.Error("NoticeAllSymbolByStrategy:", err.Error())
-		return
-	}
-	if len(coins) == 0 {
-		offsetId = 0
-		coins, _ = getSymbols(offsetId)
-	}
-	if (len(coins) > 0) {
-		offsetId = int(coins[len(coins) - 1].ID)
-	} else {
-		offsetId += 10 // 避免无限处于循环
-	}
-	
-	for _, coin := range coins {
-		nowTime := time.Now().Unix() * 1000 // 毫秒时间戳
-		if coin.Enable != 1 {
-			continue
-		}
-		
-		lastNoticeTime, exist := coinNoticeLastTimeMap[coin.Symbol]
-		if exist {
-			if (nowTime - lastNoticeTime) < int64(systemConfig.FutureTestNoticeLimitMin) * 60 * 1000 {
-				// x min 通知一次
-				continue
-			}
-		}
-		if coin.Technology == "" || coin.Strategy == "" {
-			logs.Info("no set custom strategy, symbol: ", coin.Symbol)
-			continue
-		}
-		
-		var strategyConfig technology.StrategyConfig
-		err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
-		if err != nil {
-			logs.Error("Error unmarshalling JSON Symbol: ", coin.Symbol)
-			logs.Error("Error unmarshalling JSON:", err.Error())
-			continue
-		}
-		logs.Info("futures custom strategy test, symbol: ", coin.Symbol)
-		env := line.InitParseEnv(coin.Symbol, coin.Technology)
-		for _, strategy := range strategyConfig {
-			if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
-				program, err := expr.Compile(strategy.Code, expr.Env(env))
-				if err != nil {
-					logs.Error("Error Strategy Compile Symbol: ", coin.Symbol)
-					logs.Error("Error Strategy Compile:", err.Error())
-					continue
-				}
-				output, err := expr.Run(program, env)
-				if err != nil {
-					logs.Error("Error Strategy Run Symbol: ", coin.Symbol)
-					logs.Error("Error Strategy Run:", err.Error())
-					continue
-				}
-				if result, ok := output.(bool); ok && result {
-					pusher.FuturesCustomStrategyTest(notify.FuturesTestParams{
-						Title: lang.Lang("futures.custom_strategy_test"),
-						Symbol: coin.Symbol,
-						PositionSide: strategy.Type,
-						StrategyName: strategy.Name,
-						Remarks: strategy.Code,
-					})
-					coinNoticeLastTimeMap[coin.Symbol] = nowTime
-				}
-			}
-		}
-	}
-}
-
-func getSymbols(offsetId int) (coins []*models.Symbols, err error) {
-	_, err = orm.NewOrm().
-		QueryTable("symbols").
-		Filter("enable", 1).
-		Filter("ID__gt", offsetId).
-		OrderBy("ID").
-		Limit(10).
-		All(&coins) // 按照顺序 10个币
-	return coins, err
 }

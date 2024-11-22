@@ -337,6 +337,12 @@ func (pusher DingDing) FuturesCustomStrategyTest(params FuturesTestParams) {
 	text := `
 ## %s
 #### **{futures.side}**：<font color="#008000">%s</font>
+#### **{futures.position_side}**：<font color="#008000">%s</font>
+#### **{futures.price}**：<font color="#008000">%f</font>
+#### **{futures.close_price}**：<font color="#008000">%f</font>
+#### **{futures.quantity}**：<font color="#008000">%f</font>
+#### **{futures.leverage}**：<font color="#008000">%f</font>
+#### **{futures.profit}**：<font color="#008000">%f</font>
 #### **{futures.strategy_name}**：<font color="#008000">%s</font>
 #### **{futures.time}**：%s
 
@@ -346,7 +352,13 @@ func (pusher DingDing) FuturesCustomStrategyTest(params FuturesTestParams) {
 
   text = fmt.Sprintf(lang.LangMatch(text),
     params.Symbol + params.Title,
+    lang.Lang("futures." + params.Type),
     lang.Lang("futures." + params.PositionSide),
+    params.Price,
+    params.ClosePrice,
+    params.Quantity,
+    params.Leverage,
+    params.Profit,
     params.StrategyName,
     nowTime(),
     params.Remarks,
