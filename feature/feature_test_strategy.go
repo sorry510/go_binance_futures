@@ -172,7 +172,7 @@ func CheckTestResults() {
 			EntryPrice: result.Price, // 开仓价格
 			MarkPrice: strconv.FormatFloat(floatNowPrice, 'f', -1, 64), // 当前标记价格
 			PositionAmt: result.PositionAmt, // 仓位数量(正数为多仓，负数为空仓)
-			UnRealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', -1, 64), // 未实现盈亏
+			UnRealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64), // 未实现盈亏
 			MarginType: "CROSSED",
 			Leverage: strconv.FormatInt(result.Leverage, 10),
 			PositionSide: result.PositionSide,
