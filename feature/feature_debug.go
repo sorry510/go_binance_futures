@@ -153,10 +153,10 @@ func GoTestMarketOrder() {
     	}
     	if position.Symbol == "BELUSDT" {
 			if position.PositionSide == "SHORT" {
-				_, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
-					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice)
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
 					
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					pusher.FuturesCloseOrder(notify.FuturesOrderParams{

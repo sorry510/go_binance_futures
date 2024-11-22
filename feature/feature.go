@@ -125,10 +125,10 @@ func StartTrade() {
 		if closeResult.Complete { // 触发策略,风向改变,强制平仓
 			logs.Info("%s:auto_stop_start", position.Symbol)
 			if position.PositionSide == "LONG" {
-				_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+				order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
 					// 数据库写入订单
-					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice)
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
 					
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -159,10 +159,10 @@ func StartTrade() {
 				}
 			}
 			if position.PositionSide == "SHORT" {
-				_, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
-					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice)
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
 					
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -204,10 +204,10 @@ func StartTrade() {
 			})
 			if closeResult.Complete { // 
 				if position.PositionSide == "LONG" {
-					_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
 						
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -238,10 +238,10 @@ func StartTrade() {
 					}
 				}
 				if position.PositionSide == "SHORT" {
-					_, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+					order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
 						
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -282,10 +282,10 @@ func StartTrade() {
 			})
 			if closeResult.Complete {
 				if position.PositionSide == "LONG" {
-					_, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
 						
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -316,10 +316,10 @@ func StartTrade() {
 					}
 				}
 				if position.PositionSide == "SHORT" {
-					_, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+					order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
 						
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -439,10 +439,10 @@ func StartTrade() {
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 				
 				if systemConfig.FutureOrderType == "MARKET" {
-					_, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
+					order, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG")
+						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
 							Symbol: symbol,
@@ -467,10 +467,10 @@ func StartTrade() {
 						})
 					}
 				} else {
-					_, err := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
+					order, err := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
-						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG")
+						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
 							Symbol: symbol,
@@ -509,10 +509,10 @@ func StartTrade() {
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 				
 				if systemConfig.FutureOrderType == "MARKET" {
-					_, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
+					order, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT")
+						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
 							Symbol: symbol,
@@ -537,10 +537,10 @@ func StartTrade() {
 						})
 					}
 				} else {
-					_, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
+					order, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
-						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT")
+						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
 							Symbol: symbol,
@@ -610,7 +610,7 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futu
 	}
 }
 
-func insertOpenOrder(symbol string, quantity float64, avg_price string, positionSide string) {
+func insertOpenOrder(symbol string, quantity float64, avg_price string, positionSide string, orderId int64) {
 	order := new(models.Order)
 	order.Symbol = symbol
 	order.Amount = strconv.FormatFloat(quantity, 'f', -1, 64)
@@ -618,13 +618,14 @@ func insertOpenOrder(symbol string, quantity float64, avg_price string, position
 	order.PositionSide = positionSide
 	order.Inexact_profit = "0.0" // 预估收益
 	order.Side = "open"
+	order.OrderId = orderId
 	order.UpdateTime = time.Now().Unix() * 1000 
 	
 	o := orm.NewOrm()
 	o.Insert(order)
 }
 
-func insertCloseOrder(position *futures.PositionRisk, positionAmtFloat float64, unRealizedProfit float64, avg_price string) {
+func insertCloseOrder(position *futures.PositionRisk, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64) {
 	// 数据库写入订单
 	order := new(models.Order)
 	order.Symbol = position.Symbol
@@ -633,6 +634,7 @@ func insertCloseOrder(position *futures.PositionRisk, positionAmtFloat float64, 
 	order.Inexact_profit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
 	order.PositionSide = position.PositionSide
 	order.Side = "close"
+	order.OrderId = orderId
 	order.UpdateTime = time.Now().Unix() * 1000 
 	
 	o := orm.NewOrm()
