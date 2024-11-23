@@ -40,6 +40,11 @@ func NoticeAllSymbolByStrategy() {
 		}
 		return
 	}
+	exclude_symbols_map := getExcludeSymbols()
+	if len(exclude_symbols_map) > systemConfig.FutureMaxCount {
+		logs.Info("test position order: %d, is over max %d, stop open new test order", exclude_symbols_map, systemConfig.FutureMaxCount)
+		return
+	}
 	
 	logs.Info("offsetId: ", offsetId)
 	var coins []*models.Symbols
@@ -58,7 +63,6 @@ func NoticeAllSymbolByStrategy() {
 		offsetId += 10 // 避免无限处于循环
 	}
 	
-	exclude_symbols_map := getExcludeSymbols()
 	for _, coin := range coins {
 		if _, exist := exclude_symbols_map[coin.Symbol]; exist {
 			continue
