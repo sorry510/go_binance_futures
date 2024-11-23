@@ -360,7 +360,7 @@ func StartTrade() {
 	/*************************************************检查当前仓位数量 start************************************************************ */
 	allMyCount := positionCount + len(allOpenOrders)
 	if allMyCount >= systemConfig.FutureMaxCount {
-		logs.Info("position+open order: %d, is over max%d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
+		logs.Info("position+open order: %d, is over max %d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
 		return
 	}
 	/*************************************************检查当前仓位数量  end************************************************************ */
