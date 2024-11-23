@@ -104,7 +104,11 @@ func NoticeAllSymbolByStrategy() {
 					continue
 				}
 				if res, ok := output.(bool); ok && res {
-					floatNowPrice := env["NowPrice"].(float64)
+					floatNowPrice, ok := env["NowPrice"].(float64)
+					if !ok {
+						logs.Error("Error NowPrice Symbol: ", coin.Symbol)
+						continue
+					}
 					testOrder := createTestResult(coin, floatNowPrice, strings.ToUpper(strategy.Type), strategy.Code)
 					quantity, _ := strconv.ParseFloat(testOrder.PositionAmt, 64)
 					pusher.FuturesCustomStrategyTest(notify.FuturesTestParams{
@@ -164,7 +168,11 @@ func CheckTestResults() {
 		
 		findStrategy := false
 		env := line.InitParseEnv(result.Symbol, result.Technology)
-		floatNowPrice := env["NowPrice"].(float64)
+		floatNowPrice, ok := env["NowPrice"].(float64)
+		if !ok {
+			logs.Error("Error NowPrice Symbol: ", result.Symbol)
+			continue
+		}
 		positionAmtFloat, _ := strconv.ParseFloat(result.PositionAmt, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 		enterPrice_float64, _ := strconv.ParseFloat(result.Price, 64)
