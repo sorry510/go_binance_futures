@@ -1,5 +1,8 @@
 ### Change Log
 
+## v0.0.48
+- 添加一个变量 SystemStartTime
+
 ## v0.0.47
 - 修复bug
 - 更新 ui

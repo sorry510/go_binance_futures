@@ -82,9 +82,13 @@ ema_4h_3.Data[0] > ema_4h_7.Data[0] && ema_4h_3.Data[1] < ema_4h_7.Data[1]
 
 #### 内置变量
 
-##### NowTime
+##### NowPrice
 ###### 类型: float64
 ###### 含义: 某个币的当前价格
+
+##### SystemStartTime
+###### 类型: int
+###### 含义: 系统开启的毫秒时间戳
 
 ##### NowTIme
 ###### 类型: int

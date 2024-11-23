@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/middlewares"
@@ -22,6 +23,7 @@ var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
 
 func init() {
+	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix() * 1000))
 	web.BConfig.CopyRequestBody = true // post 参数
 	web.SetStaticPath("/" + webIndex, "static") // 设置静态文件
 	logs.Info("webIndex:", webIndex)
@@ -68,8 +70,7 @@ func main() {
 		// feature.GoTestParse()
 		// feature.GoTestListen()
 		// feature.GoTestLine()
-		feature.CheckTestResults()
-		
+		// feature.CheckTestResults()
 		// web
 		web.Run(":" + webPort)
 	}

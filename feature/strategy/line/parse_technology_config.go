@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/core/logs"
 )
 
@@ -247,10 +248,13 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 	
 	// resPrice, _ := binance.GetTickerPrice(symbol)
 	// nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64)
-	config, klineMap := ParseTechnologyConfig(symbol, strTechnology)
+	system_start_time_str, _ := config.String("system_start_time")
+	system_start_time_int, _ := strconv.ParseInt(system_start_time_str, 10, 64)
+	tConfig, klineMap := ParseTechnologyConfig(symbol, strTechnology)
 	env := map[string]interface{} {
 		// build-in
 		// "NowPrice": nowPrice, // 当前价格
+		"SystemStartTime": system_start_time_int, // 系统启动时间, 毫秒时间戳
 		"NowTime": time.Now().Unix() * 1000, // 毫秒时间戳
 		
 		// function
@@ -295,7 +299,7 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 	env["BasicTrend"] = basicTrend
 	
 	// technology
-	for k, v := range config {
+	for k, v := range tConfig {
 		env[k] = v
 	}
 	
