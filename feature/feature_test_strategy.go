@@ -109,6 +109,11 @@ func NoticeAllSymbolByStrategy() {
 				}
 				if res, ok := output.(bool); ok && res {
 					floatNowPrice, ok := env["NowPrice"].(float64)
+					if strategy.Type == "long" {
+						floatNowPrice = utils.GetTradePrecision(floatNowPrice * 1.001, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
+					} else if strategy.Type == "short" {
+						floatNowPrice = utils.GetTradePrecision(floatNowPrice * 0.999, coin.TickSize) // 价格下浮 0.1%(原因是市价卖出通常会比当前价格低)
+					}
 					if !ok {
 						logs.Error("Error NowPrice Symbol: ", coin.Symbol)
 						continue

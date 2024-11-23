@@ -430,7 +430,7 @@ func StartTrade() {
 		}
 		
 		if systemConfig.FutureAllowLong == 1 && positionLong == nil && buyOrderLong == nil && openResult.CanLong {
-			buyPrice, _, err := binance.GetDepthAvgPrice(symbol) // 平均买价
+			buyPrice, _, err := binance.GetDepthAvgPrice(symbol, 10) // 平均买价
 			if err == nil {
 				buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
 				quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
@@ -442,6 +442,7 @@ func StartTrade() {
 					order, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
+						buyPrice := utils.GetTradePrecision(buyPrice * 1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
@@ -512,6 +513,7 @@ func StartTrade() {
 					order, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
+						sellPrice := utils.GetTradePrecision(sellPrice * 0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
