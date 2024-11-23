@@ -83,9 +83,13 @@ ema_4h_3.Data[0] > ema_4h_7.Data[0] && ema_4h_3.Data[1] < ema_4h_7.Data[1]
 
 #### Built in variable
 
-##### NowTime
+##### NowPrice
 ###### type: float64
 ###### meaning: the coin of the current price
+
+##### SystemStartTime
+###### type: int
+###### meaning: the millisecond timestamp of the system start time
 
 ##### NowTIme
 ###### type: int
