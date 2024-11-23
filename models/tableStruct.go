@@ -67,6 +67,9 @@ type Symbols struct {
 	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置 json
 	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
 	StrategyType string `orm:"column(strategy_type)" json:"strategy_type"` // 策略类型 // global, line_x, custom
+	Pin int64 `orm:"column(pin)" json:"pin"` // 置顶
+	Sort int64 `orm:"column(sort)" json:"sort"` // 排序
+	Type string `orm:"column(type)" json:"type"` // USDT, USDC
 }
 
 type NewSymbols struct {
