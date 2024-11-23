@@ -39,6 +39,7 @@ func (ctrl *FeatureController) Get() {
 	symbol := ctrl.GetString("symbol")
 	enable := ctrl.GetString("enable")
 	margin_type := ctrl.GetString("margin_type")
+	pin := ctrl.GetString("pin")
 	
 	o := orm.NewOrm()
 	var symbols []models.Symbols
@@ -52,20 +53,26 @@ func (ctrl *FeatureController) Get() {
 	if margin_type != "" {
 		query = query.Filter("marginType", margin_type)
 	}
-	_, err := query.OrderBy("ID").All(&symbols)
+	if pin != "" {
+		query = query.Filter("pin", 1)
+	}
+	_, err := query.OrderBy("-Pin", "ID").All(&symbols)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error"))
 	}
 	
-	sort.SliceStable(symbols, func(i, j int) bool {
-		if paramsSort == "+" {
-			return symbols[i].PercentChange >= symbols[j].PercentChange // 涨幅从大到小排序
-		} else if paramsSort == "-" {
-			return symbols[i].PercentChange < symbols[j].PercentChange // 涨幅从小到大排序
-		} else {
-			return true
-		}
-	})
+	if strings.HasPrefix(paramsSort, "percent_change") {
+		sort.SliceStable(symbols, func(i, j int) bool {
+			base := symbols[i].Pin >= symbols[j].Pin
+			if paramsSort == "percent_change+" {
+				return base && symbols[i].PercentChange >= symbols[j].PercentChange // 涨幅从大到小排序
+			} else if paramsSort == "percent_change-" {
+				return base && symbols[i].PercentChange < symbols[j].PercentChange // 涨幅从小到大排序
+			} else {
+				return true
+			}
+		})
+	}
 
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
