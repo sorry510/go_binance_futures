@@ -20,6 +20,7 @@ func (ctrl *TestStrategyResultController) Get() {
 	paramsLimit := ctrl.GetString("limit", "20")
 	paramsStartTime := ctrl.GetString("start_time")
 	paramsEndTime := ctrl.GetString("end_time")
+	paramsType := ctrl.GetString("type") // open, close, all
 	
 	page, _ := strconv.Atoi(paramsPage)
 	limit, _ := strconv.Atoi(paramsLimit)
@@ -29,16 +30,21 @@ func (ctrl *TestStrategyResultController) Get() {
 	var testResults []models.TestStrategyResults
 	
 	var query = o.QueryTable("test_strategy_results").
-		OrderBy("-UpdateTime")
+		OrderBy("-CreateTime")
 		
 	if (paramsSymbol != "") {
 		query = query.Filter("Symbol__icontains", paramsSymbol)
 	}
 	if (paramsStartTime != "") {
-		query = query.Filter("UpdateTime__gte", paramsStartTime)
+		query = query.Filter("CreateTime__gte", paramsStartTime)
 	}
 	if (paramsEndTime != "") {
-		query = query.Filter("UpdateTime__lte", paramsEndTime)
+		query = query.Filter("CreateTime__lte", paramsEndTime)
+	}
+	if (paramsType == "open") {
+		query = query.Filter("close_price", "0")
+	} else if (paramsType == "close") {
+		query = query.Exclude("close_price", "0")
 	}
 	total, err1 := query.Count()
 	if err1 != nil {
