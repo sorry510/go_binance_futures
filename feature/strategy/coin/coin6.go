@@ -8,9 +8,9 @@ import (
 type TradeCoin6 struct {
 }
 
-// 策略: 最近5min交易过的币不再交易,从交易额最高的前150个币中随机选取8个
+// 策略: 最近10min交易过的币不再交易,从交易额最高的前150个币中随机选取8个
 func (tradeCoin TradeCoin6) SelectCoins(allCoins []*models.Symbols) (coins []*models.Symbols) {
-	exclude_symbols_map := getLimitMinOrder(5)
+	exclude_symbols_map := getLimitMinOrder(10)
 	filterCoins := []*models.Symbols{}
 	for _, coin := range allCoins {
 		if _, exist := exclude_symbols_map[coin.Symbol]; exist {
@@ -26,8 +26,8 @@ func (tradeCoin TradeCoin6) SelectCoins(allCoins []*models.Symbols) (coins []*mo
 	})
 	
 	maxCount := len(filterCoins)
-	if maxCount >= 150 {
-		maxCount = 150
+	if maxCount >= 200 {
+		maxCount = 200
 	}
 
 	coins = GetRandArr(filterCoins[0:maxCount], 8)

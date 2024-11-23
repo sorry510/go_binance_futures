@@ -58,7 +58,11 @@ func NoticeAllSymbolByStrategy() {
 		offsetId += 10 // 避免无限处于循环
 	}
 	
+	exclude_symbols_map := getExcludeSymbols()
 	for _, coin := range coins {
+		if _, exist := exclude_symbols_map[coin.Symbol]; exist {
+			continue
+		} // 正在持仓的排除
 		nowTime := time.Now().Unix() * 1000 // 毫秒时间戳
 		if coin.Enable != 1 {
 			continue
@@ -300,4 +304,19 @@ func createTestResult(coin *models.Symbols, nowPrice float64, positionSide strin
 	o := orm.NewOrm()
 	o.Insert(result)
 	return result
+}
+
+func getExcludeSymbols() (symbols map[string]bool) {
+	var testPositions []*models.TestStrategyResults
+	_, err := orm.NewOrm().QueryTable("test_strategy_results").Filter("close_price", "0").All(&testPositions)
+	if err != nil {
+		logs.Error("get test_strategy_results error:", err.Error())
+		return
+	}
+	
+	symbols = make(map[string]bool)
+	for _, testPositions := range testPositions {
+		symbols[testPositions.Symbol] = true
+	}
+	return symbols
 }
