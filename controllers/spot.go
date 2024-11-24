@@ -189,9 +189,9 @@ func (ctrl *SpotController) BatchEdit() {
 		}
 	}
 	
-	go func() {
-		spot.UpdateSymbolsTradePrecision() // 更新合约交易精度
-	}()
+	// go func() {
+	// 	spot.UpdateSymbolsTradePrecision() // 更新合约交易精度
+	// }()
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,

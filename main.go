@@ -81,8 +81,8 @@ func main() {
 	/*******************************************更新基本信息 start****************************************************/
 	// 自动追加币种 和 更新币种交易精度
 	go func() {
-		logs.Info("update symbols trade precision and add new symbols, every 12 hours")
 		for {
+			logs.Info("update symbols trade precision and add new symbols, every 12 hours")
 			feature.UpdateSymbolsTradePrecision() // u本位
 			feature.UpdateDeliverySymbolsTradePrecision() // 币本位
 			spot.UpdateSymbolsTradePrecision() // 现货
