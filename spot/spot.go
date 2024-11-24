@@ -18,13 +18,7 @@ import (
 var pusher = notify.GetNotifyChannel()
 
 var flagSpotNew = 0
-func TryRush() {
-	
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err)
-		return
-	}
+func TryRush(systemConfig models.Config) {
 	if (systemConfig.SpotNewEnable == 1) {
 		if (flagSpotNew == 0) {
 			logs.Info("spot rush bot start")
@@ -112,12 +106,7 @@ func TryRush() {
 }
 
 var flagSpotNotice = 0
-func NoticeAndAutoOrder() {
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err)
-		return
-	}
+func NoticeAndAutoOrder(systemConfig models.Config) {
 	if (systemConfig.NoticeCoinEnable == 1) {
 		if (flagSpotNotice == 0) {
 			logs.Info("spot notice bot start")
@@ -347,12 +336,7 @@ func trySellMarket(symbol string, quantity string, stepSize string) (res *spot_a
 }
 
 var flagSpotListen = 0
-func ListenCoin() {
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err)
-		return
-	}
+func ListenCoin(systemConfig models.Config) {
 	if (systemConfig.ListenCoinEnable == 1) {
 		if (flagSpotListen == 0) {
 			logs.Info("spot listen bot start")

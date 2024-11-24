@@ -22,12 +22,7 @@ import (
 var pusher = notify.GetNotifyChannel()
 
 var flagFutures = 0
-func StartTrade() {
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err)
-		return
-	}
+func StartTrade(systemConfig models.Config) {
 	if (systemConfig.FutureEnable == 1) {
 		if (flagFutures == 0) {
 			logs.Info("futures trade bot start")
@@ -708,8 +703,7 @@ func UpdateSymbolTradeInfo(symbols *models.Symbols) {
 }
 
 // 更新所有币种的资金费率信息
-func UpdateSymbolsFundingRates() {
-	systemConfig, _ := utils.GetSystemConfig()
+func UpdateSymbolsFundingRates(systemConfig models.Config) {
 	if (systemConfig.ListenFundingRateEnable == 0) {
 		return
 	}

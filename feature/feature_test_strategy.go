@@ -22,19 +22,14 @@ import (
 var coinNoticeLastTimeMap = make(map[string]int64) // limit 通知一次
 var FuturesTestNotice = 0
 var offsetId = 0
-func NoticeAllSymbolByStrategy() {
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err.Error())
-		return
-	}
+func NoticeAllSymbolByStrategy(systemConfig models.Config) {
 	if (systemConfig.FutureTest == 1) {
 		if (FuturesTestNotice == 0) {
 			logs.Info("futures all symbol notice_strategy bot start")
 			FuturesTestNotice = 1
 		}
 	} else {
-		if (flagFuturesNotice == 1) {
+		if (FuturesTestNotice == 1) {
 			logs.Info("futures all symbol notice_strategy bot end")
 			FuturesTestNotice = 0
 		}
@@ -48,7 +43,7 @@ func NoticeAllSymbolByStrategy() {
 	
 	logs.Info("offsetId: ", offsetId)
 	var coins []*models.Symbols
-	coins, err = getSymbols(offsetId) // 按照顺序 10 个币
+	coins, err := getSymbols(offsetId) // 按照顺序 10 个币
 	if err != nil {
 		logs.Error("NoticeAllSymbolByStrategy:", err.Error())
 		return
@@ -141,19 +136,14 @@ func NoticeAllSymbolByStrategy() {
 }
 
 // 检查测试中的币当前是否应该平仓
-func CheckTestResults() {
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err.Error())
-		return
-	}
+func CheckTestResults(systemConfig models.Config) {
 	if (systemConfig.FutureTest == 1) {
 		if (FuturesTestNotice == 0) {
 			logs.Info("futures all symbol notice_strategy bot start")
 			FuturesTestNotice = 1
 		}
 	} else {
-		if (flagFuturesNotice == 1) {
+		if (FuturesTestNotice == 1) {
 			logs.Info("futures all symbol notice_strategy bot end")
 			FuturesTestNotice = 0
 		}
@@ -161,7 +151,7 @@ func CheckTestResults() {
 	}
 	
 	var results []*models.TestStrategyResults
-	_, err = orm.NewOrm().QueryTable("test_strategy_results").Filter("close_price", "0").All(&results)
+	_, err := orm.NewOrm().QueryTable("test_strategy_results").Filter("close_price", "0").All(&results)
 	if err != nil {
 		logs.Error("get test_strategy_results error:", err.Error())
 		return

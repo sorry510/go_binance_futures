@@ -3,6 +3,8 @@ package models
 type Config struct {
 	ID int64 `orm:"column(id)" json:"id"`
 	FutureEnable int `orm:"column(future_enable)" json:"future_enable"`
+	SpotEnable int `orm:"column(spot_enable)" json:"spot_enable"`
+	DeliveryEnable int `orm:"column(delivery_enable)" json:"delivery_enable"`
 	FutureBuyTimeout int `orm:"column(future_buy_timeout)" json:"future_buy_timeout"`
 	FutureExcludeSymbols string `orm:"column(future_exclude_symbols)" json:"future_exclude_symbols"`
 	FutureMaxCount int `orm:"column(future_max_count)" json:"future_max_count"`
@@ -18,6 +20,9 @@ type Config struct {
 	ListenFundingRateEnable int `orm:"column(listen_funding_rate_enable)" json:"listen_funding_rate_enable"`
 	FutureTest int `orm:"column(future_test)" json:"future_test"`
 	FutureTestNoticeLimitMin int `orm:"column(future_test_notice_limit_min)" json:"future_test_notice_limit_min"`
+	WsFuturesEnable int `orm:"column(ws_futures_enable)" json:"ws_futures_enable"`
+	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
+	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 }
 
 // 切记需要注册model后才能使用

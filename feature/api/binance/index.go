@@ -2,8 +2,10 @@ package binance
 
 import (
 	"context"
+	"go_binance_futures/models"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/adshao/go-binance/v2/delivery"
 	"github.com/adshao/go-binance/v2/futures"
@@ -470,11 +472,24 @@ func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate
 }
 
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
-func UpdateCoinByWs() {
+var flagWsFutures = 0
+func UpdateCoinByWs(systemConfig models.Config) {
+	if (systemConfig.WsFuturesEnable == 1) {
+		if (flagWsFutures == 0) {
+			logs.Info("futures ws start")
+			flagWsFutures = 1
+		}
+	} else {
+		if (flagWsFutures == 1) {
+			logs.Info("futures ws stop")
+			flagWsFutures = 0
+		}
+		return
+	}
+
 	var lock = false
 	var o = orm.NewOrm()
-	doneC, _, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
-		// logs.Info("futures ws run")
+	_, stopC, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
 		if !lock {
 			lock = true
 			for _, ticker := range event {
@@ -499,10 +514,17 @@ func UpdateCoinByWs() {
 	}, func(err error) {
 		logs.Error("futures ws run error:", err)
 	})
+	go func() {
+		for {
+			if flagWsFutures == 0 {
+				stopC <- struct{}{}
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
 	if err != nil {
 		logs.Error("futures ws start error:", err)
 		return
 	}
-	<-doneC
 }
 

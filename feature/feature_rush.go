@@ -15,12 +15,7 @@ import (
 )
 
 var flagFuturesRush = 0
-func TryRush() {
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err)
-		return
-	}
+func TryRush(systemConfig models.Config) {
 	if (systemConfig.FutureNewEnable == 1) {
 		if (flagFuturesRush == 0) {
 			logs.Info("futures rush bot start")
