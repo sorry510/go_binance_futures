@@ -7,6 +7,7 @@ import (
 	"go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"strconv"
+	"strings"
 
 	spot_api "github.com/adshao/go-binance/v2"
 
@@ -414,6 +415,57 @@ func ListenCoin() {
 				Price: nowPrice,
 				Remarks: lang.Lang("spot.fast_down"),
 			})
+		}
+	}
+}
+
+// 更新币种的交易精度和插入新币
+func UpdateSymbolsTradePrecision() {
+	res, err := binance.GetExchangeInfo()
+	if err == nil {
+		for _, symbol := range res.Symbols {
+			o := orm.NewOrm()
+			var tickSize string
+			var stepSize string
+			priceFilter := symbol.PriceFilter()
+			if priceFilter != nil {
+				tickSize = priceFilter.TickSize
+			}
+			lotSizeFilter := symbol.LotSizeFilter()
+			if lotSizeFilter != nil {
+				stepSize = lotSizeFilter.StepSize
+			}
+			o.QueryTable("spot_symbols").Filter("symbol", symbol.Symbol).Update(orm.Params{
+				"tickSize": tickSize,
+				"stepSize": stepSize,
+			})
+			
+			suffixType := ""
+			if strings.HasSuffix(symbol.Symbol, "USDT") {
+				suffixType = "USDT"
+			} else if strings.HasSuffix(symbol.Symbol, "FDUSD") {
+				suffixType = "FDUSD"
+			} else if strings.HasSuffix(symbol.Symbol, "USDC") {
+				suffixType = "USDC"
+			}
+			
+			if suffixType != "" {
+				if !o.QueryTable("spot_symbols").Filter("symbol", symbol.Symbol).Exist() {
+					// 没有的币种插入
+					logs.Info("add new spot symbol", symbol.Symbol)
+					o.Insert(&models.SpotSymbols{
+						Symbol: symbol.Symbol,
+						Enable: 0, // 默认不开启
+						TickSize: tickSize,
+						StepSize: stepSize,
+						Usdt: "10",
+						Profit: "10",
+						Loss: "10",
+						StrategyType: "global",
+						Type: suffixType,
+					})
+				}
+			}
 		}
 	}
 }

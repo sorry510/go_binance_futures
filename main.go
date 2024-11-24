@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/rate"
 	_ "go_binance_futures/routers"
 	"go_binance_futures/spot"
+	spot_api "go_binance_futures/spot/api/binance"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -26,7 +27,7 @@ func init() {
 	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix() * 1000))
 	web.BConfig.CopyRequestBody = true // post 参数
 	web.SetStaticPath("/" + webIndex, "static") // 设置静态文件
-	logs.Info("webIndex:", webIndex)
+	logs.Info("server web page:", "http://localhost:" + webPort + "/" + webIndex + "/index.html")
 	
 	registerModels() // 注册模型
 	registerMiddlewares() // 添加中间件
@@ -43,6 +44,8 @@ func registerModels() {
 	orm.RegisterModel(new(models.EatRateSymbols))
 	orm.RegisterModel(new(models.StrategyTemplates))
 	orm.RegisterModel(new(models.TestStrategyResults))
+	orm.RegisterModel(new(models.SpotSymbols))
+	orm.RegisterModel(new(models.DeliverySymbols))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db")
@@ -75,20 +78,32 @@ func main() {
 		web.Run(":" + webPort)
 	}
 	
+	/*******************************************更新基本信息 start****************************************************/
 	// 自动追加币种 和 更新币种交易精度
 	go func() {
 		logs.Info("update symbols trade precision and add new symbols, every 12 hours")
 		for {
-			feature.UpdateSymbolsTradePrecision()
+			feature.UpdateSymbolsTradePrecision() // u本位
+			feature.UpdateDeliverySymbolsTradePrecision() // 币本位
+			spot.UpdateSymbolsTradePrecision() // 现货
 			time.Sleep(12 * time.Hour) // 12小时更新一次
 		}
 	}()
 	
 	// websocket 订阅更新币种价格
 	go func() {
-		logs.Info("websocket start: auto update symbols price")
+		logs.Info("futures websocket start: auto update symbols price")
 		binance.UpdateCoinByWs()
 	}()
+	go func() {
+		logs.Info("spot websocket start: auto update symbols price")
+		spot_api.UpdateCoinByWs()
+	}()
+	go func() {
+		logs.Info("delivery websocket start: auto update symbols price")
+		binance.UpdateDeliveryCoinByWs()
+	}()
+	/*******************************************更新基本信息 end****************************************************/
 	
 	// 自动合约交易
 	go func() {

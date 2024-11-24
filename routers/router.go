@@ -21,6 +21,12 @@ func init() {
 	web.Router("/test-strategy-results", &controllers.TestStrategyResultController{}, "get:Get;delete:DeleteAll") // 测试策略的下单和平仓
 	web.Router("/test-strategy-results/:id", &controllers.TestStrategyResultController{}, "delete:Delete") // 删除某个测试策略结果
 	
+	web.Router("/spots", &controllers.SpotController{}, "get:Get;post:Post") // 列表查询和新增
+	web.Router("/spots/:id", &controllers.SpotController{}, "delete:Delete;put:Edit") // 更新和删除
+	web.Router("/spots/enable/:flag", &controllers.SpotController{}, "put:UpdateEnable") // 修改所有的合约交易对开启关闭
+	web.Router("/spots/batch", &controllers.SpotController{}, "put:BatchEdit") // 修改所有的合约交易
+	// web.Router("/spots/strategy-rule/test/:id", &controllers.SpotController{}, "post:TestStrategyRule") // 测试策略规则
+	
 	web.Router("/rush", &controllers.RushController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/rush/:id", &controllers.RushController{}, "delete:Delete;put:Edit") // 更新和删除
 	web.Router("/rush/enable/:flag", &controllers.RushController{}, "put:UpdateEnable") // 修改所有的交易对开启关闭

@@ -36,6 +36,7 @@ type FeatureController struct {
 
 func (ctrl *FeatureController) Get() {
 	paramsSort := ctrl.GetString("sort")
+	symbol_type := ctrl.GetString("symbol_type")
 	symbol := ctrl.GetString("symbol")
 	enable := ctrl.GetString("enable")
 	margin_type := ctrl.GetString("margin_type")
@@ -44,6 +45,9 @@ func (ctrl *FeatureController) Get() {
 	o := orm.NewOrm()
 	var symbols []models.Symbols
 	query := o.QueryTable("symbols")
+	if symbol_type != "" {
+		query = query.Filter("type", symbol_type)
+	}
 	if symbol != "" {
 		query = query.Filter("symbol__contains", symbol)
 	}
@@ -58,7 +62,7 @@ func (ctrl *FeatureController) Get() {
 	}
 	_, err := query.OrderBy("-Pin", "ID").All(&symbols)
 	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 	}
 	
 	if strings.HasPrefix(paramsSort, "percent_change") {
@@ -117,7 +121,7 @@ func (ctrl *FeatureController) Delete() {
 	_, err := o.Delete(symbols)
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "delete failed"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -133,6 +137,7 @@ func (ctrl *FeatureController) Post() {
 	symbols.Close = "0"
 	symbols.Open = "0"
 	symbols.Low = "0"
+	symbols.High = "0"
 	
 	symbols.Leverage = 3
 	symbols.MarginType = "CROSSED" // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
@@ -153,7 +158,7 @@ func (ctrl *FeatureController) Post() {
 	
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "create failed"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	symbols.ID = id
@@ -172,7 +177,7 @@ func (ctrl *FeatureController) UpdateEnable() {
 	_, err := o.Raw("UPDATE symbols SET enable = ?", flag).Exec()
 	if err != nil {
 		// 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
 	ctrl.Ctx.Resp(utils.ResJson(200, nil))
@@ -198,9 +203,6 @@ func (ctrl *FeatureController) BatchEdit() {
 	if (params.MarginType != "") {
 		query += " marginType = '" + params.MarginType + "',"
 	}
-	if (params.MarginType != "") {
-		query += " marginType = '" + params.MarginType + "',"
-	}
 	if (params.StrategyType != "") {
 		query += " strategy_type = '" + params.StrategyType + "',"
 	}
@@ -217,7 +219,7 @@ func (ctrl *FeatureController) BatchEdit() {
 		_, err := orm.NewOrm().Raw(query).Exec()
 		if err != nil {
 			// 处理错误
-			ctrl.Ctx.Resp(utils.ResJson(400, nil, "更新错误"))
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 			return
 		}
 	}
