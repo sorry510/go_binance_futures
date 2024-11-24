@@ -290,7 +290,7 @@ func ListenCoinFundingRate() {
 		nowFundingRate, _ := strconv.ParseFloat(coin.NowFundingRate, 64)
 		lastNoticeFundingRate, _ := strconv.ParseFloat(coin.LastNoticeFundingRate, 64)
 		diff := nowFundingRate - lastNoticeFundingRate
-		if (diff > 0.01 && nowFundingRate > 0.008) {
+		if (diff > 0.0055 && nowFundingRate > 0.005) {
 			// 正资金费率，做空可以吃资金费用
 			coin.LastNoticeFundingRate = coin.NowFundingRate
 			coin.LastNoticeFundingTime = coin.NowFundingTime
@@ -307,7 +307,7 @@ func ListenCoinFundingRate() {
 				Remarks: lang.Lang("futures.profit_by_funding_rate"),
 			})
 			
-		} else if (diff < -0.01 && nowFundingRate < -0.008) {
+		} else if (diff < -0.0055 && nowFundingRate < -0.005) {
 			// 负资金费率，小于 -1%, 做多可以吃资金费用
 			coin.LastNoticeFundingRate = coin.NowFundingRate
 			coin.LastNoticeFundingTime = coin.NowFundingTime

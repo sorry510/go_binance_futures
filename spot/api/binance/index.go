@@ -8,6 +8,7 @@ import (
 
 	"github.com/adshao/go-binance/v2"
 	"github.com/beego/beego/v2/adapter/logs"
+	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
 )
 
@@ -196,4 +197,42 @@ func GetOrder(orderParams OrderParams) (res *binance.Order, err error) {
 		return nil, err
 	}
 	return res, err
+}
+
+// websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
+// @doc https://developers.binance.com/docs/zh-CN/binance-spot-api-docs/web-socket-streams#%E6%8C%89symbol%E7%9A%84%E5%AE%8C%E6%95%B4ticker
+func UpdateCoinByWs() {
+	binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
+	var lock = false
+	var o = orm.NewOrm()
+	doneC, _, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
+		if !lock {
+			lock = true
+			for _, ticker := range event {
+				o.Raw(
+					"UPDATE `spot_symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
+					ticker.PriceChangePercent,
+					ticker.LastPrice, // 当前价格
+					ticker.OpenPrice,
+					ticker.LowPrice,
+					ticker.HighPrice,
+					ticker.Time,
+					ticker.BaseVolume, // 成交量
+					ticker.QuoteVolume, // 成交额
+					ticker.CloseQty, // 最新成交价格上的成交量
+					ticker.Count, // 成交数
+					
+					ticker.Symbol,
+				).Exec()
+			}
+			lock = false
+		}
+	}, func(err error) {
+		logs.Error("spot ws run error:", err.Error())
+	})
+	if err != nil {
+		logs.Error("spot ws start error:", err.Error())
+		return
+	}
+	<-doneC
 }

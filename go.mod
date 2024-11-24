@@ -5,7 +5,8 @@ go 1.21
 require github.com/beego/beego/v2 v2.1.0
 
 require (
-	github.com/adshao/go-binance/v2 v2.5.0
+	github.com/adshao/go-binance/v2 v2.6.1
+	github.com/expr-lang/expr v1.16.9
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/smartystreets/goconvey v1.6.4
@@ -15,7 +16,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/expr-lang/expr v1.16.9 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect

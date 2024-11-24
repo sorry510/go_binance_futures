@@ -664,7 +664,16 @@ func UpdateSymbolsTradePrecision() {
 				"stepSize": stepSize,
 			})
 			
-			if strings.HasSuffix(symbol.Symbol, "USDT") { // 非usdt结尾的不需要
+			suffixType := ""
+			if strings.HasSuffix(symbol.Symbol, "USDT") {
+				suffixType = "USDT"
+			} else if strings.HasSuffix(symbol.Symbol, "FDUSD") {
+				suffixType = "FDUSD"
+			} else if strings.HasSuffix(symbol.Symbol, "USDC") {
+				suffixType = "USDC"
+			}
+			
+			if suffixType != "" { // 非usdt结尾的不需要
 				if !o.QueryTable("symbols").Filter("symbol", symbol.Symbol).Exist() {
 					// 没有的币种插入
 					logs.Info("add new futures symbol", symbol.Symbol)
@@ -680,6 +689,7 @@ func UpdateSymbolsTradePrecision() {
 						Loss: "20",
 						KlineInterval: "1d",
 						StrategyType: "global",
+						Type: suffixType,
 					})
 				}
 			}
