@@ -224,9 +224,9 @@ func (ctrl *FeatureController) BatchEdit() {
 		}
 	}
 	
-	go func() {
-		feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
-	}()
+	// go func() {
+	// 	feature.UpdateSymbolsTradePrecision() // 更新合约交易精度
+	// }()
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
