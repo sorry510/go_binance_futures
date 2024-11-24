@@ -474,6 +474,7 @@ func UpdateCoinByWs() {
 	var lock = false
 	var o = orm.NewOrm()
 	doneC, _, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
+		// logs.Info("futures ws run")
 		if !lock {
 			lock = true
 			for _, ticker := range event {
@@ -496,10 +497,10 @@ func UpdateCoinByWs() {
 			lock = false
 		}
 	}, func(err error) {
-		logs.Info("ws run error:", err)
+		logs.Error("futures ws run error:", err)
 	})
 	if err != nil {
-		logs.Info("ws start error:", err)
+		logs.Error("futures ws start error:", err)
 		return
 	}
 	<-doneC
