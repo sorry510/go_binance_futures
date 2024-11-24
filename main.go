@@ -10,6 +10,7 @@ import (
 	_ "go_binance_futures/routers"
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
+	"go_binance_futures/utils"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -22,6 +23,7 @@ import (
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
+var SystemConfig models.Config
 
 func init() {
 	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix() * 1000))
@@ -31,6 +33,7 @@ func init() {
 	
 	registerModels() // 注册模型
 	registerMiddlewares() // 添加中间件
+	updateSystemConfig() // 更新配置
 }
 
 func registerModels() {
@@ -57,6 +60,14 @@ func registerMiddlewares() {
     web.InsertFilter("*", web.BeforeRouter, middlewares.JwtMiddleware)
 }
 
+func updateSystemConfig() {
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Error("GetSystemConfig:", err.Error())
+	}
+	SystemConfig = systemConfig // 更新配置信息
+}
+
 func main() {
 	// debug
 	if debug == "1" {
@@ -79,36 +90,52 @@ func main() {
 	}
 	
 	/*******************************************更新基本信息 start****************************************************/
-	// 自动追加币种 和 更新币种交易精度
+	// 读取最新配置信息
 	go func() {
 		for {
-			logs.Info("update symbols trade precision and add new symbols, every 12 hours")
-			feature.UpdateSymbolsTradePrecision() // u本位
-			feature.UpdateDeliverySymbolsTradePrecision() // 币本位
-			spot.UpdateSymbolsTradePrecision() // 现货
-			time.Sleep(12 * time.Hour) // 12小时更新一次
+			updateSystemConfig()
+			time.Sleep(time.Second * 1) // 1秒间隔
 		}
 	}()
+	// 自动追加币种 和 更新币种交易精度
+	// go func() {
+	// 	for {
+	// 		logs.Info("update symbols trade precision and add new symbols, every 12 hours")
+	// 		feature.UpdateSymbolsTradePrecision() // u本位
+	// 		feature.UpdateDeliverySymbolsTradePrecision() // 币本位
+	// 		spot.UpdateSymbolsTradePrecision() // 现货
+	// 		time.Sleep(12 * time.Hour) // 12小时更新一次
+	// 	}
+	// }()
 	
 	// websocket 订阅更新币种价格
 	go func() {
 		logs.Info("futures websocket start: auto update symbols price")
-		binance.UpdateCoinByWs()
+		for {
+			binance.UpdateCoinByWs(SystemConfig)
+			time.Sleep(time.Second * 1) // 1秒间隔
+		}
 	}()
 	go func() {
 		logs.Info("spot websocket start: auto update symbols price")
-		spot_api.UpdateCoinByWs()
+		for {
+			spot_api.UpdateCoinByWs(SystemConfig)
+			time.Sleep(time.Second * 1) // 1秒间隔
+		}
 	}()
 	go func() {
 		logs.Info("delivery websocket start: auto update symbols price")
-		binance.UpdateDeliveryCoinByWs()
+		for {
+			binance.UpdateDeliveryCoinByWs(SystemConfig)
+			time.Sleep(time.Second * 1) // 1秒间隔
+		}
 	}()
 	/*******************************************更新基本信息 end****************************************************/
 	
 	// 自动合约交易
 	go func() {
 		for {
-			feature.StartTrade()
+			feature.StartTrade(SystemConfig)
 			time.Sleep(time.Second * 1) // 1秒间隔
 		}
 	}()
@@ -116,14 +143,14 @@ func main() {
 	// 轮训测试所有开启合约交易的币种策略(每轮10个)
 	go func() {
 		for {
-			feature.NoticeAllSymbolByStrategy()
+			feature.NoticeAllSymbolByStrategy(SystemConfig)
 			time.Sleep(time.Second * 1) // 1秒间隔
 		}
 	}()
 	// 监听测试的开仓是否需要平仓
 	go func() {
 		for {
-			feature.CheckTestResults()
+			feature.CheckTestResults(SystemConfig)
 			time.Sleep(time.Second * 1) // 1秒间隔
 		}
 	}()
@@ -131,7 +158,7 @@ func main() {
 	// 新币抢购
 	go func() {
 		for {
-			spot.TryRush()
+			spot.TryRush(SystemConfig)
 			time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
 		}
 	}()
@@ -139,7 +166,7 @@ func main() {
 	// 新币合约抢购
 	go func() {
 		for {
-			feature.TryRush()
+			feature.TryRush(SystemConfig)
 			time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
 		}
 	}()
@@ -147,8 +174,8 @@ func main() {
 	// 币种通知
 	go func() {
 		for {
-			spot.NoticeAndAutoOrder()
-			feature.NoticeAndAutoOrder()
+			spot.NoticeAndAutoOrder(SystemConfig)
+			feature.NoticeAndAutoOrder(SystemConfig)
 
 			time.Sleep(time.Second * 3) // 3 秒间隔
 		}
@@ -157,8 +184,8 @@ func main() {
 	// 行情监听
 	go func() {
 		for {
-			spot.ListenCoin()
-			feature.ListenCoin()
+			spot.ListenCoin(SystemConfig)
+			feature.ListenCoin(SystemConfig)
 
 			time.Sleep(time.Second * 3) // 3 秒间隔
 		}
@@ -168,9 +195,9 @@ func main() {
 	go func() {
 		for {
 			// 更新所有币种的资金费率
-			feature.UpdateSymbolsFundingRates()
+			feature.UpdateSymbolsFundingRates(SystemConfig)
 			// 监听费率报警信息
-			feature.ListenCoinFundingRate()
+			feature.ListenCoinFundingRate(SystemConfig)
 
 			time.Sleep(time.Second * 30) // 30 秒更新一次
 		}

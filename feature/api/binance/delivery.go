@@ -2,7 +2,9 @@ package binance
 
 import (
 	"context"
+	"go_binance_futures/models"
 	"go_binance_futures/utils"
+	"time"
 
 	"github.com/adshao/go-binance/v2/delivery"
 	"github.com/beego/beego/v2/adapter/logs"
@@ -31,12 +33,25 @@ func GetDeliveryExchangeInfo()(res *delivery.ExchangeInfo, err error) {
 	return res, err
 }
 
-func UpdateDeliveryCoinByWs() {
+var flagWsDelivery = 0
+func UpdateDeliveryCoinByWs(systemConfig models.Config) {
+	if (systemConfig.WsDeliveryEnable == 1) {
+		if (flagWsDelivery == 0) {
+			logs.Info("delivery ws start")
+			flagWsDelivery = 1
+		}
+	} else {
+		if (flagWsDelivery == 1) {
+			logs.Info("delivery ws stop")
+			flagWsDelivery = 0
+		}
+		return
+	}
+	
 	// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
-	// logs.Info("start delivery ws")
 	var lock = false
 	var o = orm.NewOrm()
-	doneC, _, err := delivery.WsAllMarketTickerServe(func(event delivery.WsAllMarketTickerEvent) {
+	_, stopC, err := delivery.WsAllMarketTickerServe(func(event delivery.WsAllMarketTickerEvent) {
 		if !lock {
 			lock = true
 			for _, ticker := range event {
@@ -63,9 +78,16 @@ func UpdateDeliveryCoinByWs() {
 		lock = false
 		logs.Error("delivery ws run error:", err.Error())
 	})
+	go func() {
+		for {
+			if flagWsDelivery == 0 {
+				stopC <- struct{}{}
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
 	if err != nil {
 		logs.Error("delivery ws start error:", err.Error())
 		return
 	}
-	<-doneC
 }

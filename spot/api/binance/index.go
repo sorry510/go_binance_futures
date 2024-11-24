@@ -2,9 +2,11 @@ package binance
 
 import (
 	"context"
+	"go_binance_futures/models"
 	"go_binance_futures/utils"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/adshao/go-binance/v2"
 	"github.com/beego/beego/v2/adapter/logs"
@@ -201,11 +203,25 @@ func GetOrder(orderParams OrderParams) (res *binance.Order, err error) {
 
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
 // @doc https://developers.binance.com/docs/zh-CN/binance-spot-api-docs/web-socket-streams#%E6%8C%89symbol%E7%9A%84%E5%AE%8C%E6%95%B4ticker
-func UpdateCoinByWs() {
+var flagWsSpot = 0
+func UpdateCoinByWs(systemConfig models.Config) {
+	if (systemConfig.WsSpotEnable == 1) {
+		if (flagWsSpot == 0) {
+			logs.Info("spot ws start")
+			flagWsSpot = 1
+		}
+	} else {
+		if (flagWsSpot == 1) {
+			logs.Info("spot ws stop")
+			flagWsSpot = 0
+		}
+		return
+	}
+	
 	binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
 	var lock = false
 	var o = orm.NewOrm()
-	doneC, _, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
+	_, stopC, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
 		if !lock {
 			lock = true
 			for _, ticker := range event {
@@ -230,9 +246,16 @@ func UpdateCoinByWs() {
 	}, func(err error) {
 		logs.Error("spot ws run error:", err.Error())
 	})
+	go func() {
+		for {
+			if flagWsSpot == 0 {
+				stopC <- struct{}{}
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
 	if err != nil {
 		logs.Error("spot ws start error:", err.Error())
 		return
 	}
-	<-doneC
 }

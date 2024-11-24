@@ -14,12 +14,7 @@ import (
 )
 
 var flagFuturesNotice = 0
-func NoticeAndAutoOrder() {
-	systemConfig, err := utils.GetSystemConfig()
-	if err != nil {
-		logs.Error("GetSystemConfig:", err)
-		return
-	}
+func NoticeAndAutoOrder(systemConfig models.Config) {
 	if (systemConfig.NoticeCoinEnable == 1) {
 		if (flagFuturesNotice == 0) {
 			logs.Info("futures notice bot start")
