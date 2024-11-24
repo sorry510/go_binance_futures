@@ -51,7 +51,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.DeliverySymbols))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
-	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db")
+	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000") // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
 	// orm.Debug = true
 }
 
@@ -64,8 +64,9 @@ func updateSystemConfig() {
 	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
 		logs.Error("GetSystemConfig:", err.Error())
+	} else {
+		SystemConfig = systemConfig // 更新配置信息
 	}
-	SystemConfig = systemConfig // 更新配置信息
 }
 
 func main() {
@@ -98,15 +99,15 @@ func main() {
 		}
 	}()
 	// 自动追加币种 和 更新币种交易精度
-	// go func() {
-	// 	for {
-	// 		logs.Info("update symbols trade precision and add new symbols, every 12 hours")
-	// 		feature.UpdateSymbolsTradePrecision() // u本位
-	// 		feature.UpdateDeliverySymbolsTradePrecision() // 币本位
-	// 		spot.UpdateSymbolsTradePrecision() // 现货
-	// 		time.Sleep(12 * time.Hour) // 12小时更新一次
-	// 	}
-	// }()
+	go func() {
+		for {
+			logs.Info("update symbols trade precision and add new symbols, every 12 hours")
+			feature.UpdateSymbolsTradePrecision() // u本位
+			feature.UpdateDeliverySymbolsTradePrecision() // 币本位
+			spot.UpdateSymbolsTradePrecision() // 现货
+			time.Sleep(12 * time.Hour) // 12小时更新一次
+		}
+	}()
 	
 	// websocket 订阅更新币种价格
 	go func() {
