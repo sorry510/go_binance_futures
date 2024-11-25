@@ -23,6 +23,7 @@ import (
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
+var dbPath, _ = config.String("database::path")
 var SystemConfig models.Config
 
 func init() {
@@ -51,7 +52,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.DeliverySymbols))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
-	orm.RegisterDataBase("default", "sqlite3", "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000") // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
+	orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
 	// orm.Debug = true
 }
 

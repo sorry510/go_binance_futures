@@ -1,8 +1,14 @@
 ### Change Log
 
 ## v0.0.53
-- 增加仓位通知
+- 增加仓位监听通知
 - 更新数据库
+- 更新 app.conf 添加数据库配置
+
+```
+[database]
+path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
+```
 
 ## v0.0.52
 - 优化数据库连接方式，减少数据库锁死现象
