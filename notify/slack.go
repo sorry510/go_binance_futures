@@ -371,3 +371,27 @@ func (pusher Slack) FuturesCustomStrategyTest(params FuturesTestParams) {
   )
   SlackApi(text)
 }
+
+func (pusher Slack) FuturesPositionConvert(params FuturesPositionConvertParams) {
+  text := `
+## %s
+{futures.status}：%s
+{futures.position_side}：%s
+{futures.price}：%s
+{futures.leverage}：%f
+{futures.unRealizedProfit}：%s
+{futures.time}：%s
+
+> author <sorry510sf@gmail.com>`
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.Status),
+    lang.Lang("futures." + params.PositionSide),
+    params.Price,
+    params.Leverage,
+    params.UnRealizedProfit,
+    nowTime(),
+  )
+  DingDingApi(text)
+}

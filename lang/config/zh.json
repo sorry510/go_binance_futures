@@ -47,6 +47,9 @@
     "fast_down": "快速下跌",
     "funding_rate": "资金费率",
     "profit_by_funding_rate": "吃资金费用",
+    "notice_position_convert_title": "合约持仓收益转换通知",
+    "income_positive": "收益转正",
+    "income_negative": "收益转负",
     
     "now_price": "当前价格",
     "stop_loss_price": "止损价格",
