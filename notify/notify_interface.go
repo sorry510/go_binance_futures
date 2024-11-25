@@ -95,9 +95,20 @@ type FuturesTestParams struct {
 	Remarks string
 }
 
+type FuturesPositionConvertParams struct {
+	Title string
+	Symbol string
+	Status string // profit, loss
+	PositionSide string // long, short
+	Leverage string
+	Price string
+	UnRealizedProfit string
+}
+
 type Pusher interface {
 	TestPusher()
 	FuturesCustomStrategyTest(params FuturesTestParams)
+	FuturesPositionConvert(params FuturesPositionConvertParams)
 	
 	FuturesOpenOrder(params FuturesOrderParams)
 	FuturesCloseOrder(params FuturesOrderParams)

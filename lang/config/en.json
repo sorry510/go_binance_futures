@@ -47,6 +47,9 @@
     "fast_down": "fast down",
     "funding_rate": "funding rate",
     "profit_by_funding_rate": "profit by funding rate",
+    "notice_position_convert_title": "futures position convert notice",
+    "income_positive": "income positive",
+    "income_negative": "income negative",
     
     "now_price": "now price",
     "stop_loss_price": "stop loss price",

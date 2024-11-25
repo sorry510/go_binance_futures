@@ -365,3 +365,27 @@ func (pusher DingDing) FuturesCustomStrategyTest(params FuturesTestParams) {
   )
   DingDingApi(text)
 }
+
+func (pusher DingDing) FuturesPositionConvert(params FuturesPositionConvertParams) {
+  text := `
+## %s
+#### **{futures.status}**：<font color="#008000">%s</font>
+#### **{futures.position_side}**：<font color="#008000">%s</font>
+#### **{futures.now_price}**：<font color="#008000">%s</font>
+#### **{futures.leverage}**：<font color="#008000">%s</font>
+#### **{futures.unRealizedProfit}**：<font color="#008000">%s</font>
+#### **{futures.time}**：%s
+
+> author <sorry510sf@gmail.com>`
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    lang.Lang("futures." + params.Status),
+    lang.Lang("futures." + params.PositionSide),
+    params.Price,
+    params.Leverage,
+    params.UnRealizedProfit,
+    nowTime(),
+  )
+  DingDingApi(text)
+}

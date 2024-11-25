@@ -5,6 +5,7 @@ type Config struct {
 	FutureEnable int `orm:"column(future_enable)" json:"future_enable"`
 	SpotEnable int `orm:"column(spot_enable)" json:"spot_enable"`
 	DeliveryEnable int `orm:"column(delivery_enable)" json:"delivery_enable"`
+	FuturesPositionConvertEnable int `orm:"column(futures_position_convert_enable)" json:"futures_position_convert_enable"` // 合约持仓正负转换通知
 	FutureBuyTimeout int `orm:"column(future_buy_timeout)" json:"future_buy_timeout"`
 	FutureExcludeSymbols string `orm:"column(future_exclude_symbols)" json:"future_exclude_symbols"`
 	FutureMaxCount int `orm:"column(future_max_count)" json:"future_max_count"`

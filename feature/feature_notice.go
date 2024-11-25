@@ -6,7 +6,9 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/utils"
+	"math"
 	"strconv"
+	"time"
 
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
@@ -167,6 +169,77 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 						binance.OrderStopLoss(coin.Symbol, loss_price_float64, futures.SideTypeBuy, futures.PositionSideTypeShort)
 					}
 				}
+			}
+		}
+	}
+}
+
+
+type PositionNoticeInfo struct {
+	Status string // income_positive:盈利 income_negative:亏损
+	NoticeTime int64
+}
+
+var flagPositionConvertNotice = 0
+var positionNotices = make(map[string]PositionNoticeInfo)
+func PositionConvertNotice(systemConfig models.Config) {
+	if (systemConfig.FuturesPositionConvertEnable == 1) {
+		if (flagPositionConvertNotice == 0) {
+			logs.Info("futures position convert notice bot start")
+			flagPositionConvertNotice = 1
+		}
+	} else {
+		if (flagPositionConvertNotice == 1) {
+			logs.Info("futures position convert notice bot stop")
+			flagPositionConvertNotice = 0
+		}
+		return
+	}
+	
+	positions, err := binance.GetPosition(binance.PositionParams{})
+	if err != nil {
+		logs.Error("GetPosition err:", err)
+		return
+	}
+	
+	for _, position := range positions {
+		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
+		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
+		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
+			delete(positionNotices, position.Symbol + position.PositionSide) // 删除已经平仓的数据
+			continue
+		}
+		unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
+		status := "income_positive" // 盈利
+		if unRealizedProfit < 0 {
+			status = "income_negative" // 亏损
+		}
+		
+		noticeInfo, ok := positionNotices[position.Symbol + position.PositionSide]
+		if ok {
+			// 存在记录
+			if (status != noticeInfo.Status && time.Now().Unix() - noticeInfo.NoticeTime > 60 * 3) {
+				// 状态变化,并且上次通知时间超过3分钟，重新记录新的状态，并通知
+				positionNotices[position.Symbol + position.PositionSide] = PositionNoticeInfo{
+					Status: status,
+					NoticeTime: time.Now().Unix(),
+				}
+				// 状态变化,并且上次通知时间超过1小时
+				pusher.FuturesPositionConvert(notify.FuturesPositionConvertParams{
+					Title: lang.Lang("futures.notice_position_convert_title"),
+					Symbol: position.Symbol,
+					Status: status,
+					PositionSide: position.PositionSide,
+					Price: position.MarkPrice,
+					Leverage: position.Leverage,
+					UnRealizedProfit: position.UnRealizedProfit,
+				})
+			}
+		} else {
+			// 第一次,只进行记录
+			positionNotices[position.Symbol + position.PositionSide] = PositionNoticeInfo{
+				Status: status,
+				NoticeTime: time.Now().Unix(),
 			}
 		}
 	}

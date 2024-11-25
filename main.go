@@ -133,6 +133,14 @@ func main() {
 	}()
 	/*******************************************更新基本信息 end****************************************************/
 	
+	// 仓位正负转换通知
+	go func() {
+		for {
+			feature.PositionConvertNotice(SystemConfig)
+			time.Sleep(time.Second * 5) // 5秒间隔
+		}
+	}()
+	
 	// 自动合约交易
 	go func() {
 		for {

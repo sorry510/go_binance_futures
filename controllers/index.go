@@ -53,6 +53,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"wsFuturesEnable": systemConfig.WsFuturesEnable,
 			"wsSpotEnable": systemConfig.WsSpotEnable,
 			"wsDeliveryEnable": systemConfig.WsDeliveryEnable,
+			"futuresPositionConvertEnable": systemConfig.FuturesPositionConvertEnable,
 			
 			"coinExcludeSymbols": coinExcludeSymbols,
 			"coinMaxCount": coinMaxCount,
