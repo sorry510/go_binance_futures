@@ -9,7 +9,6 @@ import (
 	"go_binance_futures/rate"
 	_ "go_binance_futures/routers"
 	"go_binance_futures/spot"
-	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"time"
 
@@ -113,25 +112,22 @@ func main() {
 	// websocket 订阅更新币种价格
 	go func() {
 		logs.Info("futures websocket start: auto update symbols price")
-		for {
-			binance.UpdateCoinByWs(SystemConfig)
-			time.Sleep(time.Second * 1) // 1秒间隔
-		}
+		binance.UpdateCoinByWs(&SystemConfig)
 	}()
-	go func() {
-		logs.Info("spot websocket start: auto update symbols price")
-		for {
-			spot_api.UpdateCoinByWs(SystemConfig)
-			time.Sleep(time.Second * 1) // 1秒间隔
-		}
-	}()
-	go func() {
-		logs.Info("delivery websocket start: auto update symbols price")
-		for {
-			binance.UpdateDeliveryCoinByWs(SystemConfig)
-			time.Sleep(time.Second * 1) // 1秒间隔
-		}
-	}()
+	// go func() {
+	// 	logs.Info("spot websocket start: auto update symbols price")
+	// 	for {
+	// 		spot_api.UpdateCoinByWs(SystemConfig)
+	// 		time.Sleep(time.Second * 1) // 1秒间隔
+	// 	}
+	// }()
+	// go func() {
+	// 	logs.Info("delivery websocket start: auto update symbols price")
+	// 	for {
+	// 		binance.UpdateDeliveryCoinByWs(SystemConfig)
+	// 		time.Sleep(time.Second * 1) // 1秒间隔
+	// 	}
+	// }()
 	/*******************************************更新基本信息 end****************************************************/
 	
 	// 仓位正负转换通知
