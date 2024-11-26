@@ -379,7 +379,7 @@ func (pusher Slack) FuturesPositionConvert(params FuturesPositionConvertParams) 
 {futures.position_side}：%s
 {futures.price}：%s
 {futures.leverage}：%f
-{futures.unRealizedProfit}：%s
+{futures.profit}：%s
 {futures.time}：%s
 
 > author <sorry510sf@gmail.com>`

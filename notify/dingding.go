@@ -373,7 +373,7 @@ func (pusher DingDing) FuturesPositionConvert(params FuturesPositionConvertParam
 #### **{futures.position_side}**：<font color="#008000">%s</font>
 #### **{futures.now_price}**：<font color="#008000">%s</font>
 #### **{futures.leverage}**：<font color="#008000">%s</font>
-#### **{futures.unRealizedProfit}**：<font color="#008000">%s</font>
+#### **{futures.profit}**：<font color="#008000">%s</font>
 #### **{futures.time}**：%s
 
 > author <sorry510sf@gmail.com>`
