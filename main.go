@@ -24,6 +24,7 @@ var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
 var dbPath, _ = config.String("database::path")
+var wsFuturesPosition, _ = config.String("ws::futures_position")
 var SystemConfig models.Config
 
 func init() {
@@ -50,6 +51,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.TestStrategyResults))
 	orm.RegisterModel(new(models.SpotSymbols))
 	orm.RegisterModel(new(models.DeliverySymbols))
+	orm.RegisterModel(new(models.FuturesPosition))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
@@ -208,11 +210,20 @@ func main() {
 	
 	// 监听套利情况
 	go func() {
+		return
 		for {
 			rate.ListenRateEat()
 			time.Sleep(time.Hour * 1) // 1 小时更新一次
 		}	
 	}()
+	
+	// ws 订阅仓位变化
+	if wsFuturesPosition == "1" {
+		go func() {
+			logs.Info("futures websocket position start: auto update futures position")
+			binance.SyncPositions()	
+		}()
+	}
 	
 	// web
 	web.Run(":" + webPort)

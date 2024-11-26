@@ -641,9 +641,9 @@ func insertCloseOrder(position *futures.PositionRisk, positionAmtFloat float64, 
 // 更新币种的交易精度和插入新币
 func UpdateSymbolsTradePrecision() {
 	res, err := binance.GetExchangeInfo()
+	o := orm.NewOrm()
 	if err == nil {
 		for _, symbol := range res.Symbols {
-			o := orm.NewOrm()
 			var tickSize string
 			var stepSize string
 			priceFilter := symbol.PriceFilter()

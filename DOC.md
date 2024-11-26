@@ -14,3 +14,11 @@
 
 ### 问题
 1. spot 的 ws 正式 url 报错，走的 test url
+
+
+### 数据库修复
+
+```
+PRAGMA integrity_check; // 检查
+VACUUM; // 修复
+```

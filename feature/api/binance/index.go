@@ -5,6 +5,7 @@ import (
 	"go_binance_futures/models"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/adshao/go-binance/v2/delivery"
 	"github.com/adshao/go-binance/v2/futures"
@@ -518,5 +519,72 @@ func UpdateCoinByWs(systemConfig *models.Config) {
 		logs.Error("futures ws start error:", err)
 		return
 	}
+}
+
+// websocket user data 使用
+func GetListenKey() (listenKey string, err error) {
+	return futuresClient.NewStartUserStreamService().Do(context.Background())
+}
+
+func UpdateListenKey(listenKey string) (err error) {
+	return futuresClient.NewKeepaliveUserStreamService().ListenKey(listenKey).Do(context.Background())
+}
+
+// @see https://binance-docs.github.io/apidocs/futures/cn/#listenkey-user_stream
+func SyncPositions() {
+	listenKey, err := GetListenKey()
+	if err != nil {
+		logs.Error("GetListenKey:", err.Error())
+		return
+	}
+	o := orm.NewOrm()
+	doneC, stopC, err := futures.WsUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
+		if (event.Event == "ACCOUNT_UPDATE") {
+			for _, v := range event.AccountUpdate.Positions {
+				var position models.FuturesPosition
+				o.QueryTable("futures_positions").Filter("symbol", v.Symbol).Filter("side", v.Side).One(&position)
+				position.Symbol = v.Symbol
+				position.Side = string(v.Side)
+				position.Amount = v.Amount
+				position.MarginType = string(v.MarginType)
+				position.IsolatedWallet = v.IsolatedWallet
+				position.EntryPrice = v.EntryPrice
+				position.MarkPrice = v.MarkPrice
+				position.UnrealizedProfit = v.UnrealizedPnL
+				position.AccumulatedRealized = v.AccumulatedRealized
+				position.MaintenanceMarginRequired = v.MaintenanceMarginRequired
+				position.CreateTime = event.Time
+				position.UpdateTime = event.Time
+				if position.ID == 0 {
+					o.Insert(&position)
+				} else {
+					o.Update(&position)
+				}
+			}
+		} else if (event.Event == "listenKeyExpired") {
+			// 如果 listenKey 过期，重新获取 listenKey
+			logs.Info("futures ws listenKeyExpired")
+			UpdateListenKey(listenKey)
+		}
+	}, func(err error) {
+		logs.Error("futures ws user data run error:", err)
+	})
+	go func() {
+		for {
+			time.Sleep(time.Minute * 20) // key 1小时过期， 20 分钟更新一次
+			err = UpdateListenKey(listenKey)
+			if err != nil {
+				logs.Error("UpdateListenKey:", err.Error())
+				// 如果更新错误，停止 websocket
+				stopC <- struct{}{}
+			}
+		}	
+	}()
+	
+	if err != nil {
+		logs.Error("futures ws user data error:", err)
+		return
+	}
+	<-doneC
 }
 
