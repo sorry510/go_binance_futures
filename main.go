@@ -117,10 +117,12 @@ func main() {
 	}()
 	go func() {
 		logs.Info("spot websocket start: auto update symbols price")
+		return
 		spot_api.UpdateCoinByWs(&SystemConfig)
 	}()
 	go func() {
 		logs.Info("delivery websocket start: auto update symbols price")
+		return
 		binance.UpdateDeliveryCoinByWs(&SystemConfig)
 	}()
 	/*******************************************更新基本信息 end****************************************************/

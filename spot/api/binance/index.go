@@ -6,7 +6,6 @@ import (
 	"go_binance_futures/utils"
 	"sort"
 	"strconv"
-	"time"
 
 	"github.com/adshao/go-binance/v2"
 	"github.com/beego/beego/v2/adapter/logs"
@@ -208,7 +207,7 @@ func UpdateCoinByWs(systemConfig *models.Config) {
 	binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
 	var lock = false
 	var o = orm.NewOrm()
-	_, stopC, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
+	_, _, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
 		if (systemConfig.WsSpotEnable == 1) {
 			if (flagWsSpot == 0) {
 				logs.Info("spot ws start")
@@ -246,14 +245,6 @@ func UpdateCoinByWs(systemConfig *models.Config) {
 	}, func(err error) {
 		logs.Error("spot ws run error:", err.Error())
 	})
-	go func() {
-		for {
-			if flagWsSpot == 0 {
-				stopC <- struct{}{}
-			}
-			time.Sleep(1 * time.Second)
-		}
-	}()
 	if err != nil {
 		logs.Error("spot ws start error:", err.Error())
 		return
