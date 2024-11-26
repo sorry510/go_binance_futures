@@ -8,6 +8,7 @@ import (
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -229,7 +230,7 @@ func PositionConvertNotice(systemConfig models.Config) {
 					Title: lang.Lang("futures.notice_position_convert_title"),
 					Symbol: position.Symbol,
 					Status: status,
-					PositionSide: position.PositionSide,
+					PositionSide: strings.ToLower(position.PositionSide),
 					Price: position.MarkPrice,
 					Leverage: position.Leverage,
 					UnRealizedProfit: position.UnRealizedProfit,

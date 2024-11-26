@@ -34,24 +34,24 @@ func GetDeliveryExchangeInfo()(res *delivery.ExchangeInfo, err error) {
 }
 
 var flagWsDelivery = 0
-func UpdateDeliveryCoinByWs(systemConfig models.Config) {
-	if (systemConfig.WsDeliveryEnable == 1) {
-		if (flagWsDelivery == 0) {
-			logs.Info("delivery ws start")
-			flagWsDelivery = 1
-		}
-	} else {
-		if (flagWsDelivery == 1) {
-			logs.Info("delivery ws stop")
-			flagWsDelivery = 0
-		}
-		return
-	}
-	
+func UpdateDeliveryCoinByWs(systemConfig *models.Config) {
 	// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
 	var lock = false
 	var o = orm.NewOrm()
 	_, stopC, err := delivery.WsAllMarketTickerServe(func(event delivery.WsAllMarketTickerEvent) {
+		if (systemConfig.WsDeliveryEnable == 1) {
+			if (flagWsDelivery == 0) {
+				logs.Info("delivery ws start")
+				flagWsDelivery = 1
+			}
+		} else {
+			if (flagWsDelivery == 1) {
+				logs.Info("delivery ws stop")
+				flagWsDelivery = 0
+			}
+			lock = false
+			return
+		}
 		if !lock {
 			lock = true
 			for _, ticker := range event {
