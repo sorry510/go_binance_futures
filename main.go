@@ -219,6 +219,7 @@ func main() {
 	
 	// ws 订阅仓位变化
 	if wsFuturesPosition == "1" {
+		return
 		go func() {
 			logs.Info("futures websocket position start: auto update futures position")
 			binance.SyncPositions()	

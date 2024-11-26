@@ -531,6 +531,7 @@ func UpdateListenKey(listenKey string) (err error) {
 }
 
 // @see https://binance-docs.github.io/apidocs/futures/cn/#listenkey-user_stream
+// 暂时废弃，不能实时推送仓位信息，只有仓位变化才会推送
 func SyncPositions() {
 	listenKey, err := GetListenKey()
 	if err != nil {
