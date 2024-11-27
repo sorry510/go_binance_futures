@@ -224,6 +224,8 @@ kline_4h.High = [67.2, 70.3, ..] // 150 count
 kline_4h.Low = [27.2, 20.3, ..] // 150 count
 kline_4h.Open = [37.2, 30.3, ..] // 150 count
 kline_4h.Close = [47.2, 34.3, ..] // 150 count
+kline_4h.Amount = [100.1, 100.2..] // 150 count 成交额
+kline_4h.Qps = [10.31, 10.32..] // 150 count 单位时间的成交额
 ```
 
 ##### BTCUSDT 数据

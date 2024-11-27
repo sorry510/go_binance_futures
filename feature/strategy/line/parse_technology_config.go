@@ -30,6 +30,8 @@ type KLinePrice struct {
 	Low []float64 `json:"low"` // 最低价
 	Close []float64 `json:"close"` // 收盘价
 	Open []float64 `json:"open"` // 开盘价
+	Amount []float64 `json:"amount"` // 成交额(成交量 * 平均价格)
+	Qps []float64 `json:"qps"` // 单位时间成交额
 }
 
 func ParseTechnologyConfig(symbol string, strTechnology string) (config map[string]interface{}, klineMap map[string]KLinePrice) {
@@ -54,12 +56,14 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 					logs.Error("kline error, symbol:", symbol)
 					continue
 				}
-				high, low, close, open := GetLineFloatPrices(kline)
+				high, low, close, open, amount, qps := GetLineFloatValues(kline)
 				klinePrice = KLinePrice{
 					High: high,
 					Low: low,
 					Close: close,
 					Open: open,
+					Amount: amount,
+					Qps: qps,
 				}
 				klineMap[item.KlineInterval] = klinePrice
 			}
@@ -84,12 +88,14 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 					logs.Error("kline error, symbol:", symbol)
 					continue
 				}
-				high, low, close, open := GetLineFloatPrices(kline)
+				high, low, close, open, amount, qps := GetLineFloatValues(kline)
 				klinePrice = KLinePrice{
 					High: high,
 					Low: low,
 					Close: close,
 					Open: open,
+					Amount: amount,
+					Qps: qps,
 				}
 				klineMap[item.KlineInterval] = klinePrice
 			}
@@ -115,12 +121,14 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 					logs.Error("kline error, symbol:", symbol)
 					continue
 				}
-				high, low, close, open := GetLineFloatPrices(kline)
+				high, low, close, open, amount, qps := GetLineFloatValues(kline)
 				klinePrice = KLinePrice{
 					High: high,
 					Low: low,
 					Close: close,
 					Open: open,
+					Amount: amount,
+					Qps: qps,
 				}
 				klineMap[item.KlineInterval] = klinePrice
 			}
@@ -145,12 +153,14 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 					logs.Error("kline error, symbol:", symbol)
 					continue
 				}
-				high, low, close, open := GetLineFloatPrices(kline)
+				high, low, close, open, amount, qps := GetLineFloatValues(kline)
 				klinePrice = KLinePrice{
 					High: high,
 					Low: low,
 					Close: close,
 					Open: open,
+					Amount: amount,
+					Qps: qps,
 				}
 				klineMap[item.KlineInterval] = klinePrice
 			}
@@ -176,12 +186,14 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 					logs.Error("kline error, symbol:", symbol)
 					continue
 				}
-				high, low, close, open := GetLineFloatPrices(kline)
+				high, low, close, open, amount, qps := GetLineFloatValues(kline)
 				klinePrice = KLinePrice{
 					High: high,
 					Low: low,
 					Close: close,
 					Open: open,
+					Amount: amount,
+					Qps: qps,
 				}
 				klineMap[item.KlineInterval] = klinePrice
 			}
@@ -211,12 +223,14 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 					logs.Error("kline error, symbol:", symbol)
 					continue
 				}
-				high, low, close, open := GetLineFloatPrices(kline)
+				high, low, close, open, amount, qps := GetLineFloatValues(kline)
 				klinePrice = KLinePrice{
 					High: high,
 					Low: low,
 					Close: close,
 					Open: open,
+					Amount: amount,
+					Qps: qps,
 				}
 				klineMap[item.KlineInterval] = klinePrice
 			}
