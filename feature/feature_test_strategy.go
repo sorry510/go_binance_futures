@@ -37,25 +37,27 @@ func NoticeAllSymbolByStrategy(systemConfig models.Config) {
 	}
 	exclude_symbols_map := getExcludeSymbols()
 	if len(exclude_symbols_map) > systemConfig.FutureMaxCount {
-		logs.Info("test position order: %d, is over max %d, stop open new test order", exclude_symbols_map, systemConfig.FutureMaxCount)
+		logs.Info("test position order: %d, is over max %d, stop open new test order", len(exclude_symbols_map), systemConfig.FutureMaxCount)
 		return
 	}
 	
 	logs.Info("offsetId: ", offsetId)
 	var coins []*models.Symbols
-	coins, err := getSymbols(offsetId) // 按照顺序 10 个币
+	limit := 6 // 不设置太大，如果开仓太多，加上这里会导致接口请求超过限制
+	coins, err := getSymbols(offsetId, limit) // 按照顺序 limit 个币
 	if err != nil {
 		logs.Error("NoticeAllSymbolByStrategy:", err.Error())
 		return
 	}
+	
 	if len(coins) == 0 {
 		offsetId = 0
-		coins, _ = getSymbols(offsetId)
+		coins, _ = getSymbols(offsetId, limit)
 	}
 	if (len(coins) > 0) {
 		offsetId = int(coins[len(coins) - 1].ID)
 	} else {
-		offsetId += 10 // 避免无限处于循环
+		offsetId += limit // 避免无限处于循环
 	}
 	
 	for _, coin := range coins {
@@ -268,13 +270,13 @@ func CheckTestResults(systemConfig models.Config) {
 	}
 }
 
-func getSymbols(offsetId int) (coins []*models.Symbols, err error) {
+func getSymbols(offsetId int, limit int) (coins []*models.Symbols, err error) {
 	_, err = orm.NewOrm().
 		QueryTable("symbols").
 		Filter("enable", 1).
 		Filter("ID__gt", offsetId).
 		OrderBy("ID").
-		Limit(10).
+		Limit(limit).
 		All(&coins) // 按照顺序 10个币
 	return coins, err
 }

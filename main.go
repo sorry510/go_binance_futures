@@ -145,7 +145,7 @@ func main() {
 		}
 	}()
 	
-	// 轮训测试所有开启合约交易的币种策略(每轮10个)
+	// 轮训测试所有开启合约交易的币种策略(每轮5个)
 	go func() {
 		for {
 			feature.NoticeAllSymbolByStrategy(SystemConfig)
@@ -204,7 +204,7 @@ func main() {
 			// 监听费率报警信息
 			feature.ListenCoinFundingRate(SystemConfig)
 
-			time.Sleep(time.Second * 30) // 30 秒更新一次
+			time.Sleep(time.Second * 30) // 60 秒更新一次
 		}
 	}()
 	

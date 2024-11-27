@@ -7,7 +7,7 @@ import (
 type TradeCoin5 struct {
 }
 
-// 策略: 最近5min交易过的币不再交易,随机选取6个
+// 策略: 最近5min交易过的币不再交易,随机选取5个
 func (tradeCoin5 TradeCoin5) SelectCoins(allCoins []*models.Symbols) (coins []*models.Symbols) {
 	exclude_symbols_map := getLimitMinOrder(5)
 	// sort.SliceStable(allCoins, func(i, j int) bool {
@@ -24,6 +24,6 @@ func (tradeCoin5 TradeCoin5) SelectCoins(allCoins []*models.Symbols) (coins []*m
 		}
 	}
 
-	coins = GetRandArr(filterCoins, 8)
+	coins = GetRandArr(filterCoins, 5)
 	return coins
 }
