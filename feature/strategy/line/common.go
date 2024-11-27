@@ -105,6 +105,32 @@ func GetLineFloatPrices(data []*futures.Kline) (high, low, close, open []float64
 	return high, low, close, open
 }
 
+func GetLineFloatValues(data []*futures.Kline) (high, low, close, open, amount, qps []float64) {
+	high = make([]float64, len(data))
+	low = make([]float64, len(data))
+	close = make([]float64, len(data))
+	open = make([]float64, len(data))
+	amount = make([]float64, len(data))
+	qps = make([]float64, len(data))
+	for key, item := range data {
+		highPrice, _ := strconv.ParseFloat(item.High, 64)
+		lowPrice, _ := strconv.ParseFloat(item.Low, 64)
+		closePrice, _ := strconv.ParseFloat(item.Close, 64)
+		openPrice, _ := strconv.ParseFloat(item.Open, 64)
+		amountFloat, _ := strconv.ParseFloat(item.QuoteAssetVolume, 64)
+		high[key] = highPrice
+		low[key] = lowPrice
+		close[key] = closePrice
+		open[key] = openPrice	
+		amount[key] = amountFloat
+		qps[key] = amountFloat
+		if item.CloseTime - item.OpenTime > 0 {
+			qps[key] = amountFloat / float64(item.CloseTime - item.OpenTime)
+		}
+	}
+	return high, low, close, open, qps, amount
+}
+
 // 获取某中类型的line的数量是否超过阈值
 func getRightLine(data []*Line, position string) bool {
 	positionCount := 0
