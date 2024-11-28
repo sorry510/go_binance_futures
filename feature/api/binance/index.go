@@ -346,8 +346,8 @@ func GetLimitStartTimeOrders(startTime int64) (res []*futures.Order, err error) 
 	return res, err
 }
 
-// 查看当前全部挂单
-// @see https://binance-docs.github.io/apidocs/futures/cn/#user_data-5
+// 查看当前全部挂单(权重40)
+// @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/trade/rest-api/Current-All-Open-Orders
 func GetOpenOrder(symbols ...string) (res []*futures.Order, err error) {
 	service := futuresClient.NewListOpenOrdersService()
 	if len(symbols) > 0 {
