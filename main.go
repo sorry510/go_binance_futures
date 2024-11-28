@@ -141,7 +141,7 @@ func main() {
 	go func() {
 		for {
 			feature.StartTrade(SystemConfig)
-			time.Sleep(time.Second * 1) // 1秒间隔
+			time.Sleep(time.Second * 2) // 2秒间隔, 1min 中不能超过 2400 权重和
 		}
 	}()
 	
