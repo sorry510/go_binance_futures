@@ -106,8 +106,8 @@ func main() {
 		for {
 			logs.Info("update symbols trade precision and add new symbols, every 12 hours")
 			feature.UpdateSymbolsTradePrecision() // u本位
-			feature.UpdateDeliverySymbolsTradePrecision() // 币本位
-			spot.UpdateSymbolsTradePrecision() // 现货
+			// feature.UpdateDeliverySymbolsTradePrecision() // 币本位
+			// spot.UpdateSymbolsTradePrecision() // 现货
 			time.Sleep(12 * time.Hour) // 12小时更新一次
 		}
 	}()
@@ -204,7 +204,7 @@ func main() {
 			// 监听费率报警信息
 			feature.ListenCoinFundingRate(SystemConfig)
 
-			time.Sleep(time.Second * 30) // 60 秒更新一次
+			time.Sleep(time.Second * 60) // 60 秒更新一次
 		}
 	}()
 	

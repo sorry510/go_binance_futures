@@ -48,7 +48,6 @@ type ListOrderParams struct {
 func GetFuturesAccount() (res *futures.Account, err error) {
 	res, err = futuresClient.NewGetAccountService().Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	return res, err
@@ -66,7 +65,6 @@ func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, er
 	}
 	res, err = query.Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	// logs.Info(utils.ToJson(res))
@@ -175,7 +173,6 @@ func avgPrice(data *futures.DepthResponse) (buyPrice float64, sellPrice float64)
 func GetKlineData(symbol string, interval string, limit int) (klines []*futures.Kline, err error) {
 	klines, err = futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).Limit(limit).Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	sort.Slice(klines, func(i, j int) bool {
@@ -199,7 +196,6 @@ func BuyLimit(symbol string, quantity float64, price float64, positionSide futur
 		Price(strconv.FormatFloat(price, 'f', -1, 64)).
 		Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 		
@@ -220,7 +216,6 @@ func SellLimit(symbol string, quantity float64, price float64, positionSide futu
 		Price(strconv.FormatFloat(price, 'f', -1, 64)).
 		Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 		
@@ -240,7 +235,6 @@ func BuyMarket(symbol string, quantity float64, positionSide futures.PositionSid
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 		
@@ -260,7 +254,6 @@ func SellMarket(symbol string, quantity float64, positionSide futures.PositionSi
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 		
@@ -272,7 +265,6 @@ func SellMarket(symbol string, quantity float64, positionSide futures.PositionSi
 func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse, err error){
 	res, err = futuresClient.NewCancelOrderService().Symbol(symbol).OrderID(orderId).Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	return res, err
@@ -285,7 +277,6 @@ func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse
 func SetLeverage(symbol string, leverage int) (res *futures.SymbolLeverage, err error) {
 	res, err = futuresClient.NewChangeLeverageService().Symbol(symbol).Leverage(leverage).Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	return res, err
@@ -297,7 +288,6 @@ func SetLeverage(symbol string, leverage int) (res *futures.SymbolLeverage, err 
 func SetMarginType(symbol string, marginType futures.MarginType) (err error) {
 	err = futuresClient.NewChangeMarginTypeService().Symbol(symbol).MarginType(marginType).Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return err
 	}
 	return err
@@ -324,7 +314,6 @@ func GetOrders(listOrderParams ListOrderParams) (res []*futures.Order, err error
 	}
 	res, err = service.Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	return res, err
@@ -341,7 +330,6 @@ func GetOrder(orderParams OrderParams) (res *futures.Order, err error) {
 	}
 	res, err = service.Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	return res, err
@@ -353,7 +341,6 @@ func GetLimitStartTimeOrders(startTime int64) (res []*futures.Order, err error) 
 	service := futuresClient.NewListOrdersService()
 	res, err = service.StartTime(startTime).Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	return res, err
@@ -368,7 +355,6 @@ func GetOpenOrder(symbols ...string) (res []*futures.Order, err error) {
 	}
 	res, err = service.Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	return res, err
@@ -379,7 +365,6 @@ func GetOpenOrder(symbols ...string) (res []*futures.Order, err error) {
 func GetExchangeInfo()(res *futures.ExchangeInfo, err error) {
 	res, err = futuresClient.NewExchangeInfoService().Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 	// logs.Info(utils.ToJson(res))
@@ -401,7 +386,6 @@ func OrderTakeProfit(symbol string, stopPrice float64, side futures.SideType, po
 		// TimeInForce(binance.TimeInForceTypeGTC).
 		Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 		
@@ -423,7 +407,6 @@ func OrderStopLoss(symbol string, stopPrice float64, side futures.SideType, posi
 		// TimeInForce(binance.TimeInForceTypeGTC).
 		Do(context.Background())
 	if err != nil {
-		logs.Error(err)
 		return nil, err
 	}
 		

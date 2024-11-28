@@ -5,6 +5,8 @@ import (
 	"go_binance_futures/models"
 	"math/rand"
 	"time"
+
+	"github.com/beego/beego/v2/client/orm"
 )
 
 // 最近5min交易过的币种订单
@@ -13,6 +15,22 @@ func getLimitMinOrder(minute int64) (symbols map[string]bool) {
 	orders, _ := binance.GetOrders(binance.ListOrderParams{
 		StartTime: nowTime - minute * 60 * 1000,
 	})
+	symbols = make(map[string]bool)
+	for _, order := range orders {
+		symbols[order.Symbol] = true
+	}
+	return symbols
+}
+
+// 最近min交易过的币种local订单
+func getLimitMinLocalOrder(minute int64) (symbols map[string]bool) {
+	startTime := time.Now().Unix() * 1000 - minute * 60 * 1000 // 毫秒时间戳
+	o := orm.NewOrm()
+	var orders []models.Order
+	_, _ = o.QueryTable("order").
+		Filter("UpdateTime__gte", startTime).
+		Filter("Side", "close").
+		All(&orders)
 	symbols = make(map[string]bool)
 	for _, order := range orders {
 		symbols[order.Symbol] = true
