@@ -54,6 +54,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
 					continue
 				}
 				high, low, close, open, amount, qps := GetLineFloatValues(kline)
@@ -86,6 +87,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
 					continue
 				}
 				high, low, close, open, amount, qps := GetLineFloatValues(kline)
@@ -119,6 +121,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
 					continue
 				}
 				high, low, close, open, amount, qps := GetLineFloatValues(kline)
@@ -151,6 +154,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
 					continue
 				}
 				high, low, close, open, amount, qps := GetLineFloatValues(kline)
@@ -184,6 +188,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
 					continue
 				}
 				high, low, close, open, amount, qps := GetLineFloatValues(kline)
@@ -221,6 +226,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
 					continue
 				}
 				high, low, close, open, amount, qps := GetLineFloatValues(kline)
