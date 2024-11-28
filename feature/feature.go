@@ -56,13 +56,18 @@ func StartTrade(systemConfig models.Config) {
 	/************************************************获取账户信息 start******************************************************************* */
 	positions, err := binance.GetPosition(binance.PositionParams{})
 	if err != nil {
-		logs.Error("GetPosition err:", err)
+		logs.Error("GetPosition err in StartTrade:", err.Error())
+		logs.Info("Sleep 30s for limit")
+		time.Sleep(30 * time.Second)
 		return
 	}
 	
 	allOpenOrders, err := binance.GetOpenOrder()
 	if err != nil {
-		logs.Error("GetOpenOrder err:", err)
+		logs.Error("GetOpenOrder err in StartTrade:", err.Error())
+		logs.Info("Sleep 30s for limit")
+		time.Sleep(30 * time.Second)
+		return
 	}
 	/************************************************获取账户信息 end******************************************************************* */
 	

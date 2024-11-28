@@ -127,6 +127,8 @@ func (TradeLine TradeLineCustom) simpleCloseStrategy(closeParams strategy.CloseP
 	
 	lines, err := binance.GetKlineData(coin.Symbol, "5m", 2)
 	if err != nil {
+		logs.Error("Error GetKlineData Symbol in line_custom: ", coin.Symbol)
+		logs.Error("Error GetKlineData Symbol in line_custom:", err.Error())
 		closeResult.Complete = true
 		return closeResult
 	}

@@ -199,7 +199,7 @@ func PositionConvertNotice(systemConfig models.Config) {
 	
 	positions, err := binance.GetPosition(binance.PositionParams{})
 	if err != nil {
-		logs.Error("GetPosition err:", err)
+		logs.Error("GetPosition err in PositionConvertNotice:", err)
 		return
 	}
 	
