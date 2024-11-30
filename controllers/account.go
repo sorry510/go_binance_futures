@@ -23,7 +23,7 @@ func (ctrl *AccountController) GetBinanceFuturesAccount() {
 		})
 	}
 	
-	var assets []*futures.AccountAsset
+	var assets = make([]*futures.AccountAsset, len(account.Assets))
 	for _, asset := range account.Assets {
 		walletBalance, _ := strconv.ParseFloat(asset.WalletBalance, 64)
 		if walletBalance < 0.0000001 {
@@ -32,7 +32,7 @@ func (ctrl *AccountController) GetBinanceFuturesAccount() {
 		assets = append(assets, asset)
 	}
 	
-	var positions []*futures.AccountPosition
+	var positions = make([]*futures.AccountPosition, len(account.Positions))
 	for _, position := range account.Positions {
 		positionAmt, _ := strconv.ParseFloat(position.PositionAmt, 64)
 		positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
