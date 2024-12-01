@@ -1,5 +1,9 @@
 ### Change Log
 
+## v0.0.57
+- fixed bug
+- 合约列表和现货列表增加分页
+
 ## v0.0.56
 - fixed bug
 - 优化部分ui和底层逻辑
