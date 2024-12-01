@@ -456,10 +456,13 @@ func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate
 
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
 var flagWsFutures = 0
-func UpdateCoinByWs(systemConfig *models.Config) {
+func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
+	if retryNum > 0 {
+		logs.Info("futures ws restart num:", retryNum)
+	}
 	var lock = false
 	var o = orm.NewOrm()
-	futures.WebsocketKeepalive = true
+	// futures.WebsocketKeepalive = true
 	_, _, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
 		if (systemConfig.WsFuturesEnable == 1) {
 			if (flagWsFutures == 0) {
@@ -497,6 +500,7 @@ func UpdateCoinByWs(systemConfig *models.Config) {
 		}
 	}, func(err error) {
 		logs.Error("futures ws run error:", err)
+		UpdateCoinByWs(systemConfig, retryNum + 1)
 	})
 	if err != nil {
 		logs.Error("futures ws start error:", err)

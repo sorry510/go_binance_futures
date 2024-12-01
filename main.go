@@ -115,7 +115,7 @@ func main() {
 	// websocket 订阅更新币种价格
 	go func() {
 		logs.Info("futures websocket start: auto update symbols price")
-		binance.UpdateCoinByWs(&SystemConfig)
+		binance.UpdateCoinByWs(&SystemConfig, 0)
 	}()
 	go func() {
 		logs.Info("spot websocket start: auto update symbols price")
