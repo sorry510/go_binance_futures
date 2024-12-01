@@ -81,6 +81,10 @@ func StartTrade(systemConfig models.Config) {
 	/*************************************************平仓(止盈或止损)已经有持仓的币(排除手动交易白名单) start************************************************************ */
 	positionCount := 0 // 当前仓位数量
 	for _, position := range positions {
+		// 在白名单内, 不参与自动平仓交易
+		if _, exist := exclude_symbols_map[position.Symbol]; exist {
+			continue
+		}
 		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
@@ -114,9 +118,6 @@ func StartTrade(systemConfig models.Config) {
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		
-		if _, exist := exclude_symbols_map[position.Symbol]; exist { // 在白名单内
-			continue
-		}
 		closeResult := coin_line_strategy.AutoStopOrder(strategy.CloseParams{
 			Symbols: findCoin,
 			Position: position,
@@ -394,7 +395,7 @@ func StartTrade(systemConfig models.Config) {
 			Symbols: coin,
 		})
 		if !openResult.CanLong && !openResult.CanShort {
-			logs.Info("%s:not meeting the order conditions", symbol)
+			logs.Info("%s:no trading strategy conditions passed", symbol)
 			continue
 		}
 		var buyOrderLong *futures.Order // 此币种开多的单
@@ -690,6 +691,17 @@ func UpdateSymbolsTradePrecision() {
 						KlineInterval: "1d",
 						StrategyType: "global",
 						Type: suffixType,
+						PercentChange: 0.0,
+						Close: "0",
+						Open: "0",
+						High: "0",
+						Low: "0",
+						BaseVolume: 0.0,
+						QuoteVolume: 0.0,
+						CloseQty: 0.0,
+						TradeCount: 0.0,
+						Sort: 0,
+						Pin: 0,
 					})
 				}
 			}

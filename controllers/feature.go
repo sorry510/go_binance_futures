@@ -147,6 +147,11 @@ func (ctrl *FeatureController) Post() {
 	symbols.Profit = "100"
 	symbols.Loss = "100"
 	symbols.KlineInterval = "1d"
+	symbols.BaseVolume = 0.0
+	symbols.QuoteVolume = 0.0
+	symbols.CloseQty = 0.0
+	symbols.TradeCount = 0.0
+	
 	
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
@@ -233,7 +238,6 @@ func (ctrl *FeatureController) BatchEdit() {
 		"msg": "success",
 	})
 }
-
 
 func (ctrl *FeatureController) TestStrategyRule() {
 	id := ctrl.Ctx.Input.Param(":id")
