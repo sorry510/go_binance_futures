@@ -203,7 +203,11 @@ func GetOrder(orderParams OrderParams) (res *binance.Order, err error) {
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
 // @doc https://developers.binance.com/docs/zh-CN/binance-spot-api-docs/web-socket-streams#%E6%8C%89symbol%E7%9A%84%E5%AE%8C%E6%95%B4ticker
 var flagWsSpot = 0
-func UpdateCoinByWs(systemConfig *models.Config) {
+func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
+	if retryNum > 0 {
+		logs.Info("spot ws restart num:", retryNum)
+	}
+	
 	binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
 	var lock = false
 	var o = orm.NewOrm()
@@ -244,6 +248,7 @@ func UpdateCoinByWs(systemConfig *models.Config) {
 		}
 	}, func(err error) {
 		logs.Error("spot ws run error:", err.Error())
+		UpdateCoinByWs(systemConfig, retryNum + 1)
 	})
 	if err != nil {
 		logs.Error("spot ws start error:", err.Error())
