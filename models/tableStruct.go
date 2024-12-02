@@ -2,6 +2,7 @@ package models
 
 type Config struct {
 	ID int64 `orm:"column(id)" json:"id"`
+	Version int64 `orm:"column(version)" json:"version"`
 	FutureEnable int `orm:"column(future_enable)" json:"future_enable"`
 	SpotEnable int `orm:"column(spot_enable)" json:"spot_enable"`
 	DeliveryEnable int `orm:"column(delivery_enable)" json:"delivery_enable"`
