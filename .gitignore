@@ -2,3 +2,4 @@ conf/app.conf
 go_binance_futures
 db/coin.db-shm
 db/coin.db-wal
+db/coin.db
