@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go_binance_futures/command"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/middlewares"
@@ -20,6 +21,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var dbVersion int64 = 1 // 每次变动数据库版本号加 1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
@@ -35,10 +37,10 @@ func init() {
 	
 	registerModels() // 注册模型
 	registerMiddlewares() // 添加中间件
-	updateSystemConfig() // 更新配置
 }
 
 func registerModels() {
+	// orm.Debug = true
 	orm.RegisterModel(new(models.Config))
 	orm.RegisterModel(new(models.Order))
 	orm.RegisterModel(new(models.Symbols))
@@ -55,7 +57,31 @@ func registerModels() {
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
-	// orm.Debug = true
+	syncDb() // 同步数据库
+}
+
+func syncDb() {
+	config, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Info("database file does not exist, create and initialize")
+		orm.RunSyncdb("default", false, false) // 根据 model 创建数据表
+		command.InitData(dbVersion) // 初始化配置信息
+		config, err = utils.GetSystemConfig() // 重新获取配置信息
+		if err != nil {
+			logs.Error("get system config error", err)
+			return
+		}
+	}
+	// 根据旧版本更新数据库
+	oldVersion := config.Version
+	err = command.UpdateDatabase(oldVersion, dbVersion)
+	if err != nil {
+		logs.Error("update database error:", err)
+		return
+	}
+	config.Version = dbVersion
+	orm.NewOrm().Update(&config)
+	SystemConfig = config
 }
 
 func registerMiddlewares() {
