@@ -6,6 +6,9 @@
 
 # Binance-trade-bot
 
+## update database
+> If it is the first time to use the program, you can just run it directly. If you have been using it for a while, when downloading the new version of the program, you can directly place the old database file in the `db` directory and then run the program.
+
 ## peculiarity
 
 ## Pusher
