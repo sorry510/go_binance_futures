@@ -1,13 +1,20 @@
 package controllers
 
 import (
+	"encoding/json"
+	"math"
 	"strconv"
 
+	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
+	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 
+	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
+	"github.com/expr-lang/expr"
 )
 
 type TestStrategyResultController struct {
@@ -102,4 +109,89 @@ func (ctrl *TestStrategyResultController) DeleteAll() {
 		return
 	}
 	ctrl.Ctx.Resp(utils.ResJson(200, nil))
+}
+
+// 如果测试策略开启，合约列表页面的测试策略，使用的是这个接口
+func (ctrl *TestStrategyResultController) TestStrategyRule() {
+	symbol := ctrl.Ctx.Input.Param(":symbol")
+	var result models.TestStrategyResults
+	o := orm.NewOrm()
+	o.QueryTable("test_strategy_results").
+		Filter("Symbol", symbol).
+		Filter("ClosePrice", "0").
+		One(&result)
+	
+	ctrl.BindJSON(&result) // 装载前端传入的最新的策略规则
+	
+	var strategyConfig technology.StrategyConfig
+	err := json.Unmarshal([]byte(result.Strategy), &strategyConfig)
+	if err != nil {
+		logs.Error("Error unmarshalling JSON:", err.Error())
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	env := line.InitParseEnv(result.Symbol, result.Technology)
+	floatNowPrice, ok := env["NowPrice"].(float64)
+	if !ok {
+		logs.Error("Error NowPrice Symbol: ", result.Symbol)
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "Error NowPrice Symbol"))
+		return
+	}
+	// 随意指定一个模拟信息
+	env["ROI"] = 8.88
+	env["Position"] = futures.PositionRisk{
+		EntryPrice: "68000.0",
+		MarkPrice: "72000.0",
+		PositionAmt: "-0.02",
+		UnRealizedProfit: "100.2",
+		MarginType: "CROSSED",
+		Leverage: "3",
+		PositionSide: "SHORT",
+	}
+	if result.ID != 0 {
+		// 如果查到了为平仓的测试数据，就加载仓位信息
+		positionAmtFloat, _ := strconv.ParseFloat(result.PositionAmt, 64)
+		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
+		enterPrice_float64, _ := strconv.ParseFloat(result.Price, 64)
+		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
+		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
+		
+		// 模拟仓位信息
+		position := futures.PositionRisk{
+			EntryPrice: result.Price, // 开仓价格
+			MarkPrice: strconv.FormatFloat(floatNowPrice, 'f', -1, 64), // 当前标记价格
+			PositionAmt: result.PositionAmt, // 仓位数量(正数为多仓，负数为空仓)
+			UnRealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64), // 未实现盈亏
+			MarginType: "CROSSED",
+			Leverage: strconv.FormatInt(result.Leverage, 10),
+			PositionSide: result.PositionSide,
+		}
+		env["ROI"] = nowProfit // 当前收益率
+		env["Position"] = position // 当前仓位信息
+	}
+	
+	for _, strategy := range strategyConfig {
+		if strategy.Enable {
+			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			if err != nil {
+				logs.Error("Error Strategy Compile:", err.Error())
+				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+				return
+			}
+			output, err := expr.Run(program, env)
+			if err != nil {
+				logs.Error("Error Strategy Run:", err.Error())
+				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+				return
+			}
+			ctrl.Ctx.Resp(map[string]interface{} {
+				"code": 200,
+				"data": map[string]interface{} {
+					"pass": output,
+					"type": strategy.Type,
+				},
+				"msg": "success",
+			})
+		}
+	}
 }
