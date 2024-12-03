@@ -20,6 +20,7 @@ func init() {
 	
 	web.Router("/test-strategy-results", &controllers.TestStrategyResultController{}, "get:Get;delete:DeleteAll") // 测试策略的下单和平仓
 	web.Router("/test-strategy-results/:id", &controllers.TestStrategyResultController{}, "delete:Delete") // 删除某个测试策略结果
+	web.Router("/test-strategy-results/test/:symbol", &controllers.TestStrategyResultController{}, "post:TestStrategyRule") // 测试策略结果的某个平仓测试是否符合条件
 	
 	web.Router("/spots", &controllers.SpotController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/spots/:id", &controllers.SpotController{}, "delete:Delete;put:Edit") // 更新和删除

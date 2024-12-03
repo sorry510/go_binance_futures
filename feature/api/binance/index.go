@@ -504,6 +504,8 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 	})
 	if err != nil {
 		logs.Error("futures ws start error:", err)
+		time.Sleep(time.Second * 30) // 30 秒间隔
+		UpdateCoinByWs(systemConfig, retryNum + 1)
 		return
 	}
 }
