@@ -37,11 +37,12 @@ type OrderTable struct {
 type Order struct {
 	ID int64 `orm:"column(id)" json:"id,omitempty"`
 	Symbol string `orm:"column(symbol)" json:"symbol"`
-	Amount string `orm:"column(amount)" json:"amount"`
-	Avg_price string `orm:"column(avg_price)" json:"avg_price"`
-	Inexact_profit string `orm:"column(inexact_profit)" json:"inexact_profit"`
-	Side string `orm:"column(side)" json:"side"`
-	PositionSide string `orm:"column(positionSide)" json:"positionSide"`
+	Amount string `orm:"column(amount)" json:"amount"` // 数量，都是正数
+	Avg_price string `orm:"column(avg_price)" json:"avg_price"` // 开仓价 或 平仓价
+	Leverage int64 `orm:"column(leverage)" json:"leverage"`
+	Inexact_profit string `orm:"column(inexact_profit)" json:"inexact_profit"` // 平仓的收益 usdt，开仓是 0.0
+	Side string `orm:"column(side)" json:"side"` // open, close
+	PositionSide string `orm:"column(positionSide)" json:"positionSide"` // LONG, SHORT
 	OrderId int64 `orm:"column(order_id)" json:"order_id"`
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }

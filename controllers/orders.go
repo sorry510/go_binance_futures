@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"strconv"
-	"time"
 
 	"go_binance_futures/models"
 	"go_binance_futures/utils"
@@ -15,66 +14,70 @@ type OrderController struct {
 	web.Controller
 }
 
+type OrderTableList struct {
+	models.Order
+	NowPrice string `orm:"column(now_price)" json:"now_price"`
+}
+
 func (ctrl *OrderController) Get() {
 	paramsSymbol := ctrl.GetString("symbol")
+	paramPositionSide := ctrl.GetString("position_side") // LONG, SHORT, all
 	paramsPage := ctrl.GetString("page", "1")
 	paramsLimit := ctrl.GetString("limit", "20")
 	paramsStartTime := ctrl.GetString("start_time")
 	paramsEndTime := ctrl.GetString("end_time")
+	paramsType := ctrl.GetString("type") // open, close, all
 	
 	page, _ := strconv.Atoi(paramsPage)
 	limit, _ := strconv.Atoi(paramsLimit)
 	offset := (page - 1) * limit
 	
 	o := orm.NewOrm()
-	var orders []models.Order
+	var orders []OrderTableList
 	
-	var query = o.QueryTable("order").
-		OrderBy("-UpdateTime")
-		
+	var total int64
+	sql := "SELECT t.*, s.close as now_price FROM `order` t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1"
+	countSql := "SELECT COUNT(*) FROM `order` t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1"
+	
 	if (paramsSymbol != "") {
-		query = query.Filter("Symbol__icontains", paramsSymbol)
+		sql += ` and t.symbol like '%` + paramsSymbol + `%'`
+		countSql += ` and t.symbol like '%` + paramsSymbol + `%'`
+	}
+	if (paramPositionSide != "all" && paramPositionSide != "") {
+		sql += ` and t.positionSide = '` + paramPositionSide + `'`
+		countSql += ` and t.positionSide = '` + paramPositionSide + `'`
 	}
 	if (paramsStartTime != "") {
-		query = query.Filter("UpdateTime__gte", paramsStartTime)
+		sql += ` and t.updateTime >= '` + paramsStartTime + `'`
+		countSql += ` and t.updateTime >= '` + paramsStartTime + `'`
 	}
 	if (paramsEndTime != "") {
-		query = query.Filter("UpdateTime__lte", paramsEndTime)
+		sql += ` and t.updateTime <= '` + paramsEndTime + `'`
+		countSql += ` and t.updateTime <= '` + paramsEndTime + `'`
 	}
-	total, err1 := query.Count()
-	if err1 != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error_count"))
-	}
-	
-	queryPagination := query.Limit(limit, offset)
-	
-	_, err2 := queryPagination.All(&orders)
-	if err2 != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error_data"))
+	if (paramsType == "open") {
+		sql += ` and t.side = '` + paramsType + `'`
+		countSql += ` and t.side = '` + paramsType + `'`
+	} else if (paramsType == "close") {
+		sql += ` and t.side = '` + paramsType + `'`
+		countSql += ` and t.side = '` + paramsType + `'`
 	}
 	
-	var orderTables []models.OrderTable
-	for _, order := range orders {
-		orderTable := models.OrderTable {
-			Order: order,
-			UpdateDate: time.Unix(order.UpdateTime / 1000, 0).Format("2006-01-02 15:04:05"),
-		}
-		orderTable.SideText = "平仓"
-		if (order.Side == "open") {
-			orderTable.SideText = "开仓"
-		}
-		orderTable.PositionText = "做空"
-		if (order.PositionSide == "LONG") {
-			orderTable.PositionText = "做多"
-		}
-		orderTables = append(orderTables, orderTable)
+	sql = sql + " ORDER BY t.updateTime DESC LIMIT " + strconv.Itoa(limit) + " OFFSET " + strconv.Itoa(offset)
+    _, err := o.Raw(sql).QueryRows(&orders)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 	}
-
+	err = o.Raw(countSql).QueryRow(&total)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+	}
+	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
 		"data": map[string]interface{} {
 			"total": total,
-			"list": orderTables,
+			"list": orders,
 		},
 		"msg": "success",
 	})

@@ -444,7 +444,7 @@ func StartTrade(systemConfig models.Config) {
 					if err == nil {
 						// 数据库写入订单
 						buyPrice := utils.GetTradePrecision(buyPrice * 1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
-						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", order.OrderID)
+						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
 							Symbol: symbol,
@@ -472,7 +472,7 @@ func StartTrade(systemConfig models.Config) {
 					order, err := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
-						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", order.OrderID)
+						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
 							Symbol: symbol,
@@ -515,7 +515,7 @@ func StartTrade(systemConfig models.Config) {
 					if err == nil {
 						// 数据库写入订单
 						sellPrice := utils.GetTradePrecision(sellPrice * 0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
-						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", order.OrderID)
+						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
 							Symbol: symbol,
@@ -543,7 +543,7 @@ func StartTrade(systemConfig models.Config) {
 					order, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
-						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", order.OrderID)
+						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
 						pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 							Title: lang.Lang("futures.open_notice_title"),
 							Symbol: symbol,
@@ -613,12 +613,13 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futu
 	}
 }
 
-func insertOpenOrder(symbol string, quantity float64, avg_price string, positionSide string, orderId int64) {
+func insertOpenOrder(symbol string, quantity float64, avg_price string, positionSide string, leverage int64, orderId int64) {
 	order := new(models.Order)
 	order.Symbol = symbol
 	order.Amount = strconv.FormatFloat(quantity, 'f', -1, 64)
 	order.Avg_price = avg_price
 	order.PositionSide = positionSide
+	order.Leverage = leverage
 	order.Inexact_profit = "0.0" // 预估收益
 	order.Side = "open"
 	order.OrderId = orderId
@@ -630,12 +631,15 @@ func insertOpenOrder(symbol string, quantity float64, avg_price string, position
 
 func insertCloseOrder(position *futures.PositionRisk, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64) {
 	// 数据库写入订单
+	leverageInt64, _ := strconv.ParseInt(position.Leverage, 10, 64)
+	
 	order := new(models.Order)
 	order.Symbol = position.Symbol
 	order.Amount = strconv.FormatFloat(positionAmtFloat, 'f', -1, 64)
-	order.Avg_price = avg_price
+	order.Avg_price = avg_price // 平仓价格
 	order.Inexact_profit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
 	order.PositionSide = position.PositionSide
+	order.Leverage = leverageInt64
 	order.Side = "close"
 	order.OrderId = orderId
 	order.UpdateTime = time.Now().Unix() * 1000 
