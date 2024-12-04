@@ -431,7 +431,7 @@ func StartTrade(systemConfig models.Config) {
 		}
 		
 		if systemConfig.FutureAllowLong == 1 && positionLong == nil && buyOrderLong == nil && openResult.CanLong {
-			buyPrice, _, err := binance.GetDepthAvgPrice(symbol, 4) // 平均买价
+			buyPrice, _, err := binance.GetDepthAvgPrice(symbol, 5) // 平均买价
 			if err == nil {
 				buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
 				quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
@@ -502,7 +502,7 @@ func StartTrade(systemConfig models.Config) {
 		}
 		if systemConfig.FutureAllowShort == 1 && positionShort == nil && buyOrderShort == nil && openResult.CanShort {
 			
-			_, sellPrice, err := binance.GetDepthAvgPrice(symbol, 4) // 平均卖价
+			_, sellPrice, err := binance.GetDepthAvgPrice(symbol, 5) // 平均卖价
 			if err == nil {
 				sellPrice = utils.GetTradePrecision(sellPrice, tickSize) // 合理精度的价格
 				quantity := (usdt_float64 / sellPrice) * leverage_float64  // 购买数量

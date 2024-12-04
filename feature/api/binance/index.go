@@ -129,6 +129,8 @@ func GetTickerPrice(symbol string) (res []*futures.SymbolPrice, err error) {
 	return res, err
 }
 
+// limit 5, 10, 20, 50, 100, 500, 1000
+// @see https://binance-docs.github.io/apidocs/futures/cn/#38a975b802
 func GetDepthAvgPrice(symbol string, limits ...int) (buyPrice float64, sellPrice float64, err error) {
 	limit := 50 // 默认值
     if len(limits) != 0 {
