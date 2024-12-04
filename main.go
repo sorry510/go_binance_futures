@@ -21,7 +21,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 1 // 每次变动数据库版本号加 1
+var dbVersion int64 = 2 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
@@ -74,13 +74,16 @@ func syncDb() {
 	}
 	// 根据旧版本更新数据库
 	oldVersion := config.Version
-	err = command.UpdateDatabase(oldVersion, dbVersion)
-	if err != nil {
-		logs.Error("update database error:", err)
-		return
+	if oldVersion < dbVersion {
+		err = command.UpdateDatabase(oldVersion, dbVersion)
+		if err != nil {
+			logs.Error("update database error:", err)
+		} else {
+			logs.Info("update database success")
+		}
+		config.Version = dbVersion
+		orm.NewOrm().Update(&config)
 	}
-	config.Version = dbVersion
-	orm.NewOrm().Update(&config)
 	SystemConfig = config
 }
 

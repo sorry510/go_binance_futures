@@ -77,12 +77,12 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 		logs.Error("begin transaction error:", err)
 		return err
 	}
-	
-	// for ;oldVersion <= newVersion; oldVersion++ {
-	// 	// 逐个执行数据库更新脚本
-	// 	filepath := fmt.Sprintf("./command/sql/version/%d.sql", oldVersion+1)
-	// 	readAndExecuteSQLFile(filepath)
-	// }
+	version := oldVersion + 1
+	for ;version <= newVersion; version++ {
+		// 逐个执行数据库更新脚本
+		filepath := fmt.Sprintf("./command/sql/version/%d.sql", version)
+		readAndExecuteSQLFile(filepath)
+	}
 	
 	err = to.Commit()
 	if err != nil {
