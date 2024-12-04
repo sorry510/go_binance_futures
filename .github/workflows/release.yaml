@@ -1,6 +1,7 @@
 name: Go Release
 
 on:
+  workflow_dispatch:
   push:
     # 触发条件：当推送到 master 分支或创建新标签时运行
     # branches:
