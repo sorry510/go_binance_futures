@@ -45,10 +45,11 @@ jobs:
     #     done
         
     - name: Build and package for Linux
+      # 构建并打包 Linux 版本, sqlite3 需要 CGO_ENABLED=1
       run: |
         export GOOS=linux
         export GOARCH=amd64
-        export CGO_ENABLED=0
+        export CGO_ENABLED=1
         bee pack -exr='.*.tar.gz' -a linux_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
 
     - name: Build and package for Windows
