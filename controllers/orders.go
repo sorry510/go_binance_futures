@@ -83,13 +83,24 @@ func (ctrl *OrderController) Get() {
 	})
 }
 
+func (ctrl *OrderController) Delete() {
+	id := ctrl.Ctx.Input.Param(":id")
+	o := orm.NewOrm()
+	_, err := o.Raw("DELETE FROM \"order\" where id = ?", id).Exec()
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(utils.ResJson(200, nil))
+}
+
 func (ctrl *OrderController) DeleteAll() {
 	
 	o := orm.NewOrm()
 	_, err := o.Raw("DELETE FROM \"order\" where 1=1").Exec()
 	if err != nil {
 		// 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "删除错误"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
 	ctrl.Ctx.Resp(utils.ResJson(200, nil))

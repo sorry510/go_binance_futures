@@ -45,6 +45,7 @@ func init() {
 	web.Router("/listen/strategy-rule/test/:id", &controllers.ListenCoinController{}, "post:TestStrategyRule") // 测试策略规则
 	
 	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll") // order list 和 删除所有 order
+	web.Router("/orders/:id", &controllers.OrderController{}, "delete:Delete") // 删除某个订单
 	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit") // config get and edit
 	
 	web.Router("/futures/account", &controllers.AccountController{}, "get:GetBinanceFuturesAccount") // 获取合约账户信息
