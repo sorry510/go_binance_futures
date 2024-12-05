@@ -48,7 +48,7 @@ jobs:
       run: |
         export GOOS=linux
         export GOARCH=amd64
-        bee pack -a linux_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
+        bee pack -exr='.*.tar.gz' -a linux_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
 
     - name: Build and package for Windows
       run: |
@@ -57,7 +57,7 @@ jobs:
         export CGO_ENABLED=1
         export GOOS=windows
         export GOARCH=amd64
-        bee pack -a windows_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
+        bee pack -exr='.*.tar.gz' -a windows_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
         
     - name: Release
       uses: softprops/action-gh-release@v2
