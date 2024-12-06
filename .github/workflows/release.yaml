@@ -45,7 +45,7 @@ jobs:
     #     done
         
     - name: Build and package for Linux
-      # 构建并打包 Linux 版本, sqlite3 需要 CGO_ENABLED=1
+      # 构建并打包 Linux 版本, sqllite3 需要 CGO_ENABLED=1
       run: |
         export GOOS=linux
         export GOARCH=amd64
