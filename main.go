@@ -135,8 +135,8 @@ func main() {
 		for {
 			logs.Info("update symbols trade precision and add new symbols, every 12 hours")
 			feature.UpdateSymbolsTradePrecision() // u本位
+			spot.UpdateSymbolsTradePrecision() // 现货
 			// feature.UpdateDeliverySymbolsTradePrecision() // 币本位
-			// spot.UpdateSymbolsTradePrecision() // 现货
 			time.Sleep(12 * time.Hour) // 12小时更新一次
 		}
 	}()
@@ -148,7 +148,6 @@ func main() {
 	}()
 	go func() {
 		logs.Info("spot websocket start: auto update symbols price")
-		return
 		spot_api.UpdateCoinByWs(&SystemConfig, 0)
 	}()
 	go func() {
