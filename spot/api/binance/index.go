@@ -6,6 +6,7 @@ import (
 	"go_binance_futures/utils"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/adshao/go-binance/v2"
 	"github.com/beego/beego/v2/adapter/logs"
@@ -252,6 +253,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 	})
 	if err != nil {
 		logs.Error("spot ws start error:", err.Error())
+		time.Sleep(time.Second * 60 * 3) // 3min retry
 		UpdateCoinByWs(systemConfig, retryNum + 1)
 		return
 	}
