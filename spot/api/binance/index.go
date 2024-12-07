@@ -208,7 +208,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		logs.Info("spot ws restart num:", retryNum)
 	}
 	
-	binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
+	// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
 	var lock = false
 	var o = orm.NewOrm()
 	_, _, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
@@ -252,6 +252,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 	})
 	if err != nil {
 		logs.Error("spot ws start error:", err.Error())
+		UpdateCoinByWs(systemConfig, retryNum + 1)
 		return
 	}
 }
