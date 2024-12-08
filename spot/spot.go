@@ -41,14 +41,14 @@ func TryRush(systemConfig models.Config) {
 	for _, coin := range coins {
 		if coin.StepSize != "0" {
 			if coin.Side == "buy" {
-				_, err := tryBuyMarket(coin.Symbol, coin.Usdt, coin.StepSize)
+				_, err := tryBuyMarket(coin, coin.StepSize)
 				if err == nil {
 					coin.Enable = 0 // 更新为禁用
 				}
 				orm.NewOrm().Update(&coin)
 			}
 			if coin.Side == "sell" {
-				_, err := trySellMarket(coin.Symbol, coin.Quantity, coin.StepSize)
+				_, err := trySellMarket(coin, coin.StepSize)
 				if err == nil {
 					coin.Enable = 0 // 更新为禁用
 				}
@@ -81,7 +81,7 @@ func TryRush(systemConfig models.Config) {
 		if stepSize, ok := symbolMap[coin.Symbol]; ok {
 			logs.Info("lotSize:", stepSize)
 			if coin.Side == "buy" {
-				_, err := tryBuyMarket(coin.Symbol, coin.Usdt, stepSize)
+				_, err := tryBuyMarket(coin, stepSize)
 			
 				if err == nil {
 					coin.Enable = 0 // 更新为禁用
@@ -89,7 +89,7 @@ func TryRush(systemConfig models.Config) {
 				}
 			}
 			if coin.Side == "sell" {
-				_, err := trySellMarket(coin.Symbol, coin.Usdt, stepSize)
+				_, err := trySellMarket(coin, stepSize)
 			
 				if err == nil {
 					coin.Enable = 0 // 更新为禁用
@@ -254,34 +254,43 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 	}
 }
 
-func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.CreateOrderResponse, err error) {
-	logs.Info("尝试开始抢币symbol:", symbol)
-	resPrice, err1 := binance.GetTickerPrice(symbol)
-	if err1 != nil {
-		logs.Info("还未上线此币种,未确定交易价格symbol:", symbol)
-		return nil, err1
-	}
+func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *spot_api.CreateOrderResponse, err error) {
+	symbol := coin.Symbol
+	usdt := coin.Usdt
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
-	buyPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
+	buyPrice := 0.0
+	logs.Info("尝试开始抢币symbol:", symbol)
+	
+	if (coin.ExpectPrice != "0") {
+		// 定义的挂单价格
+		buyPrice, _ = strconv.ParseFloat(coin.ExpectPrice, 64) // 挂单价格
+	} else {
+		// 获取最新的交易价格
+		resPrice, err1 := binance.GetTickerPrice(symbol)
+		if err1 != nil {
+			logs.Info("还未上线此币种,未确定交易价格symbol:", symbol)
+			return nil, err1
+		}
+		buyPrice, _ = strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
+	}
+	buyPrice = utils.GetTradePrecision(buyPrice, coin.TickSize) // 合理精度的价格
+	
 	logs.Info("尝试开始抢币预计价格为:", buyPrice)
 	quantity := usdt_float64 / buyPrice  // 购买数量
 	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
 	
-	res, err = binance.BuyMarket(symbol, quantity)
+	if coin.ExpectPrice != "0" {
+		// 挂单价格
+		res, err = binance.BuyLimit(symbol, quantity, buyPrice)
+	} else {
+		// 市价
+		res, err = binance.BuyMarket(symbol, quantity)
+	}
+	
 	if err != nil {
 		logs.Error("购买失败symbol:", symbol)
 		logs.Error("err:", err.Error())
-		// pusher.SpotOrder(notify.SpotOrderParams{
-		// 	Title: lang.Lang("spot.new_coin_rush_notice_title"),
-		// 	Symbol: symbol,
-		// 	Side: "buy",
-		// 	Price: buyPrice,
-		// 	Quantity: quantity,
-		// 	Remarks: lang.Lang("spot.new_coin_rush_buy"),
-		// 	Status: "fail",
-		// 	Error: err.Error(),
-		// })
 	} else {
 		// 购买成功
 		pusher.SpotOrder(notify.SpotOrderParams{
@@ -298,14 +307,24 @@ func tryBuyMarket(symbol string, usdt string, stepSize string) (res *spot_api.Cr
 	return res, err
 }
 
-func trySellMarket(symbol string, quantity string, stepSize string) (res *spot_api.CreateOrderResponse, err error) {
+func trySellMarket(coin models.NewSymbols, stepSize string) (res *spot_api.CreateOrderResponse, err error) {
+	symbol := coin.Symbol
 	logs.Info("尝试开始抢卖symbol:", symbol)
+	quantity := coin.Quantity  // 卖出数量
 	quantity_float64, _ := strconv.ParseFloat(quantity, 64) // 卖单数量
 	quantity_float64 = utils.GetTradePrecision(quantity_float64, stepSize) // 合理精度的数量
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)]
 	
+	if coin.ExpectPrice != "0" {
+		// 挂单价格
+		sellPrice, _ := strconv.ParseFloat(coin.ExpectPrice, 64) // 挂单价格
+		sellPrice = utils.GetTradePrecision(sellPrice, coin.TickSize) // 合理精度的价格
+		res, err = binance.SellLimit(symbol, quantity_float64, sellPrice)
+	} else {
+		// 市价
+		res, err = binance.SellMarket(symbol, quantity_float64)
+	}
 	
-	res, err = binance.SellMarket(symbol, quantity_float64)
 	if err != nil {
 		logs.Error("卖出失败symbol:", symbol)
 		logs.Error("err:", err.Error())

@@ -77,12 +77,42 @@ func GetTickerPrice(symbol string) (res []*binance.SymbolPrice, err error) {
 	return res, err
 }
 
+func BuyLimit(symbol string, quantity float64, price float64) (res *binance.CreateOrderResponse, err error) {
+	res, err = client.NewCreateOrderService().
+		Symbol(symbol).
+        Side(binance.SideTypeBuy).
+		Type(binance.OrderTypeLimit).
+		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
+		Price(strconv.FormatFloat(price, 'f', -1, 64)).
+		Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return
+	}
+	return res, err
+}
+
 func BuyMarket(symbol string, quantity float64) (res *binance.CreateOrderResponse, err error) {
 	res, err = client.NewCreateOrderService().
 		Symbol(symbol).
         Side(binance.SideTypeBuy).
 		Type(binance.OrderTypeMarket).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
+		Do(context.Background())
+	if err != nil {
+		logs.Error(err)
+		return
+	}
+	return res, err
+}
+
+func SellLimit(symbol string, quantity float64, price float64) (res *binance.CreateOrderResponse, err error) {
+	res, err = client.NewCreateOrderService().
+		Symbol(symbol).
+        Side(binance.SideTypeSell).
+		Type(binance.OrderTypeLimit).
+		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
+		Price(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
 	if err != nil {
 		logs.Error(err)

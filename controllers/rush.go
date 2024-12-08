@@ -20,7 +20,7 @@ func (ctrl *RushController) Get() {
 	var symbols []models.NewSymbols
 	_, err := o.QueryTable("new_symbols").OrderBy("ID").All(&symbols)
 	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 	}
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -37,7 +37,6 @@ func (ctrl *RushController) Edit() {
 	intId, _ := strconv.ParseInt(id, 10, 64)
 	symbols.ID = intId
 	
-	
 	// 币还没上线可能会报错
 	// marginType := futures.MarginTypeIsolated
 	// if symbols.MarginType == "CROSSED" {
@@ -50,7 +49,7 @@ func (ctrl *RushController) Edit() {
 	_, err := o.Update(symbols) // _ 是受影响的条数
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "修改失败"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -70,7 +69,7 @@ func (ctrl *RushController) Delete() {
 	_, err := o.Delete(symbols)
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "删除错误"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -92,13 +91,14 @@ func (ctrl *RushController) Post() {
 	symbols.Enable = 0
 	symbols.Side = "buy"
 	symbols.Quantity = "0"
+	symbols.ExpectPrice = "0"
 	
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
 	
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "新增失败"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	symbols.ID = id
@@ -117,7 +117,7 @@ func (ctrl *RushController) UpdateEnable() {
 	_, err := o.Raw("UPDATE newSymbols SET enable = ?", flag).Exec()
 	if err != nil {
 		// 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "更新错误"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
 	ctrl.Ctx.Resp(utils.ResJson(200, nil))

@@ -84,17 +84,25 @@ func TryRush(systemConfig models.Config) {
 func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateOrderResponse, err error) {
 	symbol := coin.Symbol
 	usdt := coin.Usdt
-	resPrice, err1 := binance.GetTickerPrice(symbol)
-	if err1 != nil {
-		logs.Info("还未上线此合约币种,未确定交易价格symbol:", symbol)
-		return nil, err1
-	}
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
-	buyPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
-	if buyPrice < 0.000000001 {
-		logs.Info("还未正式上线此合约币种,没有交易盘价格", symbol)
-		return nil, errors.New("无交易价格")
+	buyPrice := 0.0
+	if (coin.ExpectPrice != "0") {
+		// 定义的挂单价格
+		buyPrice, _ = strconv.ParseFloat(coin.ExpectPrice, 64) // 挂单价格
+	} else {
+		// 获取最新的交易价格
+		resPrice, err1 := binance.GetTickerPrice(symbol)
+		if err1 != nil {
+			logs.Info("还未上线此合约币种,未确定交易价格symbol:", symbol)
+			return nil, err1
+		}
+		buyPrice, _ = strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
+		if buyPrice < 0.000000001 {
+			logs.Info("还未正式上线此合约币种,没有交易盘价格", symbol)
+			return nil, errors.New("无交易价格")
+		}
 	}
+	buyPrice = utils.GetTradePrecision(buyPrice, coin.TickSize) // 合理精度的价格
 	logs.Info("尝试开始合约抢币symbol:", symbol)
 	logs.Info("预计交易价格为:", buyPrice)
 	// 修改仓位模式
@@ -103,6 +111,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	} else {
 		binance.SetMarginType(symbol, futures.MarginTypeCrossed)
 	}
+	
 	binance.SetLeverage(symbol, int(coin.Leverage))  // 修改合约倍数
 	leverage_float64 := float64(coin.Leverage) // 合约倍数
 	quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
@@ -110,9 +119,21 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
 	
 	if coin.Side == "buy" {
-		res, err = binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
+		if coin.ExpectPrice != "0" {
+			// 挂单价格
+			res, err = binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
+		} else {
+			// 市价
+			res, err = binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
+		}
 	} else if coin.Side == "sell" {
-		res, err = binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
+		if coin.ExpectPrice != "0" {
+			// 挂单价格
+			res, err = binance.SellLimit(symbol, quantity, buyPrice, futures.PositionSideTypeShort)
+		} else {
+			// 市价
+			res, err = binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
+		}
 	}
 	
 	positionSide := "long"
@@ -120,20 +141,8 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		positionSide = "short"
 	}
 	if err != nil {
-		logs.Info("购买失败symbol:", symbol)
-		logs.Info("err:", err.Error())
-		
-		// pusher.FuturesOpenOrder(notify.FuturesOrderParams{
-		// 	Title: lang.Lang("futures.new_coin_rush_notice_title"),
-		// 	Symbol: symbol,
-		// 	Side: coin.Side,
-		// 	PositionSide: positionSide,
-		// 	Price: buyPrice,
-		// 	Quantity: quantity,
-		//  Leverage: leverage_float64,
-		// 	Status: "fail",
-		// 	Error: err.Error(),
-		// })
+		logs.Info("rush error symbol: ", symbol)
+		logs.Info("err in feature_rush: ", err.Error())
 	} else {
 		pusher.FuturesOpenOrder(notify.FuturesOrderParams{
 			Title: lang.Lang("futures.new_coin_rush_notice_title"),
