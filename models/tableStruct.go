@@ -95,6 +95,7 @@ type NewSymbols struct {
 	Usdt string `orm:"column(usdt)" json:"usdt"` // 交易金额
 	Side string `orm:"column(side)" json:"side"` // 买卖方向
 	Quantity string `orm:"column(quantity)" json:"quantity"` // 卖单数量
+	ExpectPrice string `orm:"column(expect_price)" json:"expect_price"` // 预期价格(如果存在就走挂单价)
 }
 
 type NoticeSymbols struct {
