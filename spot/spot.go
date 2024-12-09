@@ -273,11 +273,10 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *spot_api.Create
 		}
 		buyPrice, _ = strconv.ParseFloat(resPrice[0].Price, 64) // 预计交易价格
 	}
-	buyPrice = utils.GetTradePrecision(buyPrice, coin.TickSize) // 合理精度的价格
 	
 	logs.Info("尝试开始抢币预计价格为:", buyPrice)
 	quantity := usdt_float64 / buyPrice  // 购买数量
-	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
+	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的数量
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
 	
 	if coin.ExpectPrice != "0" {
