@@ -102,7 +102,6 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 			return nil, errors.New("无交易价格")
 		}
 	}
-	buyPrice = utils.GetTradePrecision(buyPrice, coin.TickSize) // 合理精度的价格
 	logs.Info("尝试开始合约抢币symbol:", symbol)
 	logs.Info("预计交易价格为:", buyPrice)
 	// 修改仓位模式
@@ -115,7 +114,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	binance.SetLeverage(symbol, int(coin.Leverage))  // 修改合约倍数
 	leverage_float64 := float64(coin.Leverage) // 合约倍数
 	quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
-	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
+	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的数量
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
 	
 	if coin.Side == "buy" {
