@@ -90,6 +90,7 @@ func StartTrade(systemConfig models.Config) {
 		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
 			continue
 		}
+		exclude_symbols_map[position.Symbol] = true // 后续的开仓中避过已经有持仓的币
 		
 		coin_profit_float64 := 10000.0 // 全局定义
 		coin_loss_float64 := 10000.0 // 全局定义
@@ -607,8 +608,12 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futu
 			// 没有超过设置的超时
 			continue
 		}
-		res, _ := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderID)
 		logs.Info("Revoke overdue warehouse opening orders")
+		res, err := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderID)
+		if err == nil {
+			// 删除对应订单
+			orm.NewOrm().Raw("DELETE FROM \"order\" where order_id = '" + strconv.FormatInt(buyOrder.OrderID, 10) + "'").Exec()
+		}
 		logs.Info("response:", res)
 	}
 }
