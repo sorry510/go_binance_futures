@@ -173,7 +173,7 @@ cp conf/app.conf.example conf/app.conf
 ## 交流群
 
 ### wx
-![alt text](image.png)
+![alt text](image.jpg)
 
 ### tg
 https://t.me/+neEHA8VSgF1jMTg9
