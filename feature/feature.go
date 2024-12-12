@@ -659,6 +659,10 @@ func UpdateSymbolsTradePrecision() {
 	o := orm.NewOrm()
 	if err == nil {
 		for _, symbol := range res.Symbols {
+			if symbol.Status != "TRADING" {
+				// 非交易中的过滤掉
+				continue
+			}
 			var tickSize string
 			var stepSize string
 			priceFilter := symbol.PriceFilter()
