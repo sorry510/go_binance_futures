@@ -53,6 +53,14 @@ func GetFuturesAccount() (res *futures.Account, err error) {
 	return res, err
 }
 
+// func GetSymbolConfig() (res []*futures.ExchangeInfoSymbol, err error) {
+// 	// res, err := futuresClient.NewC
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return res, err
+// }
+
 type PositionParams struct {
 	Symbol string
 }
@@ -522,59 +530,96 @@ func UpdateListenKey(listenKey string) (err error) {
 }
 
 // @see https://binance-docs.github.io/apidocs/futures/cn/#listenkey-user_stream
-// 暂时废弃，不能实时推送仓位信息，只有仓位变化才会推送
-func SyncPositions() {
+// 不能实时推送仓位信息，只有仓位变化才会推送, 结合查询接口联合使用
+func WsUserData() {
 	listenKey, err := GetListenKey()
 	if err != nil {
 		logs.Error("GetListenKey:", err.Error())
 		return
 	}
+	logs.Info("futures_user_data ws start: auto update symbols price")
 	o := orm.NewOrm()
-	doneC, stopC, err := futures.WsUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
+	doneC, _, err := futures.WsUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
 		if (event.Event == "ACCOUNT_UPDATE") {
 			for _, v := range event.AccountUpdate.Positions {
+				floatAmount, _ := strconv.ParseFloat(v.Amount, 64)
 				var position models.FuturesPosition
+				var symbols models.Symbols
+				o.QueryTable("symbols").Filter("symbol", v.Symbol).One(&symbols)
 				o.QueryTable("futures_positions").Filter("symbol", v.Symbol).Filter("side", v.Side).One(&position)
 				position.Symbol = v.Symbol
 				position.Side = string(v.Side)
-				position.Amount = v.Amount
+				position.Amount = strconv.FormatFloat(floatAmount, 'f', -1, 64) // 清仓时推送持仓数量为 0
 				position.MarginType = string(v.MarginType)
+				position.Leverage = symbols.Leverage // 杠杆倍数没在这里推送(默认为1), 只能暂时调用接口获取 TODO
 				position.IsolatedWallet = v.IsolatedWallet
 				position.EntryPrice = v.EntryPrice
 				position.MarkPrice = v.MarkPrice
 				position.UnrealizedProfit = v.UnrealizedPnL
 				position.AccumulatedRealized = v.AccumulatedRealized
 				position.MaintenanceMarginRequired = v.MaintenanceMarginRequired
-				position.CreateTime = event.Time
 				position.UpdateTime = event.Time
 				if position.ID == 0 {
+					position.CreateTime = event.Time
 					o.Insert(&position)
 				} else {
 					o.Update(&position)
 				}
 			}
+		}  else if (event.Event == "ORDER_TRADE_UPDATE") {
+			order := event.OrderTradeUpdate
+			var orderModel models.FuturesOrder
+			o.QueryTable("futures_orders").Filter("order_id", order.ID).One(&orderModel)
+			orderModel.Symbol = order.Symbol
+			orderModel.ClientOrderId = order.ClientOrderID
+			orderModel.OrderId = strconv.FormatInt(order.ID, 10)
+			orderModel.Side = string(order.Side)
+			orderModel.PositionSide = string(order.PositionSide)
+			orderModel.Type = string(order.Type)
+			orderModel.Status = string(order.Status)
+			orderModel.Price = order.OriginalPrice
+			orderModel.OrigQty = order.OriginalQty
+			orderModel.ExecutedQty = order.AccumulatedFilledQty
+			orderModel.UpdateTime = event.Time
+			if orderModel.ID == 0 {
+				orderModel.CreateTime = event.Time
+				o.Insert(&orderModel)
+			} else {
+				o.Update(&orderModel)
+			}
+		} else if (event.Event == "ACCOUNT_CONFIG_UPDATE") {
+			config := event.AccountConfigUpdate
+			if config.Leverage == 0 {
+				// 其它推送不处理
+				return
+			}
+			var positionModels []models.FuturesPosition
+			o.QueryTable("futures_positions").Filter("symbol", config.Symbol).All(&positionModels)
+			for _, positionModel := range positionModels {
+				positionModel.Leverage = config.Leverage
+				o.Update(&positionModel)
+			}
 		} else if (event.Event == "listenKeyExpired") {
 			// 如果 listenKey 过期，重新获取 listenKey
-			logs.Info("futures ws listenKeyExpired")
+			logs.Info("futures_user_data ws listenKeyExpired")
 			UpdateListenKey(listenKey)
 		}
 	}, func(err error) {
-		logs.Error("futures ws user data run error:", err)
+		logs.Error("futures_user_data ws run error:", err)
+		time.Sleep(time.Second * 30) // 30 秒间隔
+		WsUserData()
 	})
 	go func() {
 		for {
 			time.Sleep(time.Minute * 20) // key 1小时过期， 20 分钟更新一次
-			err = UpdateListenKey(listenKey)
-			if err != nil {
-				logs.Error("UpdateListenKey:", err.Error())
-				// 如果更新错误，停止 websocket
-				stopC <- struct{}{}
-			}
+			UpdateListenKey(listenKey)
 		}	
 	}()
 	
 	if err != nil {
-		logs.Error("futures ws user data error:", err)
+		logs.Error("futures_user_data ws start error:", err)
+		time.Sleep(time.Second * 30) // 30 秒间隔
+		WsUserData()
 		return
 	}
 	<-doneC

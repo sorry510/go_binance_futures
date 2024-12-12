@@ -6,6 +6,7 @@ type FuturesPosition struct {
 	Side string `orm:"column(side)" json:"side"` // 持仓方向, BOTH, LONG, SHORT
 	Amount string `orm:"column(amount)" json:"amount"` // 持仓数量
 	MarginType string `orm:"column(margin_type)" json:"margin_type"` // isolated, cross
+	Leverage int64 `orm:"column(leverage)" json:"leverage"` // 合约倍数
 	IsolatedWallet string `orm:"column(isolated_wallet)" json:"isolated_wallet"` // 逐仓钱包余额
 	EntryPrice string `orm:"column(entry_price)" json:"entry_price"` // 开仓价格
 	MarkPrice string `orm:"column(mark_price)" json:"mark_price"` // 标记价格

@@ -21,12 +21,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 3 // 每次变动数据库版本号 +1
+var dbVersion int64 = 5 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
 var dbPath, _ = config.String("database::path")
-var wsFuturesPosition, _ = config.String("ws::futures_position")
+var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var SystemConfig models.Config
 
 func init() {
@@ -54,6 +54,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.SpotSymbols))
 	orm.RegisterModel(new(models.DeliverySymbols))
 	orm.RegisterModel(new(models.FuturesPosition))
+	orm.RegisterModel(new(models.FuturesOrder))
 	
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
@@ -77,9 +78,9 @@ func syncDb() {
 	if oldVersion < dbVersion {
 		err = command.UpdateDatabase(oldVersion, dbVersion)
 		if err != nil {
-			logs.Error("update database error:", err)
+			logs.Error("!!! update database error !!!:", err)
 		} else {
-			logs.Info("update database success")
+			logs.Info("@@@ update database success @@@")
 		}
 		config.Version = dbVersion
 		orm.NewOrm().Update(&config)
@@ -123,6 +124,13 @@ func main() {
 	}
 	
 	/*******************************************更新基本信息 start****************************************************/
+	// ws 订阅用户数据信息(仓位,当前挂单)
+	// 如果开启，则使用本地数据库管理仓位信息，不再每次请求查询 api 接口，可以有效降低请求频率(openOrders, getPosition) 
+	// 但是需要注意，这里面的仓位信息推送，只有仓位发生变化时才会推送数据(当前仓位的盈利多少变化不会推送，需要根据 symbols 表的 close 价格计算)
+	if wsFuturesUserData == "1" {
+		feature.SyncUserData()	
+	}
+	
 	// 读取最新配置信息
 	go func() {
 		for {
@@ -155,6 +163,7 @@ func main() {
 		return
 		binance.UpdateDeliveryCoinByWs(&SystemConfig)
 	}()
+	
 	/*******************************************更新基本信息 end****************************************************/
 	
 	// 仓位正负转换通知
@@ -246,15 +255,6 @@ func main() {
 			time.Sleep(time.Hour * 1) // 1 小时更新一次
 		}	
 	}()
-	
-	// ws 订阅仓位变化
-	if wsFuturesPosition == "1" {
-		return
-		go func() {
-			logs.Info("futures websocket position start: auto update futures position")
-			binance.SyncPositions()	
-		}()
-	}
 	
 	// web
 	web.Run(":" + webPort)
