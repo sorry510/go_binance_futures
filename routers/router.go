@@ -51,6 +51,8 @@ func init() {
 	web.Router("/futures/account", &controllers.AccountController{}, "get:GetBinanceFuturesAccount") // 获取合约账户信息
 	web.Router("/futures/positions", &controllers.AccountController{}, "get:GetBinanceFuturesPositions") // 获取合约持仓信息
 	web.Router("/futures/open-orders", &controllers.AccountController{}, "get:GetBinanceFuturesOpenOrders") // 获取合约挂单信息
+	web.Router("/futures/local/positions", &controllers.AccountController{}, "get:GetLocalFuturesPositions") // 获取本地存储的合约持仓信息
+	web.Router("/futures/local/open-orders", &controllers.AccountController{}, "get:GetLocalFuturesOpenOrders") // 获取本地存储的挂单信息
 	
 	web.Router("/fund-rate/eat", &controllers.EatRateController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/fund-rate/eat/:id", &controllers.EatRateController{}, "delete:Delete;put:Edit") // 更新和删除

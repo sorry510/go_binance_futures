@@ -15,7 +15,7 @@ proxy_url = "http://127.0.0.1:7890"
 path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
 
 [ws]
-futures_position = 0
+futures_user_data = 0
 
 [web]
 # web端口
