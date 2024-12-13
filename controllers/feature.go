@@ -101,7 +101,7 @@ func (ctrl *FeatureController) Edit() {
 	_, err := o.Update(&symbols) // _ 是受影响的条数
     if err != nil {
         // 处理错误
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
     }
 	ctrl.Ctx.Resp(map[string]interface{} {

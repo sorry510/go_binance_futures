@@ -154,3 +154,24 @@ func (ctrl *AccountController) GetLocalFuturesOpenOrders() {
 		"msg": "success",
 	})
 }
+
+func (ctrl *AccountController) EditLocalFuturesPositions() {
+	id := ctrl.Ctx.Input.Param(":id")
+	var position models.FuturesPosition
+	o := orm.NewOrm()
+	o.QueryTable(position.TableName()).Filter("Id", id).One(&position)
+	
+	ctrl.BindJSON(&position)
+	
+	_, err := o.Update(&position) // _ 是受影响的条数
+    if err != nil {
+        // 处理错误
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+    }
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": position,
+		"msg": "success",
+	})
+}
