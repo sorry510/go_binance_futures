@@ -11,9 +11,9 @@ import (
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
 	"go_binance_futures/technology"
+	"go_binance_futures/types"
 	"go_binance_futures/utils"
 
-	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
@@ -268,20 +268,29 @@ func (ctrl *FeatureController) TestStrategyRule() {
 		}
 		unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
 		leverage_float64, _ := strconv.ParseFloat(position.Leverage, 64)
+		entryPrice_float64, _ := strconv.ParseFloat(position.EntryPrice, 64)
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		env["ROI"] = nowProfit
-		env["Position"] = positions[0]
+		env["Position"] = types.FuturesPositionCode{
+			Symbol: symbols.Symbol,
+			EntryPrice: entryPrice_float64,
+			MarkPrice: markPrice_float64,
+			Amount:positionAmtFloat,
+			UnrealizedProfit: unRealizedProfit,
+			Leverage: int64(leverage_float64),
+			Side: position.PositionSide,
+		}
 	} else {
 		env["ROI"] = 10.2
-		env["Position"] = futures.PositionRisk{
-			EntryPrice: "68000.0",
-			MarkPrice: "72000.0",
-			PositionAmt: "-0.02",
-			UnRealizedProfit: "100.2",
-			MarginType: "CROSSED",
-			Leverage: "3",
-			PositionSide: "SHORT",
+		env["Position"] = types.FuturesPositionCode{
+			Symbol: symbols.Symbol,
+			EntryPrice: 68000.0,
+			MarkPrice: 72000.0,
+			Amount: -0.02,
+			UnrealizedProfit: 100.2,
+			Leverage: 3,
+			Side: "SHORT",
 		}
 	}
 	for _, strategy := range strategyConfig {

@@ -8,9 +8,9 @@ import (
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
 	"go_binance_futures/technology"
+	"go_binance_futures/types"
 	"go_binance_futures/utils"
 
-	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
@@ -138,15 +138,15 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 		return
 	}
 	// 随意指定一个模拟信息
-	env["ROI"] = 8.88
-	env["Position"] = futures.PositionRisk{
-		EntryPrice: "68000.0",
-		MarkPrice: "72000.0",
-		PositionAmt: "-0.02",
-		UnRealizedProfit: "100.2",
-		MarginType: "CROSSED",
-		Leverage: "3",
-		PositionSide: "SHORT",
+	env["ROI"] = 10.22
+	env["Position"] = types.FuturesPositionCode{
+		Symbol: result.Symbol,
+		EntryPrice: 68000.0,
+		MarkPrice: 72000.0,
+		Amount: -0.02,
+		UnrealizedProfit: 100.2,
+		Leverage: 3,
+		Side: "SHORT",
 	}
 	if result.ID != 0 {
 		// 如果查到了为平仓的测试数据，就加载仓位信息
@@ -156,18 +156,17 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
 		
-		// 模拟仓位信息
-		position := futures.PositionRisk{
-			EntryPrice: result.Price, // 开仓价格
-			MarkPrice: strconv.FormatFloat(floatNowPrice, 'f', -1, 64), // 当前标记价格
-			PositionAmt: result.PositionAmt, // 仓位数量(正数为多仓，负数为空仓)
-			UnRealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64), // 未实现盈亏
-			MarginType: "CROSSED",
-			Leverage: strconv.FormatInt(result.Leverage, 10),
-			PositionSide: result.PositionSide,
-		}
 		env["ROI"] = nowProfit // 当前收益率
-		env["Position"] = position // 当前仓位信息
+		// 模拟仓位信息
+		env["Position"] = types.FuturesPositionCode{
+			Symbol: result.Symbol,
+			EntryPrice: enterPrice_float64,
+			MarkPrice: floatNowPrice,
+			Amount: positionAmtFloat,
+			UnrealizedProfit: unRealizedProfit,
+			Leverage: result.Leverage,
+			Side: result.PositionSide,
+		}
 	}
 	
 	for _, strategy := range strategyConfig {

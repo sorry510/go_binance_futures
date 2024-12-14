@@ -7,13 +7,13 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/technology"
+	"go_binance_futures/types"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/expr-lang/expr"
@@ -181,25 +181,28 @@ func CheckTestResults(systemConfig models.Config) {
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
 		
 		// 模拟仓位信息
-		position := futures.PositionRisk{
-			EntryPrice: result.Price, // 开仓价格
+		position := types.FuturesPosition{
 			MarkPrice: strconv.FormatFloat(floatNowPrice, 'f', -1, 64), // 当前标记价格
-			PositionAmt: result.PositionAmt, // 仓位数量(正数为多仓，负数为空仓)
-			UnRealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64), // 未实现盈亏
-			MarginType: "CROSSED",
-			Leverage: strconv.FormatInt(result.Leverage, 10),
-			PositionSide: result.PositionSide,
+			UnrealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64), // 未实现盈亏
 		}
 		
 		env["ROI"] = nowProfit // 当前收益率
-		env["Position"] = position // 当前仓位信息
+		env["Position"] = types.FuturesPositionCode{
+			Symbol: result.Symbol,
+			EntryPrice: enterPrice_float64,
+			MarkPrice: floatNowPrice,
+			Amount: positionAmtFloat,
+			UnrealizedProfit: unRealizedProfit,
+			Leverage: result.Leverage,
+			Side: result.PositionSide,
+		}
 		for _, strategy := range strategyConfig {
 			if strategy.Enable && (strategy.Type == "close_long" || strategy.Type == "close_short") {
-				if strategy.Type == "close_long" && position.PositionSide != "LONG" {
+				if strategy.Type == "close_long" && result.PositionSide != "LONG" {
 					// 平多仓的策略，当前仓位不是多仓，跳过
 					continue
 				}
-				if strategy.Type == "close_short" && position.PositionSide != "SHORT" {
+				if strategy.Type == "close_short" && result.PositionSide != "SHORT" {
 					// 平空仓的策略，当前仓位不是空仓，跳过
 					continue
 				}
@@ -219,7 +222,7 @@ func CheckTestResults(systemConfig models.Config) {
 				findStrategy = true // 发现有正常能执行的平仓策略
 				if res, ok := output.(bool); ok && res {
 					result.ClosePrice = position.MarkPrice
-					result.CloseProfit = position.UnRealizedProfit
+					result.CloseProfit = position.UnrealizedProfit
 					result.CloseStrategy = strategy.Code
 					result.UpdateTime = time.Now().Unix() * 1000
 					orm.NewOrm().Update(result)
@@ -246,7 +249,7 @@ func CheckTestResults(systemConfig models.Config) {
 		if !findStrategy && (nowProfit > 10 || nowProfit < -10) {
 			// 没有定义平仓策略，使用超过 10 % 就平仓
 			result.ClosePrice = position.MarkPrice
-			result.CloseProfit = position.UnRealizedProfit
+			result.CloseProfit = position.UnrealizedProfit
 			result.UpdateTime = time.Now().Unix() * 1000
 			orm.NewOrm().Update(result)
 			// 平仓通知

@@ -2,8 +2,7 @@ package strategy
 
 import (
 	"go_binance_futures/models"
-
-	"github.com/adshao/go-binance/v2/futures"
+	"go_binance_futures/types"
 )
 
 
@@ -18,7 +17,7 @@ type OpenResult struct {
 
 type CloseParams struct {
     Symbols *models.Symbols
-    Position *futures.PositionRisk
+    Position types.FuturesPosition
     NowProfit float64 // 当前收益率%
 }
 

@@ -9,7 +9,6 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/utils"
-	"math"
 	"strconv"
 	"time"
 
@@ -138,56 +137,6 @@ func GoTestUtil() {
 	ma1 := []float64{10, 9, 9.2, 6}
 	ma2 := []float64{9, 7, 9, 6.1}
 	logs.Info(line.Kdj(ma1, ma2, 4))
-}
-
-// test 平仓
-func GoTestMarketOrder() {
-	positions, _ := binance.GetPosition(binance.PositionParams{})
-	for _, position := range positions {
-    	positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
-    	positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
-    	unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
-    	
-    	if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
-    		continue
-    	}
-    	if position.Symbol == "BELUSDT" {
-			if position.PositionSide == "SHORT" {
-				order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
-				if err == nil {
-					// 数据库写入订单
-					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
-					
-					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
-					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
-						Title: lang.Lang("futures.close_notice_title"),
-						Symbol: position.Symbol,
-						Side: "buy",
-						PositionSide: "short",
-						Price: markPrice,
-						Quantity: positionAmtFloat,
-						Leverage: 10,
-						Profit: unRealizedProfit,
-						Remarks: lang.Lang("futures.stop_loss"),
-						Status: "success",
-					})
-				} else {
-					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
-						Title: lang.Lang("futures.close_notice_title"),
-						Symbol: position.Symbol,
-						Side: "buy",
-						PositionSide: "short",
-						Quantity: positionAmtFloat,
-						Leverage: 10,
-						Profit: unRealizedProfit,
-						Remarks: lang.Lang("futures.stop_loss"),
-						Status: "fail",
-						Error: err.Error(),
-					})
-				}
-			}
-    	}
-	}
 }
 
 func GoTestApi() {

@@ -5,6 +5,7 @@ import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy"
 	"go_binance_futures/technology"
+	"go_binance_futures/types"
 	"strconv"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -71,14 +72,50 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 	findStrategy := false
 	env := InitParseEnv(coin.Symbol, coin.Technology)
 	env["ROI"] = closeParams.NowProfit // 当前收益率
-	env["Position"] = position // 当前仓位信息
+	env["Position"] = types.FuturesPositionCode{
+		Symbol: coin.Symbol,
+		Side: position.Side,
+		Amount: func() float64 {
+			amount, err := strconv.ParseFloat(position.Amount, 64)
+			if err != nil {
+				logs.Error("Error parsing Amount to float64:", err.Error())
+				return 0
+			}
+			return amount
+		}(),
+		Leverage: position.Leverage,
+		EntryPrice: func() float64 {
+			entryPrice, err := strconv.ParseFloat(position.EntryPrice, 64)
+			if err != nil {
+				logs.Error("Error parsing EntryPrice to float64:", err.Error())
+				return 0
+			}
+			return entryPrice
+		}(),
+		MarkPrice: func() float64 {
+			markPrice, err := strconv.ParseFloat(position.MarkPrice, 64)
+			if err != nil {
+				logs.Error("Error parsing MarkPrice to float64:", err.Error())
+				return 0
+			}
+			return markPrice
+		}(),
+		UnrealizedProfit: func() float64 {
+			unrealizedProfit, err := strconv.ParseFloat(position.UnrealizedProfit, 64)
+			if err != nil {
+				logs.Error("Error parsing UnrealizedProfit to float64:", err.Error())
+				return 0
+			}
+			return unrealizedProfit
+		}(),
+	} // 当前仓位信息
 	for _, strategy := range strategyConfig {
 		if strategy.Enable && (strategy.Type == "close_long" || strategy.Type == "close_short") {
-			if strategy.Type == "close_long" && position.PositionSide != "LONG" {
+			if strategy.Type == "close_long" && position.Side != "LONG" {
 				// 平多仓的策略，当前仓位不是多仓，跳过
 				continue
 			}
-			if strategy.Type == "close_short" && position.PositionSide != "SHORT" {
+			if strategy.Type == "close_short" && position.Side != "SHORT" {
 				// 平空仓的策略，当前仓位不是空仓，跳过
 				continue
 			}
@@ -134,9 +171,9 @@ func (TradeLine TradeLineCustom) simpleCloseStrategy(closeParams strategy.CloseP
 	}
 	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
 	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
-	if position.PositionSide == "LONG" {
+	if position.Side == "LONG" {
 		closeResult.Complete = close0 < close1 // 价格在下跌中
-	} else if position.PositionSide == "SHORT" {
+	} else if position.Side == "SHORT" {
 		closeResult.Complete = close0 > close1 // 价格在上涨中
 	} else {
 		// BOTH 不处理双向持仓类型

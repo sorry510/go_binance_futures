@@ -8,6 +8,7 @@ import (
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/types"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
@@ -16,9 +17,11 @@ import (
 
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/core/logs"
 )
 
+var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var pusher = notify.GetNotifyChannel()
 
 var flagFutures = 0
@@ -54,17 +57,17 @@ func StartTrade(systemConfig models.Config) {
 	
 	
 	/************************************************获取账户信息 start******************************************************************* */
-	positions, err := binance.GetPosition(binance.PositionParams{})
+	positions, err := getTransformPositions()
+	// positions, err := binance.GetPosition(binance.PositionParams{})
 	if err != nil {
-		logs.Error("GetPosition err in StartTrade:", err.Error())
 		logs.Info("Sleep 30s for limit")
 		time.Sleep(30 * time.Second)
 		return
 	}
 	
-	allOpenOrders, err := binance.GetOpenOrder()
+	allOpenOrders, err := getTransformOpenOrders()
+	// allOpenOrders, err := binance.GetOpenOrder()
 	if err != nil {
-		logs.Error("GetOpenOrder err in StartTrade:", err.Error())
 		logs.Info("Sleep 30s for limit")
 		time.Sleep(30 * time.Second)
 		return
@@ -85,7 +88,7 @@ func StartTrade(systemConfig models.Config) {
 		if _, exist := exclude_symbols_map[position.Symbol]; exist {
 			continue
 		}
-		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
+		positionAmtFloat, _ := strconv.ParseFloat(position.Amount, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
 			continue
@@ -114,8 +117,8 @@ func StartTrade(systemConfig models.Config) {
 			}
 		}
 		
-		unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
-		leverage_float64, _ := strconv.ParseFloat(position.Leverage, 64)
+		unRealizedProfit, _ := strconv.ParseFloat(position.UnrealizedProfit, 64)
+		leverage_float64 := float64(position.Leverage)
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		
@@ -126,7 +129,7 @@ func StartTrade(systemConfig models.Config) {
 		})
 		if closeResult.Complete { // 触发策略,风向改变,强制平仓
 			logs.Info("%s:auto_stop_start", position.Symbol)
-			if position.PositionSide == "LONG" {
+			if position.Side == "LONG" {
 				order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
 					// 数据库写入订单
@@ -160,7 +163,7 @@ func StartTrade(systemConfig models.Config) {
 					})
 				}
 			}
-			if position.PositionSide == "SHORT" {
+			if position.Side == "SHORT" {
 				order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
@@ -205,7 +208,7 @@ func StartTrade(systemConfig models.Config) {
 				NowProfit: nowProfit,
 			})
 			if closeResult.Complete { // 
-				if position.PositionSide == "LONG" {
+				if position.Side == "LONG" {
 					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
@@ -239,7 +242,7 @@ func StartTrade(systemConfig models.Config) {
 						})
 					}
 				}
-				if position.PositionSide == "SHORT" {
+				if position.Side == "SHORT" {
 					order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
@@ -283,7 +286,7 @@ func StartTrade(systemConfig models.Config) {
 				NowProfit: nowProfit,
 			})
 			if closeResult.Complete {
-				if position.PositionSide == "LONG" {
+				if position.Side == "LONG" {
 					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
@@ -317,7 +320,7 @@ func StartTrade(systemConfig models.Config) {
 						})
 					}
 				}
-				if position.PositionSide == "SHORT" {
+				if position.Side == "SHORT" {
 					order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
@@ -399,39 +402,39 @@ func StartTrade(systemConfig models.Config) {
 			logs.Info("%s:no trading strategy conditions passed", symbol)
 			continue
 		}
-		var buyOrderLong *futures.Order // 此币种开多的单
-		var buyOrderShort *futures.Order // 此币种开空的单
+		hasBuyOrderLong := false // 此币种开多的单
+		hasBuyOrderShort := false // 此币种开空的单
 		for _, item := range allOpenOrders {
-			if item.Symbol == symbol && item.Side == futures.SideTypeBuy && item.PositionSide == futures.PositionSideTypeLong {
-				buyOrderLong = item
+			if item.Symbol == symbol && item.Side == "BUY" && item.PositionSide == "LONG" {
+				hasBuyOrderLong = true
 			}
-			if item.Symbol == symbol && item.Side == futures.SideTypeSell && item.PositionSide == futures.PositionSideTypeShort {
-				buyOrderShort = item
+			if item.Symbol == symbol && item.Side == "SELL" && item.PositionSide == "SHORT" {
+				hasBuyOrderShort = true
 			}
-			if buyOrderLong != nil && buyOrderShort != nil {
+			if hasBuyOrderLong && hasBuyOrderShort {
 				break
 			}
 		}
-		var positionLong *futures.PositionRisk // 此币种的多仓
-		var positionShort *futures.PositionRisk // 此币种的空仓
+		hasPositionLong := false // 此币种的多仓
+		hasPositionShort := false // 此币种的空仓
 		for _, item := range positions {
-			positionAmtFloat, _ := strconv.ParseFloat(item.PositionAmt, 64)
+			positionAmtFloat, _ := strconv.ParseFloat(item.Amount, 64)
 			positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 			if positionAmtFloatAbs < 0.00000000001 {// 没有持仓的
 				continue
 			}
-			if item.Symbol == symbol && item.PositionSide == positionSideLong {
-				positionLong = item
+			if item.Symbol == symbol && item.Side == positionSideLong {
+				hasPositionLong = true
 			}
-			if item.Symbol == symbol && item.PositionSide == positionSideShort {
-				positionShort = item
+			if item.Symbol == symbol && item.Side == positionSideShort {
+				hasPositionShort = true
 			}
-			if positionLong != nil && positionShort != nil {
+			if hasPositionLong && hasPositionShort {
 				break
 			}
 		}
 		
-		if systemConfig.FutureAllowLong == 1 && positionLong == nil && buyOrderLong == nil && openResult.CanLong {
+		if systemConfig.FutureAllowLong == 1 && hasPositionLong == false && hasBuyOrderLong == false && openResult.CanLong {
 			buyPrice, _, err := binance.GetDepthAvgPrice(symbol, 5) // 平均买价
 			if err == nil {
 				buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
@@ -501,7 +504,7 @@ func StartTrade(systemConfig models.Config) {
 				isOpen = true
 			}
 		}
-		if systemConfig.FutureAllowShort == 1 && positionShort == nil && buyOrderShort == nil && openResult.CanShort {
+		if systemConfig.FutureAllowShort == 1 && hasPositionShort == false && hasPositionShort == false && openResult.CanShort {
 			
 			_, sellPrice, err := binance.GetDepthAvgPrice(symbol, 5) // 平均卖价
 			if err == nil {
@@ -597,7 +600,7 @@ func GetAllSymbols() (symbols []*models.Symbols, err error) {
 }
 
 // 挂单已经超过设置的超时时间，撤销挂单
-func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futures.Order, buy_timeout int64) {
+func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []types.FuturesOrder, buy_timeout int64) {
 	nowTime := time.Now().Unix() * 1000 // 毫秒时间戳
 	for _, buyOrder := range allOpenOrders {
 		if _, exist := explodeSymbolsMap[buyOrder.Symbol]; exist {
@@ -609,10 +612,10 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []*futu
 			continue
 		}
 		logs.Info("Revoke overdue warehouse opening orders")
-		res, err := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderID)
+		res, err := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderId)
 		if err == nil {
 			// 删除对应订单
-			orm.NewOrm().Raw("DELETE FROM \"order\" where order_id = '" + strconv.FormatInt(buyOrder.OrderID, 10) + "'").Exec()
+			orm.NewOrm().Raw("DELETE FROM \"order\" where order_id = '" + strconv.FormatInt(buyOrder.OrderId, 10) + "'").Exec()
 		}
 		logs.Info("response:", res)
 	}
@@ -634,17 +637,15 @@ func insertOpenOrder(symbol string, quantity float64, avg_price string, position
 	o.Insert(order)
 }
 
-func insertCloseOrder(position *futures.PositionRisk, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64) {
+func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64) {
 	// 数据库写入订单
-	leverageInt64, _ := strconv.ParseInt(position.Leverage, 10, 64)
-	
 	order := new(models.Order)
 	order.Symbol = position.Symbol
 	order.Amount = strconv.FormatFloat(positionAmtFloat, 'f', -1, 64)
 	order.Avg_price = avg_price // 平仓价格
 	order.Inexact_profit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
-	order.PositionSide = position.PositionSide
-	order.Leverage = leverageInt64
+	order.PositionSide = position.Side
+	order.Leverage = position.Leverage
 	order.Side = "close"
 	order.OrderId = orderId
 	order.UpdateTime = time.Now().Unix() * 1000 
@@ -814,3 +815,122 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 	return lineStrategy
 }
 
+// 转换为统一格式的 positions
+func getTransformPositions() (usePositions []types.FuturesPosition, err error) {
+	if wsFuturesUserData == "1" {
+		var positions []models.FuturesPosition
+		o := orm.NewOrm()
+		sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where 1 = 1"
+		sql += ` and f.amount <> '0'`
+		_, err := o.Raw(sql).QueryRows(&positions)
+		if err != nil {
+			logs.Error("GetLocalPosition err in StartTrade:", err.Error())
+			return usePositions, err
+		}
+		for _, position := range positions {
+			positionAmt, _ := strconv.ParseFloat(position.Amount, 64)
+			positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
+			if positionAmtFloatAbs < 0.0000001 {
+				continue
+			}
+			enterPrice_float64, _ := strconv.ParseFloat(position.EntryPrice, 64)
+			markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
+			unRealizedProfit := (markPrice_float64 - enterPrice_float64) * positionAmt // 未实现盈亏
+			position.UnrealizedProfit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
+			
+			usePositions = append(usePositions, types.FuturesPosition{
+				Symbol: position.Symbol,
+				Side: position.Side,
+				Amount: position.Amount,
+				MarginType: position.MarginType,
+				Leverage: position.Leverage,
+				IsolatedWallet: position.IsolatedWallet,
+				EntryPrice: position.EntryPrice,
+				MarkPrice: position.MarkPrice,
+				UnrealizedProfit: position.UnrealizedProfit,
+			})
+		}
+	} else {
+		positions, err := binance.GetPosition(binance.PositionParams{})
+		if err != nil {
+			logs.Error("GetApiPosition err in StartTrade:", err.Error())
+			return usePositions, err
+		}
+		
+		for _, position := range positions {
+			positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
+			positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
+			if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
+				continue
+			}
+			
+			leverage, _ := strconv.ParseInt(position.Leverage, 10, 64)
+			
+			usePositions = append(usePositions, types.FuturesPosition{
+				Symbol: position.Symbol,
+				Side: position.PositionSide,
+				Amount: position.PositionAmt,
+				MarginType: position.MarginType,
+				Leverage: leverage,
+				IsolatedWallet: position.IsolatedWallet,
+				EntryPrice: position.EntryPrice,
+				MarkPrice: position.MarkPrice,
+				UnrealizedProfit: position.UnRealizedProfit,
+			})
+		}
+	}
+	return usePositions, err
+}
+
+// 转换为统一格式的 orders
+func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
+	if wsFuturesUserData == "1" {
+		var orders []models.FuturesOrder
+		o := orm.NewOrm()
+		sql := "SELECT * FROM `futures_orders` as f where 1 = 1"
+		sql += ` and f.status = 'NEW' or f.status = 'PARTIALLY_FILLED'` // 下单类型
+		_, err := o.Raw(sql).QueryRows(&orders)
+		if err != nil {
+			logs.Error("GetLocalOrder err in StartTrade:", err.Error())
+			return useOrders, err
+		}
+		for _, order := range orders {
+			orderId, _ := strconv.ParseInt(order.OrderId, 10, 64);
+			useOrders = append(useOrders, types.FuturesOrder{
+				Symbol: order.Symbol,
+				ClientOrderId: order.ClientOrderId,
+				OrderId: orderId,
+				Side: order.Side,
+				PositionSide: order.PositionSide,
+				Type: order.Type,
+				Status: order.Status,
+				Price: order.Price,
+				OrigQty: order.OrigQty,
+				ExecutedQty: order.ExecutedQty,
+				UpdateTime: order.UpdateTime,
+			})
+		}
+	} else {
+		allOpenOrders, err := binance.GetOpenOrder()
+		if err != nil {
+			logs.Error("GetOpenOrder err in StartTrade:", err.Error())
+			return useOrders, err
+		}
+		for _, order := range allOpenOrders {
+			useOrders = append(useOrders, types.FuturesOrder{
+				Symbol: order.Symbol,
+				ClientOrderId: order.ClientOrderID,
+				OrderId: order.OrderID,
+				Side: string(order.Side),
+				PositionSide: string(order.PositionSide),
+				Type: string(order.Type),
+				Status: string(order.Status),
+				Price: order.Price,
+				OrigQty: order.OrigQuantity,
+				ExecutedQty: order.ExecutedQuantity,
+				UpdateTime: order.UpdateTime,
+			})
+		}
+	}
+	return useOrders, err
+}
