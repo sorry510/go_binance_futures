@@ -197,31 +197,32 @@ func PositionConvertNotice(systemConfig models.Config) {
 		return
 	}
 	
-	positions, err := binance.GetPosition(binance.PositionParams{})
+	positions, err := getTransformPositions()
+	// positions, err := binance.GetPosition(binance.PositionParams{})
 	if err != nil {
 		logs.Error("GetPosition err in PositionConvertNotice:", err)
 		return
 	}
 	
 	for _, position := range positions {
-		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
+		positionAmtFloat, _ := strconv.ParseFloat(position.Amount, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
-			delete(positionNotices, position.Symbol + position.PositionSide) // 删除已经平仓的数据
+			delete(positionNotices, position.Symbol + position.Side) // 删除已经平仓的数据
 			continue
 		}
-		unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
+		unRealizedProfit, _ := strconv.ParseFloat(position.UnrealizedProfit, 64)
 		status := "income_positive" // 盈利
 		if unRealizedProfit < 0 {
 			status = "income_negative" // 亏损
 		}
 		
-		noticeInfo, ok := positionNotices[position.Symbol + position.PositionSide]
+		noticeInfo, ok := positionNotices[position.Symbol + position.Side]
 		if ok {
 			// 存在记录
 			if (status != noticeInfo.Status && time.Now().Unix() - noticeInfo.NoticeTime > 60 * 3) {
 				// 状态变化,并且上次通知时间超过3分钟，重新记录新的状态，并通知
-				positionNotices[position.Symbol + position.PositionSide] = PositionNoticeInfo{
+				positionNotices[position.Symbol + position.Side] = PositionNoticeInfo{
 					Status: status,
 					NoticeTime: time.Now().Unix(),
 				}
@@ -230,15 +231,15 @@ func PositionConvertNotice(systemConfig models.Config) {
 					Title: lang.Lang("futures.notice_position_convert_title"),
 					Symbol: position.Symbol,
 					Status: status,
-					PositionSide: strings.ToLower(position.PositionSide),
+					PositionSide: strings.ToLower(position.Side),
 					Price: position.MarkPrice,
-					Leverage: position.Leverage,
-					UnRealizedProfit: position.UnRealizedProfit,
+					Leverage: strconv.FormatInt(position.Leverage, 10),
+					UnRealizedProfit: position.UnrealizedProfit,
 				})
 			}
 		} else {
 			// 第一次,只进行记录
-			positionNotices[position.Symbol + position.PositionSide] = PositionNoticeInfo{
+			positionNotices[position.Symbol + position.Side] = PositionNoticeInfo{
 				Status: status,
 				NoticeTime: time.Now().Unix(),
 			}
