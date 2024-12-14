@@ -5,10 +5,10 @@ import (
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
 	"go_binance_futures/technology"
+	"go_binance_futures/types"
 	"go_binance_futures/utils"
 	"strconv"
 
-	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
@@ -118,14 +118,14 @@ func (ctrl *StrategyTemplateController) TestStrategyRule() {
 	}
 	env := line.InitParseEnv(symbols.Symbol, symbols.Technology)
 	env["ROI"] = 10.2
-	env["Position"] = futures.PositionRisk{
-		EntryPrice: "68000.0",
-		MarkPrice: "72000.0",
-		PositionAmt: "-0.02",
-		UnRealizedProfit: "100.2",
-		MarginType: "CROSSED",
-		Leverage: "3",
-		PositionSide: "SHORT",
+	env["Position"] = types.FuturesPositionCode{
+		Symbol: symbols.Symbol,
+		EntryPrice: 68000.0,
+		MarkPrice: 72000.0,
+		Amount: -0.02,
+		UnrealizedProfit: 100.2,
+		Leverage: 3,
+		Side: "SHORT",
 	}
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {

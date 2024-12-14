@@ -1,5 +1,33 @@
 ### Change Log
 
+## v0.0.63
+
+- 更新获取订单和仓位的方式，使用 `futures_user_data` 可以切换，为 1 时使用 ws 时采用本地数据库存储方式(缺点需要保证ws稳定，无法实时获取仓位标记价格，使用ws订阅的最新价格代替，未实现收益手动计算得出)，其它采用查询 binance 接口获取(缺点经常容易超过binance 的接口调用频率限制)
+- 更新自定义策略中仓位变量的名称和类型
+
+- before
+```
+Position.EntryPrice = "2500.2"
+Position.MarkPrice = "2400.2"
+Position.PositionAmt = "100.2" 
+Position.UnRealizedProfit = "32.2"
+Position.Leverage = "3"
+Position.PositionSide = "LONG"
+Position.MarginType = "CROSS"
+```
+
+- after
+
+```
+Position.Symbol = "ETHUSDT" // 交易对
+Position.EntryPrice = 2500.2 // 持仓价格
+Position.MarkPrice = 2400.2 // 当前的标记价格
+Position.Amount = 1.2 // 当前的持仓数量，做空是负数
+Position.UnRealizedProfit = 32.2 // 当前收益 usdt, 亏损是负数
+Position.Leverage = 3 // 杠杆
+Position.PositionSide = "LONG" // 合约方向
+```
+
 ## v0.0.62
 - fixed: 抢购逻辑修复
 

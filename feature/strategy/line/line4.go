@@ -69,9 +69,9 @@ func (TradeLine4 TradeLine4) CanOrderComplete(closeParams strategy.CloseParams) 
 	}
 	close0, _ := strconv.ParseFloat(lines[0].Close, 64)
 	close1, _ := strconv.ParseFloat(lines[1].Close, 64)
-	if position.PositionSide == "LONG" {
+	if position.Side == "LONG" {
 		closeResult.Complete = close0 < close1 // 价格在下跌中
-	} else if position.PositionSide == "SHORT" {
+	} else if position.Side == "SHORT" {
 		closeResult.Complete = close0 > close1 // 价格在上涨中
 	} else {
 		closeResult.Complete = true
@@ -89,7 +89,7 @@ func (TradeLine4 TradeLine4) AutoStopOrder(closeParams strategy.CloseParams) (cl
 		closeResult.Complete = false
 		return closeResult
 	}
-	closeResult.Complete = TradeLine4.MarketReversal(position.Symbol, position.PositionSide)
+	closeResult.Complete = TradeLine4.MarketReversal(position.Symbol, position.Side)
 	return closeResult
 }
 
