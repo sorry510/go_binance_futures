@@ -140,7 +140,7 @@ func (ctrl *AccountController) GetLocalFuturesOpenOrders() {
 	var orders []models.FuturesOrder
 	o := orm.NewOrm()
 	sql := "SELECT * FROM `futures_orders` as f where 1 = 1"
-	sql += ` and f.status = 'NEW' or f.status = 'PARTIALLY_FILLED'` // 下单类型
+	sql += ` and (f.status = 'NEW' or f.status = 'PARTIALLY_FILLED')` // 下单类型
 	_, err := o.Raw(sql).QueryRows(&orders)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
