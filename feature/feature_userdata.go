@@ -23,7 +23,7 @@ func SyncUserData() {
 // 删除数据表旧数据
 func deleteOldUserData() {
 	o := orm.NewOrm()
-	o.Raw("DELETE FROM \"futures_orders\" where 1=1").Exec()
+	o.Raw("DELETE FROM \"futures_orders\" where 1=1 and (status = 'NEW' or status = 'PARTIALLY_FILLED')").Exec() // 只删除未成交的订单
 	o.Raw("DELETE FROM \"futures_positions\" where 1=1").Exec()
 }
 
