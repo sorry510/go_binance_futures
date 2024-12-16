@@ -580,6 +580,12 @@ func WsUserData() {
 			orderModel.Price = order.OriginalPrice
 			orderModel.OrigQty = order.OriginalQty
 			orderModel.ExecutedQty = order.AccumulatedFilledQty
+			orderModel.AveragePrice = order.AveragePrice
+			orderModel.StopPrice = order.StopPrice
+			orderModel.CommissionAsset = order.CommissionAsset
+			orderModel.Commission = order.Commission
+			orderModel.RealizedPnL = order.RealizedPnL
+			
 			orderModel.UpdateTime = event.Time
 			if orderModel.ID == 0 {
 				orderModel.CreateTime = event.Time

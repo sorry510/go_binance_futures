@@ -175,3 +175,22 @@ func (ctrl *AccountController) EditLocalFuturesPositions() {
 		"msg": "success",
 	})
 }
+
+func (ctrl *AccountController) DelLocalFuturesPositions() {
+	id := ctrl.Ctx.Input.Param(":id")
+	var position models.FuturesPosition
+	o := orm.NewOrm()
+	o.QueryTable(position.TableName()).Filter("Id", id).One(&position)
+	
+	_, err := o.Delete(&position)
+	if err != nil {
+		// 处理错误
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": nil,
+		"msg": "success",
+	})
+}
