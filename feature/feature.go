@@ -607,11 +607,15 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []types
 			// 在白名单内
 			continue
 		}
+		if buyOrder.Status != "NEW" {
+			// 只处理open order订单
+			continue
+		}
 		if nowTime < (buyOrder.UpdateTime + buy_timeout * 1000) {
 			// 没有超过设置的超时
 			continue
 		}
-		logs.Info("Revoke overdue warehouse opening orders")
+		logs.Info("revoke over time opening order")
 		res, err := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderId)
 		if err == nil {
 			// 删除对应订单
