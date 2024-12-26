@@ -373,7 +373,7 @@ func StartTrade(systemConfig models.Config) {
 	
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
 	if systemConfig.FutureAllowLong != 1 && systemConfig.FutureAllowShort != 1 {
-		logs.Info("the base config don't allow long and all short")
+		logs.Info("the base config don't allow long and allow short")
 		return
 	}
 	
