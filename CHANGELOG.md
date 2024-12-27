@@ -1,5 +1,8 @@
 ### Change Log
 
+## v0.0.65
+- 修复一些 bug
+
 ## v0.0.64
 - 更新数据库 futures_order 接入更多信息
 - 更新 ui
