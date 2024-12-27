@@ -286,9 +286,10 @@ Position.Symbol = "ETHUSDT" // 交易对
 Position.EntryPrice = 2500.2 // 持仓价格
 Position.MarkPrice = 2400.2 // 当前的标记价格
 Position.Amount = 1.2 // 当前的持仓数量，做空是负数
-Position.UnRealizedProfit = 32.2 // 当前收益 usdt, 亏损是负数
+Position.UnrealizedProfit = 32.2 // 当前收益 usdt, 亏损是负数
 Position.Leverage = 3 // 杠杆
-Position.PositionSide = "LONG" // 合约方向
+Position.Side = "LONG" // 合约方向
+Position.Mock = false // 是否是 mock 的数据
 ```
 
 ##### 基本趋势涨跌幅
