@@ -195,6 +195,7 @@ func CheckTestResults(systemConfig models.Config) {
 			UnrealizedProfit: unRealizedProfit,
 			Leverage: result.Leverage,
 			Side: result.PositionSide,
+			Mock: false,
 		}
 		for _, strategy := range strategyConfig {
 			if strategy.Enable && (strategy.Type == "close_long" || strategy.Type == "close_short") {

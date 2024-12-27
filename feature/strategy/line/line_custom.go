@@ -108,6 +108,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 			}
 			return unrealizedProfit
 		}(),
+		Mock: false,
 	} // 当前仓位信息
 	for _, strategy := range strategyConfig {
 		if strategy.Enable && (strategy.Type == "close_long" || strategy.Type == "close_short") {
