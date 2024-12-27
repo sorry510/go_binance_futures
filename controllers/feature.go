@@ -269,6 +269,9 @@ func (ctrl *FeatureController) TestStrategyRule() {
 	}
 	positions, _ := feature.GetTransformPositions()
 	for _, position := range positions {
+		if position.Symbol != symbols.Symbol {
+			continue
+		}
 		positionAmtFloat, _ := strconv.ParseFloat(position.Amount, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
