@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
 
 	"go_binance_futures/feature"
-	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
 	"go_binance_futures/technology"
@@ -256,43 +256,44 @@ func (ctrl *FeatureController) TestStrategyRule() {
 	}
 	env := line.InitParseEnv(symbols.Symbol, symbols.Technology)
 	
-	positions, _ := binance.GetPosition(binance.PositionParams{
+	env["ROI"] = 10.2
+	env["Position"] = types.FuturesPositionCode{
 		Symbol: symbols.Symbol,
-	})
-	if len(positions) > 0 {
-		position := positions[0]
-		positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
-		positionAmtFloatAbs := positionAmtFloat
-		if positionAmtFloat < 0 {
-			positionAmtFloatAbs = -positionAmtFloat
+		EntryPrice: 68000.0,
+		MarkPrice: 72000.0,
+		Amount: -0.02,
+		UnrealizedProfit: 100.2,
+		Leverage: 3,
+		Side: "SHORT",
+		Mock: true,
+	}
+	positions, _ := feature.GetTransformPositions()
+	for _, position := range positions {
+		positionAmtFloat, _ := strconv.ParseFloat(position.Amount, 64)
+		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
+		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
+			continue
 		}
-		unRealizedProfit, _ := strconv.ParseFloat(position.UnRealizedProfit, 64)
-		leverage_float64, _ := strconv.ParseFloat(position.Leverage, 64)
-		entryPrice_float64, _ := strconv.ParseFloat(position.EntryPrice, 64)
-		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
-		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
-		env["ROI"] = nowProfit
-		env["Position"] = types.FuturesPositionCode{
-			Symbol: symbols.Symbol,
-			EntryPrice: entryPrice_float64,
-			MarkPrice: markPrice_float64,
-			Amount:positionAmtFloat,
-			UnrealizedProfit: unRealizedProfit,
-			Leverage: int64(leverage_float64),
-			Side: position.PositionSide,
-		}
-	} else {
-		env["ROI"] = 10.2
-		env["Position"] = types.FuturesPositionCode{
-			Symbol: symbols.Symbol,
-			EntryPrice: 68000.0,
-			MarkPrice: 72000.0,
-			Amount: -0.02,
-			UnrealizedProfit: 100.2,
-			Leverage: 3,
-			Side: "SHORT",
+		if (position.Side == "LONG" && strategyConfig[0].Type == "close_long") || (position.Side == "SHORT" && strategyConfig[0].Type == "close_short") {
+			unRealizedProfit, _ := strconv.ParseFloat(position.UnrealizedProfit, 64)
+			leverage_float64 := float64(position.Leverage)
+			entryPrice_float64, _ := strconv.ParseFloat(position.EntryPrice, 64)
+			markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
+			nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
+			env["ROI"] = nowProfit
+			env["Position"] = types.FuturesPositionCode{
+				Symbol: symbols.Symbol,
+				EntryPrice: entryPrice_float64,
+				MarkPrice: markPrice_float64,
+				Amount:positionAmtFloat,
+				UnrealizedProfit: unRealizedProfit,
+				Leverage: int64(leverage_float64),
+				Side: position.Side,
+				Mock: false,
+			}
 		}
 	}
+	
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))

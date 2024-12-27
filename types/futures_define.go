@@ -21,6 +21,7 @@ type FuturesPositionCode struct {
 	EntryPrice float64 `orm:"column(entry_price)" json:"entry_price"` // 开仓价格
 	MarkPrice float64 `orm:"column(mark_price)" json:"mark_price"` // 标记价格
 	UnrealizedProfit float64 `orm:"column(unrealized_profit)" json:"unrealized_profit"` // 未实现盈亏
+	Mock bool `orm:"column(mock)" json:"mock"` // 是否是模拟持仓
 }
 
 type FuturesOrder struct {

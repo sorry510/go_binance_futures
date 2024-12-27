@@ -147,6 +147,7 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 		UnrealizedProfit: 100.2,
 		Leverage: 3,
 		Side: "SHORT",
+		Mock: true,
 	}
 	if result.ID != 0 {
 		// 如果查到了为平仓的测试数据，就加载仓位信息
@@ -166,6 +167,7 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 			UnrealizedProfit: unRealizedProfit,
 			Leverage: result.Leverage,
 			Side: result.PositionSide,
+			Mock: false,
 		}
 	}
 	

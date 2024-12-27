@@ -57,8 +57,7 @@ func StartTrade(systemConfig models.Config) {
 	
 	
 	/************************************************获取账户信息 start******************************************************************* */
-	positions, err := getTransformPositions()
-	// positions, err := binance.GetPosition(binance.PositionParams{})
+	positions, err := GetTransformPositions()
 	if err != nil {
 		logs.Info("Sleep 30s for limit")
 		time.Sleep(30 * time.Second)
@@ -820,7 +819,7 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 }
 
 // 转换为统一格式的 positions
-func getTransformPositions() (usePositions []types.FuturesPosition, err error) {
+func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
 	if wsFuturesUserData == "1" {
 		var positions []models.FuturesPosition
 		o := orm.NewOrm()

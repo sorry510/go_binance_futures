@@ -126,6 +126,7 @@ func (ctrl *StrategyTemplateController) TestStrategyRule() {
 		UnrealizedProfit: 100.2,
 		Leverage: 3,
 		Side: "SHORT",
+		Mock: true,
 	}
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
