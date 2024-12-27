@@ -284,14 +284,15 @@ NowSymbolHigh = 2840.3
 > string -> float: float(Position.xxx)
 
 ```
-ORI = 10.2
-Position.EntryPrice = "2500.2"
-Position.MarkPrice = "2400.2"
-Position.PositionAmt = "100.2" 
-Position.UnRealizedProfit = "32.2"
-Position.Leverage = "3"
-Position.PositionSide = "LONG"
-Position.MarginType = "CROSS"
+ORI = 10.2 // profit %
+Position.Symbol = "ETHUSDT"
+Position.EntryPrice = 2500.2 
+Position.MarkPrice = 2400.2
+Position.Amount = 1.2
+Position.UnrealizedProfit = 32.2 
+Position.Leverage = 3
+Position.Side = "LONG"
+Position.Mock = false // is mock data
 ```
 
 ##### basic trend(change percent)
