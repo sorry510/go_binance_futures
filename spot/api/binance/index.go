@@ -112,6 +112,7 @@ func SellLimit(symbol string, quantity float64, price float64) (res *binance.Cre
 		Symbol(symbol).
         Side(binance.SideTypeSell).
 		Type(binance.OrderTypeLimit).
+		TimeInForce(binance.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Price(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
