@@ -143,7 +143,7 @@ func main() {
 		// feature.GoTestParse()
 		// feature.GoTestListen()
 		// feature.GoTestLine()
-		// feature.CheckTestResults()
+		// feature.CheckTestResults(SystemConfig)
 		// command.ExecSqlFile("./command/sql/test_strategy_results.sql")
 		// web
 		web.Run(":" + webPort)
