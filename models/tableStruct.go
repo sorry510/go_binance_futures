@@ -8,7 +8,7 @@ type Config struct {
 	DeliveryEnable int `orm:"column(delivery_enable)" json:"delivery_enable"`
 	FuturesPositionConvertEnable int `orm:"column(futures_position_convert_enable)" json:"futures_position_convert_enable"` // 合约持仓正负转换通知
 	FutureBuyTimeout int `orm:"column(future_buy_timeout)" json:"future_buy_timeout"`
-	FutureExcludeSymbols string `orm:"column(future_exclude_symbols)" json:"future_exclude_symbols"`
+	FutureExcludeSymbols string `orm:"column(future_exclude_symbols);type(text)" json:"future_exclude_symbols"`
 	FutureMaxCount int `orm:"column(future_max_count)" json:"future_max_count"`
 	FutureOrderType string `orm:"column(future_order_type)" json:"future_order_type"`
 	FutureAllowLong int `orm:"column(future_allow_long)" json:"future_allow_long"`
@@ -72,8 +72,8 @@ type Symbols struct {
 	Profit string `orm:"column(profit)" json:"profit"` // 盈利率
 	Loss string `orm:"column(loss)" json:"loss"` // 损失率
 	KlineInterval string `orm:"column(kline_interval)" json:"kline_interval"` // 选定的k线周期 (废弃)
-	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置 json
-	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
+	Technology string `orm:"column(technology);type(text)" json:"technology"` // 技术指标配置 json
+	Strategy string `orm:"column(strategy);type(text)" json:"strategy"` // 策略 json
 	StrategyType string `orm:"column(strategy_type)" json:"strategy_type"` // 策略类型 // global, line_x, custom
 	Pin int64 `orm:"column(pin)" json:"pin"` // 置顶
 	Sort int64 `orm:"column(sort)" json:"sort"` // 排序
@@ -132,8 +132,8 @@ type ListenSymbols struct {
 	LastNoticeTime int64 `orm:"column(last_notice_time)" json:"last_notice_time"` // 上一次通知的时间
 	LastNoticeType string `orm:"column(last_notice_type)" json:"last_notice_type"` // 上一次通知的类型(up/down)
 	NoticeLimitMin int64 `orm:"column(notice_limit_min)" json:"notice_limit_min"` // 通知频率限制(分钟)
-	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置 json
-	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
+	Technology string `orm:"column(technology);type(text)" json:"technology"` // 技术指标配置 json
+	Strategy string `orm:"column(strategy);type(text)" json:"strategy"` // 策略 json
 	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
@@ -188,8 +188,8 @@ type EatRateSymbols struct {
 type StrategyTemplates struct {
 	ID int64 `orm:"column(id)" json:"id"`
 	Name string `orm:"column(name)" json:"name"`
-	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置 json
-	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
+	Technology string `orm:"column(technology);type(text)" json:"technology"` // 技术指标配置 json
+	Strategy string `orm:"column(strategy);type(text)" json:"strategy"` // 策略 json
 	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
@@ -206,10 +206,10 @@ type TestStrategyResults struct {
 	Loss string `orm:"column(loss)" json:"loss"` // 损失率
 	PositionAmt string `orm:"column(position_amt)" json:"position_amt"` // 买入的数量, 做多为正, 做空为负
 	PositionSide string `orm:"column(position_side)" json:"position_side"` // LONG, SHORT
-	Technology string `orm:"column(technology)" json:"technology"` // 技术指标配置 json
-	Strategy string `orm:"column(strategy)" json:"strategy"` // 策略 json
-	OpenStrategy string `orm:"column(open_strategy)" json:"open_strategy"` // 开仓策略
-	CloseStrategy string `orm:"column(close_strategy)" json:"close_strategy"` // 平仓策略
+	Technology string `orm:"column(technology);type(text)" json:"technology"` // 技术指标配置 json
+	Strategy string `orm:"column(strategy);type(text)" json:"strategy"` // 策略 json
+	OpenStrategy string `orm:"column(open_strategy);type(text)" json:"open_strategy"` // 开仓策略
+	CloseStrategy string `orm:"column(close_strategy);type(text)" json:"close_strategy"` // 平仓策略
 	ClosePrice string `orm:"column(close_price)" json:"close_price"` // 触发平仓策略时通知价格
 	CloseProfit string `orm:"column(close_profit)" json:"close_profit"` // 触发平仓策略时收益 usdt
 	CreateTime int64 `orm:"column(createTime)" json:"createTime"`

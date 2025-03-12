@@ -7,7 +7,9 @@ require github.com/beego/beego/v2 v2.1.0
 require (
 	github.com/adshao/go-binance/v2 v2.6.1
 	github.com/expr-lang/expr v1.16.9
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/lib/pq v1.10.5
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/smartystreets/goconvey v1.6.4
 )

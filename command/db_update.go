@@ -33,6 +33,15 @@ func createStrategyTemplates() error {
 	return err
 }
 
+func ExecSqlFile(filepath string) error {
+	// filepath := "./command/sql/strategy_templates.sql"
+	err := readAndExecuteSQLFile(filepath)
+	if err != nil {
+		logs.Error("init strategy_templates table error:", err)
+	}
+	return err
+}
+
 func readAndExecuteSQLFile(filePath string) error {
 	file, err := os.Open(filePath)
 	if err != nil {
