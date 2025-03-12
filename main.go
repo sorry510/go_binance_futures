@@ -18,6 +18,8 @@ import (
 	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -25,7 +27,13 @@ var dbVersion int64 = 6 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
+var driver, _ = config.String("database::driver")
 var dbPath, _ = config.String("database::path")
+var username, _ = config.String("database::username")
+var password, _ = config.String("database::password")
+var host, _ = config.String("database::host")
+var port, _ = config.String("database::port")
+var dbname, _ = config.String("database::dbname")
 var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var SystemConfig models.Config
 
@@ -37,6 +45,24 @@ func init() {
 	
 	registerModels() // 注册模型
 	registerMiddlewares() // 添加中间件
+}
+
+func setDriver(d string)  {
+	logs.Info("use database driver:", d)
+	switch d {
+		case "sqlite":
+			orm.RegisterDriver(d, orm.DRSqlite)
+			orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
+		case "mysql":
+			orm.RegisterDriver(d, orm.DRMySQL)
+			orm.RegisterDataBase("default", "mysql", username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?charset=utf8")
+		case "postgres":
+			orm.RegisterDriver(d, orm.DRPostgres)
+			orm.RegisterDataBase("default", "postgres", "user=" + username + " password=" + password + " host=" + host + " port=" + port + " dbname=" + dbname + " sslmode=disable")
+		default:
+			orm.RegisterDriver(d, orm.DRSqlite)
+			orm.RegisterDataBase("default", "sqlite3", dbPath)
+	}
 }
 
 func registerModels() {
@@ -56,8 +82,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.FuturesPosition))
 	orm.RegisterModel(new(models.FuturesOrder))
 	
-	orm.RegisterDriver("sqlite3", orm.DRSqlite)
-	orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
+	setDriver(driver) // 设置数据库驱动
 	syncDb() // 同步数据库
 }
 
@@ -119,6 +144,7 @@ func main() {
 		// feature.GoTestListen()
 		// feature.GoTestLine()
 		// feature.CheckTestResults()
+		// command.ExecSqlFile("./command/sql/test_strategy_results.sql")
 		// web
 		web.Run(":" + webPort)
 	}
