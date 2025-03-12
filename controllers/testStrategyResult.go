@@ -93,7 +93,7 @@ func (ctrl *TestStrategyResultController) Get() {
 func (ctrl *TestStrategyResultController) Delete() {
 	id := ctrl.Ctx.Input.Param(":id")
 	o := orm.NewOrm()
-	_, err := o.Raw("DELETE FROM \"test_strategy_results\" where id = ?", id).Exec()
+	_, err := o.Raw("DELETE FROM test_strategy_results where id = ?", id).Exec()
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
@@ -103,7 +103,7 @@ func (ctrl *TestStrategyResultController) Delete() {
 
 func (ctrl *TestStrategyResultController) DeleteAll() {
 	o := orm.NewOrm()
-	_, err := o.Raw("DELETE FROM \"test_strategy_results\" where 1=1").Exec()
+	_, err := o.Raw("DELETE FROM test_strategy_results where 1=1").Exec()
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
