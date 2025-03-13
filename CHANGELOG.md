@@ -1,5 +1,8 @@
 ### Change Log
 
+## v0.0.67
+- 适配 mysql 修复 bug
+
 ## v0.0.66
 - 修复一些 bug
 

@@ -3,6 +3,7 @@ package command
 import (
 	"bufio"
 	"fmt"
+	"go_binance_futures/utils"
 	"os"
 	"strings"
 
@@ -60,7 +61,7 @@ func readAndExecuteSQLFile(filePath string) error {
 		if line == "" || strings.HasPrefix(line, "--") {
 			continue // 跳过空行和注释
 		}
-		sqlStatements = append(sqlStatements, line)
+		sqlStatements = append(sqlStatements, utils.EscapeJSON(line))
 	}
 
 	if err := scanner.Err(); err != nil {

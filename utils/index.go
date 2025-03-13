@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/beego/beego/v2/core/config"
 )
+
+var driver, _ = config.String("database::driver")
 
 func ResJson(code int, data map[string]interface{}, msg ...string) interface{} {
 	var message string
@@ -108,4 +112,11 @@ func ReverseArray(arr []float64) []float64 {
 
 func Intervals() []string {
 	return []string{"1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w", "1M"}
+}
+
+func EscapeJSON(jsonStr string) string {
+	if driver == "mysql" {
+		return strings.ReplaceAll(jsonStr, "\\n", "\\\\n")
+	}
+	return jsonStr
 }
