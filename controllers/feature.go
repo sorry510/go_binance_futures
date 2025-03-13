@@ -192,36 +192,45 @@ func (ctrl *FeatureController) BatchEdit() {
 	params := new(BatchEditParams)
 	ctrl.BindJSON(&params)
 	query := "UPDATE symbols SET"
+	bindData := []interface{}{}
 	
 	if params.Usdt != "" {
-		query += " usdt = " + params.Usdt + ","
+		query += " usdt = ?,"
+		bindData = append(bindData, params.Usdt)
 	}
 	if (params.Profit != "") {
-		query += " profit = " + params.Profit + ","	
+		query += " profit = ?,"
+		bindData = append(bindData, params.Profit)
 	}
 	if (params.Loss != "") {
-		query += " loss = " + params.Loss + ","
+		query += " loss = ?,"
+		bindData = append(bindData, params.Loss)
 	}
 	if (params.Leverage != "") {
-		query += " leverage = " + params.Leverage + ","
+		query += " leverage = ?,"
+		bindData = append(bindData, params.Leverage)
 	}
 	if (params.MarginType != "") {
-		query += " marginType = '" + params.MarginType + "',"
+		query += " marginType = ?,"
+		bindData = append(bindData, params.MarginType)
 	}
 	if (params.StrategyType != "") {
-		query += " strategy_type = '" + params.StrategyType + "',"
+		query += " strategy_type = ?,"
+		bindData = append(bindData, params.StrategyType)
 	}
 	if (params.StrategyTemplateId != 0) {
 		var template models.StrategyTemplates
 		orm.NewOrm().QueryTable("strategy_templates").Filter("Id", params.StrategyTemplateId).One(&template)
-		query += " technology = '" + template.Technology + "',"
-		query += " strategy = '" + template.Strategy + "',"
+		query += " technology = ?,"
+		bindData = append(bindData, template.Technology)
+		query += " strategy = ?,"
+		bindData = append(bindData, template.Strategy)
 	}
 	
 	if strings.HasSuffix(query, ",") {
 		query = strings.TrimSuffix(query, ",")
 		// query += " WHERE enable = 1" // 只更新开启的交易对
-		_, err := orm.NewOrm().Raw(query).Exec()
+		_, err := orm.NewOrm().Raw(query, bindData...).Exec()
 		if err != nil {
 			// 处理错误
 			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
