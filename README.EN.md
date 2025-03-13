@@ -174,6 +174,29 @@ links = [{"url": "url1", "title": "title1"}]
 cp conf/app.conf.example conf/app.conf
 ```
 
+#### database config
+
+##### use sqlite
+
+- app.conf
+```
+[database]
+driver = "sqlite"
+path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
+```
+
+##### use mysql
+
+```
+[database]
+driver = "mysql"
+username = ""
+password = ""
+host= ""
+port= ""
+dbname = ""
+```
+
 ### how to run
 > !!!Please note that after modifying the `app.conf` configuration, the program must be restarted, otherwise the configuration will not take effect!!!
 
