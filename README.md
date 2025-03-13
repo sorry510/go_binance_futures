@@ -116,6 +116,29 @@
 cp conf/app.conf.example conf/app.conf
 ```
 
+#### 数据库配置
+
+##### 使用 sqlite
+
+- app.conf
+```
+[database]
+driver = "sqlite"
+path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
+```
+
+##### 使用 mysql (需要自行安装 mysql，性能更好)
+
+```
+[database]
+driver = "mysql"
+username = ""
+password = ""
+host= ""
+port= ""
+dbname = ""
+```
+
 ### 程序运行
 > !!!注意修改app.conf配置后必须重新启动程序，否则配置不会生效!!!
 

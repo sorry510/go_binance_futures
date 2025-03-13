@@ -13,8 +13,8 @@ proxy_url = "http://127.0.0.1:7890"
 
 [database]
 # sqlite, mysql
-# driver = "sqlite"
-# path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
+driver = "sqlite"
+path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
 
 # mysql
 # driver = "mysql"
