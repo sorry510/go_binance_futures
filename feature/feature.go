@@ -618,7 +618,7 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []types
 		res, err := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderId)
 		if err == nil {
 			// 删除对应订单
-			orm.NewOrm().Raw("DELETE FROM order where order_id = '" + strconv.FormatInt(buyOrder.OrderId, 10) + "'").Exec()
+			orm.NewOrm().Raw("DELETE FROM `order` where order_id = '" + strconv.FormatInt(buyOrder.OrderId, 10) + "'").Exec()
 		}
 		logs.Info("response:", res)
 	}
