@@ -377,7 +377,7 @@ func StartTrade(systemConfig models.Config) {
 	
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
 	// 当前亏损的数量过多时，停止开仓
-	if lossCount > 10 {
+	if lossCount >= systemConfig.LossMaxCount {
 		logs.Info("the loss count is %d, stop open new order", lossCount)
 		return
 	}
