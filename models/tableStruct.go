@@ -25,6 +25,7 @@ type Config struct {
 	WsFuturesEnable int `orm:"column(ws_futures_enable)" json:"ws_futures_enable"`
 	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
+	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值
 }
 
 // 切记需要注册model后才能使用

@@ -82,6 +82,7 @@ func StartTrade(systemConfig models.Config) {
 	
 	/*************************************************平仓(止盈或止损)已经有持仓的币(排除手动交易白名单) start************************************************************ */
 	positionCount := 0 // 当前仓位数量
+	lossCount := 0 // 亏损的仓位数量
 	for _, position := range positions {
 		// 在白名单内, 不参与自动平仓交易
 		if _, exist := exclude_symbols_map[position.Symbol]; exist {
@@ -120,6 +121,10 @@ func StartTrade(systemConfig models.Config) {
 		leverage_float64 := float64(position.Leverage)
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
+		
+		if nowProfit < -0.5 {
+			lossCount += 1
+		}
 		
 		closeResult := coin_line_strategy.AutoStopOrder(strategy.CloseParams{
 			Symbols: findCoin,
@@ -371,6 +376,11 @@ func StartTrade(systemConfig models.Config) {
 	
 	
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
+	// 当前亏损的数量过多时，停止开仓
+	if lossCount > 10 {
+		logs.Info("the loss count is %d, stop open new order", lossCount)
+		return
+	}
 	if systemConfig.FutureAllowLong != 1 && systemConfig.FutureAllowShort != 1 {
 		logs.Info("the base config don't allow long and allow short")
 		return

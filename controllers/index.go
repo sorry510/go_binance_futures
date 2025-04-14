@@ -43,6 +43,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 	
 	var listenCoinEnable = systemConfig.ListenCoinEnable
 	var listenFundingRate = systemConfig.ListenFundingRateEnable
+	var lossMaxCount = systemConfig.LossMaxCount
 	var externalLinks, _ = config.String("external::links")
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -76,6 +77,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			
 			"listenCoinEnable": listenCoinEnable,
 			"listenFundingRate": listenFundingRate,
+			"lossMaxCount": lossMaxCount,
 			
 			"externalLinks": externalLinks,
 		},
