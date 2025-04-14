@@ -367,25 +367,26 @@ func StartTrade(systemConfig models.Config) {
 	/*************************************************平仓 end************************************************************ */
 	
 	/*************************************************检查当前仓位数量 start************************************************************ */
+	// 当前亏损的数量过多时，停止开仓
+	if lossCount >= systemConfig.LossMaxCount {
+		logs.Info("the loss count is %d, is over max %d, stop open new order", lossCount, systemConfig.LossMaxCount)
+		return
+	}
+	
 	allMyCount := positionCount + len(allOpenOrders)
 	if allMyCount >= systemConfig.FutureMaxCount {
 		logs.Info("position+open order: %d, is over max %d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
+		return
+	}
+	
+	if systemConfig.FutureAllowLong != 1 && systemConfig.FutureAllowShort != 1 {
+		logs.Info("the base config don't allow long and allow short")
 		return
 	}
 	/*************************************************检查当前仓位数量  end************************************************************ */
 	
 	
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
-	// 当前亏损的数量过多时，停止开仓
-	if lossCount >= systemConfig.LossMaxCount {
-		logs.Info("the loss count is %d, stop open new order", lossCount)
-		return
-	}
-	if systemConfig.FutureAllowLong != 1 && systemConfig.FutureAllowShort != 1 {
-		logs.Info("the base config don't allow long and allow short")
-		return
-	}
-	
 	isOpen := false
 	
 	for _, coin := range coins {
