@@ -184,6 +184,8 @@ func CheckTestResults(systemConfig models.Config) {
 		position := types.FuturesPosition{
 			MarkPrice: strconv.FormatFloat(floatNowPrice, 'f', -1, 64), // 当前标记价格
 			UnrealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64), // 未实现盈亏
+			CreateTime: result.CreateTime,
+			SourceType: "local",
 		}
 		
 		env["ROI"] = nowProfit // 当前收益率
@@ -196,6 +198,8 @@ func CheckTestResults(systemConfig models.Config) {
 			Leverage: result.Leverage,
 			Side: result.PositionSide,
 			Mock: false,
+			CreateTime: position.CreateTime,
+			SourceType: position.SourceType,
 		}
 		for _, strategy := range strategyConfig {
 			if strategy.Enable && (strategy.Type == "close_long" || strategy.Type == "close_short") {

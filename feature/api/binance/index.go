@@ -79,6 +79,19 @@ func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, er
 	return res, err
 }
 
+func GetPositionV3(positionParams PositionParams) (res []*futures.PositionRiskV3, err error){
+	query := futuresClient.NewGetPositionRiskV3Service()
+	if (positionParams.Symbol != "") {
+		query = query.Symbol(positionParams.Symbol)
+	}
+	res, err = query.Do(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	// logs.Info(utils.ToJson(res))
+	return res, err
+}
+
 type IncomeParams struct {
 	Symbol     string
 	IncomeType string

@@ -275,6 +275,8 @@ func (ctrl *FeatureController) TestStrategyRule() {
 		Leverage: 3,
 		Side: "SHORT",
 		Mock: true,
+		CreateTime: 1234567890000,
+		SourceType: "api",
 	}
 	positions, _ := feature.GetTransformPositions()
 	for _, position := range positions {
@@ -302,6 +304,8 @@ func (ctrl *FeatureController) TestStrategyRule() {
 				Leverage: int64(leverage_float64),
 				Side: position.Side,
 				Mock: false,
+				CreateTime: position.CreateTime,
+				SourceType: position.SourceType,
 			}
 		}
 	}

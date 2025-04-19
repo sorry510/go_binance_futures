@@ -862,6 +862,8 @@ func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
 				EntryPrice: position.EntryPrice,
 				MarkPrice: position.MarkPrice,
 				UnrealizedProfit: position.UnrealizedProfit,
+				SourceType: "local",
+				CreateTime: position.CreateTime,
 			})
 		}
 	} else {
@@ -890,6 +892,8 @@ func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
 				EntryPrice: position.EntryPrice,
 				MarkPrice: position.MarkPrice,
 				UnrealizedProfit: position.UnRealizedProfit,
+				SourceType: "api",
+				CreateTime: 0,
 			})
 		}
 	}
