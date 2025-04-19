@@ -148,6 +148,8 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 		Leverage: 3,
 		Side: "SHORT",
 		Mock: true,
+		CreateTime: 1234567890000,
+		SourceType: "local",
 	}
 	if result.ID != 0 {
 		// 如果查到了为平仓的测试数据，就加载仓位信息
@@ -168,6 +170,8 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 			Leverage: result.Leverage,
 			Side: result.PositionSide,
 			Mock: false,
+			CreateTime: result.CreateTime,
+			SourceType: "local",
 		}
 	}
 	

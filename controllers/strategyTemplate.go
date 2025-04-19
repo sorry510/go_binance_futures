@@ -127,6 +127,8 @@ func (ctrl *StrategyTemplateController) TestStrategyRule() {
 		Leverage: 3,
 		Side: "SHORT",
 		Mock: true,
+		CreateTime: 1234567890000,
+		SourceType: "api",
 	}
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {

@@ -10,6 +10,8 @@ type FuturesPosition struct {
 	EntryPrice string `orm:"column(entry_price)" json:"entry_price"` // 开仓价格
 	MarkPrice string `orm:"column(mark_price)" json:"mark_price"` // 标记价格
 	UnrealizedProfit string `orm:"column(unrealized_profit)" json:"unrealized_profit"` // 未实现盈亏
+	SourceType string `orm:"column(source_type)" json:"source_type"` // 数据来源, 0:api, 1:local
+	CreateTime int64 `orm:"column(create_time)" json:"create_time"` // 创建时间
 }
 
 // 自定义策略中的持仓信息
@@ -22,6 +24,8 @@ type FuturesPositionCode struct {
 	MarkPrice float64 `orm:"column(mark_price)" json:"mark_price"` // 标记价格
 	UnrealizedProfit float64 `orm:"column(unrealized_profit)" json:"unrealized_profit"` // 未实现盈亏
 	Mock bool `orm:"column(mock)" json:"mock"` // 是否是模拟持仓
+	CreateTime int64 `orm:"column(create_time)" json:"create_time"` // 创建时间
+	SourceType string `orm:"column(source_type)" json:"source_type"` // 数据来源, 0:api, 1:local
 }
 
 type FuturesOrder struct {
