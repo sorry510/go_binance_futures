@@ -625,7 +625,7 @@ func WsUserData() {
 		}
 	}, func(err error) {
 		logs.Error("futures_user_data ws run error:", err)
-		time.Sleep(time.Second * 30) // 30 秒间隔
+		time.Sleep(time.Second * 3) // 3 秒间隔
 		WsUserData()
 	})
 	go func() {
