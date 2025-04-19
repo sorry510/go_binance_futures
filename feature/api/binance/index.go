@@ -550,7 +550,7 @@ func WsUserData() {
 		logs.Error("GetListenKey:", err.Error())
 		return
 	}
-	logs.Info("futures_user_data ws start: auto update symbols price")
+	logs.Info("futures_user_data ws start: auto update db futures position")
 	o := orm.NewOrm()
 	doneC, _, err := futures.WsUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
 		if (event.Event == "ACCOUNT_UPDATE") {
