@@ -290,6 +290,8 @@ Position.UnrealizedProfit = 32.2 // 当前收益 usdt, 亏损是负数
 Position.Leverage = 3 // 杠杆
 Position.Side = "LONG" // 合约方向
 Position.Mock = false // 是否是 mock 的数据
+Position.CreateTime = 1745070856000 // 毫秒时间戳
+Position.SourceType = "local" or "api" // 数据来源，只有 local 才有 CreateTime
 ```
 
 ##### 基本趋势涨跌幅

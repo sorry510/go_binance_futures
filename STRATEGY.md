@@ -293,6 +293,8 @@ Position.UnrealizedProfit = 32.2
 Position.Leverage = 3
 Position.Side = "LONG"
 Position.Mock = false // is mock data
+Position.CreateTime = 1745070856000 // times
+Position.SourceType = "local" or "api" // only local has CreateTime
 ```
 
 ##### basic trend(change percent)
