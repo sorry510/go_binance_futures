@@ -1,5 +1,9 @@
 ### Change Log
 
+## v0.0.72
+- 修复 bug
+- adshao/go-binance/v2 v2.8.2 版本有问题，ws 稳定断线，暂时降级到v2.6.2
+
 ## v0.0.71
 - 更新依赖和自定义策略的 position
 
