@@ -122,7 +122,7 @@ func StartTrade(systemConfig models.Config) {
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		
-		if nowProfit < -0.5 {
+		if nowProfit < -0.2 {
 			lossCount += 1
 		}
 		
@@ -375,7 +375,7 @@ func StartTrade(systemConfig models.Config) {
 	
 	allMyCount := positionCount + len(allOpenOrders)
 	if allMyCount >= systemConfig.FutureMaxCount {
-		logs.Info("position+open order: %d, is over max %d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
+		logs.Info("position + open order: %d, is over max %d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
 		return
 	}
 	
