@@ -158,6 +158,12 @@ func CheckTestResults(systemConfig models.Config) {
 		logs.Error("get test_strategy_results error:", err.Error())
 		return
 	}
+	allCoins, err := GetAllSymbols()
+	if err != nil {
+		logs.Error("GetAllSymbols err:", err)
+		return
+	}
+	
 	for _, result := range results {
 		var strategyConfig technology.StrategyConfig
 		err := json.Unmarshal([]byte(result.Strategy), &strategyConfig)
@@ -180,6 +186,25 @@ func CheckTestResults(systemConfig models.Config) {
 		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
 		
+		// 计算当前收益率
+		coin_profit_float64 := 5.0
+		coin_loss_float64 := 5.0
+		for _, coin := range allCoins {
+			if coin.Symbol == result.Symbol {
+				// 自定义可以覆盖全局
+				if coin.Profit != "0" {
+					coin_profit_float64, _ = strconv.ParseFloat(coin.Profit, 64)
+				}
+				if coin.Loss != "0" {
+					coin_loss_float64, _ = strconv.ParseFloat(coin.Loss, 64)
+				}
+				break
+			}
+		}
+		if nowProfit > -coin_loss_float64 && nowProfit < coin_profit_float64 {
+			continue // 盈亏在范围内，不平仓
+		}
+		
 		// 模拟仓位信息
 		position := types.FuturesPosition{
 			MarkPrice: strconv.FormatFloat(floatNowPrice, 'f', -1, 64), // 当前标记价格
@@ -201,6 +226,7 @@ func CheckTestResults(systemConfig models.Config) {
 			CreateTime: position.CreateTime,
 			SourceType: position.SourceType,
 		}
+			
 		for _, strategy := range strategyConfig {
 			if strategy.Enable && (strategy.Type == "close_long" || strategy.Type == "close_short") {
 				if strategy.Type == "close_long" && result.PositionSide != "LONG" {
