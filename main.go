@@ -145,6 +145,7 @@ func main() {
 		// feature.GoTestLine()
 		// feature.CheckTestResults(SystemConfig)
 		// command.ExecSqlFile("./command/sql/test_strategy_results.sql")
+		// feature.AutoLossScale(SystemConfig, true)
 		// web
 		web.Run(":" + webPort)
 	}

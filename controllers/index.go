@@ -78,6 +78,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"listenCoinEnable": listenCoinEnable,
 			"listenFundingRate": listenFundingRate,
 			"lossMaxCount": lossMaxCount,
+			"lossAutoScale": systemConfig.LossAutoScale,
 			
 			"externalLinks": externalLinks,
 		},
