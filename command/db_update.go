@@ -18,7 +18,7 @@ func InitData(version int64) error {
 }
 
 func createConfig(version int64) error {
-	_, err := orm.NewOrm().Raw("INSERT INTO config (version,future_enable,future_buy_timeout,future_exclude_symbols,future_max_count,future_order_type,future_allow_long,future_allow_short,future_strategy_trade,future_strategy_coin,future_new_enable,spot_new_enable,notice_coin_enable,listen_coin_enable,listen_funding_rate_enable,future_test,future_test_notice_limit_min,spot_enable,delivery_enable,ws_futures_enable,ws_spot_enable,ws_delivery_enable,futures_position_convert_enable,loss_max_count) VALUES (?, '0','300','BTCUSDT','10','MARKET','1','1','line3','coin6','0','0','0','0','1',0,65,0,0,1,0,0,0,1000);", version).Exec()
+	_, err := orm.NewOrm().Raw("INSERT INTO config (version,future_enable,future_buy_timeout,future_exclude_symbols,future_max_count,future_order_type,future_allow_long,future_allow_short,future_strategy_trade,future_strategy_coin,future_new_enable,spot_new_enable,notice_coin_enable,listen_coin_enable,listen_funding_rate_enable,future_test,future_test_notice_limit_min,spot_enable,delivery_enable,ws_futures_enable,ws_spot_enable,ws_delivery_enable,futures_position_convert_enable,loss_max_count,loss_auto_scale) VALUES (?, '0','300','BTCUSDT','10','MARKET','1','1','line3','coin6','0','0','0','0','1',0,65,0,0,1,0,0,0,10,0);", version).Exec()
 	if err != nil {
 		logs.Error("init config table error:", err)
 	}

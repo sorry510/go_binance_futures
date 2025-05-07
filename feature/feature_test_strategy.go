@@ -41,6 +41,12 @@ func NoticeAllSymbolByStrategy(systemConfig models.Config) {
 		return
 	}
 	
+	// TODO: 这里可以添加一个最大亏损次数的限制
+	// if lossCount >= systemConfig.LossMaxCount {
+	// 	logs.Info("the loss count is %d, is over max %d, stop open new order", lossCount, systemConfig.LossMaxCount)
+	// 	return
+	// }
+	
 	logs.Info("offsetId: ", offsetId)
 	var coins []*models.Symbols
 	limit := 6 // 不设置太大，如果开仓太多，加上这里会导致接口请求超过限制
@@ -273,6 +279,7 @@ func CheckTestResults(systemConfig models.Config) {
 						StrategyName: strategy.Name,
 						Remarks: strategy.Code,
 					})
+					// AutoLossScale(systemConfig, unRealizedProfit >= 0)
 					return
 				}
 			}
@@ -284,6 +291,7 @@ func CheckTestResults(systemConfig models.Config) {
 			result.UpdateTime = time.Now().Unix() * 1000
 			orm.NewOrm().Update(result)
 			// 平仓通知
+			// AutoLossScale(systemConfig, unRealizedProfit >= 0)
 			
 			quantity, _ := strconv.ParseFloat(result.PositionAmt, 64)
 			profitUsdt, _ := strconv.ParseFloat(result.CloseProfit, 64)

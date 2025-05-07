@@ -26,6 +26,7 @@ type Config struct {
 	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值
+	LossAutoScale int `orm:"column(loss_auto_scale)" json:"loss_auto_scale"` // 是否自动缩放 loss_max_count
 }
 
 // 切记需要注册model后才能使用

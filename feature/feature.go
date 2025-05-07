@@ -122,7 +122,7 @@ func StartTrade(systemConfig models.Config) {
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
 		
-		if nowProfit < -0.2 {
+		if nowProfit < -0.1 {
 			lossCount += 1
 		}
 		
@@ -137,7 +137,7 @@ func StartTrade(systemConfig models.Config) {
 				order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
 					// 数据库写入订单
-					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
 					
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -171,7 +171,7 @@ func StartTrade(systemConfig models.Config) {
 				order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
-					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
+					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
 					
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -216,7 +216,7 @@ func StartTrade(systemConfig models.Config) {
 					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
 						
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -250,7 +250,7 @@ func StartTrade(systemConfig models.Config) {
 					order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
 						
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -294,7 +294,7 @@ func StartTrade(systemConfig models.Config) {
 					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
 						
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -328,7 +328,7 @@ func StartTrade(systemConfig models.Config) {
 					order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID)
+						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
 						
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.FuturesCloseOrder(notify.FuturesOrderParams{
@@ -651,7 +651,7 @@ func insertOpenOrder(symbol string, quantity float64, avg_price string, position
 	o.Insert(order)
 }
 
-func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64) {
+func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64, systemConfig models.Config) {
 	// 数据库写入订单
 	order := new(models.Order)
 	order.Symbol = position.Symbol
@@ -666,6 +666,9 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 	
 	o := orm.NewOrm()
 	o.Insert(order)
+	
+	// 自动缩放
+	AutoLossScale(systemConfig, unRealizedProfit >= 0)
 }
 
 // 更新币种的交易精度和插入新币
@@ -951,4 +954,30 @@ func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
 		}
 	}
 	return useOrders, err
+}
+
+var orderCount = 0 // 计数器, 当连续平仓盈利 3次(或亏损3次)后,增大(缩小)窗口
+func AutoLossScale(systemConfig models.Config, flag bool) {
+	if (systemConfig.LossAutoScale == 0) {
+		return
+	}
+	if flag {
+		orderCount += 1
+	} else {
+		orderCount -= 1
+	}
+	if orderCount >= 3 {
+		orderCount = 0
+		// 增加窗口
+		orm.NewOrm().QueryTable("config").Filter("id", systemConfig.ID).Update(orm.Params{
+			"loss_max_count": systemConfig.LossMaxCount + 1,
+		})
+	}
+	if orderCount <= -3 {
+		orderCount = 0
+		// 减小窗口
+		orm.NewOrm().QueryTable("config").Filter("id", systemConfig.ID).Update(orm.Params{
+			"loss_max_count": systemConfig.LossMaxCount - 1,
+		})
+	}
 }

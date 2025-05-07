@@ -41,30 +41,46 @@ func (ctrl *FeatureController) Get() {
 	enable := ctrl.GetString("enable")
 	margin_type := ctrl.GetString("margin_type")
 	pin := ctrl.GetString("pin")
+	paramsPage := ctrl.GetString("page", "1")
+	paramsLimit := ctrl.GetString("limit", "20")
+	page, _ := strconv.Atoi(paramsPage)
+	limit, _ := strconv.Atoi(paramsLimit)
+	offset := (page - 1) * limit
 	
 	o := orm.NewOrm()
 	var symbols []models.Symbols
 	query := o.QueryTable("symbols")
+	countQuery := o.QueryTable("symbols")
 	if symbol_type != "" {
 		query = query.Filter("type", symbol_type)
+		countQuery = countQuery.Filter("type", symbol_type)
 	}
 	if symbol != "" {
 		query = query.Filter("symbol__contains", symbol)
+		countQuery = countQuery.Filter("symbol__contains", symbol)
 	}
 	if enable != "" {
 		query = query.Filter("enable", enable)
+		countQuery = countQuery.Filter("enable", enable)
 	}
 	if margin_type != "" {
 		query = query.Filter("marginType", margin_type)
+		countQuery = countQuery.Filter("marginType", margin_type)
 	}
 	if pin != "" {
 		query = query.Filter("pin", 1)
+		countQuery = countQuery.Filter("pin", 1)
 	}
-	_, err := query.OrderBy("-Pin", "ID").All(&symbols)
+	_, err := query.OrderBy("-Pin", "ID").Limit(limit, offset).All(&symbols)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+	}
+	total, err := countQuery.Count()
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 	}
 	
+	// TODO: 分页之后这里有问题
 	if strings.HasPrefix(paramsSort, "percent_change") {
 		sort.SliceStable(symbols, func(i, j int) bool {
 			base := symbols[i].Pin >= symbols[j].Pin
@@ -80,7 +96,10 @@ func (ctrl *FeatureController) Get() {
 
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
-		"data": symbols,
+		"data": map[string]interface{} {
+			"total": total,
+			"list": symbols,
+		},
 		"msg": "success",
 	})
 }
