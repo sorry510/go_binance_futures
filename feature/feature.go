@@ -975,9 +975,13 @@ func AutoLossScale(systemConfig models.Config, flag bool) {
 	}
 	if orderCount <= -3 {
 		orderCount = 0
+		newCount := systemConfig.LossMaxCount - 1
+		if newCount < 1 {
+			newCount = 1
+		}
 		// 减小窗口
 		orm.NewOrm().QueryTable("config").Filter("id", systemConfig.ID).Update(orm.Params{
-			"loss_max_count": systemConfig.LossMaxCount - 1,
+			"loss_max_count": newCount,
 		})
 	}
 }
