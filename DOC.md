@@ -22,3 +22,8 @@
 PRAGMA integrity_check; // 检查
 VACUUM; // 修复
 ```
+
+### 想法
+
+1. btc(最近1小时涨幅) 0.6 + eth 0.2 + bnb 0.1 + sol 0.1
+2. 根据 1 的值，自定义选用不同的策略，大幅度涨跌的话选用 boll1

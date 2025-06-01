@@ -148,6 +148,7 @@ func main() {
 		// feature.AutoLossScale(SystemConfig, true)
 		// web
 		web.Run(":" + webPort)
+		return
 	}
 	
 	/*******************************************更新基本信息 start****************************************************/
