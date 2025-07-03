@@ -187,8 +187,8 @@ func main() {
 		spot_api.UpdateCoinByWs(&SystemConfig, 0)
 	}()
 	go func() {
-		logs.Info("delivery websocket start: auto update symbols price")
 		return
+		logs.Info("delivery websocket start: auto update symbols price")
 		binance.UpdateDeliveryCoinByWs(&SystemConfig)
 	}()
 	

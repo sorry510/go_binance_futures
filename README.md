@@ -303,3 +303,18 @@ bee pack -be GOOS=windows
 - [ ] 当买入30min中内无明显变化时，及时平仓
 
 
+### 检查 binance 和 x 的新闻
+> https://www.binance.com/zh-CN/square/profile/xxx
+
+#### 关键词
+- 马斯克
+- 活动
+- 竞赛
+- 比赛
+
+#### binance 账号
+- [ ] binance_announcement
+- [ ] binance_news
+
+
+
