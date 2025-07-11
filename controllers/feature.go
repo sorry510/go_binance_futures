@@ -354,3 +354,24 @@ func (ctrl *FeatureController) TestStrategyRule() {
 		}
 	}
 }
+
+func (ctrl *FeatureController) GetOptions() {
+	o := orm.NewOrm()
+	var symbols []models.Symbols
+	_, err := o.QueryTable("symbols").All(&symbols)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	
+	symbolsArr := make([]string, 0, len(symbols))
+	for _, symbol := range symbols {
+		symbolsArr = append(symbolsArr, symbol.Symbol)
+	}
+	
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": symbolsArr,
+		"msg": "success",
+	})
+}
