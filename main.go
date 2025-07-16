@@ -171,7 +171,7 @@ func main() {
 		for {
 			logs.Info("update symbols trade precision and add new symbols, every 12 hours")
 			feature.UpdateSymbolsTradePrecision() // u本位
-			spot.UpdateSymbolsTradePrecision() // 现货
+			// spot.UpdateSymbolsTradePrecision() // 现货
 			// feature.UpdateDeliverySymbolsTradePrecision() // 币本位
 			time.Sleep(12 * time.Hour) // 12小时更新一次
 		}
@@ -183,6 +183,7 @@ func main() {
 		binance.UpdateCoinByWs(&SystemConfig, 0)
 	}()
 	go func() {
+		return
 		logs.Info("spot websocket start: auto update symbols price")
 		spot_api.UpdateCoinByWs(&SystemConfig, 0)
 	}()
@@ -197,7 +198,7 @@ func main() {
 	// 仓位正负转换通知
 	go func() {
 		for {
-			feature.PositionConvertNotice(SystemConfig)
+			feature.PositionConvertNotice(&SystemConfig)
 			time.Sleep(time.Second * 10) // 10秒间隔
 		}
 	}()
@@ -215,14 +216,14 @@ func main() {
 	go func() {
 		for {
 			feature.NoticeAllSymbolByStrategy(SystemConfig)
-			time.Sleep(time.Second * 1) // 1秒间隔
+			time.Sleep(time.Millisecond * 1500) // 1.5秒间隔
 		}
 	}()
 	// 监听测试的开仓是否需要平仓
 	go func() {
 		for {
 			feature.CheckTestResults(SystemConfig)
-			time.Sleep(time.Second * 1) // 1秒间隔
+			time.Sleep(time.Millisecond * 1500) // 1.5秒间隔
 		}
 	}()
 	/*******************************************测试自定义策略 end**********************************************************/
@@ -249,7 +250,7 @@ func main() {
 			spot.NoticeAndAutoOrder(SystemConfig)
 			feature.NoticeAndAutoOrder(SystemConfig)
 
-			time.Sleep(time.Second * 3) // 3 秒间隔
+			time.Sleep(time.Second * 2) // 2 秒间隔
 		}
 	}()
 	
@@ -259,7 +260,7 @@ func main() {
 			spot.ListenCoin(SystemConfig)
 			feature.ListenCoin(SystemConfig)
 
-			time.Sleep(time.Second * 3) // 3 秒间隔
+			time.Sleep(time.Second * 2) // 3 秒间隔
 		}
 	}()
 	
@@ -271,7 +272,7 @@ func main() {
 			// 监听费率报警信息
 			feature.ListenCoinFundingRate(SystemConfig)
 
-			time.Sleep(time.Second * 60) // 60 秒更新一次
+			time.Sleep(time.Second * 90) // 90 秒更新一次
 		}
 	}()
 	

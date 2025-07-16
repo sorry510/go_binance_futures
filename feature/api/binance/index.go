@@ -79,18 +79,20 @@ func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, er
 	return res, err
 }
 
-// func GetPositionV3(positionParams PositionParams) (res []*futures.PositionRiskV3, err error){
-// 	query := futuresClient.NewGetPositionRiskV3Service()
-// 	if (positionParams.Symbol != "") {
-// 		query = query.Symbol(positionParams.Symbol)
-// 	}
-// 	res, err = query.Do(context.Background())
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// logs.Info(utils.ToJson(res))
-// 	return res, err
-// }
+// @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3
+// 这个版本仅返回有持仓或挂单的交易对，但是缺少了 Leverage 字段
+func GetPositionV3(positionParams PositionParams) (res []*futures.PositionRiskV3, err error){
+	query := futuresClient.NewGetPositionRiskV3Service()
+	if (positionParams.Symbol != "") {
+		query = query.Symbol(positionParams.Symbol)
+	}
+	res, err = query.Do(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	// logs.Info(utils.ToJson(res))
+	return res, err
+}
 
 type IncomeParams struct {
 	Symbol     string
@@ -483,7 +485,6 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 	if retryNum > 0 {
 		logs.Info("futures ws restart num:", retryNum)
 	}
-	var lock = false
 	var o = orm.NewOrm()
 	// futures.WebsocketKeepalive = true
 	_, _, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
@@ -497,29 +498,27 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 				logs.Info("futures ws stop")
 				flagWsFutures = 0
 			}
-			lock = false
 			return
 		}
-		if !lock {
-			lock = true
-			for _, ticker := range event {
-				o.Raw(
-					"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
-					ticker.PriceChangePercent,
-					ticker.ClosePrice,
-					ticker.OpenPrice,
-					ticker.LowPrice,
-					ticker.HighPrice,
-					ticker.Time,
-					ticker.BaseVolume, // 成交量
-					ticker.QuoteVolume, // 成交额
-					ticker.CloseQty, // 最新成交价格上的成交量
-					ticker.TradeCount, // 成交数
-					
-					ticker.Symbol,
-				).Exec()
-			}
-			lock = false
+		for _, ticker := range event {
+			o.Raw(
+				"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
+				ticker.PriceChangePercent,
+				ticker.ClosePrice,
+				ticker.OpenPrice,
+				ticker.LowPrice,
+				ticker.HighPrice,
+				ticker.Time,
+				ticker.BaseVolume, // 成交量
+				ticker.QuoteVolume, // 成交额
+				ticker.CloseQty, // 最新成交价格上的成交量
+				ticker.TradeCount, // 成交数
+				
+				ticker.Symbol,
+			).Exec()
+			// if (ticker.Symbol == "BTCUSDT") {
+			// 	logs.Info("futures ws update symbol:", ticker.Symbol)
+			// }
 		}
 	}, func(err error) {
 		logs.Error("futures ws run error:", err)
@@ -642,5 +641,18 @@ func WsUserData() {
 		return
 	}
 	<-doneC
+}
+
+// @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams
+func WsKlineData(symbol string, interval string, callback func(kline futures.WsKline)) {
+	_, _, err := futures.WsKlineServe(symbol, interval, func(event *futures.WsKlineEvent) {
+		callback(event.Kline)
+	}, func(err error) {
+		logs.Error("futures ws kline data error:", err)
+	})
+	if err != nil {
+		logs.Error("futures ws kline data start error:", err)
+		return
+	}
 }
 
