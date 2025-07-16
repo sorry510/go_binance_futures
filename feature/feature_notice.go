@@ -183,7 +183,7 @@ type PositionNoticeInfo struct {
 
 var flagPositionConvertNotice = 0
 var positionNotices = make(map[string]PositionNoticeInfo)
-func PositionConvertNotice(systemConfig models.Config) {
+func PositionConvertNotice(systemConfig *models.Config) {
 	if (systemConfig.FuturesPositionConvertEnable == 1) {
 		if (flagPositionConvertNotice == 0) {
 			logs.Info("futures position convert notice bot start")

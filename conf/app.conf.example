@@ -26,7 +26,7 @@ path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
 
 [ws]
 # 使用 ws 管理仓位和订单，代替 http api，可有效避免 api 超限
-futures_user_data = 0
+futures_user_data = 1
 
 [web]
 # web端口

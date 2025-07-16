@@ -676,6 +676,8 @@ func UpdateSymbolsTradePrecision() {
 	res, err := binance.GetExchangeInfo()
 	o := orm.NewOrm()
 	if err == nil {
+		logs.Info("api rate one minute limit: " + strconv.FormatInt(res.RateLimits[0].Limit, 10))
+		
 		for _, symbol := range res.Symbols {
 			if symbol.Status != "TRADING" {
 				// 非交易中的过滤掉
@@ -691,10 +693,6 @@ func UpdateSymbolsTradePrecision() {
 			if lotSizeFilter != nil {
 				stepSize = lotSizeFilter.StepSize
 			}
-			o.QueryTable("symbols").Filter("symbol", symbol.Symbol).Update(orm.Params{
-				"tickSize": tickSize,
-				"stepSize": stepSize,
-			})
 			
 			suffixType := ""
 			if strings.HasSuffix(symbol.Symbol, "USDT") {
@@ -705,7 +703,8 @@ func UpdateSymbolsTradePrecision() {
 				suffixType = "USDC"
 			}
 			
-			if suffixType != "" { // 非usdt结尾的不需要
+			if suffixType != "" { // 只处理USDT, FDUSD, USDC结尾的币种
+				// 检查是否存在此币种
 				if !o.QueryTable("symbols").Filter("symbol", symbol.Symbol).Exist() {
 					// 没有的币种插入
 					logs.Info("add new futures symbol", symbol.Symbol)
@@ -733,6 +732,12 @@ func UpdateSymbolsTradePrecision() {
 						TradeCount: 0.0,
 						Sort: 0,
 						Pin: 0,
+					})
+				} else {
+					// 更新交易精度
+					o.QueryTable("symbols").Filter("symbol", symbol.Symbol).Update(orm.Params{
+						"tickSize": tickSize,
+						"stepSize": stepSize,
 					})
 				}
 			}

@@ -49,7 +49,7 @@ func NoticeAllSymbolByStrategy(systemConfig models.Config) {
 	
 	logs.Info("offsetId: ", offsetId)
 	var coins []*models.Symbols
-	limit := 6 // 不设置太大，如果开仓太多，加上这里会导致接口请求超过限制
+	limit := 5 // 不设置太大，如果开仓太多，加上这里会导致接口请求超过限制
 	coins, err := getSymbols(offsetId, limit) // 按照顺序 limit 个币
 	if err != nil {
 		logs.Error("NoticeAllSymbolByStrategy:", err.Error())
@@ -171,6 +171,35 @@ func CheckTestResults(systemConfig models.Config) {
 	}
 	
 	for _, result := range results {
+		coin_profit_float64 := 5.0 // 进入策略前的盈利率限制
+		coin_loss_float64 := 5.0 // 进入策略前的亏损率限制
+		floatNowPrice := 0.0
+		for _, coin := range allCoins {
+			if coin.Symbol == result.Symbol {
+				if coin.Profit != "0" {
+					coin_profit_float64, _ = strconv.ParseFloat(coin.Profit, 64)
+				}
+				if coin.Loss != "0" {
+					coin_loss_float64, _ = strconv.ParseFloat(coin.Loss, 64)
+				}
+				floatNowPrice, _ = strconv.ParseFloat(coin.Close, 64)
+				break
+			}
+		}
+		if floatNowPrice == 0.0 {
+			continue // 没有获取到当前价格，跳过
+		}
+
+		positionAmtFloat, _ := strconv.ParseFloat(result.PositionAmt, 64)
+		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
+		enterPrice_float64, _ := strconv.ParseFloat(result.Price, 64)
+		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
+		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
+		
+		if nowProfit > -coin_loss_float64 || nowProfit < coin_profit_float64 {
+			continue // 盈亏在约定范围内，就不用进行策略，也不平仓
+		}
+		
 		var strategyConfig technology.StrategyConfig
 		err := json.Unmarshal([]byte(result.Strategy), &strategyConfig)
 		if err != nil {
@@ -185,30 +214,6 @@ func CheckTestResults(systemConfig models.Config) {
 		if !ok {
 			logs.Error("Error NowPrice Symbol: ", result.Symbol)
 			continue
-		}
-		positionAmtFloat, _ := strconv.ParseFloat(result.PositionAmt, 64)
-		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
-		enterPrice_float64, _ := strconv.ParseFloat(result.Price, 64)
-		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
-		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
-		
-		// 计算当前收益率
-		coin_profit_float64 := 5.0
-		coin_loss_float64 := 5.0
-		for _, coin := range allCoins {
-			if coin.Symbol == result.Symbol {
-				// 自定义可以覆盖全局
-				if coin.Profit != "0" {
-					coin_profit_float64, _ = strconv.ParseFloat(coin.Profit, 64)
-				}
-				if coin.Loss != "0" {
-					coin_loss_float64, _ = strconv.ParseFloat(coin.Loss, 64)
-				}
-				break
-			}
-		}
-		if nowProfit > -coin_loss_float64 && nowProfit < coin_profit_float64 {
-			continue // 盈亏在范围内，不平仓
 		}
 		
 		// 模拟仓位信息
