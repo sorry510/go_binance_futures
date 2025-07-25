@@ -669,6 +669,21 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 	
 	// 自动缩放
 	AutoLossScale(systemConfig, unRealizedProfit >= 0)
+	
+	// 检查是否有相同的开仓订单,如果有则更新状态
+	var openOrder models.Order
+	o.QueryTable("order").
+		Filter("Side", "open").
+		Filter("Symbol", order.Symbol).
+		Filter("Amount", order.Amount).
+		One(&openOrder)
+	if openOrder.OrderId != 0 {
+		// 找到对应的开仓订单，进行处理
+		openOrder.Inexact_profit = order.Inexact_profit
+		openOrder.ClosedTime = order.UpdateTime
+		o.Update(&openOrder)
+		logs.Info("Updated order status for open order, symbol:", openOrder.Symbol)
+	}
 }
 
 // 更新币种的交易精度和插入新币

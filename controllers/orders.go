@@ -23,7 +23,7 @@ func (ctrl *OrderController) Get() {
 	paramsSymbol := ctrl.GetString("symbol")
 	paramPositionSide := ctrl.GetString("position_side") // LONG, SHORT, all
 	paramsPage := ctrl.GetString("page", "1")
-	paramsLimit := ctrl.GetString("limit", "20")
+	paramsLimit := ctrl.GetString("limit", "100")
 	paramsStartTime := ctrl.GetString("start_time")
 	paramsEndTime := ctrl.GetString("end_time")
 	paramsType := ctrl.GetString("type") // open, close, all
@@ -36,9 +36,9 @@ func (ctrl *OrderController) Get() {
 	var orders []OrderTableList
 	
 	var total int64
-	sql := "SELECT t.*, s.close as now_price FROM `order` t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1"
-	countSql := "SELECT COUNT(*) FROM `order` t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1"
-	
+	sql := "SELECT t.*, s.close as now_price FROM `order` t LEFT JOIN symbols s ON t.symbol = s.symbol where side = 'open'"
+	countSql := "SELECT COUNT(*) FROM `order` t LEFT JOIN symbols s ON t.symbol = s.symbol where side = 'open'"
+
 	if (paramsSymbol != "") {
 		sql += ` and t.symbol like '%` + paramsSymbol + `%'`
 		countSql += ` and t.symbol like '%` + paramsSymbol + `%'`
@@ -56,11 +56,11 @@ func (ctrl *OrderController) Get() {
 		countSql += ` and t.updateTime <= '` + paramsEndTime + `'`
 	}
 	if (paramsType == "open") {
-		sql += ` and t.side = '` + paramsType + `'`
-		countSql += ` and t.side = '` + paramsType + `'`
+		sql += ` and t.closedTime = 0`
+		countSql += ` and t.closedTime = 0`
 	} else if (paramsType == "close") {
-		sql += ` and t.side = '` + paramsType + `'`
-		countSql += ` and t.side = '` + paramsType + `'`
+		sql += ` and t.closedTime != 0`
+		countSql += ` and t.closedTime != 0`
 	}
 	
 	sql = sql + " ORDER BY t.updateTime DESC LIMIT " + strconv.Itoa(limit) + " OFFSET " + strconv.Itoa(offset)
