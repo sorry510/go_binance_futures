@@ -23,7 +23,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 6 // 每次变动数据库版本号 +1
+var dbVersion int64 = 7 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
@@ -130,6 +130,7 @@ func updateSystemConfig() {
 func main() {
 	// debug
 	if debug == "1" {
+		// feature.UpdateOrderStatus()
 		// feature.GoTestApi()
 		// spot.TryRush()
 		// feature.GoTestFeature()
@@ -210,7 +211,16 @@ func main() {
 			time.Sleep(time.Second * 2) // 2秒间隔, 1min 中不能超过 2400 权重和
 		}
 	}()
-	
+
+	// 更新一次订单状态, 一次 100 条，平仓时也会更新对应订单的状态，此处是兜底行为
+	// TODO: 删掉那些很久一起的平仓的订单
+	go func() {
+		for {
+			feature.UpdateOrderStatus()
+			time.Sleep(time.Minute * 30) // 30分钟更新一次订单状态
+		}
+	}()
+
 	/*******************************************测试自定义策略 start**********************************************************/
 	// 轮训测试所有开启合约交易的币种策略(每轮5个)
 	go func() {
