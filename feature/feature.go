@@ -676,6 +676,9 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 		Filter("Side", "open").
 		Filter("Symbol", order.Symbol).
 		Filter("Amount", order.Amount).
+		Filter("PositionSide", order.PositionSide).
+		Filter("OrderId__lt", order.OrderId). // 只查找小于当前平仓订单的开仓订单
+		OrderBy("-Id").
 		One(&openOrder)
 	if openOrder.OrderId != 0 {
 		// 找到对应的开仓订单，进行处理
