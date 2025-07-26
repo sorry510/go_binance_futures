@@ -23,8 +23,12 @@ func UpdateOrderStatus() {
 			Filter("Side", "close").
 			Filter("Symbol", openOrder.Symbol).
 			Filter("Amount", openOrder.Amount).
+			Filter("PositionSide", openOrder.PositionSide).
+			Filter("OrderId__gt", openOrder.OrderId). // 查询大于开仓订单的平仓订单
+			OrderBy("Id").
 			One(&closeOrder)
 		if err != nil {
+			// logs.Error("Error finding close order for open order:", openOrder.OrderId, err)
 			continue
 		}
 		if closeOrder.OrderId != 0 {
