@@ -171,8 +171,8 @@ func CheckTestResults(systemConfig models.Config) {
 	}
 	
 	for _, result := range results {
-		coin_profit_float64 := 5.0 // 进入策略前的盈利率限制
-		coin_loss_float64 := 5.0 // 进入策略前的亏损率限制
+		coin_profit_float64 := 3.0 // 进入策略前的盈利率限制
+		coin_loss_float64 := 3.0 // 进入策略前的亏损率限制
 		floatNowPrice := 0.0
 		for _, coin := range allCoins {
 			if coin.Symbol == result.Symbol {
@@ -196,7 +196,7 @@ func CheckTestResults(systemConfig models.Config) {
 		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
 		
-		if nowProfit > -coin_loss_float64 || nowProfit < coin_profit_float64 {
+		if nowProfit > -coin_loss_float64 && nowProfit < coin_profit_float64 {
 			continue // 盈亏在约定范围内，就不用进行策略，也不平仓
 		}
 		
