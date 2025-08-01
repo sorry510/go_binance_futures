@@ -11,7 +11,9 @@ func init() {
 	
 	web.Router("/service/config", &controllers.IndexController{}, "get:GetServiceConfig;put:EditServiceConfig") // 服务配置信息
 	web.Router("/test-pusher", &controllers.IndexController{}, "post:TestPusher") // 测试推送
-	
+	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post") // 列表查询和新增
+	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit") // 更新和删除
+
 	web.Router("/features", &controllers.FeatureController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/features-options", &controllers.FeatureController{}, "get:GetOptions") // 列表查询
 	web.Router("/features/:id", &controllers.FeatureController{}, "delete:Delete;put:Edit") // 更新和删除
