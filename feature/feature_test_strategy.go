@@ -123,7 +123,7 @@ func NoticeAllSymbolByStrategy(systemConfig models.Config) {
 					}
 					testOrder := createTestResult(coin, floatNowPrice, strings.ToUpper(strategy.Type), strategy.Code)
 					quantity, _ := strconv.ParseFloat(testOrder.PositionAmt, 64)
-					pusher.FuturesCustomStrategyTest(notify.FuturesTestParams{
+					pusher.SetModuleName("futures_test").FuturesCustomStrategyTest(notify.FuturesTestParams{
 						Title: lang.Lang("futures.custom_strategy_test"),
 						Symbol: coin.Symbol,
 						Type: "open", // 开仓
@@ -271,7 +271,7 @@ func CheckTestResults(systemConfig models.Config) {
 					// 平仓通知
 					quantity, _ := strconv.ParseFloat(result.PositionAmt, 64)
 					profitUsdt, _ := strconv.ParseFloat(result.CloseProfit, 64)
-					pusher.FuturesCustomStrategyTest(notify.FuturesTestParams{
+					pusher.SetModuleName("futures_test").FuturesCustomStrategyTest(notify.FuturesTestParams{
 						Title: lang.Lang("futures.custom_strategy_test"),
 						Symbol: result.Symbol,
 						Type: "close", // 平仓
@@ -300,7 +300,7 @@ func CheckTestResults(systemConfig models.Config) {
 			
 			quantity, _ := strconv.ParseFloat(result.PositionAmt, 64)
 			profitUsdt, _ := strconv.ParseFloat(result.CloseProfit, 64)
-			pusher.FuturesCustomStrategyTest(notify.FuturesTestParams{
+			pusher.SetModuleName("futures_test").FuturesCustomStrategyTest(notify.FuturesTestParams{
 				Title: lang.Lang("futures.custom_strategy_test"),
 				Symbol: result.Symbol,
 				Type: "close", // 平仓

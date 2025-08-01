@@ -52,7 +52,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 		if (nowPrice <= noticePrice && coin.Side == "buy") {
 			// 做多，价格低于预警价格，进行通知
 			canOrder = true
-			pusher.FuturesNotice(notify.FuturesNoticeParams{
+			pusher.SetModuleName("coin_notice").FuturesNotice(notify.FuturesNoticeParams{
 				Title: lang.Lang("futures.notice_price_title"),
 				Symbol: coin.Symbol,
 				Side: coin.Side,
@@ -64,7 +64,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 		if (nowPrice >= noticePrice && coin.Side == "sell") {
 			// 做空，价格高于预警价格，进行通知
 			canOrder = true
-			pusher.FuturesNotice(notify.FuturesNoticeParams{
+			pusher.SetModuleName("coin_notice").FuturesNotice(notify.FuturesNoticeParams{
 				Title: lang.Lang("futures.notice_price_title"),
 				Symbol: coin.Symbol,
 				Side: coin.Side,
@@ -96,7 +96,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 				_, err := binance.BuyMarket(coin.Symbol, quantity, futures.PositionSideTypeLong)
 				if err != nil {
 					logs.Info("合约做多失败symbol:", coin.Symbol)
-					pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+					pusher.SetModuleName("coin_notice").FuturesOpenOrder(notify.FuturesOrderParams{
 						Title: lang.Lang("futures.open_notice_title"),
 						Symbol: coin.Symbol,
 						Side: "buy",
@@ -108,7 +108,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 						Error: err.Error(),
 					})
 				} else {
-					pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+					pusher.SetModuleName("coin_notice").FuturesOpenOrder(notify.FuturesOrderParams{
 						Title: lang.Lang("futures.open_notice_title"),
 						Symbol: coin.Symbol,
 						Side: "buy",
@@ -135,7 +135,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 				_, err := binance.SellMarket(coin.Symbol, quantity, futures.PositionSideTypeShort)
 				if err != nil {
 					logs.Info("合约做空失败symbol:", coin.Symbol)
-					pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+					pusher.SetModuleName("coin_notice").FuturesOpenOrder(notify.FuturesOrderParams{
 						Title: lang.Lang("futures.open_notice_title"),
 						Symbol: coin.Symbol,
 						Side: "sell",
@@ -147,7 +147,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 						Error: err.Error(),
 					})
 				} else {
-					pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+					pusher.SetModuleName("coin_notice").FuturesOpenOrder(notify.FuturesOrderParams{
 						Title: lang.Lang("futures.open_notice_title"),
 						Symbol: coin.Symbol,
 						Side: "sell",
@@ -226,7 +226,7 @@ func PositionConvertNotice(systemConfig *models.Config) {
 					NoticeTime: time.Now().Unix(),
 				}
 				// 状态变化,并且上次通知时间超过1小时
-				pusher.FuturesPositionConvert(notify.FuturesPositionConvertParams{
+				pusher.SetModuleName("futures_position_convert").FuturesPositionConvert(notify.FuturesPositionConvertParams{
 					Title: lang.Lang("futures.notice_position_convert_title"),
 					Symbol: position.Symbol,
 					Status: status,

@@ -83,7 +83,7 @@ func klineCustomListen(coin models.ListenSymbols) {
 					coin.LastNoticeType = "up"
 					orm.NewOrm().Update(&coin)
 					
-					pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
+					pusher.SetModuleName("coin_listen").FuturesListenKlineCustom(notify.FuturesListenParams{
 						Title: lang.Lang("futures.listen_custom_title"),
 						NowPrice: env["NowPrice"].(float64),
 						Symbol: coin.Symbol,
@@ -96,7 +96,7 @@ func klineCustomListen(coin models.ListenSymbols) {
 					coin.LastNoticeType = "down"
 					orm.NewOrm().Update(&coin)
 					
-					pusher.FuturesListenKlineCustom(notify.FuturesListenParams{
+					pusher.SetModuleName("coin_listen").FuturesListenKlineCustom(notify.FuturesListenParams{
 						Title: lang.Lang("futures.listen_custom_title"),
 						NowPrice: env["NowPrice"].(float64),
 						Symbol: coin.Symbol,
@@ -131,7 +131,7 @@ func klineBaseListen(coin models.ListenSymbols) {
 		coin.LastNoticeType = "up"
 		orm.NewOrm().Update(&coin)
 		
-		pusher.FuturesListenKlineBase(notify.FuturesListenParams{
+		pusher.SetModuleName("coin_listen").FuturesListenKlineBase(notify.FuturesListenParams{
 			Title: lang.Lang("futures.listen_kline_base_title"),
 			Symbol: coin.Symbol,
 			ChangePercent: (nowPrice - lastOpenPrice) / lastOpenPrice,
@@ -147,7 +147,7 @@ func klineBaseListen(coin models.ListenSymbols) {
 		coin.LastNoticeType = "down"
 		orm.NewOrm().Update(&coin)
 		
-		pusher.FuturesListenKlineBase(notify.FuturesListenParams{
+		pusher.SetModuleName("coin_listen").FuturesListenKlineBase(notify.FuturesListenParams{
 			Title: lang.Lang("futures.listen_kline_base_title"),
 			Symbol: coin.Symbol,
 			ChangePercent: (lastOpenPrice - nowPrice) / lastOpenPrice,
@@ -214,7 +214,7 @@ func klineKcListen(coin models.ListenSymbols) {
 				coin.LastNoticeType = "up"
 				orm.NewOrm().Update(&coin)
 				
-				pusher.FuturesListenKlineKc(notify.FuturesListenParams{
+				pusher.SetModuleName("coin_listen").FuturesListenKlineKc(notify.FuturesListenParams{
 					Title: lang.Lang("futures.listen_keltner_channels_title"),
 					PositionSide: "long",
 					Symbol: coin.Symbol,
@@ -237,7 +237,7 @@ func klineKcListen(coin models.ListenSymbols) {
 				coin.LastNoticeType = "down"
 				orm.NewOrm().Update(&coin)
 				
-				pusher.FuturesListenKlineKc(notify.FuturesListenParams{
+				pusher.SetModuleName("coin_listen").FuturesListenKlineKc(notify.FuturesListenParams{
 					Title: lang.Lang("futures.listen_keltner_channels_title"),
 					PositionSide: "short",
 					Symbol: coin.Symbol,
@@ -287,7 +287,7 @@ func ListenCoinFundingRate(systemConfig models.Config) {
 			orm.NewOrm().Update(&coin)
 			
 			price, _ := strconv.ParseFloat(coin.NowPrice, 64)
-			pusher.FuturesListenFundingRate(notify.FuturesListenParams{
+			pusher.SetModuleName("funding_rate").FuturesListenFundingRate(notify.FuturesListenParams{
 				Title: lang.Lang("futures.listen_funding_rate_title"),
 				Symbol: coin.Symbol,
 				PositionSide: "short",
@@ -304,7 +304,7 @@ func ListenCoinFundingRate(systemConfig models.Config) {
 			orm.NewOrm().Update(&coin)
 			
 			price, _ := strconv.ParseFloat(coin.NowPrice, 64)
-			pusher.FuturesListenFundingRate(notify.FuturesListenParams{
+			pusher.SetModuleName("funding_rate").FuturesListenFundingRate(notify.FuturesListenParams{
 				Title: lang.Lang("futures.listen_funding_rate_title"),
 				Symbol: coin.Symbol,
 				PositionSide: "long",
