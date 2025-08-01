@@ -9,12 +9,14 @@ import (
 	"net/http"
 
 	"github.com/beego/beego/v2/core/config"
+	"github.com/beego/beego/v2/core/logs"
 )
 
-var dingding_token, _ = config.String("dingding::dingding_token")
-var dingding_word, _ = config.String("dingding::dingding_word")
+var g_dingding_token, _ = config.String("dingding::dingding_token")
+var g_dingding_word, _ = config.String("dingding::dingding_word")
 
 type DingDing struct {
+  ModuleName string
 }
 
 type DingDingData struct {
@@ -36,8 +38,18 @@ type DingDingApiMarkDownData struct {
 
 // 钉钉通知, 频率限制 1分钟20次
 // https://open.dingtalk.com/document/orgapp/the-robot-sends-a-group-message
-func DingDingApi(content string) {
+func DingDingApi(content string, pusher Pusher) {
+  dingding_token := g_dingding_token
+  dingding_word := g_dingding_word
 	// 放到单独执行，避免主进程阻塞(没有 block 程序时不会执行)
+  notifyConfig := GetNotifyConfig(pusher)
+  if notifyConfig.DingDingToken != "" {
+    // 读取模块配置信息，覆盖全局
+    dingding_token = notifyConfig.DingDingToken
+    dingding_word = notifyConfig.DingDingWord
+  }
+  logs.Info("DingDingApi:", dingding_token, notifyConfig.ID)
+  
 	go func () {
 		url := "https://oapi.dingtalk.com/robot/send?access_token=" + dingding_token
 	
@@ -86,13 +98,22 @@ func DingDingApi(content string) {
 	}()
 }
 
+func (pusher DingDing) SetModuleName(name string) Pusher {
+  pusher.ModuleName = name
+  return pusher
+}
+
+func (pusher DingDing) GetModuleName() string {
+  return pusher.ModuleName
+}
+
 func (pusher DingDing) TestPusher() {
   text := `
 ## Test
 #### push test success
 
 > author <sorry510sf@gmail.com>`
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesOpenOrder(params FuturesOrderParams) {
@@ -120,7 +141,7 @@ func (pusher DingDing) FuturesOpenOrder(params FuturesOrderParams) {
     params.Error,
 		nowTime(),
 	)
-	DingDingApi(text)
+	DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesCloseOrder(params FuturesOrderParams) {
@@ -152,7 +173,7 @@ func (pusher DingDing) FuturesCloseOrder(params FuturesOrderParams) {
     params.Error,
 		nowTime(),
 	)
-	DingDingApi(text)
+	DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesNotice(params FuturesNoticeParams) {
@@ -174,7 +195,7 @@ func (pusher DingDing) FuturesNotice(params FuturesNoticeParams) {
     params.AutoOrder,
     nowTime(),
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesListenKlineBase(params FuturesListenParams) {
@@ -194,7 +215,7 @@ func (pusher DingDing) FuturesListenKlineBase(params FuturesListenParams) {
     params.Remarks,
     nowTime(),
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesListenKlineKc(params FuturesListenParams) {
@@ -220,7 +241,7 @@ func (pusher DingDing) FuturesListenKlineKc(params FuturesListenParams) {
     params.DesiredPrice,
     nowTime(),
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesListenKlineCustom(params FuturesListenParams) {
@@ -243,7 +264,7 @@ func (pusher DingDing) FuturesListenKlineCustom(params FuturesListenParams) {
     nowTime(),
     params.Remarks,
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesListenFundingRate(params FuturesListenParams) {
@@ -265,7 +286,7 @@ func (pusher DingDing) FuturesListenFundingRate(params FuturesListenParams) {
     params.Remarks,
     nowTime(),
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) SpotOrder(params SpotOrderParams) {
@@ -290,7 +311,7 @@ func (pusher DingDing) SpotOrder(params SpotOrderParams) {
     params.Error,
     nowTime(),
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) SpotNotice(params SpotNoticeParams) {
@@ -310,7 +331,7 @@ func (pusher DingDing) SpotNotice(params SpotNoticeParams) {
     params.AutoOrder,
     nowTime(),
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) SpotListenKlineBase(params SpotListenParams) {
@@ -330,7 +351,7 @@ func (pusher DingDing) SpotListenKlineBase(params SpotListenParams) {
     params.Remarks,
     nowTime(),
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesCustomStrategyTest(params FuturesTestParams) {
@@ -346,8 +367,6 @@ func (pusher DingDing) FuturesCustomStrategyTest(params FuturesTestParams) {
 #### **{futures.strategy_name}**：<font color="#008000">%s</font>
 #### **{futures.time}**：%s
 
-> <font color="#008000">%s</font>
-
 > author <sorry510sf@gmail.com>`
 
   text = fmt.Sprintf(lang.LangMatch(text),
@@ -361,9 +380,8 @@ func (pusher DingDing) FuturesCustomStrategyTest(params FuturesTestParams) {
     params.Profit,
     params.StrategyName,
     nowTime(),
-    params.Remarks,
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
 
 func (pusher DingDing) FuturesPositionConvert(params FuturesPositionConvertParams) {
@@ -387,5 +405,5 @@ func (pusher DingDing) FuturesPositionConvert(params FuturesPositionConvertParam
     params.UnRealizedProfit,
     nowTime(),
   )
-  DingDingApi(text)
+  DingDingApi(text, pusher)
 }
