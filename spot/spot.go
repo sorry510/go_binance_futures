@@ -142,7 +142,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 			if (nowPrice <= noticePrice && coin.Side == "buy") {
 				// 买币，价格低于预警价格，进行通知
 				canOrder = true
-				pusher.SpotNotice(notify.SpotNoticeParams{
+				pusher.SetModuleName("coin_notice").SpotNotice(notify.SpotNoticeParams{
 					Title: lang.Lang("spot.notice_price_title"),
 					Symbol: coin.Symbol,
 					Side: "buy",
@@ -153,7 +153,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 			if (nowPrice >= noticePrice && coin.Side == "sell") {
 				// 卖币，价格高于预警价格，进行通知
 				canOrder = true
-				pusher.SpotNotice(notify.SpotNoticeParams{
+				pusher.SetModuleName("coin_notice").SpotNotice(notify.SpotNoticeParams{
 					Title: lang.Lang("spot.notice_price_title"),
 					Symbol: coin.Symbol,
 					Side: "sell",
@@ -180,7 +180,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 				if err != nil {
 					logs.Error("购买失败symbol:", coin.Symbol)
 					logs.Error("err:", err.Error())
-					// pusher.SpotOrder(notify.SpotOrderParams{
+					// pusher.SetModuleName("coin_notice").SpotOrder(notify.SpotOrderParams{
 					// 	Title: lang.Lang("spot.notice_title"),
 					// 	Symbol: coin.Symbol,
 					// 	Side: "sell",
@@ -192,7 +192,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 					// })
 				} else {
 					// 购买成功
-					pusher.SpotOrder(notify.SpotOrderParams{
+					pusher.SetModuleName("coin_notice").SpotOrder(notify.SpotOrderParams{
 						Title: lang.Lang("spot.notice_title"),
 						Symbol: coin.Symbol,
 						Side: "sell",
@@ -226,7 +226,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 				if err != nil {
 					logs.Error("卖出失败symbol:", coin.Symbol)
 					logs.Error("err:", err.Error())
-					// pusher.SpotOrder(notify.SpotOrderParams{
+					// pusher.SetModuleName("coin_notice").SpotOrder(notify.SpotOrderParams{
 					// 	Title: lang.Lang("spot.notice_title"),
 					// 	Symbol: coin.Symbol,
 					// 	Side: "sell",
@@ -238,7 +238,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 				} else {
 					// 卖出成功
 					price_float64, _:= strconv.ParseFloat(resPrice[0].Price, 64) // 卖单数量
-					pusher.SpotOrder(notify.SpotOrderParams{
+					pusher.SetModuleName("coin_notice").SpotOrder(notify.SpotOrderParams{
 						Title: lang.Lang("spot.notice_title"),
 						Symbol: coin.Symbol,
 						Side: "sell",
@@ -292,7 +292,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *spot_api.Create
 		logs.Error("err:", err.Error())
 	} else {
 		// 购买成功
-		pusher.SpotOrder(notify.SpotOrderParams{
+		pusher.SetModuleName("new_coin_rush").SpotOrder(notify.SpotOrderParams{
 			Title: lang.Lang("spot.new_coin_rush_notice_title"),
 			Symbol: symbol,
 			Side: "buy",
@@ -327,7 +327,7 @@ func trySellMarket(coin models.NewSymbols, stepSize string) (res *spot_api.Creat
 	if err != nil {
 		logs.Error("卖出失败symbol:", symbol)
 		logs.Error("err:", err.Error())
-		// pusher.SpotOrder(notify.SpotOrderParams{
+		// pusher.SetModuleName("new_coin_rush").SpotOrder(notify.SpotOrderParams{
 		// 	Title: lang.Lang("spot.new_coin_rush_notice_title"),
 		// 	Symbol: symbol,
 		// 	Side: "sell",
@@ -339,7 +339,7 @@ func trySellMarket(coin models.NewSymbols, stepSize string) (res *spot_api.Creat
 	} else {
 		// 卖出成功
 		price_float64, _:= strconv.ParseFloat(res.Price, 64) // 卖单数量
-		pusher.SpotOrder(notify.SpotOrderParams{
+		pusher.SetModuleName("new_coin_rush").SpotOrder(notify.SpotOrderParams{
 			Title: lang.Lang("spot.new_coin_rush_notice_title"),
 			Symbol: symbol,
 			Side: "sell",
@@ -394,7 +394,7 @@ func ListenCoin(systemConfig models.Config) {
 			coin.LastNoticeType = "up"
 			orm.NewOrm().Update(&coin)
 			
-			pusher.SpotListenKlineBase(notify.SpotListenParams{
+			pusher.SetModuleName("coin_listen").SpotListenKlineBase(notify.SpotListenParams{
 				Title: lang.Lang("spot.kline_listen_base_title"),
 				Symbol: coin.Symbol,
 				ChangePercent: (nowPrice - lastOpenPrice) / lastOpenPrice,
@@ -410,7 +410,7 @@ func ListenCoin(systemConfig models.Config) {
 			coin.LastNoticeType = "down"
 			orm.NewOrm().Update(&coin)
 			
-			pusher.SpotListenKlineBase(notify.SpotListenParams{
+			pusher.SetModuleName("coin_listen").SpotListenKlineBase(notify.SpotListenParams{
 				Title: lang.Lang("spot.kline_listen_base_title"),
 				Symbol: coin.Symbol,
 				ChangePercent: (nowPrice - lastOpenPrice) / lastOpenPrice,

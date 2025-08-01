@@ -143,7 +143,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		logs.Info("rush error symbol: ", symbol)
 		logs.Info("err in feature_rush: ", err.Error())
 	} else {
-		pusher.FuturesOpenOrder(notify.FuturesOrderParams{
+		pusher.SetModuleName("new_coin_rush").FuturesOpenOrder(notify.FuturesOrderParams{
 			Title: lang.Lang("futures.new_coin_rush_notice_title"),
 			Symbol: symbol,
 			Side: coin.Side,
