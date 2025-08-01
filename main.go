@@ -81,6 +81,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.DeliverySymbols))
 	orm.RegisterModel(new(models.FuturesPosition))
 	orm.RegisterModel(new(models.FuturesOrder))
+	orm.RegisterModel(new(models.NotifyConfig))
 	
 	setDriver(driver) // 设置数据库驱动
 	syncDb() // 同步数据库
@@ -99,6 +100,7 @@ func syncDb() {
 		}
 	}
 	// 根据旧版本更新数据库
+	orm.RunSyncdb("default", false, false) // 根据 model 更新新创建的数据表
 	oldVersion := config.Version
 	if oldVersion < dbVersion {
 		err = command.UpdateDatabase(oldVersion, dbVersion)

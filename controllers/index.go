@@ -106,7 +106,7 @@ func (ctrl *IndexController) EditServiceConfig() {
 
 func (ctrl *IndexController) TestPusher() {
 	var pusher = notify.GetNotifyChannel()
-	pusher.TestPusher()
+	pusher.SetModuleName("futures_test").TestPusher()
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
 		"msg": "success",

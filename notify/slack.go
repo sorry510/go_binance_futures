@@ -11,10 +11,11 @@ import (
 	"github.com/beego/beego/v2/core/config"
 )
 
-var slack_token, _ = config.String("slack::slack_token")
-var slack_channel_id, _ = config.String("slack::slack_channel_id")
+var g_slack_token, _ = config.String("slack::slack_token")
+var g_slack_channel_id, _ = config.String("slack::slack_channel_id")
 
 type Slack struct {
+  ModuleName string
 }
 
 type SlackMessage struct {
@@ -36,9 +37,18 @@ type Text struct {
     Text string `json:"text"`
 }
 
-func SlackApi(content string) {
+func SlackApi(content string, pusher Pusher) {
+  slack_token := g_slack_token
+  slack_channel_id := g_slack_channel_id
 	// 放到单独执行，避免主进程阻塞(未知原因突然不能在 goroutine 中执行了)
-	go func () {
+	notifyConfig := GetNotifyConfig(pusher)
+	if notifyConfig.SlackToken != "" {
+		// 读取模块配置信息，覆盖全局
+		slack_token = notifyConfig.SlackToken
+		slack_channel_id = notifyConfig.SlackChannelId
+	}
+
+	go func() {
 		url := "https://slack.com/api/chat.postMessage"
 		
 		blocks := []Block{
@@ -93,12 +103,21 @@ func SlackApi(content string) {
 	}()
 }
 
+func (pusher Slack) SetModuleName(name string) Pusher {
+  pusher.ModuleName = name
+  return pusher
+}
+
+func (pusher Slack) GetModuleName() string {
+  return pusher.ModuleName
+}
+
 func (pusher Slack) TestPusher() {
   text := `
 > Test
 > push test success
 > author <sorry510sf@gmail.com>`
-  DingDingApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesOpenOrder(params FuturesOrderParams) {
@@ -126,7 +145,7 @@ func (pusher Slack) FuturesOpenOrder(params FuturesOrderParams) {
     params.Error,
 		nowTime(),
 	)
-	SlackApi(text)
+	SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesCloseOrder(params FuturesOrderParams) {
@@ -158,7 +177,7 @@ func (pusher Slack) FuturesCloseOrder(params FuturesOrderParams) {
     params.Error,
 		nowTime(),
 	)
-	SlackApi(text)
+	SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesNotice(params FuturesNoticeParams) {
@@ -180,7 +199,7 @@ func (pusher Slack) FuturesNotice(params FuturesNoticeParams) {
     params.AutoOrder,
     nowTime(),
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesListenKlineBase(params FuturesListenParams) {
@@ -200,7 +219,7 @@ func (pusher Slack) FuturesListenKlineBase(params FuturesListenParams) {
     params.Remarks,
     nowTime(),
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesListenKlineKc(params FuturesListenParams) {
@@ -226,7 +245,7 @@ func (pusher Slack) FuturesListenKlineKc(params FuturesListenParams) {
     params.DesiredPrice,
     nowTime(),
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesListenKlineCustom(params FuturesListenParams) {
@@ -249,7 +268,7 @@ func (pusher Slack) FuturesListenKlineCustom(params FuturesListenParams) {
     nowTime(),
     params.Remarks,
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesListenFundingRate(params FuturesListenParams) {
@@ -271,7 +290,7 @@ func (pusher Slack) FuturesListenFundingRate(params FuturesListenParams) {
     params.Remarks,
     nowTime(),
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) SpotOrder(params SpotOrderParams) {
@@ -296,7 +315,7 @@ func (pusher Slack) SpotOrder(params SpotOrderParams) {
     params.Error,
     nowTime(),
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) SpotNotice(params SpotNoticeParams) {
@@ -316,7 +335,7 @@ func (pusher Slack) SpotNotice(params SpotNoticeParams) {
     params.AutoOrder,
     nowTime(),
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) SpotListenKlineBase(params SpotListenParams) {
@@ -336,7 +355,7 @@ func (pusher Slack) SpotListenKlineBase(params SpotListenParams) {
     params.Remarks,
     nowTime(),
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesCustomStrategyTest(params FuturesTestParams) {
@@ -352,8 +371,6 @@ func (pusher Slack) FuturesCustomStrategyTest(params FuturesTestParams) {
 >{futures.strategy_name}：%s
 >{futures.time}：%s
 
->%s
-
 > author <sorry510sf@gmail.com>`
 
   text = fmt.Sprintf(lang.LangMatch(text),
@@ -367,9 +384,8 @@ func (pusher Slack) FuturesCustomStrategyTest(params FuturesTestParams) {
     params.Profit,
     params.StrategyName,
     nowTime(),
-    params.Remarks,
   )
-  SlackApi(text)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) FuturesPositionConvert(params FuturesPositionConvertParams) {
@@ -393,5 +409,5 @@ func (pusher Slack) FuturesPositionConvert(params FuturesPositionConvertParams) 
     params.UnRealizedProfit,
     nowTime(),
   )
-  DingDingApi(text)
+  SlackApi(text, pusher)
 }

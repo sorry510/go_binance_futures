@@ -1,8 +1,10 @@
 package notify
 
 import (
+	"go_binance_futures/models"
 	"time"
 
+	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
 )
 
@@ -34,4 +36,21 @@ func GetNotifyChannel() (pusher Pusher) {
 			pusher = DingDing{}
 	}
 	return pusher
+}
+
+func GetNotifyConfig(pusher Pusher) (notifyConfig models.NotifyConfig) {
+	var notification_channel, _ = config.String("notification::channel") // 通知方式
+	moduleName := pusher.GetModuleName()
+	if moduleName == "" {
+		return notifyConfig
+	}
+	o := orm.NewOrm()
+	o.QueryTable("notify_config").
+		Filter("module", moduleName).
+		Filter("channel", notification_channel).
+		Filter("enable", 1).
+		OrderBy("-id").
+		One(&notifyConfig)
+
+	return notifyConfig
 }

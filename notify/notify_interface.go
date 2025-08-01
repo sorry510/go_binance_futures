@@ -106,6 +106,8 @@ type FuturesPositionConvertParams struct {
 }
 
 type Pusher interface {
+	SetModuleName(name string) Pusher
+	GetModuleName() string
 	TestPusher()
 	FuturesCustomStrategyTest(params FuturesTestParams)
 	FuturesPositionConvert(params FuturesPositionConvertParams)
