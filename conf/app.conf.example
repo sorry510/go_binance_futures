@@ -52,6 +52,7 @@ commend_log = pm2 log binance_futures
 # dingding, slack
 channel = dingding
 
+# 此处是全局配置，也可以在【首页->通知配置】页面进行各个模块的独立配置覆盖全局
 [dingding]
 # token
 dingding_token = ""

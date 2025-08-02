@@ -300,3 +300,11 @@ Position.SourceType = "local" or "api" // 数据来源，只有 local 才有 Cre
 ```
 BasicTrend = 0.3
 ```
+
+##### 市场趋势
+>手动自己在首页设置，自动逻辑暂未确定
+
+```
+MarketCondition = "0"
+MarketCondition = "1"
+```

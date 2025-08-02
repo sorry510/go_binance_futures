@@ -303,3 +303,10 @@ Position.SourceType = "local" or "api" // only local has CreateTime
 ```
 BasicTrend = 0.3
 ```
+
+##### Market Condition
+>Manually set it on the homepage, the automatic logic has not been determined yet
+
+```
+MarketCondition = "0"
+Market
