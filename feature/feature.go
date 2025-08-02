@@ -1008,3 +1008,13 @@ func AutoLossScale(systemConfig models.Config, flag bool) {
 		})
 	}
 }
+
+// 自动判断并更新当前行情的趋势
+func UpdateMarketCondition(systemConfig *models.Config) {
+	if (systemConfig.MarketConditionIsAuto == 0) {
+		// 手动模式, 不自动更新
+		return
+	}
+	systemConfig.MarketCondition = 0 // 0:震荡 1:单边
+	orm.NewOrm().Update(systemConfig)
+}

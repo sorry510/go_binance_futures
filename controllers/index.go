@@ -79,6 +79,8 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"listenFundingRate": listenFundingRate,
 			"lossMaxCount": lossMaxCount,
 			"lossAutoScale": systemConfig.LossAutoScale,
+			"marketCondition": systemConfig.MarketCondition,
+			"marketConditionIsAuto": systemConfig.MarketConditionIsAuto,
 			
 			"externalLinks": externalLinks,
 		},
