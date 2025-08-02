@@ -23,7 +23,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 7 // 每次变动数据库版本号 +1
+var dbVersion int64 = 8 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index")
@@ -127,11 +127,14 @@ func updateSystemConfig() {
 	} else {
 		SystemConfig = systemConfig // 更新配置信息
 	}
+	// 设置市场行情趋势
+	config.Set("MarketCondition", fmt.Sprintf("%d", systemConfig.MarketCondition))
 }
 
 func main() {
 	// debug
 	if debug == "1" {
+		updateSystemConfig()
 		// feature.UpdateOrderStatus()
 		// feature.GoTestApi()
 		// spot.TryRush()
@@ -169,6 +172,14 @@ func main() {
 			time.Sleep(time.Second * 1) // 1秒间隔
 		}
 	}()
+	// 更新当前行情趋势
+	go func() {
+		for {
+			feature.UpdateMarketCondition(&SystemConfig)
+			time.Sleep(time.Minute * 3) // 3分钟更新一次
+		}
+	}()
+	
 	// 自动追加币种 和 更新币种交易精度
 	go func() {
 		for {

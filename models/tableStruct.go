@@ -27,6 +27,8 @@ type Config struct {
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值
 	LossAutoScale int `orm:"column(loss_auto_scale)" json:"loss_auto_scale"` // 是否自动缩放 loss_max_count
+	MarketCondition int `orm:"column(market_condition)" json:"market_condition"` // 0:震荡 1:单边
+	MarketConditionIsAuto int `orm:"column(market_condition_is_auto)" json:"market_condition_is_auto"` // 0:手动 1:自动
 }
 
 // 切记需要注册model后才能使用

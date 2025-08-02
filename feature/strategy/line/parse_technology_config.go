@@ -268,6 +268,7 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 	
 	// resPrice, _ := binance.GetTickerPrice(symbol)
 	// nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64)
+	marketConditionStr, _ := config.String("MarketCondition")
 	system_start_time_str, _ := config.String("system_start_time")
 	system_start_time_int, _ := strconv.ParseInt(system_start_time_str, 10, 64)
 	tConfig, klineMap := ParseTechnologyConfig(symbol, strTechnology)
@@ -275,6 +276,7 @@ func InitParseEnv(symbol string, strTechnology string) (map[string]interface{}) 
 		// build-in
 		// "NowPrice": nowPrice, // 当前价格
 		"SystemStartTime": system_start_time_int, // 系统启动时间, 毫秒时间戳
+		"MarketCondition": marketConditionStr, // 当前市场行情趋势
 		"NowTime": time.Now().Unix() * 1000, // 毫秒时间戳
 		
 		// function
