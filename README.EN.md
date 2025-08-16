@@ -251,6 +251,17 @@ The login account password is the `web.username` and `web.password` in the `app.
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |------------ | ------------ |
 | ABCUSDT   | buy_short  | futures  | ISOLATED or CROSSED | 10|3 | 0.1(if you don't know, please fill in 0)   | open   |
 
+## donate
+
+### qrcode
+![usdt](./img/bsc-usdt.jpg)
+
+#### bsc-usdt
+
+```
+0x170197328b6e73597bc29a1b059f29d4e111e1e8
+```
+
 
 ## how to develop
 >install golang
