@@ -229,10 +229,21 @@ dbname = ""
 | ABCUSDT(切记带着USDT后缀)   | 卖币  | 合约  | 逐仓或全仓| 10|3 |0.1(手动设定会减少一次api请求，不知道时设置为0会在上线时查询接口自动获取)  |开启   |
 
 
+## 赞赏
+
+### 二维码
+![usdt](./img/bsc-usdt.jpg)
+
+#### bsc-usdt
+
+```
+0x170197328b6e73597bc29a1b059f29d4e111e1e8
+```
+
 ## 交流群
 
 ### wx
-![alt text](image.jpg)
+![alt text](qrcode.jpg)
 
 ### tg
 https://t.me/+neEHA8VSgF1jMTg9
