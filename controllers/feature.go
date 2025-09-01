@@ -71,7 +71,10 @@ func (ctrl *FeatureController) Get() {
 		query = query.Filter("pin", 1)
 		countQuery = countQuery.Filter("pin", 1)
 	}
-	_, err := query.OrderBy("-Pin", "ID").Limit(limit, offset).All(&symbols)
+	_, err := query.OrderBy("-Pin", "ID").Limit(limit, offset).All(&symbols,
+		"ID", "Symbol", "PercentChange", "Close", "Open", "Low", "High", "Enable", "UpdateTime", "QuoteVolume", "TradeCount", "Leverage", "MarginType",
+		"StepSize", "TickSize", "Usdt", "Profit", "Loss", "StrategyType", "Pin", "Sort", "Type",
+	)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 	}
@@ -100,6 +103,21 @@ func (ctrl *FeatureController) Get() {
 			"total": total,
 			"list": symbols,
 		},
+		"msg": "success",
+	})
+}
+
+func (ctrl *FeatureController) Show() {
+	id := ctrl.Ctx.Input.Param(":id")
+	var symbols models.Symbols
+	o := orm.NewOrm()
+	if err := o.QueryTable("symbols").Filter("Id", id).One(&symbols); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{
+		"code": 200,
+		"data": symbols,
 		"msg": "success",
 	})
 }
