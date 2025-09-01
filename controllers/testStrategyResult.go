@@ -43,7 +43,7 @@ func (ctrl *TestStrategyResultController) Get() {
 	
 	var results []TestStrategyResultsTableList
 	var total int64
-	sql := `SELECT t.*, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
+	sql := `SELECT t.id, t.symbol, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.createTime, t.updateTime, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
 	countSql := `SELECT COUNT(*) FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
 	
 	if (paramsSymbol != "") {
@@ -87,6 +87,22 @@ func (ctrl *TestStrategyResultController) Get() {
 			"list": results,
 		},
 		"msg": "success",
+	})
+}
+
+func (ctrl *TestStrategyResultController) Show() {
+	id := ctrl.Ctx.Input.Param(":id")
+	o := orm.NewOrm()
+	var result TestStrategyResultsTableList
+	err := o.Raw("SELECT * from test_strategy_results WHERE id = ?", id).QueryRow(&result)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{
+		"code": 200,
+		"data": result,
+		"msg":  "success",
 	})
 }
 
