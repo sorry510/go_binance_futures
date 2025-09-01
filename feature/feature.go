@@ -1015,6 +1015,11 @@ func UpdateMarketCondition(systemConfig *models.Config) {
 		// 手动模式, 不自动更新
 		return
 	}
+	culMarketCondition(systemConfig)
+}
+
+// 计算市场行情趋势
+func culMarketCondition(systemConfig *models.Config) {
 	systemConfig.MarketCondition = 0 // 0:震荡 1:单边
 	orm.NewOrm().Update(systemConfig)
 }

@@ -22,7 +22,7 @@ func init() {
 	web.Router("/features/strategy-rule/test/:id", &controllers.FeatureController{}, "post:TestStrategyRule") // 测试策略规则
 	
 	web.Router("/test-strategy-results", &controllers.TestStrategyResultController{}, "get:Get;delete:DeleteAll") // 测试策略的下单和平仓
-	web.Router("/test-strategy-results/:id", &controllers.TestStrategyResultController{}, "delete:Delete,get:Show") // 删除某个测试策略结果和获取明细
+	web.Router("/test-strategy-results/:id", &controllers.TestStrategyResultController{}, "delete:Delete;get:Show") // 删除某个测试策略结果和获取明细
 	web.Router("/test-strategy-results/test/:symbol", &controllers.TestStrategyResultController{}, "post:TestStrategyRule") // 测试策略结果的某个平仓测试是否符合条件
 	
 	web.Router("/spots", &controllers.SpotController{}, "get:Get;post:Post") // 列表查询和新增
