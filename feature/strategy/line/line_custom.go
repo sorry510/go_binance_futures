@@ -32,7 +32,8 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParam
 		return openResult
 	}
 	env := InitParseEnv(coin.Symbol, coin.Technology)
-	env["Positions"] = TradeLine.getLocalPositions()
+	positions, _ := TradeLine.getTransformPositions()
+	env["Positions"] = positions
 	for _, strategy := range strategyConfig {
 		if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
@@ -189,17 +190,16 @@ func (TradeLine TradeLineCustom) simpleCloseStrategy(closeParams strategy.CloseP
 	return closeResult
 }
 
-func (TradeLine TradeLineCustom) getLocalPositions() ([]models.FuturesPosition) {
-	var usePositions []models.FuturesPosition
+func (TradeLine TradeLineCustom) getTransformPositions() (usePositions []types.FuturesPosition, err error) {
 	var positions []models.FuturesPosition
 	o := orm.NewOrm()
 	sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where 1 = 1"
 	sql += ` and f.amount <> '0'`
-	_, err := o.Raw(sql).QueryRows(&positions)
+	_, err = o.Raw(sql).QueryRows(&positions)
 	if err != nil {
-		return usePositions
+		logs.Error("GetLocalPosition err in StartTrade:", err.Error())
+		return usePositions, err
 	}
-	
 	for _, position := range positions {
 		positionAmt, _ := strconv.ParseFloat(position.Amount, 64)
 		positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
@@ -211,7 +211,19 @@ func (TradeLine TradeLineCustom) getLocalPositions() ([]models.FuturesPosition) 
 		unRealizedProfit := (markPrice_float64 - enterPrice_float64) * positionAmt // 未实现盈亏
 		position.UnrealizedProfit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
 		
-		usePositions = append(usePositions, position)
+		usePositions = append(usePositions, types.FuturesPosition{
+			Symbol: position.Symbol,
+			Side: position.Side,
+			Amount: position.Amount,
+			MarginType: position.MarginType,
+			Leverage: position.Leverage,
+			IsolatedWallet: position.IsolatedWallet,
+			EntryPrice: position.EntryPrice,
+			MarkPrice: position.MarkPrice,
+			UnrealizedProfit: position.UnrealizedProfit,
+			SourceType: "local",
+			CreateTime: position.CreateTime,
+		})
 	}
-	return usePositions
+	return usePositions, err
 }

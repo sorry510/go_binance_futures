@@ -346,6 +346,7 @@ func (ctrl *FeatureController) TestStrategyRule() {
 			}
 		}
 	}
+	env["Positions"] = positions
 	
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
