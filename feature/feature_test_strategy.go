@@ -96,6 +96,8 @@ func NoticeAllSymbolByStrategy(systemConfig models.Config) {
 		}
 		logs.Info("futures custom strategy test, symbol: ", coin.Symbol)
 		env := line.InitParseEnv(coin.Symbol, coin.Technology)
+		positions, _ := getTransformPositions()
+		env["Positions"] = positions
 		for _, strategy := range strategyConfig {
 			if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
 				program, err := expr.Compile(strategy.Code, expr.Env(env))
@@ -375,4 +377,36 @@ func getExcludeSymbols() (symbols map[string]bool) {
 		symbols[testPositions.Symbol] = true
 	}
 	return symbols
+}
+
+func getTransformPositions() (usePositions []types.FuturesPosition, err error) {
+	var results []*models.TestStrategyResults
+	
+	o := orm.NewOrm()
+	sql := "SELECT t.id, t.symbol, t.price, t.leverage, t.position_side, t.position_amt, t.createTime, s.close as close_price FROM `test_strategy_results` t LEFT JOIN symbols s ON t.symbol = s.symbol where t.close_price = '0'"
+	_, err = o.Raw(sql).QueryRows(&results)
+	if err != nil {
+		logs.Error("GetTestStrategyResults err: ", err.Error())
+		return usePositions, err
+	}
+	
+	for _, result := range results {
+		positionAmtFloat, _ := strconv.ParseFloat(result.PositionAmt, 64)
+		enterPrice_float64, _ := strconv.ParseFloat(result.Price, 64)
+		floatNowPrice, _ := strconv.ParseFloat(result.ClosePrice, 64)
+		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
+		
+		usePositions = append(usePositions, types.FuturesPosition{
+			Symbol: result.Symbol,
+			EntryPrice: result.Price,
+			MarkPrice: result.ClosePrice,
+			Amount: result.PositionAmt,
+			UnrealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64),
+			Leverage: result.Leverage,
+			Side: result.PositionSide,
+			CreateTime: result.CreateTime,
+			SourceType: "test",
+		})
+	}
+	return usePositions, err
 }
