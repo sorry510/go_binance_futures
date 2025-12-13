@@ -18,6 +18,13 @@ func SyncUserData() {
 	go func() {
 		binance.WsUserData()
 	}()
+	go func() {
+		// 10分钟同步一次用户数据
+		for {
+			time.Sleep(time.Minute * 30) // 30分钟间隔
+			getNowUserData()
+		}
+	}()
 }
 
 // 删除数据表旧数据
