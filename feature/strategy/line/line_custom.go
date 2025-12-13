@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy"
+	"go_binance_futures/models"
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
+	"math"
 	"strconv"
 
+	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/expr-lang/expr"
 )
@@ -29,6 +32,7 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParam
 		return openResult
 	}
 	env := InitParseEnv(coin.Symbol, coin.Technology)
+	env["Positions"] = TradeLine.getLocalPositions()
 	for _, strategy := range strategyConfig {
 		if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
@@ -183,4 +187,31 @@ func (TradeLine TradeLineCustom) simpleCloseStrategy(closeParams strategy.CloseP
 		closeResult.Complete = true
 	}
 	return closeResult
+}
+
+func (TradeLine TradeLineCustom) getLocalPositions() ([]models.FuturesPosition) {
+	var usePositions []models.FuturesPosition
+	var positions []models.FuturesPosition
+	o := orm.NewOrm()
+	sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where 1 = 1"
+	sql += ` and f.amount <> '0'`
+	_, err := o.Raw(sql).QueryRows(&positions)
+	if err != nil {
+		return usePositions
+	}
+	
+	for _, position := range positions {
+		positionAmt, _ := strconv.ParseFloat(position.Amount, 64)
+		positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
+		if positionAmtFloatAbs < 0.0000001 {
+			continue
+		}
+		enterPrice_float64, _ := strconv.ParseFloat(position.EntryPrice, 64)
+		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
+		unRealizedProfit := (markPrice_float64 - enterPrice_float64) * positionAmt // 未实现盈亏
+		position.UnrealizedProfit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
+		
+		usePositions = append(usePositions, position)
+	}
+	return usePositions
 }
