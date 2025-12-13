@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"go_binance_futures/feature"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
 	"go_binance_futures/technology"
@@ -130,6 +131,8 @@ func (ctrl *StrategyTemplateController) TestStrategyRule() {
 		CreateTime: 1234567890000,
 		SourceType: "api",
 	}
+	positions, _ := feature.GetTransformPositions()
+	env["Positions"] = positions
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
