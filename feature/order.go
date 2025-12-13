@@ -11,7 +11,7 @@ import (
 func UpdateOrderStatus() {
 	o := orm.NewOrm()
 	var openOrders []models.Order
-	sql := "SELECT * FROM `order` where side = 'open' and closedTime = 0 limit 1000"
+	sql := "SELECT * FROM `order` where side = 'open' and closedTime = 0 limit 200"
 	_, err := o.Raw(sql).QueryRows(&openOrders)
 	if err != nil {
 		logs.Error("Error fetching orders:", err)

@@ -625,13 +625,11 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []types
 			// 没有超过设置的超时
 			continue
 		}
-		logs.Info("revoke over time opening order")
-		res, err := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderId)
-		if err == nil {
-			// 删除对应订单
-			orm.NewOrm().Raw("DELETE FROM `order` where order_id = '" + strconv.FormatInt(buyOrder.OrderId, 10) + "'").Exec()
-		}
-		logs.Info("response:", res)
+		res, _ := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderId)
+		logs.Info("cancel order response:", res)
+		// 删除对应订单
+		// 有时候会出现 order 表中有订单，但是实际上 app 中没有订单的情况，调用 CancelOrder 接口会报错, 所以这里直接删除订单
+		orm.NewOrm().Raw("DELETE FROM `order` where order_id = '" + strconv.FormatInt(buyOrder.OrderId, 10) + "'").Exec()
 	}
 }
 
