@@ -21,7 +21,7 @@ func UpdateOrderStatus() {
 	
 	for _, openOrder := range openOrders {
 		var closeOrder models.Order
-		err := o.QueryTable("order").
+		o.QueryTable("order").
 			Filter("Side", "close").
 			Filter("Symbol", openOrder.Symbol).
 			Filter("Amount", openOrder.Amount).
@@ -29,10 +29,6 @@ func UpdateOrderStatus() {
 			Filter("OrderId__gt", openOrder.OrderId). // 查询大于开仓订单的平仓订单
 			OrderBy("Id").
 			One(&closeOrder)
-		if err != nil {
-			// logs.Error("Error finding close order for open order:", openOrder.OrderId, err)
-			continue
-		}
 		if closeOrder.OrderId != 0 {
 			// 找到对应的平仓订单，进行处理
 			openOrder.Inexact_profit = closeOrder.Inexact_profit
@@ -41,15 +37,18 @@ func UpdateOrderStatus() {
 			logs.Info("Updated order status for open order, symbol:", openOrder.Symbol)
 		} else {
 			// 检查当前持仓情况，是否已经没有持仓，就删掉对应的开仓订单
+			find := false
 			for _, position := range positions {
-				if position.Symbol == openOrder.Symbol && position.Side == openOrder.PositionSide {
-					// 仍然有持仓，跳过
+				if position.Symbol == openOrder.Symbol {
+					// 仍然有持仓，跳过(不检查 做多还是做空)
+					find = true
 					break
-				} else {
-					// 没有持仓，删除对应的开仓订单
-					o.Delete(&openOrder)
-					logs.Info("Deleted open order with no corresponding position, symbol:", openOrder.Symbol)
 				}
+			}
+			if !find {
+				// 没有持仓，删除对应的开仓订单
+				o.Delete(&openOrder)
+				logs.Info("Deleted open order with no corresponding position, symbol:", openOrder.Symbol)
 			}
 		}
 	}
