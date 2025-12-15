@@ -17,6 +17,8 @@ func UpdateOrderStatus() {
 		logs.Error("Error fetching orders:", err)
 	}
 	
+	positions, _ := GetTransformPositions()
+	
 	for _, openOrder := range openOrders {
 		var closeOrder models.Order
 		err := o.QueryTable("order").
@@ -37,6 +39,18 @@ func UpdateOrderStatus() {
 			openOrder.ClosedTime = closeOrder.UpdateTime
 			o.Update(&openOrder)
 			logs.Info("Updated order status for open order, symbol:", openOrder.Symbol)
+		} else {
+			// 检查当前持仓情况，是否已经没有持仓，就删掉对应的开仓订单
+			for _, position := range positions {
+				if position.Symbol == openOrder.Symbol && position.Side == openOrder.PositionSide {
+					// 仍然有持仓，跳过
+					break
+				} else {
+					// 没有持仓，删除对应的开仓订单
+					o.Delete(&openOrder)
+					logs.Info("Deleted open order with no corresponding position, symbol:", openOrder.Symbol)
+				}
+			}
 		}
 	}
 }
