@@ -11,6 +11,7 @@ func init() {
 	
 	web.Router("/service/config", &controllers.IndexController{}, "get:GetServiceConfig;put:EditServiceConfig") // 服务配置信息
 	web.Router("/test-pusher", &controllers.IndexController{}, "post:TestPusher") // 测试推送
+	web.Router("/update-market-condition", &controllers.IndexController{}, "post:UpdateMarketCondition") // 手动触发更新市场状态
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit") // 更新和删除
 

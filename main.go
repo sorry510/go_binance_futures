@@ -135,6 +135,7 @@ func main() {
 	// debug
 	if debug == "1" {
 		updateSystemConfig()
+		// feature.UpdateMarketCondition(&SystemConfig)
 		// feature.UpdateOrderStatus()
 		// feature.GoTestApi()
 		// spot.TryRush()
@@ -176,7 +177,7 @@ func main() {
 	go func() {
 		for {
 			feature.UpdateMarketCondition(&SystemConfig)
-			time.Sleep(time.Minute * 5) // 5分钟更新一次
+			time.Sleep(time.Minute * 10) // 10分钟更新一次
 		}
 	}()
 	

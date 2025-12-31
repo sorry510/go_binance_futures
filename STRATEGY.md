@@ -308,5 +308,9 @@ BasicTrend = 0.3
 >Manually set it on the homepage, the automatic logic has not been determined yet
 
 ```
-MarketCondition = "0"
-Market
+MarketCondition = "1" // strong bullish
+MarketCondition = "2" // bullish
+MarketCondition = "3" // sideways
+MarketCondition = "4" // bearish
+MarketCondition = "5" // strong bearish
+```
