@@ -1016,8 +1016,55 @@ func UpdateMarketCondition(systemConfig *models.Config) {
 	culMarketCondition(systemConfig)
 }
 
-// 计算市场行情趋势
+// M 市场行情趋势(-1 到 1 之间)
+// M > 0.35	强多头环境
+// 0.1 < M ≤ 0.35	偏多
+// -0.1 ≤ M ≤ 0.1	震荡
+// -0.35 ≤ M < -0.1	偏空
+// M < -0.35	强空头
 func culMarketCondition(systemConfig *models.Config) {
 	systemConfig.MarketCondition = 0 // 0:震荡 1:单边
+	var symbols []*models.Symbols
+	o := orm.NewOrm()
+	sql := "SELECT id, symbol, percentChange FROM symbols where type = 'USDT' ORDER BY percentChange DESC"
+	_, err := o.Raw(sql).QueryRows(&symbols)
+	if err != nil {
+		logs.Error("error", err.Error())
+		return
+	}
+	otherLengths := len(symbols) - 4
+	if otherLengths <= 0 {
+		return 
+	}
+	otherWeight := 0.35 / float64(otherLengths) // 其他币种的权重 平分剩余的权重，等于 btc 的权重
+	var weightedSum float64
+    for _, s := range symbols {
+       	if s.Symbol == "BTCUSDT" {
+			weightedSum += s.PercentChange * 0.35
+		} else if s.Symbol == "ETHUSDT" {
+			weightedSum += s.PercentChange * 0.2
+		} else if s.Symbol == "SOLUSDT" {
+			weightedSum += s.PercentChange * 0.05
+		} else if s.Symbol == "BNBUSDT" {
+			weightedSum += s.PercentChange * 0.05
+		} else {
+			weightedSum += s.PercentChange * otherWeight
+		}
+    }
+
+    // 非线性压缩，防止极端行情
+    m := math.Tanh(weightedSum)
+	if m > 0.35 {
+		systemConfig.MarketCondition = 1 // 强多头
+	} else if m > 0.1 && m <= 0.35 {
+		systemConfig.MarketCondition = 2 // 偏多
+	} else if m >= -0.1 && m <= 0.1 {
+		systemConfig.MarketCondition = 3 // 震荡
+	} else if m >= -0.35 && m < -0.1 {
+		systemConfig.MarketCondition = 4 // 偏空
+	} else if m < -0.35 {
+		systemConfig.MarketCondition = 5 // 强空头
+	}
+	
 	orm.NewOrm().Update(systemConfig)
 }

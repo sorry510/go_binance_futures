@@ -302,9 +302,11 @@ BasicTrend = 0.3
 ```
 
 ##### 市场趋势
->手动自己在首页设置，自动逻辑暂未确定
 
 ```
-MarketCondition = "0"
-MarketCondition = "1"
+MarketCondition = "1" // 强多头
+MarketCondition = "2" // 偏多头
+MarketCondition = "3" // 震荡
+MarketCondition = "4" // 偏空头
+MarketCondition = "5" // 强空头
 ```
