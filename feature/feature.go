@@ -1023,7 +1023,6 @@ func UpdateMarketCondition(systemConfig *models.Config) {
 // -0.35 ≤ M < -0.1	偏空
 // M < -0.35	强空头
 func culMarketCondition(systemConfig *models.Config) {
-	systemConfig.MarketCondition = 0 // 0:震荡 1:单边
 	var symbols []*models.Symbols
 	o := orm.NewOrm()
 	sql := "SELECT id, symbol, percentChange FROM symbols where type = 'USDT' ORDER BY percentChange DESC"

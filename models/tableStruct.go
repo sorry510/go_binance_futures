@@ -27,7 +27,7 @@ type Config struct {
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值
 	LossAutoScale int `orm:"column(loss_auto_scale)" json:"loss_auto_scale"` // 是否自动缩放 loss_max_count
-	MarketCondition float64 `orm:"column(market_condition)" json:"market_condition"` // 1:强多头 2:偏多 3:震荡 4:偏空 -5:强空头
+	MarketCondition int `orm:"column(market_condition)" json:"market_condition"` // 1:强多头 2:偏多 3:震荡 4:偏空 -5:强空头
 	MarketConditionIsAuto int `orm:"column(market_condition_is_auto)" json:"market_condition_is_auto"` // 0:手动 1:自动
 }
 
