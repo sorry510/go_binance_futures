@@ -153,6 +153,8 @@ type SymbolFundingRates struct {
 	LastNoticeFundingRate string `orm:"column(last_notice_funding_rate)" json:"last_notice_funding_rate"` // 上次报警时的资金费率
 	LastNoticeFundingTime int64 `orm:"column(last_notice_funding_time)" json:"last_notice_funding_time"` // 上次报警时资金费率时间
 	LastNoticePrice string `orm:"column(last_notice_price)" json:"last_notice_price"` // 上次报警时价格
+	AutoOrder int64 `orm:"column(auto_order)" json:"auto_order"` // 1:自动下单 0:不下单
+	
 	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
