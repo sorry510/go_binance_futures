@@ -794,6 +794,7 @@ func UpdateSymbolsFundingRates(systemConfig models.Config) {
 						NowPrice: symbol.MarkPrice,
 						LastNoticeFundingRate: "0.0",
 						LastNoticeFundingTime: 0,
+						AutoOrder: 0,
 					})
 				} else {
 					// edit

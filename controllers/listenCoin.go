@@ -198,6 +198,27 @@ func (ctrl *ListenCoinController) GetFundingRates() {
 	})
 }
 
+func (ctrl *ListenCoinController) EditFundingRates() {
+	id := ctrl.Ctx.Input.Param(":id")
+	var symbols models.SymbolFundingRates
+	o := orm.NewOrm()
+	o.QueryTable("symbol_funding_rates").Filter("Id", id).One(&symbols)
+	
+	ctrl.BindJSON(&symbols)
+	
+	_, err := o.Update(&symbols) // _ 是受影响的条数
+    if err != nil {
+        // 处理错误
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+    }
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": symbols,
+		"msg": "success",
+	})
+}
+
 func (ctrl *ListenCoinController) GetFundingRateHistory() {
 	symbol := ctrl.GetString("symbol")
 	
