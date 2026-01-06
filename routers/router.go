@@ -45,6 +45,7 @@ func init() {
 	web.Router("/listen/coin/kc-chart/:id", &controllers.ListenCoinController{}, "get:GetKcLineChart") // kcChart
 	web.Router("/listen/coin/enable/:flag", &controllers.ListenCoinController{}, "put:UpdateEnable") // 修改所有的交易对开启关闭
 	web.Router("/listen/funding-rates", &controllers.ListenCoinController{}, "get:GetFundingRates") // 合约费率列表
+	web.Router("/listen/funding-rates/:id", &controllers.ListenCoinController{}, "put:EditFundingRates") // 编辑合约费率
 	web.Router("/listen/funding-rate/history", &controllers.ListenCoinController{}, "get:GetFundingRateHistory") // 合约费率历史
 	web.Router("/listen/strategy-rule/test/:id", &controllers.ListenCoinController{}, "post:TestStrategyRule") // 测试策略规则
 	
