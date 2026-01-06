@@ -8,9 +8,11 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/technology"
+	"go_binance_futures/utils"
 	"strconv"
 	"time"
 
+	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/expr-lang/expr"
@@ -295,7 +297,29 @@ func ListenCoinFundingRate(systemConfig models.Config) {
 				Price: price,
 				Remarks: lang.Lang("futures.profit_by_funding_rate"),
 			})
-			
+			if coin.AutoOrder == 1 {
+				// 自动下单(多单),尝试追逐趋势,可能会面对损失资金费用的问题
+				var coinSymbol models.Symbols
+				err := o.QueryTable("symbols").Filter("symbol", coin.Symbol).One(&coinSymbol)
+				if err != nil {
+					logs.Error("ListenCoinFundingRate auto order err:", coin.Symbol, err.Error())
+					continue
+				}
+				buyPrice, _, err := binance.GetDepthAvgPrice(coinSymbol.Symbol, 5) // 平均买价
+				if err == nil {
+					usdt_float64, _ := strconv.ParseFloat(coinSymbol.Usdt, 64) // 交易金额
+					leverage_float64 := float64(coinSymbol.Leverage) // 合约倍数
+					buyPrice = utils.GetTradePrecision(buyPrice, coinSymbol.TickSize) // 合理精度的价格
+					quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
+					quantity = utils.GetTradePrecision(quantity, coinSymbol.StepSize) // 合理精度的价格
+					_, err := binance.BuyMarket(coinSymbol.Symbol, quantity, futures.PositionSideTypeLong)
+					if err != nil {
+						logs.Error("ListenCoinFundingRate auto order buy long err:", coin.Symbol, err.Error())
+					} else {
+						logs.Info("ListenCoinFundingRate auto order buy long success:", coin.Symbol, "price:", buyPrice, "quantity:", quantity)
+					}
+				}
+			}
 		} else if (diff < -0.0055 && nowFundingRate < -0.005) {
 			// 负资金费率，小于 -1%, 做多可以吃资金费用
 			coin.LastNoticeFundingRate = coin.NowFundingRate
@@ -312,6 +336,29 @@ func ListenCoinFundingRate(systemConfig models.Config) {
 				Price: price,
 				Remarks: lang.Lang("futures.profit_by_funding_rate"),
 			})
+			if coin.AutoOrder == 1 {
+				// 自动下单(空单),尝试追逐趋势,可能会面对损失资金费用的问题
+				var coinSymbol models.Symbols
+				err := o.QueryTable("symbols").Filter("symbol", coin.Symbol).One(&coinSymbol)
+				if err != nil {
+					logs.Error("ListenCoinFundingRate auto order err:", coin.Symbol, err.Error())
+					continue
+				}
+				_, sellPrice, err := binance.GetDepthAvgPrice(coinSymbol.Symbol, 5) // 平均卖价
+				if err == nil {
+					usdt_float64, _ := strconv.ParseFloat(coinSymbol.Usdt, 64) // 交易金额
+					leverage_float64 := float64(coinSymbol.Leverage) // 合约倍数
+					sellPrice = utils.GetTradePrecision(sellPrice, coinSymbol.TickSize) // 合理精度的价格
+					quantity := (usdt_float64 / sellPrice) * leverage_float64  // 购买数量
+					quantity = utils.GetTradePrecision(quantity, coinSymbol.StepSize) // 合理精度的价格
+					_, err := binance.SellMarket(coinSymbol.Symbol, quantity, futures.PositionSideTypeShort)
+					if err != nil {
+						logs.Error("ListenCoinFundingRate auto order buy short err:", coin.Symbol, err.Error())
+					} else {
+						logs.Info("ListenCoinFundingRate auto order buy short success:", coin.Symbol, "price:", sellPrice, "quantity:", quantity)
+					}
+				}
+			}
 		}
 	}
 }
