@@ -1054,13 +1054,13 @@ func culMarketCondition(systemConfig *models.Config) {
 
     // 非线性压缩，防止极端行情
     m := math.Tanh(weightedSum)
-	if m >= 0.4 {
+	if m >= 0.45 {
 		systemConfig.MarketCondition = 1 // 强多头
-	} else if m >= 0.15 {
+	} else if m >= 0.2 {
 		systemConfig.MarketCondition = 2 // 偏多
-	} else if m >= -0.15 {
+	} else if m >= -0.2 {
 		systemConfig.MarketCondition = 3 // 震荡
-	} else if m >= -0.4 {
+	} else if m >= -0.45 {
 		systemConfig.MarketCondition = 4 // 偏空
 	} else {
 		systemConfig.MarketCondition = 5 // 强空头
