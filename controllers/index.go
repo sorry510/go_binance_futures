@@ -45,6 +45,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 	var listenCoinEnable = systemConfig.ListenCoinEnable
 	var listenFundingRate = systemConfig.ListenFundingRateEnable
 	var lossMaxCount = systemConfig.LossMaxCount
+	var futureTestAutoTradeCountLimit = systemConfig.FutureTestAutoTradeCountLimit
 	var externalLinks, _ = config.String("external::links")
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -82,6 +83,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"lossAutoScale": systemConfig.LossAutoScale,
 			"marketCondition": systemConfig.MarketCondition,
 			"marketConditionIsAuto": systemConfig.MarketConditionIsAuto,
+			"FutureTestAutoTradeCountLimit": futureTestAutoTradeCountLimit,
 			
 			"externalLinks": externalLinks,
 		},

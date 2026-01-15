@@ -221,7 +221,7 @@ func main() {
 	// 自动合约交易
 	go func() {
 		for {
-			feature.StartTrade(SystemConfig)
+			feature.StartTrade(&SystemConfig)
 			time.Sleep(time.Second * 2) // 2秒间隔, 1min 中不能超过 2400 权重和
 		}
 	}()
@@ -239,14 +239,14 @@ func main() {
 	// 轮训测试所有开启合约交易的币种策略(每轮5个)
 	go func() {
 		for {
-			feature.NoticeAllSymbolByStrategy(SystemConfig)
+			feature.NoticeAllSymbolByStrategy(&SystemConfig)
 			time.Sleep(time.Millisecond * 1500) // 1.5秒间隔
 		}
 	}()
 	// 监听测试的开仓是否需要平仓
 	go func() {
 		for {
-			feature.CheckTestResults(SystemConfig)
+			feature.CheckTestResults(&SystemConfig)
 			time.Sleep(time.Millisecond * 1500) // 1.5秒间隔
 		}
 	}()

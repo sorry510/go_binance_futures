@@ -25,7 +25,7 @@ var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var pusher = notify.GetNotifyChannel()
 
 var flagFutures = 0
-func StartTrade(systemConfig models.Config) {
+func StartTrade(systemConfig *models.Config) {
 	if (systemConfig.FutureEnable == 1) {
 		if (flagFutures == 0) {
 			logs.Info("futures trade bot start")
@@ -649,7 +649,7 @@ func insertOpenOrder(symbol string, quantity float64, avg_price string, position
 	o.Insert(order)
 }
 
-func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64, systemConfig models.Config) {
+func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64, systemConfig *models.Config) {
 	// 数据库写入订单
 	order := new(models.Order)
 	order.Symbol = position.Symbol
@@ -667,6 +667,8 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 	
 	// 自动缩放
 	AutoLossScale(systemConfig, unRealizedProfit >= 0)
+	// 检查自动转换测试仓
+	autoTradeToTest(systemConfig, unRealizedProfit >= 0)
 	
 	// 检查是否有相同的开仓订单,如果有则更新状态
 	var openOrder models.Order
@@ -978,8 +980,8 @@ func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
 	return useOrders, err
 }
 
-var orderCount = 0 // 计数器, 当连续平仓盈利 3次(或亏损3次)后,增大(缩小)窗口
-func AutoLossScale(systemConfig models.Config, flag bool) {
+var orderCount = 0 // 计数器, 当连续平仓盈利 2次(或亏损2次)后,增大(缩小)窗口
+func AutoLossScale(systemConfig *models.Config, flag bool) {
 	if (systemConfig.LossAutoScale == 0) {
 		return
 	}
@@ -988,14 +990,14 @@ func AutoLossScale(systemConfig models.Config, flag bool) {
 	} else {
 		orderCount -= 1
 	}
-	if orderCount >= 3 {
+	if orderCount >= 2 {
 		orderCount = 0
 		// 增加窗口
 		orm.NewOrm().QueryTable("config").Filter("id", systemConfig.ID).Update(orm.Params{
 			"loss_max_count": systemConfig.LossMaxCount + 1,
 		})
 	}
-	if orderCount <= -3 {
+	if orderCount <= -2 {
 		orderCount = 0
 		newCount := systemConfig.LossMaxCount - 1
 		if newCount < 1 {
@@ -1067,4 +1069,26 @@ func culMarketCondition(systemConfig *models.Config) {
 	}
 	
 	orm.NewOrm().Update(systemConfig)
+}
+
+var trueLossTradeCount = 0 // 连续亏损计数器
+func autoTradeToTest(systemConfig *models.Config, isProfit bool) {
+	if systemConfig.FutureTestAutoTradeCountLimit <= 0 {
+		return
+	}
+	// 真实交易平仓n次都是亏损时，自动开启测试交易，关闭真实交易
+	if !isProfit {
+		trueLossTradeCount += 1
+	} else {
+		trueLossTradeCount = 0
+	}
+	if trueLossTradeCount >= systemConfig.FutureTestAutoTradeCountLimit {
+		logs.Info("futures loss %d times, auto close futures trade bot", trueLossTradeCount)
+		systemConfig.FutureEnable = 1 // 保持平仓策略继续运行
+		systemConfig.FutureAllowLong = 0
+		systemConfig.FutureAllowShort = 0
+		systemConfig.FutureTest = 1 // 开启测试交易
+		orm.NewOrm().Update(systemConfig)
+		trueLossTradeCount = 0
+	}
 }
