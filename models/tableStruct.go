@@ -29,6 +29,7 @@ type Config struct {
 	LossAutoScale int `orm:"column(loss_auto_scale)" json:"loss_auto_scale"` // 是否自动缩放 loss_max_count
 	MarketCondition int `orm:"column(market_condition)" json:"market_condition"` // 1:强多头 2:偏多 3:震荡 4:偏空 -5:强空头
 	MarketConditionIsAuto int `orm:"column(market_condition_is_auto)" json:"market_condition_is_auto"` // 0:手动 1:自动
+	FutureTestAutoTradeCountLimit int `orm:"column(future_test_auto_trade_count_limit)" json:"future_test_auto_trade_count_limit"` // 测试交易与真实交易自动切换的连续盈利次数限制，为0则不启用
 }
 
 // 切记需要注册model后才能使用

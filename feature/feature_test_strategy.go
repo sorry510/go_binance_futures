@@ -22,7 +22,7 @@ import (
 var coinNoticeLastTimeMap = make(map[string]int64) // limit 通知一次
 var FuturesTestNotice = 0
 var offsetId = 0
-func NoticeAllSymbolByStrategy(systemConfig models.Config) {
+func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 	if (systemConfig.FutureTest == 1) {
 		if (FuturesTestNotice == 0) {
 			logs.Info("futures all symbol notice_strategy bot start")
@@ -146,7 +146,7 @@ func NoticeAllSymbolByStrategy(systemConfig models.Config) {
 }
 
 // 检查测试中的币当前是否应该平仓
-func CheckTestResults(systemConfig models.Config) {
+func CheckTestResults(systemConfig *models.Config) {
 	if (systemConfig.FutureTest == 1) {
 		if (FuturesTestNotice == 0) {
 			logs.Info("futures all symbol notice_strategy bot start")
@@ -286,6 +286,7 @@ func CheckTestResults(systemConfig models.Config) {
 						StrategyName: strategy.Name,
 						Remarks: strategy.Code,
 					})
+					autoTestToTrade(systemConfig, profitUsdt >= 0.0)
 					// AutoLossScale(systemConfig, unRealizedProfit >= 0)
 					return
 				}
@@ -298,7 +299,6 @@ func CheckTestResults(systemConfig models.Config) {
 			result.UpdateTime = time.Now().Unix() * 1000
 			orm.NewOrm().Update(result)
 			// 平仓通知
-			// AutoLossScale(systemConfig, unRealizedProfit >= 0)
 			
 			quantity, _ := strconv.ParseFloat(result.PositionAmt, 64)
 			profitUsdt, _ := strconv.ParseFloat(result.CloseProfit, 64)
@@ -315,6 +315,7 @@ func CheckTestResults(systemConfig models.Config) {
 				StrategyName: "no define custom strategy",
 				Remarks: "profit or loss > 10%",
 			})
+			autoTestToTrade(systemConfig, profitUsdt >= 0)
 		}
 	}
 }
@@ -409,4 +410,28 @@ func getTransformPositions() (usePositions []types.FuturesPosition, err error) {
 		})
 	}
 	return usePositions, err
+}
+
+var testProfitTradeCount = 0 // 连续盈利计数器
+func autoTestToTrade(systemConfig *models.Config, isProfit bool) {
+	if systemConfig.FutureTestAutoTradeCountLimit <= 0 {
+		return
+	}
+	// 测试平仓n次都是盈利时，自动开启真实交易，关闭测试交易
+	if isProfit {
+		testProfitTradeCount += 1
+	} else {
+		testProfitTradeCount = 0
+	}
+	if testProfitTradeCount >= systemConfig.FutureTestAutoTradeCountLimit {
+		logs.Info("test strategy consecutive profit %d times, auto enable futures trade bot", testProfitTradeCount)
+		systemConfig.FutureEnable = 1
+		systemConfig.FutureAllowLong = 1
+		systemConfig.FutureAllowShort = 1
+		systemConfig.FutureTest = 0
+		orm.NewOrm().Update(systemConfig)
+		// 删除剩余的测试策略数据
+		orm.NewOrm().QueryTable("test_strategy_results").Filter("close_price", "0").Delete()
+		testProfitTradeCount = 0
+	}
 }
