@@ -298,8 +298,8 @@ func ListenCoinFundingRate(systemConfig models.Config) {
 				Remarks: lang.Lang("futures.profit_by_funding_rate"),
 			})
 			if coin.AutoOrder == 1 {
-				// 自动下单(多单),尝试追逐趋势,可能会面对损失资金费用的问题
-				OpenFundingRateLongOrder(coin.Symbol)
+				// 自动下单(空单)
+				OpenFundingRateShortOrder(coin.Symbol)
 			}
 		} else if (diff < -0.0055 && nowFundingRate < -0.005) {
 			// 负资金费率，小于 -1%, 做多可以吃资金费用
@@ -318,8 +318,8 @@ func ListenCoinFundingRate(systemConfig models.Config) {
 				Remarks: lang.Lang("futures.profit_by_funding_rate"),
 			})
 			if coin.AutoOrder == 1 {
-				// 自动下单(空单),尝试追逐趋势,可能会面对损失资金费用的问题
-				OpenFundingRateShortOrder(coin.Symbol)
+				OpenFundingRateLongOrder(coin.Symbol)
+				// 自动下单(多单)
 			}
 		}
 	}
