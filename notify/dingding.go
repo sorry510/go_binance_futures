@@ -407,3 +407,21 @@ func (pusher DingDing) FuturesPositionConvert(params FuturesPositionConvertParam
   )
   DingDingApi(text, pusher)
 }
+
+func (pusher DingDing) FuturesPriceChangeNotice(params FuturesNoticeParams) {
+	text := `
+## %s
+#### **{futures.change_percent}**：<font color="#008000">%.6f</font>
+#### **{futures.price}**：<font color="#008000">%f</font>
+#### **{futures.time}**：%s
+
+> author <sorry510sf@gmail.com>`
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    params.ChangePercent,
+    params.Price,
+    nowTime(),
+  )
+  DingDingApi(text, pusher)
+}

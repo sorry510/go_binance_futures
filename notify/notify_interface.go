@@ -21,6 +21,7 @@ type FuturesNoticeParams struct {
 	Side string // buy,sell
 	PositionSide string // long, short
 	Price float64
+	ChangePercent float64
 	AutoOrder string
 	Status string // success, fail 
 	Error string // 错误信息
@@ -119,6 +120,7 @@ type Pusher interface {
 	FuturesListenKlineKc(params FuturesListenParams)
 	FuturesListenKlineCustom(params FuturesListenParams)
 	FuturesListenFundingRate(params FuturesListenParams)
+	FuturesPriceChangeNotice(params FuturesNoticeParams)
 	
 	SpotOrder(params SpotOrderParams)
 	SpotNotice(params SpotNoticeParams)
