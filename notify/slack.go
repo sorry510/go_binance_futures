@@ -411,3 +411,21 @@ func (pusher Slack) FuturesPositionConvert(params FuturesPositionConvertParams) 
   )
   SlackApi(text, pusher)
 }
+
+func (pusher Slack) FuturesPriceChangeNotice(params FuturesNoticeParams) {
+	text := `
+## %s
+{futures.change_percent}：%.6f
+{futures.price}：%f
+{futures.time}：%s
+
+> author <sorry510sf@gmail.com>`
+
+  text = fmt.Sprintf(lang.LangMatch(text),
+    params.Symbol + params.Title,
+    params.ChangePercent,
+    params.Price,
+    nowTime(),
+  )
+  DingDingApi(text, pusher)
+}

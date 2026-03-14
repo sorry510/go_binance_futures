@@ -2,7 +2,9 @@ package binance
 
 import (
 	"context"
+	"go_binance_futures/lang"
 	"go_binance_futures/models"
+	"go_binance_futures/notify"
 	"sort"
 	"strconv"
 	"time"
@@ -18,6 +20,7 @@ import (
 var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
 var proxy_url, _ = config.String("binance::proxy_url")
+var pusher = notify.GetNotifyChannel()
 
 var futuresClient *futures.Client
 var deliveryClient *delivery.Client
@@ -516,6 +519,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 				
 				ticker.Symbol,
 			).Exec()
+			priceChangeNotice(systemConfig, ticker)
 			// if (ticker.Symbol == "BTCUSDT") {
 			// 	logs.Info("futures ws update symbol:", ticker.Symbol)
 			// }
@@ -529,6 +533,31 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		time.Sleep(time.Second * 30) // 30 秒间隔
 		UpdateCoinByWs(systemConfig, retryNum + 1)
 		return
+	}
+}
+
+var symbolPriceNoticeMap = make(map[string]int64) // 价格变动通知，key: symbol, value: timestamp
+func priceChangeNotice(systemConfig *models.Config, ticker *futures.WsMarketTickerEvent) {
+	if systemConfig.WsFuturesPriceChangeLimit == 0 {
+		return
+	}
+	lastTime, ok := symbolPriceNoticeMap[ticker.Symbol]
+	if ok && time.Now().Unix() - lastTime < 3600 * 4 {
+		// 4小时内已经通知过了，避免重复通知
+		return
+	}
+	if changePercent, err := strconv.ParseFloat(ticker.PriceChangePercent, 64); err == nil {
+		if changePercent >= float64(systemConfig.WsFuturesPriceChangeLimit) || changePercent <= float64(-systemConfig.WsFuturesPriceChangeLimit) {
+			closePriceFloat, _ := strconv.ParseFloat(ticker.ClosePrice, 64)
+			logs.Info("futures price change notice, symbol:", ticker.Symbol, " changePercent:", changePercent)
+			pusher.SetModuleName("coin_listen").FuturesPriceChangeNotice(notify.FuturesNoticeParams{
+				Title: lang.Lang("futures.up_or_down"),
+				Symbol: ticker.Symbol,
+				Price: closePriceFloat,
+				ChangePercent: changePercent,
+			})
+			symbolPriceNoticeMap[ticker.Symbol] = time.Now().Unix()
+		}
 	}
 }
 

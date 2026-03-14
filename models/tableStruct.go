@@ -23,6 +23,7 @@ type Config struct {
 	FutureTest int `orm:"column(future_test)" json:"future_test"`
 	FutureTestNoticeLimitMin int `orm:"column(future_test_notice_limit_min)" json:"future_test_notice_limit_min"`
 	WsFuturesEnable int `orm:"column(ws_futures_enable)" json:"ws_futures_enable"`
+	WsFuturesPriceChangeLimit int `orm:"column(ws_futures_price_change_limit)" json:"ws_futures_price_change_limit"` // websocket 价格变动通知的百分比阈值，为0则不启用，超过这个阈值就发送价格变动通知
 	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值
