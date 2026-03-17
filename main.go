@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go_binance_futures/command"
+	"go_binance_futures/crawler"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/middlewares"
@@ -55,7 +56,7 @@ func setDriver(d string)  {
 			orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
 		case "mysql":
 			orm.RegisterDriver(d, orm.DRMySQL)
-			orm.RegisterDataBase("default", "mysql", username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?charset=utf8")
+			orm.RegisterDataBase("default", "mysql", username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?charset=utf8mb4&collation=utf8mb4_0900_ai_ci")
 		case "postgres":
 			orm.RegisterDriver(d, orm.DRPostgres)
 			orm.RegisterDataBase("default", "postgres", "user=" + username + " password=" + password + " host=" + host + " port=" + port + " dbname=" + dbname + " sslmode=disable")
@@ -82,6 +83,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.FuturesPosition))
 	orm.RegisterModel(new(models.FuturesOrder))
 	orm.RegisterModel(new(models.NotifyConfig))
+	orm.RegisterModel(new(models.News))
 	
 	setDriver(driver) // 设置数据库驱动
 	syncDb() // 同步数据库
@@ -309,6 +311,12 @@ func main() {
 		}	
 	}()
 	
+	// Twitter 新闻抓取,每日清理历史新闻
+	go func() {
+		crawler.StartTwitterCrawler()
+		crawler.StartNewsCleanupTask()
+	}()
+
 	// web
 	web.Run(":" + webPort)
 }
