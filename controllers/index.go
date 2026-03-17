@@ -84,6 +84,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"marketCondition": systemConfig.MarketCondition,
 			"marketConditionIsAuto": systemConfig.MarketConditionIsAuto,
 			"FutureTestAutoTradeCountLimit": futureTestAutoTradeCountLimit,
+			"WsFuturesPriceChangeLimit": systemConfig.WsFuturesPriceChangeLimit,
 			
 			"externalLinks": externalLinks,
 		},
