@@ -66,3 +66,19 @@ slack_channel_id = ""
 [external]
 # 外部链接
 links = [{"url": "url1", "title": "title1"}]
+
+[crawler]
+# 1:开启 0:关闭
+twitter_enable = 1
+# 轮询间隔(秒)
+twitter_interval_sec = 120
+# 支持 @ 前缀, 逗号分隔
+twitter_accounts = "@binance,@coinbase,@ethereum,@solana,@binancezh,@elonmusk"
+# Twitter RSS 镜像源，逗号分隔（按顺序失败切换）
+twitter_rss_base_urls = "https://nitter.net,https://nitter.poast.org"
+# 新闻清理任务开关 1:开启 0:关闭
+news_cleanup_enable = 1
+# 保留天数（删除早于该天数的新闻）
+news_keep_days = 7
+# 每天执行时间（24小时制 HH:MM）
+news_cleanup_time = "03:00"
