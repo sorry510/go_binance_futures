@@ -27,7 +27,7 @@ import (
 var dbVersion int64 = 8 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
-var webIndex, _ = config.String("web::index")
+var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
 var driver, _ = config.String("database::driver")
 var dbPath, _ = config.String("database::path")
 var username, _ = config.String("database::username")
@@ -42,7 +42,8 @@ func init() {
 	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix() * 1000))
 	web.BConfig.CopyRequestBody = true // post 参数
 	web.SetStaticPath("/" + webIndex, "static") // 设置静态文件
-	logs.Info("server web page:", "http://localhost:" + webPort + "/" + webIndex + "/index.html")
+	logs.Info("server old web page:", "http://localhost:" + webPort + "/" + webIndex + "/index.html")
+	logs.Info("server new web page:", "http://localhost:" + webPort + "/" + webIndex + "/v2/index.html")
 	
 	registerModels() // 注册模型
 	registerMiddlewares() // 添加中间件
