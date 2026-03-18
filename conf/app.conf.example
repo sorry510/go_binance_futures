@@ -31,7 +31,7 @@ futures_user_data = 1
 [web]
 # web端口
 port = 3333
-# 首页 path
+# 首页 path(不要修改这项，否则前端需要修改打包配置，重新打包)
 index = zmkm
 # jwt key
 secret_key = 12321
