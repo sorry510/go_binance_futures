@@ -1,0 +1,1 @@
+import{aD as e,aE as o}from"./index-fjY98yle.js";const s=(t={})=>e.get(o("notice/coin"),{params:t}),c=(t,n)=>e.request("put",o(`notice/coin/${t}`),{data:n}),r=t=>e.post(o("notice/coin"),{data:t}),a=t=>e.request("delete",o(`notice/coin/${t}`));export{r as a,a as d,s as g,c as s};
