@@ -9,6 +9,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+  
 jobs:
   build-and-release:
     runs-on: ubuntu-22.04
@@ -71,7 +74,7 @@ jobs:
           linux_amd64_feature.tar.gz
           windows_amd64_feature.tar.gz
       env:
-        GITHUB_TOKEN: ${{ secrets.WORKFLOW_PERSONAL_ACCESS_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
     - name: Release Master
       uses: softprops/action-gh-release@v2
@@ -84,4 +87,4 @@ jobs:
           linux_amd64_feature.tar.gz
           windows_amd64_feature.tar.gz
       env:
-        GITHUB_TOKEN: ${{ secrets.WORKFLOW_PERSONAL_ACCESS_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
