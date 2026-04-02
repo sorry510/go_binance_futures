@@ -23,7 +23,7 @@ type ListenCoinController struct {
 
 func (ctrl *ListenCoinController) Get() {
 	paramsType := ctrl.GetString("type", "")
-	
+
 	o := orm.NewOrm()
 	var symbols []models.ListenSymbols
 	query := o.QueryTable("listen_symbols")
@@ -33,12 +33,55 @@ func (ctrl *ListenCoinController) Get() {
 	_, err := query.OrderBy("ID").All(&symbols)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
 	}
-	
-	ctrl.Ctx.Resp(map[string]interface{} {
+
+	if paramsType == "1" || paramsType == "2" {
+		symbolNames := make([]string, 0, len(symbols))
+		for _, s := range symbols {
+			symbolNames = append(symbolNames, s.Symbol)
+		}
+
+		closeMap := make(map[string]string)
+		if len(symbolNames) > 0 {
+			if paramsType == "1" {
+				var spotSymbols []models.SpotSymbols
+				o.QueryTable("spot_symbols").Filter("symbol__in", symbolNames).All(&spotSymbols, "Symbol", "Close")
+				for _, ss := range spotSymbols {
+					closeMap[ss.Symbol] = ss.Close
+				}
+			} else {
+				var futuresSymbols []models.Symbols
+				o.QueryTable("symbols").Filter("symbol__in", symbolNames).All(&futuresSymbols, "Symbol", "Close")
+				for _, fs := range futuresSymbols {
+					closeMap[fs.Symbol] = fs.Close
+				}
+			}
+		}
+
+		type ListenSymbolWithClose struct {
+			models.ListenSymbols
+			Close string `json:"close"`
+		}
+		results := make([]ListenSymbolWithClose, 0, len(symbols))
+		for _, s := range symbols {
+			results = append(results, ListenSymbolWithClose{
+				ListenSymbols: s,
+				Close:         closeMap[s.Symbol],
+			})
+		}
+		ctrl.Ctx.Resp(map[string]interface{}{
+			"code": 200,
+			"data": results,
+			"msg":  "success",
+		})
+		return
+	}
+
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": symbols,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 	

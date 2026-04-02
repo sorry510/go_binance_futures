@@ -1,5 +1,9 @@
 ### Change Log
 
+## v0.1.5
+- 更新 新UI
+- 访问地址 /zmkm/v2/index.html
+
 ## v0.1.4
 - 替换了前端 UI
 
