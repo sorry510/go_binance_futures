@@ -1,1 +1,0 @@
-import{aD as e,aE as r}from"./index-fjY98yle.js";const o=(t={})=>e.get(r("service/config"),{params:t}),a=t=>e.request("put",r("service/config"),{data:t}),n=(t={})=>e.post(r("test-pusher"),{params:t}),i=(t={})=>e.post(r("update-market-condition"),{params:t}),u=(t={})=>e.get(r("pm2-log?key=sorry510"),{params:t});export{o as a,a as e,u as g,n as t,i as u};
