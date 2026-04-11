@@ -85,6 +85,11 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"marketConditionIsAuto": systemConfig.MarketConditionIsAuto,
 			"FutureTestAutoTradeCountLimit": futureTestAutoTradeCountLimit,
 			"WsFuturesPriceChangeLimit": systemConfig.WsFuturesPriceChangeLimit,
+			"WsFuturesFastMoveEnable": systemConfig.WsFuturesFastMoveEnable,
+			"WsFuturesFastMoveThreshold": systemConfig.WsFuturesFastMoveThreshold,
+			"WsFuturesFastMoveRecover": systemConfig.WsFuturesFastMoveRecover,
+			"WsFuturesFastMoveCooldownSec": systemConfig.WsFuturesFastMoveCooldownSec,
+			"WsFuturesFastMoveWindows": systemConfig.WsFuturesFastMoveWindows,
 			
 			"externalLinks": externalLinks,
 		},

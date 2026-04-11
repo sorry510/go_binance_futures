@@ -24,6 +24,11 @@ type Config struct {
 	FutureTestNoticeLimitMin int `orm:"column(future_test_notice_limit_min)" json:"future_test_notice_limit_min"`
 	WsFuturesEnable int `orm:"column(ws_futures_enable)" json:"ws_futures_enable"`
 	WsFuturesPriceChangeLimit int `orm:"column(ws_futures_price_change_limit)" json:"ws_futures_price_change_limit"` // websocket 价格变动通知的百分比阈值，为0则不启用，超过这个阈值就发送价格变动通知
+	WsFuturesFastMoveEnable int `orm:"column(ws_futures_fast_move_enable)" json:"ws_futures_fast_move_enable"` // websocket 短周期快速波动通知开关
+	WsFuturesFastMoveThreshold int `orm:"column(ws_futures_fast_move_threshold)" json:"ws_futures_fast_move_threshold"` // websocket 短周期快速波动阈值(百分比)
+	WsFuturesFastMoveRecover int `orm:"column(ws_futures_fast_move_recover)" json:"ws_futures_fast_move_recover"` // websocket 短周期快速波动恢复阈值(百分比)
+	WsFuturesFastMoveCooldownSec int `orm:"column(ws_futures_fast_move_cooldown_sec)" json:"ws_futures_fast_move_cooldown_sec"` // websocket 短周期快速波动通知冷却时间(秒)
+	WsFuturesFastMoveWindows string `orm:"column(ws_futures_fast_move_windows)" json:"ws_futures_fast_move_windows"` // websocket 短周期快速波动窗口配置，例如: 3m,5m,30m
 	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值
