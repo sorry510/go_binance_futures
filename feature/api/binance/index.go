@@ -2,11 +2,13 @@ package binance
 
 import (
 	"context"
+	"fmt"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/adshao/go-binance/v2/delivery"
@@ -21,6 +23,37 @@ var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
 var proxy_url, _ = config.String("binance::proxy_url")
 var pusher = notify.GetNotifyChannel()
+
+const (
+	defaultFastMoveThresholdPct = 20.0
+	defaultFastMoveRecoverPct   = 18.0
+	defaultFastMoveCooldownSec  = int64(15 * 60)
+	defaultFastMoveWindows      = "3m,5m,10m"
+)
+
+type wsPricePoint struct {
+	TimeMs int64
+	Price  float64
+}
+
+type wsFastMoveWindow struct {
+	Name       string
+	DurationMs int64
+}
+
+type wsFastMoveState struct {
+	LastNotifyTs int64
+	Armed        bool
+}
+
+var wsFastMoveWindows = []wsFastMoveWindow{
+	{Name: "3m", DurationMs: 3 * 60 * 1000},
+	{Name: "5m", DurationMs: 5 * 60 * 1000},
+	{Name: "10m", DurationMs: 10 * 60 * 1000},
+}
+
+var wsTickerPriceHistory = make(map[string][]wsPricePoint)
+var wsFastMoveNoticeState = make(map[string]map[string]*wsFastMoveState)
 
 var futuresClient *futures.Client
 var deliveryClient *delivery.Client
@@ -506,7 +539,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		for _, ticker := range event {
 			o.Raw(
 				"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
-				ticker.PriceChangePercent,
+				ticker.PriceChangePercent, // 24小时价格变动百分比
 				ticker.ClosePrice,
 				ticker.OpenPrice,
 				ticker.LowPrice,
@@ -520,6 +553,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 				ticker.Symbol,
 			).Exec()
 			priceChangeNotice(systemConfig, ticker)
+			fastMoveNoticeByWindow(systemConfig, ticker)
 			// if (ticker.Symbol == "BTCUSDT") {
 			// 	logs.Info("futures ws update symbol:", ticker.Symbol)
 			// }
@@ -538,7 +572,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 
 var symbolPriceNoticeMap = make(map[string]int64) // 价格变动通知，key: symbol, value: timestamp
 func priceChangeNotice(systemConfig *models.Config, ticker *futures.WsMarketTickerEvent) {
-	if systemConfig.WsFuturesPriceChangeLimit == 0 {
+	if systemConfig.WsFuturesEnable == 0 || systemConfig.WsFuturesPriceChangeLimit == 0 {
 		return
 	}
 	lastTime, ok := symbolPriceNoticeMap[ticker.Symbol]
@@ -559,6 +593,219 @@ func priceChangeNotice(systemConfig *models.Config, ticker *futures.WsMarketTick
 			symbolPriceNoticeMap[ticker.Symbol] = time.Now().Unix()
 		}
 	}
+}
+
+var blackSymbols = map[string]bool{
+	"USDCUSDT": true,
+	"XAGUSDT": true,
+	"XAUUSDT": true,
+}
+func fastMoveNoticeByWindow(systemConfig *models.Config, ticker *futures.WsMarketTickerEvent) {
+	if systemConfig.WsFuturesEnable == 0 || systemConfig.WsFuturesFastMoveEnable == 0 {
+		return
+	}
+	// 只关注 USDT 交易对，避免一些非主流交易对价格波动过大导致频繁通知
+	if ticker == nil || ticker.Symbol == "" || !strings.Contains(ticker.Symbol, "USDT") {
+		return
+	}
+	// 黑名单中的交易对不发送快速波动通知，避免一些稳定币交易对价格波动过大导致频繁通知
+	if _, ok := blackSymbols[ticker.Symbol]; ok {
+		return
+	}
+	
+	windows := parseFastMoveWindows(systemConfig.WsFuturesFastMoveWindows)
+	if len(windows) == 0 {
+		return
+	}
+	maxWindowMs := getMaxWindowMs(windows)
+	thresholdPct := getFastMoveThreshold(systemConfig)
+	recoverPct := getFastMoveRecover(systemConfig, thresholdPct)
+	cooldownSec := getFastMoveCooldownSec(systemConfig)
+
+	price, err := strconv.ParseFloat(ticker.ClosePrice, 64)
+	if err != nil || price <= 0 {
+		return
+	}
+	currentTimeMs := ticker.Time
+	if currentTimeMs <= 0 {
+		currentTimeMs = time.Now().UnixMilli()
+	}
+
+	history := append(wsTickerPriceHistory[ticker.Symbol], wsPricePoint{TimeMs: currentTimeMs, Price: price})
+	minTimeMs := currentTimeMs - maxWindowMs
+	trimIndex := 0
+	for i := 0; i < len(history); i++ {
+		if history[i].TimeMs >= minTimeMs {
+			trimIndex = i
+			break
+		}
+		trimIndex = i + 1
+	}
+	if trimIndex > 0 {
+		history = history[trimIndex:]
+	}
+	wsTickerPriceHistory[ticker.Symbol] = history
+
+	if _, ok := wsFastMoveNoticeState[ticker.Symbol]; !ok {
+		wsFastMoveNoticeState[ticker.Symbol] = make(map[string]*wsFastMoveState)
+	}
+	stateMap := wsFastMoveNoticeState[ticker.Symbol]
+	nowSec := currentTimeMs / 1000
+	// logs.Info("fast move check, symbol:", ticker.Symbol, " price:", price, " historyLen:", len(history))
+
+	for _, window := range windows {
+		basePrice, ok := findWindowBasePrice(history, currentTimeMs-window.DurationMs)
+		if !ok || basePrice <= 0 {
+			continue
+		}
+
+		changePercent := (price - basePrice) / basePrice * 100
+		absChange := changePercent
+		if absChange < 0 {
+			absChange = -absChange
+		}
+
+		state, ok := stateMap[window.Name]
+		if !ok {
+			state = &wsFastMoveState{Armed: true}
+			stateMap[window.Name] = state
+		}
+
+		if absChange <= recoverPct {
+			state.Armed = true
+		}
+
+		if absChange < thresholdPct {
+			continue
+		}
+		if !state.Armed {
+			continue
+		}
+		if state.LastNotifyTs > 0 && nowSec-state.LastNotifyTs < cooldownSec {
+			continue
+		}
+
+		directionText := "快速上涨"
+		if changePercent < 0 {
+			directionText = "快速下跌"
+		}
+		logs.Info("futures fast move notice, symbol:", ticker.Symbol, " window:", window.Name, " changePercent:", changePercent)
+		pusher.SetModuleName("coin_listen").FuturesPriceChangeNotice(notify.FuturesNoticeParams{
+			Title:         fmt.Sprintf(" %s%s(>=%.0f%%)", window.Name, directionText, thresholdPct),
+			Symbol:        ticker.Symbol,
+			Price:         price,
+			ChangePercent: changePercent,
+		})
+
+		state.LastNotifyTs = nowSec
+		state.Armed = false
+	}
+}
+
+func findWindowBasePrice(history []wsPricePoint, targetTimeMs int64) (float64, bool) {
+	for i := len(history) - 1; i >= 0; i-- {
+		if history[i].TimeMs <= targetTimeMs {
+			return history[i].Price, true
+		}
+	}
+	return 0, false
+}
+
+func getFastMoveThreshold(systemConfig *models.Config) float64 {
+	if systemConfig.WsFuturesFastMoveThreshold > 0 {
+		return float64(systemConfig.WsFuturesFastMoveThreshold)
+	}
+	return defaultFastMoveThresholdPct
+}
+
+func getFastMoveRecover(systemConfig *models.Config, threshold float64) float64 {
+	if systemConfig.WsFuturesFastMoveRecover > 0 {
+		recoverVal := float64(systemConfig.WsFuturesFastMoveRecover)
+		if recoverVal >= threshold {
+			return threshold - 1
+		}
+		return recoverVal
+	}
+
+	recoverVal := threshold - 2
+	if recoverVal < 0 {
+		return 0
+	}
+	return recoverVal
+}
+
+func getFastMoveCooldownSec(systemConfig *models.Config) int64 {
+	if systemConfig.WsFuturesFastMoveCooldownSec > 0 {
+		return int64(systemConfig.WsFuturesFastMoveCooldownSec)
+	}
+	return defaultFastMoveCooldownSec
+}
+
+func parseFastMoveWindows(raw string) []wsFastMoveWindow {
+	text := strings.TrimSpace(raw)
+	if text == "" {
+		text = defaultFastMoveWindows
+	}
+
+	items := strings.Split(text, ",")
+	res := make([]wsFastMoveWindow, 0, len(items))
+	seen := make(map[string]struct{})
+	for _, item := range items {
+		name := strings.TrimSpace(item)
+		if name == "" {
+			continue
+		}
+		if _, ok := seen[name]; ok {
+			continue
+		}
+		duration, ok := parseWindowDurationMs(name)
+		if !ok || duration <= 0 {
+			continue
+		}
+		seen[name] = struct{}{}
+		res = append(res, wsFastMoveWindow{Name: name, DurationMs: duration})
+	}
+
+	if len(res) == 0 {
+		return wsFastMoveWindows
+	}
+	return res
+}
+
+func parseWindowDurationMs(text string) (int64, bool) {
+	if len(text) < 2 {
+		return 0, false
+	}
+	unit := text[len(text)-1]
+	numText := text[:len(text)-1]
+	val, err := strconv.ParseInt(numText, 10, 64)
+	if err != nil || val <= 0 {
+		return 0, false
+	}
+
+	switch unit {
+	case 's':
+		return val * 1000, true
+	case 'm':
+		return val * 60 * 1000, true
+	case 'h':
+		return val * 60 * 60 * 1000, true
+	default:
+		return 0, false
+	}
+}
+
+func getMaxWindowMs(windows []wsFastMoveWindow) int64 {
+	var maxMs int64
+	for _, item := range windows {
+		if item.DurationMs > maxMs {
+			maxMs = item.DurationMs
+		}
+	}
+	if maxMs <= 0 {
+		return 30 * 60 * 1000
+	}
+	return maxMs
 }
 
 // websocket user data 使用
