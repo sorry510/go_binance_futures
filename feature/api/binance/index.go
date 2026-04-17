@@ -584,12 +584,18 @@ func priceChangeNotice(systemConfig *models.Config, ticker *futures.WsMarketTick
 		if changePercent >= float64(systemConfig.WsFuturesPriceChangeLimit) || changePercent <= float64(-systemConfig.WsFuturesPriceChangeLimit) {
 			closePriceFloat, _ := strconv.ParseFloat(ticker.ClosePrice, 64)
 			logs.Info("futures price change notice, symbol:", ticker.Symbol, " changePercent:", changePercent)
-			pusher.SetModuleName("coin_listen").FuturesPriceChangeNotice(notify.FuturesNoticeParams{
-				Title: lang.Lang("futures.up_or_down"),
-				Symbol: ticker.Symbol,
-				Price: closePriceFloat,
+			title := lang.Lang("futures.up_or_down")
+			pusher.SetModuleName("futures_market_listen").FuturesPriceChangeNotice(notify.FuturesNoticeParams{
+				Title:         title,
+				Symbol:        ticker.Symbol,
+				Price:         closePriceFloat,
 				ChangePercent: changePercent,
 			})
+			direction := "up"
+			if changePercent < 0 {
+				direction = "down"
+			}
+			saveMarketNoticeLog(ticker.Symbol, "price_change", "24h", direction, closePriceFloat, 0, changePercent, float64(systemConfig.WsFuturesPriceChangeLimit), title, ticker.Time)
 			symbolPriceNoticeMap[ticker.Symbol] = time.Now().Unix()
 		}
 	}
@@ -597,9 +603,35 @@ func priceChangeNotice(systemConfig *models.Config, ticker *futures.WsMarketTick
 
 var blackSymbols = map[string]bool{
 	"USDCUSDT": true,
-	"XAGUSDT": true,
-	"XAUUSDT": true,
+	"XAGUSDT":  true,
+	"XAUUSDT":  true,
 }
+
+func saveMarketNoticeLog(symbol string, noticeType string, window string, direction string, price float64, basePrice float64, changePercent float64, thresholdPercent float64, content string, eventTime int64) {
+	if eventTime <= 0 {
+		eventTime = time.Now().UnixMilli()
+	}
+
+	item := models.FuturesMarketNoticeLog{
+		Symbol:           symbol,
+		NoticeType:       noticeType,
+		Window:           window,
+		Direction:        direction,
+		Source:           "ws_all_market_ticker",
+		Price:            price,
+		BasePrice:        basePrice,
+		ChangePercent:    changePercent,
+		ThresholdPercent: thresholdPercent,
+		Content:          content,
+		CreateTime:       eventTime,
+		UpdateTime:       eventTime,
+	}
+
+	if _, err := orm.NewOrm().Insert(&item); err != nil {
+		logs.Error("save market notice log error:", err)
+	}
+}
+
 func fastMoveNoticeByWindow(systemConfig *models.Config, ticker *futures.WsMarketTickerEvent) {
 	if systemConfig.WsFuturesEnable == 0 || systemConfig.WsFuturesFastMoveEnable == 0 {
 		return
@@ -689,13 +721,19 @@ func fastMoveNoticeByWindow(systemConfig *models.Config, ticker *futures.WsMarke
 		if changePercent < 0 {
 			directionText = "快速下跌"
 		}
+		title := fmt.Sprintf(" %s%s(>=%.0f%%)", window.Name, directionText, thresholdPct)
 		logs.Info("futures fast move notice, symbol:", ticker.Symbol, " window:", window.Name, " changePercent:", changePercent)
-		pusher.SetModuleName("coin_listen").FuturesPriceChangeNotice(notify.FuturesNoticeParams{
-			Title:         fmt.Sprintf(" %s%s(>=%.0f%%)", window.Name, directionText, thresholdPct),
+		pusher.SetModuleName("futures_market_listen").FuturesPriceChangeNotice(notify.FuturesNoticeParams{
+			Title:         title,
 			Symbol:        ticker.Symbol,
 			Price:         price,
 			ChangePercent: changePercent,
 		})
+		direction := "up"
+		if changePercent < 0 {
+			direction = "down"
+		}
+		saveMarketNoticeLog(ticker.Symbol, "fast_move", window.Name, direction, price, basePrice, changePercent, thresholdPct, title, currentTimeMs)
 
 		state.LastNotifyTs = nowSec
 		state.Armed = false

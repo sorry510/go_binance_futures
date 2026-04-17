@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"sort"
 	"strconv"
+	"strings"
 
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy/line"
@@ -23,12 +24,20 @@ type ListenCoinController struct {
 
 func (ctrl *ListenCoinController) Get() {
 	paramsType := ctrl.GetString("type", "")
+	paramsSymbol := strings.TrimSpace(ctrl.GetString("symbol"))
+	paramsListenType := strings.TrimSpace(ctrl.GetString("listen_type"))
 
 	o := orm.NewOrm()
 	var symbols []models.ListenSymbols
 	query := o.QueryTable("listen_symbols")
 	if paramsType != "" {
 		query = query.Filter("Type", paramsType)
+	}
+	if paramsSymbol != "" {
+		query = query.Filter("symbol__icontains", strings.ToUpper(paramsSymbol))
+	}
+	if paramsListenType != "" {
+		query = query.Filter("listen_type", paramsListenType)
 	}
 	_, err := query.OrderBy("ID").All(&symbols)
 	if err != nil {
