@@ -85,6 +85,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.FuturesOrder))
 	orm.RegisterModel(new(models.NotifyConfig))
 	orm.RegisterModel(new(models.News))
+	orm.RegisterModel(new(models.FuturesMarketNoticeLog))
 	
 	setDriver(driver) // 设置数据库驱动
 	syncDb() // 同步数据库
@@ -313,6 +314,11 @@ func main() {
 		}	
 	}()
 	
+	// 合约市场通知日志每日清理，删除 10 天前的数据
+	go func() {
+		binance.StartMarketNoticeLogCleanupTask()
+	}()
+
 	// Twitter 新闻抓取,每日清理历史新闻
 	go func() {
 		crawler.StartTwitterCrawler()

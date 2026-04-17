@@ -59,6 +59,7 @@ func init() {
 	web.Router("/futures/local/positions", &controllers.AccountController{}, "get:GetLocalFuturesPositions") // 获取本地存储的合约持仓信息
 	web.Router("/futures/local/positions/:id", &controllers.AccountController{}, "put:EditLocalFuturesPositions;delete:DelLocalFuturesPositions") // 修复和删除本地存储的合约持仓信息
 	web.Router("/futures/local/open-orders", &controllers.AccountController{}, "get:GetLocalFuturesOpenOrders") // 获取本地存储的挂单信息
+	web.Router("/futures/market-notice-logs", &controllers.FuturesMarketNoticeLogController{}, "get:Get") // 合约市场通知日志查询
 	
 	web.Router("/fund-rate/eat", &controllers.EatRateController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/fund-rate/eat/:id", &controllers.EatRateController{}, "delete:Delete;put:Edit") // 更新和删除
