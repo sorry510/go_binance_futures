@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"math"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -15,6 +14,7 @@ import (
 	"go_binance_futures/utils"
 
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/expr-lang/expr"
@@ -34,6 +34,51 @@ type FeatureController struct {
 	web.Controller
 }
 
+func featureSQLColumn(driver string, name string) string {
+	quote := "`"
+	if driver == "postgres" {
+		quote = "\""
+	}
+	return quote + name + quote
+}
+
+func featureSortExpr(paramsSort string, driver string) (string, string, bool) {
+	if paramsSort == "" {
+		return "", "", false
+	}
+
+	direction := "ASC"
+	field := paramsSort
+	if strings.HasSuffix(paramsSort, "+") {
+		direction = "DESC"
+		field = strings.TrimSuffix(paramsSort, "+")
+	} else if strings.HasSuffix(paramsSort, "-") {
+		field = strings.TrimSuffix(paramsSort, "-")
+	} else {
+		return "", "", false
+	}
+
+	switch field {
+	case "percent_change":
+		field = "percentChange"
+	case "quote_volume":
+		field = "quoteVolume"
+	}
+
+	switch field {
+	case "percentChange", "close":
+		castType := "DECIMAL(20,8)"
+		if driver == "sqlite" {
+			castType = "REAL"
+		}
+		return "CAST(" + featureSQLColumn(driver, field) + " AS " + castType + ")", direction, true
+	case "quoteVolume", "symbol":
+		return featureSQLColumn(driver, field), direction, true
+	default:
+		return "", "", false
+	}
+}
+
 func (ctrl *FeatureController) Get() {
 	paramsSort := ctrl.GetString("sort")
 	symbol_type := ctrl.GetString("symbol_type")
@@ -46,57 +91,97 @@ func (ctrl *FeatureController) Get() {
 	page, _ := strconv.Atoi(paramsPage)
 	limit, _ := strconv.Atoi(paramsLimit)
 	offset := (page - 1) * limit
+	dbDriver, _ := config.String("database::driver")
+	
+	selectedFields := []string{
+		"id", "symbol", "percentChange", "close", "open", "low", "high", "enable", "updateTime", "quoteVolume", "tradeCount", "leverage", "marginType",
+		"stepSize", "tickSize", "usdt", "profit", "loss", "strategy_type", "pin",
+	}
 	
 	o := orm.NewOrm()
 	var symbols []models.Symbols
-	query := o.QueryTable("symbols")
-	countQuery := o.QueryTable("symbols")
-	if symbol_type != "" {
-		query = query.Filter("type", symbol_type)
-		countQuery = countQuery.Filter("type", symbol_type)
-	}
-	if symbol != "" {
-		query = query.Filter("symbol__contains", symbol)
-		countQuery = countQuery.Filter("symbol__contains", symbol)
-	}
-	if enable != "" {
-		query = query.Filter("enable", enable)
-		countQuery = countQuery.Filter("enable", enable)
-	}
-	if margin_type != "" {
-		query = query.Filter("marginType", margin_type)
-		countQuery = countQuery.Filter("marginType", margin_type)
-	}
-	if pin != "" {
-		query = query.Filter("pin", 1)
-		countQuery = countQuery.Filter("pin", 1)
-	}
-	_, err := query.OrderBy("-Pin", "ID").Limit(limit, offset).All(&symbols,
-		"ID", "Symbol", "PercentChange", "Close", "Open", "Low", "High", "Enable", "UpdateTime", "QuoteVolume", "TradeCount", "Leverage", "MarginType",
-		"StepSize", "TickSize", "Usdt", "Profit", "Loss", "StrategyType", "Pin", "Sort", "Type",
-	)
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-	}
-	total, err := countQuery.Count()
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+	var total int64
+	var err error
+	sortExpr, orderDirection, hasCustomSort := featureSortExpr(paramsSort, dbDriver)
+	if hasCustomSort {
+		whereClauses := make([]string, 0, 5)
+		bindData := make([]interface{}, 0, 5)
+		if symbol_type != "" {
+			whereClauses = append(whereClauses, featureSQLColumn(dbDriver, "type")+" = ?")
+			bindData = append(bindData, symbol_type)
+		}
+		if symbol != "" {
+			whereClauses = append(whereClauses, featureSQLColumn(dbDriver, "symbol")+" LIKE ?")
+			bindData = append(bindData, "%"+symbol+"%")
+		}
+		if enable != "" {
+			whereClauses = append(whereClauses, featureSQLColumn(dbDriver, "enable")+" = ?")
+			bindData = append(bindData, enable)
+		}
+		if margin_type != "" {
+			whereClauses = append(whereClauses, featureSQLColumn(dbDriver, "marginType")+" = ?")
+			bindData = append(bindData, margin_type)
+		}
+		if pin != "" {
+			whereClauses = append(whereClauses, featureSQLColumn(dbDriver, "pin")+" = ?")
+			bindData = append(bindData, 1)
+		}
+		
+		whereSQL := ""
+		if len(whereClauses) > 0 {
+			whereSQL = " WHERE " + strings.Join(whereClauses, " AND ")
+		}
+		
+		listSQL := "SELECT " + strings.Join(selectedFields, ", ") +
+			" FROM " + featureSQLColumn(dbDriver, "symbols") + whereSQL +
+			" ORDER BY " + sortExpr + " " + orderDirection + ", " + featureSQLColumn(dbDriver, "id") + " ASC LIMIT ? OFFSET ?"
+		listBindData := append(bindData, limit, offset)
+		_, err = o.Raw(listSQL, listBindData...).QueryRows(&symbols)
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+		countSQL := "SELECT COUNT(*) FROM " + featureSQLColumn(dbDriver, "symbols") + whereSQL
+		err = o.Raw(countSQL, bindData...).QueryRow(&total)
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+	} else {
+		query := o.QueryTable("symbols")
+		countQuery := o.QueryTable("symbols")
+		if symbol_type != "" {
+			query = query.Filter("type", symbol_type)
+			countQuery = countQuery.Filter("type", symbol_type)
+		}
+		if symbol != "" {
+			query = query.Filter("symbol__contains", symbol)
+			countQuery = countQuery.Filter("symbol__contains", symbol)
+		}
+		if enable != "" {
+			query = query.Filter("enable", enable)
+			countQuery = countQuery.Filter("enable", enable)
+		}
+		if margin_type != "" {
+			query = query.Filter("marginType", margin_type)
+			countQuery = countQuery.Filter("marginType", margin_type)
+		}
+		if pin != "" {
+			query = query.Filter("pin", 1)
+			countQuery = countQuery.Filter("pin", 1)
+		}
+		_, err = query.OrderBy("ID").Limit(limit, offset).All(&symbols, selectedFields...)
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+		total, err = countQuery.Count()
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
 	}
 	
-	// TODO: 分页之后这里有问题
-	if strings.HasPrefix(paramsSort, "percent_change") {
-		sort.SliceStable(symbols, func(i, j int) bool {
-			base := symbols[i].Pin >= symbols[j].Pin
-			if paramsSort == "percent_change+" {
-				return base && symbols[i].PercentChange >= symbols[j].PercentChange // 涨幅从大到小排序
-			} else if paramsSort == "percent_change-" {
-				return base && symbols[i].PercentChange < symbols[j].PercentChange // 涨幅从小到大排序
-			} else {
-				return true
-			}
-		})
-	}
-
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
 		"data": map[string]interface{} {
