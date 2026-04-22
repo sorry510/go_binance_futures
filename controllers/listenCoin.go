@@ -26,6 +26,7 @@ func (ctrl *ListenCoinController) Get() {
 	paramsType := ctrl.GetString("type", "")
 	paramsSymbol := strings.TrimSpace(ctrl.GetString("symbol"))
 	paramsListenType := strings.TrimSpace(ctrl.GetString("listen_type"))
+	paramsEnable := ctrl.GetString("enable", "")
 
 	o := orm.NewOrm()
 	var symbols []models.ListenSymbols
@@ -38,6 +39,9 @@ func (ctrl *ListenCoinController) Get() {
 	}
 	if paramsListenType != "" {
 		query = query.Filter("listen_type", paramsListenType)
+	}
+	if paramsEnable != "" {
+		query = query.Filter("enable", paramsEnable)
 	}
 	_, err := query.OrderBy("ID").All(&symbols)
 	if err != nil {
