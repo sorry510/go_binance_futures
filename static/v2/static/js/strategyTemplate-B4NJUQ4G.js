@@ -1,1 +1,0 @@
-import{aD as e,aE as s}from"./index-D44YF4uQ.js";const p=(t={})=>e.get(s("strategy-templates"),{params:t}),n=(t,a)=>e.request("put",s(`strategy-templates/${t}`),{data:a}),o=t=>e.post(s("strategy-templates"),{data:t}),g=t=>e.request("delete",s(`strategy-templates/${t}`)),l=(t,a)=>e.post(s(`strategy-templates/test/${t}`),{data:a});export{o as a,g as d,n as e,p as g,l as t};

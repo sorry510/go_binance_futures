@@ -1,0 +1,1 @@
+import{d as c,i as s,u as p,c as u,o as i}from"./index-CBlovyXs.js";const l=c({name:"Redirect",__name:"redirect",setup(_){const{currentRoute:r,replace:t}=s(),{params:a,query:n}=p(r),{path:e}=a,o=Array.isArray(e)?e.join("/"):e;return t({path:"/"+o,query:n}),(m,d)=>(i(),u("div"))}});export{l as default};
