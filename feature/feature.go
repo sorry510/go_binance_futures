@@ -1,6 +1,7 @@
 package feature
 
 import (
+	"fmt"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy"
 	"go_binance_futures/feature/strategy/coin"
@@ -694,7 +695,18 @@ func UpdateSymbolsTradePrecision() {
 	res, err := binance.GetExchangeInfo()
 	o := orm.NewOrm()
 	if err == nil {
-		logs.Info("api rate one minute limit: " + strconv.FormatInt(res.RateLimits[0].Limit, 10))
+		logs.Info("Binance API rate one minute limit: " + strconv.FormatInt(res.RateLimits[0].Limit, 10))
+		logs.Info("auto add or update futures symbols trade precision")
+
+		var currentSymbols []models.Symbols
+		_, _ = o.QueryTable("symbols").All(&currentSymbols, "Symbol")
+		existingSymbolMap := make(map[string]struct{}, len(currentSymbols))
+		for _, item := range currentSymbols {
+			existingSymbolMap[item.Symbol] = struct{}{}
+		}
+
+		updates := make([]futuresSymbolPrecisionUpdate, 0, len(res.Symbols))
+		newSymbols := make([]futuresSymbolInsert, 0)
 		
 		for _, symbol := range res.Symbols {
 			if symbol.Status != "TRADING" {
@@ -722,45 +734,191 @@ func UpdateSymbolsTradePrecision() {
 			}
 			
 			if suffixType != "" { // 只处理USDT, FDUSD, USDC结尾的币种
-				// 检查是否存在此币种
-				if !o.QueryTable("symbols").Filter("symbol", symbol.Symbol).Exist() {
-					// 没有的币种插入
+				updates = append(updates, futuresSymbolPrecisionUpdate{
+					Symbol:   symbol.Symbol,
+					TickSize: tickSize,
+					StepSize: stepSize,
+				})
+
+				if _, ok := existingSymbolMap[symbol.Symbol]; !ok {
 					logs.Info("add new futures symbol", symbol.Symbol)
-					o.Insert(&models.Symbols{
-						Symbol: symbol.Symbol,
-						Enable: 0, // 默认不开启
-						Leverage: 3,
-						MarginType: "CROSSED", // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
-						TickSize: tickSize,
-						StepSize: stepSize,
-						Usdt: "10",
-						Profit: "20",
-						Loss: "20",
+					newSymbols = append(newSymbols, futuresSymbolInsert{
+						Symbol:        symbol.Symbol,
+						UpdateTime:    0,
+						LastClose:     "0",
+						LastUpdateTime: 0,
+						Enable:        0,
+						Leverage:      3,
+						MarginType:    "CROSSED",
+						TickSize:      tickSize,
+						StepSize:      stepSize,
+						Usdt:          "10",
+						Profit:        "20",
+						Loss:          "20",
 						KlineInterval: "1d",
-						StrategyType: "global",
-						Type: suffixType,
+						Technology:    "",
+						Strategy:      "",
+						StrategyType:  "global",
+						Type:          suffixType,
 						PercentChange: 0.0,
-						Close: "0",
-						Open: "0",
-						High: "0",
-						Low: "0",
-						BaseVolume: 0.0,
-						QuoteVolume: 0.0,
-						CloseQty: 0.0,
-						TradeCount: 0.0,
-						Sort: 0,
-						Pin: 0,
+						Close:         "0",
+						Open:          "0",
+						High:          "0",
+						Low:           "0",
+						BaseVolume:    0.0,
+						QuoteVolume:   0.0,
+						CloseQty:      0.0,
+						TradeCount:    0.0,
+						Sort:          0,
+						Pin:           0,
 					})
-				} else {
-					// 更新交易精度
-					o.QueryTable("symbols").Filter("symbol", symbol.Symbol).Update(orm.Params{
-						"tickSize": tickSize,
-						"stepSize": stepSize,
-					})
+					existingSymbolMap[symbol.Symbol] = struct{}{}
 				}
 			}
 		}
+
+		for start := 0; start < len(newSymbols); start += 1000 {
+			end := start + 1000
+			if end > len(newSymbols) {
+				end = len(newSymbols)
+			}
+
+			query, args := buildBatchInsertFuturesSymbolsSQL(newSymbols[start:end])
+			if query == "" {
+				continue
+			}
+			if _, err := o.Raw(query, args...).Exec(); err != nil {
+				logs.Error("insert futures symbols error:", err)
+				return
+			}
+		}
+
+		for start := 0; start < len(updates); start += 300 {
+			end := start + 300
+			if end > len(updates) {
+				end = len(updates)
+			}
+
+			query, args := buildBatchUpdateSymbolsTradePrecisionSQL(updates[start:end])
+			if query == "" {
+				continue
+			}
+			if _, err := o.Raw(query, args...).Exec(); err != nil {
+				logs.Error("update futures symbols trade precision error:", err)
+				return
+			}
+		}
 	}
+}
+
+type futuresSymbolPrecisionUpdate struct {
+	Symbol   string
+	TickSize string
+	StepSize string
+}
+
+type futuresSymbolInsert struct {
+	Symbol        string
+	UpdateTime    int64
+	LastClose     string
+	LastUpdateTime int64
+	Enable        int
+	Leverage      int64
+	MarginType    string
+	TickSize      string
+	StepSize      string
+	Usdt          string
+	Profit        string
+	Loss          string
+	KlineInterval string
+	Technology    string
+	Strategy      string
+	StrategyType  string
+	Type          string
+	PercentChange float64
+	Close         string
+	Open          string
+	High          string
+	Low           string
+	BaseVolume    float64
+	QuoteVolume   float64
+	CloseQty      float64
+	TradeCount    float64
+	Sort          int64
+	Pin           int64
+}
+
+func buildBatchUpdateSymbolsTradePrecisionSQL(items []futuresSymbolPrecisionUpdate) (string, []interface{}) {
+	if len(items) == 0 {
+		return "", nil
+	}
+
+	selectParts := make([]string, 0, len(items))
+	args := make([]interface{}, 0, len(items)*3)
+	for _, item := range items {
+		selectParts = append(selectParts, "SELECT ? AS symbol, ? AS tickSize, ? AS stepSize")
+		args = append(args, item.Symbol, item.TickSize, item.StepSize)
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE `symbols` AS s "+
+			"JOIN (%s) AS v ON s.symbol = v.symbol "+
+			"SET s.tickSize = v.tickSize, s.stepSize = v.stepSize",
+		strings.Join(selectParts, " UNION ALL "),
+	)
+
+	return query, args
+}
+
+func buildBatchInsertFuturesSymbolsSQL(items []futuresSymbolInsert) (string, []interface{}) {
+	if len(items) == 0 {
+		return "", nil
+	}
+
+	valueParts := make([]string, 0, len(items))
+	args := make([]interface{}, 0, len(items)*28)
+	for _, item := range items {
+		valueParts = append(valueParts, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		args = append(args,
+			item.Symbol,
+			item.PercentChange,
+			item.Close,
+			item.Open,
+			item.Low,
+			item.High,
+			item.Enable,
+			item.UpdateTime,
+			item.LastClose,
+			item.LastUpdateTime,
+			item.BaseVolume,
+			item.QuoteVolume,
+			item.CloseQty,
+			item.TradeCount,
+			item.Leverage,
+			item.MarginType,
+			item.TickSize,
+			item.StepSize,
+			item.Usdt,
+			item.Profit,
+			item.Loss,
+			item.KlineInterval,
+			item.Technology,
+			item.Strategy,
+			item.StrategyType,
+			item.Pin,
+			item.Sort,
+			item.Type,
+		)
+	}
+
+	query := fmt.Sprintf(
+		"INSERT INTO `symbols` "+
+			"(`symbol`, `percentChange`, `close`, `open`, `low`, `high`, `enable`, `updateTime`, `lastClose`, `lastUpdateTime`, `baseVolume`, `quoteVolume`, `closeQty`, `tradeCount`, `leverage`, `marginType`, `tickSize`, `stepSize`, `usdt`, `profit`, `loss`, `kline_interval`, `technology`, `strategy`, `strategy_type`, `pin`, `sort`, `type`) "+
+			"VALUES %s",
+		strings.Join(valueParts, ", "),
+	)
+
+	return query, args
 }
 
 // 更新币种信息

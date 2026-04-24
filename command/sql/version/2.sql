@@ -1,2 +1,0 @@
-	
-ALTER TABLE "order" ADD leverage INTEGER DEFAULT (5);
