@@ -237,56 +237,88 @@ func GetOrder(orderParams OrderParams) (res *binance.Order, err error) {
 // @doc https://developers.binance.com/docs/zh-CN/binance-spot-api-docs/web-socket-streams#%E6%8C%89symbol%E7%9A%84%E5%AE%8C%E6%95%B4ticker
 var flagWsSpot = 0
 func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
-	if retryNum > 0 {
-		logs.Info("spot ws restart num:", retryNum)
-	}
-	
-	// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
-	var lock = false
-	var o = orm.NewOrm()
-	_, _, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
-		if (systemConfig.WsSpotEnable == 1) {
-			if (flagWsSpot == 0) {
-				logs.Info("spot ws start")
-				flagWsSpot = 1
-			}
-		} else {
-			if (flagWsSpot == 1) {
-				logs.Info("spot ws stop")
-				flagWsSpot = 0
-			}
-			lock = false
-			return
+	for {
+		if retryNum > 0 {
+			logs.Info("spot ws restart num:", retryNum)
 		}
-		if !lock {
-			lock = true
-			for _, ticker := range event {
-				o.Raw(
-					"UPDATE `spot_symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
-					ticker.PriceChangePercent,
-					ticker.LastPrice, // 当前价格
-					ticker.OpenPrice,
-					ticker.LowPrice,
-					ticker.HighPrice,
-					ticker.Time,
-					ticker.BaseVolume, // 成交量
-					ticker.QuoteVolume, // 成交额
-					ticker.CloseQty, // 最新成交价格上的成交量
-					ticker.Count, // 成交数
-					
-					ticker.Symbol,
-				).Exec()
+
+		// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
+		var lock = false
+		var o = orm.NewOrm()
+		runErrCh := make(chan error, 1)
+		doneC, _, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
+			if systemConfig.WsSpotEnable == 1 {
+				if flagWsSpot == 0 {
+					logs.Info("spot ws start")
+					flagWsSpot = 1
+				}
+			} else {
+				if flagWsSpot == 1 {
+					logs.Info("spot ws stop")
+					flagWsSpot = 0
+				}
+				lock = false
+				return
 			}
-			lock = false
+			if !lock {
+				lock = true
+				for _, ticker := range event {
+					o.Raw(
+						"UPDATE `spot_symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
+						ticker.PriceChangePercent,
+						ticker.LastPrice, // 当前价格
+						ticker.OpenPrice,
+						ticker.LowPrice,
+						ticker.HighPrice,
+						ticker.Time,
+						ticker.BaseVolume, // 成交量
+						ticker.QuoteVolume, // 成交额
+						ticker.CloseQty, // 最新成交价格上的成交量
+						ticker.Count, // 成交数
+
+						ticker.Symbol,
+					).Exec()
+				}
+				lock = false
+			}
+		}, func(err error) {
+			logs.Error("spot ws run error:", err)
+			select {
+			case runErrCh <- err:
+			default:
+			}
+		})
+		if err != nil {
+			flagWsSpot = 0
+			logs.Error("spot ws start error:", err)
+			retryNum++
+			time.Sleep(time.Second * 3)
+			continue
 		}
-	}, func(err error) {
-		logs.Error("spot ws run error:", err.Error())
-		UpdateCoinByWs(systemConfig, retryNum + 1)
-	})
-	if err != nil {
-		logs.Error("spot ws start error:", err.Error())
-		time.Sleep(time.Second * 60 * 3) // 3min retry
-		UpdateCoinByWs(systemConfig, retryNum + 1)
-		return
+
+		if doneC == nil {
+			flagWsSpot = 0
+			logs.Error("spot ws closed immediately: done channel is nil")
+			retryNum++
+			time.Sleep(time.Second * 3)
+			continue
+		}
+
+		<-doneC
+		flagWsSpot = 0
+
+		select {
+		case runErr := <-runErrCh:
+			if runErr != nil {
+				logs.Error("spot ws closed after run error, restarting")
+			} else {
+				logs.Error("spot ws closed, restarting")
+			}
+		default:
+			logs.Error("spot ws done channel closed, restarting")
+		}
+
+		retryNum++
+		time.Sleep(time.Second * 3)
 	}
 }

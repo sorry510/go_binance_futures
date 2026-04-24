@@ -518,55 +518,88 @@ func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
 var flagWsFutures = 0
 func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
-	if retryNum > 0 {
-		logs.Info("futures ws restart num:", retryNum)
-	}
-	var o = orm.NewOrm()
-	// futures.WebsocketKeepalive = true
-	_, _, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
-		if (systemConfig.WsFuturesEnable == 1) {
-			if (flagWsFutures == 0) {
-				logs.Info("futures ws start")
-				flagWsFutures = 1
-			}
-		} else {
-			if (flagWsFutures == 1) {
-				logs.Info("futures ws stop")
-				flagWsFutures = 0
-			}
-			return
+	for {
+		if retryNum > 0 {
+			logs.Info("futures ws restart num:", retryNum)
 		}
-		for _, ticker := range event {
-			o.Raw(
-				"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
-				ticker.PriceChangePercent, // 24小时价格变动百分比
-				ticker.ClosePrice,
-				ticker.OpenPrice,
-				ticker.LowPrice,
-				ticker.HighPrice,
-				ticker.Time,
-				ticker.BaseVolume, // 成交量
-				ticker.QuoteVolume, // 成交额
-				ticker.CloseQty, // 最新成交价格上的成交量
-				ticker.TradeCount, // 成交数
-				
-				ticker.Symbol,
-			).Exec()
-			priceChangeNotice(systemConfig, ticker)
-			fastMoveNoticeByWindow(systemConfig, ticker)
-			// if (ticker.Symbol == "BTCUSDT") {
-			// 	logs.Info("futures ws update symbol:", ticker.Symbol)
-			// }
+
+		var o = orm.NewOrm()
+		runErrCh := make(chan error, 1)
+		// futures.WebsocketKeepalive = true
+		doneC, _, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
+			if systemConfig.WsFuturesEnable == 1 {
+				if flagWsFutures == 0 {
+					logs.Info("futures ws start")
+					flagWsFutures = 1
+				}
+			} else {
+				if flagWsFutures == 1 {
+					logs.Info("futures ws stop")
+					flagWsFutures = 0
+				}
+				return
+			}
+			for _, ticker := range event {
+				o.Raw(
+					"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
+					ticker.PriceChangePercent, // 24小时价格变动百分比
+					ticker.ClosePrice,
+					ticker.OpenPrice,
+					ticker.LowPrice,
+					ticker.HighPrice,
+					ticker.Time,
+					ticker.BaseVolume, // 成交量
+					ticker.QuoteVolume, // 成交额
+					ticker.CloseQty, // 最新成交价格上的成交量
+					ticker.TradeCount, // 成交数
+
+					ticker.Symbol,
+				).Exec()
+				priceChangeNotice(systemConfig, ticker)
+				fastMoveNoticeByWindow(systemConfig, ticker)
+				// if (ticker.Symbol == "BTCUSDT") {
+				// 	logs.Info("futures ws update symbol:", ticker.Symbol)
+				// }
+			}
+		}, func(err error) {
+			logs.Error("futures ws run error:", err)
+			select {
+			case runErrCh <- err:
+			default:
+			}
+		})
+		if err != nil {
+			flagWsFutures = 0
+			logs.Error("futures ws start error:", err)
+			retryNum++
+			time.Sleep(time.Second * 3) // 3 秒间隔
+			continue
 		}
-	}, func(err error) {
-		logs.Error("futures ws run error:", err)
-		UpdateCoinByWs(systemConfig, retryNum + 1)
-	})
-	if err != nil {
-		logs.Error("futures ws start error:", err)
-		time.Sleep(time.Second * 30) // 30 秒间隔
-		UpdateCoinByWs(systemConfig, retryNum + 1)
-		return
+
+		if doneC == nil {
+			flagWsFutures = 0
+			logs.Error("futures ws closed immediately: done channel is nil")
+			retryNum++
+			time.Sleep(time.Second * 3)
+			continue
+		}
+
+		<-doneC
+		flagWsFutures = 0
+
+		select {
+		case runErr := <-runErrCh:
+			if runErr != nil {
+				logs.Error("futures ws closed after run error, restarting")
+			} else {
+				logs.Error("futures ws closed, restarting")
+			}
+		default:
+			logs.Error("futures ws done channel closed, restarting")
+		}
+
+		retryNum++
+		time.Sleep(time.Second * 3)
 	}
 }
 
