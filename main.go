@@ -110,6 +110,7 @@ func syncDb() {
 		err = command.UpdateDatabase(oldVersion, dbVersion)
 		if err != nil {
 			logs.Error("!!! update database error !!!:", err)
+			panic(err)
 		} else {
 			logs.Info("@@@ update database success @@@")
 			config.Version = dbVersion
