@@ -24,13 +24,13 @@ func CleanupOldMarketNoticeLogs(keepDays int) (int64, error) {
 }
 
 func StartMarketNoticeLogCleanupTask() {
-	logs.Info("market notice log cleanup task start, keep days:", marketNoticeLogKeepDays)
+	logs.Debug("market notice log cleanup task start, keep days:", marketNoticeLogKeepDays)
 
 	deleted, err := CleanupOldMarketNoticeLogs(marketNoticeLogKeepDays)
 	if err != nil {
 		logs.Error("market notice log cleanup task init error:", err)
 	} else {
-		logs.Info("market notice log cleanup task init done, deleted:", deleted)
+		logs.Debug("market notice log cleanup task init done, deleted:", deleted)
 	}
 
 	ticker := time.NewTicker(24 * time.Hour)
@@ -42,6 +42,6 @@ func StartMarketNoticeLogCleanupTask() {
 			logs.Error("market notice log cleanup task error:", err)
 			continue
 		}
-		logs.Info("market notice log cleanup task done, deleted:", deleted)
+		logs.Debug("market notice log cleanup task done, deleted:", deleted)
 	}
 }

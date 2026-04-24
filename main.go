@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"go_binance_futures/command"
-	"go_binance_futures/crawler"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/middlewares"
@@ -24,7 +23,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 10 // 每次变动数据库版本号 +1
+var dbVersion int64 = 1 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -36,9 +35,11 @@ var host, _ = config.String("database::host")
 var port, _ = config.String("database::port")
 var dbname, _ = config.String("database::dbname")
 var wsFuturesUserData, _ = config.String("ws::futures_user_data")
+var tradeKey, _ = config.String("binance::api_key")
 var SystemConfig models.Config
 
 func init() {
+	initLogger() // 初始化日志
 	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix() * 1000))
 	web.BConfig.CopyRequestBody = true // post 参数
 	web.SetStaticPath("/" + webIndex, "static") // 设置静态文件
@@ -47,6 +48,12 @@ func init() {
 	
 	registerModels() // 注册模型
 	registerMiddlewares() // 添加中间件
+}
+
+func initLogger() {
+	// 设置日志级别
+	level, _ := config.Int("log_level")
+	logs.SetLevel(level)
 }
 
 func setDriver(d string)  {
@@ -94,9 +101,9 @@ func registerModels() {
 func syncDb() {
 	config, err := utils.GetSystemConfig()
 	if err != nil {
-		logs.Info("database file does not exist, create and initialize")
+		logs.Info("database does not exist, create and initialize")
 		orm.RunSyncdb("default", false, false) // 根据 model 创建数据表
-		command.InitData(dbVersion) // 初始化配置信息
+		command.InitData(0) // 初始化配置信息
 		config, err = utils.GetSystemConfig() // 重新获取配置信息
 		if err != nil {
 			logs.Error("get system config error", err)
@@ -168,7 +175,7 @@ func main() {
 	// ws 订阅用户数据信息(仓位,当前挂单)
 	// 如果开启，则使用本地数据库管理仓位信息，不再每次请求查询 api 接口，可以有效降低请求频率(openOrders, getPosition) 
 	// 但是需要注意，这里面的仓位信息推送，只有仓位发生变化时才会推送数据(当前仓位的盈利多少变化不会推送，需要根据 symbols 表的 close 价格计算)
-	if wsFuturesUserData == "1" {
+	if wsFuturesUserData == "1" && tradeKey != "" {
 		feature.SyncUserData()	
 	}
 	
@@ -321,10 +328,10 @@ func main() {
 	}()
 
 	// Twitter 新闻抓取,每日清理历史新闻
-	go func() {
-		crawler.StartTwitterCrawler()
-		crawler.StartNewsCleanupTask()
-	}()
+	// go func() {
+	// 	crawler.StartTwitterCrawler()
+	// 	crawler.StartNewsCleanupTask()
+	// }()
 
 	// web
 	web.Run(":" + webPort)
