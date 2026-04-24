@@ -112,9 +112,9 @@ func syncDb() {
 			logs.Error("!!! update database error !!!:", err)
 		} else {
 			logs.Info("@@@ update database success @@@")
+			config.Version = dbVersion
+			orm.NewOrm().Update(&config)
 		}
-		config.Version = dbVersion
-		orm.NewOrm().Update(&config)
 	}
 	SystemConfig = config
 }
