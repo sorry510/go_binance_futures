@@ -27,7 +27,7 @@ func createConfig(version int64) error {
 
 func createStrategyTemplates() error {
 	filepath := "./command/sql/strategy_templates.sql"
-	err := readAndExecuteSQLFile(filepath)
+	err := readAndExecuteSQLFile(orm.NewOrm(), filepath)
 	if err != nil {
 		logs.Error("init strategy_templates table error:", err)
 	}
@@ -36,62 +36,116 @@ func createStrategyTemplates() error {
 
 func ExecSqlFile(filepath string) error {
 	// filepath := "./command/sql/strategy_templates.sql"
-	err := readAndExecuteSQLFile(filepath)
+	err := readAndExecuteSQLFile(orm.NewOrm(), filepath)
 	if err != nil {
 		logs.Error("init strategy_templates table error:", err)
 	}
 	return err
 }
 
-func readAndExecuteSQLFile(filePath string) error {
+type rawExecutor interface {
+	Raw(query string, args ...interface{}) orm.RawSeter
+}
+
+func readAndExecuteSQLFile(executor rawExecutor, filePath string) error {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("can't open SQL file: %v", err)
 	}
 	defer file.Close()
 
-	// 创建一个新的 ORM 实例
-	o := orm.NewOrm()
-
 	// 读取文件内容并逐行执行 SQL 语句
 	scanner := bufio.NewScanner(file)
-	var sqlStatements []string
+	var sqlLines []string
 	for scanner.Scan() {
-		line := scanner.Text()
+		line := strings.TrimSpace(scanner.Text())
 		if line == "" || strings.HasPrefix(line, "--") {
 			continue // 跳过空行和注释
 		}
-		sqlStatements = append(sqlStatements, utils.EscapeJSON(line))
+		sqlLines = append(sqlLines, utils.EscapeJSON(line))
 	}
 
 	if err := scanner.Err(); err != nil {
 		return fmt.Errorf("read SQL file error: %v", err)
 	}
 
-	// 将多行 SQL 语句合并为一个完整的 SQL 语句
-	sqlQuery := strings.Join(sqlStatements, " ")
-
-	// 执行 SQL 语句
-	_, err = o.Raw(sqlQuery).Exec()
-	if err != nil {
-		return fmt.Errorf("exec SQL error: %v", err)
+	for _, sqlQuery := range splitSQLStatements(strings.Join(sqlLines, "\n")) {
+		_, err = executor.Raw(sqlQuery).Exec()
+		if err != nil {
+			return fmt.Errorf("exec SQL error: %v, sql: %s", err, sqlQuery)
+		}
 	}
 
 	return nil
 }
 
+func splitSQLStatements(content string) []string {
+	statements := make([]string, 0)
+	var builder strings.Builder
+	inSingleQuote := false
+	inDoubleQuote := false
+	inBacktick := false
+	escaped := false
+
+	for _, char := range content {
+		builder.WriteRune(char)
+
+		if escaped {
+			escaped = false
+			continue
+		}
+
+		switch char {
+		case '\\':
+			if inSingleQuote || inDoubleQuote {
+				escaped = true
+			}
+		case '\'':
+			if !inDoubleQuote && !inBacktick {
+				inSingleQuote = !inSingleQuote
+			}
+		case '"':
+			if !inSingleQuote && !inBacktick {
+				inDoubleQuote = !inDoubleQuote
+			}
+		case '`':
+			if !inSingleQuote && !inDoubleQuote {
+				inBacktick = !inBacktick
+			}
+		case ';':
+			if !inSingleQuote && !inDoubleQuote && !inBacktick {
+				statement := strings.TrimSpace(builder.String())
+				if statement != "" {
+					statements = append(statements, statement)
+				}
+				builder.Reset()
+			}
+		}
+	}
+
+	statement := strings.TrimSpace(builder.String())
+	if statement != "" {
+		statements = append(statements, statement)
+	}
+
+	return statements
+}
+
 func UpdateDatabase(oldVersion int64, newVersion int64) error {
 	o := orm.NewOrm()
-    to, err := o.Begin()
+	to, err := o.Begin()
 	if err != nil {
 		logs.Error("begin transaction error:", err)
 		return err
 	}
 	version := oldVersion + 1
-	for ;version <= newVersion; version++ {
+	for ; version <= newVersion; version++ {
 		// 逐个执行数据库更新脚本
 		filepath := fmt.Sprintf("./command/sql/version/%d.sql", version)
-		readAndExecuteSQLFile(filepath)
+		if err := readAndExecuteSQLFile(to, filepath); err != nil {
+			_ = to.Rollback()
+			return fmt.Errorf("update database version %d failed: %w", version, err)
+		}
 	}
 	
 	err = to.Commit()

@@ -32,7 +32,7 @@ const (
 	defaultFastMoveCooldownSec  = int64(15 * 60)
 	defaultFastMoveWindows      = "3m,5m,10m"
 	futuresWsFlushInterval      = time.Second
-	futuresWsBatchSize          = 200
+	futuresWsBatchSize          = 300
 	wsNoDataAlertThreshold      = 3 * time.Minute
 	wsNoDataAlertInterval       = 10 * time.Minute
 	wsNoDataCheckInterval       = 30 * time.Second
@@ -569,7 +569,7 @@ func flushLatestWsTickers(systemConfig *models.Config) {
 		if query == "" {
 			continue
 		}
-		logs.Info(fmt.Sprintf("futures ws batch update symbols: processing %d/%d", end, len(tickers)))
+		// logs.Info(fmt.Sprintf("futures ws batch update symbols: processing %d/%d", end, len(tickers)))
 
 		if _, err := o.Raw(query, args...).Exec(); err != nil {
 			logs.Error("futures ws batch update symbols error:", err)
@@ -599,6 +599,7 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 	valueParts := make([]string, 0, len(tickers))
 	args := make([]interface{}, 0, len(tickers)*28)
 	for _, ticker := range tickers {
+		// logs.Info("ws symbol:", ticker.Symbol, "closePrice:", ticker.ClosePrice)
 		suffixType := ""
 		if strings.HasSuffix(ticker.Symbol, "USDT") {
 			suffixType = "USDT"
