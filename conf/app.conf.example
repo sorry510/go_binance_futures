@@ -22,20 +22,20 @@ api_secret = ""
 proxy_url = "http://127.0.0.1:7890"
 
 [database]
-# sqlite, mysql
-driver = "sqlite"
-path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
-
 # mysql
-# driver = "mysql"
-# username = ""
-# password = ""
-# host= ""
-# port= ""
-# dbname = ""
+driver = "mysql"
+username = ""
+password = ""
+host= ""
+port= ""
+dbname = ""
+
+# sqlite
+# driver = "sqlite"
+# path = "./db/coin.db?_journal_mode=WAL&_busy_timeout=5000"
 
 [ws]
-# 使用 ws 管理仓位和订单，代替 http api，可有效避免 api 超限
+# 使用 ws 管理仓位和订单，代替 http api，可有效避免 binance api 超限，需要本地网络稳定
 futures_user_data = 1
 
 [web]
@@ -44,7 +44,7 @@ port = 3333
 # 首页 path(不要修改这项，否则前端需要修改打包配置，重新打包)
 index = zmkm
 # jwt key
-secret_key = 12321
+secret_key = ak4758
 # 用户名
 username = admin
 # 密码
@@ -52,11 +52,11 @@ password = admin
 # 过期时间(hour)
 expires = 24
 # 重启服务按钮命令
-commend_start = pm2 restart binance_futures
+commend_start = pm2 restart go_binance_futures
 # 停止合约服务命令
-commend_stop = pm2 stop binance_futures
+commend_stop = pm2 stop go_binance_futures
 # 查看 web 日志的命令 /pm2-log
-commend_log = pm2 log binance_futures
+commend_log = pm2 log go_binance_futures
 
 [notification]
 # dingding, slack
@@ -77,9 +77,10 @@ slack_channel_id = ""
 # 外部链接
 links = [{"url": "url1", "title": "title1"}]
 
+# 实验模块
 [crawler]
 # 1:开启 0:关闭
-twitter_enable = 1
+twitter_enable = 0
 # 轮询间隔(秒)
 twitter_interval_sec = 120
 # 支持 @ 前缀, 逗号分隔

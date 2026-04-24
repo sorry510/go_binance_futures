@@ -12,6 +12,7 @@ import (
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
+	"sync/atomic"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -56,24 +57,6 @@ func initLogger() {
 	logs.SetLevel(level)
 }
 
-func setDriver(d string)  {
-	logs.Info("use database driver:", d)
-	switch d {
-		case "sqlite":
-			orm.RegisterDriver(d, orm.DRSqlite)
-			orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
-		case "mysql":
-			orm.RegisterDriver(d, orm.DRMySQL)
-			orm.RegisterDataBase("default", "mysql", username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?charset=utf8mb4&collation=utf8mb4_0900_ai_ci")
-		case "postgres":
-			orm.RegisterDriver(d, orm.DRPostgres)
-			orm.RegisterDataBase("default", "postgres", "user=" + username + " password=" + password + " host=" + host + " port=" + port + " dbname=" + dbname + " sslmode=disable")
-		default:
-			orm.RegisterDriver(d, orm.DRSqlite)
-			orm.RegisterDataBase("default", "sqlite3", dbPath)
-	}
-}
-
 func registerModels() {
 	// orm.Debug = true
 	orm.RegisterModel(new(models.Config))
@@ -96,6 +79,24 @@ func registerModels() {
 	
 	setDriver(driver) // 设置数据库驱动
 	syncDb() // 同步数据库
+}
+
+func setDriver(d string)  {
+	logs.Info("use database driver:", d)
+	switch d {
+		case "sqlite":
+			orm.RegisterDriver(d, orm.DRSqlite)
+			orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
+		case "mysql":
+			orm.RegisterDriver(d, orm.DRMySQL)
+			orm.RegisterDataBase("default", "mysql", username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?charset=utf8mb4&collation=utf8mb4_0900_ai_ci")
+		case "postgres":
+			orm.RegisterDriver(d, orm.DRPostgres)
+			orm.RegisterDataBase("default", "postgres", "user=" + username + " password=" + password + " host=" + host + " port=" + port + " dbname=" + dbname + " sslmode=disable")
+		default:
+			orm.RegisterDriver(d, orm.DRSqlite)
+			orm.RegisterDataBase("default", "sqlite3", dbPath)
+	}
 }
 
 func syncDb() {
@@ -180,17 +181,14 @@ func main() {
 	}
 	
 	// 读取最新配置信息
-	go func() {
-		for {
-			updateSystemConfig()
-			time.Sleep(time.Second * 1) // 1秒间隔
-		}
-	}()
+	loopRun(updateSystemConfig, time.Second * 2) // 每 2 秒更新一次系统配置信息
 	// 更新当前行情趋势
 	go func() {
-		for {
+		feature.UpdateMarketCondition(&SystemConfig)
+		ticker := time.NewTicker(time.Minute * 10)
+		defer ticker.Stop()
+		for range ticker.C {
 			feature.UpdateMarketCondition(&SystemConfig)
-			time.Sleep(time.Minute * 10) // 10分钟更新一次
 		}
 	}()
 	
@@ -225,9 +223,11 @@ func main() {
 	
 	// 仓位正负转换通知
 	go func() {
-		for {
+		feature.PositionConvertNotice(&SystemConfig)
+		ticker := time.NewTicker(time.Second * 10)
+		defer ticker.Stop()
+		for range ticker.C {
 			feature.PositionConvertNotice(&SystemConfig)
-			time.Sleep(time.Second * 10) // 10秒间隔
 		}
 	}()
 	
@@ -266,40 +266,26 @@ func main() {
 	/*******************************************测试自定义策略 end**********************************************************/
 	
 	// 新币抢购
-	go func() {
-		for {
-			spot.TryRush(SystemConfig)
-			time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
-		}
-	}()
+	loopRun(func () {
+		spot.TryRush(SystemConfig)
+	}, time.Millisecond * 100) // 0.1 秒间隔
 	
 	// 新币合约抢购
-	go func() {
-		for {
-			feature.TryRush(SystemConfig)
-			time.Sleep(time.Millisecond * 100) // 0.1 秒间隔
-		}
-	}()
+	loopRun(func () {
+		feature.TryRush(SystemConfig)
+	}, time.Millisecond * 100) // 0.1 秒间隔
 	
 	// 币种通知
-	go func() {
-		for {
-			spot.NoticeAndAutoOrder(SystemConfig)
-			feature.NoticeAndAutoOrder(SystemConfig)
-
-			time.Sleep(time.Second * 2) // 2 秒间隔
-		}
-	}()
+	loopRun(func () {
+		spot.NoticeAndAutoOrder(SystemConfig)
+		feature.NoticeAndAutoOrder(SystemConfig)
+	}, time.Second * 2)
 	
 	// 行情监听
-	go func() {
-		for {
-			spot.ListenCoin(SystemConfig)
-			feature.ListenCoin(SystemConfig)
-
-			time.Sleep(time.Second * 2) // 3 秒间隔
-		}
-	}()
+	loopRun(func () {
+		feature.ListenCoin(SystemConfig)
+		spot.ListenCoin(SystemConfig)
+	}, time.Second * 2)
 	
 	// 合约费率监听
 	go func() {
@@ -337,4 +323,17 @@ func main() {
 	web.Run(":" + webPort)
 }
 
-
+func loopRun(callback func(), d time.Duration) {
+	go func() {
+		var running int32
+		ticker := time.NewTicker(d)
+		for range ticker.C {
+			if atomic.CompareAndSwapInt32(&running, 0, 1) {
+				go func() {
+					defer atomic.StoreInt32(&running, 0)
+					callback()
+				}()
+			}
+		}
+	}()
+}
