@@ -24,7 +24,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 9 // 每次变动数据库版本号 +1
+var dbVersion int64 = 10 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -139,7 +139,7 @@ func main() {
 	// debug
 	if debug == "1" {
 		updateSystemConfig()
-		// binance.UpdateCoinByWs(&SystemConfig, 0)
+		go binance.UpdateCoinByWs(&SystemConfig, 0)
 		// feature.UpdateMarketCondition(&SystemConfig)
 		// feature.UpdateOrderStatus()
 		// feature.GoTestApi()
