@@ -665,6 +665,8 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 }
 
 func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
+	logs.Info("futures websocket start: auto update symbols price")
+	
 	startFuturesWsFlushTask(systemConfig)
 
 	for {
