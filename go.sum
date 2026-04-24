@@ -1,5 +1,7 @@
 github.com/adshao/go-binance/v2 v2.8.3 h1:jwPRcX2u7FIO1pPoXgocyXpXhBI81A41kcmSDzS6uzo=
 github.com/adshao/go-binance/v2 v2.8.3/go.mod h1:XkkuecSyJKPolaCGf/q4ovJYB3t0P+7RUYTbGr+LMGM=
+github.com/adshao/go-binance/v2 v2.8.11 h1:uE9bERWjrUMykankotJrEdSmweYL65Zv/auQHzutEMM=
+github.com/adshao/go-binance/v2 v2.8.11/go.mod h1:XkkuecSyJKPolaCGf/q4ovJYB3t0P+7RUYTbGr+LMGM=
 github.com/beego/beego/v2 v2.1.0 h1:Lk0FtQGvDQCx5V5yEu4XwDsIgt+QOlNjt5emUa3/ZmA=
 github.com/beego/beego/v2 v2.1.0/go.mod h1:6h36ISpaxNrrpJ27siTpXBG8d/Icjzsc7pU1bWpp0EE=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=

@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/adshao/go-binance/v2/delivery"
@@ -29,6 +31,13 @@ const (
 	defaultFastMoveRecoverPct   = 18.0
 	defaultFastMoveCooldownSec  = int64(15 * 60)
 	defaultFastMoveWindows      = "3m,5m,10m"
+	futuresWsFlushInterval      = time.Second
+	futuresWsBatchSize          = 200
+	wsNoDataAlertThreshold      = 3 * time.Minute
+	wsNoDataAlertInterval       = 10 * time.Minute
+	wsNoDataCheckInterval       = 30 * time.Second
+	futuresOrderTypeTakeProfitMarket futures.OrderType = "TAKE_PROFIT_MARKET"
+	futuresOrderTypeStopMarket       futures.OrderType = "STOP_MARKET"
 )
 
 type wsPricePoint struct {
@@ -54,6 +63,9 @@ var wsFastMoveWindows = []wsFastMoveWindow{
 
 var wsTickerPriceHistory = make(map[string][]wsPricePoint)
 var wsFastMoveNoticeState = make(map[string]map[string]*wsFastMoveState)
+var wsLatestTickerMap = make(map[string]futures.WsMarketTickerEvent)
+var wsLatestTickerMu sync.Mutex
+var futuresWsFlushOnce sync.Once
 
 var futuresClient *futures.Client
 var deliveryClient *delivery.Client
@@ -440,7 +452,7 @@ func OrderTakeProfit(symbol string, stopPrice float64, side futures.SideType, po
 		Symbol(symbol).
 		Side(side).
 		PositionSide(positionSide).
-		Type(futures.OrderTypeTakeProfitMarket). // 止盈市价单
+		Type(futuresOrderTypeTakeProfitMarket). // 止盈市价单
 		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 触发价格
 		ClosePosition(true). // 是否市价全平(和quantity参数互斥)
 		// Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
@@ -461,7 +473,7 @@ func OrderStopLoss(symbol string, stopPrice float64, side futures.SideType, posi
 		Symbol(symbol).
 		Side(side).
 		PositionSide(positionSide).
-		Type(futures.OrderTypeStopMarket). // 止损限价单
+		Type(futuresOrderTypeStopMarket). // 止损限价单
 		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 触发价格
 		ClosePosition(true). // 是否市价全平(和quantity参数互斥)
 		// Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
@@ -517,16 +529,157 @@ func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate
 
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
 var flagWsFutures = 0
+
+func startFuturesWsFlushTask(systemConfig *models.Config) {
+	futuresWsFlushOnce.Do(func() {
+		go func() {
+			ticker := time.NewTicker(futuresWsFlushInterval)
+			defer ticker.Stop()
+
+			for range ticker.C {
+				flushLatestWsTickers(systemConfig)
+			}
+		}()
+	})
+}
+
+func flushLatestWsTickers(systemConfig *models.Config) {
+	wsLatestTickerMu.Lock()
+	if len(wsLatestTickerMap) == 0 {
+		wsLatestTickerMu.Unlock()
+		return
+	}
+
+	tickers := make([]futures.WsMarketTickerEvent, 0, len(wsLatestTickerMap))
+	for symbol, ticker := range wsLatestTickerMap {
+		tickers = append(tickers, ticker)
+		delete(wsLatestTickerMap, symbol)
+	}
+	wsLatestTickerMu.Unlock()
+
+	o := orm.NewOrm()
+	for start := 0; start < len(tickers); start += futuresWsBatchSize {
+		end := start + futuresWsBatchSize
+		if end > len(tickers) {
+			end = len(tickers)
+		}
+
+		chunk := tickers[start:end]
+		query, args := buildBatchUpdateSymbolsSQL(chunk)
+		if query == "" {
+			continue
+		}
+		logs.Info(fmt.Sprintf("futures ws batch update symbols: processing %d/%d", end, len(tickers)))
+
+		if _, err := o.Raw(query, args...).Exec(); err != nil {
+			logs.Error("futures ws batch update symbols error:", err)
+			wsLatestTickerMu.Lock()
+			for _, ticker := range tickers[start:] {
+				wsLatestTickerMap[ticker.Symbol] = ticker
+			}
+			wsLatestTickerMu.Unlock()
+			return
+		}
+	}
+
+	go func() {
+		for index := range tickers {
+			ticker := &tickers[index]
+			priceChangeNotice(systemConfig, ticker)
+			fastMoveNoticeByWindow(systemConfig, ticker)
+		}
+	}()
+}
+
+func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, []interface{}) {
+	if len(tickers) == 0 {
+		return "", nil
+	}
+
+	valueParts := make([]string, 0, len(tickers))
+	args := make([]interface{}, 0, len(tickers)*28)
+	for _, ticker := range tickers {
+		suffixType := ""
+		if strings.HasSuffix(ticker.Symbol, "USDT") {
+			suffixType = "USDT"
+		} else if strings.HasSuffix(ticker.Symbol, "FDUSD") {
+			suffixType = "FDUSD"
+		} else if strings.HasSuffix(ticker.Symbol, "USDC") {
+			suffixType = "USDC"
+		}
+
+		valueParts = append(valueParts, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		args = append(args,
+			ticker.Symbol,
+			ticker.PriceChangePercent,
+			ticker.ClosePrice,
+			ticker.OpenPrice,
+			ticker.LowPrice,
+			ticker.HighPrice,
+			0,
+			ticker.Time,
+			ticker.ClosePrice,
+			ticker.Time,
+			ticker.BaseVolume,
+			ticker.QuoteVolume,
+			ticker.CloseQty,
+			ticker.TradeCount,
+			3,
+			"CROSSED",
+			"",
+			"",
+			"10",
+			"20",
+			"20",
+			"1d",
+			"",
+			"",
+			"global",
+			0,
+			0,
+			suffixType,
+		)
+	}
+
+	query := fmt.Sprintf(
+		"INSERT INTO `symbols` "+
+			"(`symbol`, `percentChange`, `close`, `open`, `low`, `high`, `enable`, `updateTime`, `lastClose`, `lastUpdateTime`, `baseVolume`, `quoteVolume`, `closeQty`, `tradeCount`, `leverage`, `marginType`, `tickSize`, `stepSize`, `usdt`, `profit`, `loss`, `kline_interval`, `technology`, `strategy`, `strategy_type`, `pin`, `sort`, `type`) "+
+			"VALUES %s "+
+			"ON DUPLICATE KEY UPDATE "+
+			"`lastClose` = `close`, "+
+			"`lastUpdateTime` = `updateTime`, "+
+			"`percentChange` = VALUES(`percentChange`), "+
+			"`close` = VALUES(`close`), "+
+			"`open` = VALUES(`open`), "+
+			"`low` = VALUES(`low`), "+
+			"`high` = VALUES(`high`), "+
+			"`updateTime` = VALUES(`updateTime`), "+
+			"`baseVolume` = VALUES(`baseVolume`), "+
+			"`quoteVolume` = VALUES(`quoteVolume`), "+
+			"`closeQty` = VALUES(`closeQty`), "+
+			"`tradeCount` = VALUES(`tradeCount`)",
+		strings.Join(valueParts, ", "),
+	)
+	return query, args
+}
+
 func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
+	startFuturesWsFlushTask(systemConfig)
+
 	for {
 		if retryNum > 0 {
 			logs.Info("futures ws restart num:", retryNum)
 		}
 
-		var o = orm.NewOrm()
 		runErrCh := make(chan error, 1)
+		monitorStopC := make(chan struct{})
+		var lastRecvAt atomic.Int64
+		var lastAlertAt atomic.Int64
 		// futures.WebsocketKeepalive = true
+		
 		doneC, _, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
+			lastRecvAt.Store(time.Now().UnixMilli())
+			lastAlertAt.Store(0)
 			if systemConfig.WsFuturesEnable == 1 {
 				if flagWsFutures == 0 {
 					logs.Info("futures ws start")
@@ -540,23 +693,9 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 				return
 			}
 			for _, ticker := range event {
-				o.Raw(
-					"UPDATE `symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
-					ticker.PriceChangePercent, // 24小时价格变动百分比
-					ticker.ClosePrice,
-					ticker.OpenPrice,
-					ticker.LowPrice,
-					ticker.HighPrice,
-					ticker.Time,
-					ticker.BaseVolume, // 成交量
-					ticker.QuoteVolume, // 成交额
-					ticker.CloseQty, // 最新成交价格上的成交量
-					ticker.TradeCount, // 成交数
-
-					ticker.Symbol,
-				).Exec()
-				priceChangeNotice(systemConfig, ticker)
-				fastMoveNoticeByWindow(systemConfig, ticker)
+				wsLatestTickerMu.Lock()
+				wsLatestTickerMap[ticker.Symbol] = *ticker
+				wsLatestTickerMu.Unlock()
 				// if (ticker.Symbol == "BTCUSDT") {
 				// 	logs.Info("futures ws update symbol:", ticker.Symbol)
 				// }
@@ -584,7 +723,11 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 			continue
 		}
 
+		lastRecvAt.Store(time.Now().UnixMilli())
+		go watchFuturesWsNoData(systemConfig, &lastRecvAt, &lastAlertAt, monitorStopC)
+
 		<-doneC
+		close(monitorStopC)
 		flagWsFutures = 0
 
 		select {
@@ -600,6 +743,66 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 
 		retryNum++
 		time.Sleep(time.Second * 3)
+	}
+}
+
+func watchFuturesWsNoData(systemConfig *models.Config, lastRecvAt *atomic.Int64, lastAlertAt *atomic.Int64, stopC <-chan struct{}) {
+	ticker := time.NewTicker(wsNoDataCheckInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-stopC:
+			return
+		case <-ticker.C:
+			if systemConfig.WsFuturesEnable != 1 {
+				continue
+			}
+
+			nowMs := time.Now().UnixMilli()
+			lastRecvMs := lastRecvAt.Load()
+			if lastRecvMs <= 0 || nowMs-lastRecvMs < wsNoDataAlertThreshold.Milliseconds() {
+				continue
+			}
+
+			lastAlertMs := lastAlertAt.Load()
+			if lastAlertMs > 0 && nowMs-lastAlertMs < wsNoDataAlertInterval.Milliseconds() {
+				continue
+			}
+
+			if !lastAlertAt.CompareAndSwap(lastAlertMs, nowMs) {
+				continue
+			}
+
+			noDataMinutes := float64(nowMs-lastRecvMs) / float64(time.Minute/time.Millisecond)
+			logs.Error("futures ws no data received for", noDataMinutes, "minutes")
+			sendFuturesWsNoDataAlert(noDataMinutes)
+		}
+	}
+}
+
+func sendFuturesWsNoDataAlert(noDataMinutes float64) {
+	alertPusher := pusher.SetModuleName("futures_market_listen")
+	content := fmt.Sprintf(`
+## FuturesWS 无数据告警
+#### 超过 %.1f 分钟未收到任何数据包
+#### 告警阈值：2 分钟
+#### 告警频率：5 分钟一次
+
+> author <sorry510sf@gmail.com>`, noDataMinutes)
+
+	switch p := alertPusher.(type) {
+	case notify.DingDing:
+		notify.DingDingApi(content, p)
+	case notify.Slack:
+		notify.SlackApi(content, p)
+	default:
+		alertPusher.FuturesPriceChangeNotice(notify.FuturesNoticeParams{
+			Symbol:        "FuturesWS",
+			Title:         " 无数据告警",
+			ChangePercent: noDataMinutes,
+			Price:         0,
+		})
 	}
 }
 
