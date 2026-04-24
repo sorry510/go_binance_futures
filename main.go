@@ -7,7 +7,6 @@ import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
-	"go_binance_futures/rate"
 	_ "go_binance_futures/routers"
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
@@ -183,14 +182,9 @@ func main() {
 	// 读取最新配置信息
 	loopRun(updateSystemConfig, time.Second * 2) // 每 2 秒更新一次系统配置信息
 	// 更新当前行情趋势
-	go func() {
+	loopRun(func () {
 		feature.UpdateMarketCondition(&SystemConfig)
-		ticker := time.NewTicker(time.Minute * 10)
-		defer ticker.Stop()
-		for range ticker.C {
-			feature.UpdateMarketCondition(&SystemConfig)
-		}
-	}()
+	}, time.Minute * 10) // 10分钟更新一次市场行情趋势
 	
 	// 自动追加币种 和 更新币种交易精度
 	go func() {
@@ -204,10 +198,8 @@ func main() {
 	}()
 	
 	// websocket 订阅更新币种价格
-	go func() {
-		logs.Info("futures websocket start: auto update symbols price")
-		binance.UpdateCoinByWs(&SystemConfig, 0)
-	}()
+	go binance.UpdateCoinByWs(&SystemConfig, 0)
+	
 	go func() {
 		return
 		logs.Info("spot websocket start: auto update symbols price")
@@ -232,37 +224,25 @@ func main() {
 	}()
 	
 	// 自动合约交易
-	go func() {
-		for {
-			feature.StartTrade(&SystemConfig)
-			time.Sleep(time.Second * 2) // 2秒间隔, 1min 中不能超过 2400 权重和
-		}
-	}()
+	loopRun(func () {
+		feature.StartTrade(&SystemConfig)
+	}, time.Second * 2) // 2秒间隔, 1min 中不能超过 2400 权重和
 
 	// 30 分钟检查一次所有未平仓的订单, 一次 200 条，此处是兜底行为，处理一些意外情况
 	// 处理 app 上已经平仓的订单，但是系统中没有找到对应的平仓订单
-	go func() {
-		for {
-			feature.UpdateOrderStatus()
-			time.Sleep(time.Minute * 30) // 30分钟更新一次订单状态
-		}
-	}()
+	loopRun(func () {
+		feature.UpdateOrderStatus()
+	}, time.Minute * 30) // 30分钟更新一次订单状态
 
 	/*******************************************测试自定义策略 start**********************************************************/
 	// 轮训测试所有开启合约交易的币种策略(每轮5个)
-	go func() {
-		for {
-			feature.NoticeAllSymbolByStrategy(&SystemConfig)
-			time.Sleep(time.Millisecond * 1500) // 1.5秒间隔
-		}
-	}()
+	loopRun(func () {
+		feature.NoticeAllSymbolByStrategy(&SystemConfig)
+	}, time.Millisecond * 1500) // 1.5秒间隔, 避免请求过快
 	// 监听测试的开仓是否需要平仓
-	go func() {
-		for {
-			feature.CheckTestResults(&SystemConfig)
-			time.Sleep(time.Millisecond * 1500) // 1.5秒间隔
-		}
-	}()
+	loopRun(func () {
+		feature.CheckTestResults(&SystemConfig)
+	}, time.Millisecond * 1500) // 1.5秒间隔
 	/*******************************************测试自定义策略 end**********************************************************/
 	
 	// 新币抢购
@@ -288,30 +268,24 @@ func main() {
 	}, time.Second * 2)
 	
 	// 合约费率监听
-	go func() {
-		for {
-			// 更新所有币种的资金费率
-			feature.UpdateSymbolsFundingRates(SystemConfig)
-			// 监听费率报警信息
-			feature.ListenCoinFundingRate(SystemConfig)
-
-			time.Sleep(time.Second * 90) // 90 秒更新一次
-		}
-	}()
+	loopRun(func () {
+		// 更新所有币种的资金费率
+		feature.UpdateSymbolsFundingRates(SystemConfig)
+		// 监听费率报警信息
+		feature.ListenCoinFundingRate(SystemConfig)
+	}, time.Second * 120) // 120 秒更新一次
 	
 	// 监听套利情况
-	go func() {
-		return
-		for {
-			rate.ListenRateEat()
-			time.Sleep(time.Hour * 1) // 1 小时更新一次
-		}	
-	}()
+	// go func() {
+	// 	return
+	// 	for {
+	// 		rate.ListenRateEat()
+	// 		time.Sleep(time.Hour * 1) // 1 小时更新一次
+	// 	}	
+	// }()
 	
 	// 合约市场通知日志每日清理，删除 10 天前的数据
-	go func() {
-		binance.StartMarketNoticeLogCleanupTask()
-	}()
+	go binance.StartMarketNoticeLogCleanupTask()
 
 	// Twitter 新闻抓取,每日清理历史新闻
 	// go func() {
