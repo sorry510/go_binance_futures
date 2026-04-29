@@ -33,7 +33,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 	
 	o := orm.NewOrm()
 	var coins []models.NoticeSymbols
-	o.QueryTable("notice_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).Filter("has_notice", 0).All(&coins) // 通知币列表
+	o.QueryTable("notice_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).All(&coins) // 通知币列表
 	
 	for _, coin := range coins {
 		logs.Info("notice_futures: ", coin.Symbol)
