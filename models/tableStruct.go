@@ -29,6 +29,7 @@ type Config struct {
 	WsFuturesFastMoveRecover int `orm:"column(ws_futures_fast_move_recover)" json:"ws_futures_fast_move_recover"` // websocket 短周期快速波动恢复阈值(百分比)
 	WsFuturesFastMoveCooldownSec int `orm:"column(ws_futures_fast_move_cooldown_sec)" json:"ws_futures_fast_move_cooldown_sec"` // websocket 短周期快速波动通知冷却时间(秒)
 	WsFuturesFastMoveWindows string `orm:"column(ws_futures_fast_move_windows)" json:"ws_futures_fast_move_windows"` // websocket 短周期快速波动窗口配置，例如: 3m,5m,30m
+	WsFuturesLiquidationEnable int `orm:"column(ws_futures_liquidation_enable)" json:"ws_futures_liquidation_enable"` // websocket 强平订单采集开关
 	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值

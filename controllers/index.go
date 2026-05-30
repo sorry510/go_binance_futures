@@ -90,6 +90,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"WsFuturesFastMoveRecover": systemConfig.WsFuturesFastMoveRecover,
 			"WsFuturesFastMoveCooldownSec": systemConfig.WsFuturesFastMoveCooldownSec,
 			"WsFuturesFastMoveWindows": systemConfig.WsFuturesFastMoveWindows,
+			"WsFuturesLiquidationEnable": systemConfig.WsFuturesLiquidationEnable,
 			
 			"externalLinks": externalLinks,
 		},
