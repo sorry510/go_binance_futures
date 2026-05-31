@@ -12,7 +12,7 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
-const futuresLiquidationOrderKeepDays = 10
+const futuresLiquidationOrderKeepDays = 5
 
 // CollectFuturesLiquidationOrders 采集全市场强平订单快照。
 // @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams
