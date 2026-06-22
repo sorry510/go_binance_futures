@@ -1,5 +1,6 @@
 package models
 
+// 市场波动通知日志
 type FuturesMarketNoticeLog struct {
 	ID               int64   `orm:"column(id)" json:"id"`
 	Symbol           string  `orm:"column(symbol);size(32)" json:"symbol"`
