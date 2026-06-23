@@ -15,6 +15,7 @@ var secretKey, _ = config.String("web::secret_key")
 
 var excludeRoutes = []string{
 	"/login",
+	"/mcp",
 	"/pull",
 	"/pm2-log",
 	"/pm2-log2",

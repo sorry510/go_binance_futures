@@ -5,6 +5,7 @@ import (
 	"go_binance_futures/command"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/mcpserver"
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
 	_ "go_binance_futures/routers"
@@ -48,6 +49,7 @@ func init() {
 	
 	registerModels() // 注册模型
 	registerMiddlewares() // 添加中间件
+	registerMCPHTTP() // 注册 MCP HTTP 服务
 }
 
 func initLogger() {
@@ -131,6 +133,14 @@ func syncDb() {
 func registerMiddlewares() {
     web.InsertFilter("*", web.BeforeRouter, middlewares.CorsMiddleware)
     web.InsertFilter("*", web.BeforeRouter, middlewares.JwtMiddleware)
+}
+
+func registerMCPHTTP() {
+	web.Handler(mcpserver.DefaultHTTPPath, mcpserver.NewHTTPHandler(mcpserver.NewServer(), mcpserver.HTTPOptions{
+		JSONResponse: true,
+		Stateless: false,
+	}))
+	logs.Info("mcp http endpoint:", "http://localhost:" + webPort + mcpserver.DefaultHTTPPath)
 }
 
 func updateSystemConfig() {
