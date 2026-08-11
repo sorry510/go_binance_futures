@@ -1,0 +1,4 @@
+interface:
+  display_name: "Custom Strategy"
+  short_description: "Design and persist efficient custom futures strategies"
+  default_prompt: "Use $custom-strategy to design, validate, and optionally persist a custom futures strategy."

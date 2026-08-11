@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "custom-strategy": {
+      "source": ".agents/skills/custom-strategy",
+      "sourceType": "local",
+      "computedHash": "877328ae7c136c4d"
+    },
     "go-binance-beego-cleanup-task": {
       "source": "/Users/zhz/.skillmax/drafts/go-binance-beego-cleanup-task",
       "sourceType": "local",
