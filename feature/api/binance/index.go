@@ -3,7 +3,6 @@ package binance
 import (
 	"context"
 	"fmt"
-	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"sort"
@@ -585,7 +584,6 @@ func flushLatestWsTickers(systemConfig *models.Config) {
 	go func() {
 		for index := range tickers {
 			ticker := &tickers[index]
-			priceChangeNotice(systemConfig, ticker)
 			fastMoveNoticeByWindow(systemConfig, ticker)
 		}
 	}()
@@ -806,37 +804,6 @@ func sendFuturesWsNoDataAlert(noDataMinutes float64) {
 			ChangePercent: noDataMinutes,
 			Price:         0,
 		})
-	}
-}
-
-var symbolPriceNoticeMap = make(map[string]int64) // 价格变动通知，key: symbol, value: timestamp
-func priceChangeNotice(systemConfig *models.Config, ticker *futures.WsMarketTickerEvent) {
-	if systemConfig.WsFuturesEnable == 0 || systemConfig.WsFuturesPriceChangeLimit == 0 {
-		return
-	}
-	lastTime, ok := symbolPriceNoticeMap[ticker.Symbol]
-	if ok && time.Now().Unix() - lastTime < 3600 * 4 {
-		// 4小时内已经通知过了，避免重复通知
-		return
-	}
-	if changePercent, err := strconv.ParseFloat(ticker.PriceChangePercent, 64); err == nil {
-		if changePercent >= float64(systemConfig.WsFuturesPriceChangeLimit) || changePercent <= float64(-systemConfig.WsFuturesPriceChangeLimit) {
-			closePriceFloat, _ := strconv.ParseFloat(ticker.ClosePrice, 64)
-			logs.Info("futures price change notice, symbol:", ticker.Symbol, " changePercent:", changePercent)
-			title := lang.Lang("futures.up_or_down")
-			pusher.SetModuleName("futures_market_listen").FuturesPriceChangeNotice(notify.FuturesNoticeParams{
-				Title:         title,
-				Symbol:        ticker.Symbol,
-				Price:         closePriceFloat,
-				ChangePercent: changePercent,
-			})
-			direction := "up"
-			if changePercent < 0 {
-				direction = "down"
-			}
-			saveMarketNoticeLog(ticker.Symbol, "price_change", "24h", direction, closePriceFloat, 0, changePercent, float64(systemConfig.WsFuturesPriceChangeLimit), title, ticker.Time)
-			symbolPriceNoticeMap[ticker.Symbol] = time.Now().Unix()
-		}
 	}
 }
 
@@ -1208,4 +1175,3 @@ func WsKlineData(symbol string, interval string, callback func(kline futures.WsK
 		return
 	}
 }
-

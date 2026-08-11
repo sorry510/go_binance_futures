@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"strconv"
+	"strings"
 
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
@@ -26,14 +28,84 @@ type TestStrategyResultsTableList struct {
 	NowPrice string `orm:"column(now_price)" json:"now_price"`
 }
 
+type testStrategyResultSearchParams struct {
+	Symbol       string
+	PositionSide string
+	StartTime    string
+	EndTime      string
+	Type         string
+}
+
+func (ctrl *TestStrategyResultController) getSearchParams() testStrategyResultSearchParams {
+	return testStrategyResultSearchParams{
+		Symbol:       strings.TrimSpace(ctrl.GetString("symbol")),
+		PositionSide: strings.ToUpper(strings.TrimSpace(ctrl.GetString("position_side"))),
+		StartTime:    strings.TrimSpace(ctrl.GetString("start_time")),
+		EndTime:      strings.TrimSpace(ctrl.GetString("end_time")),
+		Type:         strings.ToLower(strings.TrimSpace(ctrl.GetString("type"))),
+	}
+}
+
+func (params testStrategyResultSearchParams) whereClause(tableAlias string) (string, []interface{}, bool, error) {
+	prefix := ""
+	if tableAlias != "" {
+		prefix = tableAlias + "."
+	}
+
+	conditions := make([]string, 0, 5)
+	args := make([]interface{}, 0, 4)
+	if params.Symbol != "" {
+		if strings.ContainsAny(params.Symbol, "%_") {
+			return "", nil, false, fmt.Errorf("invalid symbol")
+		}
+		conditions = append(conditions, prefix+"symbol LIKE ?")
+		args = append(args, "%"+params.Symbol+"%")
+	}
+	if params.PositionSide != "" && params.PositionSide != "ALL" {
+		conditions = append(conditions, prefix+"position_side = ?")
+		args = append(args, params.PositionSide)
+	}
+
+	var startTime int64
+	var endTime int64
+	if params.StartTime != "" {
+		value, err := strconv.ParseInt(params.StartTime, 10, 64)
+		if err != nil || value <= 0 {
+			return "", nil, false, fmt.Errorf("invalid start_time")
+		}
+		startTime = value
+		conditions = append(conditions, prefix+"createTime >= ?")
+		args = append(args, startTime)
+	}
+	if params.EndTime != "" {
+		value, err := strconv.ParseInt(params.EndTime, 10, 64)
+		if err != nil || value <= 0 {
+			return "", nil, false, fmt.Errorf("invalid end_time")
+		}
+		endTime = value
+		conditions = append(conditions, prefix+"createTime <= ?")
+		args = append(args, endTime)
+	}
+	if startTime > 0 && endTime > 0 && startTime > endTime {
+		return "", nil, false, fmt.Errorf("start_time must not exceed end_time")
+	}
+
+	if params.Type == "open" {
+		conditions = append(conditions, prefix+"close_price = '0'")
+	} else if params.Type == "close" {
+		conditions = append(conditions, prefix+"close_price != '0'")
+	}
+
+	if len(conditions) == 0 {
+		return "", nil, false, nil
+	}
+	return " AND " + strings.Join(conditions, " AND "), args, true, nil
+}
+
 func (ctrl *TestStrategyResultController) Get() {
-	paramsSymbol := ctrl.GetString("symbol")
-	paramPositionSide := ctrl.GetString("position_side") // LONG, SHORT, all
 	paramsPage := ctrl.GetString("page", "1")
 	paramsLimit := ctrl.GetString("limit", "20")
-	paramsStartTime := ctrl.GetString("start_time")
-	paramsEndTime := ctrl.GetString("end_time")
-	paramsType := ctrl.GetString("type") // open, close, all
+	searchParams := ctrl.getSearchParams()
 	
 	page, _ := strconv.Atoi(paramsPage)
 	limit, _ := strconv.Atoi(paramsLimit)
@@ -45,39 +117,24 @@ func (ctrl *TestStrategyResultController) Get() {
 	var total int64
 	sql := `SELECT t.id, t.symbol, t.price, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.createTime, t.updateTime, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
 	countSql := `SELECT COUNT(*) FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
-	
-	if (paramsSymbol != "") {
-		sql += ` and t.symbol like '%` + paramsSymbol + `%'`
-		countSql += ` and t.symbol like '%` + paramsSymbol + `%'`
+	whereClause, args, _, err := searchParams.whereClause("t")
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
 	}
-	if (paramPositionSide != "all" && paramPositionSide != "") {
-		sql += ` and t.position_side = '` + paramPositionSide + `'`
-		countSql += ` and t.position_side = '` + paramPositionSide + `'`
-	}
-	if (paramsStartTime != "") {
-		sql += ` and t.createTime >= '` + paramsStartTime + `'`
-		countSql += ` and t.createTime >= '` + paramsStartTime + `'`
-	}
-	if (paramsEndTime != "") {
-		sql += ` and t.createTime <= '` + paramsEndTime + `'`
-		countSql += ` and t.createTime <= '` + paramsEndTime + `'`
-	}
-	if (paramsType == "open") {
-		sql += ` and t.close_price = '0'`
-		countSql += ` and t.close_price = '0'`
-	} else if (paramsType == "close") {
-		sql += ` and t.close_price != '0'`
-		countSql += ` and t.close_price != '0'`
-	}
+	sql += whereClause
+	countSql += whereClause
 	
 	sql = sql + " ORDER BY t.createTime DESC LIMIT " + strconv.Itoa(limit) + " OFFSET " + strconv.Itoa(offset)
-    _, err := o.Raw(sql).QueryRows(&results)
+	_, err = o.Raw(sql, args...).QueryRows(&results)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
 	}
-	err = o.Raw(countSql).QueryRow(&total)
+	err = o.Raw(countSql, args...).QueryRow(&total)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
 	}
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
@@ -109,22 +166,35 @@ func (ctrl *TestStrategyResultController) Show() {
 func (ctrl *TestStrategyResultController) Delete() {
 	id := ctrl.Ctx.Input.Param(":id")
 	o := orm.NewOrm()
-	_, err := o.Raw("DELETE FROM test_strategy_results where id = ?", id).Exec()
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	ctrl.Ctx.Resp(utils.ResJson(200, nil))
-}
+	deleteSQL := "DELETE FROM test_strategy_results WHERE 1 = 1"
+	args := make([]interface{}, 0, 4)
 
-func (ctrl *TestStrategyResultController) DeleteAll() {
-	o := orm.NewOrm()
-	_, err := o.Raw("DELETE FROM test_strategy_results where 1=1").Exec()
+	if id != "" {
+		deleteSQL += " AND id = ?"
+		args = append(args, id)
+	} else {
+		whereClause, searchArgs, hasSearchCondition, err := ctrl.getSearchParams().whereClause("")
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+		if !hasSearchCondition {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, "at least one search condition is required"))
+			return
+		}
+		deleteSQL += whereClause
+		args = append(args, searchArgs...)
+	}
+
+	result, err := o.Raw(deleteSQL, args...).Exec()
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
-	ctrl.Ctx.Resp(utils.ResJson(200, nil))
+	deleted, _ := result.RowsAffected()
+	ctrl.Ctx.Resp(utils.ResJson(200, map[string]interface{}{
+		"deleted": deleted,
+	}))
 }
 
 // 如果测试策略开启，合约列表页面的测试策略，使用的是这个接口
