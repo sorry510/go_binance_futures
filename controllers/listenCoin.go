@@ -97,25 +97,25 @@ func (ctrl *ListenCoinController) Get() {
 		"msg":  "success",
 	})
 }
-	
+
 func (ctrl *ListenCoinController) Edit() {
 	id := ctrl.Ctx.Input.Param(":id")
 	var symbols models.ListenSymbols
 	o := orm.NewOrm()
 	o.QueryTable("listen_symbols").Filter("Id", id).One(&symbols)
-	
+
 	ctrl.BindJSON(&symbols)
-	
+
 	_, err := o.Update(&symbols) // _ 是受影响的条数
-    if err != nil {
-        // 处理错误
+	if err != nil {
+		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "修改失败"))
 		return
-    }
-	ctrl.Ctx.Resp(map[string]interface{} {
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": symbols,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
@@ -125,50 +125,50 @@ func (ctrl *ListenCoinController) Delete() {
 	intId, _ := strconv.ParseInt(id, 10, 64)
 	symbols.ID = intId
 	o := orm.NewOrm()
-	
+
 	_, err := o.Delete(symbols)
-    if err != nil {
-        // 处理错误
+	if err != nil {
+		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "删除错误"))
 		return
-    }
-	ctrl.Ctx.Resp(map[string]interface{} {
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
 func (ctrl *ListenCoinController) Post() {
 	symbols := new(models.ListenSymbols)
 	ctrl.BindJSON(&symbols)
-	
-	symbols.Enable = 0 // 默认不开启
-	symbols.KlineInterval = "1m" // 默认k线周期
-	symbols.ChangePercent = "1.1" // 1.1% 默认变化幅度
-	symbols.LastNoticeTime = 0 // 最后一次通知时间
-	symbols.NoticeLimitMin = 5 // 最小通知间隔
-	symbols.ListenType = "kline_base"
+
+	symbols.Enable = 0            // 默认不开启
+	symbols.KlineInterval = "5m"  // 默认k线周期
+	symbols.ChangePercent = "10"  // 3% 默认变化幅度
+	symbols.LastNoticeTime = 0    // 最后一次通知时间
+	symbols.NoticeLimitMin = 5    // 最小通知间隔
+	symbols.ListenType = "custom" // 默认自定义策略, custom,kline_base,kline_kc
 
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
-	
-    if err != nil {
-        // 处理错误
+
+	if err != nil {
+		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "新增失败"))
 		return
-    }
+	}
 	symbols.ID = id
-	
-	ctrl.Ctx.Resp(map[string]interface{} {
+
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": symbols,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
 func (ctrl *ListenCoinController) UpdateEnable() {
 	flag := ctrl.Ctx.Input.Param(":flag")
-	
+
 	o := orm.NewOrm()
 	_, err := o.Raw("UPDATE listen_symbols SET enable = ?", flag).Exec()
 	if err != nil {
@@ -184,7 +184,7 @@ func (ctrl *ListenCoinController) GetKcLineChart() {
 	var symbols models.ListenSymbols
 	o := orm.NewOrm()
 	o.QueryTable("listen_symbols").Filter("Id", id).One(&symbols)
-	
+
 	symbol := symbols.Symbol
 	limit := 150
 	period := 50
@@ -193,28 +193,28 @@ func (ctrl *ListenCoinController) GetKcLineChart() {
 	multiplier2 := 3.75 // 宽通道
 	kline_1, err := binance.GetKlineData(symbol, interval1, limit)
 	if err != nil {
-		ctrl.Ctx.Resp(map[string]interface{} {
+		ctrl.Ctx.Resp(map[string]interface{}{
 			"code": 500,
-			"msg": "kline error",
+			"msg":  "kline error",
 		})
 		return
 	}
-	
+
 	high1, low1, close1, _ := line.GetLineFloatPrices(kline_1)
 	upper1, ma1, lower1 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
-	upper2, _, lower2 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
-	
-	ctrl.Ctx.Resp(map[string]interface{} {
+	upper2, _, lower2 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2)   // kc2
+
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"data": map[string]interface{} {
+		"data": map[string]interface{}{
 			"upper1": upper1,
-			"ma1": ma1,
+			"ma1":    ma1,
 			"lower1": lower1,
 			"upper2": upper2,
 			"lower2": lower2,
 			"close1": close1,
-			"high1": high1,
-			"low1": low1,
+			"high1":  high1,
+			"low1":   low1,
 		},
 		"msg": "success",
 	})
@@ -223,7 +223,7 @@ func (ctrl *ListenCoinController) GetKcLineChart() {
 func (ctrl *ListenCoinController) GetFundingRates() {
 	paramsSort := ctrl.GetString("sort")
 	symbol := ctrl.GetString("symbol")
-	
+
 	o := orm.NewOrm()
 	var symbols []models.SymbolFundingRates
 	query := o.QueryTable("symbol_funding_rates")
@@ -234,7 +234,7 @@ func (ctrl *ListenCoinController) GetFundingRates() {
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error"))
 	}
-	
+
 	sort.SliceStable(symbols, func(i, j int) bool {
 		nowFundingRate1, _ := strconv.ParseFloat(symbols[i].NowFundingRate, 64)
 		nowFundingRate2, _ := strconv.ParseFloat(symbols[j].NowFundingRate, 64)
@@ -247,10 +247,10 @@ func (ctrl *ListenCoinController) GetFundingRates() {
 		}
 	})
 
-	ctrl.Ctx.Resp(map[string]interface{} {
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": symbols,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
@@ -259,42 +259,42 @@ func (ctrl *ListenCoinController) EditFundingRates() {
 	var symbols models.SymbolFundingRates
 	o := orm.NewOrm()
 	o.QueryTable("symbol_funding_rates").Filter("Id", id).One(&symbols)
-	
+
 	ctrl.BindJSON(&symbols)
-	
+
 	_, err := o.Update(&symbols) // _ 是受影响的条数
-    if err != nil {
-        // 处理错误
+	if err != nil {
+		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
-    }
-	ctrl.Ctx.Resp(map[string]interface{} {
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": symbols,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
 func (ctrl *ListenCoinController) GetFundingRateHistory() {
 	symbol := ctrl.GetString("symbol")
-	
+
 	histories, err := binance.GetFundingRateHistory(binance.FundingRateParams{
 		Symbol: symbol,
-		Limit: 200,
+		Limit:  200,
 	})
-	
+
 	if err != nil {
-		ctrl.Ctx.Resp(map[string]interface{} {
+		ctrl.Ctx.Resp(map[string]interface{}{
 			"code": 500,
-			"msg": "binance api error",
+			"msg":  "binance api error",
 		})
 		return
 	}
 
-	ctrl.Ctx.Resp(map[string]interface{} {
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": histories,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
@@ -303,9 +303,9 @@ func (ctrl *ListenCoinController) TestStrategyRule() {
 	var symbols models.ListenSymbols
 	o := orm.NewOrm()
 	o.QueryTable("listen_symbols").Filter("Id", id).One(&symbols)
-	
+
 	ctrl.BindJSON(&symbols)
-	
+
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(symbols.Strategy), &strategyConfig)
 	if err != nil {
@@ -328,9 +328,9 @@ func (ctrl *ListenCoinController) TestStrategyRule() {
 				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 				return
 			}
-			ctrl.Ctx.Resp(map[string]interface{} {
+			ctrl.Ctx.Resp(map[string]interface{}{
 				"code": 200,
-				"data": map[string]interface{} {
+				"data": map[string]interface{}{
 					"pass": output,
 					"type": strategy.Type,
 				},
