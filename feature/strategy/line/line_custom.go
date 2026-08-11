@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/types"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -23,6 +24,9 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParam
 	coin := openParams.Symbols
 	openResult.CanLong = false
 	openResult.CanShort = false
+	if isNullCustomConfig(coin.Strategy) {
+		return openResult
+	}
 	
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
@@ -31,7 +35,7 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParam
 		logs.Error("Error unmarshalling JSON:", err.Error())
 		return openResult
 	}
-	env := InitParseEnv(coin.Symbol, coin.Technology)
+	env := InitParseEnv(coin.Symbol, normalizeCustomTechnology(coin.Technology))
 	positions, _ := TradeLine.getTransformPositions()
 	env["Positions"] = positions
 	for _, strategy := range strategyConfig {
@@ -66,6 +70,9 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 	coin := closeParams.Symbols // 交易对
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
+	if isNullCustomConfig(coin.Strategy) {
+		return closeResult
+	}
 	
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
@@ -75,7 +82,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 		return closeResult
 	}
 	findStrategy := false
-	env := InitParseEnv(coin.Symbol, coin.Technology)
+	env := InitParseEnv(coin.Symbol, normalizeCustomTechnology(coin.Technology))
 	env["ROI"] = closeParams.NowProfit // 当前收益率
 	env["Position"] = types.FuturesPositionCode{
 		Symbol: coin.Symbol,
@@ -157,6 +164,18 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 func (TradeLine TradeLineCustom) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
 	closeResult.Complete = false
 	return closeResult
+}
+
+func isNullCustomConfig(value string) bool {
+	value = strings.TrimSpace(value)
+	return value == "" || value == "null"
+}
+
+func normalizeCustomTechnology(value string) string {
+	if isNullCustomConfig(value) {
+		return "{}"
+	}
+	return value
 }
 
 func (TradeLine TradeLineCustom) simpleCloseStrategy(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {

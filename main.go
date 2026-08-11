@@ -45,7 +45,7 @@ func init() {
 	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix()*1000))
 	web.BConfig.CopyRequestBody = true        // post 参数
 	web.SetStaticPath("/"+webIndex, "static") // 设置静态文件
-	logs.Info("server old web page:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
+	logs.Info("server web index:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
 
 	registerModels()      // 注册模型
 	registerMiddlewares() // 添加中间件
@@ -161,24 +161,6 @@ func main() {
 	if debug == "1" {
 		updateSystemConfig()
 		go binance.UpdateCoinByWs(&SystemConfig, 0)
-		// feature.UpdateMarketCondition(&SystemConfig)
-		// feature.UpdateOrderStatus()
-		// feature.GoTestApi()
-		// spot.TryRush()
-		// feature.GoTestFeature()
-		// feature.UpdateSymbolsFundingRates()
-		// feature.ListenCoinFundingRate()
-		// feature.GoTestOrder()
-		// feature.GoTestUtil()
-		// feature.GoTestMarketOrder()
-		// feature.GoTestNotify()
-		// feature.GoTestDeliveryAccount()
-		// feature.GoTestParse()
-		// feature.GoTestListen()
-		// feature.GoTestLine()
-		// feature.CheckTestResults(SystemConfig)
-		// command.ExecSqlFile("./command/sql/test_strategy_results.sql")
-		// feature.AutoLossScale(SystemConfig, true)
 		// web
 		web.Run(":" + webPort)
 		return
