@@ -67,7 +67,7 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 ![New UI - Configuration Center](./img/ui/dashboard.jpg)
 
 #### Futures Trade
-![New UI - Futures Trade](./img/ui/futures-symbols.jpg)
+![New UI - Futures Trade](./img/ui/futures-symbols.png)
 
 #### Futures Orders
 ![New UI - Futures Orders](./img/ui/futures-orders.jpg)

@@ -62,7 +62,7 @@
 ![新版 UI - 配置中心](./img/ui/dashboard.jpg)
 
 #### 合约交易
-![新版 UI - 合约交易](./img/ui/futures-symbols.jpg)
+![新版 UI - 合约交易](./img/ui/futures-symbols.png)
 
 #### 合约订单
 ![新版 UI - 合约订单](./img/ui/futures-orders.jpg)

@@ -1,5 +1,10 @@
 ### Change Log
 
+## v0.3.3
+- 优化一些交互功能
+- 删除一些废弃的代码
+- update skills
+
 ## v0.3.2
 - 自定义策略新增指标: MACD, ADX, KDJ, Supertrend, CCI, ROC, MFI, OBV, Donchian Channel
 
