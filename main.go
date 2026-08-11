@@ -37,19 +37,21 @@ var port, _ = config.String("database::port")
 var dbname, _ = config.String("database::dbname")
 var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var tradeKey, _ = config.String("binance::api_key")
+var mcpEnable, _ = config.Bool("mcp::mcp_enable")
 var SystemConfig models.Config
 
 func init() {
 	initLogger() // 初始化日志
-	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix() * 1000))
-	web.BConfig.CopyRequestBody = true // post 参数
-	web.SetStaticPath("/" + webIndex, "static") // 设置静态文件
-	logs.Info("server old web page:", "http://localhost:" + webPort + "/" + webIndex + "/index.html")
-	logs.Info("server new web page:", "http://localhost:" + webPort + "/" + webIndex + "/v2/index.html")
-	
-	registerModels() // 注册模型
+	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix()*1000))
+	web.BConfig.CopyRequestBody = true        // post 参数
+	web.SetStaticPath("/"+webIndex, "static") // 设置静态文件
+	logs.Info("server old web page:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
+
+	registerModels()      // 注册模型
 	registerMiddlewares() // 添加中间件
-	registerMCPHTTP() // 注册 MCP HTTP 服务
+	if mcpEnable {
+		registerMCPHTTP() // 注册 MCP HTTP 服务
+	}
 }
 
 func initLogger() {
@@ -78,26 +80,26 @@ func registerModels() {
 	orm.RegisterModel(new(models.News))
 	orm.RegisterModel(new(models.FuturesMarketNoticeLog))
 	orm.RegisterModel(new(models.FuturesLiquidationOrder))
-	
+
 	setDriver(driver) // 设置数据库驱动
-	syncDb() // 同步数据库
+	syncDb()          // 同步数据库
 }
 
-func setDriver(d string)  {
+func setDriver(d string) {
 	logs.Info("use database driver:", d)
 	switch d {
-		case "sqlite":
-			orm.RegisterDriver(d, orm.DRSqlite)
-			orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
-		case "mysql":
-			orm.RegisterDriver(d, orm.DRMySQL)
-			orm.RegisterDataBase("default", "mysql", username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?charset=utf8mb4&collation=utf8mb4_0900_ai_ci")
-		case "postgres":
-			orm.RegisterDriver(d, orm.DRPostgres)
-			orm.RegisterDataBase("default", "postgres", "user=" + username + " password=" + password + " host=" + host + " port=" + port + " dbname=" + dbname + " sslmode=disable")
-		default:
-			orm.RegisterDriver(d, orm.DRSqlite)
-			orm.RegisterDataBase("default", "sqlite3", dbPath)
+	case "sqlite":
+		orm.RegisterDriver(d, orm.DRSqlite)
+		orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
+	case "mysql":
+		orm.RegisterDriver(d, orm.DRMySQL)
+		orm.RegisterDataBase("default", "mysql", username+":"+password+"@tcp("+host+":"+port+")/"+dbname+"?charset=utf8mb4&collation=utf8mb4_0900_ai_ci")
+	case "postgres":
+		orm.RegisterDriver(d, orm.DRPostgres)
+		orm.RegisterDataBase("default", "postgres", "user="+username+" password="+password+" host="+host+" port="+port+" dbname="+dbname+" sslmode=disable")
+	default:
+		orm.RegisterDriver(d, orm.DRSqlite)
+		orm.RegisterDataBase("default", "sqlite3", dbPath)
 	}
 }
 
@@ -106,8 +108,8 @@ func syncDb() {
 	if err != nil {
 		logs.Info("database does not exist, create and initialize")
 		orm.RunSyncdb("default", false, false) // 根据 model 创建数据表
-		command.InitData(0) // 初始化配置信息
-		config, err = utils.GetSystemConfig() // 重新获取配置信息
+		command.InitData(0)                    // 初始化配置信息
+		config, err = utils.GetSystemConfig()  // 重新获取配置信息
 		if err != nil {
 			logs.Error("get system config error", err)
 			return
@@ -131,16 +133,16 @@ func syncDb() {
 }
 
 func registerMiddlewares() {
-    web.InsertFilter("*", web.BeforeRouter, middlewares.CorsMiddleware)
-    web.InsertFilter("*", web.BeforeRouter, middlewares.JwtMiddleware)
+	web.InsertFilter("*", web.BeforeRouter, middlewares.CorsMiddleware)
+	web.InsertFilter("*", web.BeforeRouter, middlewares.JwtMiddleware)
 }
 
 func registerMCPHTTP() {
 	web.Handler(mcpserver.DefaultHTTPPath, mcpserver.NewHTTPHandler(mcpserver.NewServer(), mcpserver.HTTPOptions{
 		JSONResponse: true,
-		Stateless: false,
+		Stateless:    false,
 	}))
-	logs.Info("mcp http endpoint:", "http://localhost:" + webPort + mcpserver.DefaultHTTPPath)
+	logs.Info("mcp http endpoint:", "http://localhost:"+webPort+mcpserver.DefaultHTTPPath)
 }
 
 func updateSystemConfig() {
@@ -181,22 +183,22 @@ func main() {
 		web.Run(":" + webPort)
 		return
 	}
-	
+
 	/*******************************************更新基本信息 start****************************************************/
 	// ws 订阅用户数据信息(仓位,当前挂单)
-	// 如果开启，则使用本地数据库管理仓位信息，不再每次请求查询 api 接口，可以有效降低请求频率(openOrders, getPosition) 
+	// 如果开启，则使用本地数据库管理仓位信息，不再每次请求查询 api 接口，可以有效降低请求频率(openOrders, getPosition)
 	// 但是需要注意，这里面的仓位信息推送，只有仓位发生变化时才会推送数据(当前仓位的盈利多少变化不会推送，需要根据 symbols 表的 close 价格计算)
 	if wsFuturesUserData == "1" && tradeKey != "" {
-		feature.SyncUserData()	
+		feature.SyncUserData()
 	}
-	
+
 	// 读取最新配置信息
-	loopRun(updateSystemConfig, time.Second * 2) // 每 2 秒更新一次系统配置信息
+	loopRun(updateSystemConfig, time.Second*2) // 每 2 秒更新一次系统配置信息
 	// 更新当前行情趋势
-	loopRun(func () {
+	loopRun(func() {
 		feature.UpdateMarketCondition(&SystemConfig)
-	}, time.Minute * 10) // 10分钟更新一次市场行情趋势
-	
+	}, time.Minute*10) // 10分钟更新一次市场行情趋势
+
 	// 自动追加币种 和 更新币种交易精度
 	go func() {
 		for {
@@ -207,12 +209,12 @@ func main() {
 			time.Sleep(12 * time.Hour) // 12小时更新一次
 		}
 	}()
-	
+
 	// websocket 订阅更新币种价格
 	go binance.UpdateCoinByWs(&SystemConfig, 0)
 	// websocket 订阅全市场强平订单
 	go binance.CollectFuturesLiquidationOrders(&SystemConfig)
-	
+
 	go func() {
 		return
 		logs.Info("spot websocket start: auto update symbols price")
@@ -223,9 +225,9 @@ func main() {
 		logs.Info("delivery websocket start: auto update symbols price")
 		binance.UpdateDeliveryCoinByWs(&SystemConfig)
 	}()
-	
+
 	/*******************************************更新基本信息 end****************************************************/
-	
+
 	// 仓位正负转换通知
 	go func() {
 		feature.PositionConvertNotice(&SystemConfig)
@@ -235,68 +237,68 @@ func main() {
 			feature.PositionConvertNotice(&SystemConfig)
 		}
 	}()
-	
+
 	// 自动合约交易
-	loopRun(func () {
+	loopRun(func() {
 		feature.StartTrade(&SystemConfig)
-	}, time.Second * 2) // 2秒间隔, 1min 中不能超过 2400 权重和
+	}, time.Second*2) // 2秒间隔, 1min 中不能超过 2400 权重和
 
 	// 30 分钟检查一次所有未平仓的订单, 一次 200 条，此处是兜底行为，处理一些意外情况
 	// 处理 app 上已经平仓的订单，但是系统中没有找到对应的平仓订单
-	loopRun(func () {
+	loopRun(func() {
 		feature.UpdateOrderStatus()
-	}, time.Minute * 30) // 30分钟更新一次订单状态
+	}, time.Minute*30) // 30分钟更新一次订单状态
 
 	/*******************************************测试自定义策略 start**********************************************************/
 	// 轮训测试所有开启合约交易的币种策略(每轮5个)
-	loopRun(func () {
+	loopRun(func() {
 		feature.NoticeAllSymbolByStrategy(&SystemConfig)
-	}, time.Millisecond * 1500) // 1.5秒间隔, 避免请求过快
+	}, time.Millisecond*1500) // 1.5秒间隔, 避免请求过快
 	// 监听测试的开仓是否需要平仓
-	loopRun(func () {
+	loopRun(func() {
 		feature.CheckTestResults(&SystemConfig)
-	}, time.Millisecond * 1500) // 1.5秒间隔
+	}, time.Millisecond*1500) // 1.5秒间隔
 	/*******************************************测试自定义策略 end**********************************************************/
-	
+
 	// 新币抢购
-	loopRun(func () {
+	loopRun(func() {
 		spot.TryRush(SystemConfig)
-	}, time.Millisecond * 100) // 0.1 秒间隔
-	
+	}, time.Millisecond*100) // 0.1 秒间隔
+
 	// 新币合约抢购
-	loopRun(func () {
+	loopRun(func() {
 		feature.TryRush(SystemConfig)
-	}, time.Millisecond * 100) // 0.1 秒间隔
-	
+	}, time.Millisecond*100) // 0.1 秒间隔
+
 	// 币种通知
-	loopRun(func () {
+	loopRun(func() {
 		spot.NoticeAndAutoOrder(SystemConfig)
 		feature.NoticeAndAutoOrder(SystemConfig)
-	}, time.Second * 2)
-	
+	}, time.Second*2)
+
 	// 行情监听
-	loopRun(func () {
+	loopRun(func() {
 		feature.ListenCoin(SystemConfig)
 		spot.ListenCoin(SystemConfig)
-	}, time.Second * 2)
-	
+	}, time.Second*2)
+
 	// 合约费率监听
-	loopRun(func () {
+	loopRun(func() {
 		// 更新所有币种的资金费率
 		feature.UpdateSymbolsFundingRates(SystemConfig)
 		// 监听费率报警信息
 		feature.ListenCoinFundingRate(SystemConfig)
-	}, time.Second * 120) // 120 秒更新一次
-	
+	}, time.Second*120) // 120 秒更新一次
+
 	// 监听套利情况
 	// go func() {
 	// 	return
 	// 	for {
 	// 		rate.ListenRateEat()
 	// 		time.Sleep(time.Hour * 1) // 1 小时更新一次
-	// 	}	
+	// 	}
 	// }()
-	
+
 	// 合约市场通知日志每日清理，删除 10 天前的数据
 	go binance.StartMarketNoticeLogCleanupTask()
 	// 合约强平订单每日清理，删除 10 天前的数据

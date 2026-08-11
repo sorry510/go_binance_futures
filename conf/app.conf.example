@@ -93,3 +93,6 @@ news_cleanup_enable = 1
 news_keep_days = 7
 # 每天执行时间（24小时制 HH:MM）
 news_cleanup_time = "03:00"
+
+[mcp]
+mcp_enable = 0
