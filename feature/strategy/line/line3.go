@@ -44,14 +44,14 @@ func (TradeLine3 TradeLine3) GetCanLongOrShort(openParams strategy.OpenParams) (
 	
 	baseTrend := BaseTrend() // 基础趋势涨跌幅
 	
-	if ((Kdj(ema1, ema2, 3) && rsi1[0] > 40) || (lineData.Line[0].Position == "LONG" && rsi1[0] < 18)) &&
+	if ((KdjSimple(ema1, ema2, 3) && rsi1[0] > 40) || (lineData.Line[0].Position == "LONG" && rsi1[0] < 18)) &&
 		baseTrend > -3 && // 基础趋势不是大幅下跌
 		TradeLine3.checkLongLine(lineData) {
 		// 产生金叉 或 rsi 超卖了
 		openResult.CanLong = true
 		return openResult
 	}
-	if ((Kdj(ema2, ema1, 3) && rsi1[0] < 60) || (lineData.Line[0].Position == "SHORT" && rsi1[0] > 82)) &&
+	if ((KdjSimple(ema2, ema1, 3) && rsi1[0] < 60) || (lineData.Line[0].Position == "SHORT" && rsi1[0] > 82)) &&
 		baseTrend < 3 && // 基础趋势不是大幅上涨
 		// 产生死叉 或 rsi 超买了
 		TradeLine3.checkShortLine(lineData) {
@@ -112,12 +112,12 @@ func (TradeLine3 TradeLine3) MarketReversal(symbol string, positionSide string) 
 	ma1d_15, _ := CalculateSimpleMovingAverage(kline_1d_close, 15) // ma15
 	
 	if positionSide== "LONG" {
-		if Kdj(ma1d_7, ma1d_3, 4) && Kdj(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
+		if KdjSimple(ma1d_7, ma1d_3, 4) && KdjSimple(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
 			return true
 		}
 	}
 	if positionSide == "SHORT" {
-		if Kdj(ma1d_3, ma1d_7, 4) && Kdj(ma1d_3, ma1d_15, 4) && utils.IsDesc(ma1d_3[0:3]) {
+		if KdjSimple(ma1d_3, ma1d_7, 4) && KdjSimple(ma1d_3, ma1d_15, 4) && utils.IsDesc(ma1d_3[0:3]) {
 			return true
 		}
 	}
@@ -153,5 +153,4 @@ func (TradeLine3 TradeLine3) checkShortLine(lineData *LineData) bool {
 	}
 	return false
 }
-
 

@@ -29,6 +29,47 @@ type ConfigData struct {
 	Mid              []float64 `json:"mid,omitempty"`                // 可选字段
 }
 
+type MACDConfigData struct {
+	KlineInterval string    `json:"kline_interval"` // K-line interval
+	FastPeriod    int       `json:"fast_period"`    // Fast EMA period
+	SlowPeriod    int       `json:"slow_period"`    // Slow EMA period
+	SignalPeriod  int       `json:"signal_period"`  // Signal EMA period
+	DIF           []float64 `json:"dif"`            // Fast EMA minus slow EMA
+	DEA           []float64 `json:"dea"`            // EMA of DIF
+	Histogram     []float64 `json:"histogram"`      // DIF minus DEA
+}
+
+type ADXConfigData struct {
+	KlineInterval string    `json:"kline_interval"` // K-line interval
+	Period        int       `json:"period"`         // Wilder smoothing period
+	ADX           []float64 `json:"adx"`            // Trend strength
+	PlusDI        []float64 `json:"plus_di"`        // Positive directional indicator
+	MinusDI       []float64 `json:"minus_di"`       // Negative directional indicator
+}
+
+type KDJConfigData struct {
+	KlineInterval string    `json:"kline_interval"` // K-line interval
+	Period        int       `json:"period"`         // RSV lookback period
+	KPeriod       int       `json:"k_period"`       // K smoothing period
+	DPeriod       int       `json:"d_period"`       // D smoothing period
+	K             []float64 `json:"k"`              // Smoothed RSV
+	D             []float64 `json:"d"`              // Smoothed K
+	J             []float64 `json:"j"`              // Three K minus two D
+}
+
+type SupertrendConfigData struct {
+	KlineInterval string    `json:"kline_interval"` // K-line interval
+	Period        int       `json:"period"`         // ATR period
+	Multiplier    float64   `json:"multiplier"`     // ATR multiplier
+	Data          []float64 `json:"data"`           // Active trend line
+	Trend         []float64 `json:"trend"`          // One for bullish and minus one for bearish
+}
+
+type OBVConfigData struct {
+	KlineInterval string    `json:"kline_interval"` // K-line interval
+	Data          []float64 `json:"data"`           // On-balance volume
+}
+
 type KLinePrice struct {
 	High   []float64 `json:"high"`   // 最高价
 	Low    []float64 `json:"low"`    // 最低价
@@ -111,6 +152,39 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 		}
 	}
+	for _, item := range technologyConfig.MACD {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "macd", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid MACD config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			dif, dea, histogram, err := CalculateMACD(klinePrice.Close, item.FastPeriod, item.SlowPeriod, item.SignalPeriod)
+			if err != nil {
+				logs.Error("CalculateMACD error:", err.Error())
+				continue
+			}
+			config[item.Name] = MACDConfigData{
+				KlineInterval: item.KlineInterval,
+				FastPeriod:    item.FastPeriod,
+				SlowPeriod:    item.SlowPeriod,
+				SignalPeriod:  item.SignalPeriod,
+				DIF:           dif,
+				DEA:           dea,
+				Histogram:     histogram,
+			}
+		}
+	}
 	for _, item := range technologyConfig.RSI {
 		if item.Enable {
 			if err := validateIndicatorConfig(symbol, "rsi", item, limit, usedIndicatorNames); err != nil {
@@ -137,6 +211,154 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				KlineInterval: item.KlineInterval,
 				Period:        item.Period,
 				Data:          rsiArr,
+			}
+		}
+	}
+	for _, item := range technologyConfig.ROC {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "roc", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid ROC config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			roc, err := CalculateROC(klinePrice.Close, item.Period)
+			if err != nil {
+				logs.Error("CalculateROC error:", err.Error())
+				continue
+			}
+			config[item.Name] = ConfigData{
+				KlineInterval: item.KlineInterval,
+				Period:        item.Period,
+				Data:          roc,
+			}
+		}
+	}
+	for _, item := range technologyConfig.MFI {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "mfi", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid MFI config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			mfi, err := CalculateMFI(klinePrice.High, klinePrice.Low, klinePrice.Close, klinePrice.Amount, item.Period)
+			if err != nil {
+				logs.Error("CalculateMFI error:", err.Error())
+				continue
+			}
+			config[item.Name] = ConfigData{
+				KlineInterval: item.KlineInterval,
+				Period:        item.Period,
+				Data:          mfi,
+			}
+		}
+	}
+	for _, item := range technologyConfig.OBV {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "obv", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid OBV config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			obv, err := CalculateOBV(klinePrice.Close, klinePrice.Amount)
+			if err != nil {
+				logs.Error("CalculateOBV error:", err.Error())
+				continue
+			}
+			config[item.Name] = OBVConfigData{
+				KlineInterval: item.KlineInterval,
+				Data:          obv,
+			}
+		}
+	}
+	for _, item := range technologyConfig.CCI {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "cci", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid CCI config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			cci, err := CalculateCCI(klinePrice.High, klinePrice.Low, klinePrice.Close, item.Period)
+			if err != nil {
+				logs.Error("CalculateCCI error:", err.Error())
+				continue
+			}
+			config[item.Name] = ConfigData{
+				KlineInterval: item.KlineInterval,
+				Period:        item.Period,
+				Data:          cci,
+			}
+		}
+	}
+	for _, item := range technologyConfig.KDJ {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "kdj", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid KDJ config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			k, d, j, err := Kdj(klinePrice.High, klinePrice.Low, klinePrice.Close, item.Period, item.KPeriod, item.DPeriod)
+			if err != nil {
+				logs.Error("Kdj error:", err.Error())
+				continue
+			}
+			config[item.Name] = KDJConfigData{
+				KlineInterval: item.KlineInterval,
+				Period:        item.Period,
+				KPeriod:       item.KPeriod,
+				DPeriod:       item.DPeriod,
+				K:             k,
+				D:             d,
+				J:             j,
 			}
 		}
 	}
@@ -208,6 +430,37 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 		}
 	}
+	for _, item := range technologyConfig.Donchian {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "donchian", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid Donchian config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			upper, middle, lower, err := CalculateDonchianChannels(klinePrice.High, klinePrice.Low, item.Period)
+			if err != nil {
+				logs.Error("CalculateDonchianChannels error:", err.Error())
+				continue
+			}
+			config[item.Name] = ConfigData{
+				KlineInterval: item.KlineInterval,
+				Period:        item.Period,
+				High:          upper,
+				Mid:           middle,
+				Low:           lower,
+			}
+		}
+	}
 	for _, item := range technologyConfig.ATR {
 		if item.Enable {
 			if err := validateIndicatorConfig(symbol, "atr", item, limit, usedIndicatorNames); err != nil {
@@ -234,6 +487,68 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 				KlineInterval: item.KlineInterval,
 				Period:        item.Period,
 				Data:          atrArr,
+			}
+		}
+	}
+	for _, item := range technologyConfig.Supertrend {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "supertrend", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid Supertrend config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			data, trend, err := CalculateSupertrend(klinePrice.High, klinePrice.Low, klinePrice.Close, item.Period, item.Multiplier)
+			if err != nil {
+				logs.Error("CalculateSupertrend error:", err.Error())
+				continue
+			}
+			config[item.Name] = SupertrendConfigData{
+				KlineInterval: item.KlineInterval,
+				Period:        item.Period,
+				Multiplier:    item.Multiplier,
+				Data:          data,
+				Trend:         trend,
+			}
+		}
+	}
+	for _, item := range technologyConfig.ADX {
+		if item.Enable {
+			if err := validateIndicatorConfig(symbol, "adx", item, limit, usedIndicatorNames); err != nil {
+				logs.Error("invalid ADX config:", err.Error())
+				continue
+			}
+			klinePrice, ok := klineMap[item.KlineInterval]
+			if !ok {
+				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				if err != nil {
+					logs.Error("kline error, symbol:", symbol)
+					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
+					continue
+				}
+				klinePrice = newKLinePrice(kline)
+				klineMap[item.KlineInterval] = klinePrice
+			}
+			adx, plusDI, minusDI, err := CalculateADX(klinePrice.High, klinePrice.Low, klinePrice.Close, item.Period)
+			if err != nil {
+				logs.Error("CalculateADX error:", err.Error())
+				continue
+			}
+			config[item.Name] = ADXConfigData{
+				KlineInterval: item.KlineInterval,
+				Period:        item.Period,
+				ADX:           adx,
+				PlusDI:        plusDI,
+				MinusDI:       minusDI,
 			}
 		}
 	}
@@ -265,7 +580,7 @@ var reservedIndicatorNames = map[string]struct{}{
 	"SystemStartTime": {}, "MarketCondition": {}, "NowTime": {}, "NowPrice": {},
 	"NowSymbolPercentChange": {}, "NowSymbolClose": {}, "NowSymbolOpen": {},
 	"NowSymbolLow": {}, "NowSymbolHigh": {}, "BasicTrend": {},
-	"Kdj": {}, "IsAsc": {}, "IsDesc": {}, "ROI": {}, "Position": {}, "Positions": {},
+	"KdjSimple": {}, "IsAsc": {}, "IsDesc": {}, "ROI": {}, "Position": {}, "Positions": {},
 	"BTCUSDT": {}, "ETHUSDT": {}, "SOLUSDT": {}, "BNBUSDT": {},
 }
 
@@ -286,14 +601,46 @@ func validateIndicatorConfig(symbol, indicatorType string, item technology.Indic
 	if _, supported := supportedKlineIntervals[item.KlineInterval]; !supported {
 		return fmt.Errorf("%s indicator %q has unsupported K-line interval %q", indicatorType, name, item.KlineInterval)
 	}
+	if indicatorType == "macd" {
+		if item.FastPeriod <= 0 || item.SlowPeriod <= 0 || item.SignalPeriod <= 0 {
+			return fmt.Errorf("MACD indicator %q periods must be greater than zero", name)
+		}
+		if item.FastPeriod >= item.SlowPeriod {
+			return fmt.Errorf("MACD indicator %q fast period must be less than slow period", name)
+		}
+		if item.SlowPeriod+item.SignalPeriod-1 > maxPeriod {
+			return fmt.Errorf("MACD indicator %q requires more than %d K-lines", name, maxPeriod)
+		}
+		usedNames[name] = struct{}{}
+		return nil
+	}
+	if indicatorType == "obv" {
+		usedNames[name] = struct{}{}
+		return nil
+	}
 	if item.Period <= 0 || item.Period > maxPeriod {
 		return fmt.Errorf("%s indicator %q period must be between 1 and %d", indicatorType, name, maxPeriod)
 	}
 	if indicatorType == "rsi" && item.Period >= maxPeriod {
 		return fmt.Errorf("RSI indicator %q period must be between 1 and %d", name, maxPeriod-1)
 	}
+	if indicatorType == "mfi" && item.Period >= maxPeriod {
+		return fmt.Errorf("MFI indicator %q period must be between 1 and %d", name, maxPeriod-1)
+	}
+	if indicatorType == "roc" && item.Period >= maxPeriod {
+		return fmt.Errorf("ROC indicator %q period must be between 1 and %d", name, maxPeriod-1)
+	}
+	if indicatorType == "kdj" && (item.KPeriod <= 0 || item.KPeriod > maxPeriod || item.DPeriod <= 0 || item.DPeriod > maxPeriod) {
+		return fmt.Errorf("KDJ indicator %q smoothing periods must be between 1 and %d", name, maxPeriod)
+	}
+	if indicatorType == "adx" && item.Period > maxPeriod/2 {
+		return fmt.Errorf("ADX indicator %q period must be between 1 and %d", name, maxPeriod/2)
+	}
 	if indicatorType == "kc" && item.Multiplier < 0 {
 		return fmt.Errorf("KC indicator %q multiplier must not be negative", name)
+	}
+	if indicatorType == "supertrend" && item.Multiplier <= 0 {
+		return fmt.Errorf("Supertrend indicator %q multiplier must be greater than zero", name)
 	}
 	if indicatorType == "boll" && item.StdDevMultiplier < 0 {
 		return fmt.Errorf("BOLL indicator %q standard deviation multiplier must not be negative", name)
@@ -326,7 +673,7 @@ func InitParseEnv(symbol string, strTechnology string) map[string]interface{} {
 		"NowTime":         time.Now().Unix() * 1000, // 毫秒时间戳
 
 		// function
-		"Kdj":        Kdj,          // 计算是否是金叉,
+		"KdjSimple":  KdjSimple,    // 计算是否是金叉,
 		"IsAsc":      utils.IsAsc,  // 是否是升序数组
 		"IsDesc":     utils.IsDesc, // 是否是降序数组,
 		"BasicTrend": 0.0,          // 基础趋势涨跌幅 (btc * 0.6 + eth * 0.3 + sol * 0.05 + bnb * 0.05)
