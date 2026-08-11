@@ -1,0 +1,81 @@
+{
+  "name": "短线趋势动量 v1",
+  "technology": {
+    "ma": [],
+    "ema": [],
+    "macd": [
+      {
+        "name": "macd_15m_8_21_5",
+        "enable": true,
+        "kline_interval": "15m",
+        "fast_period": 8,
+        "slow_period": 21,
+        "signal_period": 5
+      }
+    ],
+    "adx": [
+      {
+        "name": "adx_15m_14",
+        "enable": true,
+        "kline_interval": "15m",
+        "period": 14
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_15m_14",
+        "enable": true,
+        "kline_interval": "15m",
+        "period": 14
+      }
+    ],
+    "supertrend": [
+      {
+        "name": "supertrend_1h_10_3",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 10,
+        "multiplier": 3
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "short_term_momentum_long_open_v1",
+      "type": "long",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet trend_ok = supertrend_1h_10_3.Trend[0] == 1 && kline_1h.Close[0] > supertrend_1h_10_3.Data[0];\nlet momentum_cross = macd_15m_8_21_5.DIF[0] > macd_15m_8_21_5.DEA[0] && macd_15m_8_21_5.DIF[1] <= macd_15m_8_21_5.DEA[1];\nlet strength_ok = adx_15m_14.ADX[0] >= 20 && adx_15m_14.ADX[0] >= adx_15m_14.ADX[1] && adx_15m_14.PlusDI[0] > adx_15m_14.MinusDI[0];\nlet atr = atr_15m_14.Data[0];\nlet candle_body = abs(kline_15m.Close[0] - kline_15m.Open[0]);\nlet no_chase = atr > 0 && candle_body <= atr * 1.2 && kline_15m.Close[0] <= kline_15m.High[1] + atr * 0.5;\n\nwarmup_ok && trend_ok && momentum_cross && strength_ok && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "short_term_momentum_short_open_v1",
+      "type": "short",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet trend_ok = supertrend_1h_10_3.Trend[0] == -1 && kline_1h.Close[0] < supertrend_1h_10_3.Data[0];\nlet momentum_cross = macd_15m_8_21_5.DIF[0] < macd_15m_8_21_5.DEA[0] && macd_15m_8_21_5.DIF[1] >= macd_15m_8_21_5.DEA[1];\nlet strength_ok = adx_15m_14.ADX[0] >= 20 && adx_15m_14.ADX[0] >= adx_15m_14.ADX[1] && adx_15m_14.MinusDI[0] > adx_15m_14.PlusDI[0];\nlet atr = atr_15m_14.Data[0];\nlet candle_body = abs(kline_15m.Close[0] - kline_15m.Open[0]);\nlet no_chase = atr > 0 && candle_body <= atr * 1.2 && kline_15m.Close[0] >= kline_15m.Low[1] - atr * 0.5;\n\nwarmup_ok && trend_ok && momentum_cross && strength_ok && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "short_term_momentum_long_close_v1",
+      "type": "close_long",
+      "code": "let atr = atr_15m_14.Data[0];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\nlet hard_stop = mark <= entry - atr * 2.2 || ROI <= -6;\nlet hard_take = mark >= entry + atr * 4 || ROI >= 10;\nlet momentum_reversal = macd_15m_8_21_5.DIF[0] < macd_15m_8_21_5.DEA[0] && macd_15m_8_21_5.DIF[1] >= macd_15m_8_21_5.DEA[1];\nlet protect_profit = ROI >= 3 && momentum_reversal;\nlet setup_failure = supertrend_1h_10_3.Trend[0] == -1 && ROI <= 0;\nlet time_exit = Position.SourceType == \"local\" && Position.CreateTime > 0 && NowTime - Position.CreateTime >= 129600000 && abs(mark - entry) < atr;\n\nhard_stop || hard_take || protect_profit || setup_failure || time_exit",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "short_term_momentum_short_close_v1",
+      "type": "close_short",
+      "code": "let atr = atr_15m_14.Data[0];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\nlet hard_stop = mark >= entry + atr * 2.2 || ROI <= -6;\nlet hard_take = mark <= entry - atr * 4 || ROI >= 10;\nlet momentum_reversal = macd_15m_8_21_5.DIF[0] > macd_15m_8_21_5.DEA[0] && macd_15m_8_21_5.DIF[1] <= macd_15m_8_21_5.DEA[1];\nlet protect_profit = ROI >= 3 && momentum_reversal;\nlet setup_failure = supertrend_1h_10_3.Trend[0] == 1 && ROI <= 0;\nlet time_exit = Position.SourceType == \"local\" && Position.CreateTime > 0 && NowTime - Position.CreateTime >= 129600000 && abs(mark - entry) < atr;\n\nhard_stop || hard_take || protect_profit || setup_failure || time_exit",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
