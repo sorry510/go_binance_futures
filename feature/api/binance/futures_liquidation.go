@@ -1,6 +1,7 @@
 package binance
 
 import (
+	"database/sql/driver"
 	"errors"
 	"go_binance_futures/models"
 	"strconv"
@@ -12,7 +13,12 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
-const futuresLiquidationOrderKeepDays = 5
+const (
+	futuresLiquidationOrderKeepDays          = 5
+	futuresLiquidationOrderCleanupBatchSize  = 1000
+	futuresLiquidationOrderCleanupMaxRetries = 3
+	futuresLiquidationOrderCleanupRetryDelay = time.Second
+)
 
 // CollectFuturesLiquidationOrders 采集全市场强平订单快照。
 // @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams
@@ -156,13 +162,59 @@ func CleanupOldFuturesLiquidationOrders(keepDays int) (int64, error) {
 	}
 
 	cutoff := time.Now().AddDate(0, 0, -keepDays).UnixMilli()
-	return orm.NewOrm().QueryTable(new(models.FuturesLiquidationOrder)).Filter("event_time__lt", cutoff).Delete()
+	o := orm.NewOrm()
+	var totalDeleted int64
+
+	for {
+		var orders []models.FuturesLiquidationOrder
+		_, err := o.QueryTable(new(models.FuturesLiquidationOrder)).
+			Filter("event_time__lt", cutoff).
+			OrderBy("id").
+			Limit(futuresLiquidationOrderCleanupBatchSize).
+			All(&orders, "ID")
+		if err != nil {
+			return totalDeleted, err
+		}
+		if len(orders) == 0 {
+			return totalDeleted, nil
+		}
+
+		ids := make([]interface{}, len(orders))
+		for i := range orders {
+			ids[i] = orders[i].ID
+		}
+
+		deleted, err := o.QueryTable(new(models.FuturesLiquidationOrder)).Filter("id__in", ids...).Delete()
+		totalDeleted += deleted
+		if err != nil {
+			return totalDeleted, err
+		}
+	}
+}
+
+func cleanupOldFuturesLiquidationOrdersWithRetry(keepDays int) (int64, error) {
+	return retryFuturesLiquidationOrderCleanup(CleanupOldFuturesLiquidationOrders, keepDays, time.Sleep)
+}
+
+func retryFuturesLiquidationOrderCleanup(cleanup func(int) (int64, error), keepDays int, wait func(time.Duration)) (int64, error) {
+	var totalDeleted int64
+	for attempt := 1; ; attempt++ {
+		deleted, err := cleanup(keepDays)
+		totalDeleted += deleted
+		if err == nil {
+			return totalDeleted, nil
+		}
+		if !errors.Is(err, driver.ErrBadConn) || attempt == futuresLiquidationOrderCleanupMaxRetries {
+			return totalDeleted, err
+		}
+		wait(futuresLiquidationOrderCleanupRetryDelay)
+	}
 }
 
 func StartFuturesLiquidationOrderCleanupTask() {
 	logs.Debug("futures liquidation order cleanup task start, keep days:", futuresLiquidationOrderKeepDays)
 
-	deleted, err := CleanupOldFuturesLiquidationOrders(futuresLiquidationOrderKeepDays)
+	deleted, err := cleanupOldFuturesLiquidationOrdersWithRetry(futuresLiquidationOrderKeepDays)
 	if err != nil {
 		logs.Error("futures liquidation order cleanup task init error:", err)
 	} else {
@@ -173,7 +225,7 @@ func StartFuturesLiquidationOrderCleanupTask() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		deleted, err := CleanupOldFuturesLiquidationOrders(futuresLiquidationOrderKeepDays)
+		deleted, err := cleanupOldFuturesLiquidationOrdersWithRetry(futuresLiquidationOrderKeepDays)
 		if err != nil {
 			logs.Error("futures liquidation order cleanup task error:", err)
 			continue
