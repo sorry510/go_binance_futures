@@ -1,6 +1,6 @@
 ---
 name: custom-strategy
-description: Design, validate, export, and optionally persist efficient expr-lang custom futures strategies for this go_binance_futures project and its go_binance_futrues_new_ui frontend. Use when the user asks to create, revise, simplify, inspect, test, export, insert, or update a strategy_templates custom strategy with technical indicators, K-line conditions, and long/short open and close rules.
+description: Design, validate, export, persist, evaluate, and optimize efficient expr-lang custom futures strategies for this go_binance_futures project and its go_binance_futrues_new_ui frontend. Use when the user asks to create, revise, simplify, inspect, test, export, insert, or update a strategy_templates custom strategy, or to judge and optimize a tested strategy from test_strategy_results.
 ---
 
 # Custom Strategy
@@ -100,6 +100,22 @@ rtk bash .agents/skills/custom-strategy/scripts/validate_strategy.sh \
 3. If the local service is unavailable, report the API check as blocked and compile/run every rule with the real expr package and actual Go environment structs using deterministic synthetic arrays.
 4. Interpret `code: 200` only as compile/runtime success. `pass: false` is a valid current-snapshot result.
 5. The current test controller responds inside the first enabled-rule iteration and injects one fixed mock position. Validate one rule per request, and do not treat that mock as proof of correct long/short position semantics. Cover all four rule types with real Go environment structs and deterministic LONG/SHORT cases.
+
+## Evaluate forward-test results
+
+Read `references/test-strategy-results.md` completely before deciding whether a tested strategy is effective or needs optimization.
+
+1. Query `test_strategy_results` read-only. Do not judge from the frontend's current-page profit total because it does not represent the complete filtered cohort.
+2. Select one exact strategy version by canonicalized `technology` and `strategy` snapshots plus the requested test window. Do not mix JSON formatting variants, revised rules, or different indicator configurations, and do not identify a cohort only by template name.
+3. Separate open rows where `close_price == "0"` from closed rows. Treat open rows as censored observations: report their count and age, but never count them as wins, losses, or realized profit.
+4. For closed rows, report sample count, wins/losses/breakeven, gross profit and loss, gross PnL, win rate, profit factor, expectancy, average and median margin return, median and p90 holding time, maximum closed-trade drawdown, and maximum losing streak. Segment at least by `LONG`/`SHORT`, symbol, and test period.
+5. Calculate margin return as `close_profit / usdt * 100` only when both values parse correctly and `usdt > 0`. Reject malformed rows from numeric metrics and report how many were rejected.
+6. Treat `close_profit` as gross simulated USDT PnL. It excludes trading fees, funding, and additional close slippage. Apply an explicit cost assumption when the user supplies one; otherwise report gross results and state that net effectiveness remains unproven.
+7. Include the simulator's behavior in the diagnosis: open prices already contain a 0.1% adverse adjustment, and close rules are evaluated only after the symbol's outer `profit` or `loss` gate is crossed. `close_strategy` stores the complete matched close rule, not the internal Boolean branch that caused the exit.
+8. Return exactly one verdict: `insufficient evidence`, `promising under tested conditions`, `needs optimization`, or `invalidated`. Use 20 closed trades as the default minimum for a preliminary verdict and 50 for a more stable verdict, but raise the requirement for concentrated symbols, one-sided samples, or a narrow market regime.
+9. Optimize only when the evidence points to a specific failure mode. Change one logical dimension at a time, create a new named strategy version, preserve the old template and results, and compare non-overlapping version cohorts. Never update templates, delete test rows, or enable trading without explicit authorization.
+
+Forward simulation is stronger evidence than compile and current-snapshot checks, but it is not a historical backtest or live-trading proof. Do not claim general profitability from one test window.
 
 ## Persist only with explicit authorization
 

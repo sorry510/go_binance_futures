@@ -425,11 +425,11 @@ bee pack -be GOOS=windows
 - [ ] 允许同一个仓位多次加仓
 
 ### AI TODO
-- [ ] mcp 服务，提供 ai 外部的使用接口, token 接入
+- [X] ai 写自定义策略的 skill
+- [ ] mcp 服务，提供当前除了 登录 之外的所有接口，提供 通知 服务，使用 token 来使用(需要一个管理 token 的页面, token 需要自定义有效期时间)
 - [ ] ai 自动判定当前市场的大环境
 - [ ] ai 驱动的监听报警和自动买卖
 - [ ] ai 驱动的问币策略
-
 
 ### 检查 binance 和 x 的新闻
 > https://www.binance.com/zh-CN/square/profile/xxx
