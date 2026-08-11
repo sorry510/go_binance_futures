@@ -126,7 +126,7 @@ The **Futures Trade → Futures Trade** page supports per-symbol settings for st
 
 ### Global settings
 
-- **24h movement and fast-movement alerts:** configure the movement threshold, recovery threshold, cooldown, and monitoring windows. Review triggered events under **Market Volatility Logs**.
+- **Fast-movement alerts:** configure the movement threshold, recovery threshold, cooldown, and monitoring windows. Review triggered events under **Market Volatility Logs**.
 - **Position profit sign-change notification:** sends a notification when a position changes between profit and loss. Enabling it for many positions or symbols increases API traffic.
 - **Allow Long / Allow Short:** direction-level master switches; disabled directions will not open even when a strategy matches.
 - **Trading Strategy / Coin Selection Strategy:** used when a symbol's strategy type is `global`; custom symbols use their own configuration.
