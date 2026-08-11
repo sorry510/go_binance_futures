@@ -201,8 +201,16 @@ func klineKcListen(coin models.ListenSymbols) {
 	}
 	
 	high1, low1, close1, _ := line.GetLineFloatPrices(kline_1)
-	upper1, ma1, lower1 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
-	upper2, _, lower2 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
+	upper1, ma1, lower1, err := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
+	if err != nil {
+		logs.Error("calculate narrow Keltner Channels error:", err.Error())
+		return
+	}
+	upper2, _, lower2, err := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
+	if err != nil {
+		logs.Error("calculate wide Keltner Channels error:", err.Error())
+		return
+	}
 	
 	limitPeriod := 12 // 最近n根k线
 	lossPercent := 0.015
