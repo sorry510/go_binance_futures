@@ -99,14 +99,9 @@ func IsAsc(arr []float64) bool {
 func ReverseArray(arr []float64) []float64 {
 	n := len(arr)
 	reversed := make([]float64, n)
-
-	left, right := 0, n-1
-	for left < right {
-		reversed[left], reversed[right] = arr[right], arr[left]
-		left++
-		right--
+	for i, value := range arr {
+		reversed[n-1-i] = value
 	}
-
 	return reversed
 }
 

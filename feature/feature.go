@@ -26,23 +26,24 @@ var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var pusher = notify.GetNotifyChannel()
 
 var flagFutures = 0
+
 func StartTrade(systemConfig *models.Config) {
-	if (systemConfig.FutureEnable == 1) {
-		if (flagFutures == 0) {
+	if systemConfig.FutureEnable == 1 {
+		if flagFutures == 0 {
 			logs.Info("futures trade bot start")
 			flagFutures = 1
 		}
 	} else {
-		if (flagFutures == 1) {
+		if flagFutures == 1 {
 			logs.Info("futures trade bot stop")
 			flagFutures = 0
 		}
 		return
 	}
-	
-	globalCoinStrategy := GetCoinStrategy(systemConfig.FutureStrategyCoin) // 交易策略
+
+	globalCoinStrategy := GetCoinStrategy(systemConfig.FutureStrategyCoin)  // 交易策略
 	globalLineStrategy := GetLineStrategy(systemConfig.FutureStrategyTrade) // 选币策略
-	
+
 	/************************************************寻找交易币种 start******************************************************************* */
 	allCoins, err := GetAllSymbols()
 	if err != nil {
@@ -55,8 +56,7 @@ func StartTrade(systemConfig *models.Config) {
 		return
 	}
 	/************************************************寻找交易币种 end******************************************************************* */
-	
-	
+
 	/************************************************获取账户信息 start******************************************************************* */
 	positions, err := GetTransformPositions()
 	if err != nil {
@@ -64,7 +64,7 @@ func StartTrade(systemConfig *models.Config) {
 		time.Sleep(30 * time.Second)
 		return
 	}
-	
+
 	allOpenOrders, err := getTransformOpenOrders()
 	// allOpenOrders, err := binance.GetOpenOrder()
 	if err != nil {
@@ -73,17 +73,15 @@ func StartTrade(systemConfig *models.Config) {
 		return
 	}
 	/************************************************获取账户信息 end******************************************************************* */
-	
-	
+
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 start************************************************************ */
 	exclude_symbols_map := GetExcludeSymbolsMap(systemConfig.FutureExcludeSymbols)
 	cancelTimeoutOrder(exclude_symbols_map, allOpenOrders, int64(systemConfig.FutureBuyTimeout))
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 end************************************************************ */
-	
-	
+
 	/*************************************************平仓(止盈或止损)已经有持仓的币(排除手动交易白名单) start************************************************************ */
 	positionCount := 0 // 当前仓位数量
-	lossCount := 0 // 亏损的仓位数量
+	lossCount := 0     // 亏损的仓位数量
 	for _, position := range positions {
 		// 在白名单内, 不参与自动平仓交易
 		if _, exist := exclude_symbols_map[position.Symbol]; exist {
@@ -91,13 +89,13 @@ func StartTrade(systemConfig *models.Config) {
 		}
 		positionAmtFloat, _ := strconv.ParseFloat(position.Amount, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
-		if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
+		if positionAmtFloatAbs < 0.0000000001 {           // 没有持仓的
 			continue
 		}
 		exclude_symbols_map[position.Symbol] = true // 后续的开仓中避过已经有持仓的币
-		
-		coin_profit_float64 := 10000.0 // 全局定义
-		coin_loss_float64 := 10000.0 // 全局定义
+
+		coin_profit_float64 := 10000.0           // 全局定义
+		coin_loss_float64 := 10000.0             // 全局定义
 		coin_line_strategy := globalLineStrategy // 默认为全局
 		var findCoin *models.Symbols
 		for _, coin := range allCoins {
@@ -117,19 +115,19 @@ func StartTrade(systemConfig *models.Config) {
 				break
 			}
 		}
-		
+
 		unRealizedProfit, _ := strconv.ParseFloat(position.UnrealizedProfit, 64)
 		leverage_float64 := float64(position.Leverage)
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
-		
+
 		if nowProfit < -0.1 {
 			lossCount += 1
 		}
-		
+
 		closeResult := coin_line_strategy.AutoStopOrder(strategy.CloseParams{
-			Symbols: findCoin,
-			Position: position,
+			Symbols:   findCoin,
+			Position:  position,
 			NowProfit: nowProfit,
 		})
 		if closeResult.Complete { // 触发策略,风向改变,强制平仓
@@ -139,32 +137,32 @@ func StartTrade(systemConfig *models.Config) {
 				if err == nil {
 					// 数据库写入订单
 					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
-					
+
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-						Title: lang.Lang("futures.close_notice_title"),
-						Symbol: position.Symbol,
-						Side: "sell",
+						Title:        lang.Lang("futures.close_notice_title"),
+						Symbol:       position.Symbol,
+						Side:         "sell",
 						PositionSide: "long",
-						Price: markPrice,
-						Quantity: positionAmtFloat,
-						Leverage: leverage_float64,
-						Profit: unRealizedProfit,
-						Remarks: lang.Lang("futures.wind_of_change"),
-						Status: "success",
+						Price:        markPrice,
+						Quantity:     positionAmtFloat,
+						Leverage:     leverage_float64,
+						Profit:       unRealizedProfit,
+						Remarks:      lang.Lang("futures.wind_of_change"),
+						Status:       "success",
 					})
 				} else {
 					pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-						Title: lang.Lang("futures.close_notice_title"),
-						Symbol: position.Symbol,
-						Side: "sell",
+						Title:        lang.Lang("futures.close_notice_title"),
+						Symbol:       position.Symbol,
+						Side:         "sell",
 						PositionSide: "long",
-						Quantity: positionAmtFloat,
-						Leverage: leverage_float64,
-						Profit: unRealizedProfit,
-						Remarks: lang.Lang("futures.wind_of_change"),
-						Status: "fail",
-						Error: err.Error(),
+						Quantity:     positionAmtFloat,
+						Leverage:     leverage_float64,
+						Profit:       unRealizedProfit,
+						Remarks:      lang.Lang("futures.wind_of_change"),
+						Status:       "fail",
+						Error:        err.Error(),
 					})
 				}
 			}
@@ -173,32 +171,32 @@ func StartTrade(systemConfig *models.Config) {
 				if err == nil {
 					// 数据库写入订单
 					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
-					
+
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-						Title: lang.Lang("futures.close_notice_title"),
-						Symbol: position.Symbol,
-						Side: "buy",
+						Title:        lang.Lang("futures.close_notice_title"),
+						Symbol:       position.Symbol,
+						Side:         "buy",
 						PositionSide: "short",
-						Price: markPrice,
-						Quantity: positionAmtFloat,
-						Leverage: leverage_float64,
-						Profit: unRealizedProfit,
-						Remarks: lang.Lang("futures.wind_of_change"),
-						Status: "success",
+						Price:        markPrice,
+						Quantity:     positionAmtFloat,
+						Leverage:     leverage_float64,
+						Profit:       unRealizedProfit,
+						Remarks:      lang.Lang("futures.wind_of_change"),
+						Status:       "success",
 					})
 				} else {
 					pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-						Title: lang.Lang("futures.close_notice_title"),
-						Symbol: position.Symbol,
-						Side: "buy",
+						Title:        lang.Lang("futures.close_notice_title"),
+						Symbol:       position.Symbol,
+						Side:         "buy",
 						PositionSide: "short",
-						Quantity: positionAmtFloat,
-						Leverage: leverage_float64,
-						Profit: unRealizedProfit,
-						Remarks: lang.Lang("futures.wind_of_change"),
-						Status: "fail",
-						Error: err.Error(),
+						Quantity:     positionAmtFloat,
+						Leverage:     leverage_float64,
+						Profit:       unRealizedProfit,
+						Remarks:      lang.Lang("futures.wind_of_change"),
+						Status:       "fail",
+						Error:        err.Error(),
 					})
 				}
 			}
@@ -208,42 +206,42 @@ func StartTrade(systemConfig *models.Config) {
 		if nowProfit <= -coin_loss_float64 { // 平仓(止损)
 			// position.Symbol, position.PositionSide
 			closeResult := coin_line_strategy.CanOrderComplete(strategy.CloseParams{
-				Symbols: findCoin,
-				Position: position,
+				Symbols:   findCoin,
+				Position:  position,
 				NowProfit: nowProfit,
 			})
-			if closeResult.Complete { // 
+			if closeResult.Complete { //
 				if position.Side == "LONG" {
 					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
-						
+
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.close_notice_title"),
-							Symbol: position.Symbol,
-							Side: "sell",
+							Title:        lang.Lang("futures.close_notice_title"),
+							Symbol:       position.Symbol,
+							Side:         "sell",
 							PositionSide: "long",
-							Price: markPrice,
-							Quantity: positionAmtFloat,
-							Leverage: leverage_float64,
-							Profit: unRealizedProfit,
-							Remarks: lang.Lang("futures.stop_loss"),
-							Status: "success",
+							Price:        markPrice,
+							Quantity:     positionAmtFloat,
+							Leverage:     leverage_float64,
+							Profit:       unRealizedProfit,
+							Remarks:      lang.Lang("futures.stop_loss"),
+							Status:       "success",
 						})
 					} else {
 						pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.close_notice_title"),
-							Symbol: position.Symbol,
-							Side: "sell",
+							Title:        lang.Lang("futures.close_notice_title"),
+							Symbol:       position.Symbol,
+							Side:         "sell",
 							PositionSide: "long",
-							Quantity: positionAmtFloat,
-							Leverage: leverage_float64,
-							Profit: unRealizedProfit,
-							Remarks: lang.Lang("futures.stop_loss"),
-							Status: "fail",
-							Error: err.Error(),
+							Quantity:     positionAmtFloat,
+							Leverage:     leverage_float64,
+							Profit:       unRealizedProfit,
+							Remarks:      lang.Lang("futures.stop_loss"),
+							Status:       "fail",
+							Error:        err.Error(),
 						})
 					}
 				}
@@ -252,32 +250,32 @@ func StartTrade(systemConfig *models.Config) {
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
-						
+
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.close_notice_title"),
-							Symbol: position.Symbol,
-							Side: "buy",
+							Title:        lang.Lang("futures.close_notice_title"),
+							Symbol:       position.Symbol,
+							Side:         "buy",
 							PositionSide: "short",
-							Price: markPrice,
-							Quantity: positionAmtFloat,
-							Leverage: leverage_float64,
-							Profit: unRealizedProfit,
-							Remarks: lang.Lang("futures.stop_loss"),
-							Status: "success",
+							Price:        markPrice,
+							Quantity:     positionAmtFloat,
+							Leverage:     leverage_float64,
+							Profit:       unRealizedProfit,
+							Remarks:      lang.Lang("futures.stop_loss"),
+							Status:       "success",
 						})
 					} else {
 						pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.close_notice_title"),
-							Symbol: position.Symbol,
-							Side: "buy",
+							Title:        lang.Lang("futures.close_notice_title"),
+							Symbol:       position.Symbol,
+							Side:         "buy",
 							PositionSide: "short",
-							Quantity: positionAmtFloat,
-							Leverage: leverage_float64,
-							Profit: unRealizedProfit,
-							Remarks: lang.Lang("futures.stop_loss"),
-							Status: "fail",
-							Error: err.Error(),
+							Quantity:     positionAmtFloat,
+							Leverage:     leverage_float64,
+							Profit:       unRealizedProfit,
+							Remarks:      lang.Lang("futures.stop_loss"),
+							Status:       "fail",
+							Error:        err.Error(),
 						})
 					}
 				}
@@ -286,8 +284,8 @@ func StartTrade(systemConfig *models.Config) {
 		}
 		if nowProfit >= coin_profit_float64 { // 平仓(止盈)
 			closeResult := coin_line_strategy.CanOrderComplete(strategy.CloseParams{
-				Symbols: findCoin,
-				Position: position,
+				Symbols:   findCoin,
+				Position:  position,
 				NowProfit: nowProfit,
 			})
 			if closeResult.Complete {
@@ -296,32 +294,32 @@ func StartTrade(systemConfig *models.Config) {
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
-						
+
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.close_notice_title"),
-							Symbol: position.Symbol,
-							Side: "sell",
+							Title:        lang.Lang("futures.close_notice_title"),
+							Symbol:       position.Symbol,
+							Side:         "sell",
 							PositionSide: "long",
-							Price: markPrice,
-							Quantity: positionAmtFloat,
-							Leverage: leverage_float64,
-							Profit: unRealizedProfit,
-							Remarks: lang.Lang("futures.target_profit"),
-							Status: "success",
+							Price:        markPrice,
+							Quantity:     positionAmtFloat,
+							Leverage:     leverage_float64,
+							Profit:       unRealizedProfit,
+							Remarks:      lang.Lang("futures.target_profit"),
+							Status:       "success",
 						})
 					} else {
 						pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.close_notice_title"),
-							Symbol: position.Symbol,
-							Side: "sell",
+							Title:        lang.Lang("futures.close_notice_title"),
+							Symbol:       position.Symbol,
+							Side:         "sell",
 							PositionSide: "long",
-							Quantity: positionAmtFloat,
-							Leverage: leverage_float64,
-							Profit: unRealizedProfit,
-							Remarks: lang.Lang("futures.target_profit"),
-							Status: "fail",
-							Error: err.Error(),
+							Quantity:     positionAmtFloat,
+							Leverage:     leverage_float64,
+							Profit:       unRealizedProfit,
+							Remarks:      lang.Lang("futures.target_profit"),
+							Status:       "fail",
+							Error:        err.Error(),
 						})
 					}
 				}
@@ -330,32 +328,32 @@ func StartTrade(systemConfig *models.Config) {
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
-						
+
 						markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 						pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.close_notice_title"),
-							Symbol: position.Symbol,
-							Side: "buy",
+							Title:        lang.Lang("futures.close_notice_title"),
+							Symbol:       position.Symbol,
+							Side:         "buy",
 							PositionSide: "short",
-							Price: markPrice,
-							Quantity: positionAmtFloat,
-							Leverage: leverage_float64,
-							Profit: unRealizedProfit,
-							Remarks: lang.Lang("futures.target_profit"),
-							Status: "success",
+							Price:        markPrice,
+							Quantity:     positionAmtFloat,
+							Leverage:     leverage_float64,
+							Profit:       unRealizedProfit,
+							Remarks:      lang.Lang("futures.target_profit"),
+							Status:       "success",
 						})
 					} else {
 						pusher.SetModuleName("futures").FuturesCloseOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.close_notice_title"),
-							Symbol: position.Symbol,
-							Side: "buy",
+							Title:        lang.Lang("futures.close_notice_title"),
+							Symbol:       position.Symbol,
+							Side:         "buy",
 							PositionSide: "short",
-							Quantity: positionAmtFloat,
-							Leverage: leverage_float64,
-							Profit: unRealizedProfit,
-							Remarks: lang.Lang("futures.target_profit"),
-							Status: "fail",
-							Error: err.Error(),
+							Quantity:     positionAmtFloat,
+							Leverage:     leverage_float64,
+							Profit:       unRealizedProfit,
+							Remarks:      lang.Lang("futures.target_profit"),
+							Status:       "fail",
+							Error:        err.Error(),
 						})
 					}
 				}
@@ -366,42 +364,41 @@ func StartTrade(systemConfig *models.Config) {
 		positionCount += 1
 	}
 	/*************************************************平仓 end************************************************************ */
-	
+
 	/*************************************************检查当前仓位数量 start************************************************************ */
 	// 当前亏损的数量过多时，停止开仓
 	if lossCount >= systemConfig.LossMaxCount {
 		logs.Info("the loss count is %d, is over max %d, stop open new order", lossCount, systemConfig.LossMaxCount)
 		return
 	}
-	
+
 	allMyCount := positionCount + len(allOpenOrders)
 	if allMyCount >= systemConfig.FutureMaxCount {
 		logs.Info("position + open order: %d, is over max %d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
 		return
 	}
-	
+
 	if systemConfig.FutureAllowLong != 1 && systemConfig.FutureAllowShort != 1 {
 		logs.Info("the base config don't allow long and allow short")
 		return
 	}
 	/*************************************************检查当前仓位数量  end************************************************************ */
-	
-	
+
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
 	isOpen := false
-	
+
 	for _, coin := range coins {
 		if _, exist := exclude_symbols_map[coin.Symbol]; exist { // 在白名单内
 			continue
 		}
 		positionSideLong := "LONG"
-      	positionSideShort := "SHORT"
+		positionSideShort := "SHORT"
 		symbol := coin.Symbol
-		tickSize := coin.TickSize // 交易金额精度
-		stepSize := coin.StepSize // 交易数量精度
+		tickSize := coin.TickSize                            // 交易金额精度
+		stepSize := coin.StepSize                            // 交易数量精度
 		usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64) // 交易金额
-		leverage_float64 := float64(coin.Leverage) // 合约倍数
-		coin_line_strategy := globalLineStrategy // 默认为全局
+		leverage_float64 := float64(coin.Leverage)           // 合约倍数
+		coin_line_strategy := globalLineStrategy             // 默认为全局
 		if coin.StrategyType != "global" {
 			// 独立的策略
 			coin_line_strategy = GetLineStrategy(coin.StrategyType)
@@ -413,7 +410,7 @@ func StartTrade(systemConfig *models.Config) {
 			logs.Info("%s:no trading strategy conditions passed", symbol)
 			continue
 		}
-		hasBuyOrderLong := false // 此币种开多的单
+		hasBuyOrderLong := false  // 此币种开多的单
 		hasBuyOrderShort := false // 此币种开空的单
 		for _, item := range allOpenOrders {
 			if item.Symbol == symbol && item.Side == "BUY" && item.PositionSide == "LONG" {
@@ -426,12 +423,12 @@ func StartTrade(systemConfig *models.Config) {
 				break
 			}
 		}
-		hasPositionLong := false // 此币种的多仓
+		hasPositionLong := false  // 此币种的多仓
 		hasPositionShort := false // 此币种的空仓
 		for _, item := range positions {
 			positionAmtFloat, _ := strconv.ParseFloat(item.Amount, 64)
 			positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
-			if positionAmtFloatAbs < 0.00000000001 {// 没有持仓的
+			if positionAmtFloatAbs < 0.00000000001 {          // 没有持仓的
 				continue
 			}
 			if item.Symbol == symbol && item.Side == positionSideLong {
@@ -444,43 +441,43 @@ func StartTrade(systemConfig *models.Config) {
 				break
 			}
 		}
-		
+
 		if systemConfig.FutureAllowLong == 1 && hasPositionLong == false && hasBuyOrderLong == false && openResult.CanLong {
 			buyPrice, _, err := binance.GetDepthAvgPrice(symbol, 5) // 平均买价
 			if err == nil {
-				buyPrice = utils.GetTradePrecision(buyPrice, tickSize) // 合理精度的价格
-				quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
-				quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
-				
+				buyPrice = utils.GetTradePrecision(buyPrice, tickSize)   // 合理精度的价格
+				quantity := (usdt_float64 / buyPrice) * leverage_float64 // 购买数量
+				quantity = utils.GetTradePrecision(quantity, stepSize)   // 合理精度的价格
+
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
-				
+
 				if systemConfig.FutureOrderType == "MARKET" {
 					order, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
-						buyPrice := utils.GetTradePrecision(buyPrice * 1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
+						buyPrice := utils.GetTradePrecision(buyPrice*1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
 						pusher.SetModuleName("futures").FuturesOpenOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.open_notice_title"),
-							Symbol: symbol,
-							Side: "buy",
+							Title:        lang.Lang("futures.open_notice_title"),
+							Symbol:       symbol,
+							Side:         "buy",
 							PositionSide: "long",
-							Price: buyPrice,
-							Quantity: quantity,
-							Leverage: leverage_float64,
-							Status: "success",
+							Price:        buyPrice,
+							Quantity:     quantity,
+							Leverage:     leverage_float64,
+							Status:       "success",
 						})
 					} else {
 						pusher.SetModuleName("futures").FuturesOpenOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.open_notice_title"),
-							Symbol: symbol,
-							Side: "buy",
+							Title:        lang.Lang("futures.open_notice_title"),
+							Symbol:       symbol,
+							Side:         "buy",
 							PositionSide: "long",
-							Price: buyPrice,
-							Quantity: quantity,
-							Leverage: leverage_float64,
-							Status: "fail",
-							Error: err.Error(),
+							Price:        buyPrice,
+							Quantity:     quantity,
+							Leverage:     leverage_float64,
+							Status:       "fail",
+							Error:        err.Error(),
 						})
 					}
 				} else {
@@ -489,69 +486,69 @@ func StartTrade(systemConfig *models.Config) {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
 						pusher.SetModuleName("futures").FuturesOpenOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.open_notice_title"),
-							Symbol: symbol,
-							Side: "buy",
+							Title:        lang.Lang("futures.open_notice_title"),
+							Symbol:       symbol,
+							Side:         "buy",
 							PositionSide: "long",
-							Price: buyPrice,
-							Quantity: quantity,
-							Leverage: leverage_float64,
-							Status: "success",
+							Price:        buyPrice,
+							Quantity:     quantity,
+							Leverage:     leverage_float64,
+							Status:       "success",
 						})
 					} else {
 						pusher.SetModuleName("futures").FuturesOpenOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.open_notice_title"),
-							Symbol: symbol,
-							Side: "buy",
+							Title:        lang.Lang("futures.open_notice_title"),
+							Symbol:       symbol,
+							Side:         "buy",
 							PositionSide: "long",
-							Price: buyPrice,
-							Quantity: quantity,
-							Leverage: leverage_float64,
-							Status: "fail",
-							Error: err.Error(),
+							Price:        buyPrice,
+							Quantity:     quantity,
+							Leverage:     leverage_float64,
+							Status:       "fail",
+							Error:        err.Error(),
 						})
 					}
 				}
 				isOpen = true
 			}
 		}
-		if systemConfig.FutureAllowShort == 1 && hasPositionShort == false && hasPositionShort == false && openResult.CanShort {
-			
+		if systemConfig.FutureAllowShort == 1 && hasPositionShort == false && hasBuyOrderShort == false && openResult.CanShort {
+
 			_, sellPrice, err := binance.GetDepthAvgPrice(symbol, 5) // 平均卖价
 			if err == nil {
-				sellPrice = utils.GetTradePrecision(sellPrice, tickSize) // 合理精度的价格
-				quantity := (usdt_float64 / sellPrice) * leverage_float64  // 购买数量
-				quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的价格
-				
+				sellPrice = utils.GetTradePrecision(sellPrice, tickSize)  // 合理精度的价格
+				quantity := (usdt_float64 / sellPrice) * leverage_float64 // 购买数量
+				quantity = utils.GetTradePrecision(quantity, stepSize)    // 合理精度的价格
+
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
-				
+
 				if systemConfig.FutureOrderType == "MARKET" {
 					order, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
-						sellPrice := utils.GetTradePrecision(sellPrice * 0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
+						sellPrice := utils.GetTradePrecision(sellPrice*0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
 						pusher.SetModuleName("futures").FuturesOpenOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.open_notice_title"),
-							Symbol: symbol,
-							Side: "sell",
+							Title:        lang.Lang("futures.open_notice_title"),
+							Symbol:       symbol,
+							Side:         "sell",
 							PositionSide: "short",
-							Price: sellPrice,
-							Quantity: quantity,
-							Leverage: leverage_float64,
-							Status: "success",
+							Price:        sellPrice,
+							Quantity:     quantity,
+							Leverage:     leverage_float64,
+							Status:       "success",
 						})
 					} else {
 						pusher.SetModuleName("futures").FuturesOpenOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.open_notice_title"),
-							Symbol: symbol,
-							Side: "sell",
+							Title:        lang.Lang("futures.open_notice_title"),
+							Symbol:       symbol,
+							Side:         "sell",
 							PositionSide: "short",
-							Price: sellPrice,
-							Quantity: quantity,
-							Leverage: leverage_float64,
-							Status: "fail",
-							Error: err.Error(),
+							Price:        sellPrice,
+							Quantity:     quantity,
+							Leverage:     leverage_float64,
+							Status:       "fail",
+							Error:        err.Error(),
 						})
 					}
 				} else {
@@ -560,26 +557,26 @@ func StartTrade(systemConfig *models.Config) {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
 						pusher.SetModuleName("futures").FuturesOpenOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.open_notice_title"),
-							Symbol: symbol,
-							Side: "sell",
+							Title:        lang.Lang("futures.open_notice_title"),
+							Symbol:       symbol,
+							Side:         "sell",
 							PositionSide: "short",
-							Price: sellPrice,
-							Quantity: quantity,
-							Leverage: leverage_float64,
-							Status: "success",
+							Price:        sellPrice,
+							Quantity:     quantity,
+							Leverage:     leverage_float64,
+							Status:       "success",
 						})
 					} else {
 						pusher.SetModuleName("futures").FuturesOpenOrder(notify.FuturesOrderParams{
-							Title: lang.Lang("futures.open_notice_title"),
-							Symbol: symbol,
-							Side: "sell",
+							Title:        lang.Lang("futures.open_notice_title"),
+							Symbol:       symbol,
+							Side:         "sell",
 							PositionSide: "short",
-							Price: sellPrice,
-							Quantity: quantity,
-							Leverage: leverage_float64,
-							Status: "fail",
-							Error: err.Error(),
+							Price:        sellPrice,
+							Quantity:     quantity,
+							Leverage:     leverage_float64,
+							Status:       "fail",
+							Error:        err.Error(),
 						})
 					}
 				}
@@ -594,7 +591,7 @@ func StartTrade(systemConfig *models.Config) {
 }
 
 // 排除自动交易的币
-func GetExcludeSymbolsMap(exclude_symbols_str string) (map[string]bool) {
+func GetExcludeSymbolsMap(exclude_symbols_str string) map[string]bool {
 	exclude_symbols_map := make(map[string]bool)
 	exclude_symbols := strings.Split(exclude_symbols_str, ",")
 	for _, symbol := range exclude_symbols {
@@ -622,7 +619,7 @@ func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []types
 			// 只处理open order订单
 			continue
 		}
-		if nowTime < (buyOrder.UpdateTime + buy_timeout * 1000) {
+		if nowTime < (buyOrder.UpdateTime + buy_timeout*1000) {
 			// 没有超过设置的超时
 			continue
 		}
@@ -644,8 +641,8 @@ func insertOpenOrder(symbol string, quantity float64, avg_price string, position
 	order.Inexact_profit = "0.0" // 预估收益
 	order.Side = "open"
 	order.OrderId = orderId
-	order.UpdateTime = time.Now().Unix() * 1000 
-	
+	order.UpdateTime = time.Now().Unix() * 1000
+
 	o := orm.NewOrm()
 	o.Insert(order)
 }
@@ -661,16 +658,16 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 	order.Leverage = position.Leverage
 	order.Side = "close"
 	order.OrderId = orderId
-	order.UpdateTime = time.Now().Unix() * 1000 
-	
+	order.UpdateTime = time.Now().Unix() * 1000
+
 	o := orm.NewOrm()
 	o.Insert(order)
-	
+
 	// 自动缩放
 	AutoLossScale(systemConfig, unRealizedProfit >= 0)
 	// 检查自动转换测试仓
 	autoTradeToTest(systemConfig, unRealizedProfit >= 0)
-	
+
 	// 检查是否有相同的开仓订单,如果有则更新状态
 	var openOrder models.Order
 	o.QueryTable("order").
@@ -707,7 +704,7 @@ func UpdateSymbolsTradePrecision() {
 
 		updates := make([]futuresSymbolPrecisionUpdate, 0, len(res.Symbols))
 		newSymbols := make([]futuresSymbolInsert, 0)
-		
+
 		for _, symbol := range res.Symbols {
 			if symbol.Status != "TRADING" {
 				// 非交易中的过滤掉
@@ -723,7 +720,7 @@ func UpdateSymbolsTradePrecision() {
 			if lotSizeFilter != nil {
 				stepSize = lotSizeFilter.StepSize
 			}
-			
+
 			suffixType := ""
 			if strings.HasSuffix(symbol.Symbol, "USDT") {
 				suffixType = "USDT"
@@ -732,7 +729,7 @@ func UpdateSymbolsTradePrecision() {
 			} else if strings.HasSuffix(symbol.Symbol, "USDC") {
 				suffixType = "USDC"
 			}
-			
+
 			if suffixType != "" { // 只处理USDT, FDUSD, USDC结尾的币种
 				updates = append(updates, futuresSymbolPrecisionUpdate{
 					Symbol:   symbol.Symbol,
@@ -743,34 +740,34 @@ func UpdateSymbolsTradePrecision() {
 				if _, ok := existingSymbolMap[symbol.Symbol]; !ok {
 					logs.Info("add new futures symbol", symbol.Symbol)
 					newSymbols = append(newSymbols, futuresSymbolInsert{
-						Symbol:        symbol.Symbol,
-						UpdateTime:    0,
-						LastClose:     "0",
+						Symbol:         symbol.Symbol,
+						UpdateTime:     0,
+						LastClose:      "0",
 						LastUpdateTime: 0,
-						Enable:        0,
-						Leverage:      3,
-						MarginType:    "CROSSED",
-						TickSize:      tickSize,
-						StepSize:      stepSize,
-						Usdt:          "10",
-						Profit:        "20",
-						Loss:          "20",
-						KlineInterval: "1d",
-						Technology:    "",
-						Strategy:      "",
-						StrategyType:  "global",
-						Type:          suffixType,
-						PercentChange: 0.0,
-						Close:         "0",
-						Open:          "0",
-						High:          "0",
-						Low:           "0",
-						BaseVolume:    0.0,
-						QuoteVolume:   0.0,
-						CloseQty:      0.0,
-						TradeCount:    0.0,
-						Sort:          0,
-						Pin:           0,
+						Enable:         0,
+						Leverage:       3,
+						MarginType:     "CROSSED",
+						TickSize:       tickSize,
+						StepSize:       stepSize,
+						Usdt:           "10",
+						Profit:         "20",
+						Loss:           "20",
+						KlineInterval:  "1d",
+						Technology:     "",
+						Strategy:       "",
+						StrategyType:   "global",
+						Type:           suffixType,
+						PercentChange:  0.0,
+						Close:          "0",
+						Open:           "0",
+						High:           "0",
+						Low:            "0",
+						BaseVolume:     0.0,
+						QuoteVolume:    0.0,
+						CloseQty:       0.0,
+						TradeCount:     0.0,
+						Sort:           0,
+						Pin:            0,
 					})
 					existingSymbolMap[symbol.Symbol] = struct{}{}
 				}
@@ -818,34 +815,34 @@ type futuresSymbolPrecisionUpdate struct {
 }
 
 type futuresSymbolInsert struct {
-	Symbol        string
-	UpdateTime    int64
-	LastClose     string
+	Symbol         string
+	UpdateTime     int64
+	LastClose      string
 	LastUpdateTime int64
-	Enable        int
-	Leverage      int64
-	MarginType    string
-	TickSize      string
-	StepSize      string
-	Usdt          string
-	Profit        string
-	Loss          string
-	KlineInterval string
-	Technology    string
-	Strategy      string
-	StrategyType  string
-	Type          string
-	PercentChange float64
-	Close         string
-	Open          string
-	High          string
-	Low           string
-	BaseVolume    float64
-	QuoteVolume   float64
-	CloseQty      float64
-	TradeCount    float64
-	Sort          int64
-	Pin           int64
+	Enable         int
+	Leverage       int64
+	MarginType     string
+	TickSize       string
+	StepSize       string
+	Usdt           string
+	Profit         string
+	Loss           string
+	KlineInterval  string
+	Technology     string
+	Strategy       string
+	StrategyType   string
+	Type           string
+	PercentChange  float64
+	Close          string
+	Open           string
+	High           string
+	Low            string
+	BaseVolume     float64
+	QuoteVolume    float64
+	CloseQty       float64
+	TradeCount     float64
+	Sort           int64
+	Pin            int64
 }
 
 func buildBatchUpdateSymbolsTradePrecisionSQL(items []futuresSymbolPrecisionUpdate) (string, []interface{}) {
@@ -927,13 +924,13 @@ func UpdateSymbolTradeInfo(symbols *models.Symbols) {
 	if symbols.MarginType == "CROSSED" {
 		marginType = futures.MarginTypeCrossed
 	}
-	binance.SetLeverage(symbols.Symbol, int(symbols.Leverage))  // 修改合约倍数
-	binance.SetMarginType(symbols.Symbol, marginType) // 修改仓位模式
+	binance.SetLeverage(symbols.Symbol, int(symbols.Leverage)) // 修改合约倍数
+	binance.SetMarginType(symbols.Symbol, marginType)          // 修改仓位模式
 }
 
 // 更新所有币种的资金费率信息
 func UpdateSymbolsFundingRates(systemConfig models.Config) {
-	if (systemConfig.ListenFundingRateEnable == 0) {
+	if systemConfig.ListenFundingRateEnable == 0 {
 		return
 	}
 	res, err := binance.GetFundingRate(binance.FundingRateParams{})
@@ -944,17 +941,17 @@ func UpdateSymbolsFundingRates(systemConfig models.Config) {
 			if strings.HasSuffix(symbol.Symbol, "USDT") {
 				var fundingRate models.SymbolFundingRates
 				o.QueryTable("symbol_funding_rates").Filter("symbol", symbol.Symbol).One(&fundingRate)
-				if (fundingRate.Symbol == "") {
+				if fundingRate.Symbol == "" {
 					// add
 					o.Insert(&models.SymbolFundingRates{
-						Symbol: symbol.Symbol,
-						Enable: 1,
-						NowFundingRate: symbol.LastFundingRate,
-						NowFundingTime: symbol.Time,
-						NowPrice: symbol.MarkPrice,
+						Symbol:                symbol.Symbol,
+						Enable:                1,
+						NowFundingRate:        symbol.LastFundingRate,
+						NowFundingTime:        symbol.Time,
+						NowPrice:              symbol.MarkPrice,
 						LastNoticeFundingRate: "0.0",
 						LastNoticeFundingTime: 0,
-						AutoOrder: 0,
+						AutoOrder:             0,
 					})
 				} else {
 					// edit
@@ -970,46 +967,46 @@ func UpdateSymbolsFundingRates(systemConfig models.Config) {
 
 // 获取币的策略
 func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
-	switch (name) {
-		case "coin1":
-			coinStrategy = coin.TradeCoin1{}
-		case "coin2":
-			coinStrategy = coin.TradeCoin2{}
-		case "coin3":
-			coinStrategy = coin.TradeCoin3{}
-		case "coin4":
-			coinStrategy = coin.TradeCoin4{}
-		case "coin5":
-			coinStrategy = coin.TradeCoin5{}
-		case "coin6":
-			coinStrategy = coin.TradeCoin6{}
-		default:
-			coinStrategy = coin.TradeCoin1{}
+	switch name {
+	case "coin1":
+		coinStrategy = coin.TradeCoin1{}
+	case "coin2":
+		coinStrategy = coin.TradeCoin2{}
+	case "coin3":
+		coinStrategy = coin.TradeCoin3{}
+	case "coin4":
+		coinStrategy = coin.TradeCoin4{}
+	case "coin5":
+		coinStrategy = coin.TradeCoin5{}
+	case "coin6":
+		coinStrategy = coin.TradeCoin6{}
+	default:
+		coinStrategy = coin.TradeCoin1{}
 	}
 	return coinStrategy
 }
 
 // 获取交易策略
 func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
-	switch (name) {
-		case "custom":
-			lineStrategy = line.TradeLineCustom{}
-		case "line1":
-			lineStrategy = line.TradeLine1{}
-		case "line2":
-			lineStrategy = line.TradeLine2{}
-		case "line3":
-			lineStrategy = line.TradeLine3{}
-		case "line4":
-			lineStrategy = line.TradeLine4{}
-		case "line5":
-			lineStrategy = line.TradeLine5{}
-		case "line6":
-			lineStrategy = line.TradeLine6{}
-		case "line7":
-			lineStrategy = line.TradeLine7{}
-		default:
-			lineStrategy = line.TradeLine1{}
+	switch name {
+	case "custom":
+		lineStrategy = line.TradeLineCustom{}
+	case "line1":
+		lineStrategy = line.TradeLine1{}
+	case "line2":
+		lineStrategy = line.TradeLine2{}
+	case "line3":
+		lineStrategy = line.TradeLine3{}
+	case "line4":
+		lineStrategy = line.TradeLine4{}
+	case "line5":
+		lineStrategy = line.TradeLine5{}
+	case "line6":
+		lineStrategy = line.TradeLine6{}
+	case "line7":
+		lineStrategy = line.TradeLine7{}
+	default:
+		lineStrategy = line.TradeLine1{}
 	}
 	return lineStrategy
 }
@@ -1036,19 +1033,19 @@ func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
 			markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 			unRealizedProfit := (markPrice_float64 - enterPrice_float64) * positionAmt // 未实现盈亏
 			position.UnrealizedProfit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
-			
+
 			usePositions = append(usePositions, types.FuturesPosition{
-				Symbol: position.Symbol,
-				Side: position.Side,
-				Amount: position.Amount,
-				MarginType: position.MarginType,
-				Leverage: position.Leverage,
-				IsolatedWallet: position.IsolatedWallet,
-				EntryPrice: position.EntryPrice,
-				MarkPrice: position.MarkPrice,
+				Symbol:           position.Symbol,
+				Side:             position.Side,
+				Amount:           position.Amount,
+				MarginType:       position.MarginType,
+				Leverage:         position.Leverage,
+				IsolatedWallet:   position.IsolatedWallet,
+				EntryPrice:       position.EntryPrice,
+				MarkPrice:        position.MarkPrice,
 				UnrealizedProfit: position.UnrealizedProfit,
-				SourceType: "local",
-				CreateTime: position.CreateTime,
+				SourceType:       "local",
+				CreateTime:       position.CreateTime,
 			})
 		}
 	} else {
@@ -1057,28 +1054,28 @@ func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
 			logs.Error("GetApiPosition err in StartTrade:", err.Error())
 			return usePositions, err
 		}
-		
+
 		for _, position := range positions {
 			positionAmtFloat, _ := strconv.ParseFloat(position.PositionAmt, 64)
 			positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
-			if positionAmtFloatAbs < 0.0000000001 {// 没有持仓的
+			if positionAmtFloatAbs < 0.0000000001 {           // 没有持仓的
 				continue
 			}
-			
+
 			leverage, _ := strconv.ParseInt(position.Leverage, 10, 64)
-			
+
 			usePositions = append(usePositions, types.FuturesPosition{
-				Symbol: position.Symbol,
-				Side: position.PositionSide,
-				Amount: position.PositionAmt,
-				MarginType: position.MarginType,
-				Leverage: leverage,
-				IsolatedWallet: position.IsolatedWallet,
-				EntryPrice: position.EntryPrice,
-				MarkPrice: position.MarkPrice,
+				Symbol:           position.Symbol,
+				Side:             position.PositionSide,
+				Amount:           position.PositionAmt,
+				MarginType:       position.MarginType,
+				Leverage:         leverage,
+				IsolatedWallet:   position.IsolatedWallet,
+				EntryPrice:       position.EntryPrice,
+				MarkPrice:        position.MarkPrice,
 				UnrealizedProfit: position.UnRealizedProfit,
-				SourceType: "api",
-				CreateTime: 0,
+				SourceType:       "api",
+				CreateTime:       0,
 			})
 		}
 	}
@@ -1098,19 +1095,19 @@ func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
 			return useOrders, err
 		}
 		for _, order := range orders {
-			orderId, _ := strconv.ParseInt(order.OrderId, 10, 64);
+			orderId, _ := strconv.ParseInt(order.OrderId, 10, 64)
 			useOrders = append(useOrders, types.FuturesOrder{
-				Symbol: order.Symbol,
+				Symbol:        order.Symbol,
 				ClientOrderId: order.ClientOrderId,
-				OrderId: orderId,
-				Side: order.Side,
-				PositionSide: order.PositionSide,
-				Type: order.Type,
-				Status: order.Status,
-				Price: order.Price,
-				OrigQty: order.OrigQty,
-				ExecutedQty: order.ExecutedQty,
-				UpdateTime: order.UpdateTime,
+				OrderId:       orderId,
+				Side:          order.Side,
+				PositionSide:  order.PositionSide,
+				Type:          order.Type,
+				Status:        order.Status,
+				Price:         order.Price,
+				OrigQty:       order.OrigQty,
+				ExecutedQty:   order.ExecutedQty,
+				UpdateTime:    order.UpdateTime,
 			})
 		}
 	} else {
@@ -1121,17 +1118,17 @@ func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
 		}
 		for _, order := range allOpenOrders {
 			useOrders = append(useOrders, types.FuturesOrder{
-				Symbol: order.Symbol,
+				Symbol:        order.Symbol,
 				ClientOrderId: order.ClientOrderID,
-				OrderId: order.OrderID,
-				Side: string(order.Side),
-				PositionSide: string(order.PositionSide),
-				Type: string(order.Type),
-				Status: string(order.Status),
-				Price: order.Price,
-				OrigQty: order.OrigQuantity,
-				ExecutedQty: order.ExecutedQuantity,
-				UpdateTime: order.UpdateTime,
+				OrderId:       order.OrderID,
+				Side:          string(order.Side),
+				PositionSide:  string(order.PositionSide),
+				Type:          string(order.Type),
+				Status:        string(order.Status),
+				Price:         order.Price,
+				OrigQty:       order.OrigQuantity,
+				ExecutedQty:   order.ExecutedQuantity,
+				UpdateTime:    order.UpdateTime,
 			})
 		}
 	}
@@ -1140,7 +1137,7 @@ func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
 
 var orderCount = 0 // 计数器, 当连续平仓盈利 2次(或亏损2次)后,增大(缩小)窗口
 func AutoLossScale(systemConfig *models.Config, flag bool) {
-	if (systemConfig.LossAutoScale == 0) {
+	if systemConfig.LossAutoScale == 0 {
 		return
 	}
 	if flag {
@@ -1170,7 +1167,7 @@ func AutoLossScale(systemConfig *models.Config, flag bool) {
 
 // 自动判断并更新当前行情的趋势
 func UpdateMarketCondition(systemConfig *models.Config) {
-	if (systemConfig.MarketConditionIsAuto == 0) {
+	if systemConfig.MarketConditionIsAuto == 0 {
 		// 手动模式, 不自动更新
 		return
 	}
@@ -1194,12 +1191,12 @@ func culMarketCondition(systemConfig *models.Config) {
 	}
 	otherLengths := len(symbols) - 4
 	if otherLengths <= 0 {
-		return 
+		return
 	}
 	otherWeight := 0.35 / float64(otherLengths) // 其他币种的权重 平分剩余的权重，等于 btc 的权重
 	var weightedSum float64
-    for _, s := range symbols {
-       	if s.Symbol == "BTCUSDT" {
+	for _, s := range symbols {
+		if s.Symbol == "BTCUSDT" {
 			weightedSum += s.PercentChange * 0.35
 		} else if s.Symbol == "ETHUSDT" {
 			weightedSum += s.PercentChange * 0.2
@@ -1210,10 +1207,10 @@ func culMarketCondition(systemConfig *models.Config) {
 		} else {
 			weightedSum += s.PercentChange * otherWeight
 		}
-    }
+	}
 
-    // 非线性压缩，防止极端行情
-    m := math.Tanh(weightedSum)
+	// 非线性压缩，防止极端行情
+	m := math.Tanh(weightedSum)
 	if m >= 0.45 {
 		systemConfig.MarketCondition = 1 // 强多头
 	} else if m >= 0.2 {
@@ -1225,7 +1222,7 @@ func culMarketCondition(systemConfig *models.Config) {
 	} else {
 		systemConfig.MarketCondition = 5 // 强空头
 	}
-	
+
 	orm.NewOrm().Update(systemConfig)
 }
 

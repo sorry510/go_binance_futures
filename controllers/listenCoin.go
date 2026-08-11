@@ -201,8 +201,22 @@ func (ctrl *ListenCoinController) GetKcLineChart() {
 	}
 
 	high1, low1, close1, _ := line.GetLineFloatPrices(kline_1)
-	upper1, ma1, lower1 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
-	upper2, _, lower2 := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2)   // kc2
+	upper1, ma1, lower1, err := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
+	if err != nil {
+		ctrl.Ctx.Resp(map[string]interface{}{
+			"code": 500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+	upper2, _, lower2, err := line.CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
+	if err != nil {
+		ctrl.Ctx.Resp(map[string]interface{}{
+			"code": 500,
+			"msg":  err.Error(),
+		})
+		return
+	}
 
 	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,

@@ -43,8 +43,14 @@ func (TradeLine TradeLine7) GetCanLongOrShort(openParams strategy.OpenParams) (o
 	}
 	
 	high1, low1, close1, _ := GetLineFloatPrices(kline_1)
-	upper1, _, lower1 := CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
-	upper2, _, lower2 := CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
+	upper1, _, lower1, err := CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
+	if err != nil {
+		return openResult
+	}
+	upper2, _, lower2, err := CalculateKeltnerChannels(high1, low1, close1, period, multiplier2) // kc2
+	if err != nil {
+		return openResult
+	}
 	
 	close2 := GetLineClosePrices(kline_2)
 	limitPeriod := 12 // 最近n根k线

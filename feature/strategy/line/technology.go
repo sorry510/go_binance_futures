@@ -9,8 +9,8 @@ import (
 
 // 简单移动平均（SMA）price数据从时间最近到最远 ma = (p1 + p2 + ... + pn) / n
 func CalculateSimpleMovingAverage(prices []float64, period int) ([]float64, error) {
-	if len(prices) < period {
-		return nil, fmt.Errorf("insufficient data for period %d", period)
+	if err := validatePeriod(len(prices), period); err != nil {
+		return nil, err
 	}
 
 	prices = utils.ReverseArray(prices) // 时间由远到近
@@ -35,17 +35,17 @@ func CalculateSimpleMovingAverage(prices []float64, period int) ([]float64, erro
 
 // 指数移动平均（EMA）price数据从时间最近到最远 ema[t] = α * price[t] + (1 - α) * ema[t-1]; α = 2 / (n + 1)
 func CalculateExponentialMovingAverage(price []float64, period int) ([]float64, error) {
-	if len(price) < period {
-		return nil, fmt.Errorf("insufficient data for period %d", period)
+	if err := validatePeriod(len(price), period); err != nil {
+		return nil, err
 	}
 	
 	price = utils.ReverseArray(price) // 时间由远到近
 
 	alpha := 2.0 / (float64(period) + 1)
-	ema := make([]float64, len(price))
+	ema := make([]float64, len(price)-period+1)
 	ema[0] = calculateAverage(price[0:period])
-	for i := 1; i < len(price); i++ {
-		ema[i] = alpha * price[i] + (1.0 - alpha) * ema[i-1]
+	for i := period; i < len(price); i++ {
+		ema[i-period+1] = alpha*price[i] + (1.0-alpha)*ema[i-period]
 	}
 
 	return utils.ReverseArray(ema), nil
@@ -55,8 +55,11 @@ func CalculateExponentialMovingAverage(price []float64, period int) ([]float64, 
 // 默认 period = 21, stdDevMultiplier = 2, 返回的切片长度 len(clonePrices)-period+1
 // bbw = (UP - DN) / MB * 100
 func CalculateBollingerBands(clonePrices []float64, period int, stdDevMultiplier float64) (up, mb, dn []float64, err error) {
-	if len(clonePrices) < period {
-		return nil, nil, nil, fmt.Errorf("insufficient data for period %d", period)
+	if err := validatePeriod(len(clonePrices), period); err != nil {
+		return nil, nil, nil, err
+	}
+	if stdDevMultiplier < 0 {
+		return nil, nil, nil, fmt.Errorf("standard deviation multiplier must not be negative")
 	}
 	
 	clonePrices = utils.ReverseArray(clonePrices) // 时间由远到近
@@ -111,8 +114,11 @@ func calculateAverage(values []float64) float64 {
 // 新平均收益 = [(前一个周期的平均收益 × (周期 - 1)) + 当前周期的收益] / 周期
 // 新平均损失 = [(前一个周期的平均损失 × (周期 - 1)) + 当前周期的损失] / 周期
 func CalculateRSI(prices []float64, period int) ([]float64, error) {
+	if period <= 0 {
+		return nil, fmt.Errorf("period must be greater than zero")
+	}
 	if len(prices) <= period {
-		return nil, fmt.Errorf("price slice too short for period %d", period)
+		return nil, fmt.Errorf("insufficient data for period %d: got %d values", period, len(prices))
 	}
 	
 	prices = utils.ReverseArray(prices) // 时间由远到近
@@ -141,34 +147,36 @@ func CalculateRSI(prices []float64, period int) ([]float64, error) {
 	avgGain := sumGains / float64(period)
 	avgLoss := sumLosses / float64(period)
 
-	// 初始化 RSI 切片
-	rsiValues := make([]float64, len(prices)-period+1)
+	// Initialize the first RSI at the candle that closes the seed window.
+	rsiValues := make([]float64, len(prices)-period)
+	rsiValues[0] = calculateRSIValue(avgGain, avgLoss)
 
-	// 计算第一个 RSI 值
-	if avgLoss == 0 {
-		rsiValues[0] = 100.0
-	} else {
-		rs := avgGain / avgLoss
-		rsiValues[0] = 100 - (100 / (1 + rs))
-	}
-
-	// 计算后续的 RSI 值
-	for i := period; i < len(prices); i++ {
-		newGain := gains[i-1]
-		newLoss := losses[i-1]
+	// Apply Wilder smoothing once for every change after the seed window.
+	for i := period; i < len(gains); i++ {
+		newGain := gains[i]
+		newLoss := losses[i]
 
 		avgGain = ((avgGain * float64(period - 1)) + newGain) / float64(period)
 		avgLoss = ((avgLoss * float64(period - 1)) + newLoss) / float64(period)
 
-		if avgLoss == 0 {
-			rsiValues[i-period+1] = 100.0
-		} else {
-			rs := avgGain / avgLoss
-			rsiValues[i-period+1] = 100 - (100 / (1 + rs))
-		}
+		rsiValues[i-period+1] = calculateRSIValue(avgGain, avgLoss)
 	}
 
 	return utils.ReverseArray(rsiValues), nil
+}
+
+func calculateRSIValue(avgGain, avgLoss float64) float64 {
+	if avgGain == 0 && avgLoss == 0 {
+		return 50
+	}
+	if avgLoss == 0 {
+		return 100
+	}
+	if avgGain == 0 {
+		return 0
+	}
+	rs := avgGain / avgLoss
+	return 100 - (100 / (1 + rs))
 }
 
 // sum 计算浮点数切片的总和
@@ -216,11 +224,14 @@ func Kdj(ma1 []float64, ma2[]float64, num int) bool {
 }
 
 // 计算真实范围 TR= max(High−Low,∣High−PreviousClose∣,∣Low−PreviousClose∣) 数据时间由新到旧
-func calculateTrueRange(high, low, close []float64) []float64 {
-	tr := make([]float64, len(high))
+func calculateTrueRange(high, low, close []float64) ([]float64, error) {
 	if len(high) == 0 {
-		return tr
+		return nil, fmt.Errorf("price slices must not be empty")
 	}
+	if len(high) != len(low) || len(high) != len(close) {
+		return nil, fmt.Errorf("high, low, and close slices must have the same length")
+	}
+	tr := make([]float64, len(high))
 
 	for i := 0; i < len(high) - 1; i++ {
 		hl := high[i] - low[i]
@@ -230,24 +241,34 @@ func calculateTrueRange(high, low, close []float64) []float64 {
 	}
 	tr[len(high)-1] = high[len(high)-1] - low[len(high)-1]
 
-	return tr
+	return tr, nil
 }
 
 // 平均真实波幅
 func CalculateAtr(high, low, close []float64, period int) ([]float64, error) {
-	tr := calculateTrueRange(high, low, close)
-	atr, err := CalculateExponentialMovingAverage(tr, period)
+	tr, err := calculateTrueRange(high, low, close)
 	if err != nil {
 		return nil, err
 	}
-	return atr, nil
+	return calculateWilderMovingAverage(tr, period)
 }
 
 // 肯纳特通道
-func CalculateKeltnerChannels(high, low, close []float64, period int, multiplier float64) (upper, ma, lower []float64) {
-	ma, _ = CalculateExponentialMovingAverage(close, period)
-	tr := calculateTrueRange(high, low, close)
-	atr, _ := CalculateExponentialMovingAverage(tr, period)
+func CalculateKeltnerChannels(high, low, close []float64, period int, multiplier float64) (upper, ma, lower []float64, err error) {
+	if multiplier < 0 {
+		return nil, nil, nil, fmt.Errorf("multiplier must not be negative")
+	}
+	ma, err = CalculateExponentialMovingAverage(close, period)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	atr, err := CalculateAtr(high, low, close, period)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if len(ma) != len(atr) {
+		return nil, nil, nil, fmt.Errorf("EMA and ATR lengths do not match")
+	}
 
 	upper = make([]float64, len(ma))
 	lower = make([]float64, len(ma))
@@ -257,7 +278,31 @@ func CalculateKeltnerChannels(high, low, close []float64, period int, multiplier
 		lower[i] = ma[i] - multiplier * atr[i]
 	}
 
-	return upper, ma, lower
+	return upper, ma, lower, nil
+}
+
+func calculateWilderMovingAverage(values []float64, period int) ([]float64, error) {
+	if err := validatePeriod(len(values), period); err != nil {
+		return nil, err
+	}
+
+	values = utils.ReverseArray(values)
+	result := make([]float64, len(values)-period+1)
+	result[0] = calculateAverage(values[:period])
+	for i := period; i < len(values); i++ {
+		result[i-period+1] = (result[i-period]*float64(period-1) + values[i]) / float64(period)
+	}
+	return utils.ReverseArray(result), nil
+}
+
+func validatePeriod(dataLength, period int) error {
+	if period <= 0 {
+		return fmt.Errorf("period must be greater than zero")
+	}
+	if dataLength < period {
+		return fmt.Errorf("insufficient data for period %d: got %d values", period, dataLength)
+	}
+	return nil
 }
 type Candle struct {
     Open  float64

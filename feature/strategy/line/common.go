@@ -123,12 +123,11 @@ func GetLineFloatValues(data []*futures.Kline) (high, low, close, open, amount, 
 		close[key] = closePrice
 		open[key] = openPrice	
 		amount[key] = amountFloat
-		qps[key] = amountFloat
-		if item.CloseTime - item.OpenTime > 0 {
-			qps[key] = amountFloat / float64(item.CloseTime - item.OpenTime)
+		if durationMilliseconds := item.CloseTime - item.OpenTime; durationMilliseconds > 0 {
+			qps[key] = amountFloat / (float64(durationMilliseconds) / 1000)
 		}
 	}
-	return high, low, close, open, qps, amount
+	return high, low, close, open, amount, qps
 }
 
 // 获取某中类型的line的数量是否超过阈值
