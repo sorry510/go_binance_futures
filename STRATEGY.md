@@ -100,7 +100,7 @@ ema_4h_3.Data[0] > ema_4h_7.Data[0] && ema_4h_3.Data[1] < ema_4h_7.Data[1]
 
 ##### other function
 
-###### Kdj
+###### KdjSimple
 
 ```
 /**
@@ -110,7 +110,7 @@ ema_4h_3.Data[0] > ema_4h_7.Data[0] && ema_4h_3.Data[1] < ema_4h_7.Data[1]
  * @param num num
  * @returns Boolean
  */
-func Kdj(ma1 []float64, ma2[]float64, num int) bool 
+func KdjSimple(ma1 []float64, ma2[]float64, num int) bool
 ```
 
 ###### IsDesc

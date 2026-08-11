@@ -14,7 +14,7 @@ func CalculateSimpleMovingAverage(prices []float64, period int) ([]float64, erro
 	}
 
 	prices = utils.ReverseArray(prices) // 时间由远到近
-	
+
 	sma := make([]float64, len(prices)-period+1)
 
 	// 计算第一个 SMA 值
@@ -38,7 +38,7 @@ func CalculateExponentialMovingAverage(price []float64, period int) ([]float64, 
 	if err := validatePeriod(len(price), period); err != nil {
 		return nil, err
 	}
-	
+
 	price = utils.ReverseArray(price) // 时间由远到近
 
 	alpha := 2.0 / (float64(period) + 1)
@@ -51,6 +51,44 @@ func CalculateExponentialMovingAverage(price []float64, period int) ([]float64, 
 	return utils.ReverseArray(ema), nil
 }
 
+// CalculateMACD returns DIF, DEA, and histogram values ordered from newest to oldest.
+func CalculateMACD(prices []float64, fastPeriod, slowPeriod, signalPeriod int) (dif, dea, histogram []float64, err error) {
+	if fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0 {
+		return nil, nil, nil, fmt.Errorf("MACD periods must be greater than zero")
+	}
+	if fastPeriod >= slowPeriod {
+		return nil, nil, nil, fmt.Errorf("MACD fast period must be less than slow period")
+	}
+	if len(prices) < slowPeriod+signalPeriod-1 {
+		return nil, nil, nil, fmt.Errorf("insufficient data for MACD periods %d/%d/%d: got %d values", fastPeriod, slowPeriod, signalPeriod, len(prices))
+	}
+
+	fastEMA, err := CalculateExponentialMovingAverage(prices, fastPeriod)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	slowEMA, err := CalculateExponentialMovingAverage(prices, slowPeriod)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	difValues := make([]float64, len(slowEMA))
+	for i := range slowEMA {
+		difValues[i] = fastEMA[i] - slowEMA[i]
+	}
+	dea, err = CalculateExponentialMovingAverage(difValues, signalPeriod)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	dif = difValues[:len(dea)]
+	histogram = make([]float64, len(dea))
+	for i := range dea {
+		histogram[i] = dif[i] - dea[i]
+	}
+	return dif, dea, histogram, nil
+}
+
 // 布林带(boll) 中轨线（MB，通常为移动平均线）、上轨线（UP，通常为中轨线加上一定倍数的标准差）和下轨线（DN，通常为中轨线减去相同倍数的标准差）
 // 默认 period = 21, stdDevMultiplier = 2, 返回的切片长度 len(clonePrices)-period+1
 // bbw = (UP - DN) / MB * 100
@@ -61,7 +99,7 @@ func CalculateBollingerBands(clonePrices []float64, period int, stdDevMultiplier
 	if stdDevMultiplier < 0 {
 		return nil, nil, nil, fmt.Errorf("standard deviation multiplier must not be negative")
 	}
-	
+
 	clonePrices = utils.ReverseArray(clonePrices) // 时间由远到近
 
 	// Calculate the simple moving average (SMA) as the middle band (MB)
@@ -120,9 +158,9 @@ func CalculateRSI(prices []float64, period int) ([]float64, error) {
 	if len(prices) <= period {
 		return nil, fmt.Errorf("insufficient data for period %d: got %d values", period, len(prices))
 	}
-	
+
 	prices = utils.ReverseArray(prices) // 时间由远到近
-	
+
 	// 初始化收益和损失切片
 	gains := make([]float64, len(prices)-1)
 	losses := make([]float64, len(prices)-1)
@@ -156,8 +194,8 @@ func CalculateRSI(prices []float64, period int) ([]float64, error) {
 		newGain := gains[i]
 		newLoss := losses[i]
 
-		avgGain = ((avgGain * float64(period - 1)) + newGain) / float64(period)
-		avgLoss = ((avgLoss * float64(period - 1)) + newLoss) / float64(period)
+		avgGain = ((avgGain * float64(period-1)) + newGain) / float64(period)
+		avgLoss = ((avgLoss * float64(period-1)) + newLoss) / float64(period)
 
 		rsiValues[i-period+1] = calculateRSIValue(avgGain, avgLoss)
 	}
@@ -179,6 +217,193 @@ func calculateRSIValue(avgGain, avgLoss float64) float64 {
 	return 100 - (100 / (1 + rs))
 }
 
+// CalculateROC returns percentage price changes ordered from newest to oldest.
+func CalculateROC(close []float64, period int) ([]float64, error) {
+	if len(close) == 0 {
+		return nil, fmt.Errorf("close slice must not be empty")
+	}
+	if period <= 0 {
+		return nil, fmt.Errorf("ROC period must be greater than zero")
+	}
+	if len(close) <= period {
+		return nil, fmt.Errorf("insufficient data for ROC period %d: got %d values", period, len(close))
+	}
+
+	roc := make([]float64, len(close)-period)
+	for i := range roc {
+		previousClose := close[i+period]
+		if previousClose == 0 {
+			return nil, fmt.Errorf("ROC reference close must not be zero at index %d", i+period)
+		}
+		roc[i] = (close[i] - previousClose) / previousClose * 100
+	}
+	return roc, nil
+}
+
+// CalculateMFI returns money flow index values ordered from newest to oldest.
+func CalculateMFI(high, low, close, amount []float64, period int) ([]float64, error) {
+	if len(high) == 0 || len(high) != len(low) || len(high) != len(close) || len(high) != len(amount) {
+		return nil, fmt.Errorf("high, low, close, and amount slices must be non-empty and have the same length")
+	}
+	if period <= 0 {
+		return nil, fmt.Errorf("MFI period must be greater than zero")
+	}
+	if len(high) <= period {
+		return nil, fmt.Errorf("insufficient data for MFI period %d: got %d values", period, len(high))
+	}
+
+	typicalPrice := make([]float64, len(high))
+	for i := range high {
+		if amount[i] < 0 {
+			return nil, fmt.Errorf("MFI amount must not be negative")
+		}
+		typicalPrice[i] = (high[i] + low[i] + close[i]) / 3
+	}
+
+	positiveFlow := make([]float64, len(high)-1)
+	negativeFlow := make([]float64, len(high)-1)
+	for i := 0; i < len(positiveFlow); i++ {
+		if typicalPrice[i] > typicalPrice[i+1] {
+			positiveFlow[i] = amount[i]
+		} else if typicalPrice[i] < typicalPrice[i+1] {
+			negativeFlow[i] = amount[i]
+		}
+	}
+
+	positiveSum := Sum(positiveFlow[:period])
+	negativeSum := Sum(negativeFlow[:period])
+	mfi := make([]float64, len(high)-period)
+	mfi[0] = calculateMFIValue(positiveSum, negativeSum)
+	for i := period; i < len(positiveFlow); i++ {
+		positiveSum += positiveFlow[i] - positiveFlow[i-period]
+		negativeSum += negativeFlow[i] - negativeFlow[i-period]
+		mfi[i-period+1] = calculateMFIValue(positiveSum, negativeSum)
+	}
+	return mfi, nil
+}
+
+func calculateMFIValue(positiveFlow, negativeFlow float64) float64 {
+	if positiveFlow == 0 && negativeFlow == 0 {
+		return 50
+	}
+	if negativeFlow == 0 {
+		return 100
+	}
+	if positiveFlow == 0 {
+		return 0
+	}
+	moneyFlowRatio := positiveFlow / negativeFlow
+	return 100 - (100 / (1 + moneyFlowRatio))
+}
+
+// CalculateOBV returns on-balance volume values ordered from newest to oldest.
+func CalculateOBV(close, amount []float64) ([]float64, error) {
+	if len(close) == 0 || len(close) != len(amount) {
+		return nil, fmt.Errorf("close and amount slices must be non-empty and have the same length")
+	}
+	for i := range amount {
+		if amount[i] < 0 {
+			return nil, fmt.Errorf("OBV amount must not be negative at index %d", i)
+		}
+	}
+
+	chronologicalClose := utils.ReverseArray(close)
+	chronologicalAmount := utils.ReverseArray(amount)
+	obv := make([]float64, len(close))
+	for i := 1; i < len(obv); i++ {
+		obv[i] = obv[i-1]
+		if chronologicalClose[i] > chronologicalClose[i-1] {
+			obv[i] += chronologicalAmount[i]
+		} else if chronologicalClose[i] < chronologicalClose[i-1] {
+			obv[i] -= chronologicalAmount[i]
+		}
+	}
+	return utils.ReverseArray(obv), nil
+}
+
+// CalculateCCI returns commodity channel index values ordered from newest to oldest.
+func CalculateCCI(high, low, close []float64, period int) ([]float64, error) {
+	if len(high) == 0 || len(high) != len(low) || len(high) != len(close) {
+		return nil, fmt.Errorf("high, low, and close slices must be non-empty and have the same length")
+	}
+	if period <= 0 {
+		return nil, fmt.Errorf("CCI period must be greater than zero")
+	}
+	if len(high) < period {
+		return nil, fmt.Errorf("insufficient data for CCI period %d: got %d values", period, len(high))
+	}
+
+	typicalPrice := make([]float64, len(high))
+	for i := range high {
+		if high[i] < low[i] {
+			return nil, fmt.Errorf("CCI high must not be lower than low at index %d", i)
+		}
+		typicalPrice[i] = (high[i] + low[i] + close[i]) / 3
+	}
+
+	cci := make([]float64, len(high)-period+1)
+	for start := 0; start <= len(high)-period; start++ {
+		window := typicalPrice[start : start+period]
+		average := calculateAverage(window)
+		meanDeviation := 0.0
+		for _, value := range window {
+			meanDeviation += math.Abs(value - average)
+		}
+		meanDeviation /= float64(period)
+		if meanDeviation == 0 {
+			cci[start] = 0
+			continue
+		}
+		cci[start] = (typicalPrice[start] - average) / (0.015 * meanDeviation)
+	}
+	return cci, nil
+}
+
+// Kdj returns K, D, and J values ordered from newest to oldest.
+func Kdj(high, low, close []float64, period, kPeriod, dPeriod int) (kValues, dValues, jValues []float64, err error) {
+	if len(high) == 0 || len(high) != len(low) || len(high) != len(close) {
+		return nil, nil, nil, fmt.Errorf("high, low, and close slices must be non-empty and have the same length")
+	}
+	if period <= 0 || kPeriod <= 0 || dPeriod <= 0 {
+		return nil, nil, nil, fmt.Errorf("KDJ periods must be greater than zero")
+	}
+	if len(high) < period {
+		return nil, nil, nil, fmt.Errorf("insufficient data for KDJ period %d: got %d values", period, len(high))
+	}
+
+	high = utils.ReverseArray(high)
+	low = utils.ReverseArray(low)
+	close = utils.ReverseArray(close)
+	resultLength := len(high) - period + 1
+	kValues = make([]float64, resultLength)
+	dValues = make([]float64, resultLength)
+	jValues = make([]float64, resultLength)
+	k, d := 50.0, 50.0
+	for i := period - 1; i < len(high); i++ {
+		highestHigh := high[i-period+1]
+		lowestLow := low[i-period+1]
+		for j := i - period + 2; j <= i; j++ {
+			if high[j] > highestHigh {
+				highestHigh = high[j]
+			}
+			if low[j] < lowestLow {
+				lowestLow = low[j]
+			}
+		}
+		rsv := 50.0
+		if highestHigh != lowestLow {
+			rsv = (close[i] - lowestLow) / (highestHigh - lowestLow) * 100
+		}
+		k = (float64(kPeriod-1)*k + rsv) / float64(kPeriod)
+		d = (float64(dPeriod-1)*d + k) / float64(dPeriod)
+		index := i - period + 1
+		kValues[index] = k
+		dValues[index] = d
+		jValues[index] = 3*k - 2*d
+	}
+	return utils.ReverseArray(kValues), utils.ReverseArray(dValues), utils.ReverseArray(jValues), nil
+}
+
 // sum 计算浮点数切片的总和
 func Sum(numbers []float64) float64 {
 	sum := 0.0
@@ -195,20 +420,20 @@ func Sum(numbers []float64) float64 {
  * @param num 数据数
  * @returns Boolean
  */
-func Kdj(ma1 []float64, ma2[]float64, num int) bool {
-	if (ma1 == nil || ma2 == nil) {
+func KdjSimple(ma1 []float64, ma2 []float64, num int) bool {
+	if ma1 == nil || ma2 == nil {
 		return false
 	}
-	if (len(ma1) < num || len(ma2) < num) {
+	if len(ma1) < num || len(ma2) < num {
 		return false
 	}
-	if (ma1[0] < ma2[0]) {
+	if ma1[0] < ma2[0] {
 		// 最新数据的必须是短线在上
 		return false
 	}
 	k := 0
 	for i := 1; i < num; i++ {
-		if (ma1[i] < ma2[i]) {
+		if ma1[i] < ma2[i] {
 			// 发生过短线在下，说明产生过死叉
 			k = i
 			break
@@ -216,7 +441,7 @@ func Kdj(ma1 []float64, ma2[]float64, num int) bool {
 	}
 	// 之后数据不能再重新产生交叉
 	for i := k; i < num; i++ {
-		if (ma1[i] > ma2[i]) {
+		if ma1[i] > ma2[i] {
 			return false
 		}
 	}
@@ -233,7 +458,7 @@ func calculateTrueRange(high, low, close []float64) ([]float64, error) {
 	}
 	tr := make([]float64, len(high))
 
-	for i := 0; i < len(high) - 1; i++ {
+	for i := 0; i < len(high)-1; i++ {
 		hl := high[i] - low[i]
 		hpc := math.Abs(high[i] - close[i+1])
 		lpc := math.Abs(low[i] - close[i+1])
@@ -251,6 +476,149 @@ func CalculateAtr(high, low, close []float64, period int) ([]float64, error) {
 		return nil, err
 	}
 	return calculateWilderMovingAverage(tr, period)
+}
+
+// CalculateSupertrend returns the active trend line and direction ordered from newest to oldest.
+func CalculateSupertrend(high, low, close []float64, period int, multiplier float64) (data, trend []float64, err error) {
+	if len(high) == 0 || len(high) != len(low) || len(high) != len(close) {
+		return nil, nil, fmt.Errorf("high, low, and close slices must be non-empty and have the same length")
+	}
+	if period <= 0 {
+		return nil, nil, fmt.Errorf("Supertrend period must be greater than zero")
+	}
+	if multiplier <= 0 {
+		return nil, nil, fmt.Errorf("Supertrend multiplier must be greater than zero")
+	}
+	for i := range high {
+		if high[i] < low[i] {
+			return nil, nil, fmt.Errorf("Supertrend high must not be lower than low at index %d", i)
+		}
+	}
+
+	atrNewestFirst, err := CalculateAtr(high, low, close, period)
+	if err != nil {
+		return nil, nil, err
+	}
+	high = utils.ReverseArray(high)
+	low = utils.ReverseArray(low)
+	close = utils.ReverseArray(close)
+	atr := utils.ReverseArray(atrNewestFirst)
+
+	resultLength := len(atr)
+	finalUpper := make([]float64, resultLength)
+	finalLower := make([]float64, resultLength)
+	data = make([]float64, resultLength)
+	trend = make([]float64, resultLength)
+	for resultIndex := 0; resultIndex < resultLength; resultIndex++ {
+		priceIndex := period - 1 + resultIndex
+		midpoint := (high[priceIndex] + low[priceIndex]) / 2
+		basicUpper := midpoint + multiplier*atr[resultIndex]
+		basicLower := midpoint - multiplier*atr[resultIndex]
+		if resultIndex == 0 {
+			finalUpper[resultIndex] = basicUpper
+			finalLower[resultIndex] = basicLower
+			if close[priceIndex] >= midpoint {
+				trend[resultIndex] = 1
+				data[resultIndex] = finalLower[resultIndex]
+			} else {
+				trend[resultIndex] = -1
+				data[resultIndex] = finalUpper[resultIndex]
+			}
+			continue
+		}
+
+		previousIndex := resultIndex - 1
+		previousClose := close[priceIndex-1]
+		if basicUpper < finalUpper[previousIndex] || previousClose > finalUpper[previousIndex] {
+			finalUpper[resultIndex] = basicUpper
+		} else {
+			finalUpper[resultIndex] = finalUpper[previousIndex]
+		}
+		if basicLower > finalLower[previousIndex] || previousClose < finalLower[previousIndex] {
+			finalLower[resultIndex] = basicLower
+		} else {
+			finalLower[resultIndex] = finalLower[previousIndex]
+		}
+
+		if trend[previousIndex] < 0 {
+			if close[priceIndex] > finalUpper[resultIndex] {
+				trend[resultIndex] = 1
+				data[resultIndex] = finalLower[resultIndex]
+			} else {
+				trend[resultIndex] = -1
+				data[resultIndex] = finalUpper[resultIndex]
+			}
+		} else if close[priceIndex] < finalLower[resultIndex] {
+			trend[resultIndex] = -1
+			data[resultIndex] = finalUpper[resultIndex]
+		} else {
+			trend[resultIndex] = 1
+			data[resultIndex] = finalLower[resultIndex]
+		}
+	}
+
+	return utils.ReverseArray(data), utils.ReverseArray(trend), nil
+}
+
+// CalculateADX returns ADX, +DI, and -DI values ordered from newest to oldest.
+func CalculateADX(high, low, close []float64, period int) (adx, plusDI, minusDI []float64, err error) {
+	tr, err := calculateTrueRange(high, low, close)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if period <= 0 {
+		return nil, nil, nil, fmt.Errorf("ADX period must be greater than zero")
+	}
+	if len(high) < period*2 {
+		return nil, nil, nil, fmt.Errorf("insufficient data for ADX period %d: got %d values", period, len(high))
+	}
+
+	directionalCount := len(high) - 1
+	plusDM := make([]float64, directionalCount)
+	minusDM := make([]float64, directionalCount)
+	for i := 0; i < directionalCount; i++ {
+		upMove := high[i] - high[i+1]
+		downMove := low[i+1] - low[i]
+		if upMove > downMove && upMove > 0 {
+			plusDM[i] = upMove
+		} else if downMove > upMove && downMove > 0 {
+			minusDM[i] = downMove
+		}
+	}
+
+	smoothedTR, err := calculateWilderMovingAverage(tr[:directionalCount], period)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	smoothedPlusDM, err := calculateWilderMovingAverage(plusDM, period)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	smoothedMinusDM, err := calculateWilderMovingAverage(minusDM, period)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	plusDIValues := make([]float64, len(smoothedTR))
+	minusDIValues := make([]float64, len(smoothedTR))
+	dx := make([]float64, len(smoothedTR))
+	for i := range smoothedTR {
+		if smoothedTR[i] == 0 {
+			continue
+		}
+		plusDIValues[i] = 100 * smoothedPlusDM[i] / smoothedTR[i]
+		minusDIValues[i] = 100 * smoothedMinusDM[i] / smoothedTR[i]
+		directionalSum := plusDIValues[i] + minusDIValues[i]
+		if directionalSum > 0 {
+			dx[i] = 100 * math.Abs(plusDIValues[i]-minusDIValues[i]) / directionalSum
+		}
+	}
+
+	adx, err = calculateWilderMovingAverage(dx, period)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return adx, plusDIValues[:len(adx)], minusDIValues[:len(adx)], nil
 }
 
 // 肯纳特通道
@@ -274,11 +642,45 @@ func CalculateKeltnerChannels(high, low, close []float64, period int, multiplier
 	lower = make([]float64, len(ma))
 
 	for i := 0; i < len(ma); i++ {
-		upper[i] = ma[i] + multiplier * atr[i]
-		lower[i] = ma[i] - multiplier * atr[i]
+		upper[i] = ma[i] + multiplier*atr[i]
+		lower[i] = ma[i] - multiplier*atr[i]
 	}
 
 	return upper, ma, lower, nil
+}
+
+// CalculateDonchianChannels returns upper, middle, and lower bands ordered from newest to oldest.
+func CalculateDonchianChannels(high, low []float64, period int) (upper, middle, lower []float64, err error) {
+	if len(high) == 0 || len(high) != len(low) {
+		return nil, nil, nil, fmt.Errorf("high and low slices must be non-empty and have the same length")
+	}
+	if err := validatePeriod(len(high), period); err != nil {
+		return nil, nil, nil, err
+	}
+	for i := range high {
+		if high[i] < low[i] {
+			return nil, nil, nil, fmt.Errorf("Donchian high must not be lower than low at index %d", i)
+		}
+	}
+
+	resultLength := len(high) - period + 1
+	upper = make([]float64, resultLength)
+	middle = make([]float64, resultLength)
+	lower = make([]float64, resultLength)
+	for start := 0; start < resultLength; start++ {
+		upper[start] = high[start]
+		lower[start] = low[start]
+		for i := start + 1; i < start+period; i++ {
+			if high[i] > upper[start] {
+				upper[start] = high[i]
+			}
+			if low[i] < lower[start] {
+				lower[start] = low[i]
+			}
+		}
+		middle[start] = (upper[start] + lower[start]) / 2
+	}
+	return upper, middle, lower, nil
 }
 
 func calculateWilderMovingAverage(values []float64, period int) ([]float64, error) {
@@ -304,23 +706,24 @@ func validatePeriod(dataLength, period int) error {
 	}
 	return nil
 }
+
 type Candle struct {
-    Open  float64
-    Close float64
-    High  float64
-    Low   float64
+	Open  float64
+	Close float64
+	High  float64
+	Low   float64
 }
 
 // 根据日本蜡烛图帮我写一个黑云压顶的函数
 func IsDarkCloudCover(first, second Candle) bool {
-    // First candle is bullish
-    isFirstBullish := first.Close > first.Open
-    // Second candle is bearish
-    isSecondBearish := second.Close < second.Open
-    // Second candle opens above the first candle's close
-    opensAboveFirstClose := second.Open > first.Close
-    // Second candle closes inside the body of the first candle
-    closesInsideFirstBody := second.Close < first.Open && second.Close > first.Close * 0.5 + first.Open * 0.5
+	// First candle is bullish
+	isFirstBullish := first.Close > first.Open
+	// Second candle is bearish
+	isSecondBearish := second.Close < second.Open
+	// Second candle opens above the first candle's close
+	opensAboveFirstClose := second.Open > first.Close
+	// Second candle closes inside the body of the first candle
+	closesInsideFirstBody := second.Close < first.Open && second.Close > first.Close*0.5+first.Open*0.5
 
-    return isFirstBullish && isSecondBearish && opensAboveFirstClose && closesInsideFirstBody
+	return isFirstBullish && isSecondBearish && opensAboveFirstClose && closesInsideFirstBody
 }

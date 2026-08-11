@@ -6,7 +6,7 @@
 ![alt text](./img/zh/custom_type2.png)
 
 ## 然后需要定义技术指标
-> 目前支持的指标有 `ma`, `ema`, `rsi`, `kc(肯纳特通道)`, `boll(布林带)`, `atr`
+> 目前支持的指标有 `ma`, `ema`, `macd`, `adx/dmi`, `mfi`, `obv`, `cci`, `roc`, `kdj`, `rsi`, `kc(肯纳特通道)`, `boll(布林带)`, `donchian(唐奇安通道)`, `atr`, `supertrend`
 
 - 示例图
 ![img1](./img/zh/te_001.jpg)
@@ -22,7 +22,7 @@
 
 ### 其它输入
 > 指标相关的标准参数
-> 周期必须是正整数且不超过 150；RSI 需要额外一根 K 线计算涨跌值，因此最大周期是 149。KC 和 BOLL 的乘数不能为负数。
+> 周期必须是正整数且不超过 150；RSI、MFI 和 ROC 需要额外一根 K 线比较前后变化，因此最大周期是 149。OBV 不需要周期。ADX 需要两层 Wilder 初始化，因此最大周期是 75。MACD 要求快线周期小于慢线周期，并且 `慢线周期 + 信号线周期 - 1 <= 150`。KDJ 的 K、D 平滑周期必须是 1 到 150 的整数。KC 和 BOLL 的乘数不能为负数，Supertrend 的 ATR 乘数必须大于 0。
 
 ### 启用
 > 只有选择了开启的指标才可以在策略中使用
@@ -102,7 +102,7 @@ ema_4h_3.Data[0] > ema_4h_7.Data[0] && ema_4h_3.Data[1] < ema_4h_7.Data[1]
 
 ##### 其它函数
 
-###### Kdj
+###### KdjSimple
 
 ```
 /**
@@ -112,8 +112,10 @@ ema_4h_3.Data[0] > ema_4h_7.Data[0] && ema_4h_3.Data[1] < ema_4h_7.Data[1]
  * @param num 检查数量
  * @returns Boolean
  */
-func Kdj(ma1 []float64, ma2[]float64, num int) bool 
+func KdjSimple(ma1 []float64, ma2[]float64, num int) bool
 ```
+
+> `KdjSimple()` 是两组数组的单次交叉辅助函数；标准 KDJ 指标由后端的 `Kdj()` 计算，并通过技术指标配置中的小写 `kdj` 暴露为 `K`、`D`、`J` 数组。
 
 ###### IsDesc
 
@@ -137,10 +139,19 @@ func IsAsc(arr []float64) bool
 
 - MA：指定周期的简单移动平均。
 - EMA：以第一个完整周期的 SMA 为种子，之后使用 `2 / (period + 1)` 平滑。
+- MACD：`DIF = EMA(fast) - EMA(slow)`，`DEA = EMA(DIF, signal)`，`Histogram = DIF - DEA`。
+- ADX/DMI：使用 Wilder 平滑计算 `PlusDI`、`MinusDI` 和方向强度 `ADX`；ADX 只衡量趋势强度，方向由两条 DI 的相对位置判断。
+- MFI：使用典型价格判断资金流方向，使用 K 线报价资产成交额 `Amount` 作为资金流，结果范围是 0 到 100；价格完全不变或没有正负资金流时返回 50。
+- OBV：价格上涨时累加当前 K 线的报价资产成交额 `Amount`，价格下跌时扣减，价格不变时保持不变；系统按当前取得的 150 根 K 线从 0 开始累计，因此应关注方向、斜率和前后变化，而不是跨窗口比较绝对值。
+- CCI：使用典型价格相对其周期均值的偏差计算，公式为 `(TypicalPrice - SMA) / (0.015 × MeanDeviation)`；平均偏差为 0 时返回中性值 0。
+- ROC：计算当前收盘价相对 `period` 根之前收盘价的百分比变化，公式为 `(Close[当前] - Close[period根前]) / Close[period根前] × 100`；0 表示没有变化。
+- KDJ：先计算 RSV，再以初始 `K=50、D=50` 分别按 K、D 平滑周期递推，最后计算 `J = 3 × K - 2 × D`；最高价等于最低价时 RSV 返回 50。
 - RSI：使用 Wilder 平滑；完全横盘时返回中性值 50。
 - BOLL：中轨使用 SMA，标准差使用总体标准差。
+- Donchian：上轨是周期内最高价、下轨是周期内最低价、中轨是上下轨平均值。因为当前 K 线也包含在当前通道中，判断有效突破时通常应将当前价格与上一根通道 `High[1]` 或 `Low[1]` 比较。
 - ATR：使用 True Range 和 Wilder 平滑 `1 / period`。
 - KC：中轨使用 EMA，上下轨为 `EMA ± multiplier × ATR`。
+- Supertrend：以 `HL2 ± multiplier × ATR` 生成基础轨道，再根据前一根收盘价收缩为最终上下轨；`Data` 是当前生效的趋势线，`Trend` 为 `1`（多头）或 `-1`（空头）。
 
 ##### ma
 
@@ -166,6 +177,144 @@ ma1.Data = [30.2, 30.3, ..] // 150 count
 ema1.KlineInterval // 4h
 ema1.Period // 14
 ema1.Data = [30.2, 30.3, ..] // < 150 count
+```
+
+##### macd
+
+| 名称  | k线类型 | 快线周期 | 慢线周期 | 信号线周期 | 启用 |
+| ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
+| macd1 | 1h | 12 | 26 | 9 | true |
+
+```
+macd1.KlineInterval // 1h
+macd1.FastPeriod // 12
+macd1.SlowPeriod // 26
+macd1.SignalPeriod // 9
+macd1.DIF = [0.32, 0.28, ..]
+macd1.DEA = [0.25, 0.23, ..]
+macd1.Histogram = [0.07, 0.05, ..]
+```
+
+例如，实时金叉可以写成：
+
+```
+macd1.DIF[0] > macd1.DEA[0] && macd1.DIF[1] <= macd1.DEA[1]
+```
+
+##### adx/dmi
+
+| 名称 | k线类型 | 周期 | 启用 |
+| ------------ | ------------ | ------------ | ------------ |
+| adx1 | 1h | 14 | true |
+
+```
+adx1.KlineInterval // 1h
+adx1.Period // 14
+adx1.ADX = [28.2, 26.8, ..]
+adx1.PlusDI = [31.5, 29.1, ..]
+adx1.MinusDI = [18.4, 20.2, ..]
+```
+
+例如，强势多头和强势空头可以分别写成：
+
+```
+adx1.ADX[0] >= 25 && adx1.PlusDI[0] > adx1.MinusDI[0]
+adx1.ADX[0] >= 25 && adx1.MinusDI[0] > adx1.PlusDI[0]
+```
+
+##### mfi
+
+| 名称 | k线类型 | 周期 | 启用 |
+| ------------ | ------------ | ------------ | ------------ |
+| mfi1 | 1h | 14 | true |
+
+```
+mfi1.KlineInterval // 1h
+mfi1.Period // 14
+mfi1.Data = [68.2, 64.7, ..]
+```
+
+常用参考区间是 20 和 80。例如从超卖区域向上恢复可以写成：
+
+```
+mfi1.Data[0] > 20 && mfi1.Data[1] <= 20
+```
+
+##### obv
+
+| 名称 | k线类型 | 启用 |
+| ------------ | ------------ | ------------ |
+| obv1 | 1h | true |
+
+```
+obv1.KlineInterval // 1h
+obv1.Data = [5823412.5, 5132088.1, ..]
+```
+
+OBV 没有周期参数。它使用当前 K 线的报价资产成交额 `Amount` 累加，当前 150 根 K 线窗口中最旧的一根以 0 为基准。因此更适合判断量价是否同步、趋势方向或相邻差值，例如：
+
+```
+obv1.Data[0] > obv1.Data[1] && kline_1h.Close[0] > kline_1h.Close[1]
+```
+
+##### cci
+
+| 名称 | k线类型 | 周期 | 启用 |
+| ------------ | ------------ | ------------ | ------------ |
+| cci1 | 1h | 20 | true |
+
+```
+cci1.KlineInterval // 1h
+cci1.Period // 20
+cci1.Data = [125.4, 92.1, ..]
+```
+
+CCI 常用参考线是 `+100` 和 `-100`。例如向上突破 `+100` 和向下跌破 `-100` 可以分别写成：
+
+```
+cci1.Data[0] > 100 && cci1.Data[1] <= 100
+cci1.Data[0] < -100 && cci1.Data[1] >= -100
+```
+
+##### roc
+
+| 名称 | k线类型 | 周期 | 启用 |
+| ------------ | ------------ | ------------ | ------------ |
+| roc1 | 1h | 12 | true |
+
+```
+roc1.KlineInterval // 1h
+roc1.Period // 12
+roc1.Data = [3.25, 2.81, ..] // 百分比
+```
+
+例如，ROC 上穿和下穿零轴可以分别写成：
+
+```
+roc1.Data[0] > 0 && roc1.Data[1] <= 0
+roc1.Data[0] < 0 && roc1.Data[1] >= 0
+```
+
+##### kdj
+
+| 名称 | k线类型 | RSV周期 | K平滑周期 | D平滑周期 | 启用 |
+| ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
+| kdj1 | 15m | 9 | 3 | 3 | true |
+
+```
+kdj1.KlineInterval // 15m
+kdj1.Period // 9
+kdj1.KPeriod // 3
+kdj1.DPeriod // 3
+kdj1.K = [62.1, 58.4, ..]
+kdj1.D = [55.7, 52.5, ..]
+kdj1.J = [74.9, 70.2, ..]
+```
+
+例如，低位 K 线上穿 D 线可以写成：
+
+```
+kdj1.K[0] > kdj1.D[0] && kdj1.K[1] <= kdj1.D[1] && kdj1.J[0] < 30
 ```
 
 ##### rsi
@@ -211,6 +360,27 @@ boll_1.Mid = [57.2, 50.3, ..]
 boll_1.Low = [37.2, 40.3, ..]
 ```
 
+##### donchian
+
+| 名称 | k线类型 | 周期 | 启用 |
+| ------------ | ------------ | ------------ | ------------ |
+| donchian1 | 1h | 20 | true |
+
+```
+donchian1.KlineInterval // 1h
+donchian1.Period // 20
+donchian1.High = [67.2, 66.8, ..]
+donchian1.Mid = [52.2, 51.9, ..]
+donchian1.Low = [37.2, 37.0, ..]
+```
+
+当前通道包含当前 K 线，因此 `Close[0] > donchian1.High[0]` 通常无法成立。实时判断向上或向下突破时，应与上一根通道比较：
+
+```
+kline_1h.Close[0] > donchian1.High[1]
+kline_1h.Close[0] < donchian1.Low[1]
+```
+
 ##### atr
 
 | 名称  |  k线类型 | 周期  | 启用  |
@@ -221,6 +391,27 @@ boll_1.Low = [37.2, 40.3, ..]
 atr1.KlineInterval // 4h
 atr1.Period // 14
 atr1.Data = [67.2, 70.3, ..] // < 150 count
+```
+
+##### supertrend
+
+| 名称 | k线类型 | ATR周期 | ATR乘数 | 启用 |
+| ------------ | ------------ | ------------ | ------------ | ------------ |
+| supertrend1 | 15m | 10 | 3 | true |
+
+```
+supertrend1.KlineInterval // 15m
+supertrend1.Period // 10
+supertrend1.Multiplier // 3
+supertrend1.Data = [105.2, 104.8, ..]
+supertrend1.Trend = [1, 1, -1, ..] // 1=多头, -1=空头
+```
+
+例如，多头和空头趋势切换可以分别写成：
+
+```
+supertrend1.Trend[0] == 1 && supertrend1.Trend[1] == -1
+supertrend1.Trend[0] == -1 && supertrend1.Trend[1] == 1
 ```
 
 #### 其它

@@ -42,13 +42,13 @@ func (TradeLine4 TradeLine4) GetCanLongOrShort(openParams strategy.OpenParams) (
 	}
 	baseCanLong, baseCanShort := BaseCheckCanLongOrShort() // 基本盘
 	isRsi := rsi6[0] < 80 && rsi6[0] > 30 && rsi14[0] < 75 && rsi14[0] > 28
-	// logs.Info(symbol, Kdj(ma6h_3, ma6h_7, 4), Kdj(ma6h_7, ma6h_3, 4), rsi6[1], rsi14[1])
-	if Kdj(ma6h_3, ma6h_7, 4) && TradeLine4.checkLongLine(kline_1h) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
+	// logs.Info(symbol, KdjSimple(ma6h_3, ma6h_7, 4), KdjSimple(ma6h_7, ma6h_3, 4), rsi6[1], rsi14[1])
+	if KdjSimple(ma6h_3, ma6h_7, 4) && TradeLine4.checkLongLine(kline_1h) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		openResult.CanLong = true
 		return openResult
 	}
-	if Kdj(ma6h_7, ma6h_3, 4) && TradeLine4.checkShortLine(kline_1h)&& isRsi && baseCanShort {
+	if KdjSimple(ma6h_7, ma6h_3, 4) && TradeLine4.checkShortLine(kline_1h)&& isRsi && baseCanShort {
 		openResult.CanShort = true
 		return openResult
 	}
@@ -105,12 +105,12 @@ func (TradeLine4 TradeLine4) MarketReversal(symbol string, positionSide string) 
 	ma1d_15, _ := CalculateSimpleMovingAverage(kline_1d_close, 15) // ma15
 	
 	if positionSide== "LONG" {
-		if Kdj(ma1d_7, ma1d_3, 4) && Kdj(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
+		if KdjSimple(ma1d_7, ma1d_3, 4) && KdjSimple(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
 			return true
 		}
 	}
 	if positionSide == "SHORT" {
-		if Kdj(ma1d_3, ma1d_7, 4) && Kdj(ma1d_3, ma1d_15, 4) && utils.IsDesc(ma1d_3[0:3]) {
+		if KdjSimple(ma1d_3, ma1d_7, 4) && KdjSimple(ma1d_3, ma1d_15, 4) && utils.IsDesc(ma1d_3[0:3]) {
 			return true
 		}
 	}
@@ -150,4 +150,3 @@ func (TradeLine4 TradeLine4) checkShortLine(klines []*futures.Kline) bool {
 	}
 	return false
 }
-

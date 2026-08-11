@@ -90,12 +90,12 @@ func (TradeLine6 TradeLine6) MarketReversal(symbol string, positionSide string) 
 	ma1d_15, _ := CalculateSimpleMovingAverage(kline_1d_close, 15) // ma15
 	
 	if positionSide== "LONG" {
-		if Kdj(ma1d_7, ma1d_3, 4) && Kdj(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
+		if KdjSimple(ma1d_7, ma1d_3, 4) && KdjSimple(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
 			return true
 		}
 	}
 	if positionSide == "SHORT" {
-		if Kdj(ma1d_3, ma1d_7, 4) && Kdj(ma1d_3, ma1d_15, 4) && utils.IsDesc(ma1d_3[0:3]) {
+		if KdjSimple(ma1d_3, ma1d_7, 4) && KdjSimple(ma1d_3, ma1d_15, 4) && utils.IsDesc(ma1d_3[0:3]) {
 			return true
 		}
 	}

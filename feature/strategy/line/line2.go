@@ -37,12 +37,12 @@ func (TradeLine2 TradeLine2) GetCanLongOrShort(openParams strategy.OpenParams) (
 		// 开盘小于 4.5 天
 		return openResult
 	}
-	// logs.Info(symbol, Kdj(ema6h_3, ema6h_7, 4), Kdj(ema6h_7, ema6h_3, 4), utils.IsDesc(ema6h_3[0:2]), rsi6[1], rsi14[1])
-	if Kdj(ema6h_3, ema6h_7, 4) && Kdj(ema6h_7, ema6h_15, 4) && utils.IsDesc(ema6h_3[0:2]) && rsi6[0] < 80 && rsi14[0] < 75 { // 1天之内发生过金叉, rsi 没有超买
+	// logs.Info(symbol, KdjSimple(ema6h_3, ema6h_7, 4), KdjSimple(ema6h_7, ema6h_3, 4), utils.IsDesc(ema6h_3[0:2]), rsi6[1], rsi14[1])
+	if KdjSimple(ema6h_3, ema6h_7, 4) && KdjSimple(ema6h_7, ema6h_15, 4) && utils.IsDesc(ema6h_3[0:2]) && rsi6[0] < 80 && rsi14[0] < 75 { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		openResult.CanLong = true
 		return openResult
-	} else if Kdj(ema6h_7, ema6h_3, 4) && Kdj(ema6h_15, ema6h_7, 4) && utils.IsAsc(ema6h_3[0:2]) && rsi6[0] < 80 && rsi14[0] < 75 {
+	} else if KdjSimple(ema6h_7, ema6h_3, 4) && KdjSimple(ema6h_15, ema6h_7, 4) && utils.IsAsc(ema6h_3[0:2]) && rsi6[0] < 80 && rsi14[0] < 75 {
 		openResult.CanShort = true
 		return openResult
 	}

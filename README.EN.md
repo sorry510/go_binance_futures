@@ -63,9 +63,6 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 
 These screenshots use the current UI. Pages that may contain balances, orders, configuration secrets, or log text show only a safe area.
 
-#### Login
-![New UI - Login](./img/ui/login.jpg)
-
 #### Configuration Center
 ![New UI - Configuration Center](./img/ui/dashboard.jpg)
 
