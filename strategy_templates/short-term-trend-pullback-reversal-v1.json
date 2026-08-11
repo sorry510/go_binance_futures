@@ -1,0 +1,81 @@
+{
+  "name": "短线趋势回调反转 v1",
+  "technology": {
+    "ma": [],
+    "ema": [],
+    "macd": [],
+    "adx": [],
+    "mfi": [
+      {
+        "name": "mfi_15m_14",
+        "enable": true,
+        "kline_interval": "15m",
+        "period": 14
+      }
+    ],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [
+      {
+        "name": "kdj_15m_9_3_3",
+        "enable": true,
+        "kline_interval": "15m",
+        "period": 9,
+        "k_period": 3,
+        "d_period": 3
+      }
+    ],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_15m_14",
+        "enable": true,
+        "kline_interval": "15m",
+        "period": 14
+      }
+    ],
+    "supertrend": [
+      {
+        "name": "supertrend_1h_10_3",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 10,
+        "multiplier": 3
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "short_term_pullback_long_open_v1",
+      "type": "long",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet trend_ok = supertrend_1h_10_3.Trend[0] == 1 && kline_1h.Close[0] > supertrend_1h_10_3.Data[0];\nlet oscillator_turn = kdj_15m_9_3_3.K[0] > kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] <= kdj_15m_9_3_3.D[1] && kdj_15m_9_3_3.J[0] >= 20 && kdj_15m_9_3_3.J[0] <= 60;\nlet flow_ok = mfi_15m_14.Data[0] > mfi_15m_14.Data[1] && mfi_15m_14.Data[0] >= 40 && mfi_15m_14.Data[0] <= 70;\nlet atr = atr_15m_14.Data[0];\nlet price_recovery = kline_15m.Close[0] > kline_15m.Close[1];\nlet no_chase = atr > 0 && abs(kline_15m.Close[0] - kline_15m.Close[1]) <= atr * 0.8 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr * 1.2;\n\nwarmup_ok && trend_ok && oscillator_turn && flow_ok && price_recovery && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "short_term_pullback_short_open_v1",
+      "type": "short",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet trend_ok = supertrend_1h_10_3.Trend[0] == -1 && kline_1h.Close[0] < supertrend_1h_10_3.Data[0];\nlet oscillator_turn = kdj_15m_9_3_3.K[0] < kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] >= kdj_15m_9_3_3.D[1] && kdj_15m_9_3_3.J[0] >= 40 && kdj_15m_9_3_3.J[0] <= 80;\nlet flow_ok = mfi_15m_14.Data[0] < mfi_15m_14.Data[1] && mfi_15m_14.Data[0] >= 30 && mfi_15m_14.Data[0] <= 60;\nlet atr = atr_15m_14.Data[0];\nlet price_rejection = kline_15m.Close[0] < kline_15m.Close[1];\nlet no_chase = atr > 0 && abs(kline_15m.Close[0] - kline_15m.Close[1]) <= atr * 0.8 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr * 1.2;\n\nwarmup_ok && trend_ok && oscillator_turn && flow_ok && price_rejection && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "short_term_pullback_long_close_v1",
+      "type": "close_long",
+      "code": "let atr = atr_15m_14.Data[0];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\nlet hard_stop = mark <= entry - atr * 2 || ROI <= -6;\nlet hard_take = mark >= entry + atr * 3.2 || ROI >= 9;\nlet oscillator_reverse = kdj_15m_9_3_3.K[0] < kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] >= kdj_15m_9_3_3.D[1];\nlet flow_reverse = mfi_15m_14.Data[0] < 45 && mfi_15m_14.Data[0] < mfi_15m_14.Data[1];\nlet protect_profit = ROI >= 2.5 && (oscillator_reverse || flow_reverse);\nlet setup_failure = supertrend_1h_10_3.Trend[0] == -1 && ROI <= 0;\nlet time_exit = Position.SourceType == \"local\" && Position.CreateTime > 0 && NowTime - Position.CreateTime >= 172800000 && abs(mark - entry) < atr;\n\nhard_stop || hard_take || protect_profit || setup_failure || time_exit",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "short_term_pullback_short_close_v1",
+      "type": "close_short",
+      "code": "let atr = atr_15m_14.Data[0];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\nlet hard_stop = mark >= entry + atr * 2 || ROI <= -6;\nlet hard_take = mark <= entry - atr * 3.2 || ROI >= 9;\nlet oscillator_reverse = kdj_15m_9_3_3.K[0] > kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] <= kdj_15m_9_3_3.D[1];\nlet flow_reverse = mfi_15m_14.Data[0] > 55 && mfi_15m_14.Data[0] > mfi_15m_14.Data[1];\nlet protect_profit = ROI >= 2.5 && (oscillator_reverse || flow_reverse);\nlet setup_failure = supertrend_1h_10_3.Trend[0] == 1 && ROI <= 0;\nlet time_exit = Position.SourceType == \"local\" && Position.CreateTime > 0 && NowTime - Position.CreateTime >= 172800000 && abs(mark - entry) < atr;\n\nhard_stop || hard_take || protect_profit || setup_failure || time_exit",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
