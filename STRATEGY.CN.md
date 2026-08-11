@@ -9,9 +9,9 @@
 > 目前支持的指标有 `ma`, `ema`, `macd`, `adx/dmi`, `mfi`, `obv`, `cci`, `roc`, `kdj`, `rsi`, `kc(肯纳特通道)`, `boll(布林带)`, `donchian(唐奇安通道)`, `atr`, `supertrend`
 
 - 示例图
-![img1](./img/zh/te_001.jpg)
-![img2](./img/zh/te_002.jpg)
-![img3](./img/zh/te_003.jpg)
+![img1](./img/ui/te_001.png)
+![img2](./img/ui/te_002.png)
+![img3](./img/ui/te_003.png)
 
 ### 名称
 > 当前指标起一个名字 `必须所有栏目下唯一`(写策略时需要用到)
