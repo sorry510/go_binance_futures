@@ -26,8 +26,18 @@ func createConfig(version int64) error {
 }
 
 func createStrategyTemplates() error {
+	o := orm.NewOrm()
+	count, err := o.QueryTable("strategy_templates").Count()
+	if err != nil {
+		logs.Error("count strategy_templates table error:", err)
+		return err
+	}
+	if count > 0 {
+		return nil
+	}
+
 	filepath := "./command/sql/strategy_templates.sql"
-	err := readAndExecuteSQLFile(orm.NewOrm(), filepath)
+	err = readAndExecuteSQLFile(o, filepath)
 	if err != nil {
 		logs.Error("init strategy_templates table error:", err)
 	}
@@ -147,7 +157,7 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 			return fmt.Errorf("update database version %d failed: %w", version, err)
 		}
 	}
-	
+
 	err = to.Commit()
 	if err != nil {
 		logs.Error("commit transaction error:", err)
