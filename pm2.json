@@ -1,0 +1,10 @@
+{
+    "apps": {
+        "name": "go_binance_futures",
+        "describe": "binance bot",
+        "script": "go_binance_futures",
+        "cwd": "./",
+        "interpreter": "",
+        "args": ""
+    }
+}

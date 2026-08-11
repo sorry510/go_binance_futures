@@ -1,0 +1,100 @@
+{
+  "name": "多周期趋势回踩突破 v1",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_15m_9",
+        "kline_interval": "15m",
+        "period": 9,
+        "enable": true
+      },
+      {
+        "name": "ema_15m_21",
+        "kline_interval": "15m",
+        "period": 21,
+        "enable": true
+      },
+      {
+        "name": "ema_1h_9",
+        "kline_interval": "1h",
+        "period": 9,
+        "enable": true
+      },
+      {
+        "name": "ema_1h_21",
+        "kline_interval": "1h",
+        "period": 21,
+        "enable": true
+      },
+      {
+        "name": "ema_4h_20",
+        "kline_interval": "4h",
+        "period": 20,
+        "enable": true
+      },
+      {
+        "name": "ema_4h_50",
+        "kline_interval": "4h",
+        "period": 50,
+        "enable": true
+      }
+    ],
+    "rsi": [
+      {
+        "name": "rsi_1h_14",
+        "kline_interval": "1h",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "kc": [],
+    "boll": [
+      {
+        "name": "boll_1h_20_2",
+        "kline_interval": "1h",
+        "period": 20,
+        "std_dev_multiplier": 2,
+        "enable": true
+      }
+    ],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "kline_interval": "1h",
+        "period": 14,
+        "enable": true
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "trend_pullback_breakout_long_open_v1",
+      "type": "long",
+      "code": "// Use closed candles only for entry signals.\nlet warmup_ok = (NowTime - SystemStartTime) / 1000 > 900;\nlet market_ok = BasicTrend > -2.5 && BTCUSDT.PercentChange > -5;\n\n// Confirm the higher-timeframe uptrend.\nlet trend_4h = ema_4h_20.Data[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] > ema_4h_20.Data[2] && kline_4h.Close[1] > ema_4h_20.Data[1];\n\n// Require healthy momentum without chasing an overbought move.\nlet momentum_1h = ema_1h_9.Data[1] > ema_1h_21.Data[1] && rsi_1h_14.Data[1] >= 52 && rsi_1h_14.Data[1] <= 72;\n\n// Accept either a pullback reclaim or a confirmed range breakout.\nlet pullback_reclaim = kline_1h.Close[2] <= ema_1h_9.Data[2] && kline_1h.Close[1] > ema_1h_9.Data[1] && kline_1h.Close[1] > kline_1h.Open[1];\nlet range_breakout = kline_1h.Close[1] > boll_1h_20_2.High[1] && all(kline_1h.High[2:10], # < kline_1h.Close[1]);\n\n// Compare quote volume only within the same interval.\nlet volume_ok = kline_1h.Qps[1] >= mean(kline_1h.Qps[2:22]) * 1.10;\nlet atr_pct = atr_1h_14.Data[1] / kline_1h.Close[1] * 100;\nlet volatility_ok = atr_pct >= 0.25 && atr_pct <= 5;\nlet not_extended = kline_1h.Close[1] <= ema_1h_21.Data[1] + atr_1h_14.Data[1] * 2.5;\n\nwarmup_ok && market_ok && trend_4h && momentum_1h && volume_ok && volatility_ok && not_extended && (pullback_reclaim || range_breakout)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "trend_pullback_breakout_short_open_v1",
+      "type": "short",
+      "code": "// Use closed candles only for entry signals.\nlet warmup_ok = (NowTime - SystemStartTime) / 1000 > 900;\nlet market_ok = BasicTrend < 2.5 && BTCUSDT.PercentChange < 5;\n\n// Confirm the higher-timeframe downtrend.\nlet trend_4h = ema_4h_20.Data[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] < ema_4h_20.Data[2] && kline_4h.Close[1] < ema_4h_20.Data[1];\n\n// Require healthy downside momentum without chasing an oversold move.\nlet momentum_1h = ema_1h_9.Data[1] < ema_1h_21.Data[1] && rsi_1h_14.Data[1] >= 28 && rsi_1h_14.Data[1] <= 48;\n\n// Accept either a rebound rejection or a confirmed range breakdown.\nlet rebound_rejection = kline_1h.Close[2] >= ema_1h_9.Data[2] && kline_1h.Close[1] < ema_1h_9.Data[1] && kline_1h.Close[1] < kline_1h.Open[1];\nlet range_breakdown = kline_1h.Close[1] < boll_1h_20_2.Low[1] && all(kline_1h.Low[2:10], # > kline_1h.Close[1]);\n\n// Compare quote volume only within the same interval.\nlet volume_ok = kline_1h.Qps[1] >= mean(kline_1h.Qps[2:22]) * 1.10;\nlet atr_pct = atr_1h_14.Data[1] / kline_1h.Close[1] * 100;\nlet volatility_ok = atr_pct >= 0.25 && atr_pct <= 5;\nlet not_extended = kline_1h.Close[1] >= ema_1h_21.Data[1] - atr_1h_14.Data[1] * 2.5;\n\nwarmup_ok && market_ok && trend_4h && momentum_1h && volume_ok && volatility_ok && not_extended && (rebound_rejection || range_breakdown)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "trend_pullback_breakout_long_close_v1",
+      "type": "close_long",
+      "code": "let atr = atr_1h_14.Data[1];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\n\n// Bound the loss and realize an extended move.\nlet hard_stop = mark <= entry - atr * 2.2 || ROI <= -15;\nlet hard_take = mark >= entry + atr * 4.0;\n\n// Protect a developed profit when the 15m trend reverses.\nlet profit_ready = mark >= entry + atr * 1.5;\nlet reversal_15m = (ema_15m_9.Data[1] < ema_15m_21.Data[1] && ema_15m_9.Data[2] >= ema_15m_21.Data[2]) || kline_15m.Close[1] < ema_15m_21.Data[1];\nlet protect_profit = profit_ready && reversal_15m;\n\n// Exit a failed setup or a broad-market shock.\nlet trend_failure = ema_1h_9.Data[1] < ema_1h_21.Data[1] && kline_1h.Close[1] < ema_1h_21.Data[1] && ROI <= 0;\nlet market_shock = BasicTrend < -4 && ROI < 0;\n\n// Time exit applies only to local positions with a recorded create time.\nlet time_exit = Position.CreateTime > 0 && (NowTime - Position.CreateTime) / 1000 > 129600 && abs(mark - entry) < atr;\n\nhard_stop || hard_take || protect_profit || trend_failure || market_shock || time_exit",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "trend_pullback_breakout_short_close_v1",
+      "type": "close_short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\n\n// Bound the loss and realize an extended move.\nlet hard_stop = mark >= entry + atr * 2.2 || ROI <= -15;\nlet hard_take = mark <= entry - atr * 4.0;\n\n// Protect a developed profit when the 15m trend reverses.\nlet profit_ready = mark <= entry - atr * 1.5;\nlet reversal_15m = (ema_15m_9.Data[1] > ema_15m_21.Data[1] && ema_15m_9.Data[2] <= ema_15m_21.Data[2]) || kline_15m.Close[1] > ema_15m_21.Data[1];\nlet protect_profit = profit_ready && reversal_15m;\n\n// Exit a failed setup or a broad-market shock.\nlet trend_failure = ema_1h_9.Data[1] > ema_1h_21.Data[1] && kline_1h.Close[1] > ema_1h_21.Data[1] && ROI <= 0;\nlet market_shock = BasicTrend > 4 && ROI < 0;\n\n// Time exit applies only to local positions with a recorded create time.\nlet time_exit = Position.CreateTime > 0 && (NowTime - Position.CreateTime) / 1000 > 129600 && abs(mark - entry) < atr;\n\nhard_stop || hard_take || protect_profit || trend_failure || market_shock || time_exit",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
