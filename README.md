@@ -16,6 +16,8 @@
 
 - 钉钉
 ![钉钉推送1](./img/zh/dingding_future1.jpg)
+![钉钉推送2](./img/zh/dingding3.jpg)
+![钉钉推送3](./img/zh/dingding4.jpg)
 
 - slack
 ![slack](./img/zh/listen_slack.jpg)
