@@ -25,7 +25,40 @@ type TestStrategyResultController struct {
 
 type TestStrategyResultsTableList struct {
 	models.TestStrategyResults
-	NowPrice string `orm:"column(now_price)" json:"now_price"`
+	NowPrice      string `orm:"column(now_price)" json:"now_price"`
+	ProfitPercent string `json:"profit_percent"`
+}
+
+func calculateTestStrategyResultMetrics(result *TestStrategyResultsTableList) {
+	entryPrice, errEntry := strconv.ParseFloat(result.Price, 64)
+	positionAmt, errAmount := strconv.ParseFloat(result.PositionAmt, 64)
+	closePrice, _ := strconv.ParseFloat(result.ClosePrice, 64)
+	if errEntry != nil || errAmount != nil {
+		result.CloseProfit = "0.000"
+		result.ProfitPercent = "0.000"
+		return
+	}
+
+	effectivePrice := closePrice
+	if effectivePrice <= 0 {
+		currentPrice, errCurrent := strconv.ParseFloat(result.NowPrice, 64)
+		if errCurrent != nil {
+			result.CloseProfit = "0.000"
+			result.ProfitPercent = "0.000"
+			return
+		}
+		effectivePrice = currentPrice
+	}
+	if effectivePrice <= 0 || positionAmt == 0 {
+		result.CloseProfit = "0.000"
+		result.ProfitPercent = "0.000"
+		return
+	}
+
+	profit := (effectivePrice - entryPrice) * positionAmt
+	profitPercent := profit / (math.Abs(positionAmt) * effectivePrice) * float64(result.Leverage) * 100
+	result.CloseProfit = strconv.FormatFloat(profit, 'f', 3, 64)
+	result.ProfitPercent = strconv.FormatFloat(profitPercent, 'f', 3, 64)
 }
 
 type testStrategyResultSearchParams struct {
@@ -130,6 +163,9 @@ func (ctrl *TestStrategyResultController) Get() {
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
+	}
+	for index := range results {
+		calculateTestStrategyResultMetrics(&results[index])
 	}
 	err = o.Raw(countSql, args...).QueryRow(&total)
 	if err != nil {
