@@ -1,0 +1,81 @@
+{
+  "name": "短线多市场状态自适应 v1",
+  "technology": {
+    "ma": [],
+    "ema": [],
+    "macd": [],
+    "adx": [],
+    "mfi": [
+      {
+        "name": "mfi_15m_14",
+        "kline_interval": "15m",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [
+      {
+        "name": "kdj_15m_9_3_3",
+        "kline_interval": "15m",
+        "period": 9,
+        "k_period": 3,
+        "d_period": 3,
+        "enable": true
+      }
+    ],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_15m_14",
+        "kline_interval": "15m",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "supertrend": [
+      {
+        "name": "supertrend_1h_10_3",
+        "kline_interval": "1h",
+        "period": 10,
+        "multiplier": 3,
+        "enable": true
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "multi_regime_adaptive_long_open_v1",
+      "type": "long",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet atr = atr_15m_14.Data[0];\nlet bullish_candle = kline_15m.Close[0] > kline_15m.Open[0] && kline_15m.Close[0] > kline_15m.Close[1];\nlet bullish_turn = kdj_15m_9_3_3.K[0] > kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] <= kdj_15m_9_3_3.D[1];\nlet flow_up = mfi_15m_14.Data[0] > mfi_15m_14.Data[1];\nlet no_chase = atr > 0 && abs(kline_15m.Close[0] - kline_15m.Close[1]) <= atr * 0.8 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr * 1.1;\n\nlet trend_entry = (MarketCondition == \"1\" || MarketCondition == \"2\" || MarketCondition == \"8\") && BasicTrend >= 0.3 && supertrend_1h_10_3.Trend[0] == 1 && kline_1h.Close[0] > supertrend_1h_10_3.Data[0] && bullish_turn && kdj_15m_9_3_3.J[0] >= 15 && kdj_15m_9_3_3.J[0] <= 60 && flow_up && mfi_15m_14.Data[0] >= 35 && mfi_15m_14.Data[0] <= 70 && bullish_candle && no_chase;\nlet divergence_entry = MarketCondition == \"6\" && BasicTrend >= -1.5 && supertrend_1h_10_3.Trend[0] == 1 && bullish_turn && kdj_15m_9_3_3.J[0] >= 10 && kdj_15m_9_3_3.J[0] <= 45 && flow_up && mfi_15m_14.Data[0] >= 40 && mfi_15m_14.Data[0] <= 60 && bullish_candle && no_chase;\nlet range_entry = (MarketCondition == \"3\" || MarketCondition == \"11\") && abs(BasicTrend) <= 1 && bullish_turn && kdj_15m_9_3_3.J[1] <= 20 && kdj_15m_9_3_3.J[0] <= 40 && flow_up && mfi_15m_14.Data[0] <= 45 && bullish_candle && no_chase;\nlet high_vol_breakout = MarketCondition == \"10\" && BasicTrend >= 0.5 && supertrend_1h_10_3.Trend[0] == 1 && atr > atr_15m_14.Data[1] && kline_15m.Close[0] > kline_15m.High[1] && kline_15m.Close[0] > kline_15m.High[2] && kline_15m.Close[0] > kline_15m.High[3] && mfi_15m_14.Data[0] > 55 && mfi_15m_14.Data[0] <= 80 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr * 1.5;\n\nwarmup_ok && (trend_entry || divergence_entry || range_entry || high_vol_breakout)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "multi_regime_adaptive_short_open_v1",
+      "type": "short",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet atr = atr_15m_14.Data[0];\nlet bearish_candle = kline_15m.Close[0] < kline_15m.Open[0] && kline_15m.Close[0] < kline_15m.Close[1];\nlet bearish_turn = kdj_15m_9_3_3.K[0] < kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] >= kdj_15m_9_3_3.D[1];\nlet flow_down = mfi_15m_14.Data[0] < mfi_15m_14.Data[1];\nlet no_chase = atr > 0 && abs(kline_15m.Close[0] - kline_15m.Close[1]) <= atr * 0.8 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr * 1.1;\n\nlet trend_entry = (MarketCondition == \"4\" || MarketCondition == \"5\" || MarketCondition == \"9\") && BasicTrend <= -0.3 && supertrend_1h_10_3.Trend[0] == -1 && kline_1h.Close[0] < supertrend_1h_10_3.Data[0] && bearish_turn && kdj_15m_9_3_3.J[0] >= 40 && kdj_15m_9_3_3.J[0] <= 85 && flow_down && mfi_15m_14.Data[0] >= 30 && mfi_15m_14.Data[0] <= 65 && bearish_candle && no_chase;\nlet divergence_entry = MarketCondition == \"7\" && BasicTrend <= 1.5 && supertrend_1h_10_3.Trend[0] == -1 && bearish_turn && kdj_15m_9_3_3.J[0] >= 55 && kdj_15m_9_3_3.J[0] <= 90 && flow_down && mfi_15m_14.Data[0] >= 40 && mfi_15m_14.Data[0] <= 60 && bearish_candle && no_chase;\nlet range_entry = (MarketCondition == \"3\" || MarketCondition == \"11\") && abs(BasicTrend) <= 1 && bearish_turn && kdj_15m_9_3_3.J[1] >= 80 && kdj_15m_9_3_3.J[0] >= 60 && flow_down && mfi_15m_14.Data[0] >= 55 && bearish_candle && no_chase;\nlet high_vol_breakout = MarketCondition == \"10\" && BasicTrend <= -0.5 && supertrend_1h_10_3.Trend[0] == -1 && atr > atr_15m_14.Data[1] && kline_15m.Close[0] < kline_15m.Low[1] && kline_15m.Close[0] < kline_15m.Low[2] && kline_15m.Close[0] < kline_15m.Low[3] && mfi_15m_14.Data[0] >= 20 && mfi_15m_14.Data[0] < 45 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr * 1.5;\n\nwarmup_ok && (trend_entry || divergence_entry || range_entry || high_vol_breakout)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "multi_regime_adaptive_long_close_v1",
+      "type": "close_long",
+      "code": "let atr = atr_15m_14.Data[0];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\nlet reversal = (kdj_15m_9_3_3.K[0] < kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] >= kdj_15m_9_3_3.D[1]) || (mfi_15m_14.Data[0] < 50 && mfi_15m_14.Data[0] < mfi_15m_14.Data[1]);\nlet hard_stop = ROI <= -7;\nlet trend_take = (MarketCondition == \"1\" || MarketCondition == \"2\" || MarketCondition == \"6\" || MarketCondition == \"8\") && (ROI >= 11 || (ROI >= 7 && reversal && mark >= entry + atr * 2));\nlet range_take = (MarketCondition == \"3\" || MarketCondition == \"11\") && ROI >= 7;\nlet high_vol_take = MarketCondition == \"10\" && (ROI >= 13 || (ROI >= 7 && reversal && mark >= entry + atr * 3));\nlet adverse_market_take = (MarketCondition == \"4\" || MarketCondition == \"5\" || MarketCondition == \"7\" || MarketCondition == \"9\") && ROI >= 7;\n\nhard_stop || trend_take || range_take || high_vol_take || adverse_market_take",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "multi_regime_adaptive_short_close_v1",
+      "type": "close_short",
+      "code": "let atr = atr_15m_14.Data[0];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\nlet reversal = (kdj_15m_9_3_3.K[0] > kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] <= kdj_15m_9_3_3.D[1]) || (mfi_15m_14.Data[0] > 50 && mfi_15m_14.Data[0] > mfi_15m_14.Data[1]);\nlet hard_stop = ROI <= -7;\nlet trend_take = (MarketCondition == \"4\" || MarketCondition == \"5\" || MarketCondition == \"7\" || MarketCondition == \"9\") && (ROI >= 11 || (ROI >= 7 && reversal && mark <= entry - atr * 2));\nlet range_take = (MarketCondition == \"3\" || MarketCondition == \"11\") && ROI >= 7;\nlet high_vol_take = MarketCondition == \"10\" && (ROI >= 13 || (ROI >= 7 && reversal && mark <= entry - atr * 3));\nlet adverse_market_take = (MarketCondition == \"1\" || MarketCondition == \"2\" || MarketCondition == \"6\" || MarketCondition == \"8\") && ROI >= 7;\n\nhard_stop || trend_take || range_take || high_vol_take || adverse_market_take",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
