@@ -4,12 +4,17 @@
     "custom-strategy": {
       "source": ".agents/skills/custom-strategy",
       "sourceType": "local",
-      "computedHash": "efbecb0d99e5451f"
+      "computedHash": "cd2d94d973b6dc94"
     },
     "go-binance-beego-cleanup-task": {
       "source": "/Users/zhz/.skillmax/drafts/go-binance-beego-cleanup-task",
       "sourceType": "local",
       "computedHash": "07b4303aa8b27f04"
+    },
+    "go-binance-mcp-http-api-mirror": {
+      "source": ".agents/skills/go-binance-mcp-http-api-mirror",
+      "sourceType": "local",
+      "computedHash": "775356a760d7a4d5"
     }
   }
 }

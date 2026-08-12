@@ -32,8 +32,8 @@ func (ctrl *FuturesLiquidationOrderController) Get() {
 	if limit <= 0 {
 		limit = 20
 	}
-	if limit > 500 {
-		limit = 500
+	if limit > 10000 {
+		limit = 10000
 	}
 	offset := (page - 1) * limit
 

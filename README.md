@@ -446,7 +446,7 @@ bee pack -be GOOS=windows
 
 ### AI TODO
 - [X] ai 写自定义策略的 skill
-- [ ] mcp 服务，提供当前除了 登录 之外的所有接口，提供 通知 服务，使用 token 来使用(需要一个管理 token 的页面, token 需要自定义有效期时间)
+- [X] mcp 服务，通过 HTTP 提供白名单业务接口，使用登录 token 鉴权
 - [ ] ai 自动判定当前市场的大环境
 - [ ] ai 驱动的监听报警和自动买卖
 - [ ] ai 驱动的问币策略

@@ -78,4 +78,5 @@ slack_channel_id = ""
 links = [{"url": "url1", "title": "title1"}]
 
 [mcp]
+# MCP 仅使用 Streamable HTTP，地址为当前 Web 服务的 /mcp，使用登录接口返回的 Bearer Token 鉴权
 mcp_enable = 0
