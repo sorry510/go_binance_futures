@@ -91,8 +91,8 @@ endpoint = "/v1/chat/completions"
 api_key = ""
 model = ""
 timeout_seconds = 60
-max_tokens = 1024
-temperature = 0.2
+max_tokens = 2048
+temperature = 0.7
 proxy_url = ""
 # JSON object, example: {"OpenAI-Organization":"org_xxx"}
 headers = {}
@@ -103,8 +103,8 @@ endpoint = "/v1/chat/completions"
 api_key = ""
 model = ""
 timeout_seconds = 60
-max_tokens = 1024
-temperature = 0.2
+max_tokens = 2048
+temperature = 0.7
 proxy_url = ""
 # JSON object for provider-specific headers
 headers = {}
@@ -116,8 +116,8 @@ api_key = ""
 api_version = "2023-06-01"
 model = ""
 timeout_seconds = 60
-max_tokens = 1024
-temperature = 0.2
+max_tokens = 2048
+temperature = 0.7
 proxy_url = ""
 headers = {}
 
