@@ -131,11 +131,20 @@ func (ctrl *IndexController) UpdateMarketCondition() {
 		ctrl.Ctx.Resp(utils.ResJson(500, nil, "internal error"))
 		return
 	}
-	feature.UpdateMarketCondition(&config)
+	result, err := feature.UpdateMarketCondition(&config)
+	if err != nil {
+		logs.Error("UpdateMarketCondition:", err.Error())
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, "internal error"))
+		return
+	}
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
 		"data": map[string]interface{} {
-			"marketCondition": config.MarketCondition,
+			"marketCondition": result.MarketCondition,
+			"marketConditionName": result.Name,
+			"source": result.Source,
+			"confidence": result.Confidence,
+			"reason": result.Reason,
 		},
 		"msg": "success",
 	})
