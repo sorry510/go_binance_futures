@@ -1,0 +1,81 @@
+{
+  "name": "短线市场过滤回调反转 v2",
+  "technology": {
+    "ma": [],
+    "ema": [],
+    "macd": [],
+    "adx": [],
+    "mfi": [
+      {
+        "name": "mfi_15m_14",
+        "kline_interval": "15m",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [
+      {
+        "name": "kdj_15m_9_3_3",
+        "kline_interval": "15m",
+        "period": 9,
+        "k_period": 3,
+        "d_period": 3,
+        "enable": true
+      }
+    ],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_15m_14",
+        "kline_interval": "15m",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "supertrend": [
+      {
+        "name": "supertrend_1h_10_3",
+        "kline_interval": "1h",
+        "period": 10,
+        "multiplier": 3,
+        "enable": true
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "market_filtered_pullback_long_open_v2",
+      "type": "long",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet market_ok = (MarketCondition == \"1\" || MarketCondition == \"2\" || MarketCondition == \"8\") && BasicTrend >= 0.3;\nlet trend_ok = supertrend_1h_10_3.Trend[0] == 1 && kline_1h.Close[0] > supertrend_1h_10_3.Data[0];\nlet oscillator_turn = kdj_15m_9_3_3.K[0] > kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] <= kdj_15m_9_3_3.D[1] && kdj_15m_9_3_3.J[0] >= 15 && kdj_15m_9_3_3.J[0] <= 55;\nlet flow_ok = mfi_15m_14.Data[0] > mfi_15m_14.Data[1] && mfi_15m_14.Data[0] >= 35 && mfi_15m_14.Data[0] <= 65;\nlet atr = atr_15m_14.Data[0];\nlet price_recovery = kline_15m.Close[0] > kline_15m.Open[0] && kline_15m.Close[0] > kline_15m.Close[1];\nlet no_chase = atr > 0 && abs(kline_15m.Close[0] - kline_15m.Close[1]) <= atr * 0.7 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr;\n\nwarmup_ok && market_ok && trend_ok && oscillator_turn && flow_ok && price_recovery && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "market_filtered_pullback_short_open_v2",
+      "type": "short",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet market_ok = (MarketCondition == \"4\" || MarketCondition == \"5\" || MarketCondition == \"7\" || MarketCondition == \"9\") && BasicTrend <= -0.3;\nlet trend_ok = supertrend_1h_10_3.Trend[0] == -1 && kline_1h.Close[0] < supertrend_1h_10_3.Data[0];\nlet oscillator_turn = kdj_15m_9_3_3.K[0] < kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] >= kdj_15m_9_3_3.D[1] && kdj_15m_9_3_3.J[0] >= 45 && kdj_15m_9_3_3.J[0] <= 85;\nlet flow_ok = mfi_15m_14.Data[0] < mfi_15m_14.Data[1] && mfi_15m_14.Data[0] >= 35 && mfi_15m_14.Data[0] <= 65;\nlet atr = atr_15m_14.Data[0];\nlet price_rejection = kline_15m.Close[0] < kline_15m.Open[0] && kline_15m.Close[0] < kline_15m.Close[1];\nlet no_chase = atr > 0 && abs(kline_15m.Close[0] - kline_15m.Close[1]) <= atr * 0.7 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr;\n\nwarmup_ok && market_ok && trend_ok && oscillator_turn && flow_ok && price_rejection && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "market_filtered_pullback_long_close_v2",
+      "type": "close_long",
+      "code": "let atr = atr_15m_14.Data[0];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\nlet hard_stop = ROI <= -7;\nlet hard_take = ROI >= 10 || (ROI >= 7 && mark >= entry + atr * 3);\nlet oscillator_reverse = kdj_15m_9_3_3.K[0] < kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] >= kdj_15m_9_3_3.D[1];\nlet flow_reverse = mfi_15m_14.Data[0] < 50 && mfi_15m_14.Data[0] < mfi_15m_14.Data[1];\nlet protect_profit = ROI >= 7 && (oscillator_reverse || flow_reverse || supertrend_1h_10_3.Trend[0] == -1);\n\nhard_stop || hard_take || protect_profit",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "market_filtered_pullback_short_close_v2",
+      "type": "close_short",
+      "code": "let atr = atr_15m_14.Data[0];\nlet entry = Position.EntryPrice;\nlet mark = Position.MarkPrice;\nlet hard_stop = ROI <= -7;\nlet hard_take = ROI >= 10 || (ROI >= 7 && mark <= entry - atr * 3);\nlet oscillator_reverse = kdj_15m_9_3_3.K[0] > kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] <= kdj_15m_9_3_3.D[1];\nlet flow_reverse = mfi_15m_14.Data[0] > 50 && mfi_15m_14.Data[0] > mfi_15m_14.Data[1];\nlet protect_profit = ROI >= 7 && (oscillator_reverse || flow_reverse || supertrend_1h_10_3.Trend[0] == 1);\n\nhard_stop || hard_take || protect_profit",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
