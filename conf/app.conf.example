@@ -80,3 +80,65 @@ links = [{"url": "url1", "title": "title1"}]
 [mcp]
 # MCP 仅使用 Streamable HTTP，地址为当前 Web 服务的 /mcp，使用登录接口返回的 Bearer Token 鉴权
 mcp_enable = 0
+
+[llm]
+# openai, chatgpt, openai_compatible, anthropic, claude, claude_sdk, codex_sdk
+provider = openai_compatible
+
+[llm_openai]
+base_url = "https://api.openai.com"
+endpoint = "/v1/chat/completions"
+api_key = ""
+model = ""
+timeout_seconds = 60
+max_tokens = 2048
+temperature = 0.7
+proxy_url = ""
+# JSON object, example: {"OpenAI-Organization":"org_xxx"}
+headers = {}
+
+[llm_openai_compatible]
+base_url = "http://127.0.0.1:11434"
+endpoint = "/v1/chat/completions"
+api_key = ""
+model = ""
+timeout_seconds = 60
+max_tokens = 2048
+temperature = 0.7
+proxy_url = ""
+# JSON object for provider-specific headers
+headers = {}
+
+[llm_anthropic]
+base_url = "https://api.anthropic.com"
+endpoint = "/v1/messages"
+api_key = ""
+api_version = "2023-06-01"
+model = ""
+timeout_seconds = 60
+max_tokens = 2048
+temperature = 0.7
+proxy_url = ""
+headers = {}
+
+[llm_claude_sdk]
+command = "node"
+# JSON array; paths are resolved from working_dir
+args = ["llm/bridge/claude.mjs"]
+working_dir = "."
+api_key = ""
+model = ""
+timeout_seconds = 120
+# JSON object for additional child-process environment variables
+environment = {}
+
+[llm_codex_sdk]
+command = "node"
+# JSON array; paths are resolved from working_dir
+args = ["llm/bridge/codex.mjs"]
+working_dir = "."
+api_key = ""
+model = ""
+timeout_seconds = 120
+# JSON object for additional child-process environment variables
+environment = {}

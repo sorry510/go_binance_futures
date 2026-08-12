@@ -507,10 +507,18 @@ BasicTrend = 0.3
 
 ##### 市场趋势
 
+> 自动模式下，配置且可用的 LLM 会分析市场快照；LLM 不可用时回退到原有的 1–5 本地加权算法。
+
 ```
 MarketCondition = "1" // 强多头
 MarketCondition = "2" // 偏多头
 MarketCondition = "3" // 震荡
 MarketCondition = "4" // 偏空头
 MarketCondition = "5" // 强空头
+MarketCondition = "6" // 多头分化
+MarketCondition = "7" // 空头分化
+MarketCondition = "8" // 普涨
+MarketCondition = "9" // 普跌
+MarketCondition = "10" // 高波动震荡
+MarketCondition = "11" // 低波动盘整
 ```

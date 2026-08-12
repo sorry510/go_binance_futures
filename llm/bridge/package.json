@@ -1,0 +1,9 @@
+{
+  "name": "go-binance-futures-llm-bridges",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "latest",
+    "@openai/codex-sdk": "latest"
+  }
+}

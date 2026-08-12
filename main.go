@@ -177,8 +177,10 @@ func main() {
 	loopRun(updateSystemConfig, time.Second*2) // 每 2 秒更新一次系统配置信息
 	// 更新当前行情趋势
 	loopRun(func() {
-		feature.UpdateMarketCondition(&SystemConfig)
-	}, time.Minute*10) // 10分钟更新一次市场行情趋势
+		if _, err := feature.UpdateMarketCondition(&SystemConfig); err != nil {
+			logs.Error("UpdateMarketCondition:", err.Error())
+		}
+	}, time.Minute*60) // 60分钟更新一次市场行情趋势
 
 	// 自动追加币种 和 更新币种交易精度
 	go func() {
