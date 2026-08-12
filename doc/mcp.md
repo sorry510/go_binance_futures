@@ -172,3 +172,18 @@ mcp_enable = 1
 - MCP 内部调用会原样复用当前 MCP 请求的 `Authorization` 请求头。
 - 新增、更新、删除和批量启停工具会改变数据，调用前应确认参数与目标环境。
 - 不要在说明文档、日志或 MCP 对话中输出 Token、Binance Key、数据库密码等敏感信息。
+
+### 本地调试
+
+#### 安装 MCP Inspector
+```
+npm install -g @modelcontextprotocol/inspector
+```
+
+#### 开启调试
+```
+npx @modelcontextprotocol/inspector \
+  --server-url http://127.0.0.1:3333/mcp \
+  --transport http \
+  --header "Authorization: Bearer YOUR_TOKEN"
+```
