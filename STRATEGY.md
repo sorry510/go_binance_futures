@@ -305,7 +305,8 @@ BasicTrend = 0.3
 ```
 
 ##### Market Condition
->Manually set it on the homepage, the automatic logic has not been determined yet
+
+>In automatic mode, a configured and available LLM analyzes the market snapshot. If the LLM is unavailable, the original five-level local weighted algorithm is used.
 
 ```
 MarketCondition = "1" // strong bullish
@@ -313,4 +314,10 @@ MarketCondition = "2" // bullish
 MarketCondition = "3" // sideways
 MarketCondition = "4" // bearish
 MarketCondition = "5" // strong bearish
+MarketCondition = "6" // bullish divergence
+MarketCondition = "7" // bearish divergence
+MarketCondition = "8" // broad rise
+MarketCondition = "9" // broad decline
+MarketCondition = "10" // high-volatility sideways
+MarketCondition = "11" // low-volatility consolidation
 ```
