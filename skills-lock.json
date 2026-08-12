@@ -15,6 +15,11 @@
       "source": ".agents/skills/go-binance-mcp-http-api-mirror",
       "sourceType": "local",
       "computedHash": "775356a760d7a4d5"
+    },
+    "go-binance-test-result-display": {
+      "source": "/Users/zhz/.skillmax/drafts/go-binance-test-result-display",
+      "sourceType": "local",
+      "computedHash": "9ea59fb098fd311e"
     }
   }
 }
