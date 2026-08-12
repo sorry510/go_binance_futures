@@ -55,6 +55,8 @@ Include one enabled rule for each type unless the user narrows the request:
 
 Keep each expr program readable and make its last expression Boolean. Use short `let` bindings, valid array indexes, and no unnecessary loops over long ranges. Prefer one cohesive close rule per side because multiple close rules have OR semantics.
 
+Before finalizing close rules, compare every internal ROI trigger with the target symbols' outer `profit` and `loss` settings. The evaluator does not run the close expression while ROI is inside `(-loss, profit)`. Therefore a profit-protection trigger below `profit`, a setup-failure trigger near zero, or a stop whose magnitude is smaller than `loss` cannot fire at its intended level. Align the operational settings or redesign the thresholds, and report the required `profit/loss` values with the strategy.
+
 Do not claim that a rule is profitable or effective merely because it compiles. This project supports current-snapshot testing and forward simulation, not historical backtesting.
 
 ## Create the portable JSON
@@ -105,7 +107,7 @@ rtk bash .agents/skills/custom-strategy/scripts/validate_strategy.sh \
 
 Read `references/test-strategy-results.md` completely before deciding whether a tested strategy is effective or needs optimization.
 
-1. Query `test_strategy_results` read-only. Do not judge from the frontend's current-page profit total because it does not represent the complete filtered cohort.
+1. Query `test_strategy_results` read-only. Do not judge from the frontend's current-page profit total because it does not represent the complete filtered cohort. Record an `as_of` timestamp and fetch each live database cohort with one SELECT when possible. Do not combine pages collected while open rows are still being closed; if data changes during inspection, rerun the final metrics from a fresh single-statement snapshot.
 2. Select one exact strategy version by canonicalized `technology` and `strategy` snapshots plus the requested test window. Do not mix JSON formatting variants, revised rules, or different indicator configurations, and do not identify a cohort only by template name.
 3. Separate open rows where `close_price == "0"` from closed rows. Treat open rows as censored observations: report their count and age, but never count them as wins, losses, or realized profit.
 4. For closed rows, report sample count, wins/losses/breakeven, gross profit and loss, gross PnL, win rate, profit factor, expectancy, average and median margin return, median and p90 holding time, maximum closed-trade drawdown, and maximum losing streak. Segment at least by `LONG`/`SHORT`, symbol, and test period.

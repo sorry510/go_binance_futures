@@ -20,6 +20,7 @@ Use this reference to evaluate one exact custom-strategy version from `test_stra
 4. Keep closed and open rows separate.
 5. Split fallback exits from normal strategy exits.
 6. Report the number of malformed numeric rows and exclude them from calculated metrics.
+7. Compare the row or symbol `profit/loss` gates with every internal ROI exit threshold. Mark branches that cannot be reached at their intended ROI because the outer gate delays expression evaluation.
 
 The table has no template ID or template name. Exact JSON snapshots are the strategy-version identity available in the data.
 
@@ -53,6 +54,7 @@ Also show the same core metrics by side and symbol. Flag concentration when one 
 - `close_profit` excludes fees, funding, and additional close slippage. Never label gross PnL as net PnL.
 - The table does not record maximum adverse excursion, maximum favorable excursion, signal opportunities that did not open, or the internal close-condition branch that fired.
 - Results are affected by symbol enablement, scan order and frequency, open-position limits, notification cooldown, price availability, and the outer close gate.
+- The table is live: rows can move from open to closed during analysis. Record the snapshot time and obtain the final cohort with one database statement or a supported consistent read. Never merge changing paginated results into one verdict.
 - The frontend defaults to a paginated result set and its displayed profit sum covers only loaded rows. Query the full database cohort for evaluation.
 
 ## Decide and optimize
