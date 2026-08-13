@@ -12,6 +12,7 @@ import (
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
+	"go_binance_futures/webnotification"
 	"sync/atomic"
 	"time"
 
@@ -287,6 +288,8 @@ func main() {
 	go binance.StartMarketNoticeLogCleanupTask()
 	// 合约强平订单每日清理，删除 10 天前的数据
 	go binance.StartFuturesLiquidationOrderCleanupTask()
+	// 清理过期消息通知
+	go webnotification.StartNotificationCleanupTask()
 
 	// web
 	web.Run(":" + webPort)
