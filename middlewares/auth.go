@@ -15,6 +15,7 @@ var secretKey, _ = config.String("web::secret_key")
 
 var excludeRoutes = []string{
 	"/login",
+	"/ws/notifications",
 	"/pull",
 	"/pm2-log",
 	"/pm2-log2",
@@ -39,28 +40,36 @@ func JwtMiddleware(ctx *context.Context) {
 		return
     }
 
-    tokenString := authHeader[len("Bearer "):]
-
-    // 解析并验证Token
-    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-            return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-        }
-        return []byte(secretKey), nil
-    })
-	
+	claims, err := ValidateAuthorization(authHeader)
 	if err != nil {
         ctx.Redirect(http.StatusUnauthorized, "/" + webIndex + "/index.html")
         return
     }
+	ctx.Input.SetData("user", claims)
+}
 
-    // 验证通过，将claims放入上下文供后续处理器使用
-    if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-        ctx.Input.SetData("user", claims)
-    } else {
-        ctx.Redirect(http.StatusUnauthorized, "/" + webIndex + "/index.html")
-		return
-    }
+func ValidateAuthorization(authorization string) (jwt.MapClaims, error) {
+	authorization = strings.TrimSpace(authorization)
+	if !strings.HasPrefix(authorization, "Bearer ") {
+		return nil, fmt.Errorf("authorization bearer token is required")
+	}
+	tokenString := strings.TrimSpace(strings.TrimPrefix(authorization, "Bearer "))
+	if tokenString == "" || strings.HasPrefix(tokenString, "Bearer ") {
+		return nil, fmt.Errorf("invalid bearer token")
+	}
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, fmt.Errorf("invalid token claims")
 }
 
 func pathMatch(actualPath, pattern string) (bool, error) {
