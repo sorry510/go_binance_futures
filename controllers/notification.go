@@ -34,10 +34,27 @@ func (ctrl *NotificationController) Get() {
 	}
 
 	o := orm.NewOrm()
-	query := o.QueryTable(new(models.Notification))
-	if ctrl.GetString("unread_only") == "1" {
-		query = query.Filter("is_read", 0)
+	condition := orm.NewCondition()
+	if keyword := strings.TrimSpace(ctrl.GetString("keyword")); keyword != "" {
+		keywordCondition := orm.NewCondition().Or("title__icontains", keyword).Or("content__icontains", keyword)
+		condition = condition.AndCond(keywordCondition)
 	}
+	if module := strings.TrimSpace(ctrl.GetString("module")); module != "" {
+		condition = condition.And("module", module)
+	}
+	if isRead := strings.TrimSpace(ctrl.GetString("is_read")); isRead == "0" || isRead == "1" {
+		readStatus, _ := strconv.Atoi(isRead)
+		condition = condition.And("is_read", readStatus)
+	} else if ctrl.GetString("unread_only") == "1" {
+		condition = condition.And("is_read", 0)
+	}
+	if startTime, err := strconv.ParseInt(ctrl.GetString("start_time"), 10, 64); err == nil && startTime > 0 {
+		condition = condition.And("create_time__gte", startTime)
+	}
+	if endTime, err := strconv.ParseInt(ctrl.GetString("end_time"), 10, 64); err == nil && endTime > 0 {
+		condition = condition.And("create_time__lte", endTime)
+	}
+	query := o.QueryTable(new(models.Notification)).SetCond(condition)
 	total, err := query.Count()
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))

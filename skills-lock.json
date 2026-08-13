@@ -24,7 +24,7 @@
     "go-binance-web-notification": {
       "source": ".agents/skills/go-binance-web-notification",
       "sourceType": "local",
-      "computedHash": "9411ad4257b51ea0"
+      "computedHash": "5ed67002c77cf88a"
     }
   }
 }
