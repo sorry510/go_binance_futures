@@ -48,9 +48,12 @@ func GetNotifyConfig(pusher Pusher) (notifyConfig models.NotifyConfig) {
 	o.QueryTable("notify_config").
 		Filter("module", moduleName).
 		Filter("channel", notification_channel).
-		Filter("enable", 1).
 		OrderBy("-id").
 		One(&notifyConfig)
 
 	return notifyConfig
+}
+
+func IsModulePushEnabled(notifyConfig models.NotifyConfig) bool {
+	return notifyConfig.ID == 0 || notifyConfig.Enable == 1
 }
