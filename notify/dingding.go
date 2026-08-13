@@ -45,8 +45,11 @@ func DingDingApi(content string, pusher Pusher) {
   }
   dingding_token := g_dingding_token
   dingding_word := g_dingding_word
-	// 放到单独执行，避免主进程阻塞(没有 block 程序时不会执行)
+  // 放到单独执行，避免主进程阻塞(没有 block 程序时不会执行)
   notifyConfig := GetNotifyConfig(pusher)
+  if !IsModulePushEnabled(notifyConfig) {
+    return
+  }
   if notifyConfig.DingDingToken != "" {
     // 读取模块配置信息，覆盖全局
     dingding_token = notifyConfig.DingDingToken

@@ -1,7 +1,7 @@
 ---
 name: go-binance-web-notification
 description: Implement and verify persisted browser notifications with authenticated WebSocket delivery across go_binance_futures and go_binance_futrues_new_ui.
-version: 1.0.0
+version: 1.0.1
 ---
 # Go Binance Web Notification
 
@@ -18,7 +18,7 @@ Use this skill when adding or changing browser notification persistence, real-ti
 
 1. Define the ORM model and explicitly register it in `main.go` so `RunSyncdb` creates or updates the table at startup.
 2. Keep notification persistence separate from WebSocket fan-out. Insert first; broadcast only after a successful insert.
-3. Reuse the existing notification producers rather than duplicating business rules. Audit their call graph before choosing the persistence hook. In this project every logical message calls both DingDing and Slack, while some call only DingDing, so publish only from `DingDingApi`; publishing from both channel functions creates duplicate rows.
+3. Reuse the existing notification producers rather than duplicating business rules. Audit their call graph before choosing the persistence hook. This project selects exactly one `Pusher` implementation through `GetNotifyChannel`, so publish from both `DingDingApi` and `SlackApi`; only the selected implementation runs for a logical message.
 4. Implement a bounded WebSocket client send queue, ping/pong deadlines, unregister on disconnect, and one shared hub.
 5. Expose paginated history, unread count, read-one, read-all, and WebSocket routes. Put the static read-all route before the parameter route.
 6. Browser WebSocket clients cannot set an Authorization header. Accept the existing `Bearer <jwt>` value through the `token` query parameter and validate it inside the WebSocket controller. Excluding the WS route from header middleware is safe only when the controller performs this validation before upgrading. Reject malformed or doubled Bearer prefixes.
@@ -43,3 +43,9 @@ Use this skill when adding or changing browser notification persistence, real-ti
 - Remove only artifacts created by the verification run. Preserve unrelated worktree changes.
 - Finish with `git diff --check` in both repositories and `git diff -- conf/app.conf` in the backend.
 
+## Retention, search, and module switches
+
+- Keep browser notifications for 30 days. Run cleanup once at task startup and every 6 hours afterwards; delete rows whose `create_time` is strictly before the cutoff.
+- A normal history page should support title/content keyword, module, read status, start/end time, pagination, read-one, and read-all, with Chinese and English labels.
+- `notify_config.enable` is the module's external-channel switch. Query the latest active-channel row without filtering by `enable`; no row means enabled by default, while an existing row with `enable = 0` must return before DingTalk or Slack network I/O. Web persistence must happen before this return.
+- On create, distinguish an omitted `enable` field from an explicit zero: omitted defaults to enabled, explicit zero remains disabled.
