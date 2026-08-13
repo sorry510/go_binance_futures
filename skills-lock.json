@@ -20,6 +20,11 @@
       "source": "/Users/zhz/.skillmax/drafts/go-binance-test-result-display",
       "sourceType": "local",
       "computedHash": "9ea59fb098fd311e"
+    },
+    "go-binance-web-notification": {
+      "source": ".agents/skills/go-binance-web-notification",
+      "sourceType": "local",
+      "computedHash": "9411ad4257b51ea0"
     }
   }
 }

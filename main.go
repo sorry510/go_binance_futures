@@ -79,6 +79,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.NotifyConfig))
 	orm.RegisterModel(new(models.FuturesMarketNoticeLog))
 	orm.RegisterModel(new(models.FuturesLiquidationOrder))
+	orm.RegisterModel(new(models.Notification))
 
 	setDriver(driver) // 设置数据库驱动
 	syncDb()          // 同步数据库
