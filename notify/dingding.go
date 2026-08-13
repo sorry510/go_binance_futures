@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_binance_futures/lang"
+	"go_binance_futures/webnotification"
 	"io"
 	"net/http"
 
@@ -39,10 +40,16 @@ type DingDingApiMarkDownData struct {
 // 钉钉通知, 频率限制 1分钟20次
 // https://open.dingtalk.com/document/orgapp/the-robot-sends-a-group-message
 func DingDingApi(content string, pusher Pusher) {
+  if _, err := webnotification.Publish(pusher.GetModuleName(), content); err != nil {
+    logs.Error("save web notification error:", err)
+  }
   dingding_token := g_dingding_token
   dingding_word := g_dingding_word
-	// 放到单独执行，避免主进程阻塞(没有 block 程序时不会执行)
+  // 放到单独执行，避免主进程阻塞(没有 block 程序时不会执行)
   notifyConfig := GetNotifyConfig(pusher)
+  if !IsModulePushEnabled(notifyConfig) {
+    return
+  }
   if notifyConfig.DingDingToken != "" {
     // 读取模块配置信息，覆盖全局
     dingding_token = notifyConfig.DingDingToken

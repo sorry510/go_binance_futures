@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_binance_futures/lang"
+	"go_binance_futures/webnotification"
 	"io"
 	"net/http"
 
 	"github.com/beego/beego/v2/core/config"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 var g_slack_token, _ = config.String("slack::slack_token")
@@ -38,10 +40,16 @@ type Text struct {
 }
 
 func SlackApi(content string, pusher Pusher) {
+  if _, err := webnotification.Publish(pusher.GetModuleName(), content); err != nil {
+    logs.Error("save web notification error:", err)
+  }
   slack_token := g_slack_token
   slack_channel_id := g_slack_channel_id
 	// 放到单独执行，避免主进程阻塞(未知原因突然不能在 goroutine 中执行了)
 	notifyConfig := GetNotifyConfig(pusher)
+	if !IsModulePushEnabled(notifyConfig) {
+		return
+	}
 	if notifyConfig.SlackToken != "" {
 		// 读取模块配置信息，覆盖全局
 		slack_token = notifyConfig.SlackToken
