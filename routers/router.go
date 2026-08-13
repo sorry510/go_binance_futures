@@ -14,6 +14,10 @@ func init() {
 	web.Router("/update-market-condition", &controllers.IndexController{}, "post:UpdateMarketCondition") // 手动触发更新市场状态
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit") // 更新和删除
+	web.Router("/notifications", &controllers.NotificationController{}, "get:Get") // 网页通知列表
+	web.Router("/notifications/read-all", &controllers.NotificationController{}, "put:ReadAll") // 全部标记为已读
+	web.Router("/notifications/:id/read", &controllers.NotificationController{}, "put:Read") // 标记单条通知为已读
+	web.Router("/ws/notifications", &controllers.NotificationWebSocketController{}, "get:Get") // 网页通知 WebSocket
 
 	web.Router("/features", &controllers.FeatureController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/features-options", &controllers.FeatureController{}, "get:GetOptions") // 列表查询
