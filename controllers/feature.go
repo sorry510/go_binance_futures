@@ -255,6 +255,12 @@ func (ctrl *FeatureController) Delete() {
 func (ctrl *FeatureController) Post() {
 	symbols := new(models.Symbols)
 	ctrl.BindJSON(&symbols)
+	symbols.Symbol = strings.ToUpper(strings.TrimSpace(symbols.Symbol))
+	symbols.Type = utils.FuturesSymbolType(symbols.Symbol, "")
+	if symbols.Type == "" {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "unsupported futures symbol quote asset"))
+		return
+	}
 	symbols.PercentChange = 0
 	symbols.Close = "0"
 	symbols.Open = "0"
