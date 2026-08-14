@@ -687,10 +687,38 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 	}
 }
 
+// BackfillEmptyFuturesSymbolTypes fills supported quote types for existing symbols.
+func BackfillEmptyFuturesSymbolTypes() error {
+	o := orm.NewOrm()
+	var symbols []models.Symbols
+	if _, err := o.QueryTable("symbols").All(&symbols, "ID", "Symbol", "Type"); err != nil {
+		return err
+	}
+
+	for _, symbol := range symbols {
+		if strings.TrimSpace(symbol.Type) != "" {
+			continue
+		}
+		symbolType := utils.FuturesSymbolType(symbol.Symbol, "")
+		if symbolType == "" {
+			continue
+		}
+		if _, err := o.QueryTable("symbols").Filter("ID", symbol.ID).Update(orm.Params{"type": symbolType}); err != nil {
+			return fmt.Errorf("update symbol %s type: %w", symbol.Symbol, err)
+		}
+	}
+
+	return nil
+}
+
 // 更新币种的交易精度和插入新币
 func UpdateSymbolsTradePrecision() {
-	res, err := binance.GetExchangeInfo()
+	if err := BackfillEmptyFuturesSymbolTypes(); err != nil {
+		logs.Error("backfill empty futures symbol types error:", err)
+	}
+
 	o := orm.NewOrm()
+	res, err := binance.GetExchangeInfo()
 	if err == nil {
 		logs.Info("Binance API rate one minute limit: " + strconv.FormatInt(res.RateLimits[0].Limit, 10))
 		logs.Info("auto add or update futures symbols trade precision")
@@ -721,20 +749,14 @@ func UpdateSymbolsTradePrecision() {
 				stepSize = lotSizeFilter.StepSize
 			}
 
-			suffixType := ""
-			if strings.HasSuffix(symbol.Symbol, "USDT") {
-				suffixType = "USDT"
-			} else if strings.HasSuffix(symbol.Symbol, "FDUSD") {
-				suffixType = "FDUSD"
-			} else if strings.HasSuffix(symbol.Symbol, "USDC") {
-				suffixType = "USDC"
-			}
+			symbolType := utils.FuturesSymbolType(symbol.Symbol, symbol.QuoteAsset)
 
-			if suffixType != "" { // 只处理USDT, FDUSD, USDC结尾的币种
+			if symbolType != "" { // 只处理USDT, FDUSD, USDC结尾的币种
 				updates = append(updates, futuresSymbolPrecisionUpdate{
 					Symbol:   symbol.Symbol,
 					TickSize: tickSize,
 					StepSize: stepSize,
+					Type:     symbolType,
 				})
 
 				if _, ok := existingSymbolMap[symbol.Symbol]; !ok {
@@ -756,7 +778,7 @@ func UpdateSymbolsTradePrecision() {
 						Technology:     "",
 						Strategy:       "",
 						StrategyType:   "global",
-						Type:           suffixType,
+						Type:           symbolType,
 						PercentChange:  0.0,
 						Close:          "0",
 						Open:           "0",
@@ -812,6 +834,7 @@ type futuresSymbolPrecisionUpdate struct {
 	Symbol   string
 	TickSize string
 	StepSize string
+	Type     string
 }
 
 type futuresSymbolInsert struct {
@@ -851,16 +874,16 @@ func buildBatchUpdateSymbolsTradePrecisionSQL(items []futuresSymbolPrecisionUpda
 	}
 
 	selectParts := make([]string, 0, len(items))
-	args := make([]interface{}, 0, len(items)*3)
+	args := make([]interface{}, 0, len(items)*4)
 	for _, item := range items {
-		selectParts = append(selectParts, "SELECT ? AS symbol, ? AS tickSize, ? AS stepSize")
-		args = append(args, item.Symbol, item.TickSize, item.StepSize)
+		selectParts = append(selectParts, "SELECT ? AS symbol, ? AS tickSize, ? AS stepSize, ? AS type")
+		args = append(args, item.Symbol, item.TickSize, item.StepSize, item.Type)
 	}
 
 	query := fmt.Sprintf(
 		"UPDATE `symbols` AS s "+
 			"JOIN (%s) AS v ON s.symbol = v.symbol "+
-			"SET s.tickSize = v.tickSize, s.stepSize = v.stepSize",
+			"SET s.tickSize = v.tickSize, s.stepSize = v.stepSize, s.type = v.type",
 		strings.Join(selectParts, " UNION ALL "),
 	)
 

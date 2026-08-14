@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/utils"
 	"sort"
 	"strconv"
 	"strings"
@@ -598,13 +599,9 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 	args := make([]interface{}, 0, len(tickers)*28)
 	for _, ticker := range tickers {
 		// logs.Info("ws symbol:", ticker.Symbol, "closePrice:", ticker.ClosePrice)
-		suffixType := ""
-		if strings.HasSuffix(ticker.Symbol, "USDT") {
-			suffixType = "USDT"
-		} else if strings.HasSuffix(ticker.Symbol, "FDUSD") {
-			suffixType = "FDUSD"
-		} else if strings.HasSuffix(ticker.Symbol, "USDC") {
-			suffixType = "USDC"
+		symbolType := utils.FuturesSymbolType(ticker.Symbol, "")
+		if symbolType == "" {
+			continue
 		}
 
 		valueParts = append(valueParts, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
@@ -636,8 +633,11 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 			"global",
 			0,
 			0,
-			suffixType,
+			symbolType,
 		)
+	}
+	if len(valueParts) == 0 {
+		return "", nil
 	}
 
 	query := fmt.Sprintf(
@@ -656,7 +656,8 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 			"`baseVolume` = VALUES(`baseVolume`), "+
 			"`quoteVolume` = VALUES(`quoteVolume`), "+
 			"`closeQty` = VALUES(`closeQty`), "+
-			"`tradeCount` = VALUES(`tradeCount`)",
+			"`tradeCount` = VALUES(`tradeCount`), "+
+			"`type` = VALUES(`type`)",
 		strings.Join(valueParts, ", "),
 	)
 	return query, args
