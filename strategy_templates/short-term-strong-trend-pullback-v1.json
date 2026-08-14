@@ -1,0 +1,81 @@
+{
+  "name": "短线强趋势回调确认 v1",
+  "technology": {
+    "ma": [],
+    "ema": [],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_1h_14",
+        "kline_interval": "1h",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [
+      {
+        "name": "kdj_15m_9_3_3",
+        "kline_interval": "15m",
+        "period": 9,
+        "k_period": 3,
+        "d_period": 3,
+        "enable": true
+      }
+    ],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_15m_14",
+        "kline_interval": "15m",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "supertrend": [
+      {
+        "name": "supertrend_1h_10_3",
+        "kline_interval": "1h",
+        "period": 10,
+        "multiplier": 3,
+        "enable": true
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "strong_trend_pullback_long_open_v1",
+      "type": "long",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet atr = atr_15m_14.Data[0];\nlet market_ok = BasicTrend >= 0.8;\nlet trend_ok = supertrend_1h_10_3.Trend[0] == 1 && supertrend_1h_10_3.Trend[1] == 1 && kline_1h.Close[0] > supertrend_1h_10_3.Data[0];\nlet strength_ok = adx_1h_14.ADX[0] >= 25 && adx_1h_14.ADX[0] >= adx_1h_14.ADX[1] && adx_1h_14.PlusDI[0] > adx_1h_14.MinusDI[0] * 1.15;\nlet pullback_turn = kdj_15m_9_3_3.K[0] > kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] <= kdj_15m_9_3_3.D[1] && kdj_15m_9_3_3.J[1] <= 40 && kdj_15m_9_3_3.J[0] >= 20 && kdj_15m_9_3_3.J[0] <= 55;\nlet price_confirm = kline_15m.Close[0] > kline_15m.Open[0] && kline_15m.Close[0] > kline_15m.Close[1];\nlet no_chase = atr > 0 && abs(kline_15m.Close[0] - kline_15m.Close[1]) <= atr * 0.65 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr;\n\nwarmup_ok && market_ok && trend_ok && strength_ok && pullback_turn && price_confirm && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "strong_trend_pullback_short_open_v1",
+      "type": "short",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet atr = atr_15m_14.Data[0];\nlet market_ok = BasicTrend <= -0.3;\nlet trend_ok = supertrend_1h_10_3.Trend[0] == -1 && supertrend_1h_10_3.Trend[1] == -1 && kline_1h.Close[0] < supertrend_1h_10_3.Data[0];\nlet strength_ok = adx_1h_14.ADX[0] >= 23 && adx_1h_14.ADX[0] >= adx_1h_14.ADX[1] && adx_1h_14.MinusDI[0] > adx_1h_14.PlusDI[0] * 1.1;\nlet pullback_turn = kdj_15m_9_3_3.K[0] < kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] >= kdj_15m_9_3_3.D[1] && kdj_15m_9_3_3.J[1] >= 60 && kdj_15m_9_3_3.J[0] >= 45 && kdj_15m_9_3_3.J[0] <= 80;\nlet price_confirm = kline_15m.Close[0] < kline_15m.Open[0] && kline_15m.Close[0] < kline_15m.Close[1];\nlet no_chase = atr > 0 && abs(kline_15m.Close[0] - kline_15m.Close[1]) <= atr * 0.65 && abs(kline_15m.Close[0] - kline_15m.Open[0]) <= atr;\n\nwarmup_ok && market_ok && trend_ok && strength_ok && pullback_turn && price_confirm && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "strong_trend_pullback_long_close_v1",
+      "type": "close_long",
+      "code": "let hard_stop = ROI <= -7;\nlet hard_take = ROI >= 10;\nlet oscillator_reverse = kdj_15m_9_3_3.K[0] < kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] >= kdj_15m_9_3_3.D[1];\nlet trend_reverse = supertrend_1h_10_3.Trend[0] == -1;\nlet protect_profit = ROI >= 7 && (oscillator_reverse || trend_reverse);\n\nhard_stop || hard_take || protect_profit",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "strong_trend_pullback_short_close_v1",
+      "type": "close_short",
+      "code": "let hard_stop = ROI <= -7;\nlet hard_take = ROI >= 10;\nlet oscillator_reverse = kdj_15m_9_3_3.K[0] > kdj_15m_9_3_3.D[0] && kdj_15m_9_3_3.K[1] <= kdj_15m_9_3_3.D[1];\nlet trend_reverse = supertrend_1h_10_3.Trend[0] == 1;\nlet protect_profit = ROI >= 7 && (oscillator_reverse || trend_reverse);\n\nhard_stop || hard_take || protect_profit",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

@@ -84,6 +84,9 @@ func registerModels() {
 
 	setDriver(driver) // 设置数据库驱动
 	syncDb()          // 同步数据库
+	if err := feature.BackfillEmptyFuturesSymbolTypes(); err != nil {
+		logs.Error("backfill empty futures symbol types error:", err)
+	}
 }
 
 func setDriver(d string) {
