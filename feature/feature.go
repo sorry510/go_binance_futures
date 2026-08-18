@@ -883,12 +883,25 @@ func buildBatchUpdateSymbolsTradePrecisionSQL(items []futuresSymbolPrecisionUpda
 		args = append(args, item.Symbol, item.TickSize, item.StepSize, item.Type)
 	}
 
-	query := fmt.Sprintf(
-		"UPDATE `symbols` AS s "+
-			"JOIN (%s) AS v ON s.symbol = v.symbol "+
-			"SET s.tickSize = v.tickSize, s.stepSize = v.stepSize, s.type = v.type",
-		strings.Join(selectParts, " UNION ALL "),
-	)
+	driver, _ := config.String("database::driver")
+	var query string
+	if driver == "mysql" {
+		query = fmt.Sprintf(
+			"UPDATE `symbols` AS s "+
+				"JOIN (%s) AS v ON s.symbol = v.symbol "+
+				"SET s.tickSize = v.tickSize, s.stepSize = v.stepSize, s.type = v.type",
+			strings.Join(selectParts, " UNION ALL "),
+		)
+	} else {
+		// SQLite (default) and Postgres do not support "UPDATE ... JOIN", they use "UPDATE ... FROM".
+		query = fmt.Sprintf(
+			"UPDATE `symbols` AS s "+
+				"SET tickSize = v.tickSize, stepSize = v.stepSize, type = v.type "+
+				"FROM (%s) AS v "+
+				"WHERE s.symbol = v.symbol",
+			strings.Join(selectParts, " UNION ALL "),
+		)
+	}
 
 	return query, args
 }
