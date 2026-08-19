@@ -124,12 +124,9 @@ Forward simulation is stronger evidence than compile and current-snapshot checks
 When the user explicitly requests a database write:
 
 1. Finish and validate the portable JSON file first.
-2. Check for a conflicting template name.
-3. Before every `INSERT` or `UPDATE`, compact the `technology` and `strategy` subtrees with `json.Compact`, `json.Marshal`, or `jq -c`. Never store pretty-printed JSON or structural line breaks and indentation in these columns.
-4. Use a transaction and prepared parameters to persist `name`, the compact JSON strings, and Unix-millisecond timestamps. Never concatenate JSON into an SQL statement.
-5. Reject a duplicate instead of overwriting it. Update an existing row only when the user specifically asks to replace or revise that row.
-6. Commit the transaction, then query the row back by name. Require both columns to be valid JSON and byte-for-byte equal to the compact inputs before reporting the row ID and success.
-7. Never assign the template to symbols, change `strategy_type`, enable trading, or place orders unless separately authorized.
+2. For DBX writes, read [references/dbx-strategy-template-persistence.md](references/dbx-strategy-template-persistence.md) completely and follow its exact-name check, compact UTF-8 hex encoding, direct `INSERT ... VALUES`, and strict readback workflow.
+3. Reject a duplicate instead of overwriting it. Update an existing row only when the user specifically asks to replace or revise that row.
+4. Never assign the template to symbols, change `strategy_type`, enable trading, or place orders unless separately authorized.
 
 ## Report runtime caveats
 
