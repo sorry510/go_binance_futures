@@ -1,0 +1,79 @@
+{
+  "name": "短线趋势突破确认 v2",
+  "technology": {
+    "ma": [],
+    "ema": [],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [
+      {
+        "name": "rsi_15m_14",
+        "kline_interval": "15m",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "kc": [],
+    "boll": [],
+    "donchian": [
+      {
+        "name": "donchian_15m_20",
+        "kline_interval": "15m",
+        "period": 20,
+        "enable": true
+      }
+    ],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "kline_interval": "1h",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "supertrend": [
+      {
+        "name": "supertrend_1h_10_3",
+        "kline_interval": "1h",
+        "period": 10,
+        "multiplier": 3,
+        "enable": true
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "confirmed_breakout_long_open_v2",
+      "type": "long",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet atr = atr_1h_14.Data[0];\nlet trend_ok = supertrend_1h_10_3.Trend[0] == 1 && supertrend_1h_10_3.Trend[1] == 1 && kline_1h.Close[0] > supertrend_1h_10_3.Data[0] && kline_1h.Close[1] > supertrend_1h_10_3.Data[1];\nlet confirmed_breakout = kline_15m.Close[1] > donchian_15m_20.High[2] && kline_15m.Close[2] <= donchian_15m_20.High[3];\nlet hold_breakout = kline_15m.Close[0] > donchian_15m_20.High[2] && kline_15m.Close[0] >= kline_15m.Open[0];\nlet momentum_ok = rsi_15m_14.Data[1] >= 55 && rsi_15m_14.Data[1] <= 68 && rsi_15m_14.Data[0] >= 50 && rsi_15m_14.Data[0] <= 72;\nlet no_chase = atr > 0 && kline_15m.Close[0] - donchian_15m_20.High[2] <= atr * 0.35 && kline_15m.High[0] - kline_15m.Low[0] <= atr * 0.45;\n\nwarmup_ok && trend_ok && confirmed_breakout && hold_breakout && momentum_ok && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "confirmed_breakout_short_open_v2",
+      "type": "short",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet atr = atr_1h_14.Data[0];\nlet trend_ok = supertrend_1h_10_3.Trend[0] == -1 && supertrend_1h_10_3.Trend[1] == -1 && kline_1h.Close[0] < supertrend_1h_10_3.Data[0] && kline_1h.Close[1] < supertrend_1h_10_3.Data[1];\nlet confirmed_breakout = kline_15m.Close[1] < donchian_15m_20.Low[2] && kline_15m.Close[2] >= donchian_15m_20.Low[3];\nlet hold_breakout = kline_15m.Close[0] < donchian_15m_20.Low[2] && kline_15m.Close[0] <= kline_15m.Open[0];\nlet momentum_ok = rsi_15m_14.Data[1] >= 32 && rsi_15m_14.Data[1] <= 45 && rsi_15m_14.Data[0] >= 28 && rsi_15m_14.Data[0] <= 50;\nlet no_chase = atr > 0 && donchian_15m_20.Low[2] - kline_15m.Close[0] <= atr * 0.35 && kline_15m.High[0] - kline_15m.Low[0] <= atr * 0.45;\n\nwarmup_ok && trend_ok && confirmed_breakout && hold_breakout && momentum_ok && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "confirmed_breakout_long_close_v2",
+      "type": "close_long",
+      "code": "let atr = atr_1h_14.Data[0];\nlet hard_stop = Position.MarkPrice <= Position.EntryPrice - atr * 2 || ROI <= -8;\nlet hard_take = Position.MarkPrice >= Position.EntryPrice + atr * 3 || ROI >= 12;\nlet protect_profit = ROI >= 4 && kline_15m.Close[0] < donchian_15m_20.Mid[0];\nlet trend_exit = supertrend_1h_10_3.Trend[0] == -1;\nlet time_exit = Position.CreateTime > 0 && (NowTime - Position.CreateTime) / 1000 >= 172800;\n\nhard_stop || hard_take || protect_profit || trend_exit || time_exit",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "confirmed_breakout_short_close_v2",
+      "type": "close_short",
+      "code": "let atr = atr_1h_14.Data[0];\nlet hard_stop = Position.MarkPrice >= Position.EntryPrice + atr * 2 || ROI <= -8;\nlet hard_take = Position.MarkPrice <= Position.EntryPrice - atr * 3 || ROI >= 12;\nlet protect_profit = ROI >= 4 && kline_15m.Close[0] > donchian_15m_20.Mid[0];\nlet trend_exit = supertrend_1h_10_3.Trend[0] == 1;\nlet time_exit = Position.CreateTime > 0 && (NowTime - Position.CreateTime) / 1000 >= 172800;\n\nhard_stop || hard_take || protect_profit || trend_exit || time_exit",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
