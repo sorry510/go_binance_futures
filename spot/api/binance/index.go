@@ -8,6 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	// Loads the global config before the package-level reads below run.
+	_ "go_binance_futures/bootstrap"
+
 	"github.com/adshao/go-binance/v2"
 	"github.com/beego/beego/v2/adapter/logs"
 	"github.com/beego/beego/v2/client/orm"
