@@ -29,14 +29,14 @@ type TestStrategyResultsTableList struct {
 	ProfitPercent string `json:"profit_percent"`
 }
 
-func calculateTestStrategyResultMetrics(result *TestStrategyResultsTableList) {
+func calculateTestStrategyResultMetrics(result *TestStrategyResultsTableList) float64 {
 	entryPrice, errEntry := strconv.ParseFloat(result.Price, 64)
 	positionAmt, errAmount := strconv.ParseFloat(result.PositionAmt, 64)
 	closePrice, _ := strconv.ParseFloat(result.ClosePrice, 64)
 	if errEntry != nil || errAmount != nil {
 		result.CloseProfit = "0.000"
 		result.ProfitPercent = "0.000"
-		return
+		return 0
 	}
 
 	effectivePrice := closePrice
@@ -45,20 +45,30 @@ func calculateTestStrategyResultMetrics(result *TestStrategyResultsTableList) {
 		if errCurrent != nil {
 			result.CloseProfit = "0.000"
 			result.ProfitPercent = "0.000"
-			return
+			return 0
 		}
 		effectivePrice = currentPrice
 	}
 	if effectivePrice <= 0 || positionAmt == 0 {
 		result.CloseProfit = "0.000"
 		result.ProfitPercent = "0.000"
-		return
+		return 0
 	}
 
 	profit := (effectivePrice - entryPrice) * positionAmt
 	profitPercent := profit / (math.Abs(positionAmt) * effectivePrice) * float64(result.Leverage) * 100
 	result.CloseProfit = strconv.FormatFloat(profit, 'f', 3, 64)
 	result.ProfitPercent = strconv.FormatFloat(profitPercent, 'f', 3, 64)
+	formattedProfit, _ := strconv.ParseFloat(result.CloseProfit, 64)
+	return formattedProfit
+}
+
+func calculateTestStrategyResultsCurrentProfit(results []TestStrategyResultsTableList) string {
+	totalProfit := 0.0
+	for index := range results {
+		totalProfit += calculateTestStrategyResultMetrics(&results[index])
+	}
+	return strconv.FormatFloat(totalProfit, 'f', 2, 64)
 }
 
 type testStrategyResultSearchParams struct {
@@ -147,9 +157,11 @@ func (ctrl *TestStrategyResultController) Get() {
 	o := orm.NewOrm()
 	
 	var results []TestStrategyResultsTableList
+	var profitResults []TestStrategyResultsTableList
 	var total int64
 	sql := `SELECT t.id, t.symbol, t.price, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.createTime, t.updateTime, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
 	countSql := `SELECT COUNT(*) FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
+	profitSql := `SELECT t.price, t.leverage, t.position_amt, t.close_price, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
 	whereClause, args, _, err := searchParams.whereClause("t")
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
@@ -157,6 +169,7 @@ func (ctrl *TestStrategyResultController) Get() {
 	}
 	sql += whereClause
 	countSql += whereClause
+	profitSql += whereClause
 	
 	sql = sql + " ORDER BY t.createTime DESC LIMIT " + strconv.Itoa(limit) + " OFFSET " + strconv.Itoa(offset)
 	_, err = o.Raw(sql, args...).QueryRows(&results)
@@ -172,12 +185,19 @@ func (ctrl *TestStrategyResultController) Get() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
+	_, err = o.Raw(profitSql, args...).QueryRows(&profitResults)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	currentProfit := calculateTestStrategyResultsCurrentProfit(profitResults)
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
 		"data": map[string]interface{} {
-			"total": total,
-			"list": results,
+			"total":          total,
+			"list":           results,
+			"current_profit": currentProfit,
 		},
 		"msg": "success",
 	})
