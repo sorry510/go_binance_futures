@@ -22,6 +22,11 @@
 
 ## custom strategy
 
+### ai strategy create
+![ai-strategy-create](./img/ui/ai-strategy-create.png)
+
+### desc
+
 In the new UI, maintain indicators and strategy methods under **Futures Trade → Strategy Templates** (`合约交易 → 策略模板`), then assign a global or custom strategy to each symbol under **Futures Trade → Futures Trade** (`合约交易 → 合约交易`).
 
 <a href="./STRATEGY.md">custom strategy details</a>
