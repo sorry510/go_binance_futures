@@ -15,6 +15,15 @@ Use this project-specific workflow to produce a strategy that matches the real e
 4. Treat `[0]` as the current/forming K-line and `[1]` as the latest closed K-line. Preserve the user's intentional use of live `[0]` values.
 5. Re-read current code instead of assuming the indicator list is unchanged. Current families include MA, EMA, MACD, ADX/DMI, MFI, OBV, CCI, ROC, KDJ, RSI, KC, BOLL, Donchian, ATR, and Supertrend.
 
+## Maintain paginated template consumers
+
+When `GET /strategy-templates` uses pagination, keep every frontend consumer on the same contract instead of restoring an unbounded response.
+
+1. Treat the response as `data: { total, list }` with `page`, `limit`, and optional `name`; preserve backend `id` descending order and a bounded page size.
+2. Keep the strategy-template management table on ordinary pagination. For business `el-select` controls, load page 1 by default, set `filterable` and `remote`, restart at page 1 when the name query changes, and request the next page when the popup scrollbar reaches the bottom.
+3. Reuse one composable for all template dropdowns. Guard against stale search responses, deduplicate appended rows by template `id`, and retain full `technology` and `strategy` fields when selecting a template copies its configuration.
+4. Search the complete frontend for imports of the strategy-template API and for `strategyTemplateId` before declaring all dropdowns fixed. Run Vue type checking, focused linting, and a production build, then synchronize `dist/` to backend `static/` and verify both directories are identical.
+
 ## Audit existing templates safely
 
 1. Read database connection values from `[database]` in `conf/app.conf` without printing credentials or changing the file.
