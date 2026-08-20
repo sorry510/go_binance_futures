@@ -134,6 +134,9 @@ func parseStrategyTemplateImport(data []byte) (parsedStrategyTemplateImport, err
 	if err := validateStrategyTemplateImportRules(strategyRules); err != nil {
 		return result, err
 	}
+	if err := validateStrategyTemplateRuleExpressions(technologyConfig, strategyRules); err != nil {
+		return result, err
+	}
 
 	technologyJSON, err := compactStrategyTemplateJSON(payload.Technology)
 	if err != nil {
