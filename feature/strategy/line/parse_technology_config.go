@@ -584,6 +584,44 @@ var reservedIndicatorNames = map[string]struct{}{
 	"BTCUSDT": {}, "ETHUSDT": {}, "SOLUSDT": {}, "BNBUSDT": {},
 }
 
+// ValidateTechnologyConfig validates enabled indicator settings without loading market data.
+func ValidateTechnologyConfig(config technology.TechnologyConfig) error {
+	usedNames := make(map[string]struct{})
+	indicatorGroups := []struct {
+		name  string
+		items []technology.IndicatorConfig
+	}{
+		{name: "ma", items: config.MA},
+		{name: "ema", items: config.EMA},
+		{name: "macd", items: config.MACD},
+		{name: "adx", items: config.ADX},
+		{name: "mfi", items: config.MFI},
+		{name: "obv", items: config.OBV},
+		{name: "cci", items: config.CCI},
+		{name: "roc", items: config.ROC},
+		{name: "kdj", items: config.KDJ},
+		{name: "rsi", items: config.RSI},
+		{name: "kc", items: config.KC},
+		{name: "boll", items: config.BOLL},
+		{name: "donchian", items: config.Donchian},
+		{name: "atr", items: config.ATR},
+		{name: "supertrend", items: config.Supertrend},
+	}
+
+	for _, group := range indicatorGroups {
+		for _, item := range group.items {
+			if !item.Enable {
+				continue
+			}
+			if err := validateIndicatorConfig("", group.name, item, 150, usedNames); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func validateIndicatorConfig(symbol, indicatorType string, item technology.IndicatorConfig, maxPeriod int, usedNames map[string]struct{}) error {
 	name := strings.TrimSpace(item.Name)
 	if name == "" {
