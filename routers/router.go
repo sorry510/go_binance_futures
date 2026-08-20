@@ -72,6 +72,7 @@ func init() {
 	web.Router("/fund-rate/eat/end/:id", &controllers.EatRateController{}, "post:End") // end
 	
 	web.Router("/strategy-templates", &controllers.StrategyTemplateController{}, "get:Get;post:Post") // 策略模板
+	web.Router("/strategy-templates/import", &controllers.StrategyTemplateController{}, "post:Import") // 导入策略模板 JSON
 	web.Router("/strategy-templates/:id", &controllers.StrategyTemplateController{}, "delete:Delete;put:Edit") // 策略模板更新
 	web.Router("/strategy-templates/test/:symbol", &controllers.StrategyTemplateController{}, "post:TestStrategyRule") // 测试策略规则
 	
