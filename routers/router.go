@@ -74,6 +74,8 @@ func init() {
 	
 	web.Router("/strategy-templates", &controllers.StrategyTemplateController{}, "get:Get;post:Post") // 策略模板
 	web.Router("/strategy-templates/import", &controllers.StrategyTemplateController{}, "post:Import") // 导入策略模板 JSON
+	web.Router("/strategy-templates/ai-generate", &controllers.StrategyTemplateController{}, "post:StartAIGeneration") // 创建 AI 策略模板生成任务
+	web.Router("/strategy-templates/ai-generate/:taskId", &controllers.StrategyTemplateController{}, "get:GetAIGenerationTask") // 查询 AI 策略模板生成进度
 	web.Router("/strategy-templates/:id", &controllers.StrategyTemplateController{}, "delete:Delete;put:Edit") // 策略模板更新
 	web.Router("/strategy-templates/test/:symbol", &controllers.StrategyTemplateController{}, "post:TestStrategyRule") // 测试策略规则
 	
