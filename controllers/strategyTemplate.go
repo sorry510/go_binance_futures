@@ -43,23 +43,53 @@ func (ctrl *StrategyTemplateController) Post() {
 
 func (ctrl *StrategyTemplateController) Get() {
 	paramsName := ctrl.GetString("name", "")
+	paramsPage := ctrl.GetString("page", "1")
+	paramsLimit := ctrl.GetString("limit", "20")
+
+	page, _ := strconv.Atoi(paramsPage)
+	limit, _ := strconv.Atoi(paramsLimit)
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset := (page - 1) * limit
 	
 	o := orm.NewOrm()
-	var templates []models.StrategyTemplates
-	query := o.QueryTable("strategy_templates")
-	if paramsName != "" {
-		query = query.Filter("Type", paramsName)
-	}
-	_, err := query.OrderBy("ID").All(&templates)
+	templates, total, err := queryStrategyTemplatePage(o, paramsName, limit, offset)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
 	}
 	
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
-		"data": templates,
+		"data": map[string]interface{} {
+			"total": total,
+			"list": templates,
+		},
 		"msg": "success",
 	})
+}
+
+func queryStrategyTemplatePage(o orm.Ormer, name string, limit, offset int) ([]models.StrategyTemplates, int64, error) {
+	query := o.QueryTable("strategy_templates")
+	if name != "" {
+		query = query.Filter("Name__icontains", name)
+	}
+
+	total, err := query.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var templates []models.StrategyTemplates
+	_, err = query.OrderBy("-ID").Limit(limit, offset).All(&templates)
+	return templates, total, err
 }
 	
 func (ctrl *StrategyTemplateController) Edit() {
