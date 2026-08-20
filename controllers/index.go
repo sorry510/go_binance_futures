@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"go_binance_futures/feature"
 	"go_binance_futures/notify"
 	"go_binance_futures/utils"
 
@@ -125,27 +124,30 @@ func (ctrl *IndexController) TestPusher() {
 }
 
 func (ctrl *IndexController) UpdateMarketCondition() {
-	config, err := utils.GetSystemConfig()
+	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
 		logs.Error("GetSystemConfig:", err.Error())
 		ctrl.Ctx.Resp(utils.ResJson(500, nil, "internal error"))
 		return
 	}
-	result, err := feature.UpdateMarketCondition(&config)
-	if err != nil {
-		logs.Error("UpdateMarketCondition:", err.Error())
-		ctrl.Ctx.Resp(utils.ResJson(500, nil, "internal error"))
+	task := startMarketConditionUpdateTask(systemConfig)
+	ctrl.Ctx.Resp(map[string]interface{} {
+		"code": 200,
+		"data": task,
+		"msg": "accepted",
+	})
+}
+
+func (ctrl *IndexController) GetMarketConditionUpdateTask() {
+	taskID := ctrl.Ctx.Input.Param(":taskId")
+	task, exists := getMarketConditionUpdateTask(taskID)
+	if !exists {
+		ctrl.Ctx.Resp(utils.ResJson(404, nil, "task not found"))
 		return
 	}
 	ctrl.Ctx.Resp(map[string]interface{} {
 		"code": 200,
-		"data": map[string]interface{} {
-			"marketCondition": result.MarketCondition,
-			"marketConditionName": result.Name,
-			"source": result.Source,
-			"confidence": result.Confidence,
-			"reason": result.Reason,
-		},
+		"data": task,
 		"msg": "success",
 	})
 }

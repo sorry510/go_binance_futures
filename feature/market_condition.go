@@ -33,6 +33,13 @@ type MarketConditionResult struct {
 	Reason          string  `json:"reason,omitempty"`
 }
 
+type MarketConditionProgress struct {
+	Progress int    `json:"progress"`
+	Stage    string `json:"stage"`
+}
+
+type MarketConditionProgressCallback func(MarketConditionProgress)
+
 type marketConditionSnapshot struct {
 	AsOf                      string                  `json:"as_of"`
 	SymbolCount               int                     `json:"symbol_count"`
@@ -67,19 +74,28 @@ type marketConditionLLMResponse struct {
 
 // UpdateMarketCondition updates the current market condition with LLM analysis when available.
 func UpdateMarketCondition(systemConfig *models.Config) (MarketConditionResult, error) {
+	return UpdateMarketConditionWithProgress(systemConfig, nil)
+}
+
+// UpdateMarketConditionWithProgress reports coarse-grained stages without exposing model output.
+func UpdateMarketConditionWithProgress(systemConfig *models.Config, progressCallback MarketConditionProgressCallback) (MarketConditionResult, error) {
+	reportMarketConditionProgress(progressCallback, 5, "waiting")
 	marketConditionUpdateMu.Lock()
 	defer marketConditionUpdateMu.Unlock()
 
 	result := newMarketConditionResult(systemConfig.MarketCondition, "manual")
 	if systemConfig.MarketConditionIsAuto == 0 {
 		result.Reason = "当前为手动模式"
+		reportMarketConditionProgress(progressCallback, 100, "completed")
 		return result, nil
 	}
 
+	reportMarketConditionProgress(progressCallback, 15, "loading_market_data")
 	symbols, err := loadMarketConditionSymbols()
 	if err != nil {
 		return result, err
 	}
+	reportMarketConditionProgress(progressCallback, 30, "calculating_fallback")
 	fallbackCondition, err := calculateLegacyMarketCondition(symbols)
 	if err != nil {
 		return result, err
@@ -89,16 +105,21 @@ func UpdateMarketCondition(systemConfig *models.Config) (MarketConditionResult, 
 	result.Reason = "使用本地行情加权算法分析"
 
 	if isLLMConfigured() {
+		reportMarketConditionProgress(progressCallback, 40, "preparing_llm")
 		snapshot := buildMarketConditionSnapshot(symbols)
-		aiResult, aiErr := analyzeMarketConditionWithLLM(snapshot)
+		aiResult, aiErr := analyzeMarketConditionWithLLM(snapshot, progressCallback)
 		if aiErr != nil {
 			logs.Warning("market condition LLM analysis unavailable, use algorithm fallback:", aiErr)
 			result.Reason = "LLM 分析不可用，已使用本地行情加权算法"
+			reportMarketConditionProgress(progressCallback, 85, "using_fallback")
 		} else {
 			result = aiResult
 		}
+	} else {
+		reportMarketConditionProgress(progressCallback, 85, "using_fallback")
 	}
 
+	reportMarketConditionProgress(progressCallback, 92, "saving")
 	if result.MarketCondition != systemConfig.MarketCondition {
 		if _, err := orm.NewOrm().QueryTable("config").Filter("id", systemConfig.ID).Update(orm.Params{
 			"market_condition": result.MarketCondition,
@@ -115,6 +136,7 @@ func UpdateMarketCondition(systemConfig *models.Config) (MarketConditionResult, 
 		result.Confidence,
 		sanitizeMarketConditionReason(result.Reason),
 	)
+	reportMarketConditionProgress(progressCallback, 100, "completed")
 	return result, nil
 }
 
@@ -253,7 +275,7 @@ func buildMarketConditionSnapshot(symbols []models.Symbols) marketConditionSnaps
 	return snapshot
 }
 
-func analyzeMarketConditionWithLLM(snapshot marketConditionSnapshot) (MarketConditionResult, error) {
+func analyzeMarketConditionWithLLM(snapshot marketConditionSnapshot, progressCallback MarketConditionProgressCallback) (MarketConditionResult, error) {
 	client, err := llm.NewFromConfig()
 	if err != nil {
 		return MarketConditionResult{}, fmt.Errorf("initialize LLM client: %w", err)
@@ -266,6 +288,7 @@ func analyzeMarketConditionWithLLM(snapshot marketConditionSnapshot) (MarketCond
 
 	ctx, cancel := context.WithTimeout(context.Background(), marketConditionLLMTimeout)
 	defer cancel()
+	reportMarketConditionProgress(progressCallback, 55, "calling_llm")
 	response, err := client.Generate(ctx, llm.Request{
 		System: "You are a cryptocurrency futures market-regime classifier. Analyze only the supplied snapshot. Return exactly one JSON object without Markdown, trading advice, positions, leverage, or orders.",
 		Messages: []llm.Message{
@@ -279,6 +302,7 @@ func analyzeMarketConditionWithLLM(snapshot marketConditionSnapshot) (MarketCond
 		return MarketConditionResult{}, fmt.Errorf("generate market condition analysis: %w", err)
 	}
 
+	reportMarketConditionProgress(progressCallback, 80, "validating_llm")
 	analysis, err := parseMarketConditionLLMResponse(response.Content)
 	if err != nil {
 		return MarketConditionResult{}, err
@@ -290,6 +314,13 @@ func analyzeMarketConditionWithLLM(snapshot marketConditionSnapshot) (MarketCond
 		Confidence:      analysis.Confidence,
 		Reason:          sanitizeMarketConditionReason(analysis.Reason),
 	}, nil
+}
+
+func reportMarketConditionProgress(callback MarketConditionProgressCallback, progress int, stage string) {
+	if callback == nil {
+		return
+	}
+	callback(MarketConditionProgress{Progress: progress, Stage: stage})
 }
 
 func buildMarketConditionPrompt(snapshotJSON string) string {
