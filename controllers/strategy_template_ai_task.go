@@ -12,6 +12,7 @@ import (
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -24,49 +25,67 @@ const (
 	strategyTemplateAITaskRetention  = 30 * time.Minute
 	maxStrategyTemplateAIPromptSize  = 12 * 1024
 	maxStrategyTemplateAIContextSize = 256 * 1024
+	maxStrategyTemplateAIRounds      = 15 // 最大15循环
 )
 
-const strategyTemplateAISystemPrompt = `You generate portable custom futures strategy template JSON for go_binance_futures.
+const strategyTemplateAISystemPrompt = `Generate valid custom futures strategy-template JSON for go_binance_futures. You have at most 10 agent rounds. Each response must be one compact JSON object without Markdown or extra text.
 
-Return exactly one compact JSON object. Do not use Markdown fences, comments, explanations, trading advice, position sizing, leverage, or order instructions.
+Agent protocol:
+- Tool: {"action":"tool","summary":"reason/current findings","tool":"NAME","arguments":{...}}
+- Final: {"action":"final","summary":"design/evidence summary","json":{"name":"...","technology":{},"strategy":[]}}
+- Tools: get_features arguments are sort,symbol_type,symbol,enable,margin_type,pin,page,limit (default/max limit 20); get_test_strategy_results arguments are symbol,position_side,start_time,end_time,type,page,limit (default/max limit 100). TOOL_RESULT arrives in the next user message; include relevant findings in the next summary. Avoid duplicate calls without a new reason.
+- A request for test results MUST call get_test_strategy_results first, preserving symbol/side/time/type filters and defaulting to page=1,limit=100. A request for a coin/contract/symbol's data MUST call get_features first with that symbol and requested filters. If both are requested, call both in separate rounds.
 
-The root object must contain exactly:
-{"name":string,"technology":object,"strategy":array}
+Final json contract:
+- Root is exactly {"name":string,"technology":object,"strategy":array}.
+- technology always contains arrays: ma,ema,macd,adx,mfi,obv,cci,roc,kdj,rsi,kc,boll,donchian,atr,supertrend.
+- Every enabled indicator has name,kline_interval,enable. name is a unique expr identifier, not reserved and not prefixed kline_. Intervals: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M.
+- Config fields: ma/ema/adx/mfi/cci/roc/rsi/donchian/atr use period; macd uses fast_period,slow_period,signal_period with fast<slow and slow+signal-1<=150; obv has no period; kdj uses period,k_period,d_period; kc/supertrend use period,multiplier; boll uses period,std_dev_multiplier. Periods are 1..150, except rsi/mfi/roc <=149 and adx <=75; KDJ smoothing periods are 1..150; KC/BOLL multipliers are >=0 and Supertrend multiplier is >0.
+- Every strategy item is exactly {name,type,code,fullScreen,enable}; names are unique, booleans are booleans, type is long|short|close_long|close_short, and expr code must compile to Boolean.
 
-technology must contain all of these array fields, even when empty:
-ma, ema, macd, adx, mfi, obv, cci, roc, kdj, rsi, kc, boll, donchian, atr, supertrend.
+Indicator terms and generated values (each configured indicator also has KlineInterval):
+- ma (Simple Moving Average): arithmetic mean of Close; smooth lagging trend. Exposes Period,Data.
+- ema (Exponential Moving Average): recent Close has greater weight than MA, so it reacts faster. Exposes Period,Data.
+- macd (Moving Average Convergence Divergence): DIF=fast EMA-slow EMA, DEA=signal EMA of DIF, Histogram=DIF-DEA; crosses/zero line show momentum direction and Histogram its expansion/contraction. Exposes FastPeriod,SlowPeriod,SignalPeriod,DIF,DEA,Histogram.
+- adx (Average Directional Index/DMI): ADX measures trend strength, not direction; PlusDI>MinusDI is positive direction and the reverse is negative; 20-25 is only a common reference. Exposes Period,ADX,PlusDI,MinusDI.
+- mfi (Money Flow Index): 0..100 price-volume oscillator using typical price and quote turnover Amount; 20/80 are reference zones, not reversal guarantees. Exposes Period,Data.
+- obv (On-Balance Volume): cumulative Amount added on rising closes and subtracted on falling closes; it restarts at zero within the fetched 150-candle window, so use direction/slope/differences, not absolute level. Exposes Data.
+- cci (Commodity Channel Index): normalized deviation of typical price from its average; +100/-100 are common references and zero is returned when mean deviation is zero. Exposes Period,Data.
+- roc (Rate of Change): percentage Close change versus period candles earlier; sign and zero crosses show momentum direction. Exposes Period,Data.
+- kdj (Stochastic KDJ): smoothed RSV where J=3*K-2*D; K/D crosses and J extremes describe range position/momentum, not guaranteed reversals. Exposes Period,KPeriod,DPeriod,K,D,J.
+- rsi (Relative Strength Index): Wilder-smoothed 0..100 momentum oscillator; 30/70 are references and flat input returns 50. Exposes Period,Data.
+- kc (Keltner Channel): EMA midpoint and EMA +/- multiplier*ATR volatility channel. Exposes Period,Multiplier,High,Mid,Low.
+- boll (Bollinger Bands): SMA midpoint and population-standard-deviation bands; width shows volatility and a band touch alone is not a reversal. Exposes Period,StdDevMultiplier,High,Mid,Low.
+- donchian (Donchian Channel): period highest High, lowest Low, and midpoint; defines recent range/breakout boundaries. Exposes Period,High,Mid,Low.
+- atr (Average True Range): Wilder-smoothed true range measuring absolute volatility, not direction. Exposes Period,Data.
+- supertrend: ATR trailing trend line; Data is the active line and Trend is 1 bullish/-1 bearish. Exposes Period,Multiplier,Data,Trend.
 
-Every enabled indicator has name, kline_interval, enable. Names must be unique valid expr identifiers and must not start with kline_. Supported intervals: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M.
-Fields by family:
-- ma/ema/mfi/cci/roc/rsi/atr/donchian/adx: period
-- macd: fast_period, slow_period, signal_period; fast_period < slow_period
-- obv: no period
-- kdj: period, k_period, d_period
-- kc/supertrend: period, multiplier
-- boll: period, std_dev_multiplier
-Periods are positive and at most 150; rsi/mfi/roc must be below 150; adx at most 75; multipliers must be non-negative and supertrend multiplier must be positive.
+Runtime data and variables:
+- All arrays are newest-to-oldest, max 150; [0] is the forming K-line and [1] the latest closed K-line. Each enabled interval creates kline_INTERVAL with High,Low,Open,Close price arrays, Amount quote turnover (volume*average price), and Qps quote turnover/second.
+- SystemStartTime (int64): system-start Unix milliseconds. NowTime (int64): current Unix milliseconds.
+- MarketCondition (string): regime code 1 strong bull, 2 bull, 3 sideways, 4 bear, 5 strong bear, 6 bullish divergence, 7 bearish divergence, 8 broad rise, 9 broad decline, 10 high-volatility sideways, 11 low-volatility consolidation.
+- BasicTrend (float64): 24h percentage-point weighted trend BTC*0.60+ETH*0.30+SOL*0.05+BNB*0.05; positive is bullish, negative bearish.
+- NowPrice and NowSymbolClose (float64): selected symbol's latest stored/current close. NowSymbolPercentChange (float64): its 24h change in percentage points. NowSymbolOpen/Low/High (float64): its 24h open/low/high.
+- BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT: benchmark objects with PercentChange (24h percentage points), Close,Open,Low,High.
+- IsAsc(array)/IsDesc(array): strict increase/decrease in the supplied order; remember arrays are newest-to-oldest. KdjSimple(short,long,count): newest short is above long with exactly one upward cross and no recross in the inspected window; usable for any numeric arrays.
+- Entry long/short only: Positions is the current local futures-position list. Each item has Symbol string; Side LONG|SHORT|BOTH; Amount numeric string (short normally negative); MarginType isolated|cross; Leverage int64; IsolatedWallet,EntryPrice,MarkPrice,UnrealizedProfit numeric strings; SourceType local|api; CreateTime milliseconds. Use float(...) for numeric strings. ROI and Position are unavailable.
+- Exit close_long/close_short only: ROI float64 leveraged return in percentage points; Position has Symbol string, Side LONG|SHORT|BOTH, Amount float64 (short normally negative), Leverage int64, EntryPrice/MarkPrice/UnrealizedProfit float64, Mock bool, CreateTime milliseconds, SourceType local|api. Time exits require SourceType=local and CreateTime>0. Positions is unavailable.
 
-Each strategy item must contain exactly name, type, code, fullScreen, enable. fullScreen and enable are booleans. type is one of long, short, close_long, close_short. Names must be unique. Each expr-lang code must compile and its final expression must be Boolean.
-
-Runtime contract:
-- Array index 0 is the current/forming K-line; index 1 is the latest closed K-line.
-- Every enabled interval exposes kline_INTERVAL with High, Low, Open, Close, Amount, Qps arrays.
-- ma/ema/mfi/cci/roc/rsi/atr expose .Data.
-- macd exposes .DIF, .DEA, .Histogram.
-- adx exposes .ADX, .PlusDI, .MinusDI.
-- obv exposes .Data; kdj exposes .K, .D, .J.
-- kc/boll/donchian expose .High, .Mid, .Low.
-- supertrend exposes .Data and .Trend where 1 is bullish and -1 is bearish.
-- Available globals include MarketCondition (string), BasicTrend, NowTime, NowPrice, NowSymbolPercentChange, NowSymbolClose/Open/Low/High, BTCUSDT/ETHUSDT/SOLUSDT/BNBUSDT market objects, IsAsc, IsDesc, KdjSimple. long/short rules additionally receive Positions. close_long/close_short rules receive ROI and Position, but not Positions.
-- A live Donchian breakout must compare kline close[0] with channel High[1] or Low[1], because channel[0] includes the forming K-line.
-- Close expressions are evaluated only after the symbol's outer profit/loss threshold is crossed. Do not claim an inner threshold can bypass that gate.
-
-Prefer two distinct intervals and three or four enabled indicators. Unless the user explicitly narrows the request, generate one enabled rule for each of long, short, close_long, close_short. Keep rules symmetric, readable, efficient, and conservative. Do not claim profitability.`
+Critical rules: for a live Donchian breakout compare kline close[0] with channel High[1]/Low[1], since channel[0] includes the forming candle. Close expr runs only after the symbol's outer profit/loss threshold is crossed. Unless narrowed by the user, produce enabled long,short,close_long,close_short rules. Never claim profitability or provide sizing, leverage, or order instructions.`
 
 type strategyTemplateAIGenerationRequest struct {
 	Prompt          string `json:"prompt"`
 	PreviousJSON    string `json:"previousJson"`
 	ValidationError string `json:"validationError"`
+	ConversationID  string `json:"conversationId"`
+}
+
+type strategyTemplateAIAgentDecision struct {
+	Action    string          `json:"action"`
+	Summary   string          `json:"summary"`
+	Tool      string          `json:"tool"`
+	Arguments json.RawMessage `json:"arguments"`
+	JSON      json.RawMessage `json:"json"`
 }
 
 type strategyTemplateSyntheticMarket struct {
@@ -80,6 +99,7 @@ type strategyTemplateSyntheticMarket struct {
 type strategyTemplateAIProgressEvent struct {
 	Progress int       `json:"progress"`
 	Stage    string    `json:"stage"`
+	Tool     string    `json:"tool,omitempty"`
 	Message  string    `json:"message"`
 	Time     time.Time `json:"time"`
 }
@@ -93,9 +113,13 @@ type strategyTemplateAIGenerationTask struct {
 	JSON            string                            `json:"json,omitempty"`
 	ValidationError string                            `json:"validationError,omitempty"`
 	Error           string                            `json:"error,omitempty"`
+	Round           int                               `json:"round"`
+	MaxRounds       int                               `json:"maxRounds"`
+	Imported        bool                              `json:"imported"`
 	CreatedAt       time.Time                         `json:"createdAt"`
 	UpdatedAt       time.Time                         `json:"updatedAt"`
 	CompletedAt     *time.Time                        `json:"completedAt,omitempty"`
+	Messages        []llm.Message                     `json:"-"`
 }
 
 var strategyTemplateAITaskStore = struct {
@@ -125,7 +149,11 @@ func (ctrl *StrategyTemplateController) StartAIGeneration() {
 		return
 	}
 
-	task := startStrategyTemplateAITask(request)
+	task, err := startStrategyTemplateAITask(request)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
 	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": task,
@@ -147,26 +175,83 @@ func (ctrl *StrategyTemplateController) GetAIGenerationTask() {
 	})
 }
 
-func startStrategyTemplateAITask(request strategyTemplateAIGenerationRequest) strategyTemplateAIGenerationTask {
-	now := time.Now().UTC()
-	taskID := newStrategyTemplateAITaskID()
-	task := &strategyTemplateAIGenerationTask{
-		TaskID:    taskID,
-		Status:    "queued",
-		Progress:  0,
-		Stage:     "queued",
-		CreatedAt: now,
-		UpdatedAt: now,
+func (ctrl *StrategyTemplateController) ImportAIGeneratedTemplate() {
+	taskID := strings.TrimSpace(ctrl.Ctx.Input.Param(":taskId"))
+	if taskID == "" {
+		ctrl.strategyTemplateImportError("taskId 不能为空")
+		return
 	}
+	if err := ensureStrategyTemplateAITaskCanImport(taskID); err != nil {
+		ctrl.strategyTemplateImportError(err.Error())
+		return
+	}
+
+	data := ctrl.Ctx.Input.RequestBody
+	action, stored, err := importStrategyTemplateData(data)
+	if err != nil {
+		recordStrategyTemplateAIImportError(taskID, string(data), err.Error())
+		ctrl.strategyTemplateImportError(err.Error())
+		return
+	}
+	markStrategyTemplateAITaskImported(taskID)
+	ctrl.Ctx.Resp(map[string]interface{}{
+		"code": 200,
+		"data": map[string]interface{}{
+			"action":   action,
+			"template": stored,
+		},
+		"msg": "success",
+	})
+}
+
+func startStrategyTemplateAITask(request strategyTemplateAIGenerationRequest) (strategyTemplateAIGenerationTask, error) {
+	now := time.Now().UTC()
 	strategyTemplateAITaskStore.Lock()
 	cleanupStrategyTemplateAITasksLocked(now)
-	strategyTemplateAITaskStore.tasks[taskID] = task
-	appendStrategyTemplateAIEventLocked(task, 0, "queued", "生成任务已创建")
+
+	taskID := strings.TrimSpace(request.ConversationID)
+	var task *strategyTemplateAIGenerationTask
+	if taskID != "" {
+		task = strategyTemplateAITaskStore.tasks[taskID]
+		if task == nil {
+			strategyTemplateAITaskStore.Unlock()
+			return strategyTemplateAIGenerationTask{}, fmt.Errorf("续聊任务不存在或已过期")
+		}
+		if task.Status == "queued" || task.Status == "running" {
+			strategyTemplateAITaskStore.Unlock()
+			return strategyTemplateAIGenerationTask{}, fmt.Errorf("当前生成任务仍在运行")
+		}
+		if task.Imported {
+			strategyTemplateAITaskStore.Unlock()
+			return strategyTemplateAIGenerationTask{}, fmt.Errorf("该对话已成功导入，不能继续生成")
+		}
+		task.Status = "queued"
+		task.Progress = 0
+		task.Stage = "queued"
+		task.Round = 0
+		task.Error = ""
+		task.CompletedAt = nil
+		appendStrategyTemplateAIEventLocked(task, 0, "queued", "已保留历史对话，开始新一轮生成")
+	} else {
+		taskID = newStrategyTemplateAITaskID()
+		task = &strategyTemplateAIGenerationTask{
+			TaskID:    taskID,
+			Status:    "queued",
+			Progress:  0,
+			Stage:     "queued",
+			MaxRounds: maxStrategyTemplateAIRounds,
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
+		strategyTemplateAITaskStore.tasks[taskID] = task
+		appendStrategyTemplateAIEventLocked(task, 0, "queued", "生成任务已创建")
+	}
+	task.MaxRounds = maxStrategyTemplateAIRounds
 	result := cloneStrategyTemplateAITask(task)
 	strategyTemplateAITaskStore.Unlock()
 
 	go runStrategyTemplateAITask(taskID, request)
-	return result
+	return result, nil
 }
 
 func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerationRequest) {
@@ -177,37 +262,101 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 		return
 	}
 
-	updateStrategyTemplateAITask(taskID, 15, "building_prompt", "正在整理策略需求和框架约束")
+	updateStrategyTemplateAITask(taskID, 8, "building_prompt", "正在整理策略需求和框架约束")
 	userPrompt := buildStrategyTemplateAIUserPrompt(request)
-	updateStrategyTemplateAITask(taskID, 25, "calling_llm", "已发送请求，等待 AI 生成 JSON")
+	appendStrategyTemplateAIMessage(taskID, llm.RoleUser, userPrompt)
+	requiredTools := requiredStrategyTemplateAITools(request.Prompt)
+	calledTools := make(map[string]bool, len(requiredTools))
 
-	response, err := generateStrategyTemplateWithProgress(taskID, client, userPrompt)
-	if err != nil {
-		logs.Error("strategy template AI task %s: %s", taskID, err.Error())
-		failStrategyTemplateAITask(taskID, "AI 生成失败: "+truncateStrategyTemplateAIError(err.Error()))
-		return
+	lastError := "AI 未在限定轮数内返回合法策略 JSON"
+	for round := 1; round <= maxStrategyTemplateAIRounds; round++ {
+		progress := 8 + round*7
+		updateStrategyTemplateAIRound(taskID, round, progress, fmt.Sprintf("Agent 第 %d/%d 轮：正在分析上下文并决定下一步", round, maxStrategyTemplateAIRounds))
+		messages, exists := getStrategyTemplateAIMessages(taskID)
+		if !exists {
+			return
+		}
+		response, err := generateStrategyTemplateWithProgress(taskID, client, messages, round)
+		if err != nil {
+			logs.Error("strategy template AI task %s round %d: %s", taskID, round, err.Error())
+			failStrategyTemplateAITask(taskID, "Agent 第 "+strconv.Itoa(round)+" 轮调用失败: "+truncateStrategyTemplateAIError(err.Error()))
+			return
+		}
+		if response == nil {
+			failStrategyTemplateAITask(taskID, fmt.Sprintf("Agent 第 %d 轮调用失败: LLM 返回空响应", round))
+			return
+		}
+		appendStrategyTemplateAIMessage(taskID, llm.RoleAssistant, response.Content)
+
+		if isLLMResponseTruncated(response.FinishReason) {
+			lastError = "AI 响应因 max_tokens 限制被截断，请输出更紧凑的响应或提高配置"
+			recordStrategyTemplateAIRepair(taskID, lastError, "repairing_response")
+			continue
+		}
+
+		decision, err := parseStrategyTemplateAIAgentDecision(response.Content)
+		if err != nil {
+			lastError = "Agent 响应协议错误: " + err.Error()
+			recordStrategyTemplateAIRepair(taskID, lastError, "repairing_response")
+			continue
+		}
+
+		switch decision.Action {
+		case "tool":
+			if strings.TrimSpace(decision.Tool) == "" {
+				lastError = "Agent 选择调用工具但未提供 tool"
+				recordStrategyTemplateAIRepair(taskID, lastError, "tool_error")
+				continue
+			}
+			message := fmt.Sprintf("Agent 第 %d 轮决定调用 %s", round, decision.Tool)
+			if strings.TrimSpace(decision.Summary) != "" {
+				message += "：" + truncateStrategyTemplateAIEventMessage(decision.Summary)
+			}
+			updateStrategyTemplateAIToolEvent(taskID, progress+2, "calling_tool", decision.Tool, message)
+			toolResult, toolErr := executeStrategyTemplateAITool(decision.Tool, decision.Arguments)
+			if toolErr != nil {
+				lastError = fmt.Sprintf("工具 %s 调用失败: %s", decision.Tool, truncateStrategyTemplateAIError(toolErr.Error()))
+				appendStrategyTemplateAIMessage(taskID, llm.RoleUser, buildStrategyTemplateAIToolResultMessage(decision.Tool, "", toolErr))
+				updateStrategyTemplateAIToolEvent(taskID, progress+3, "tool_error", decision.Tool, lastError)
+				continue
+			}
+			appendStrategyTemplateAIMessage(taskID, llm.RoleUser, buildStrategyTemplateAIToolResultMessage(decision.Tool, toolResult, nil))
+			updateStrategyTemplateAIToolEvent(taskID, progress+3, "tool_result", decision.Tool, fmt.Sprintf("%s 已返回数据，下一轮将总结并继续分析", decision.Tool))
+			calledTools[decision.Tool] = true
+			lastError = fmt.Sprintf("Agent 第 %d 轮调用了 %s，但尚未返回最终 JSON", round, decision.Tool)
+			continue
+		case "final":
+			if missingTools := missingStrategyTemplateAITools(requiredTools, calledTools); len(missingTools) > 0 {
+				lastError = "用户已明确要求使用工具，返回最终 JSON 前必须先成功调用: " + strings.Join(missingTools, ", ")
+				recordStrategyTemplateAIRepair(taskID, lastError, "repairing_response")
+				continue
+			}
+			generatedJSON := strings.TrimSpace(string(decision.JSON))
+			if generatedJSON == "" || generatedJSON == "null" {
+				lastError = "Agent final 响应缺少 json 对象"
+				recordStrategyTemplateAIRepair(taskID, lastError, "repairing_json")
+				continue
+			}
+			generatedJSON = formatStrategyTemplateJSON(generatedJSON)
+			updateStrategyTemplateAITask(taskID, minStrategyTemplateAIProgress(progress+4, 95), "validating_json", fmt.Sprintf("Agent 第 %d 轮正在校验 JSON、指标参数和 expr 规则", round))
+			if err := validateGeneratedStrategyTemplateJSON([]byte(generatedJSON)); err != nil {
+				lastError = err.Error()
+				recordStrategyTemplateAICandidate(taskID, generatedJSON, lastError)
+				recordStrategyTemplateAIRepair(taskID, "JSON 校验失败: "+lastError, "repairing_json")
+				continue
+			}
+			finishStrategyTemplateAITask(taskID, generatedJSON, decision.Summary)
+			return
+		default:
+			lastError = fmt.Sprintf("Agent 返回未知 action %q，仅支持 tool 或 final", decision.Action)
+			recordStrategyTemplateAIRepair(taskID, lastError, "repairing_response")
+		}
 	}
 
-	updateStrategyTemplateAITask(taskID, 75, "extracting_json", "已收到 AI 响应，正在提取 JSON")
-	generatedJSON := extractStrategyTemplateJSON(response.Content)
-	if strings.TrimSpace(generatedJSON) == "" {
-		failStrategyTemplateAITask(taskID, "AI 未返回可用内容")
-		return
-	}
-
-	updateStrategyTemplateAITask(taskID, 86, "validating_json", "正在校验 JSON 结构、指标参数和 expr 规则")
-	validationError := ""
-	if err := validateGeneratedStrategyTemplateJSON([]byte(generatedJSON)); err != nil {
-		validationError = err.Error()
-	}
-	if isLLMResponseTruncated(response.FinishReason) {
-		validationError = joinStrategyTemplateAIValidationErrors(validationError, "AI 响应可能因 max_tokens 限制被截断，请提高配置后重新生成")
-	}
-	generatedJSON = formatStrategyTemplateJSON(generatedJSON)
-	finishStrategyTemplateAITask(taskID, generatedJSON, validationError)
+	failStrategyTemplateAITask(taskID, fmt.Sprintf("Agent 已达到最大 %d 轮，最后错误: %s", maxStrategyTemplateAIRounds, truncateStrategyTemplateAIError(lastError)))
 }
 
-func generateStrategyTemplateWithProgress(taskID string, client llm.Client, userPrompt string) (*llm.Response, error) {
+func generateStrategyTemplateWithProgress(taskID string, client llm.Client, messages []llm.Message, round int) (*llm.Response, error) {
 	type result struct {
 		response *llm.Response
 		err      error
@@ -217,11 +366,8 @@ func generateStrategyTemplateWithProgress(taskID string, client llm.Client, user
 	defer cancel()
 	go func() {
 		response, err := client.Generate(ctx, llm.Request{
-			System: strategyTemplateAISystemPrompt,
-			Messages: []llm.Message{{
-				Role:    llm.RoleUser,
-				Content: userPrompt,
-			}},
+			System:   strategyTemplateAISystemPrompt,
+			Messages: messages,
 		})
 		resultChannel <- result{response: response, err: err}
 	}()
@@ -235,11 +381,9 @@ func generateStrategyTemplateWithProgress(taskID string, client llm.Client, user
 			return generated.response, generated.err
 		case <-ticker.C:
 			waitedSeconds += 5
-			progress := 25 + waitedSeconds/5*3
-			if progress > 68 {
-				progress = 68
-			}
-			updateStrategyTemplateAITask(taskID, progress, "waiting_llm", fmt.Sprintf("AI 正在生成，已等待 %d 秒", waitedSeconds))
+			progress := 8 + round*7 + waitedSeconds/5
+			progress = minStrategyTemplateAIProgress(progress, 94)
+			updateStrategyTemplateAITask(taskID, progress, "waiting_llm", fmt.Sprintf("Agent 第 %d/%d 轮等待 AI 响应，已等待 %d 秒", round, maxStrategyTemplateAIRounds, waitedSeconds))
 		}
 	}
 }
@@ -261,6 +405,82 @@ func buildStrategyTemplateAIUserPrompt(request strategyTemplateAIGenerationReque
 		}
 	}
 	return builder.String()
+}
+
+func requiredStrategyTemplateAITools(prompt string) []string {
+	normalized := strings.Join(strings.Fields(strings.ToLower(prompt)), "")
+	required := make([]string, 0, 2)
+	testResultMarkers := []string{
+		"调用测试结果", "查询测试结果", "获取测试结果", "查看测试结果", "分析测试结果", "testresults",
+	}
+	for _, marker := range testResultMarkers {
+		if strings.Contains(normalized, marker) {
+			required = append(required, "get_test_strategy_results")
+			break
+		}
+	}
+
+	requestsData := strings.Contains(normalized, "获取") || strings.Contains(normalized, "查询") || strings.Contains(normalized, "get") || strings.Contains(normalized, "query")
+	mentionsInstrument := strings.Contains(normalized, "币") || strings.Contains(normalized, "合约") || strings.Contains(normalized, "coin") || strings.Contains(normalized, "contract") || strings.Contains(normalized, "symbol") || strings.Contains(normalized, "usdt") || strings.Contains(normalized, "usdc")
+	mentionsData := strings.Contains(normalized, "数据") || strings.Contains(normalized, "data")
+	if requestsData && mentionsInstrument && mentionsData {
+		required = append(required, "get_features")
+	}
+	return required
+}
+
+func missingStrategyTemplateAITools(required []string, called map[string]bool) []string {
+	missing := make([]string, 0, len(required))
+	for _, tool := range required {
+		if !called[tool] {
+			missing = append(missing, tool)
+		}
+	}
+	return missing
+}
+
+func parseStrategyTemplateAIAgentDecision(content string) (strategyTemplateAIAgentDecision, error) {
+	var decision strategyTemplateAIAgentDecision
+	value := extractStrategyTemplateJSON(content)
+	if strings.TrimSpace(value) == "" {
+		return decision, fmt.Errorf("AI 未返回可用内容")
+	}
+	if err := json.Unmarshal([]byte(value), &decision); err != nil {
+		return decision, fmt.Errorf("无法解析响应 JSON: %w", err)
+	}
+	decision.Action = strings.ToLower(strings.TrimSpace(decision.Action))
+	decision.Tool = strings.TrimSpace(decision.Tool)
+	if decision.Action != "" {
+		return decision, nil
+	}
+
+	var root map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(value), &root); err == nil && root["name"] != nil && root["technology"] != nil && root["strategy"] != nil {
+		decision.Action = "final"
+		decision.Summary = "模型直接返回了策略模板 JSON"
+		decision.JSON = json.RawMessage(value)
+		return decision, nil
+	}
+	return decision, fmt.Errorf("响应缺少 action 字段")
+}
+
+func buildStrategyTemplateAIToolResultMessage(toolName, result string, toolErr error) string {
+	payload := map[string]interface{}{
+		"tool": toolName,
+		"ok":   toolErr == nil,
+	}
+	if toolErr != nil {
+		payload["error"] = truncateStrategyTemplateAIError(toolErr.Error())
+	} else {
+		var value interface{}
+		if err := json.Unmarshal([]byte(result), &value); err == nil {
+			payload["result"] = value
+		} else {
+			payload["result"] = result
+		}
+	}
+	data, _ := json.Marshal(payload)
+	return "TOOL_RESULT\n" + string(data) + "\nSummarize the relevant facts in your next summary field, then choose another tool or return a final strategy JSON."
 }
 
 func extractStrategyTemplateJSON(content string) string {
@@ -440,15 +660,69 @@ func updateStrategyTemplateAITask(taskID string, progress int, stage, message st
 	appendStrategyTemplateAIEventLocked(task, progress, stage, message)
 }
 
-func appendStrategyTemplateAIEventLocked(task *strategyTemplateAIGenerationTask, progress int, stage, message string) {
-	now := time.Now().UTC()
-	task.Progress = progress
-	task.Stage = stage
-	task.UpdatedAt = now
-	task.Events = append(task.Events, strategyTemplateAIProgressEvent{Progress: progress, Stage: stage, Message: message, Time: now})
+func updateStrategyTemplateAIToolEvent(taskID string, progress int, stage, tool, message string) {
+	strategyTemplateAITaskStore.Lock()
+	defer strategyTemplateAITaskStore.Unlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil || (task.Status != "queued" && task.Status != "running") {
+		return
+	}
+	task.Status = "running"
+	appendStrategyTemplateAIToolEventLocked(task, progress, stage, tool, message)
 }
 
-func finishStrategyTemplateAITask(taskID, generatedJSON, validationError string) {
+func updateStrategyTemplateAIRound(taskID string, round, progress int, message string) {
+	strategyTemplateAITaskStore.Lock()
+	defer strategyTemplateAITaskStore.Unlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil || (task.Status != "queued" && task.Status != "running") {
+		return
+	}
+	task.Status = "running"
+	task.Round = round
+	appendStrategyTemplateAIEventLocked(task, progress, "agent_round", message)
+}
+
+func appendStrategyTemplateAIMessage(taskID, role, content string) {
+	strategyTemplateAITaskStore.Lock()
+	defer strategyTemplateAITaskStore.Unlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil {
+		return
+	}
+	lastIndex := len(task.Messages) - 1
+	if lastIndex >= 0 && task.Messages[lastIndex].Role == role {
+		task.Messages[lastIndex].Content += "\n\n" + content
+	} else {
+		task.Messages = append(task.Messages, llm.Message{Role: role, Content: content})
+	}
+	task.UpdatedAt = time.Now().UTC()
+}
+
+func getStrategyTemplateAIMessages(taskID string) ([]llm.Message, bool) {
+	strategyTemplateAITaskStore.RLock()
+	defer strategyTemplateAITaskStore.RUnlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil {
+		return nil, false
+	}
+	return append([]llm.Message(nil), task.Messages...), true
+}
+
+func recordStrategyTemplateAIRepair(taskID, errorMessage, stage string) {
+	payload, _ := json.Marshal(map[string]string{"error": errorMessage})
+	appendStrategyTemplateAIMessage(taskID, llm.RoleUser, "AGENT_FEEDBACK\n"+string(payload)+"\nCorrect the error using the full conversation. Return one tool or final response envelope.")
+	strategyTemplateAITaskStore.Lock()
+	defer strategyTemplateAITaskStore.Unlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil || task.Status != "running" {
+		return
+	}
+	task.ValidationError = errorMessage
+	appendStrategyTemplateAIEventLocked(task, minStrategyTemplateAIProgress(task.Progress+1, 95), stage, truncateStrategyTemplateAIEventMessage(errorMessage))
+}
+
+func recordStrategyTemplateAICandidate(taskID, generatedJSON, validationError string) {
 	strategyTemplateAITaskStore.Lock()
 	defer strategyTemplateAITaskStore.Unlock()
 	task := strategyTemplateAITaskStore.tasks[taskID]
@@ -457,12 +731,90 @@ func finishStrategyTemplateAITask(taskID, generatedJSON, validationError string)
 	}
 	task.JSON = generatedJSON
 	task.ValidationError = validationError
+	task.UpdatedAt = time.Now().UTC()
+}
+
+func appendStrategyTemplateAIEventLocked(task *strategyTemplateAIGenerationTask, progress int, stage, message string) {
+	appendStrategyTemplateAIToolEventLocked(task, progress, stage, "", message)
+}
+
+func appendStrategyTemplateAIToolEventLocked(task *strategyTemplateAIGenerationTask, progress int, stage, tool, message string) {
+	now := time.Now().UTC()
+	if stage != "queued" && progress < task.Progress {
+		progress = task.Progress
+	}
+	task.Progress = progress
+	task.Stage = stage
+	task.UpdatedAt = now
+	task.Events = append(task.Events, strategyTemplateAIProgressEvent{Progress: progress, Stage: stage, Tool: tool, Message: message, Time: now})
+}
+
+func finishStrategyTemplateAITask(taskID, generatedJSON, summary string) {
+	strategyTemplateAITaskStore.Lock()
+	defer strategyTemplateAITaskStore.Unlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil {
+		return
+	}
+	task.JSON = generatedJSON
+	task.ValidationError = ""
+	task.Error = ""
 	task.Status = "succeeded"
 	message := "JSON 已生成并通过框架校验"
-	if validationError != "" {
-		message = "JSON 已生成，但框架校验发现问题"
+	if strings.TrimSpace(summary) != "" {
+		message += "：" + truncateStrategyTemplateAIEventMessage(summary)
 	}
 	appendStrategyTemplateAIEventLocked(task, 100, "completed", message)
+	completedAt := task.UpdatedAt
+	task.CompletedAt = &completedAt
+}
+
+func ensureStrategyTemplateAITaskCanImport(taskID string) error {
+	strategyTemplateAITaskStore.RLock()
+	defer strategyTemplateAITaskStore.RUnlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil {
+		return fmt.Errorf("AI 生成任务不存在或已过期")
+	}
+	if task.Status == "queued" || task.Status == "running" {
+		return fmt.Errorf("AI 生成任务仍在运行，暂时不能导入")
+	}
+	if task.Imported {
+		return fmt.Errorf("该 AI 生成任务已经成功导入")
+	}
+	return nil
+}
+
+func recordStrategyTemplateAIImportError(taskID, generatedJSON, errorMessage string) {
+	payload, _ := json.Marshal(map[string]string{
+		"error": errorMessage,
+		"json":  generatedJSON,
+	})
+	appendStrategyTemplateAIMessage(taskID, llm.RoleUser, "IMPORT_ERROR\n"+string(payload)+"\nThe user may provide a revised prompt. Preserve prior evidence and generate a complete corrected JSON when asked.")
+	strategyTemplateAITaskStore.Lock()
+	defer strategyTemplateAITaskStore.Unlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil {
+		return
+	}
+	task.JSON = generatedJSON
+	task.ValidationError = errorMessage
+	appendStrategyTemplateAIEventLocked(task, 100, "import_failed", "导入失败："+truncateStrategyTemplateAIEventMessage(errorMessage))
+}
+
+func markStrategyTemplateAITaskImported(taskID string) {
+	strategyTemplateAITaskStore.Lock()
+	defer strategyTemplateAITaskStore.Unlock()
+	task := strategyTemplateAITaskStore.tasks[taskID]
+	if task == nil {
+		return
+	}
+	task.Imported = true
+	task.Status = "succeeded"
+	task.Error = ""
+	task.ValidationError = ""
+	task.Messages = nil
+	appendStrategyTemplateAIEventLocked(task, 100, "imported", "策略模板已成功导入，对话上下文已结束")
 	completedAt := task.UpdatedAt
 	task.CompletedAt = &completedAt
 }
@@ -494,12 +846,13 @@ func getStrategyTemplateAITask(taskID string) (strategyTemplateAIGenerationTask,
 func cloneStrategyTemplateAITask(task *strategyTemplateAIGenerationTask) strategyTemplateAIGenerationTask {
 	cloned := *task
 	cloned.Events = append([]strategyTemplateAIProgressEvent(nil), task.Events...)
+	cloned.Messages = nil
 	return cloned
 }
 
 func cleanupStrategyTemplateAITasksLocked(now time.Time) {
 	for taskID, task := range strategyTemplateAITaskStore.tasks {
-		if task.Status == "queued" || task.Status == "running" || now.Sub(task.UpdatedAt) <= strategyTemplateAITaskRetention {
+		if task.Status == "queued" || task.Status == "running" || !task.Imported || now.Sub(task.UpdatedAt) <= strategyTemplateAITaskRetention {
 			continue
 		}
 		delete(strategyTemplateAITaskStore.tasks, taskID)
@@ -519,11 +872,20 @@ func isLLMResponseTruncated(finishReason string) bool {
 	return finishReason == "length" || finishReason == "max_tokens"
 }
 
-func joinStrategyTemplateAIValidationErrors(current, next string) string {
-	if current == "" {
-		return next
+func minStrategyTemplateAIProgress(value, maximum int) int {
+	if value > maximum {
+		return maximum
 	}
-	return current + "；" + next
+	return value
+}
+
+func truncateStrategyTemplateAIEventMessage(message string) string {
+	const maxLength = 300
+	value := []rune(strings.TrimSpace(message))
+	if len(value) <= maxLength {
+		return string(value)
+	}
+	return string(value[:maxLength]) + "..."
 }
 
 func truncateStrategyTemplateAIError(message string) string {
