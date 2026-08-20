@@ -24,6 +24,10 @@
 
 ## 自定义交易策略
 
+### ai 生成策略
+![ai-strategy-create](./img/ui/ai-strategy-create.png)
+
+### 说明
 新版 UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法，再到 `合约交易 → 合约交易` 为单个币种选择全局策略或自定义策略。
 
 <a href="./STRATEGY.CN.md">自定义详情</a>
