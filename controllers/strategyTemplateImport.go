@@ -40,23 +40,37 @@ type parsedStrategyTemplateImport struct {
 
 func (ctrl *StrategyTemplateController) Import() {
 	data := ctrl.Ctx.Input.RequestBody
-	if len(bytes.TrimSpace(data)) == 0 {
-		ctrl.strategyTemplateImportError("请输入策略模板 JSON")
-		return
-	}
-	if int64(len(data)) > maxStrategyTemplateImportSize {
-		ctrl.strategyTemplateImportError("JSON 内容不能超过 2 MB")
-		return
-	}
-
-	template, err := parseStrategyTemplateImport(data)
+	action, stored, err := importStrategyTemplateData(data)
 	if err != nil {
 		ctrl.strategyTemplateImportError(err.Error())
 		return
 	}
 
-	o := orm.NewOrm()
+	ctrl.Ctx.Resp(map[string]interface{}{
+		"code": 200,
+		"data": map[string]interface{}{
+			"action":   action,
+			"template": stored,
+		},
+		"msg": "success",
+	})
+}
+
+func importStrategyTemplateData(data []byte) (string, models.StrategyTemplates, error) {
 	var stored models.StrategyTemplates
+	if len(bytes.TrimSpace(data)) == 0 {
+		return "", stored, errors.New("请输入策略模板 JSON")
+	}
+	if int64(len(data)) > maxStrategyTemplateImportSize {
+		return "", stored, errors.New("JSON 内容不能超过 2 MB")
+	}
+
+	template, err := parseStrategyTemplateImport(data)
+	if err != nil {
+		return "", stored, err
+	}
+
+	o := orm.NewOrm()
 	err = o.QueryTable("strategy_templates").Filter("Name", template.Name).One(&stored)
 	now := time.Now().UnixMilli()
 	action := "updated"
@@ -73,8 +87,7 @@ func (ctrl *StrategyTemplateController) Import() {
 		stored.ID, err = o.Insert(&stored)
 		action = "created"
 	case err != nil:
-		ctrl.strategyTemplateImportError("查询同名策略模板失败: " + err.Error())
-		return
+		return "", stored, fmt.Errorf("查询同名策略模板失败: %w", err)
 	default:
 		stored.Technology = template.Technology
 		stored.Strategy = template.Strategy
@@ -83,18 +96,9 @@ func (ctrl *StrategyTemplateController) Import() {
 	}
 
 	if err != nil {
-		ctrl.strategyTemplateImportError("保存策略模板失败: " + err.Error())
-		return
+		return "", stored, fmt.Errorf("保存策略模板失败: %w", err)
 	}
-
-	ctrl.Ctx.Resp(map[string]interface{}{
-		"code": 200,
-		"data": map[string]interface{}{
-			"action":   action,
-			"template": stored,
-		},
-		"msg": "success",
-	})
+	return action, stored, nil
 }
 
 func (ctrl *StrategyTemplateController) strategyTemplateImportError(message string) {
