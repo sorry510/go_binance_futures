@@ -43,8 +43,13 @@ type DingDingApiMarkDownData struct {
 // 钉钉通知, 频率限制 1分钟20次
 // https://open.dingtalk.com/document/orgapp/the-robot-sends-a-group-message
 func DingDingApi(content string, pusher Pusher) {
-  if _, err := webnotification.Publish(pusher.GetModuleName(), content); err != nil {
+	dingDingAPI(content, pusher, webnotification.PublishOptions{})
+}
+
+func dingDingAPI(content string, pusher Pusher, options webnotification.PublishOptions) {
+  if _, err := webnotification.PublishWithOptions(pusher.GetModuleName(), content, options); err != nil {
     logs.Error("save web notification error:", err)
+		return
   }
   dingding_token := g_dingding_token
   dingding_word := g_dingding_word
@@ -434,4 +439,41 @@ func (pusher DingDing) FuturesPriceChangeNotice(params FuturesNoticeParams) {
     nowTime(),
   )
   DingDingApi(text, pusher)
+}
+
+func (pusher DingDing) FuturesLiquidationAggregate(params FuturesLiquidationAggregateParams) {
+	text := `
+## %s
+#### **{futures.coin}**：<font color="#008000">%s</font>
+#### **{futures.liquidation_side}**：<font color="#FF0000">%s</font>
+#### **{futures.aggregate_notional}**：<font color="#FF0000">%.2f USDT</font>
+#### **{futures.order_count}**：<font color="#008000">%d</font>
+#### **{futures.aggregate_window}**：<font color="#008000">%d s</font>
+#### **{futures.notional_threshold}**：<font color="#008000">%.2f USDT</font>
+#### **{futures.window_start}**：%s
+#### **{futures.window_end}**：%s
+
+> author <sorry510sf@gmail.com>`
+
+	text = fmt.Sprintf(lang.LangMatch(text),
+		params.Symbol+params.Title,
+		params.Symbol,
+		lang.Lang("futures.liquidation_"+params.LiquidationSide),
+		params.AggregateNotional,
+		params.OrderCount,
+		params.WindowSec,
+		params.Threshold,
+		formatMillis(params.WindowStart),
+		formatMillis(params.WindowEnd),
+	)
+	dingDingAPI(text, pusher, webnotification.PublishOptions{
+		Level:             "warning",
+		EventType:         "futures_liquidation_aggregate",
+		Symbol:            params.Symbol,
+		LiquidationSide:   params.LiquidationSide,
+		AggregateNotional: params.AggregateNotional,
+		OrderCount:        params.OrderCount,
+		WindowStart:       params.WindowStart,
+		WindowEnd:         params.WindowEnd,
+	})
 }
