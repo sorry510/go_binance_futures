@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"strings"
 
+	// Loads the global config before the package-level reads below run.
+	_ "go_binance_futures/bootstrap"
+
 	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/server/web/context"
 	"github.com/golang-jwt/jwt/v5"

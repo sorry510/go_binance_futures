@@ -3,8 +3,10 @@ package lang
 import (
 	"encoding/json"
 	"fmt"
+	"go_binance_futures/bootstrap"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -23,7 +25,9 @@ func ReadLangJsonFile(filePath string) (langTextMap map[string]interface{}, err 
 	if filePath == "" {
 		lang := GetLanguage()
 		logs.Info("use lang:", lang)
-		filePath = fmt.Sprintf("./lang/config/%s.json", lang)
+		// Resolve from the project root so the lookup also works when the
+		// process starts in a package directory, e.g. during "go test".
+		filePath = filepath.Join(bootstrap.ProjectRoot(), "lang", "config", lang+".json")
 	}
 	jsonFile, err := os.Open(filePath)
     if err != nil {
