@@ -54,7 +54,17 @@
     "stop_loss_price": "stop loss price",
     "target_half_profit_price": "half profit price",
     "target_all_profit_price": "all profit price",
-    "desired_price": "desired price"
+    "desired_price": "desired price",
+    "liquidation_aggregate_title": "large liquidation aggregate alert",
+    "liquidation_side": "liquidation side",
+    "liquidation_long": "long liquidation",
+    "liquidation_short": "short liquidation",
+    "aggregate_notional": "aggregate notional",
+    "order_count": "liquidation order count",
+    "aggregate_window": "aggregate window",
+    "notional_threshold": "alert threshold",
+    "window_start": "window start",
+    "window_end": "window end"
   },
   "spot": {
     "coin": "coin",

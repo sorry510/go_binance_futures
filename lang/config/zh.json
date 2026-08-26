@@ -54,7 +54,17 @@
     "stop_loss_price": "止损价格",
     "target_half_profit_price": "半仓止盈价格",
     "target_all_profit_price": "全仓止盈价格",
-    "desired_price": "期望止盈价格"
+    "desired_price": "期望止盈价格",
+    "liquidation_aggregate_title": "大额强平聚合告警",
+    "liquidation_side": "强平方向",
+    "liquidation_long": "多单爆仓",
+    "liquidation_short": "空单爆仓",
+    "aggregate_notional": "累计名义金额",
+    "order_count": "强平订单数",
+    "aggregate_window": "聚合窗口",
+    "notional_threshold": "告警阈值",
+    "window_start": "窗口开始",
+    "window_end": "窗口结束"
   },
   "spot": {
     "coin": "币种",

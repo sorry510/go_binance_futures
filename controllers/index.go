@@ -89,6 +89,9 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"WsFuturesFastMoveCooldownSec": systemConfig.WsFuturesFastMoveCooldownSec,
 			"WsFuturesFastMoveWindows": systemConfig.WsFuturesFastMoveWindows,
 			"WsFuturesLiquidationEnable": systemConfig.WsFuturesLiquidationEnable,
+			"WsFuturesLiquidationAlertWindowSec": systemConfig.WsFuturesLiquidationAlertWindowSec,
+			"WsFuturesLiquidationAlertNotionalThreshold": systemConfig.WsFuturesLiquidationAlertNotionalThreshold,
+			"WsFuturesLiquidationAlertCooldownSec": systemConfig.WsFuturesLiquidationAlertCooldownSec,
 			
 			"externalLinks": externalLinks,
 		},
