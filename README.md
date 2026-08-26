@@ -12,7 +12,7 @@
 ## 功能
 
 ## 实时推送
-> dingding, slack
+> dingding, slack, 网页 websocket 通知
 
 - 钉钉
 ![钉钉推送1](./img/zh/dingding_future1.jpg)
@@ -22,13 +22,16 @@
 - slack
 ![slack](./img/zh/listen_slack.jpg)
 
+- 网页 websocket 通知
+![ws1](./img/ui/ws-notification1.png)
+
 ## 自定义交易策略
 
 ### ai 生成策略
 ![ai-strategy-create](./img/ui/ai-strategy-create.png)
 
 ### 说明
-新版 UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法，再到 `合约交易 → 合约交易` 为单个币种选择全局策略或自定义策略。
+UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法，再到 `合约交易 → 合约交易` 为单个币种选择全局策略或自定义策略。
 
 <a href="./STRATEGY.CN.md">自定义详情</a>
 
@@ -37,7 +40,7 @@
 
 # 功能
 
-## 新版 Web UI
+## Web UI
 
 访问 `http://<服务器 IP>:<web.port>/zmkm/index.html`，登录后通过左侧菜单进入各功能页。登录账号和密码来自 `conf/app.conf` 的 `web.username`、`web.password`。
 
@@ -58,60 +61,60 @@
 | 系统配置 | 在线编辑 `conf/app.conf`，并提供保存、重启服务和停止服务按钮 |
 | 日志 | 查看 `web.commend_log` 命令返回的服务日志 |
 
-### 新版 UI 页面截图
+### UI 页面截图
 
-截图使用当前新版 UI。涉及账户、订单、配置密钥和日志正文的页面只展示安全区域。
+截图使用当前UI。涉及账户、订单、配置密钥和日志正文的页面只展示安全区域。
 
 #### 配置中心
-![新版 UI - 配置中心](./img/ui/dashboard.jpg)
+![UI - 配置中心](./img/ui/dashboard.jpg)
 
 #### 合约交易
-![新版 UI - 合约交易](./img/ui/futures-symbols.png)
+![UI - 合约交易](./img/ui/futures-symbols.png)
 
 #### 合约订单
-![新版 UI - 合约订单](./img/ui/futures-orders.jpg)
+![UI - 合约订单](./img/ui/futures-orders.jpg)
 
 #### 合约账户
-![新版 UI - 合约账户](./img/ui/futures-account.jpg)
+![UI - 合约账户](./img/ui/futures-account.jpg)
 
 #### 本地合约账户
-![新版 UI - 本地合约账户](./img/ui/local-futures-account.jpg)
+![UI - 本地合约账户](./img/ui/local-futures-account.jpg)
 
 #### 策略模板
-![新版 UI - 策略模板](./img/ui/strategy-templates.jpg)
+![UI - 策略模板](./img/ui/strategy-templates.jpg)
 
 #### 测试结果
-![新版 UI - 测试结果](./img/ui/test-results.jpg)
+![UI - 测试结果](./img/ui/test-results.jpg)
 
 #### 市场波动日志
-![新版 UI - 市场波动日志](./img/ui/market-volatility-logs.jpg)
+![UI - 市场波动日志](./img/ui/market-volatility-logs.jpg)
 
 #### 现货提醒
-![新版 UI - 现货提醒](./img/ui/spot-alerts.jpg)
+![UI - 现货提醒](./img/ui/spot-alerts.jpg)
 
 #### 合约提醒
-![新版 UI - 合约提醒](./img/ui/futures-alerts.jpg)
+![UI - 合约提醒](./img/ui/futures-alerts.jpg)
 
 #### 现货监听
-![新版 UI - 现货监听](./img/ui/spot-monitoring.jpg)
+![UI - 现货监听](./img/ui/spot-monitoring.jpg)
 
 #### 合约监听
-![新版 UI - 合约监听](./img/ui/futures-monitoring.jpg)
+![UI - 合约监听](./img/ui/futures-monitoring.jpg)
 
 #### 资金费率监听
-![新版 UI - 资金费率监听](./img/ui/funding-rate.jpg)
+![UI - 资金费率监听](./img/ui/funding-rate.jpg)
 
 #### 抢新配置
-![新版 UI - 抢新配置](./img/ui/new-coin-rush.jpg)
+![UI - 抢新配置](./img/ui/new-coin-rush.jpg)
 
 #### 通知配置
-![新版 UI - 通知配置](./img/ui/notification-config.jpg)
+![UI - 通知配置](./img/ui/notification-config.jpg)
 
 #### 系统配置
-![新版 UI - 系统配置](./img/ui/system-config.jpg)
+![UI - 系统配置](./img/ui/system-config.jpg)
 
 #### 日志
-![新版 UI - 日志](./img/ui/service-logs.jpg)
+![UI - 日志](./img/ui/service-logs.jpg)
 
 ## 合约交易
 
@@ -248,7 +251,7 @@
 ## 如何使用
 > 在 https://github.com/sorry510/go_binance_futures/releases 页面下载最新对应操作系统的发布版解压后配置运行或者使用`golang`自行编译
 
-### 常见问题（新版 UI）
+### 常见问题（UI）
 
 1. **登录后从哪里开启自动交易？** 进入 `配置中心 → 合约交易`，依次检查合约交易总开关、`WebSocket`、`允许做多/允许做空`；再到 `合约交易 → 合约交易` 检查目标币种是否启用。
 2. **在哪里查看模拟交易？** 打开 `配置中心 → 合约交易 → 测试策略`，通过 `查看测试结果` 按钮或 `合约交易 → 测试结果` 查看。
@@ -306,7 +309,7 @@ dbname = ""
 ### 交易策略
 > 参考 `feature/strategy` 文件夹
 
-### 新版 UI 常用按钮
+### UI 常用按钮
 
 - `合约交易 → 合约交易 → 全部开启/全部关闭`：批量修改当前币种列表的启用状态，操作前请确认筛选范围。
 - `合约交易 → 合约交易 → 批量编辑`：批量修改币种参数。
@@ -364,7 +367,7 @@ https://t.me/+neEHA8VSgF1jMTg9
 
 
 ## 开发
->安装最新版 golang
+>安装最golang
 
 ## 配置文件
 

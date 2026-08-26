@@ -40,8 +40,13 @@ type Text struct {
 }
 
 func SlackApi(content string, pusher Pusher) {
-  if _, err := webnotification.Publish(pusher.GetModuleName(), content); err != nil {
+	slackAPI(content, pusher, webnotification.PublishOptions{})
+}
+
+func slackAPI(content string, pusher Pusher, options webnotification.PublishOptions) {
+  if _, err := webnotification.PublishWithOptions(pusher.GetModuleName(), content, options); err != nil {
     logs.Error("save web notification error:", err)
+		return
   }
   slack_token := g_slack_token
   slack_channel_id := g_slack_channel_id
@@ -436,4 +441,41 @@ func (pusher Slack) FuturesPriceChangeNotice(params FuturesNoticeParams) {
     nowTime(),
   )
   DingDingApi(text, pusher)
+}
+
+func (pusher Slack) FuturesLiquidationAggregate(params FuturesLiquidationAggregateParams) {
+	text := `
+## %s
+{futures.coin}：%s
+{futures.liquidation_side}：%s
+{futures.aggregate_notional}：%.2f USDT
+{futures.order_count}：%d
+{futures.aggregate_window}：%d s
+{futures.notional_threshold}：%.2f USDT
+{futures.window_start}：%s
+{futures.window_end}：%s
+
+> author <sorry510sf@gmail.com>`
+
+	text = fmt.Sprintf(lang.LangMatch(text),
+		params.Symbol+params.Title,
+		params.Symbol,
+		lang.Lang("futures.liquidation_"+params.LiquidationSide),
+		params.AggregateNotional,
+		params.OrderCount,
+		params.WindowSec,
+		params.Threshold,
+		formatMillis(params.WindowStart),
+		formatMillis(params.WindowEnd),
+	)
+	slackAPI(text, pusher, webnotification.PublishOptions{
+		Level:             "warning",
+		EventType:         "futures_liquidation_aggregate",
+		Symbol:            params.Symbol,
+		LiquidationSide:   params.LiquidationSide,
+		AggregateNotional: params.AggregateNotional,
+		OrderCount:        params.OrderCount,
+		WindowStart:       params.WindowStart,
+		WindowEnd:         params.WindowEnd,
+	})
 }
