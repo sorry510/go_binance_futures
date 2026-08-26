@@ -30,6 +30,9 @@ type Config struct {
 	WsFuturesFastMoveCooldownSec int `orm:"column(ws_futures_fast_move_cooldown_sec)" json:"ws_futures_fast_move_cooldown_sec"` // websocket 短周期快速波动通知冷却时间(秒)
 	WsFuturesFastMoveWindows string `orm:"column(ws_futures_fast_move_windows)" json:"ws_futures_fast_move_windows"` // websocket 短周期快速波动窗口配置，例如: 3m,5m,30m
 	WsFuturesLiquidationEnable int `orm:"column(ws_futures_liquidation_enable)" json:"ws_futures_liquidation_enable"` // websocket 强平订单采集开关
+	WsFuturesLiquidationAlertWindowSec int `orm:"column(ws_futures_liquidation_alert_window_sec);default(60)" json:"ws_futures_liquidation_alert_window_sec"` // BTCUSDT 大额强平聚合窗口(秒)
+	WsFuturesLiquidationAlertNotionalThreshold float64 `orm:"column(ws_futures_liquidation_alert_notional_threshold);digits(30);decimals(8);default(5000000)" json:"ws_futures_liquidation_alert_notional_threshold"` // BTCUSDT 大额强平聚合名义金额阈值(USDT)
+	WsFuturesLiquidationAlertCooldownSec int `orm:"column(ws_futures_liquidation_alert_cooldown_sec);default(300)" json:"ws_futures_liquidation_alert_cooldown_sec"` // BTCUSDT 大额强平聚合通知冷却时间(秒)
 	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值

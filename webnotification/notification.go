@@ -12,17 +12,42 @@ import (
 
 var htmlTagPattern = regexp.MustCompile(`<[^>]+>`)
 
+type PublishOptions struct {
+	Level             string
+	EventType         string
+	Symbol            string
+	LiquidationSide   string
+	AggregateNotional float64
+	OrderCount        int
+	WindowStart       int64
+	WindowEnd         int64
+}
+
 func Publish(module, content string) (*models.Notification, error) {
+	return PublishWithOptions(module, content, PublishOptions{})
+}
+
+func PublishWithOptions(module, content string, options PublishOptions) (*models.Notification, error) {
 	plainContent := normalizeContent(content)
 	notification := &models.Notification{
-		Title:      extractTitle(plainContent),
-		Content:    plainContent,
-		Module:     strings.TrimSpace(module),
-		Level:      "info",
-		CreateTime: time.Now().UnixMilli(),
+		Title:             extractTitle(plainContent),
+		Content:           plainContent,
+		Module:            strings.TrimSpace(module),
+		Level:             strings.TrimSpace(options.Level),
+		EventType:         strings.TrimSpace(options.EventType),
+		Symbol:            strings.ToUpper(strings.TrimSpace(options.Symbol)),
+		LiquidationSide:   strings.ToLower(strings.TrimSpace(options.LiquidationSide)),
+		AggregateNotional: options.AggregateNotional,
+		OrderCount:        options.OrderCount,
+		WindowStart:       options.WindowStart,
+		WindowEnd:         options.WindowEnd,
+		CreateTime:        time.Now().UnixMilli(),
 	}
 	if notification.Module == "" {
 		notification.Module = "system"
+	}
+	if notification.Level == "" {
+		notification.Level = "info"
 	}
 
 	id, err := orm.NewOrm().Insert(notification)
