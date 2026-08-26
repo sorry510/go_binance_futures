@@ -4,6 +4,9 @@ import (
 	"go_binance_futures/utils"
 	"strconv"
 
+	// Loads the global config before the package-level reads below run.
+	_ "go_binance_futures/bootstrap"
+
 	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/server/web"
 )
