@@ -40,8 +40,13 @@ func CollectFuturesLiquidationOrders(systemConfig *models.Config) {
 				return
 			}
 
-			if err := SaveFuturesLiquidationOrder(event); err != nil {
+			item, err := saveFuturesLiquidationOrder(event)
+			if err != nil {
 				logs.Error("save futures liquidation order error:", err)
+				return
+			}
+			if _, err := defaultFuturesLiquidationAlertAggregator.Evaluate(item, systemConfig); err != nil {
+				logs.Error("check futures liquidation aggregate alert error:", err)
 			}
 		}, func(err error) {
 			logs.Error("futures liquidation ws run error:", err)
@@ -95,13 +100,21 @@ func waitFuturesLiquidationWs(systemConfig *models.Config, doneC chan struct{}, 
 }
 
 func SaveFuturesLiquidationOrder(event *futures.WsLiquidationOrderEvent) error {
+	_, err := saveFuturesLiquidationOrder(event)
+	return err
+}
+
+func saveFuturesLiquidationOrder(event *futures.WsLiquidationOrderEvent) (models.FuturesLiquidationOrder, error) {
 	item, err := newFuturesLiquidationOrder(event)
 	if err != nil {
-		return err
+		return models.FuturesLiquidationOrder{}, err
 	}
 
 	_, err = orm.NewOrm().Insert(&item)
-	return err
+	if err != nil {
+		return models.FuturesLiquidationOrder{}, err
+	}
+	return item, nil
 }
 
 func newFuturesLiquidationOrder(event *futures.WsLiquidationOrderEvent) (models.FuturesLiquidationOrder, error) {
