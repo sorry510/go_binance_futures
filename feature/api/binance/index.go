@@ -13,6 +13,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	// Loads the global config before the package-level reads below run.
+	_ "go_binance_futures/bootstrap"
+
 	"github.com/adshao/go-binance/v2/delivery"
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/adapter/logs"
