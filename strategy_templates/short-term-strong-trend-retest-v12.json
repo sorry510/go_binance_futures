@@ -1,0 +1,79 @@
+{
+  "name": "短线强趋势精选回踩 v12",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1h_50",
+        "kline_interval": "1h",
+        "period": 50,
+        "enable": true
+      }
+    ],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_1h_14",
+        "kline_interval": "1h",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [
+      {
+        "name": "rsi_15m_14",
+        "kline_interval": "15m",
+        "period": 14,
+        "enable": true
+      }
+    ],
+    "kc": [],
+    "boll": [
+      {
+        "name": "boll_15m_20_2",
+        "kline_interval": "15m",
+        "period": 20,
+        "std_dev_multiplier": 2,
+        "enable": true
+      }
+    ],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "strong_trend_retest_long_open_v12",
+      "type": "long",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet strong_bull = MarketCondition == \"1\" && BasicTrend >= 0.5;\nlet mid = boll_15m_20_2.Mid[1];\nlet band_width = boll_15m_20_2.High[1] - boll_15m_20_2.Low[1];\nlet volatility_ok = mid > 0 && band_width / mid >= 0.008 && band_width / mid <= 0.06;\nlet direction_ok = adx_1h_14.ADX[1] >= 28 && adx_1h_14.PlusDI[1] >= adx_1h_14.MinusDI[1] * 1.25 && kline_1h.Close[1] > ema_1h_50.Data[1] && ema_1h_50.Data[1] > ema_1h_50.Data[2];\nlet pullback_reclaim = kline_15m.Close[2] <= boll_15m_20_2.Mid[2] && kline_15m.Low[2] <= boll_15m_20_2.Mid[2] && kline_15m.Close[1] > boll_15m_20_2.Mid[1] && kline_15m.Close[1] > kline_15m.Open[1];\nlet momentum_ok = rsi_15m_14.Data[2] <= 52 && rsi_15m_14.Data[1] >= 54 && rsi_15m_14.Data[1] <= 62 && rsi_15m_14.Data[1] > rsi_15m_14.Data[2];\nlet live_hold = kline_15m.Close[0] > boll_15m_20_2.Mid[0] && kline_15m.Close[0] >= kline_15m.Open[0] && kline_15m.Close[0] - boll_15m_20_2.Mid[0] <= band_width * 0.18 && rsi_15m_14.Data[0] >= 52;\n\nwarmup_ok && strong_bull && volatility_ok && direction_ok && pullback_reclaim && momentum_ok && live_hold",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "strong_trend_retest_short_open_v12",
+      "type": "short",
+      "code": "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet strong_bear = MarketCondition == \"5\" && BasicTrend <= -0.5;\nlet mid = boll_15m_20_2.Mid[1];\nlet band_width = boll_15m_20_2.High[1] - boll_15m_20_2.Low[1];\nlet volatility_ok = mid > 0 && band_width / mid >= 0.008 && band_width / mid <= 0.06;\nlet direction_ok = adx_1h_14.ADX[1] >= 28 && adx_1h_14.MinusDI[1] >= adx_1h_14.PlusDI[1] * 1.25 && kline_1h.Close[1] < ema_1h_50.Data[1] && ema_1h_50.Data[1] < ema_1h_50.Data[2];\nlet pullback_reject = kline_15m.Close[2] >= boll_15m_20_2.Mid[2] && kline_15m.High[2] >= boll_15m_20_2.Mid[2] && kline_15m.Close[1] < boll_15m_20_2.Mid[1] && kline_15m.Close[1] < kline_15m.Open[1];\nlet momentum_ok = rsi_15m_14.Data[2] >= 48 && rsi_15m_14.Data[1] <= 46 && rsi_15m_14.Data[1] >= 38 && rsi_15m_14.Data[1] < rsi_15m_14.Data[2];\nlet live_hold = kline_15m.Close[0] < boll_15m_20_2.Mid[0] && kline_15m.Close[0] <= kline_15m.Open[0] && boll_15m_20_2.Mid[0] - kline_15m.Close[0] <= band_width * 0.18 && rsi_15m_14.Data[0] <= 48;\n\nwarmup_ok && strong_bear && volatility_ok && direction_ok && pullback_reject && momentum_ok && live_hold",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "strong_trend_retest_long_close_v12",
+      "type": "close_long",
+      "code": "let hard_stop = ROI <= -3;\nlet hard_take = ROI >= 6;\nlet range_market = MarketCondition == \"3\" || MarketCondition == \"10\" || MarketCondition == \"11\";\nlet market_against = MarketCondition == \"4\" || MarketCondition == \"5\" || MarketCondition == \"9\";\nlet trend_failure = kline_1h.Close[0] < ema_1h_50.Data[0] && adx_1h_14.MinusDI[0] > adx_1h_14.PlusDI[0];\nlet momentum_reversal = rsi_15m_14.Data[0] < 48 && rsi_15m_14.Data[1] >= 48;\nlet range_target = range_market && kline_15m.Close[0] >= boll_15m_20_2.Mid[0] && rsi_15m_14.Data[0] >= 55;\nlet protect_profit = ROI >= 3 && (market_against || trend_failure || momentum_reversal || range_target);\nlet time_take = ROI >= 3 && Position.CreateTime > 0 && (NowTime - Position.CreateTime) / 1000 >= 86400;\n\nhard_stop || hard_take || protect_profit || time_take",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "strong_trend_retest_short_close_v12",
+      "type": "close_short",
+      "code": "let hard_stop = ROI <= -3;\nlet hard_take = ROI >= 6;\nlet range_market = MarketCondition == \"3\" || MarketCondition == \"10\" || MarketCondition == \"11\";\nlet market_against = MarketCondition == \"1\" || MarketCondition == \"2\" || MarketCondition == \"8\";\nlet trend_failure = kline_1h.Close[0] > ema_1h_50.Data[0] && adx_1h_14.PlusDI[0] > adx_1h_14.MinusDI[0];\nlet momentum_reversal = rsi_15m_14.Data[0] > 52 && rsi_15m_14.Data[1] <= 52;\nlet range_target = range_market && kline_15m.Close[0] <= boll_15m_20_2.Mid[0] && rsi_15m_14.Data[0] <= 45;\nlet protect_profit = ROI >= 3 && (market_against || trend_failure || momentum_reversal || range_target);\nlet time_take = ROI >= 3 && Position.CreateTime > 0 && (NowTime - Position.CreateTime) / 1000 >= 86400;\n\nhard_stop || hard_take || protect_profit || time_take",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
