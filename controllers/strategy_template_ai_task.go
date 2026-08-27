@@ -6,12 +6,14 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/llm"
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
+	"net"
 	"strconv"
 	"strings"
 	"sync"
@@ -25,16 +27,17 @@ const (
 	strategyTemplateAITaskRetention  = 30 * time.Minute
 	maxStrategyTemplateAIPromptSize  = 12 * 1024
 	maxStrategyTemplateAIContextSize = 256 * 1024
-	maxStrategyTemplateAIRounds      = 15 // 最大15循环
+	maxStrategyTemplateAIRounds      = 10 // Maximum agent rounds
 )
 
-const strategyTemplateAISystemPrompt = `Generate valid custom futures strategy-template JSON for go_binance_futures. You have at most 10 agent rounds. Each response must be one compact JSON object without Markdown or extra text.
+const strategyTemplateAISystemPrompt = `Generate valid custom futures strategy-template JSON for go_binance_futures. You have at most 15 agent rounds. Each response must be one compact JSON object without Markdown or extra text.
 
 Agent protocol:
 - Tool: {"action":"tool","summary":"reason/current findings","tool":"NAME","arguments":{...}}
 - Final: {"action":"final","summary":"design/evidence summary","json":{"name":"...","technology":{},"strategy":[]}}
 - Tools: get_features arguments are sort,symbol_type,symbol,enable,margin_type,pin,page,limit (default/max limit 20); get_test_strategy_results arguments are symbol,position_side,start_time,end_time,type,page,limit (default/max limit 100). TOOL_RESULT arrives in the next user message; include relevant findings in the next summary. Avoid duplicate calls without a new reason.
 - A request for test results MUST call get_test_strategy_results first, preserving symbol/side/time/type filters and defaulting to page=1,limit=100. A request for a coin/contract/symbol's data MUST call get_features first with that symbol and requested filters. If both are requested, call both in separate rounds.
+- AGENT_FEEDBACK means the immediately preceding response failed. Fix the exact reported error and return a complete replacement; never repeat the failed response unchanged. TOOL_RESULT with ok=false means the tool call failed and its name or arguments must be corrected before retrying.
 
 Final json contract:
 - Root is exactly {"name":string,"technology":object,"strategy":array}.
@@ -44,6 +47,7 @@ Final json contract:
 - Every strategy item is exactly {name,type,code,fullScreen,enable}; names are unique, booleans are booleans, type is long|short|close_long|close_short, and expr code must compile to Boolean.
 
 Indicator terms and generated values (each configured indicator also has KlineInterval):
+- Indicators are objects named exactly by their configured name. Access fields with a dot: if name is rsi_14, use rsi_14.Data[0], never rsi_14_Data[0]. Do not invent flattened variables.
 - ma (Simple Moving Average): arithmetic mean of Close; smooth lagging trend. Exposes Period,Data.
 - ema (Exponential Moving Average): recent Close has greater weight than MA, so it reacts faster. Exposes Period,Data.
 - macd (Moving Average Convergence Divergence): DIF=fast EMA-slow EMA, DEA=signal EMA of DIF, Histogram=DIF-DEA; crosses/zero line show momentum direction and Histogram its expansion/contraction. Exposes FastPeriod,SlowPeriod,SignalPeriod,DIF,DEA,Histogram.
@@ -120,6 +124,8 @@ type strategyTemplateAIGenerationTask struct {
 	UpdatedAt       time.Time                         `json:"updatedAt"`
 	CompletedAt     *time.Time                        `json:"completedAt,omitempty"`
 	Messages        []llm.Message                     `json:"-"`
+	LastRepairError string                            `json:"-"`
+	RepairRepeats   int                               `json:"-"`
 }
 
 var strategyTemplateAITaskStore = struct {
@@ -230,6 +236,8 @@ func startStrategyTemplateAITask(request strategyTemplateAIGenerationRequest) (s
 		task.Stage = "queued"
 		task.Round = 0
 		task.Error = ""
+		task.LastRepairError = ""
+		task.RepairRepeats = 0
 		task.CompletedAt = nil
 		appendStrategyTemplateAIEventLocked(task, 0, "queued", "已保留历史对话，开始新一轮生成")
 	} else {
@@ -270,16 +278,23 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 
 	lastError := "AI 未在限定轮数内返回合法策略 JSON"
 	for round := 1; round <= maxStrategyTemplateAIRounds; round++ {
-		progress := 8 + round*7
+		progress := strategyTemplateAIRoundProgress(round)
 		updateStrategyTemplateAIRound(taskID, round, progress, fmt.Sprintf("Agent 第 %d/%d 轮：正在分析上下文并决定下一步", round, maxStrategyTemplateAIRounds))
 		messages, exists := getStrategyTemplateAIMessages(taskID)
 		if !exists {
 			return
 		}
+		messages = compactStrategyTemplateAIRepairHistory(messages)
 		response, err := generateStrategyTemplateWithProgress(taskID, client, messages, round)
 		if err != nil {
 			logs.Error("strategy template AI task %s round %d: %s", taskID, round, err.Error())
-			failStrategyTemplateAITask(taskID, "Agent 第 "+strconv.Itoa(round)+" 轮调用失败: "+truncateStrategyTemplateAIError(err.Error()))
+			lastError = "Agent 第" + strconv.Itoa(round) + "轮调用失败: " + truncateStrategyTemplateAIError(err.Error())
+			if isRetryableStrategyTemplateAILLMError(err) && round < maxStrategyTemplateAIRounds {
+				updateStrategyTemplateAITask(taskID, minStrategyTemplateAIProgress(progress+1, 94), "retrying_llm", lastError+"；将在下一轮重试")
+				time.Sleep(time.Second)
+				continue
+			}
+			failStrategyTemplateAITask(taskID, lastError)
 			return
 		}
 		if response == nil {
@@ -290,14 +305,14 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 
 		if isLLMResponseTruncated(response.FinishReason) {
 			lastError = "AI 响应因 max_tokens 限制被截断，请输出更紧凑的响应或提高配置"
-			recordStrategyTemplateAIRepair(taskID, lastError, "repairing_response")
+			recordStrategyTemplateAIRepair(taskID, round, lastError, "repairing_response")
 			continue
 		}
 
 		decision, err := parseStrategyTemplateAIAgentDecision(response.Content)
 		if err != nil {
 			lastError = "Agent 响应协议错误: " + err.Error()
-			recordStrategyTemplateAIRepair(taskID, lastError, "repairing_response")
+			recordStrategyTemplateAIRepair(taskID, round, lastError, "repairing_response")
 			continue
 		}
 
@@ -305,7 +320,7 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 		case "tool":
 			if strings.TrimSpace(decision.Tool) == "" {
 				lastError = "Agent 选择调用工具但未提供 tool"
-				recordStrategyTemplateAIRepair(taskID, lastError, "tool_error")
+				recordStrategyTemplateAIRepair(taskID, round, lastError, "tool_error")
 				continue
 			}
 			message := fmt.Sprintf("Agent 第 %d 轮决定调用 %s", round, decision.Tool)
@@ -328,13 +343,13 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 		case "final":
 			if missingTools := missingStrategyTemplateAITools(requiredTools, calledTools); len(missingTools) > 0 {
 				lastError = "用户已明确要求使用工具，返回最终 JSON 前必须先成功调用: " + strings.Join(missingTools, ", ")
-				recordStrategyTemplateAIRepair(taskID, lastError, "repairing_response")
+				recordStrategyTemplateAIRepair(taskID, round, lastError, "repairing_response")
 				continue
 			}
 			generatedJSON := strings.TrimSpace(string(decision.JSON))
 			if generatedJSON == "" || generatedJSON == "null" {
 				lastError = "Agent final 响应缺少 json 对象"
-				recordStrategyTemplateAIRepair(taskID, lastError, "repairing_json")
+				recordStrategyTemplateAIRepair(taskID, round, lastError, "repairing_json")
 				continue
 			}
 			generatedJSON = formatStrategyTemplateJSON(generatedJSON)
@@ -342,14 +357,14 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 			if err := validateGeneratedStrategyTemplateJSON([]byte(generatedJSON)); err != nil {
 				lastError = err.Error()
 				recordStrategyTemplateAICandidate(taskID, generatedJSON, lastError)
-				recordStrategyTemplateAIRepair(taskID, "JSON 校验失败: "+lastError, "repairing_json")
+				recordStrategyTemplateAIRepair(taskID, round, "JSON 校验失败: "+lastError, "repairing_json", generatedJSON)
 				continue
 			}
 			finishStrategyTemplateAITask(taskID, generatedJSON, decision.Summary)
 			return
 		default:
 			lastError = fmt.Sprintf("Agent 返回未知 action %q，仅支持 tool 或 final", decision.Action)
-			recordStrategyTemplateAIRepair(taskID, lastError, "repairing_response")
+			recordStrategyTemplateAIRepair(taskID, round, lastError, "repairing_response")
 		}
 	}
 
@@ -381,7 +396,7 @@ func generateStrategyTemplateWithProgress(taskID string, client llm.Client, mess
 			return generated.response, generated.err
 		case <-ticker.C:
 			waitedSeconds += 5
-			progress := 8 + round*7 + waitedSeconds/5
+			progress := strategyTemplateAIRoundProgress(round) + waitedSeconds/5
 			progress = minStrategyTemplateAIProgress(progress, 94)
 			updateStrategyTemplateAITask(taskID, progress, "waiting_llm", fmt.Sprintf("Agent 第 %d/%d 轮等待 AI 响应，已等待 %d 秒", round, maxStrategyTemplateAIRounds, waitedSeconds))
 		}
@@ -410,20 +425,25 @@ func buildStrategyTemplateAIUserPrompt(request strategyTemplateAIGenerationReque
 func requiredStrategyTemplateAITools(prompt string) []string {
 	normalized := strings.Join(strings.Fields(strings.ToLower(prompt)), "")
 	required := make([]string, 0, 2)
+	if strings.Contains(normalized, "get_test_strategy_results") {
+		required = append(required, "get_test_strategy_results")
+	}
 	testResultMarkers := []string{
 		"调用测试结果", "查询测试结果", "获取测试结果", "查看测试结果", "分析测试结果", "testresults",
 	}
-	for _, marker := range testResultMarkers {
-		if strings.Contains(normalized, marker) {
-			required = append(required, "get_test_strategy_results")
-			break
+	if len(required) == 0 {
+		for _, marker := range testResultMarkers {
+			if strings.Contains(normalized, marker) {
+				required = append(required, "get_test_strategy_results")
+				break
+			}
 		}
 	}
 
 	requestsData := strings.Contains(normalized, "获取") || strings.Contains(normalized, "查询") || strings.Contains(normalized, "get") || strings.Contains(normalized, "query")
 	mentionsInstrument := strings.Contains(normalized, "币") || strings.Contains(normalized, "合约") || strings.Contains(normalized, "coin") || strings.Contains(normalized, "contract") || strings.Contains(normalized, "symbol") || strings.Contains(normalized, "usdt") || strings.Contains(normalized, "usdc")
 	mentionsData := strings.Contains(normalized, "数据") || strings.Contains(normalized, "data")
-	if requestsData && mentionsInstrument && mentionsData {
+	if strings.Contains(normalized, "get_features") || (requestsData && mentionsInstrument && mentionsData) {
 		required = append(required, "get_features")
 	}
 	return required
@@ -480,7 +500,57 @@ func buildStrategyTemplateAIToolResultMessage(toolName, result string, toolErr e
 		}
 	}
 	data, _ := json.Marshal(payload)
+	if toolErr != nil {
+		return "TOOL_RESULT\n" + string(data) + "\nThis tool call failed. Correct the tool name or arguments before retrying; do not repeat the same call unchanged."
+	}
 	return "TOOL_RESULT\n" + string(data) + "\nSummarize the relevant facts in your next summary field, then choose another tool or return a final strategy JSON."
+}
+
+func compactStrategyTemplateAIRepairHistory(messages []llm.Message) []llm.Message {
+	lastFeedback := -1
+	for index, message := range messages {
+		if message.Role == llm.RoleUser && strings.HasPrefix(message.Content, "AGENT_FEEDBACK\n") {
+			lastFeedback = index
+		}
+	}
+	if lastFeedback < 0 {
+		return messages
+	}
+
+	skip := make(map[int]bool)
+	for index := 0; index < lastFeedback; index++ {
+		message := messages[index]
+		if message.Role != llm.RoleUser || !strings.HasPrefix(message.Content, "AGENT_FEEDBACK\n") {
+			continue
+		}
+		if strings.Contains(message.Content, "\n\nUser requirements:\n") {
+			continue
+		}
+		skip[index] = true
+		if index > 0 && messages[index-1].Role == llm.RoleAssistant {
+			skip[index-1] = true
+		}
+	}
+
+	result := make([]llm.Message, 0, len(messages)-len(skip))
+	for index, message := range messages {
+		if !skip[index] {
+			result = append(result, message)
+		}
+	}
+	return result
+}
+
+func isRetryableStrategyTemplateAILLMError(err error) bool {
+	if errors.Is(err, context.DeadlineExceeded) {
+		return true
+	}
+	var networkError net.Error
+	if errors.As(err, &networkError) && (networkError.Timeout() || networkError.Temporary()) {
+		return true
+	}
+	var httpError *llm.HTTPError
+	return errors.As(err, &httpError) && (httpError.StatusCode == 429 || httpError.StatusCode >= 500)
 }
 
 func extractStrategyTemplateJSON(content string) string {
@@ -690,6 +760,10 @@ func appendStrategyTemplateAIMessage(taskID, role, content string) {
 	if task == nil {
 		return
 	}
+	appendStrategyTemplateAIMessageLocked(task, role, content)
+}
+
+func appendStrategyTemplateAIMessageLocked(task *strategyTemplateAIGenerationTask, role, content string) {
 	lastIndex := len(task.Messages) - 1
 	if lastIndex >= 0 && task.Messages[lastIndex].Role == role {
 		task.Messages[lastIndex].Content += "\n\n" + content
@@ -709,17 +783,107 @@ func getStrategyTemplateAIMessages(taskID string) ([]llm.Message, bool) {
 	return append([]llm.Message(nil), task.Messages...), true
 }
 
-func recordStrategyTemplateAIRepair(taskID, errorMessage, stage string) {
-	payload, _ := json.Marshal(map[string]string{"error": errorMessage})
-	appendStrategyTemplateAIMessage(taskID, llm.RoleUser, "AGENT_FEEDBACK\n"+string(payload)+"\nCorrect the error using the full conversation. Return one tool or final response envelope.")
+func recordStrategyTemplateAIRepair(taskID string, round int, errorMessage, stage string, candidateJSON ...string) {
 	strategyTemplateAITaskStore.Lock()
 	defer strategyTemplateAITaskStore.Unlock()
 	task := strategyTemplateAITaskStore.tasks[taskID]
 	if task == nil || task.Status != "running" {
 		return
 	}
+	if task.LastRepairError == errorMessage {
+		task.RepairRepeats++
+	} else {
+		task.LastRepairError = errorMessage
+		task.RepairRepeats = 1
+	}
+	feedback := map[string]interface{}{
+		"type":         "repair_required",
+		"round":        round,
+		"stage":        stage,
+		"error":        errorMessage,
+		"repeat_count": task.RepairRepeats,
+	}
+	candidate := ""
+	if len(candidateJSON) > 0 {
+		candidate = candidateJSON[0]
+	}
+	guidance := buildStrategyTemplateAIRepairGuidance(errorMessage, candidate)
+	if guidance != "" {
+		feedback["required_fix"] = guidance
+	}
+	payload, _ := json.Marshal(feedback)
+	instruction := "The immediately preceding assistant response is invalid. Fix the exact error above and return one complete replacement tool or final envelope. Do not repeat the failed response unchanged."
+	if task.RepairRepeats > 1 {
+		instruction = fmt.Sprintf("The same error has occurred %d times. Apply required_fix exactly, rebuild every affected rule from the contract, and return a complete replacement. Do not copy the previous response.", task.RepairRepeats)
+	}
+	appendStrategyTemplateAIMessageLocked(task, llm.RoleUser, "AGENT_FEEDBACK\n"+string(payload)+"\n"+instruction)
 	task.ValidationError = errorMessage
 	appendStrategyTemplateAIEventLocked(task, minStrategyTemplateAIProgress(task.Progress+1, 95), stage, truncateStrategyTemplateAIEventMessage(errorMessage))
+}
+
+func buildStrategyTemplateAIRepairGuidance(errorMessage, candidateJSON string) string {
+	unknownName := extractStrategyTemplateAIUnknownName(errorMessage)
+	if unknownName == "" {
+		return ""
+	}
+
+	type indicatorName struct {
+		Name string `json:"name"`
+	}
+	var candidate struct {
+		Technology map[string][]indicatorName `json:"technology"`
+	}
+	_ = json.Unmarshal([]byte(candidateJSON), &candidate)
+	fieldsByFamily := map[string][]string{
+		"ma":         {"Data"},
+		"ema":        {"Data"},
+		"macd":       {"DIF", "DEA", "Histogram"},
+		"adx":        {"ADX", "PlusDI", "MinusDI"},
+		"mfi":        {"Data"},
+		"obv":        {"Data"},
+		"cci":        {"Data"},
+		"roc":        {"Data"},
+		"kdj":        {"K", "D", "J"},
+		"rsi":        {"Data"},
+		"kc":         {"High", "Mid", "Low"},
+		"boll":       {"High", "Mid", "Low"},
+		"donchian":   {"High", "Mid", "Low"},
+		"atr":        {"Data"},
+		"supertrend": {"Data", "Trend"},
+	}
+	for family, indicators := range candidate.Technology {
+		for _, indicator := range indicators {
+			for _, field := range fieldsByFamily[family] {
+				flattenedName := indicator.Name + "_" + field
+				if unknownName == flattenedName {
+					return fmt.Sprintf("Replace every %s[...] with %s.%s[...]. %s is the configured indicator object and %s is its field; flattened indicator variables do not exist.", unknownName, indicator.Name, field, indicator.Name, field)
+				}
+			}
+		}
+	}
+
+	knownFields := []string{"Data", "DIF", "DEA", "Histogram", "ADX", "PlusDI", "MinusDI", "K", "D", "J", "High", "Mid", "Low", "Trend", "Close", "Open", "Amount", "Qps"}
+	for _, field := range knownFields {
+		suffix := "_" + field
+		if strings.HasSuffix(unknownName, suffix) {
+			objectName := strings.TrimSuffix(unknownName, suffix)
+			return fmt.Sprintf("%s is not a runtime variable. Use object field syntax %s.%s[...] instead of the flattened form %s[...], and fix every occurrence in all strategy rules.", unknownName, objectName, field, unknownName)
+		}
+	}
+	return "Use only configured indicator object names, kline_INTERVAL objects, and documented global variables; do not invent flattened variable names."
+}
+
+func extractStrategyTemplateAIUnknownName(errorMessage string) string {
+	const marker = "unknown name "
+	position := strings.Index(errorMessage, marker)
+	if position < 0 {
+		return ""
+	}
+	value := errorMessage[position+len(marker):]
+	if end := strings.IndexAny(value, " \t\r\n("); end >= 0 {
+		value = value[:end]
+	}
+	return strings.TrimSpace(value)
 }
 
 func recordStrategyTemplateAICandidate(taskID, generatedJSON, validationError string) {
@@ -877,6 +1041,16 @@ func minStrategyTemplateAIProgress(value, maximum int) int {
 		return maximum
 	}
 	return value
+}
+
+func strategyTemplateAIRoundProgress(round int) int {
+	if round < 1 {
+		return 8
+	}
+	if round > maxStrategyTemplateAIRounds {
+		round = maxStrategyTemplateAIRounds
+	}
+	return 8 + round*82/maxStrategyTemplateAIRounds
 }
 
 func truncateStrategyTemplateAIEventMessage(message string) string {
