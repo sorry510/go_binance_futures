@@ -1,0 +1,52 @@
+package skill
+
+import (
+	"context"
+
+	"go_binance_futures/agent/validator"
+	"go_binance_futures/llm"
+)
+
+type Request struct {
+	Input          string         `json:"input"`
+	ConversationID string         `json:"conversation_id,omitempty"`
+	Metadata       map[string]any `json:"metadata,omitempty"`
+}
+
+type Skill interface {
+	Name() string
+	SystemPrompt() string
+	Tools() []string
+	MaxRounds() int
+	BuildInput(ctx context.Context, req Request) ([]llm.Message, error)
+	Validator() validator.FinalValidator
+}
+
+type Definition struct {
+	SkillName      string
+	Prompt         string
+	AllowedTools   []string
+	Rounds         int
+	BuildInputFunc func(context.Context, Request) ([]llm.Message, error)
+	FinalValidator validator.FinalValidator
+}
+
+func (definition Definition) Name() string         { return definition.SkillName }
+func (definition Definition) SystemPrompt() string { return definition.Prompt }
+func (definition Definition) Tools() []string {
+	return append([]string(nil), definition.AllowedTools...)
+}
+func (definition Definition) MaxRounds() int { return definition.Rounds }
+func (definition Definition) BuildInput(ctx context.Context, req Request) ([]llm.Message, error) {
+	if definition.BuildInputFunc != nil {
+		return definition.BuildInputFunc(ctx, req)
+	}
+	return []llm.Message{{Role: llm.RoleUser, Content: req.Input}}, nil
+}
+
+func (definition Definition) Validator() validator.FinalValidator {
+	if definition.FinalValidator != nil {
+		return definition.FinalValidator
+	}
+	return validator.Passthrough{}
+}
