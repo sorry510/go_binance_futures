@@ -7,7 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
+	"strings"
+	"syscall"
 	"time"
 
 	"go_binance_futures/agent/task"
@@ -42,7 +45,21 @@ func (runner *DefaultRunner) record(item *task.Task, status task.Status, stage s
 	item.Stage = stage
 	item.Progress = progress
 	item.UpdatedAt = now
-	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Message: message, Skill: item.Skill, Time: now}
+	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Round: item.Round, Message: message, Skill: item.Skill, Time: now}
+	item.Events = append(item.Events, event)
+	_ = runner.cfg.Tasks.Save(context.Background(), item)
+	if runner.cfg.EventHook != nil {
+		runner.cfg.EventHook(event)
+	}
+}
+
+func (runner *DefaultRunner) recordToolWaiting(item *task.Task, stage string, progress int, toolName, message string) {
+	now := time.Now().UTC()
+	item.Status = task.StatusWaitingTool
+	item.Stage = stage
+	item.Progress = progress
+	item.UpdatedAt = now
+	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Round: item.Round, Message: message, Skill: item.Skill, Tool: toolName, Status: "running", Time: now}
 	item.Events = append(item.Events, event)
 	_ = runner.cfg.Tasks.Save(context.Background(), item)
 	if runner.cfg.EventHook != nil {
@@ -56,7 +73,7 @@ func (runner *DefaultRunner) recordTool(item *task.Task, stage string, progress 
 	item.Stage = stage
 	item.Progress = progress
 	item.UpdatedAt = now
-	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Message: message, Skill: item.Skill, Tool: toolName, Status: outcome, DurationMs: duration.Milliseconds(), Time: now}
+	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Round: item.Round, Message: message, Skill: item.Skill, Tool: toolName, Status: outcome, DurationMs: duration.Milliseconds(), Time: now}
 	item.Events = append(item.Events, event)
 	_ = runner.cfg.Tasks.Save(context.Background(), item)
 	if runner.cfg.EventHook != nil {
@@ -89,7 +106,7 @@ func (runner *DefaultRunner) finishContextError(item *task.Task, err error) erro
 	return runner.fail(item, "timeout", err)
 }
 
-func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.Request) (*llm.Response, error) {
+func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.Request, item *task.Task, progress int) (*llm.Response, error) {
 	attempts := runner.cfg.Retry.MaxAttempts
 	if attempts < 1 {
 		attempts = 1
@@ -104,6 +121,8 @@ func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.
 		if ctx.Err() != nil || !retryableLLMError(err) || attempt == attempts {
 			break
 		}
+		runner.record(item, task.StatusWaitingLLM, "retrying_llm", min(progress+1, 94),
+			fmt.Sprintf("LLM request failed; retrying attempt %d/%d: %s", attempt+1, attempts, err.Error()))
 		if runner.cfg.Retry.Delay > 0 {
 			timer := time.NewTimer(runner.cfg.Retry.Delay)
 			select {
@@ -119,6 +138,10 @@ func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.
 
 func retryableLLMError(err error) bool {
 	if errors.Is(err, context.DeadlineExceeded) {
+		return true
+	}
+	if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) || errors.Is(err, net.ErrClosed) ||
+		errors.Is(err, syscall.ECONNRESET) || errors.Is(err, syscall.EPIPE) {
 		return true
 	}
 	var networkError net.Error
@@ -152,5 +175,21 @@ func repairFeedback(kind, message string) llm.Message {
 		Role: llm.RoleUser,
 		Content: "AGENT_FEEDBACK\n" + string(payload) +
 			"\nThe previous response is invalid. Return one complete replacement tool or final decision.",
+	}
+}
+
+func (runner *DefaultRunner) appendRuntimeMessage(taskID string, messages *[]llm.Message, message llm.Message) {
+	*messages = append(*messages, message)
+	if runner.cfg.MessageHook != nil {
+		runner.cfg.MessageHook(taskID, message)
+	}
+}
+
+func isTruncatedFinishReason(value string) bool {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "length", "max_tokens", "max_output_tokens":
+		return true
+	default:
+		return false
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -94,9 +95,8 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 	currentTask.StartedAt = &startedAt
 	runner.record(currentTask, task.StatusRunning, "building_input", 3, "building skill input")
 
-	messages, err := selectedSkill.BuildInput(runCtx, skill.Request{
-		Input: req.Input, ConversationID: req.ConversationID, Metadata: req.Metadata,
-	})
+	skillRequest := skill.Request{Input: req.Input, ConversationID: req.ConversationID, Metadata: req.Metadata}
+	messages, err := selectedSkill.BuildInput(runCtx, skillRequest)
 	if err != nil {
 		return nil, runner.fail(currentTask, "build_input_failed", err)
 	}
@@ -104,6 +104,16 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 	for _, name := range selectedSkill.Tools() {
 		allowedTools[strings.TrimSpace(name)] = true
 	}
+	requiredTools := make(map[string]bool)
+	if provider, ok := selectedSkill.(skill.ToolRequirementProvider); ok {
+		for _, name := range provider.RequiredTools(skillRequest) {
+			name = strings.TrimSpace(name)
+			if name != "" {
+				requiredTools[name] = true
+			}
+		}
+	}
+	successfulTools := make(map[string]bool, len(requiredTools))
 	toolCalls := 0
 
 	for round := 1; round <= maxRounds; round++ {
@@ -119,7 +129,7 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 		runner.record(currentTask, task.StatusWaitingLLM, "waiting_llm", progress, fmt.Sprintf("agent round %d/%d", round, maxRounds))
 		response, err := runner.generateWithRetry(runCtx, llm.Request{
 			System: selectedSkill.SystemPrompt(), Messages: messages,
-		})
+		}, currentTask, progress)
 		if err != nil {
 			if runCtx.Err() != nil {
 				return nil, runner.finishContextError(currentTask, runCtx.Err())
@@ -133,11 +143,18 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 		if response.Model != "" {
 			currentTask.Model = response.Model
 		}
-		messages = append(messages, llm.Message{Role: llm.RoleAssistant, Content: response.Content})
+		runner.appendRuntimeMessage(currentTask.ID, &messages, llm.Message{Role: llm.RoleAssistant, Content: response.Content})
+		if isTruncatedFinishReason(response.FinishReason) {
+			feedback := repairFeedback("truncated_response", "LLM response was truncated by the output token limit")
+			runner.appendRuntimeMessage(currentTask.ID, &messages, feedback)
+			runner.record(currentTask, task.StatusRunning, "repairing_response", progress+1, "LLM response was truncated")
+			continue
+		}
 
 		decision, err := parseDecision(response.Content)
 		if err != nil {
-			messages = append(messages, repairFeedback("decision_protocol", err.Error()))
+			feedback := repairFeedback("decision_protocol", err.Error())
+			runner.appendRuntimeMessage(currentTask.ID, &messages, feedback)
 			runner.record(currentTask, task.StatusRunning, "repairing_decision", progress+1, err.Error())
 			continue
 		}
@@ -164,7 +181,7 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			if len(arguments) == 0 || string(arguments) == "null" {
 				arguments = json.RawMessage(`{}`)
 			}
-			runner.record(currentTask, task.StatusWaitingTool, "waiting_tool", progress+2, "calling "+selectedTool.Name())
+			runner.recordToolWaiting(currentTask, "waiting_tool", progress+2, selectedTool.Name(), "calling "+selectedTool.Name())
 			toolCtx := runCtx
 			cancelTool := func() {}
 			metadata := selectedTool.Metadata()
@@ -183,7 +200,10 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			if err != nil {
 				return nil, runner.fail(currentTask, "tool_result_failed", err)
 			}
-			messages = append(messages, toolMessage)
+			runner.appendRuntimeMessage(currentTask.ID, &messages, toolMessage)
+			if toolErr == nil {
+				successfulTools[selectedTool.Name()] = true
+			}
 			outcome := "success"
 			if toolErr != nil {
 				outcome = "error"
@@ -191,10 +211,28 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			runner.recordTool(currentTask, "tool_result", progress+3, selectedTool.Name(), outcome, duration, "tool result received")
 
 		case "final":
+			missingTools := make([]string, 0, len(requiredTools))
+			for name := range requiredTools {
+				if !successfulTools[name] {
+					missingTools = append(missingTools, name)
+				}
+			}
+			if len(missingTools) > 0 {
+				sort.Strings(missingTools)
+				err := fmt.Errorf("required tools must succeed before final: %s", strings.Join(missingTools, ", "))
+				feedback := repairFeedback("required_tools", err.Error())
+				runner.appendRuntimeMessage(currentTask.ID, &messages, feedback)
+				runner.record(currentTask, task.StatusRunning, "repairing_required_tools", min(progress+4, 95), err.Error())
+				continue
+			}
 			runner.record(currentTask, task.StatusValidating, "validating", min(progress+4, 95), "validating final result")
 			value, err := selectedSkill.Validator().Validate(runCtx, decision.Result)
+			if runner.cfg.ValidationHook != nil {
+				runner.cfg.ValidationHook(currentTask.ID, append(json.RawMessage(nil), decision.Result...), err)
+			}
 			if err != nil {
-				messages = append(messages, repairFeedback("final_validation", err.Error()))
+				feedback := repairFeedback("final_validation", err.Error())
+				runner.appendRuntimeMessage(currentTask.ID, &messages, feedback)
 				runner.record(currentTask, task.StatusRunning, "repairing_final", min(progress+5, 96), err.Error())
 				continue
 			}

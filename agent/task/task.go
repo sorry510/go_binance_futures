@@ -22,6 +22,7 @@ type Event struct {
 	TaskID     string    `json:"task_id"`
 	Stage      string    `json:"stage"`
 	Progress   int       `json:"progress"`
+	Round      int       `json:"round,omitempty"`
 	Message    string    `json:"message,omitempty"`
 	Skill      string    `json:"skill,omitempty"`
 	Tool       string    `json:"tool,omitempty"`

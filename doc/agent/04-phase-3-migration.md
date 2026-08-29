@@ -2,7 +2,7 @@
 
 ## 目标
 
-把已有 `market condition` 与 `strategy builder` 接入统一 Runtime，验证新架构能承载真实业务；迁移期间保持旧 API 和旧行为可回退。
+把已有 `market condition` 与 `strategy builder` 接入统一 Runtime，验证新架构能承载真实业务，同时保持现有 HTTP API 和前端契约。
 
 ## 迁移原则
 
@@ -50,23 +50,36 @@ LLM 不可用或 Runtime 失败时仍调用 Algorithm Fallback，保证市场环
 
 ## 3B. Strategy Builder 迁移
 
-这是验证 Runtime 的关键业务，因为现有实现已经覆盖多轮、Tool、Repair、Progress 和续聊。
+### 当前实施状态（已完成）
 
-迁移时按职责拆分：
+- `agent/skills/strategybuilder` 持有 System Prompt、用户输入构造、历史 Repair 压缩、动态必需 Tool 判断和最终 Validator 适配。
+- 最终响应统一使用 Runtime 协议 `{"action":"final","summary":"...","result":{...}}`，不再维护 Strategy Builder 私有 decision parser。
+- `get_features` 已加入通用只读 Tool Registry，和 `get_test_strategy_results` 一样直接调用 Domain Service。
+- Strategy Builder 开放 `get_market_condition`，读取 Phase 3A Market Regime 最新持久化到 `systemConfig.MarketCondition` 的结果，不在 Tool 内重复触发市场分析。
+- Runtime 新增动态 RequiredTools：用户明确要求查询测试结果或合约数据时，对应 Tool 必须成功调用后才能 final；要求基于市场趋势/当前行情时，`get_market_condition` 也必须在本轮成功调用。
+- 市场趋势型策略启用确定性语义校验：所有启用的 `long`/`short` 开仓规则必须显式引用运行时字符串变量 `MarketCondition`，整体覆盖 `"1"` 至 `"11"`；相似行情允许在同一规则中用 `&&`/`||` 分组，避免 11 个近似规则一比一展开。
+- 复杂策略表达式增加可读性校验：短条件允许单行；长表达式或包含大量 `&&`/`||` 时必须使用多行 `let` 局部变量拆解行情、趋势、动量或结构条件，最后组合成布尔结果。
+- AI 平仓规则增加质量校验：`close_long`/`close_short` 不能只依赖 ROI、持仓盈亏或时间阈值，必须结合指标、K 线结构或市场趋势确认；外层盈亏阈值只作为触发前置条件。
+- Strategy Builder System Prompt 已压缩为协议、Schema、字段映射和关键策略规则，移除逐指标长篇解释，减少上下文占用。
+- Runtime 新增 MessageHook、ValidationHook 和 Round 事件；旧 HTTP Task API 通过适配这些事件继续返回进度、失败候选 JSON 和 validationError。
+- LLM retry、截断响应修复、Tool Result、协议 Repair、最终 Validator Repair、MaxRounds 全部由统一 Runtime 处理。
+- `controllers/strategy_template_ai_task.go` 只保留 HTTP/Task Store/续聊兼容、Runtime 组装和导入状态管理，不再直接调用 `Client.Generate`。
+- `controllers/strategy_template_ai_tools.go` 与旧 Strategy Agent contract test 已删除。
+- “AI 生成成功”和“导入数据库”仍是两个授权边界；Runtime final 不会直接写入 `strategy_templates`。
+- 现有 `conversationId` 继续兼容旧 taskId 语义并保存完整 Runtime transcript；独立 Conversation Store 按原计划在 Phase 6 实现。
 
-- System Prompt/策略契约 -> `strategy_builder` Skill。
-- `requiredStrategyTemplateAITools` -> Skill 的动态 Tool Requirement/Policy。
-- `executeStrategyTemplateAITool` -> 通用 Tool Registry。
-- `parseStrategyTemplateAIAgentDecision` -> Runtime Decision Parser。
-- LLM retry/round loop -> Runtime。
-- `validateGeneratedStrategyTemplateJSON` -> Skill Validator。
-- Task progress/event -> 通用 Task Manager。
-- 策略导入动作仍保留在业务 Controller/Service，不自动并入 AI final。
+### Strategy Builder 验收
 
-重要：迁移后仍保留“生成”和“导入”为两个授权边界，Agent 成功生成 JSON 不等于写数据库。
+- 多轮 Tool/Final/Repair/Retry 使用统一 Runner。
+- 用户要求的必需 Tool 在 final 前必须成功执行。
+- 策略 JSON 继续执行 framework schema、indicator 参数和 expr 编译/运行校验。
+- 校验失败时前端仍能取得候选 JSON 与 `validationError`。
+- 续聊保留前一轮 assistant、Tool Result、AGENT_FEEDBACK 和 import error 上下文。
+- 原 `/strategy-templates/ai-generate*` HTTP 契约和独立 import 动作保持兼容。
+
 ## Phase 3 验证方式
 
-不再维护运行时双轨开关。迁移完成的 Skill 只保留统一 Runtime 路径；业务可靠性由确定性 fallback、测试和可观测性保证。
+不再维护运行时双轨开关。迁移完成的 Skill 只保留统一 Runtime 路径，不维护第二套 LLM 主循环。Market Regime 由确定性算法 fallback 保证可用性；Strategy Builder 生成失败则明确结束任务，不写数据库。
 
 Market Regime 的验证重点是分类/置信度、fallback 命中率、耗时和 token 使用；Strategy Builder 迁移后验证 JSON 校验通过率、轮数、Tool 次数、耗时和 token 使用。
 
@@ -76,7 +89,7 @@ Market Regime 的验证重点是分类/置信度、fallback 命中率、耗时�
 - 不再各自维护 LLM/Tool/Retry 主循环。
 - 旧 HTTP API 对前端保持兼容。
 - 已迁移能力不再保留独立 LLM 主循环；非 AI fallback 属于业务层确定性兜底。
-- 关键行为回归测试通过后，才允许删除重复的旧 Agent Loop 代码。
+- 重复的旧 Agent Loop 与 Strategy Builder 私有 Tool executor 已删除。
 
 ## 删除旧代码的条件
 

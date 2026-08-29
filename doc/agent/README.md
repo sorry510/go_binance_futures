@@ -25,8 +25,8 @@
 ## 当前可复用基础
 
 - `llm/`：已具备多 Provider 统一 Client。
-- `controllers/strategy_template_ai_task.go`：已有多轮 Agent、Tool、Retry、Repair、Task Progress 雏形。
-- `controllers/strategy_template_ai_tools.go`：已有局部 Tool 执行机制。
+- `agent/runtime/`：统一处理多轮 Agent、Tool、Retry、Repair、Task Event。
+- `agent/skills/strategybuilder/`：策略生成 Prompt、动态 Tool Requirement、Validator 适配和续聊输入构建。
 - `feature/market_condition.go`：已有算法兜底 + LLM 市场环境分类。
 - `mcpserver/`：已有外部 MCP Tool 暴露能力。
 - `feature/api/binance/`：已有 REST/WS 行情和交易封装。
@@ -36,9 +36,9 @@
 
 - Phase 0：已完成基线记录与旧 AI 输出契约测试。
 - Phase 1：已完成第一版通用 Runtime。
-- Phase 2：已完成共享 Domain Service、8 个只读 Agent Tool，以及部分 MCP 进程内 Service 复用。
-- Phase 3A：Market Regime 已接入统一 Runtime，旧 HTTP/Task 契约和算法 fallback 保持兼容。
-- 下一步：Phase 3B，迁移 Strategy Builder。
+- Phase 2：已完成共享 Domain Service、9 个只读 Agent Tool，以及部分 MCP 进程内 Service 复用。
+- Phase 3：已完成 Market Regime 与 Strategy Builder 迁移，两项 AI 能力都只使用统一 Runtime。
+- 下一步：Phase 4，实现 `symbol_analysis`。
 
 ## 分阶段路线
 
@@ -47,7 +47,7 @@
 | Phase 0 ✅ | 固化边界与基线 | 架构约束、接口草案、现有行为基线 |
 | Phase 1 ✅ | 建立 Agent Runtime | Runner、Decision、Skill、Tool Registry、Validator、Task 抽象 |
 | Phase 2 ✅ | 建立共享业务 Tool/Service 层 | Binance/DB/Scanner/Notify 能力以 Tool 复用，MCP 与 Agent 解耦 Controller |
-| Phase 3 ◐ | 迁移已有 AI 能力 | Market Regime ✅；Strategy Builder 待迁移 |
+| Phase 3 ✅ | 迁移已有 AI 能力 | Market Regime 与 Strategy Builder 均接入统一 Runtime |
 | Phase 4 | 实现单币分析 | `symbol_analysis` Skill、市场数据 Context、结构化 TradingPlan |
 | Phase 5 | 实现事件驱动报警 | Event Bus、Signal Engine、Alert Skill，WS 不直接调用 LLM |
 | Phase 6 | 统一调度与持久化 | Scheduler、Task Store、Conversation、运行历史、配置管理 |

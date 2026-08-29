@@ -25,9 +25,9 @@
 
 ## Strategy Builder
 
-- [ ] 原多轮工具调用和 Repair 行为迁移到 Runtime。
-- [ ] 策略 JSON 继续执行真实业务校验和 expr 编译检查。
-- [ ] “AI 生成成功”和“导入数据库”仍是两个动作。
+- [x] 原多轮工具调用和 Repair 行为迁移到 Runtime。
+- [x] 策略 JSON 继续执行真实业务校验和 expr 编译检查。
+- [x] “AI 生成成功”和“导入数据库”仍是两个动作。
 - [ ] 续聊使用 Conversation 概念，不依赖内存 Task ID 语义。
 ## Symbol Analysis
 
