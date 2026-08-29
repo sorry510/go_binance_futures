@@ -42,7 +42,21 @@ func (runner *DefaultRunner) record(item *task.Task, status task.Status, stage s
 	item.Stage = stage
 	item.Progress = progress
 	item.UpdatedAt = now
-	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Message: message, Time: now}
+	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Message: message, Skill: item.Skill, Time: now}
+	item.Events = append(item.Events, event)
+	_ = runner.cfg.Tasks.Save(context.Background(), item)
+	if runner.cfg.EventHook != nil {
+		runner.cfg.EventHook(event)
+	}
+}
+
+func (runner *DefaultRunner) recordTool(item *task.Task, stage string, progress int, toolName, outcome string, duration time.Duration, message string) {
+	now := time.Now().UTC()
+	item.Status = task.StatusRunning
+	item.Stage = stage
+	item.Progress = progress
+	item.UpdatedAt = now
+	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Message: message, Skill: item.Skill, Tool: toolName, Status: outcome, DurationMs: duration.Milliseconds(), Time: now}
 	item.Events = append(item.Events, event)
 	_ = runner.cfg.Tasks.Save(context.Background(), item)
 	if runner.cfg.EventHook != nil {
