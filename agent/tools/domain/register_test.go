@@ -14,7 +14,7 @@ func TestRegisterReadOnlyRegistersExpectedTools(t *testing.T) {
 	if err := RegisterReadOnly(registry, Dependencies{}); err != nil {
 		t.Fatal(err)
 	}
-	names := []string{"get_symbol_snapshot", "get_klines", "get_funding_rate", "get_liquidations", "get_market_condition", "scan_symbols", "get_test_strategy_results", "get_strategy_template"}
+	names := []string{"get_features", "get_symbol_snapshot", "get_klines", "get_funding_rate", "get_liquidations", "get_market_condition", "scan_symbols", "get_test_strategy_results", "get_strategy_template"}
 	for _, name := range names {
 		tool, ok := registry.Get(name)
 		if !ok {

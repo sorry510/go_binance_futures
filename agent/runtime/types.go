@@ -46,6 +46,8 @@ type Config struct {
 	MaxToolCalls       int
 	Retry              RetryPolicy
 	EventHook          func(task.Event)
+	MessageHook        func(taskID string, message llm.Message)
+	ValidationHook     func(taskID string, raw json.RawMessage, err error)
 }
 
 type Runner interface {

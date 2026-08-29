@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -365,5 +366,115 @@ func TestRunnerRetriesRecoverableLLMError(t *testing.T) {
 	client.mu.Unlock()
 	if calls != 2 {
 		t.Fatalf("LLM calls = %d, want 2", calls)
+	}
+}
+
+func TestRunnerRetriesEOFTransportError(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{err: fmt.Errorf("send llm request: %w", io.EOF)},
+		{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}},
+	}}
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "test", Rounds: 2}); err != nil {
+		t.Fatal(err)
+	}
+	runner, err := NewRunner(Config{
+		Client: client, Skills: skills, Retry: RetryPolicy{MaxAttempts: 2}, Timeout: time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runner.Run(context.Background(), Request{Skill: "test", Input: "hello"}); err != nil {
+		t.Fatal(err)
+	}
+	client.mu.Lock()
+	calls := len(client.requests)
+	client.mu.Unlock()
+	if calls != 2 {
+		t.Fatalf("LLM calls = %d, want 2", calls)
+	}
+}
+
+func TestRunnerEnforcesRequiredToolsBeforeFinal(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}},
+		{response: &llm.Response{Content: `{"action":"tool","tool":"echo","arguments":{}}`}},
+		{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}},
+	}}
+	echo := tools.Func{ToolName: "echo", ToolRisk: permission.RiskRead, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) {
+		return map[string]bool{"ok": true}, nil
+	}}
+	definition := skill.Definition{
+		SkillName: "required", AllowedTools: []string{"echo"}, Rounds: 4,
+		RequiredToolsFunc: func(skill.Request) []string { return []string{"echo"} },
+	}
+	runner, _ := newTestRunner(t, client, definition, echo)
+	if _, err := runner.Run(context.Background(), Request{Skill: "required", Input: "test"}); err != nil {
+		t.Fatal(err)
+	}
+	if len(client.requests) != 3 {
+		t.Fatalf("LLM calls = %d, want 3", len(client.requests))
+	}
+	feedback := client.request(1).Messages
+	if len(feedback) == 0 || !strings.Contains(feedback[len(feedback)-1].Content, "required_tools") {
+		t.Fatalf("required tool feedback missing: %+v", feedback)
+	}
+}
+
+func TestRunnerHooksReceiveMessagesAndValidationCandidates(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Content: `{"action":"final","result":{"version":1}}`}},
+		{response: &llm.Response{Content: `{"action":"final","result":{"version":2}}`}},
+	}}
+	definition := skill.Definition{SkillName: "hooks", Rounds: 3, FinalValidator: validator.Func(func(_ context.Context, raw json.RawMessage) (any, error) {
+		var value struct {
+			Version int `json:"version"`
+		}
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return nil, err
+		}
+		if value.Version != 2 {
+			return nil, fmt.Errorf("version must be 2")
+		}
+		return value, nil
+	})}
+	skills := skill.NewRegistry()
+	if err := skills.Register(definition); err != nil {
+		t.Fatal(err)
+	}
+	var messages []llm.Message
+	var validations []error
+	runner, err := NewRunner(Config{
+		Client: client, Skills: skills, Retry: RetryPolicy{MaxAttempts: 1}, Timeout: time.Second,
+		MessageHook:    func(_ string, message llm.Message) { messages = append(messages, message) },
+		ValidationHook: func(_ string, _ json.RawMessage, err error) { validations = append(validations, err) },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runner.Run(context.Background(), Request{Skill: "hooks", Input: "test"}); err != nil {
+		t.Fatal(err)
+	}
+	if len(validations) != 2 || validations[0] == nil || validations[1] != nil {
+		t.Fatalf("unexpected validation hooks: %#v", validations)
+	}
+	if len(messages) < 3 || !strings.Contains(messages[1].Content, "AGENT_FEEDBACK") {
+		t.Fatalf("unexpected message hooks: %+v", messages)
+	}
+}
+
+func TestRunnerRepairsTruncatedResponse(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Content: `{"action":"final"`, FinishReason: "length"}},
+		{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}},
+	}}
+	definition := skill.Definition{SkillName: "truncate", Rounds: 3}
+	runner, _ := newTestRunner(t, client, definition)
+	if _, err := runner.Run(context.Background(), Request{Skill: "truncate", Input: "test"}); err != nil {
+		t.Fatal(err)
+	}
+	request := client.request(1)
+	if !strings.Contains(request.Messages[len(request.Messages)-1].Content, "truncated_response") {
+		t.Fatalf("truncation feedback missing: %+v", request.Messages)
 	}
 }
