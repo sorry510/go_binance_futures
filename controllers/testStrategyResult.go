@@ -9,6 +9,7 @@ import (
 
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
@@ -23,53 +24,7 @@ type TestStrategyResultController struct {
 	web.Controller
 }
 
-type TestStrategyResultsTableList struct {
-	models.TestStrategyResults
-	NowPrice      string `orm:"column(now_price)" json:"now_price"`
-	ProfitPercent string `json:"profit_percent"`
-}
-
-func calculateTestStrategyResultMetrics(result *TestStrategyResultsTableList) float64 {
-	entryPrice, errEntry := strconv.ParseFloat(result.Price, 64)
-	positionAmt, errAmount := strconv.ParseFloat(result.PositionAmt, 64)
-	closePrice, _ := strconv.ParseFloat(result.ClosePrice, 64)
-	if errEntry != nil || errAmount != nil {
-		result.CloseProfit = "0.000"
-		result.ProfitPercent = "0.000"
-		return 0
-	}
-
-	effectivePrice := closePrice
-	if effectivePrice <= 0 {
-		currentPrice, errCurrent := strconv.ParseFloat(result.NowPrice, 64)
-		if errCurrent != nil {
-			result.CloseProfit = "0.000"
-			result.ProfitPercent = "0.000"
-			return 0
-		}
-		effectivePrice = currentPrice
-	}
-	if effectivePrice <= 0 || positionAmt == 0 {
-		result.CloseProfit = "0.000"
-		result.ProfitPercent = "0.000"
-		return 0
-	}
-
-	profit := (effectivePrice - entryPrice) * positionAmt
-	profitPercent := profit / (math.Abs(positionAmt) * effectivePrice) * float64(result.Leverage) * 100
-	result.CloseProfit = strconv.FormatFloat(profit, 'f', 3, 64)
-	result.ProfitPercent = strconv.FormatFloat(profitPercent, 'f', 3, 64)
-	formattedProfit, _ := strconv.ParseFloat(result.CloseProfit, 64)
-	return formattedProfit
-}
-
-func calculateTestStrategyResultsCurrentProfit(results []TestStrategyResultsTableList) string {
-	totalProfit := 0.0
-	for index := range results {
-		totalProfit += calculateTestStrategyResultMetrics(&results[index])
-	}
-	return strconv.FormatFloat(totalProfit, 'f', 2, 64)
-}
+type TestStrategyResultsTableList = strategyservice.TestResult
 
 type testStrategyResultSearchParams struct {
 	Symbol       string
@@ -146,61 +101,20 @@ func (params testStrategyResultSearchParams) whereClause(tableAlias string) (str
 }
 
 func (ctrl *TestStrategyResultController) Get() {
-	paramsPage := ctrl.GetString("page", "1")
-	paramsLimit := ctrl.GetString("limit", "20")
-	searchParams := ctrl.getSearchParams()
-	
-	page, _ := strconv.Atoi(paramsPage)
-	limit, _ := strconv.Atoi(paramsLimit)
-	offset := (page - 1) * limit
-	
-	o := orm.NewOrm()
-	
-	var results []TestStrategyResultsTableList
-	var profitResults []TestStrategyResultsTableList
-	var total int64
-	sql := `SELECT t.id, t.symbol, t.price, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.createTime, t.updateTime, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
-	countSql := `SELECT COUNT(*) FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
-	profitSql := `SELECT t.price, t.leverage, t.position_amt, t.close_price, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1`
-	whereClause, args, _, err := searchParams.whereClause("t")
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	sql += whereClause
-	countSql += whereClause
-	profitSql += whereClause
-	
-	sql = sql + " ORDER BY t.createTime DESC LIMIT " + strconv.Itoa(limit) + " OFFSET " + strconv.Itoa(offset)
-	_, err = o.Raw(sql, args...).QueryRows(&results)
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	for index := range results {
-		calculateTestStrategyResultMetrics(&results[index])
-	}
-	err = o.Raw(countSql, args...).QueryRow(&total)
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	_, err = o.Raw(profitSql, args...).QueryRows(&profitResults)
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	currentProfit := calculateTestStrategyResultsCurrentProfit(profitResults)
-	
-	ctrl.Ctx.Resp(map[string]interface{} {
-		"code": 200,
-		"data": map[string]interface{} {
-			"total":          total,
-			"list":           results,
-			"current_profit": currentProfit,
-		},
-		"msg": "success",
+	page, _ := strconv.Atoi(ctrl.GetString("page", "1"))
+	limit, _ := strconv.Atoi(ctrl.GetString("limit", "20"))
+	result, err := (strategyservice.Service{}).ListTestResults(ctrl.Ctx.Request.Context(), strategyservice.TestResultsOptions{
+		Symbol: ctrl.GetString("symbol"), PositionSide: ctrl.GetString("position_side"),
+		StartTime: ctrl.GetString("start_time"), EndTime: ctrl.GetString("end_time"), Type: ctrl.GetString("type"),
+		Page: page, Limit: limit, DefaultLimit: 20,
 	})
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": map[string]interface{}{
+		"total": result.Total, "list": result.List, "current_profit": result.CurrentProfit,
+	}, "msg": "success"})
 }
 
 func (ctrl *TestStrategyResultController) Show() {
@@ -262,9 +176,9 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 		Filter("Symbol", symbol).
 		Filter("ClosePrice", "0").
 		One(&result)
-	
+
 	ctrl.BindJSON(&result) // 装载前端传入的最新的策略规则
-	
+
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(result.Strategy), &strategyConfig)
 	if err != nil {
@@ -282,16 +196,16 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 	// 随意指定一个模拟信息
 	env["ROI"] = 10.22
 	env["Position"] = types.FuturesPositionCode{
-		Symbol: result.Symbol,
-		EntryPrice: 68000.0,
-		MarkPrice: 72000.0,
-		Amount: -0.02,
+		Symbol:           result.Symbol,
+		EntryPrice:       68000.0,
+		MarkPrice:        72000.0,
+		Amount:           -0.02,
 		UnrealizedProfit: 100.2,
-		Leverage: 3,
-		Side: "SHORT",
-		Mock: true,
-		CreateTime: 1234567890000,
-		SourceType: "local",
+		Leverage:         3,
+		Side:             "SHORT",
+		Mock:             true,
+		CreateTime:       1234567890000,
+		SourceType:       "local",
 	}
 	if result.ID != 0 {
 		// 如果查到了为平仓的测试数据，就加载仓位信息
@@ -300,23 +214,23 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 		enterPrice_float64, _ := strconv.ParseFloat(result.Price, 64)
 		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
 		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
-		
+
 		env["ROI"] = nowProfit // 当前收益率
 		// 模拟仓位信息
 		env["Position"] = types.FuturesPositionCode{
-			Symbol: result.Symbol,
-			EntryPrice: enterPrice_float64,
-			MarkPrice: floatNowPrice,
-			Amount: positionAmtFloat,
+			Symbol:           result.Symbol,
+			EntryPrice:       enterPrice_float64,
+			MarkPrice:        floatNowPrice,
+			Amount:           positionAmtFloat,
 			UnrealizedProfit: unRealizedProfit,
-			Leverage: result.Leverage,
-			Side: result.PositionSide,
-			Mock: false,
-			CreateTime: result.CreateTime,
-			SourceType: "local",
+			Leverage:         result.Leverage,
+			Side:             result.PositionSide,
+			Mock:             false,
+			CreateTime:       result.CreateTime,
+			SourceType:       "local",
 		}
 	}
-	
+
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
@@ -331,9 +245,9 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 				return
 			}
-			ctrl.Ctx.Resp(map[string]interface{} {
+			ctrl.Ctx.Resp(map[string]interface{}{
 				"code": 200,
-				"data": map[string]interface{} {
+				"data": map[string]interface{}{
 					"pass": output,
 					"type": strategy.Type,
 				},

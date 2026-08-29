@@ -19,11 +19,15 @@ const (
 )
 
 type Event struct {
-	TaskID   string    `json:"task_id"`
-	Stage    string    `json:"stage"`
-	Progress int       `json:"progress"`
-	Message  string    `json:"message,omitempty"`
-	Time     time.Time `json:"time"`
+	TaskID     string    `json:"task_id"`
+	Stage      string    `json:"stage"`
+	Progress   int       `json:"progress"`
+	Message    string    `json:"message,omitempty"`
+	Skill      string    `json:"skill,omitempty"`
+	Tool       string    `json:"tool,omitempty"`
+	Status     string    `json:"status,omitempty"`
+	DurationMs int64     `json:"duration_ms,omitempty"`
+	Time       time.Time `json:"time"`
 }
 
 type Usage struct {

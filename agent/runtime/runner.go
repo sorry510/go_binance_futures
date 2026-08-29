@@ -165,13 +165,30 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 				arguments = json.RawMessage(`{}`)
 			}
 			runner.record(currentTask, task.StatusWaitingTool, "waiting_tool", progress+2, "calling "+selectedTool.Name())
-			value, toolErr := selectedTool.Execute(runCtx, arguments)
-			toolMessage, err := buildToolResultMessage(selectedTool.Name(), value, toolErr, runner.cfg.MaxToolResultBytes)
+			toolCtx := runCtx
+			cancelTool := func() {}
+			metadata := selectedTool.Metadata()
+			if metadata.Timeout > 0 {
+				toolCtx, cancelTool = context.WithTimeout(runCtx, metadata.Timeout)
+			}
+			toolStarted := time.Now()
+			value, toolErr := selectedTool.Execute(toolCtx, arguments)
+			cancelTool()
+			duration := time.Since(toolStarted)
+			maxResultBytes := runner.cfg.MaxToolResultBytes
+			if metadata.MaxResultBytes > 0 && (maxResultBytes <= 0 || metadata.MaxResultBytes < maxResultBytes) {
+				maxResultBytes = metadata.MaxResultBytes
+			}
+			toolMessage, err := buildToolResultMessage(selectedTool.Name(), value, toolErr, maxResultBytes)
 			if err != nil {
 				return nil, runner.fail(currentTask, "tool_result_failed", err)
 			}
 			messages = append(messages, toolMessage)
-			runner.record(currentTask, task.StatusRunning, "tool_result", progress+3, "tool result received")
+			outcome := "success"
+			if toolErr != nil {
+				outcome = "error"
+			}
+			runner.recordTool(currentTask, "tool_result", progress+3, selectedTool.Name(), outcome, duration, "tool result received")
 
 		case "final":
 			runner.record(currentTask, task.StatusValidating, "validating", min(progress+4, 95), "validating final result")
