@@ -35,8 +35,10 @@
 ## 当前实施状态
 
 - Phase 0：已完成基线记录与旧 AI 输出契约测试。
-- Phase 1：已完成第一版通用 Runtime；旧市场环境/策略生成尚未切换，保持原路径运行。
-- 下一步：Phase 2，共享 Domain Service 与业务 Tool。
+- Phase 1：已完成第一版通用 Runtime。
+- Phase 2：已完成共享 Domain Service、8 个只读 Agent Tool，以及部分 MCP 进程内 Service 复用。
+- Phase 3A：Market Regime 已接入统一 Runtime，旧 HTTP/Task 契约和算法 fallback 保持兼容。
+- 下一步：Phase 3B，迁移 Strategy Builder。
 
 ## 分阶段路线
 
@@ -45,7 +47,7 @@
 | Phase 0 ✅ | 固化边界与基线 | 架构约束、接口草案、现有行为基线 |
 | Phase 1 ✅ | 建立 Agent Runtime | Runner、Decision、Skill、Tool Registry、Validator、Task 抽象 |
 | Phase 2 ✅ | 建立共享业务 Tool/Service 层 | Binance/DB/Scanner/Notify 能力以 Tool 复用，MCP 与 Agent 解耦 Controller |
-| Phase 3 | 迁移已有 AI 能力 | Strategy Builder 与 Market Regime 接入统一 Runtime |
+| Phase 3 ◐ | 迁移已有 AI 能力 | Market Regime ✅；Strategy Builder 待迁移 |
 | Phase 4 | 实现单币分析 | `symbol_analysis` Skill、市场数据 Context、结构化 TradingPlan |
 | Phase 5 | 实现事件驱动报警 | Event Bus、Signal Engine、Alert Skill，WS 不直接调用 LLM |
 | Phase 6 | 统一调度与持久化 | Scheduler、Task Store、Conversation、运行历史、配置管理 |
