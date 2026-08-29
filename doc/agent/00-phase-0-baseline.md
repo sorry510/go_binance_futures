@@ -11,11 +11,11 @@ main.go
  -> loopRun(60m)
  -> feature.UpdateMarketCondition
  -> UpdateMarketConditionWithProgress
- -> loadMarketConditionSymbols (symbols 表 USDT 合约)
- -> calculateLegacyMarketCondition (本地 fallback)
- -> buildMarketConditionSnapshot
- -> llm.NewFromConfig / Client.Generate
- -> parseMarketConditionLLMResponse
+ -> service/market.LoadRegimeSymbols (symbols 表 USDT 合约)
+ -> service/market.CalculateAlgorithmCondition (本地 fallback)
+ -> service/market.BuildRegimeSnapshot
+ -> market_regime Skill
+ -> Agent Runtime / Final Validator
  -> config.market_condition 持久化
 ```
 
