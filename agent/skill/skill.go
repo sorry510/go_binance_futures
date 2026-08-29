@@ -13,6 +13,10 @@ type Request struct {
 	Metadata       map[string]any `json:"metadata,omitempty"`
 }
 
+type ToolRequirementProvider interface {
+	RequiredTools(req Request) []string
+}
+
 type Skill interface {
 	Name() string
 	SystemPrompt() string
@@ -23,12 +27,13 @@ type Skill interface {
 }
 
 type Definition struct {
-	SkillName      string
-	Prompt         string
-	AllowedTools   []string
-	Rounds         int
-	BuildInputFunc func(context.Context, Request) ([]llm.Message, error)
-	FinalValidator validator.FinalValidator
+	SkillName         string
+	Prompt            string
+	AllowedTools      []string
+	Rounds            int
+	BuildInputFunc    func(context.Context, Request) ([]llm.Message, error)
+	FinalValidator    validator.FinalValidator
+	RequiredToolsFunc func(Request) []string
 }
 
 func (definition Definition) Name() string         { return definition.SkillName }
@@ -49,4 +54,11 @@ func (definition Definition) Validator() validator.FinalValidator {
 		return definition.FinalValidator
 	}
 	return validator.Passthrough{}
+}
+
+func (definition Definition) RequiredTools(req Request) []string {
+	if definition.RequiredToolsFunc == nil {
+		return nil
+	}
+	return append([]string(nil), definition.RequiredToolsFunc(req)...)
 }

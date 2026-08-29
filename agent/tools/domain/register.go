@@ -19,6 +19,7 @@ import (
 
 type Dependencies struct {
 	GetSymbol           func(context.Context, string) (any, error)
+	ListSymbols         func(context.Context, symbolservice.ListOptions) (symbolservice.ListResult, error)
 	GetKlines           func(context.Context, string, string, int) (any, error)
 	GetFundingRate      func(context.Context, string) (any, error)
 	GetMarketCondition  func(context.Context) (any, error)
@@ -34,7 +35,8 @@ func DefaultDependencies() Dependencies {
 	liquidations := liquidationservice.Service{}
 	strategies := strategyservice.Service{}
 	return Dependencies{
-		GetSymbol: func(ctx context.Context, value string) (any, error) { return symbols.Snapshot(ctx, value) },
+		GetSymbol:   func(ctx context.Context, value string) (any, error) { return symbols.Snapshot(ctx, value) },
+		ListSymbols: symbols.List,
 		GetKlines: func(ctx context.Context, symbol, interval string, limit int) (any, error) {
 			return market.Klines(ctx, symbol, interval, limit)
 		},
@@ -54,7 +56,7 @@ func RegisterReadOnly(registry *agenttools.Registry, deps Dependencies) error {
 		return fmt.Errorf("tool registry is nil")
 	}
 	definitions := []agenttools.Tool{
-		newSymbolSnapshotTool(deps), newKlinesTool(deps), newFundingRateTool(deps), newLiquidationsTool(deps),
+		newFeaturesTool(deps), newSymbolSnapshotTool(deps), newKlinesTool(deps), newFundingRateTool(deps), newLiquidationsTool(deps),
 		newMarketConditionTool(deps), newScanSymbolsTool(deps), newTestResultsTool(deps), newStrategyTemplateTool(deps),
 	}
 	for _, tool := range definitions {
@@ -67,6 +69,31 @@ func RegisterReadOnly(registry *agenttools.Registry, deps Dependencies) error {
 
 func metadata(inputSchema string, timeout time.Duration, maxBytes int) agenttools.Metadata {
 	return agenttools.Metadata{InputSchema: json.RawMessage(inputSchema), OutputSchema: json.RawMessage(`{"type":["object","array"]}`), Timeout: timeout, MaxResultBytes: maxBytes, Idempotent: true}
+}
+
+func newFeaturesTool(deps Dependencies) agenttools.Tool {
+	type input struct {
+		Sort       string `json:"sort"`
+		SymbolType string `json:"symbol_type"`
+		Symbol     string `json:"symbol"`
+		Enable     string `json:"enable"`
+		MarginType string `json:"margin_type"`
+		Pin        string `json:"pin"`
+		Page       int    `json:"page"`
+		Limit      int    `json:"limit"`
+	}
+	return agenttools.Func{ToolName: "get_features", ToolDescription: "查询合约列表、行情快照和交易配置，兼容策略生成数据查询", ToolRisk: permission.RiskRead,
+		ToolMetadata: metadata(`{"type":"object","properties":{"sort":{"type":"string"},"symbol_type":{"type":"string"},"symbol":{"type":"string"},"enable":{"type":"string"},"margin_type":{"type":"string"},"pin":{"type":"string"},"page":{"type":"integer"},"limit":{"type":"integer","maximum":20}}}`, 5*time.Second, 128<<10),
+		ExecuteFunc: func(ctx context.Context, raw json.RawMessage) (any, error) {
+			var in input
+			if err := strictDecode(raw, &in); err != nil {
+				return nil, err
+			}
+			if deps.ListSymbols == nil {
+				return nil, fmt.Errorf("symbol service is unavailable")
+			}
+			return deps.ListSymbols(ctx, symbolservice.ListOptions{Sort: in.Sort, SymbolType: in.SymbolType, Symbol: in.Symbol, Enable: in.Enable, MarginType: in.MarginType, Pin: in.Pin, Page: in.Page, Limit: in.Limit, DefaultLimit: 20, MaxLimit: 20})
+		}}
 }
 
 func newSymbolSnapshotTool(deps Dependencies) agenttools.Tool {
@@ -126,7 +153,7 @@ func newFundingRateTool(deps Dependencies) agenttools.Tool {
 }
 
 func newMarketConditionTool(deps Dependencies) agenttools.Tool {
-	return agenttools.Func{ToolName: "get_market_condition", ToolDescription: "读取系统当前市场环境分类，不触发重新分析", ToolRisk: permission.RiskRead,
+	return agenttools.Func{ToolName: "get_market_condition", ToolDescription: "获取当前市场趋势：读取 Phase 3A Market Regime 最新保存到 systemConfig.MarketCondition 的结果，不触发重新分析", ToolRisk: permission.RiskRead,
 		ToolMetadata: metadata(`{"type":"object","additionalProperties":false}`, 5*time.Second, 8<<10),
 		ExecuteFunc: func(ctx context.Context, raw json.RawMessage) (any, error) {
 			var in struct{}
