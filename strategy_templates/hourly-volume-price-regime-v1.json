@@ -1,0 +1,70 @@
+{
+  "name": "小时量价全行情 v1",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_4h_34",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 34
+      }
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [
+      {
+        "name": "mfi_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "obv": [
+      {
+        "name": "obv_1h",
+        "enable": true,
+        "kline_interval": "1h"
+      }
+    ],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "hourly_volume_price_long",
+      "type": "long",
+      "code": "let avg_volume = (kline_1h.Amount[2] + kline_1h.Amount[3] + kline_1h.Amount[4] + kline_1h.Amount[5]) / 4;\nlet volume_ready = avg_volume > 0;\nlet price_up = kline_1h.Close[1] > kline_1h.Open[1] && kline_1h.Close[1] > kline_1h.Close[2];\nlet price_breakout = kline_1h.Close[1] > kline_1h.High[2] && kline_1h.Close[1] > kline_1h.High[3];\nlet bullish_rejection = kline_1h.Close[1] > kline_1h.Open[1] && kline_1h.Low[1] <= kline_1h.Low[2] && kline_1h.Close[1] > kline_1h.Close[2];\nlet obv_up = obv_1h.Data[1] > obv_1h.Data[2] && obv_1h.Data[2] >= obv_1h.Data[3];\nlet money_in = mfi_1h_14.Data[1] > mfi_1h_14.Data[2];\nlet trend_up = kline_4h.Close[1] > ema_4h_34.Data[1] && ema_4h_34.Data[1] >= ema_4h_34.Data[2];\nlet current_hold = kline_1h.Close[0] >= kline_1h.Close[1] * 0.995 && kline_1h.Close[0] <= kline_1h.Close[1] * 1.01;\nlet compressed = kline_1h.Close[2] > 0 && kline_1h.Close[3] > 0 && (kline_1h.High[2] - kline_1h.Low[2]) / kline_1h.Close[2] < 0.018 && (kline_1h.High[3] - kline_1h.Low[3]) / kline_1h.Close[3] < 0.018;\n\nlet strong_bull = MarketCondition == \"1\" && trend_up && price_up && kline_1h.Amount[1] >= avg_volume * 1.35 && obv_up && money_in && mfi_1h_14.Data[1] >= 58 && mfi_1h_14.Data[1] <= 82;\nlet bull_flow = (MarketCondition == \"2\" || MarketCondition == \"8\") && trend_up && price_up && kline_1h.Amount[1] >= avg_volume * 1.15 && obv_up && money_in && mfi_1h_14.Data[1] >= 52 && mfi_1h_14.Data[1] <= 78;\nlet bullish_divergence = MarketCondition == \"6\" && bullish_rejection && kline_1h.Amount[1] >= avg_volume * 1.2 && obv_up && money_in && mfi_1h_14.Data[1] >= 35 && mfi_1h_14.Data[1] <= 65;\nlet sideways_absorption = MarketCondition == \"3\" && bullish_rejection && kline_1h.Amount[1] >= avg_volume * 1.25 && obv_up && mfi_1h_14.Data[2] <= 45 && mfi_1h_14.Data[1] > mfi_1h_14.Data[2] && mfi_1h_14.Data[1] <= 55;\nlet high_vol_breakout = MarketCondition == \"10\" && price_breakout && kline_1h.Amount[1] >= avg_volume * 1.6 && obv_up && money_in && mfi_1h_14.Data[1] >= 55 && mfi_1h_14.Data[1] <= 80;\nlet low_vol_breakout = MarketCondition == \"11\" && compressed && price_breakout && kline_1h.Amount[1] >= avg_volume * 1.3 && obv_up && money_in && mfi_1h_14.Data[1] >= 50 && mfi_1h_14.Data[1] <= 72;\nlet blocked_long = MarketCondition == \"4\" || MarketCondition == \"5\" || MarketCondition == \"7\" || MarketCondition == \"9\";\n\nvolume_ready && current_hold && !blocked_long && (strong_bull || bull_flow || bullish_divergence || sideways_absorption || high_vol_breakout || low_vol_breakout)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "hourly_volume_price_short",
+      "type": "short",
+      "code": "let avg_volume = (kline_1h.Amount[2] + kline_1h.Amount[3] + kline_1h.Amount[4] + kline_1h.Amount[5]) / 4;\nlet volume_ready = avg_volume > 0;\nlet price_down = kline_1h.Close[1] < kline_1h.Open[1] && kline_1h.Close[1] < kline_1h.Close[2];\nlet price_breakdown = kline_1h.Close[1] < kline_1h.Low[2] && kline_1h.Close[1] < kline_1h.Low[3];\nlet bearish_rejection = kline_1h.Close[1] < kline_1h.Open[1] && kline_1h.High[1] >= kline_1h.High[2] && kline_1h.Close[1] < kline_1h.Close[2];\nlet obv_down = obv_1h.Data[1] < obv_1h.Data[2] && obv_1h.Data[2] <= obv_1h.Data[3];\nlet money_out = mfi_1h_14.Data[1] < mfi_1h_14.Data[2];\nlet trend_down = kline_4h.Close[1] < ema_4h_34.Data[1] && ema_4h_34.Data[1] <= ema_4h_34.Data[2];\nlet current_hold = kline_1h.Close[0] <= kline_1h.Close[1] * 1.005 && kline_1h.Close[0] >= kline_1h.Close[1] * 0.99;\nlet compressed = kline_1h.Close[2] > 0 && kline_1h.Close[3] > 0 && (kline_1h.High[2] - kline_1h.Low[2]) / kline_1h.Close[2] < 0.018 && (kline_1h.High[3] - kline_1h.Low[3]) / kline_1h.Close[3] < 0.018;\n\nlet strong_bear = MarketCondition == \"5\" && trend_down && price_down && kline_1h.Amount[1] >= avg_volume * 1.35 && obv_down && money_out && mfi_1h_14.Data[1] >= 18 && mfi_1h_14.Data[1] <= 42;\nlet bear_flow = (MarketCondition == \"4\" || MarketCondition == \"9\") && trend_down && price_down && kline_1h.Amount[1] >= avg_volume * 1.15 && obv_down && money_out && mfi_1h_14.Data[1] >= 22 && mfi_1h_14.Data[1] <= 48;\nlet bearish_divergence = MarketCondition == \"7\" && bearish_rejection && kline_1h.Amount[1] >= avg_volume * 1.2 && obv_down && money_out && mfi_1h_14.Data[1] >= 35 && mfi_1h_14.Data[1] <= 65;\nlet sideways_distribution = MarketCondition == \"3\" && bearish_rejection && kline_1h.Amount[1] >= avg_volume * 1.25 && obv_down && mfi_1h_14.Data[2] >= 55 && mfi_1h_14.Data[1] < mfi_1h_14.Data[2] && mfi_1h_14.Data[1] >= 45;\nlet high_vol_breakdown = MarketCondition == \"10\" && price_breakdown && kline_1h.Amount[1] >= avg_volume * 1.6 && obv_down && money_out && mfi_1h_14.Data[1] >= 20 && mfi_1h_14.Data[1] <= 45;\nlet low_vol_breakdown = MarketCondition == \"11\" && compressed && price_breakdown && kline_1h.Amount[1] >= avg_volume * 1.3 && obv_down && money_out && mfi_1h_14.Data[1] >= 28 && mfi_1h_14.Data[1] <= 50;\nlet blocked_short = MarketCondition == \"1\" || MarketCondition == \"2\" || MarketCondition == \"6\" || MarketCondition == \"8\";\n\nvolume_ready && current_hold && !blocked_short && (strong_bear || bear_flow || bearish_divergence || sideways_distribution || high_vol_breakdown || low_vol_breakdown)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "hourly_volume_price_close_long",
+      "type": "close_long",
+      "code": "let avg_volume = (kline_1h.Amount[2] + kline_1h.Amount[3] + kline_1h.Amount[4] + kline_1h.Amount[5]) / 4;\nlet obv_down = obv_1h.Data[1] < obv_1h.Data[2];\nlet money_out = mfi_1h_14.Data[1] < mfi_1h_14.Data[2];\nlet trend_break = kline_4h.Close[1] < ema_4h_34.Data[1] && ema_4h_34.Data[1] <= ema_4h_34.Data[2];\nlet distribution = avg_volume > 0 && kline_1h.Close[1] < kline_1h.Open[1] && kline_1h.Close[1] < kline_1h.Close[2] && kline_1h.Amount[1] >= avg_volume * 1.15 && obv_down;\nlet upside_exhaustion = avg_volume > 0 && kline_1h.Close[1] >= kline_1h.Close[2] && kline_1h.Amount[1] <= avg_volume * 0.75 && obv_1h.Data[1] <= obv_1h.Data[2] && money_out;\nlet range_rejection = kline_1h.Close[1] < kline_1h.Open[1] && kline_1h.Close[1] < (kline_1h.High[1] + kline_1h.Low[1]) / 2 && obv_down;\nlet downside_breakout = avg_volume > 0 && kline_1h.Close[1] < kline_1h.Low[2] && kline_1h.Amount[1] >= avg_volume * 1.35 && obv_down;\n\nlet favorable = MarketCondition == \"1\" || MarketCondition == \"2\" || MarketCondition == \"6\" || MarketCondition == \"8\";\nlet adverse = MarketCondition == \"4\" || MarketCondition == \"5\" || MarketCondition == \"7\" || MarketCondition == \"9\";\nlet sideways = MarketCondition == \"3\";\nlet high_vol_sideways = MarketCondition == \"10\";\nlet low_vol_sideways = MarketCondition == \"11\";\n\nlet profit_close = ROI >= 5 && ((favorable && (trend_break || (upside_exhaustion && money_out))) || (adverse && (trend_break || distribution)) || (sideways && range_rejection && money_out) || (high_vol_sideways && downside_breakout && money_out) || (low_vol_sideways && upside_exhaustion && money_out));\nlet loss_close = ROI <= -5 && ((favorable && trend_break && distribution) || (adverse && (trend_break || distribution)) || (sideways && range_rejection && money_out) || (high_vol_sideways && downside_breakout) || (low_vol_sideways && downside_breakout && money_out));\nlet catastrophic_stop = ROI <= -9;\n\ncatastrophic_stop || profit_close || loss_close",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "hourly_volume_price_close_short",
+      "type": "close_short",
+      "code": "let avg_volume = (kline_1h.Amount[2] + kline_1h.Amount[3] + kline_1h.Amount[4] + kline_1h.Amount[5]) / 4;\nlet obv_up = obv_1h.Data[1] > obv_1h.Data[2];\nlet money_in = mfi_1h_14.Data[1] > mfi_1h_14.Data[2];\nlet trend_break = kline_4h.Close[1] > ema_4h_34.Data[1] && ema_4h_34.Data[1] >= ema_4h_34.Data[2];\nlet accumulation = avg_volume > 0 && kline_1h.Close[1] > kline_1h.Open[1] && kline_1h.Close[1] > kline_1h.Close[2] && kline_1h.Amount[1] >= avg_volume * 1.15 && obv_up;\nlet downside_exhaustion = avg_volume > 0 && kline_1h.Close[1] <= kline_1h.Close[2] && kline_1h.Amount[1] <= avg_volume * 0.75 && obv_1h.Data[1] >= obv_1h.Data[2] && money_in;\nlet range_rejection = kline_1h.Close[1] > kline_1h.Open[1] && kline_1h.Close[1] > (kline_1h.High[1] + kline_1h.Low[1]) / 2 && obv_up;\nlet upside_breakout = avg_volume > 0 && kline_1h.Close[1] > kline_1h.High[2] && kline_1h.Amount[1] >= avg_volume * 1.35 && obv_up;\n\nlet favorable = MarketCondition == \"4\" || MarketCondition == \"5\" || MarketCondition == \"7\" || MarketCondition == \"9\";\nlet adverse = MarketCondition == \"1\" || MarketCondition == \"2\" || MarketCondition == \"6\" || MarketCondition == \"8\";\nlet sideways = MarketCondition == \"3\";\nlet high_vol_sideways = MarketCondition == \"10\";\nlet low_vol_sideways = MarketCondition == \"11\";\n\nlet profit_close = ROI >= 5 && ((favorable && (trend_break || (downside_exhaustion && money_in))) || (adverse && (trend_break || accumulation)) || (sideways && range_rejection && money_in) || (high_vol_sideways && upside_breakout && money_in) || (low_vol_sideways && downside_exhaustion && money_in));\nlet loss_close = ROI <= -5 && ((favorable && trend_break && accumulation) || (adverse && (trend_break || accumulation)) || (sideways && range_rejection && money_in) || (high_vol_sideways && upside_breakout) || (low_vol_sideways && upside_breakout && money_in));\nlet catastrophic_stop = ROI <= -9;\n\ncatastrophic_stop || profit_close || loss_close",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

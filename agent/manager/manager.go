@@ -15,6 +15,7 @@ import (
 
 type Config struct {
 	NewClient      func() (llm.Client, error)
+	Admission      func(skill string) error
 	Skills         *skill.Registry
 	Tools          *agenttools.Registry
 	Store          task.Store
@@ -50,6 +51,11 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	skillRequest := skill.Request{Input: req.Input, ConversationID: req.ConversationID, Metadata: req.Metadata}
 	if inputValidator, ok := selectedSkill.(skill.InputValidator); ok {
 		if err := inputValidator.ValidateInput(skillRequest); err != nil {
+			return nil, err
+		}
+	}
+	if manager.cfg.Admission != nil {
+		if err := manager.cfg.Admission(selectedSkill.Name()); err != nil {
 			return nil, err
 		}
 	}

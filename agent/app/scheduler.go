@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go_binance_futures/agent/scheduler"
+	"go_binance_futures/agent/security"
 	marketregime "go_binance_futures/agent/skills/marketregime"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/models"
@@ -113,5 +114,5 @@ func applyMarketRegimeFallback(ctx context.Context, provider SchedulerConfigProv
 		logs.Error("market regime scheduler fallback save:", err)
 		return
 	}
-	logs.Warning("market regime scheduler used algorithm fallback: condition=%d reason=%s", condition, reason)
+	logs.Warning("market regime scheduler used algorithm fallback: condition=%d reason=%s", condition, security.RedactText(reason))
 }

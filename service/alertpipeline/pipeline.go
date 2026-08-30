@@ -47,7 +47,9 @@ type Pipeline struct {
 	signalsReceived    atomic.Uint64
 	signalsDropped     atomic.Uint64
 	shadowSignals      atomic.Uint64
+	belowSeverity      atomic.Uint64
 	suppressedCooldown atomic.Uint64
+	eligibleSignals    atomic.Uint64
 	aiTasksStarted     atomic.Uint64
 	aiFallbacks        atomic.Uint64
 	notifications      atomic.Uint64
@@ -122,6 +124,7 @@ func (pipeline *Pipeline) process(ctx context.Context, value signalservice.Signa
 		return
 	}
 	if !signalservice.SeverityAtLeast(value.Severity, settings.MinSeverity) {
+		pipeline.belowSeverity.Add(1)
 		trace.Status = "below_severity"
 		pipeline.addTrace(trace)
 		return
@@ -133,6 +136,7 @@ func (pipeline *Pipeline) process(ctx context.Context, value signalservice.Signa
 		return
 	}
 	pipeline.markCooldown(value)
+	pipeline.eligibleSignals.Add(1)
 	if !settings.AIEnabled {
 		pipeline.notifyFallback(value, &trace, "AI disabled")
 		return
@@ -395,16 +399,28 @@ func (pipeline *Pipeline) Stats() Stats {
 	if pipeline == nil {
 		return Stats{}
 	}
-	return Stats{
+	eligible := pipeline.eligibleSignals.Load()
+	aiTasks := pipeline.aiTasksStarted.Load()
+	fallbacks := pipeline.aiFallbacks.Load()
+	stats := Stats{
 		SignalsReceived:    pipeline.signalsReceived.Load(),
 		SignalsDropped:     pipeline.signalsDropped.Load(),
 		ShadowSignals:      pipeline.shadowSignals.Load(),
+		BelowSeverity:      pipeline.belowSeverity.Load(),
 		SuppressedCooldown: pipeline.suppressedCooldown.Load(),
-		AITasksStarted:     pipeline.aiTasksStarted.Load(),
-		AIFallbacks:        pipeline.aiFallbacks.Load(),
+		EligibleSignals:    eligible,
+		AITasksStarted:     aiTasks,
+		AIFallbacks:        fallbacks,
 		Notifications:      pipeline.notifications.Load(),
 		ActiveAI:           int(pipeline.activeAI.Load()),
 	}
+	if eligible > 0 {
+		stats.SignalNotifyRate = float64(stats.Notifications) / float64(eligible)
+	}
+	if eligible > 0 {
+		stats.AIFallbackRate = float64(fallbacks) / float64(eligible)
+	}
+	return stats
 }
 
 func (pipeline *Pipeline) acquireAISlot(limit int) bool {
