@@ -31,11 +31,11 @@
 - [ ] 续聊使用 Conversation 概念，不依赖内存 Task ID 语义。
 ## Symbol Analysis
 
-- [ ] 指定任意有效 USDT 合约可以启动分析。
-- [ ] 数据获取失败进入 `data_missing`，模型不会伪造。
-- [ ] 输出为版本化 TradingPlan Schema。
-- [ ] neutral 是合法结论，不强迫做多/做空。
-- [ ] 所有证据均可追溯到 Context/Tool。
+- [x] 指定任意有效 USDT 合约可以启动分析。
+- [x] 数据获取失败进入 `data_missing`，模型不会伪造。
+- [x] 输出为版本化 TradingPlan Schema。
+- [x] neutral 是合法结论，不强迫做多/做空。
+- [x] 所有证据均可追溯到 Context/Tool。
 
 ## Event / Alert
 

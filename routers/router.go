@@ -13,6 +13,9 @@ func init() {
 	web.Router("/test-pusher", &controllers.IndexController{}, "post:TestPusher") // 测试推送
 	web.Router("/update-market-condition", &controllers.IndexController{}, "post:UpdateMarketCondition") // 手动触发更新市场状态
 	web.Router("/update-market-condition/:taskId", &controllers.IndexController{}, "get:GetMarketConditionUpdateTask") // 查询市场状态更新进度
+	web.Router("/agents/tasks", &controllers.AgentController{}, "post:StartTask") // 创建统一 Agent 任务
+	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask") // 查询统一 Agent 任务
+	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory") // 查询单币分析历史
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit") // 更新和删除
 	web.Router("/notifications", &controllers.NotificationController{}, "get:Get") // 网页通知列表
