@@ -52,7 +52,6 @@ func (client *bridgeClient) Generate(ctx context.Context, request Request) (*Res
 		defer cancel()
 	}
 	request.Model = requestModel(request, client.cfg.Model)
-	request.MaxTokens = requestMaxTokens(request, client.cfg.MaxTokens)
 	request.Temperature = requestTemperature(request, client.cfg.Temperature)
 
 	input, err := json.Marshal(bridgeRequest{Request: request, WorkingDir: client.cfg.WorkingDir})
