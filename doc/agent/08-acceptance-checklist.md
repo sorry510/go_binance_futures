@@ -58,7 +58,7 @@
 - [ ] LLM/Tool 故障不会影响核心交易循环和 WebSocket。
 - [ ] 每个 Skill 有独立开关，可以快速回滚。
 - [ ] 有成功率、耗时、Token、Tool/Validator 错误等指标。
-- [ ] 新旧路径完成灰度对比后才删除 legacy 实现。
+- [x] FastMove / Liquidation 新旧路径完成灰度对比，legacy 检测与直接通知实现已删除。
 
 ## Definition of Done
 

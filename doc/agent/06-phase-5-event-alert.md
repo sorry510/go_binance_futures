@@ -53,13 +53,13 @@ Signal 至少包含：`signal_id`、`symbol`、`type`、`severity`、`window`、
 
 ## 与现有 WS 逻辑的迁移
 
-现有 `fastMoveNoticeByWindow()` 不直接删除。先改造为：
+FastMove 与 Liquidation 已完成最终切流：
 
-1. 原有价格历史/阈值计算继续工作。
-2. 命中阈值时除旧通知路径外，同时产出 `FastMoveSignal`（影子模式）。
-3. 对比 Signal 数量、去重和冷却行为。
-4. Alert Pipeline 稳定后再切换通知入口。
-5. 最后决定是否保留旧通知实现作为 fallback。
+1. Binance WS 只负责发布 `PriceTickEvent` / `LiquidationEvent`。
+2. 阈值、窗口、聚合、去重和 Signal cooldown 统一由 `service/signal` 处理。
+3. FastMove 与 Liquidation 的旧检测器、旧聚合器和直接通知实现已经删除。
+4. `agent_alert_pipeline_enable=0` 时 Signal 继续监测，但这两类 Signal 不发送通知。
+5. Pipeline 开启后，唯一通知出口为 `Alert Pipeline -> AgentAlert -> notifications`。
 
 ## AlertAnalysis Skill
 
@@ -97,7 +97,7 @@ cooldown_until
 
 ## 当前实现
 
-Phase 5 第一版已经完成并采用灰度切流：
+Phase 5 第一版已经完成，并已完成 FastMove / Liquidation 最终切流：
 
 - `agent/event`：进程内 typed Event Bus，bounded queue、非阻塞 Publish、drop policy 和统计指标。
 - Binance 全市场 ticker 发布 `PriceTickEvent`；强平 WS 发布带稳定事件 ID 的 `LiquidationEvent`；WS 无数据报警额外发布 `WsHealthEvent`。
@@ -105,7 +105,7 @@ Phase 5 第一版已经完成并采用灰度切流：
 - `alert_analysis`：只消费已筛选 Signal，强制使用只读 Tool 补充市场上下文，只能返回 `notify/record/ignore`。
 - `service/alertpipeline`：severity gate、symbol/type cooldown、AI 并发限制、每分钟预算、AI 失败 deterministic fallback、最近 Trace 和运行指标。
 - Notification 持久化 `event_id/signal_id/task_id`，支持 Event → Signal → Agent Task → Notification 追踪。
-- `agent_alert_pipeline_enable=0` 时保持 legacy 通知并让新 Signal Engine 影子运行；开启后 FastMove / Liquidation 通知切到新 Pipeline，避免双发。
+- FastMove / Liquidation 的 legacy 检测和直接通知实现已删除；`agent_alert_pipeline_enable=0` 时只监测 Signal 不通知，开启后统一由新 Pipeline 处理。
 - `agent_alert_analysis_enable=0` 或 AI 不可用时仍发送规则 fallback，不影响 WS 数据链。
 - WS 无数据健康报警始终由确定性逻辑发送，不依赖 AI。
 

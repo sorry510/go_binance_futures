@@ -3,6 +3,7 @@ package binance
 import (
 	"database/sql/driver"
 	"errors"
+	"fmt"
 	agentevent "go_binance_futures/agent/event"
 	"go_binance_futures/models"
 	"strconv"
@@ -47,11 +48,6 @@ func CollectFuturesLiquidationOrders(systemConfig *models.Config) {
 				return
 			}
 			publishFuturesLiquidationEvent(item)
-			if systemConfig.AgentAlertPipelineEnable != 1 {
-				if _, err := defaultFuturesLiquidationAlertAggregator.Evaluate(item, systemConfig); err != nil {
-					logs.Error("check futures liquidation aggregate alert error:", err)
-				}
-			}
 		}, func(err error) {
 			logs.Error("futures liquidation ws run error:", err)
 		})
@@ -173,6 +169,26 @@ func calculateLiquidationNotional(order futures.WsLiquidationOrder) float64 {
 	return price * quantity
 }
 
+func liquidationPositionSide(orderSide string) (string, bool) {
+	switch strings.ToUpper(strings.TrimSpace(orderSide)) {
+	case "SELL":
+		return "long", true
+	case "BUY":
+		return "short", true
+	default:
+		return "", false
+	}
+}
+
+func futuresLiquidationEventKey(item models.FuturesLiquidationOrder) string {
+	return fmt.Sprintf("%s|%s|%d|%d|%s|%s|%s|%.8f",
+		strings.ToUpper(strings.TrimSpace(item.Symbol)),
+		strings.ToUpper(strings.TrimSpace(item.Side)),
+		item.EventTime, item.TradeTime, item.AvgPrice, item.Price,
+		item.AccumulatedFilledQty, item.Notional,
+	)
+}
+
 func publishFuturesLiquidationEvent(item models.FuturesLiquidationOrder) {
 	liquidationSide, ok := liquidationPositionSide(item.Side)
 	if !ok || item.Notional <= 0 {
@@ -188,7 +204,7 @@ func publishFuturesLiquidationEvent(item models.FuturesLiquidationOrder) {
 	}
 	value := agentevent.NewLiquidation(item.Symbol, "binance_ws_all_liquidation", item.EventTime,
 		item.Side, price, quantity, item.Notional, liquidationSide)
-	value.Meta.EventID = agentevent.StableID("liq", futuresLiquidationAlertEventKey(item))
+	value.Meta.EventID = agentevent.StableID("liq", futuresLiquidationEventKey(item))
 	agentevent.DefaultBus().Publish(value)
 }
 
