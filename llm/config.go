@@ -1,29 +1,22 @@
 package llm
 
 import (
-	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
-
-	beegoConfig "github.com/beego/beego/v2/core/config"
 )
 
 const defaultTimeout = 60 * time.Second
+const defaultAnthropicMaxTokens = 4096
 
 type Config struct {
 	Provider    Provider
 	Model       string
-	BaseURL     string
-	Endpoint    string
+	APIURL      string
 	APIKey      string
 	APIVersion  string
-	ProxyURL    string
 	Timeout     time.Duration
-	MaxTokens   int
 	Temperature *float64
-	Headers     map[string]string
 
 	Command     string
 	Args        []string
@@ -32,86 +25,32 @@ type Config struct {
 }
 
 func LoadConfig() (Config, error) {
-	rawProvider := strings.TrimSpace(readString("llm::provider", ""))
-	provider, section, err := normalizeProvider(rawProvider)
-	if err != nil {
-		return Config{}, err
-	}
-
-	prefix := section + "::"
-	timeoutSeconds := readInt(prefix+"timeout_seconds", int(defaultTimeout/time.Second))
-	maxTokens := readInt(prefix+"max_tokens", 1024)
-
-	cfg := Config{
-		Provider:    provider,
-		Model:       strings.TrimSpace(readString(prefix+"model", "")),
-		BaseURL:     strings.TrimSpace(readString(prefix+"base_url", defaultBaseURL(provider))),
-		Endpoint:    strings.TrimSpace(readString(prefix+"endpoint", defaultEndpoint(provider))),
-		APIKey:      strings.TrimSpace(readString(prefix+"api_key", "")),
-		APIVersion:  strings.TrimSpace(readString(prefix+"api_version", defaultAPIVersion(provider))),
-		ProxyURL:    strings.TrimSpace(readString(prefix+"proxy_url", "")),
-		Timeout:     time.Duration(timeoutSeconds) * time.Second,
-		MaxTokens:   maxTokens,
-		Command:     strings.TrimSpace(readString(prefix+"command", defaultCommand(provider))),
-		WorkingDir:  strings.TrimSpace(readString(prefix+"working_dir", ".")),
-		Headers:     map[string]string{},
-		Environment: map[string]string{},
-	}
-
-	if value := strings.TrimSpace(readString(prefix+"temperature", "")); value != "" {
-		temperature, parseErr := strconv.ParseFloat(value, 64)
-		if parseErr != nil {
-			return Config{}, fmt.Errorf("invalid %stemperature: %w", prefix, parseErr)
-		}
-		cfg.Temperature = &temperature
-	}
-
-	if err := decodeJSONSetting(prefix+"headers", &cfg.Headers); err != nil {
-		return Config{}, err
-	}
-	if err := decodeJSONSetting(prefix+"environment", &cfg.Environment); err != nil {
-		return Config{}, err
-	}
-	if err := decodeJSONSetting(prefix+"args", &cfg.Args); err != nil {
-		return Config{}, err
-	}
-	if len(cfg.Args) == 0 {
-		cfg.Args = defaultArgs(provider)
-	}
-
-	if err := cfg.Validate(); err != nil {
-		return Config{}, err
-	}
-	return cfg, nil
+	return (Store{}).ActiveConfig()
 }
-
 func (cfg Config) Validate() error {
 	if cfg.Timeout <= 0 {
 		return fmt.Errorf("llm timeout must be greater than zero")
 	}
-	if cfg.MaxTokens <= 0 {
-		return fmt.Errorf("llm max_tokens must be greater than zero")
-	}
 
 	switch cfg.Provider {
-	case ProviderOpenAI:
-		if cfg.APIKey == "" {
-			return fmt.Errorf("llm_openai::api_key is required")
+	case ProviderOpenAI, ProviderDeepSeek, ProviderGLM, ProviderMoonshot, ProviderGemini:
+		if strings.TrimSpace(cfg.APIKey) == "" {
+			return fmt.Errorf("api_key is required for %s", cfg.Provider)
 		}
 		fallthrough
-	case ProviderOpenAICompatible:
-		if cfg.BaseURL == "" || cfg.Endpoint == "" || cfg.Model == "" {
-			return fmt.Errorf("base_url, endpoint and model are required for %s", cfg.Provider)
+	case ProviderOpenAICompatible, ProviderOllama:
+		if strings.TrimSpace(cfg.APIURL) == "" || strings.TrimSpace(cfg.Model) == "" {
+			return fmt.Errorf("api_url and model are required for %s", cfg.Provider)
 		}
 	case ProviderAnthropic:
-		if cfg.APIKey == "" {
-			return fmt.Errorf("llm_anthropic::api_key is required")
+		if strings.TrimSpace(cfg.APIKey) == "" {
+			return fmt.Errorf("api_key is required for anthropic")
 		}
-		if cfg.BaseURL == "" || cfg.Endpoint == "" || cfg.Model == "" || cfg.APIVersion == "" {
-			return fmt.Errorf("base_url, endpoint, api_version and model are required for anthropic")
+		if strings.TrimSpace(cfg.APIURL) == "" || strings.TrimSpace(cfg.Model) == "" || strings.TrimSpace(cfg.APIVersion) == "" {
+			return fmt.Errorf("api_url, api_version and model are required for anthropic")
 		}
 	case ProviderClaudeSDK, ProviderCodexSDK:
-		if cfg.Command == "" {
+		if strings.TrimSpace(cfg.Command) == "" {
 			return fmt.Errorf("command is required for %s", cfg.Provider)
 		}
 	default:
@@ -119,82 +58,34 @@ func (cfg Config) Validate() error {
 	}
 	return nil
 }
-
-func normalizeProvider(value string) (Provider, string, error) {
-	switch strings.ToLower(value) {
+func normalizeProvider(value string) (Provider, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
 	case "openai", "chatgpt", "chatgpt_api":
-		return ProviderOpenAI, "llm_openai", nil
-	case "openai_compatible", "compatible":
-		return ProviderOpenAICompatible, "llm_openai_compatible", nil
+		return ProviderOpenAI, nil
+	case "openai_compatible", "compatible", "custom":
+		return ProviderOpenAICompatible, nil
 	case "anthropic", "claude", "claude_api":
-		return ProviderAnthropic, "llm_anthropic", nil
+		return ProviderAnthropic, nil
+	case "deepseek":
+		return ProviderDeepSeek, nil
+	case "glm", "zhipu", "bigmodel":
+		return ProviderGLM, nil
+	case "moonshot", "kimi":
+		return ProviderMoonshot, nil
+	case "ollama":
+		return ProviderOllama, nil
+	case "gemini", "google":
+		return ProviderGemini, nil
 	case "claude_sdk", "claude_agent_sdk":
-		return ProviderClaudeSDK, "llm_claude_sdk", nil
+		return ProviderClaudeSDK, nil
 	case "codex_sdk":
-		return ProviderCodexSDK, "llm_codex_sdk", nil
+		return ProviderCodexSDK, nil
 	case "":
-		return "", "", fmt.Errorf("llm::provider is required")
+		return "", fmt.Errorf("llm provider is required")
 	default:
-		return "", "", fmt.Errorf("unsupported llm::provider %q", value)
+		return "", fmt.Errorf("unsupported llm provider %q", value)
 	}
 }
-
-func readString(key string, fallback string) string {
-	value, err := beegoConfig.String(key)
-	if err != nil || value == "" {
-		return fallback
-	}
-	return value
-}
-
-func readInt(key string, fallback int) int {
-	value, err := beegoConfig.Int(key)
-	if err != nil {
-		return fallback
-	}
-	return value
-}
-
-func decodeJSONSetting(key string, destination interface{}) error {
-	value := strings.TrimSpace(readString(key, ""))
-	if value == "" {
-		return nil
-	}
-	if err := json.Unmarshal([]byte(value), destination); err != nil {
-		return fmt.Errorf("invalid JSON in %s: %w", key, err)
-	}
-	return nil
-}
-
-func defaultBaseURL(provider Provider) string {
-	switch provider {
-	case ProviderOpenAI:
-		return "https://api.openai.com"
-	case ProviderAnthropic:
-		return "https://api.anthropic.com"
-	default:
-		return ""
-	}
-}
-
-func defaultEndpoint(provider Provider) string {
-	switch provider {
-	case ProviderOpenAI, ProviderOpenAICompatible:
-		return "/v1/chat/completions"
-	case ProviderAnthropic:
-		return "/v1/messages"
-	default:
-		return ""
-	}
-}
-
-func defaultAPIVersion(provider Provider) string {
-	if provider == ProviderAnthropic {
-		return "2023-06-01"
-	}
-	return ""
-}
-
 func defaultCommand(provider Provider) string {
 	switch provider {
 	case ProviderClaudeSDK, ProviderCodexSDK:

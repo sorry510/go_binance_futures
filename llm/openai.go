@@ -70,7 +70,7 @@ func (client *openAIClient) Generate(ctx context.Context, request Request) (*Res
 	payload := openAIRequest{
 		Model:       requestModel(request, client.cfg.Model),
 		Messages:    messages,
-		MaxTokens:   requestMaxTokens(request, client.cfg.MaxTokens),
+		MaxTokens:   request.MaxTokens,
 		Temperature: requestTemperature(request, client.cfg.Temperature),
 	}
 	headers := map[string]string{}
@@ -79,7 +79,7 @@ func (client *openAIClient) Generate(ctx context.Context, request Request) (*Res
 	}
 
 	var result openAIResponse
-	if err := client.transport.postJSON(ctx, client.cfg.Endpoint, payload, &result, headers); err != nil {
+	if err := client.transport.postJSON(ctx, client.cfg.APIURL, payload, &result, headers); err != nil {
 		return nil, err
 	}
 	if len(result.Choices) == 0 {

@@ -8,6 +8,11 @@ const (
 	ProviderOpenAI           Provider = "openai"
 	ProviderOpenAICompatible Provider = "openai_compatible"
 	ProviderAnthropic        Provider = "anthropic"
+	ProviderDeepSeek         Provider = "deepseek"
+	ProviderGLM              Provider = "glm"
+	ProviderMoonshot         Provider = "moonshot"
+	ProviderOllama           Provider = "ollama"
+	ProviderGemini           Provider = "gemini"
 	ProviderClaudeSDK        Provider = "claude_sdk"
 	ProviderCodexSDK         Provider = "codex_sdk"
 )

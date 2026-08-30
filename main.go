@@ -7,6 +7,7 @@ import (
 	"go_binance_futures/command"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/llm"
 	"go_binance_futures/mcpserver"
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
@@ -91,12 +92,16 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.AgentSkill))
+	orm.RegisterModel(new(models.LLMConfig))
 	orm.RegisterModel(new(models.Notification))
 
 	setDriver(driver) // 设置数据库驱动
 	syncDb()          // 同步数据库
 	if err := agentapp.EnsureDefaultSkillConfigs(); err != nil {
 		logs.Error("initialize agent skill configs:", err)
+	}
+	if err := llm.EnsureDatabaseConfigFromLegacy(context.Background()); err != nil {
+		logs.Error("initialize LLM database config:", err)
 	}
 	if err := feature.BackfillEmptyFuturesSymbolTypes(); err != nil {
 		logs.Error("backfill empty futures symbol types error:", err)
@@ -183,6 +188,7 @@ func main() {
 		updateSystemConfig()
 		go binance.UpdateCoinByWs(&SystemConfig, 0)
 		// web
+		logs.Info("Web service startup completed")
 		web.Run(":" + webPort)
 		return
 	}
@@ -307,6 +313,7 @@ func main() {
 	go webnotification.StartNotificationCleanupTask()
 
 	// web
+	logs.Info("Web service startup completed")
 	web.Run(":" + webPort)
 }
 
