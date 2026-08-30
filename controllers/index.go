@@ -21,13 +21,13 @@ func (ctrl *IndexController) GetServiceConfig() {
 		logs.Error("GetSystemConfig:", err)
 		return
 	}
-	
+
 	var coinExcludeSymbols = systemConfig.FutureExcludeSymbols
 	var coinMaxCount = systemConfig.FutureMaxCount
 	var coinOrderType = systemConfig.FutureOrderType
 	var coinAllowLong = systemConfig.FutureAllowLong
 	var coinAllowShort = systemConfig.FutureAllowShort
-	
+
 	var tradeFutureTest = systemConfig.FutureTest
 	var tradeFutureTestNoticeLimitMin = systemConfig.FutureTestNoticeLimitMin
 	var tradeFutureEnable = systemConfig.FutureEnable
@@ -36,71 +36,75 @@ func (ctrl *IndexController) GetServiceConfig() {
 	var tradeStrategyTrade = systemConfig.FutureStrategyTrade
 	var tradeStrategyCoin = systemConfig.FutureStrategyCoin
 	var tradeNewEnable = systemConfig.FutureNewEnable
-	
+
 	var spotNewEnable = systemConfig.SpotNewEnable
-	
+
 	var noticeCoinEnable = systemConfig.NoticeCoinEnable
-	
+
 	var listenCoinEnable = systemConfig.ListenCoinEnable
 	var listenFundingRate = systemConfig.ListenFundingRateEnable
 	var lossMaxCount = systemConfig.LossMaxCount
 	var futureTestAutoTradeCountLimit = systemConfig.FutureTestAutoTradeCountLimit
 	var externalLinks, _ = config.String("external::links")
-	
-	ctrl.Ctx.Resp(map[string]interface{} {
+
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"data": map[string]interface{} {
+		"data": map[string]interface{}{
 			"debug": debug,
-			
-			"wsFuturesEnable": systemConfig.WsFuturesEnable,
-			"wsSpotEnable": systemConfig.WsSpotEnable,
-			"wsDeliveryEnable": systemConfig.WsDeliveryEnable,
+
+			"wsFuturesEnable":              systemConfig.WsFuturesEnable,
+			"wsSpotEnable":                 systemConfig.WsSpotEnable,
+			"wsDeliveryEnable":             systemConfig.WsDeliveryEnable,
 			"futuresPositionConvertEnable": systemConfig.FuturesPositionConvertEnable,
-			
+
 			"coinExcludeSymbols": coinExcludeSymbols,
-			"coinMaxCount": coinMaxCount,
-			"coinOrderType": coinOrderType,
-			"coinAllowLong": coinAllowLong,
-			"coinAllowShort": coinAllowShort,
-			
-			"tradeFutureTest": tradeFutureTest,
+			"coinMaxCount":       coinMaxCount,
+			"coinOrderType":      coinOrderType,
+			"coinAllowLong":      coinAllowLong,
+			"coinAllowShort":     coinAllowShort,
+
+			"tradeFutureTest":               tradeFutureTest,
 			"tradeFutureTestNoticeLimitMin": tradeFutureTestNoticeLimitMin,
-			"tradeFutureEnable": tradeFutureEnable,
-			"tradeSpotEnable": tradeSpotEnable,
-			"tradeDeliveryEnable": tradeDeliveryEnable,
-			"tradeStrategyTrade": tradeStrategyTrade,
-			"tradeStrategyCoin": tradeStrategyCoin,
-			"tradeNewEnable": tradeNewEnable,
-			
+			"tradeFutureEnable":             tradeFutureEnable,
+			"tradeSpotEnable":               tradeSpotEnable,
+			"tradeDeliveryEnable":           tradeDeliveryEnable,
+			"tradeStrategyTrade":            tradeStrategyTrade,
+			"tradeStrategyCoin":             tradeStrategyCoin,
+			"tradeNewEnable":                tradeNewEnable,
+
 			"spotNewEnable": spotNewEnable,
-			
+
 			"noticeCoinEnable": noticeCoinEnable,
-			
-			"listenCoinEnable": listenCoinEnable,
-			"listenFundingRate": listenFundingRate,
-			"lossMaxCount": lossMaxCount,
-			"lossAutoScale": systemConfig.LossAutoScale,
-			"marketCondition": systemConfig.MarketCondition,
-			"marketConditionIsAuto": systemConfig.MarketConditionIsAuto,
-			"FutureTestAutoTradeCountLimit": futureTestAutoTradeCountLimit,
-			"WsFuturesFastMoveEnable": systemConfig.WsFuturesFastMoveEnable,
-			"WsFuturesFastMoveThreshold": systemConfig.WsFuturesFastMoveThreshold,
-			"WsFuturesFastMoveRecover": systemConfig.WsFuturesFastMoveRecover,
-			"WsFuturesFastMoveCooldownSec": systemConfig.WsFuturesFastMoveCooldownSec,
-			"WsFuturesFastMoveWindows": systemConfig.WsFuturesFastMoveWindows,
-			"WsFuturesLiquidationEnable": systemConfig.WsFuturesLiquidationEnable,
-			"WsFuturesLiquidationAlertWindowSec": systemConfig.WsFuturesLiquidationAlertWindowSec,
+
+			"listenCoinEnable":                           listenCoinEnable,
+			"listenFundingRate":                          listenFundingRate,
+			"lossMaxCount":                               lossMaxCount,
+			"lossAutoScale":                              systemConfig.LossAutoScale,
+			"marketCondition":                            systemConfig.MarketCondition,
+			"marketConditionIsAuto":                      systemConfig.MarketConditionIsAuto,
+			"FutureTestAutoTradeCountLimit":              futureTestAutoTradeCountLimit,
+			"WsFuturesFastMoveEnable":                    systemConfig.WsFuturesFastMoveEnable,
+			"WsFuturesFastMoveThreshold":                 systemConfig.WsFuturesFastMoveThreshold,
+			"WsFuturesFastMoveRecover":                   systemConfig.WsFuturesFastMoveRecover,
+			"WsFuturesFastMoveCooldownSec":               systemConfig.WsFuturesFastMoveCooldownSec,
+			"WsFuturesFastMoveWindows":                   systemConfig.WsFuturesFastMoveWindows,
+			"WsFuturesLiquidationEnable":                 systemConfig.WsFuturesLiquidationEnable,
+			"WsFuturesLiquidationAlertWindowSec":         systemConfig.WsFuturesLiquidationAlertWindowSec,
 			"WsFuturesLiquidationAlertNotionalThreshold": systemConfig.WsFuturesLiquidationAlertNotionalThreshold,
-			"WsFuturesLiquidationAlertCooldownSec": systemConfig.WsFuturesLiquidationAlertCooldownSec,
-			"AgentAlertPipelineEnable": systemConfig.AgentAlertPipelineEnable,
-			"AgentAlertAnalysisEnable": systemConfig.AgentAlertAnalysisEnable,
-			"AgentAlertMinSeverity": systemConfig.AgentAlertMinSeverity,
-			"AgentAlertCooldownSec": systemConfig.AgentAlertCooldownSec,
-			"AgentAlertMaxConcurrent": systemConfig.AgentAlertMaxConcurrent,
-			"AgentAlertMaxPerMinute": systemConfig.AgentAlertMaxPerMinute,
-			"AgentMarketRegimeScheduleEnable": systemConfig.AgentMarketRegimeScheduleEnable,
-			"AgentMarketRegimeIntervalMin": systemConfig.AgentMarketRegimeIntervalMin,
-			
+			"WsFuturesLiquidationAlertCooldownSec":       systemConfig.WsFuturesLiquidationAlertCooldownSec,
+			"AgentAlertPipelineEnable":                   systemConfig.AgentAlertPipelineEnable,
+			"AgentAlertAnalysisEnable":                   systemConfig.AgentAlertAnalysisEnable,
+			"AgentAlertMinSeverity":                      systemConfig.AgentAlertMinSeverity,
+			"AgentAlertCooldownSec":                      systemConfig.AgentAlertCooldownSec,
+			"AgentAlertMaxConcurrent":                    systemConfig.AgentAlertMaxConcurrent,
+			"AgentAlertMaxPerMinute":                     systemConfig.AgentAlertMaxPerMinute,
+			"AgentMarketRegimeScheduleEnable":            systemConfig.AgentMarketRegimeScheduleEnable,
+			"AgentMarketRegimeIntervalMin":               systemConfig.AgentMarketRegimeIntervalMin,
+			"AgentMaxStartsPerMinute":                    systemConfig.AgentMaxStartsPerMinute,
+			"AgentMaxStartsPerHour":                      systemConfig.AgentMaxStartsPerHour,
+			"AgentMaxTokensPerTask":                      systemConfig.AgentMaxTokensPerTask,
+			"AgentMaxToolCallsPerTask":                   systemConfig.AgentMaxToolCallsPerTask,
+
 			"externalLinks": externalLinks,
 		},
 		"msg": "success",
@@ -109,28 +113,28 @@ func (ctrl *IndexController) GetServiceConfig() {
 
 func (ctrl *IndexController) EditServiceConfig() {
 	systemConfig, _ := utils.GetSystemConfig()
-	
+
 	ctrl.BindJSON(&systemConfig)
-	
+
 	_, err := orm.NewOrm().Update(&systemConfig) // _ 是受影响的条数
-    if err != nil {
-        // 处理错误
+	if err != nil {
+		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
 		return
-    }
-	ctrl.Ctx.Resp(map[string]interface{} {
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": systemConfig,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
 func (ctrl *IndexController) TestPusher() {
 	var pusher = notify.GetNotifyChannel()
 	pusher.SetModuleName("futures_test").TestPusher()
-	ctrl.Ctx.Resp(map[string]interface{} {
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
@@ -142,10 +146,10 @@ func (ctrl *IndexController) UpdateMarketCondition() {
 		return
 	}
 	task := startMarketConditionUpdateTask(systemConfig)
-	ctrl.Ctx.Resp(map[string]interface{} {
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": task,
-		"msg": "accepted",
+		"msg":  "accepted",
 	})
 }
 
@@ -156,9 +160,9 @@ func (ctrl *IndexController) GetMarketConditionUpdateTask() {
 		ctrl.Ctx.Resp(utils.ResJson(404, nil, "task not found"))
 		return
 	}
-	ctrl.Ctx.Resp(map[string]interface{} {
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": task,
-		"msg": "success",
+		"msg":  "success",
 	})
 }

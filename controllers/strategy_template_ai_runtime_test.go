@@ -10,6 +10,7 @@ import (
 	"time"
 
 	conversationstore "go_binance_futures/agent/conversation"
+	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/llm"
 )
@@ -39,8 +40,18 @@ func TestStrategyTemplateAITaskUsesRuntimeAndPreservesConversation(t *testing.T)
 		validStrategyBuilderEnvelope("runtime-second"),
 	}}
 	original := newStrategyBuilderLLMClient
+	originalAdmission := admitStrategyBuilderSkill
+	originalBudget := strategyBuilderBudgetProvider
 	newStrategyBuilderLLMClient = func() (llm.Client, error) { return client, nil }
-	defer func() { newStrategyBuilderLLMClient = original }()
+	admitStrategyBuilderSkill = func(string) error { return nil }
+	strategyBuilderBudgetProvider = func(string) agentruntime.Budget {
+		return agentruntime.Budget{MaxToolCalls: maxStrategyTemplateAIRounds, MaxTotalTokens: 120000}
+	}
+	defer func() {
+		newStrategyBuilderLLMClient = original
+		admitStrategyBuilderSkill = originalAdmission
+		strategyBuilderBudgetProvider = originalBudget
+	}()
 
 	first, err := startStrategyTemplateAITask(strategyTemplateAIGenerationRequest{Prompt: "生成一个简单策略"})
 	if err != nil {

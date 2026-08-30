@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	agentapp "go_binance_futures/agent/app"
+	"go_binance_futures/agent/observability"
 	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/task"
 	alertpipeline "go_binance_futures/service/alertpipeline"
@@ -69,6 +70,18 @@ func (ctrl *AgentController) ListTasks() {
 func (ctrl *AgentController) GetSchedulerStatus() {
 	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200, "data": agentapp.DefaultSchedulerStatus(), "msg": "success",
+	})
+}
+
+func (ctrl *AgentController) GetGovernanceStatus() {
+	ctrl.Ctx.Resp(map[string]interface{}{
+		"code": 200,
+		"data": map[string]interface{}{
+			"governance":     agentapp.DefaultGovernanceStatus(),
+			"metrics":        observability.Default().Snapshot(),
+			"alert_pipeline": alertpipeline.DefaultStatus(1).Pipeline,
+		},
+		"msg": "success",
 	})
 }
 
