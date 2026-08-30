@@ -16,6 +16,7 @@ const (
 	StatusSucceeded   Status = "succeeded"
 	StatusFailed      Status = "failed"
 	StatusCancelled   Status = "cancelled"
+	StatusInterrupted Status = "interrupted"
 )
 
 type Event struct {
@@ -39,7 +40,8 @@ type Usage struct {
 
 type Task struct {
 	ID          string          `json:"id"`
-	Skill       string          `json:"skill"`
+	Skill          string          `json:"skill"`
+	ConversationID string          `json:"conversation_id,omitempty"`
 	Status      Status          `json:"status"`
 	Stage       string          `json:"stage"`
 	Progress    int             `json:"progress"`
@@ -55,5 +57,18 @@ type Task struct {
 	StartedAt   *time.Time      `json:"started_at,omitempty"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 	CompletedAt *time.Time      `json:"completed_at,omitempty"`
-	Events      []Event         `json:"events,omitempty"`
+	Events         []Event         `json:"events,omitempty"`
+}
+
+func IsRunningStatus(status Status) bool {
+	switch status {
+	case StatusQueued, StatusRunning, StatusWaitingLLM, StatusWaitingTool, StatusValidating:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsTerminalStatus(status Status) bool {
+	return status == StatusSucceeded || status == StatusFailed || status == StatusCancelled || status == StatusInterrupted
 }

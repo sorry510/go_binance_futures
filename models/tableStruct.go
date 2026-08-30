@@ -39,6 +39,8 @@ type Config struct {
 	AgentAlertCooldownSec int `orm:"column(agent_alert_cooldown_sec);default(900)" json:"agent_alert_cooldown_sec"`
 	AgentAlertMaxConcurrent int `orm:"column(agent_alert_max_concurrent);default(2)" json:"agent_alert_max_concurrent"`
 	AgentAlertMaxPerMinute int `orm:"column(agent_alert_max_per_minute);default(6)" json:"agent_alert_max_per_minute"`
+	AgentMarketRegimeScheduleEnable int `orm:"column(agent_market_regime_schedule_enable);default(1)" json:"agent_market_regime_schedule_enable"`
+	AgentMarketRegimeIntervalMin int `orm:"column(agent_market_regime_interval_min);default(60)" json:"agent_market_regime_interval_min"`
 	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值

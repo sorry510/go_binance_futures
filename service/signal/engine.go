@@ -284,10 +284,13 @@ func trimPriceHistory(values []pricePoint, cutoff int64) []pricePoint {
 	for index < len(values) && values[index].TimeMs < cutoff {
 		index++
 	}
-	if index == 0 {
+	if index <= 1 {
 		return values
 	}
-	return append([]pricePoint(nil), values[index:]...)
+	// Retain the final sample before the cutoff. The configured maximum window
+	// needs that predecessor as its base price because WS timestamps rarely land
+	// exactly on the window boundary.
+	return append([]pricePoint(nil), values[index-1:]...)
 }
 
 func findBasePrice(values []pricePoint, target int64) (float64, bool) {

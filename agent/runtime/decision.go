@@ -21,7 +21,7 @@ func parseDecision(content string) (decision, error) {
 	if payload == "" {
 		return parsed, fmt.Errorf("agent response is not a JSON object")
 	}
-	if err := json.Unmarshal([]byte(payload), &parsed); err != nil {
+	if err := unmarshalDecision(payload, &parsed); err != nil {
 		return parsed, fmt.Errorf("decode agent decision: %w", err)
 	}
 	parsed.Action = strings.ToLower(strings.TrimSpace(parsed.Action))
@@ -44,6 +44,45 @@ func parseDecision(content string) (decision, error) {
 	}
 	return parsed, nil
 }
+
+func unmarshalDecision(payload string, parsed *decision) error {
+	err := json.Unmarshal([]byte(payload), parsed)
+	if err == nil {
+		return nil
+	}
+
+	// Some models repeatedly reverse or duplicate the object/array terminators
+	// after the last array element (for example, `..."supertrend":[{...}}]`).
+	// Only accept a repair when the decoder points at that exact byte and one
+	// unambiguous single-token correction makes the complete decision valid
+	// JSON. Every other malformed response remains a protocol error.
+	syntaxError, ok := err.(*json.SyntaxError)
+	if !ok || !strings.Contains(syntaxError.Error(), "invalid character '}' after array element") {
+		return err
+	}
+	offset := int(syntaxError.Offset) - 1
+	if offset < 0 || offset >= len(payload) || payload[offset] != '}' {
+		return err
+	}
+	candidates := []string{payload[:offset] + payload[offset+1:]}
+	if offset+1 < len(payload) && payload[offset+1] == ']' {
+		candidates = append(candidates, payload[:offset]+"]}"+payload[offset+2:])
+	}
+
+	valid := make([]decision, 0, 1)
+	for _, candidate := range candidates {
+		var repaired decision
+		if repairErr := json.Unmarshal([]byte(candidate), &repaired); repairErr == nil {
+			valid = append(valid, repaired)
+		}
+	}
+	if len(valid) != 1 {
+		return err
+	}
+	*parsed = valid[0]
+	return nil
+}
+
 func extractJSONObject(content string) string {
 	trimmed := strings.TrimSpace(content)
 	if strings.HasPrefix(trimmed, "```") {
