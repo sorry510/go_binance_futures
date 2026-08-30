@@ -28,7 +28,10 @@ func TestEngineCreatesFastMoveSignalWithCooldown(t *testing.T) {
 	bus.Start(ctx)
 	base := time.UnixMilli(1_700_000_000_000)
 	bus.Publish(agentevent.NewPriceTick("BTCUSDT", "test", base.UnixMilli(), 100, 0))
-	bus.Publish(agentevent.NewPriceTick("BTCUSDT", "test", base.Add(3*time.Minute).UnixMilli(), 111, 11))
+	// Real WS events do not land exactly on the configured window boundary.
+	// The sample immediately before the cutoff must remain available as the base.
+	triggerAt := base.Add(3*time.Minute + 137*time.Millisecond)
+	bus.Publish(agentevent.NewPriceTick("BTCUSDT", "test", triggerAt.UnixMilli(), 111, 11))
 	select {
 	case got := <-signals:
 		if got.Type != TypeFastMove || got.Symbol != "BTCUSDT" || got.Labels["direction"] != "up" {
@@ -40,7 +43,7 @@ func TestEngineCreatesFastMoveSignalWithCooldown(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("fast move signal was not emitted")
 	}
-	bus.Publish(agentevent.NewPriceTick("BTCUSDT", "test", base.Add(3*time.Minute+time.Second).UnixMilli(), 112, 12))
+	bus.Publish(agentevent.NewPriceTick("BTCUSDT", "test", triggerAt.Add(time.Second).UnixMilli(), 112, 12))
 	select {
 	case duplicate := <-signals:
 		t.Fatalf("cooldown should suppress duplicate: %+v", duplicate)
