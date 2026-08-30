@@ -50,6 +50,10 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Menu | Pages and purpose |
 | --- | --- |
 | Configuration Center (`配置中心`) | Global switches and runtime settings for futures trading, WebSocket, new-coin rush, price alerts, market monitoring, funding-rate monitoring, notifications, debug push, and external links |
+| AI → Symbol Analysis (`AI → 单币分析`) | Select or enter a USDT perpetual contract, add an optional focus, start an AI analysis, and review historical direction, confidence, market regime, price movement, and summaries |
+| AI → Task Center (`AI → 任务中心`) | View Agent governance and runtime metrics, per-Skill metrics, Scheduler status, and Agent Task history |
+| AI → Skill Management (`AI → Skill 管理`) | Manage database-backed Skill registrations, display names, descriptions, and enabled states; implementations remain in backend code |
+| AI → LLM Configuration (`AI → LLM 配置`) | Add, edit, test, and switch database-backed LLM configurations; new tasks use the current model without a service restart |
 | Futures Trade → Futures Trade (`合约交易 → 合约交易`) | Browse `Favorites`, `USDT`, and `USDC` symbols; add, search, batch-edit, enable all, or disable all symbol configurations |
 | Futures Trade → Futures Orders (`合约交易 → 合约订单`) | Search real futures order history by symbol and time range |
 | Futures Trade → Futures Account (`合约交易 → 合约账户`) | View Binance futures assets, positions, and open orders |
@@ -70,6 +74,18 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 
 #### Configuration Center
 ![New UI - Configuration Center](./img/ui/dashboard.jpg)
+
+#### AI - Symbol Analysis
+![New UI - AI Symbol Analysis](./img/ui/ai-symbol-analysis.png)
+
+#### AI - Task Center
+![New UI - AI Task Center](./img/ui/ai-task-center.png)
+
+#### AI - Skill Management
+![New UI - AI Skill Management](./img/ui/ai-skill-management.png)
+
+#### AI - LLM Configuration
+![New UI - AI LLM Configuration](./img/ui/ai-llm-config.png)
 
 #### Futures Trade
 ![New UI - Futures Trade](./img/ui/futures-symbols.png)
@@ -118,6 +134,29 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 
 #### Logs
 ![New UI - Logs](./img/ui/service-logs.jpg)
+
+## AI features
+
+### Symbol Analysis
+
+Select or enter a USDT perpetual contract and optionally tell the AI what to focus on. The page starts the `symbol_analysis` Skill, loads the contract's latest successful analysis, compares it with the current market, and returns a structured TradingPlan. History shows status, direction, confidence, market regime, analysis-time price, current price, subsequent change, and summary.
+
+### Task Center
+
+- **Agent governance and runtime metrics:** per-minute and per-hour launch limits, accepted and rejected tasks, task success rate, LLM/Tool error rates, token usage, latency, average rounds, and Signal-to-notification conversion.
+- **Per-Skill metrics:** task count, success rate, error rates, token usage, and P95 latency for each Skill.
+- **Agent Scheduler:** enabled state, interval, running state, execution/skip counts, next run, and previous status for scheduled jobs.
+- **Agent Task history:** filter by Skill and status, then inspect stage, progress, provider, model, tokens, Conversation ID, and task details.
+
+### Skill Management
+
+Skill registration and governance settings are stored in the database. The page can create, edit, enable, disable, and delete Skills and maintain their display names and descriptions. Skill implementations remain in backend code; deleting the database registration prevents that Skill from starting.
+
+Built-in Skills include alert analysis (`alert_analysis`), market-regime analysis (`market_regime`), strategy generation (`strategy_builder`), and symbol analysis (`symbol_analysis`).
+
+### LLM Configuration
+
+LLM configurations are stored in the database. The page can select a provider template; maintain the configuration name, API endpoint, API key, model name, request timeout, and Temperature; test connectivity; and mark a model as current. New Agent tasks read the current configuration without restarting the service. API keys are never returned in plaintext, while token and tool-call limits remain controlled by global Agent governance settings.
 
 ## futures-trade
 

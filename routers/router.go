@@ -22,6 +22,10 @@ func init() {
 	web.Router("/agents/skills/implementations", &controllers.AgentSkillController{}, "get:GetImplementations")        // 可用 Skill implementation
 	web.Router("/agents/skills", &controllers.AgentSkillController{}, "get:Get;post:Post")                             // Agent Skill 配置
 	web.Router("/agents/skills/:id", &controllers.AgentSkillController{}, "put:Put;delete:Delete")                     // Agent Skill 更新/删除
+	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                           // LLM Provider 预设
+	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                  // 测试 LLM 配置
+	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                               // LLM 配置列表/新增
+	web.Router("/llm/configs/:id", &controllers.LLMConfigController{}, "put:Put;delete:Delete")                        // LLM 配置更新/删除
 	web.Router("/agents/scheduler/jobs/:name/trigger", &controllers.AgentController{}, "post:TriggerSchedulerJob")     // 手动触发 Scheduler Job
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post")                           // 列表查询和新增
 	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit")                  // 更新和删除

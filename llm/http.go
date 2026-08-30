@@ -7,16 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
 const maxErrorBodyBytes = 8 * 1024
 
 type httpTransport struct {
-	client  *http.Client
-	baseURL string
-	headers map[string]string
+	client *http.Client
 }
 
 type HTTPError struct {
@@ -29,23 +26,7 @@ func (err *HTTPError) Error() string {
 }
 
 func newHTTPTransport(cfg Config) (*httpTransport, error) {
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	if cfg.ProxyURL != "" {
-		proxyURL, err := url.Parse(cfg.ProxyURL)
-		if err != nil {
-			return nil, fmt.Errorf("invalid llm proxy_url: %w", err)
-		}
-		transport.Proxy = http.ProxyURL(proxyURL)
-	}
-
-	return &httpTransport{
-		client: &http.Client{
-			Timeout:   cfg.Timeout,
-			Transport: transport,
-		},
-		baseURL: strings.TrimRight(cfg.BaseURL, "/"),
-		headers: cfg.Headers,
-	}, nil
+	return &httpTransport{client: &http.Client{Timeout: cfg.Timeout}}, nil
 }
 
 func (transport *httpTransport) postJSON(ctx context.Context, endpoint string, payload interface{}, destination interface{}, headers map[string]string) error {
@@ -54,17 +35,14 @@ func (transport *httpTransport) postJSON(ctx context.Context, endpoint string, p
 		return fmt.Errorf("encode llm request: %w", err)
 	}
 
-	requestURL := endpoint
-	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
-		requestURL = transport.baseURL + "/" + strings.TrimLeft(endpoint, "/")
+	requestURL := strings.TrimSpace(endpoint)
+	if !strings.HasPrefix(requestURL, "http://") && !strings.HasPrefix(requestURL, "https://") {
+		return fmt.Errorf("llm api_url must be an absolute HTTP URL")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestURL, bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("create llm request: %w", err)
-	}
-	for key, value := range transport.headers {
-		req.Header.Set(key, value)
 	}
 	for key, value := range headers {
 		req.Header.Set(key, value)
