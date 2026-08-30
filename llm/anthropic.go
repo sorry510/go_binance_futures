@@ -74,7 +74,7 @@ func (client *anthropicClient) Generate(ctx context.Context, request Request) (*
 		Model:       requestModel(request, client.cfg.Model),
 		System:      strings.Join(systemParts, "\n\n"),
 		Messages:    messages,
-		MaxTokens:   requestMaxTokens(request, client.cfg.MaxTokens),
+		MaxTokens:   requestMaxTokens(request, defaultAnthropicMaxTokens),
 		Temperature: requestTemperature(request, client.cfg.Temperature),
 	}
 	headers := map[string]string{
@@ -83,7 +83,7 @@ func (client *anthropicClient) Generate(ctx context.Context, request Request) (*
 	}
 
 	var result anthropicResponse
-	if err := client.transport.postJSON(ctx, client.cfg.Endpoint, payload, &result, headers); err != nil {
+	if err := client.transport.postJSON(ctx, client.cfg.APIURL, payload, &result, headers); err != nil {
 		return nil, err
 	}
 
