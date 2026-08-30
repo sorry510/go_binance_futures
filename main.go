@@ -90,10 +90,14 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentTaskEvent))
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
+	orm.RegisterModel(new(models.AgentSkill))
 	orm.RegisterModel(new(models.Notification))
 
 	setDriver(driver) // 设置数据库驱动
 	syncDb()          // 同步数据库
+	if err := agentapp.EnsureDefaultSkillConfigs(); err != nil {
+		logs.Error("initialize agent skill configs:", err)
+	}
 	if err := feature.BackfillEmptyFuturesSymbolTypes(); err != nil {
 		logs.Error("backfill empty futures symbol types error:", err)
 	}

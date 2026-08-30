@@ -54,10 +54,10 @@
 
 ## 安全与运行
 
-- [ ] 日志和 Task 数据不保存 API Key、Token、密码。
-- [ ] LLM/Tool 故障不会影响核心交易循环和 WebSocket。
-- [ ] 每个 Skill 有独立开关，可以快速回滚。
-- [ ] 有成功率、耗时、Token、Tool/Validator 错误等指标。
+- [x] 日志、Task、Conversation 数据不保存 API Key、Token、密码或数据库凭据。
+- [x] LLM/Tool 故障不会影响核心交易循环和 WebSocket，Alert/Scheduler 有 fallback。
+- [x] 每个 Skill 由 `agent_skills` 独立启停，可以快速回滚。
+- [x] 有成功率、耗时、Token、Tool/Validator 错误、Alert 转化/Fallback 等指标。
 - [x] FastMove / Liquidation 新旧路径完成灰度对比，legacy 检测与直接通知实现已删除。
 
 ## Definition of Done

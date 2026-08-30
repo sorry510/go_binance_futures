@@ -134,7 +134,7 @@ func TestRunnerRejectsUnavailableOrUnauthorizedTools(t *testing.T) {
 	}{
 		{name: "not allowed", allowed: nil, registered: []tools.Tool{tools.Func{ToolName: "echo", ToolRisk: permission.RiskRead, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) { return nil, nil }}}, want: "does not allow"},
 		{name: "not registered", allowed: []string{"echo"}, want: "not registered"},
-		{name: "risk denied", allowed: []string{"trade"}, registered: []tools.Tool{tools.Func{ToolName: "trade", ToolRisk: permission.RiskTrade, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) { return nil, nil }}}, want: "exceeds allowed risk"},
+		{name: "risk denied", allowed: []string{"trade"}, registered: []tools.Tool{tools.Func{ToolName: "trade", ToolRisk: permission.RiskTrade, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) { return nil, nil }}}, want: "globally disabled"},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {

@@ -5,11 +5,11 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
 
+	"go_binance_futures/agent/security"
 	"go_binance_futures/llm"
 	"go_binance_futures/models"
 
@@ -104,7 +104,7 @@ func (store *ORMStore) Append(ctx context.Context, conversationID, taskID string
 	now := time.Now().UTC()
 	row := models.AgentConversationMessage{
 		ConversationID: conversationID, TaskID: strings.TrimSpace(taskID), Sequence: int(count) + 1,
-		Role: strings.TrimSpace(message.Role), Content: redact(message.Content), CreatedAt: now.UnixMilli(),
+		Role: strings.TrimSpace(message.Role), Content: security.RedactText(message.Content), CreatedAt: now.UnixMilli(),
 	}
 	if _, err := o.Insert(&row); err != nil {
 		return fmt.Errorf("insert conversation message: %w", err)
@@ -197,7 +197,7 @@ func (store *MemoryStore) Append(ctx context.Context, conversationID, taskID str
 	if item == nil {
 		return fmt.Errorf("conversation %q not found", conversationID)
 	}
-	message.Content = redact(message.Content)
+	message.Content = security.RedactText(message.Content)
 	item.messages = append(item.messages, message)
 	item.UpdatedAt = time.Now().UTC()
 	return nil
@@ -233,12 +233,4 @@ func newID() string {
 		return "conv_" + hex.EncodeToString(value)
 	}
 	return fmt.Sprintf("conv_%d", time.Now().UnixNano())
-}
-
-var sensitivePattern = regexp.MustCompile(`(?i)(api[_-]?key|authorization|password|token|secret)\s*[:=]\s*([^\s,;]+)`)
-var bearerPattern = regexp.MustCompile(`(?i)bearer\s+[^\s,;]+`)
-
-func redact(value string) string {
-	value = sensitivePattern.ReplaceAllString(value, "$1=[REDACTED]")
-	return bearerPattern.ReplaceAllString(value, "Bearer [REDACTED]")
 }

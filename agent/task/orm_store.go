@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 
+	"go_binance_futures/agent/security"
 	"go_binance_futures/models"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -205,54 +205,10 @@ func fromEventModel(row models.AgentTaskEvent) Event {
 	}
 }
 
-var sensitiveTextPattern = regexp.MustCompile(`(?i)(api[_-]?key|authorization|password|token|secret)\s*[:=]\s*([^\s,;]+)`)
-var bearerPattern = regexp.MustCompile(`(?i)bearer\s+[^\s,;]+`)
-
 func sanitizeText(value string) string {
-	value = sensitiveTextPattern.ReplaceAllString(value, "$1=[REDACTED]")
-	return bearerPattern.ReplaceAllString(value, "Bearer [REDACTED]")
+	return security.RedactText(value)
 }
 
 func sanitizePayload(value string) string {
-	value = strings.TrimSpace(value)
-	if value == "" {
-		return ""
-	}
-	var decoded any
-	if err := json.Unmarshal([]byte(value), &decoded); err != nil {
-		return sanitizeText(value)
-	}
-	redactValue(decoded)
-	encoded, err := json.Marshal(decoded)
-	if err != nil {
-		return sanitizeText(value)
-	}
-	return string(encoded)
-}
-
-func redactValue(value any) {
-	switch current := value.(type) {
-	case map[string]any:
-		for key, child := range current {
-			if isSensitiveKey(key) {
-				current[key] = "[REDACTED]"
-				continue
-			}
-			redactValue(child)
-		}
-	case []any:
-		for _, child := range current {
-			redactValue(child)
-		}
-	}
-}
-
-func isSensitiveKey(key string) bool {
-	normalized := strings.ToLower(strings.NewReplacer("_", "", "-", "").Replace(strings.TrimSpace(key)))
-	switch normalized {
-	case "apikey", "authorization", "password", "token", "accesstoken", "refreshtoken", "secret", "clientsecret":
-		return true
-	default:
-		return false
-	}
+	return security.RedactPayload(value)
 }

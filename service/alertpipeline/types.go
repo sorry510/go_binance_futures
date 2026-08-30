@@ -87,12 +87,16 @@ func SettingsFromConfig(config models.Config) Settings {
 }
 
 type Stats struct {
-	SignalsReceived    uint64 `json:"signals_received"`
-	SignalsDropped     uint64 `json:"signals_dropped"`
-	ShadowSignals      uint64 `json:"shadow_signals"`
-	SuppressedCooldown uint64 `json:"suppressed_cooldown"`
-	AITasksStarted     uint64 `json:"ai_tasks_started"`
-	AIFallbacks        uint64 `json:"ai_fallbacks"`
-	Notifications      uint64 `json:"notifications"`
-	ActiveAI           int    `json:"active_ai"`
+	SignalsReceived    uint64  `json:"signals_received"`
+	SignalsDropped     uint64  `json:"signals_dropped"`
+	ShadowSignals      uint64  `json:"shadow_signals"`
+	BelowSeverity      uint64  `json:"below_severity"`
+	SuppressedCooldown uint64  `json:"suppressed_cooldown"`
+	EligibleSignals    uint64  `json:"eligible_signals"`
+	AITasksStarted     uint64  `json:"ai_tasks_started"`
+	AIFallbacks        uint64  `json:"ai_fallbacks"`
+	Notifications      uint64  `json:"notifications"`
+	ActiveAI           int     `json:"active_ai"`
+	SignalNotifyRate   float64 `json:"signal_notify_rate"`
+	AIFallbackRate     float64 `json:"ai_fallback_rate"`
 }
