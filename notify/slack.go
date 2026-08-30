@@ -446,43 +446,6 @@ func (pusher Slack) FuturesPriceChangeNotice(params FuturesNoticeParams) {
   DingDingApi(text, pusher)
 }
 
-func (pusher Slack) FuturesLiquidationAggregate(params FuturesLiquidationAggregateParams) {
-	text := `
-## %s
-{futures.coin}：%s
-{futures.liquidation_side}：%s
-{futures.aggregate_notional}：%.2f USDT
-{futures.order_count}：%d
-{futures.aggregate_window}：%d s
-{futures.notional_threshold}：%.2f USDT
-{futures.window_start}：%s
-{futures.window_end}：%s
-
-> author <sorry510sf@gmail.com>`
-
-	text = fmt.Sprintf(lang.LangMatch(text),
-		params.Symbol+params.Title,
-		params.Symbol,
-		lang.Lang("futures.liquidation_"+params.LiquidationSide),
-		params.AggregateNotional,
-		params.OrderCount,
-		params.WindowSec,
-		params.Threshold,
-		formatMillis(params.WindowStart),
-		formatMillis(params.WindowEnd),
-	)
-	slackAPI(text, pusher, webnotification.PublishOptions{
-		Level:             "warning",
-		EventType:         "futures_liquidation_aggregate",
-		Symbol:            params.Symbol,
-		LiquidationSide:   params.LiquidationSide,
-		AggregateNotional: params.AggregateNotional,
-		OrderCount:        params.OrderCount,
-		WindowStart:       params.WindowStart,
-		WindowEnd:         params.WindowEnd,
-	})
-}
-
 func (pusher Slack) AgentAlert(params AgentAlertParams) (int64, error) {
 	pusher.ModuleName = agentAlertModule(params)
 	notification, err := slackAPI(agentAlertContent(params), pusher, agentAlertPublishOptions(params))
