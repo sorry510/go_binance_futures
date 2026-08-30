@@ -84,9 +84,11 @@ func (service HistoryService) Save(ctx context.Context, req HistorySaveRequest) 
 			}
 		}
 	}
-	o := orm.NewOrm()
+	var o orm.Ormer
 	if service.Alias != "" {
 		o = orm.NewOrmUsingDB(service.Alias)
+	} else {
+		o = orm.NewOrm()
 	}
 	var existing models.SymbolAnalysisHistory
 	err := o.QueryTable(new(models.SymbolAnalysisHistory)).Filter("task_id", req.TaskID).One(&existing)
@@ -116,9 +118,11 @@ func (service HistoryService) List(ctx context.Context, opts HistoryListOptions)
 	if limit > 100 {
 		limit = 100
 	}
-	o := orm.NewOrm()
+	var o orm.Ormer
 	if service.Alias != "" {
 		o = orm.NewOrmUsingDB(service.Alias)
+	} else {
+		o = orm.NewOrm()
 	}
 	query := o.QueryTable(new(models.SymbolAnalysisHistory))
 	if symbol := strings.ToUpper(strings.TrimSpace(opts.Symbol)); symbol != "" {

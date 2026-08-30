@@ -33,6 +33,12 @@ type Config struct {
 	WsFuturesLiquidationAlertWindowSec int `orm:"column(ws_futures_liquidation_alert_window_sec);default(60)" json:"ws_futures_liquidation_alert_window_sec"` // BTCUSDT 大额强平聚合窗口(秒)
 	WsFuturesLiquidationAlertNotionalThreshold float64 `orm:"column(ws_futures_liquidation_alert_notional_threshold);digits(30);decimals(8);default(5000000)" json:"ws_futures_liquidation_alert_notional_threshold"` // BTCUSDT 大额强平聚合名义金额阈值(USDT)
 	WsFuturesLiquidationAlertCooldownSec int `orm:"column(ws_futures_liquidation_alert_cooldown_sec);default(300)" json:"ws_futures_liquidation_alert_cooldown_sec"` // BTCUSDT 大额强平聚合通知冷却时间(秒)
+	AgentAlertPipelineEnable int `orm:"column(agent_alert_pipeline_enable);default(0)" json:"agent_alert_pipeline_enable"`
+	AgentAlertAnalysisEnable int `orm:"column(agent_alert_analysis_enable);default(0)" json:"agent_alert_analysis_enable"`
+	AgentAlertMinSeverity string `orm:"column(agent_alert_min_severity);size(16);default(medium)" json:"agent_alert_min_severity"`
+	AgentAlertCooldownSec int `orm:"column(agent_alert_cooldown_sec);default(900)" json:"agent_alert_cooldown_sec"`
+	AgentAlertMaxConcurrent int `orm:"column(agent_alert_max_concurrent);default(2)" json:"agent_alert_max_concurrent"`
+	AgentAlertMaxPerMinute int `orm:"column(agent_alert_max_per_minute);default(6)" json:"agent_alert_max_per_minute"`
 	WsSpotEnable int `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable int `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount int `orm:"column(loss_max_count)" json:"loss_max_count"` // 允许开仓的最大亏损仓位临界值
