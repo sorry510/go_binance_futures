@@ -95,10 +95,24 @@ cooldown_until
 - WS 无数据健康报警属于确定性系统告警，不依赖 AI。
 - Alert Agent 有独立并发上限和每分钟调用预算，行情极端时不能形成 LLM 风暴。
 
+## 当前实现
+
+Phase 5 第一版已经完成并采用灰度切流：
+
+- `agent/event`：进程内 typed Event Bus，bounded queue、非阻塞 Publish、drop policy 和统计指标。
+- Binance 全市场 ticker 发布 `PriceTickEvent`；强平 WS 发布带稳定事件 ID 的 `LiquidationEvent`；WS 无数据报警额外发布 `WsHealthEvent`。
+- `service/signal`：首批实际检测 `FastMoveSignal` 与 `LiquidationSpikeSignal`；其余 Signal 类型先固化契约，后续按业务需要增加检测器。
+- `alert_analysis`：只消费已筛选 Signal，强制使用只读 Tool 补充市场上下文，只能返回 `notify/record/ignore`。
+- `service/alertpipeline`：severity gate、symbol/type cooldown、AI 并发限制、每分钟预算、AI 失败 deterministic fallback、最近 Trace 和运行指标。
+- Notification 持久化 `event_id/signal_id/task_id`，支持 Event → Signal → Agent Task → Notification 追踪。
+- `agent_alert_pipeline_enable=0` 时保持 legacy 通知并让新 Signal Engine 影子运行；开启后 FastMove / Liquidation 通知切到新 Pipeline，避免双发。
+- `agent_alert_analysis_enable=0` 或 AI 不可用时仍发送规则 fallback，不影响 WS 数据链。
+- WS 无数据健康报警始终由确定性逻辑发送，不依赖 AI。
+
 ## Phase 5 验收
 
-- 正常 WS 高频流量不会触发同等数量的 LLM 请求。
-- 可从 Event 追踪到 Signal、Agent Task、Notification。
-- 关闭 AI Alert 后，基础确定性报警仍能工作。
-- 重复行情不会突破 cooldown 连续发送相同报警。
-- Agent/Notify 失败不会影响 WS 数据持续写入和价格刷新。
+- [x] 正常 WS 高频流量不会触发同等数量的 LLM 请求。
+- [x] 可从 Event 追踪到 Signal、Agent Task、Notification。
+- [x] 关闭 AI Alert 后，基础确定性报警仍能工作。
+- [x] 重复行情不会突破 cooldown 连续发送相同报警。
+- [x] Agent/Notify 失败不会影响 WS 数据持续写入和价格刷新。

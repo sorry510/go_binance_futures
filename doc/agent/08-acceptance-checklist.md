@@ -39,11 +39,11 @@
 
 ## Event / Alert
 
-- [ ] WS Tick 不直接调用 LLM。
-- [ ] Event Bus 消费失败不会阻塞 WS 回调。
-- [ ] Signal Engine 完成去重、阈值、聚合和冷却。
-- [ ] 行情极端时有 Agent 并发/频率保护。
-- [ ] AI 关闭或失败时基础报警仍工作。
+- [x] WS Tick 不直接调用 LLM。
+- [x] Event Bus 消费失败不会阻塞 WS 回调。
+- [x] Signal Engine 完成去重、阈值、聚合和冷却。
+- [x] 行情极端时有 Agent 并发/频率保护。
+- [x] AI 关闭或失败时基础报警仍工作。
 
 ## Scheduler / Store
 

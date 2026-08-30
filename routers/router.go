@@ -16,6 +16,7 @@ func init() {
 	web.Router("/agents/tasks", &controllers.AgentController{}, "post:StartTask") // 创建统一 Agent 任务
 	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask") // 查询统一 Agent 任务
 	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory") // 查询单币分析历史
+	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus") // 查询事件报警链路状态与追踪
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit") // 更新和删除
 	web.Router("/notifications", &controllers.NotificationController{}, "get:Get") // 网页通知列表

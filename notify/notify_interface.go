@@ -118,6 +118,23 @@ type FuturesLiquidationAggregateParams struct {
 	WindowEnd         int64
 }
 
+type AgentAlertParams struct {
+	Title         string
+	Module        string
+	EventID       string
+	SignalID      string
+	TaskID        string
+	Symbol        string
+	SignalType    string
+	Severity      string
+	Summary       string
+	MarketContext string
+	ConfirmedBy   []string
+	Risks         []string
+	Source        string
+	Fallback      bool
+}
+
 type Pusher interface {
 	SetModuleName(name string) Pusher
 	GetModuleName() string
@@ -125,6 +142,7 @@ type Pusher interface {
 	FuturesCustomStrategyTest(params FuturesTestParams)
 	FuturesPositionConvert(params FuturesPositionConvertParams)
 	FuturesLiquidationAggregate(params FuturesLiquidationAggregateParams)
+	AgentAlert(params AgentAlertParams) (int64, error)
 	
 	FuturesOpenOrder(params FuturesOrderParams)
 	FuturesCloseOrder(params FuturesOrderParams)
