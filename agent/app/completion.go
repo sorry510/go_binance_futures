@@ -8,16 +8,28 @@ import (
 	"time"
 
 	agentruntime "go_binance_futures/agent/runtime"
+	marketregime "go_binance_futures/agent/skills/marketregime"
 	symbolanalysis "go_binance_futures/agent/skills/symbolanalysis"
 	"go_binance_futures/agent/task"
+	marketservice "go_binance_futures/service/market"
 	symbolservice "go_binance_futures/service/symbol"
 	symbolanalysisservice "go_binance_futures/service/symbolanalysis"
+	"go_binance_futures/utils"
 
 	"github.com/beego/beego/v2/core/logs"
 )
 
 func persistTaskCompletion(req agentruntime.Request, item *task.Task, result *agentruntime.Result, runErr error) error {
-	if req.Skill != symbolanalysis.Name || item == nil {
+	if item == nil {
+		return nil
+	}
+	if req.Skill == marketregime.Name {
+		if job, _ := req.Metadata["scheduler_job"].(string); job == "market_regime" {
+			return persistMarketRegimeCompletion(item, result)
+		}
+		return nil
+	}
+	if req.Skill != symbolanalysis.Name {
 		return nil
 	}
 	var input symbolanalysis.Input
@@ -53,11 +65,33 @@ func persistTaskCompletion(req agentruntime.Request, item *task.Task, result *ag
 	return err
 }
 
-func EnsureCompletion(item *task.Task) error {
-	if item == nil || item.Skill != symbolanalysis.Name {
+func persistMarketRegimeCompletion(item *task.Task, result *agentruntime.Result) error {
+	if item.Status != task.StatusSucceeded {
 		return nil
 	}
-	if item.Status != task.StatusSucceeded && item.Status != task.StatusFailed && item.Status != task.StatusCancelled {
+	raw := item.Result
+	if result != nil && len(result.Raw) > 0 {
+		raw = result.Raw
+	}
+	var analysis marketregime.Analysis
+	if err := json.Unmarshal(raw, &analysis); err != nil {
+		return err
+	}
+	cfg, err := utils.GetSystemConfig()
+	if err != nil {
+		return err
+	}
+	return marketservice.SaveMarketCondition(context.Background(), cfg.ID, analysis.MarketCondition)
+}
+
+func EnsureCompletion(item *task.Task) error {
+	if item == nil || !task.IsTerminalStatus(item.Status) {
+		return nil
+	}
+	if item.Skill == marketregime.Name {
+		return nil
+	}
+	if item.Skill != symbolanalysis.Name {
 		return nil
 	}
 	var result *agentruntime.Result

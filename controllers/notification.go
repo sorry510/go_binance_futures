@@ -124,6 +124,9 @@ var notificationUpgrader = websocket.Upgrader{
 }
 
 func (ctrl *NotificationWebSocketController) Get() {
+	// Beego must not render a second HTTP response after Gorilla hijacks the
+	// connection, otherwise it calls WriteHeader on the WebSocket connection.
+	ctrl.EnableRender = false
 	authorization := strings.TrimSpace(ctrl.GetString("token"))
 	if _, err := middlewares.ValidateAuthorization(authorization); err != nil {
 		ctrl.Ctx.ResponseWriter.WriteHeader(http.StatusUnauthorized)

@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	conversationstore "go_binance_futures/agent/conversation"
+	"go_binance_futures/agent/task"
 	"go_binance_futures/llm"
 )
 
@@ -49,12 +51,15 @@ func TestStrategyTemplateAITaskUsesRuntimeAndPreservesConversation(t *testing.T)
 		t.Fatalf("unexpected first task: %+v", firstDone)
 	}
 
-	second, err := startStrategyTemplateAITask(strategyTemplateAIGenerationRequest{Prompt: "基于上一版修改名称", ConversationID: first.TaskID})
+	second, err := startStrategyTemplateAITask(strategyTemplateAIGenerationRequest{Prompt: "基于上一版修改名称", ConversationID: first.ConversationID})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if second.TaskID != first.TaskID {
-		t.Fatalf("conversation task id changed: %s -> %s", first.TaskID, second.TaskID)
+	if second.ConversationID != first.ConversationID {
+		t.Fatalf("conversation id changed: %s -> %s", first.ConversationID, second.ConversationID)
+	}
+	if second.TaskID == first.TaskID {
+		t.Fatalf("each conversation turn must create a new task: %s", second.TaskID)
 	}
 	secondDone := waitStrategyTemplateAITask(t, second.TaskID)
 	if secondDone.Status != "succeeded" || !strings.Contains(secondDone.JSON, "runtime-second") {
@@ -93,8 +98,10 @@ func waitStrategyTemplateAITask(t *testing.T, taskID string) strategyTemplateAIG
 
 func resetStrategyTemplateAITaskStoreForRuntimeTest() {
 	strategyTemplateAITaskStore.Lock()
-	defer strategyTemplateAITaskStore.Unlock()
 	strategyTemplateAITaskStore.tasks = make(map[string]*strategyTemplateAIGenerationTask)
+	strategyTemplateAITaskStore.Unlock()
+	strategyTemplateConversationStore = conversationstore.NewMemoryStore()
+	strategyTemplatePersistentTaskStore = task.NewMemoryStore()
 }
 
 func validStrategyBuilderEnvelope(name string) string {

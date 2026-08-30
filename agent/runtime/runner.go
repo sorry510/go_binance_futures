@@ -82,6 +82,7 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 	currentTask := &task.Task{
 		ID:        taskID,
 		Skill:     selectedSkill.Name(),
+		ConversationID: strings.TrimSpace(req.ConversationID),
 		Status:    task.StatusQueued,
 		Stage:     "queued",
 		Progress:  0,
