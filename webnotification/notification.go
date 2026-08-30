@@ -15,6 +15,9 @@ var htmlTagPattern = regexp.MustCompile(`<[^>]+>`)
 type PublishOptions struct {
 	Level             string
 	EventType         string
+	EventID           string
+	SignalID          string
+	TaskID            string
 	Symbol            string
 	LiquidationSide   string
 	AggregateNotional float64
@@ -35,6 +38,9 @@ func PublishWithOptions(module, content string, options PublishOptions) (*models
 		Module:            strings.TrimSpace(module),
 		Level:             strings.TrimSpace(options.Level),
 		EventType:         strings.TrimSpace(options.EventType),
+		EventID:           strings.TrimSpace(options.EventID),
+		SignalID:          strings.TrimSpace(options.SignalID),
+		TaskID:            strings.TrimSpace(options.TaskID),
 		Symbol:            strings.ToUpper(strings.TrimSpace(options.Symbol)),
 		LiquidationSide:   strings.ToLower(strings.TrimSpace(options.LiquidationSide)),
 		AggregateNotional: options.AggregateNotional,

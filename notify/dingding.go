@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_binance_futures/lang"
+	"go_binance_futures/models"
 	"go_binance_futures/webnotification"
 	"io"
 	"net/http"
@@ -46,17 +47,18 @@ func DingDingApi(content string, pusher Pusher) {
 	dingDingAPI(content, pusher, webnotification.PublishOptions{})
 }
 
-func dingDingAPI(content string, pusher Pusher, options webnotification.PublishOptions) {
-  if _, err := webnotification.PublishWithOptions(pusher.GetModuleName(), content, options); err != nil {
+func dingDingAPI(content string, pusher Pusher, options webnotification.PublishOptions) (*models.Notification, error) {
+  notification, err := webnotification.PublishWithOptions(pusher.GetModuleName(), content, options)
+  if err != nil {
     logs.Error("save web notification error:", err)
-		return
+		return nil, err
   }
   dingding_token := g_dingding_token
   dingding_word := g_dingding_word
   // 放到单独执行，避免主进程阻塞(没有 block 程序时不会执行)
   notifyConfig := GetNotifyConfig(pusher)
   if !IsModulePushEnabled(notifyConfig) {
-    return
+    return notification, nil
   }
   if notifyConfig.DingDingToken != "" {
     // 读取模块配置信息，覆盖全局
@@ -111,6 +113,7 @@ func dingDingAPI(content string, pusher Pusher, options webnotification.PublishO
 			fmt.Println("Unexpected status code:", resp.StatusCode)
 		}
 	}()
+	return notification, nil
 }
 
 func (pusher DingDing) SetModuleName(name string) Pusher {
@@ -476,4 +479,13 @@ func (pusher DingDing) FuturesLiquidationAggregate(params FuturesLiquidationAggr
 		WindowStart:       params.WindowStart,
 		WindowEnd:         params.WindowEnd,
 	})
+}
+
+func (pusher DingDing) AgentAlert(params AgentAlertParams) (int64, error) {
+	pusher.ModuleName = agentAlertModule(params)
+	notification, err := dingDingAPI(agentAlertContent(params), pusher, agentAlertPublishOptions(params))
+	if err != nil {
+		return 0, err
+	}
+	return notification.ID, nil
 }

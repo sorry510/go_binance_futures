@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"go_binance_futures/command"
 	"go_binance_futures/feature"
@@ -9,6 +10,7 @@ import (
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
 	_ "go_binance_futures/routers"
+	alertpipeline "go_binance_futures/service/alertpipeline"
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
@@ -165,6 +167,9 @@ func updateSystemConfig() {
 }
 
 func main() {
+	if err := alertpipeline.StartDefault(context.Background(), func() models.Config { return SystemConfig }); err != nil {
+		logs.Error("start alert pipeline:", err)
+	}
 	// debug
 	if debug == "1" {
 		updateSystemConfig()

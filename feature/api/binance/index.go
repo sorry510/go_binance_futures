@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"fmt"
+	agentevent "go_binance_futures/agent/event"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/utils"
@@ -713,6 +714,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 				wsLatestTickerMu.Lock()
 				wsLatestTickerMap[ticker.Symbol] = *ticker
 				wsLatestTickerMu.Unlock()
+				publishFuturesPriceTick(ticker)
 				// if (ticker.Symbol == "BTCUSDT") {
 				// 	logs.Info("futures ws update symbol:", ticker.Symbol)
 				// }
@@ -763,6 +765,20 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 	}
 }
 
+func publishFuturesPriceTick(ticker *futures.WsMarketTickerEvent) {
+	if ticker == nil || strings.TrimSpace(ticker.Symbol) == "" {
+		return
+	}
+	price, err := strconv.ParseFloat(ticker.ClosePrice, 64)
+	if err != nil || price <= 0 {
+		return
+	}
+	change24h, _ := strconv.ParseFloat(ticker.PriceChangePercent, 64)
+	agentevent.DefaultBus().Publish(agentevent.NewPriceTick(
+		ticker.Symbol, "binance_ws_all_market_ticker", ticker.Time, price, change24h,
+	))
+}
+
 func watchFuturesWsNoData(systemConfig *models.Config, lastRecvAt *atomic.Int64, lastAlertAt *atomic.Int64, stopC <-chan struct{}) {
 	ticker := time.NewTicker(wsNoDataCheckInterval)
 	defer ticker.Stop()
@@ -799,6 +815,9 @@ func watchFuturesWsNoData(systemConfig *models.Config, lastRecvAt *atomic.Int64,
 }
 
 func sendFuturesWsNoDataAlert(noDataMinutes float64) {
+	agentevent.DefaultBus().Publish(agentevent.NewWsHealth(
+		"binance_ws_all_market_ticker", "no_data", time.Now().UnixMilli(), noDataMinutes,
+	))
 	alertPusher := pusher.SetModuleName("futures_market_listen")
 	content := fmt.Sprintf(`
 ## FuturesWS 无数据告警
@@ -856,6 +875,9 @@ func saveMarketNoticeLog(symbol string, noticeType string, window string, direct
 
 func fastMoveNoticeByWindow(systemConfig *models.Config, ticker *futures.WsMarketTickerEvent) {
 	if systemConfig.WsFuturesEnable == 0 || systemConfig.WsFuturesFastMoveEnable == 0 {
+		return
+	}
+	if systemConfig.AgentAlertPipelineEnable == 1 {
 		return
 	}
 	// 只关注 USDT 交易对，避免一些非主流交易对价格波动过大导致频繁通知

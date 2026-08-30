@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_binance_futures/lang"
+	"go_binance_futures/models"
 	"go_binance_futures/webnotification"
 	"io"
 	"net/http"
@@ -43,17 +44,18 @@ func SlackApi(content string, pusher Pusher) {
 	slackAPI(content, pusher, webnotification.PublishOptions{})
 }
 
-func slackAPI(content string, pusher Pusher, options webnotification.PublishOptions) {
-  if _, err := webnotification.PublishWithOptions(pusher.GetModuleName(), content, options); err != nil {
+func slackAPI(content string, pusher Pusher, options webnotification.PublishOptions) (*models.Notification, error) {
+  notification, err := webnotification.PublishWithOptions(pusher.GetModuleName(), content, options)
+  if err != nil {
     logs.Error("save web notification error:", err)
-		return
+		return nil, err
   }
   slack_token := g_slack_token
   slack_channel_id := g_slack_channel_id
 	// 放到单独执行，避免主进程阻塞(未知原因突然不能在 goroutine 中执行了)
 	notifyConfig := GetNotifyConfig(pusher)
 	if !IsModulePushEnabled(notifyConfig) {
-		return
+		return notification, nil
 	}
 	if notifyConfig.SlackToken != "" {
 		// 读取模块配置信息，覆盖全局
@@ -114,6 +116,7 @@ func slackAPI(content string, pusher Pusher, options webnotification.PublishOpti
 			fmt.Println("Unexpected status code:", resp.StatusCode)
 		}
 	}()
+	return notification, nil
 }
 
 func (pusher Slack) SetModuleName(name string) Pusher {
@@ -478,4 +481,13 @@ func (pusher Slack) FuturesLiquidationAggregate(params FuturesLiquidationAggrega
 		WindowStart:       params.WindowStart,
 		WindowEnd:         params.WindowEnd,
 	})
+}
+
+func (pusher Slack) AgentAlert(params AgentAlertParams) (int64, error) {
+	pusher.ModuleName = agentAlertModule(params)
+	notification, err := slackAPI(agentAlertContent(params), pusher, agentAlertPublishOptions(params))
+	if err != nil {
+		return 0, err
+	}
+	return notification.ID, nil
 }
