@@ -52,6 +52,9 @@ func NewRunner(cfg Config) (*DefaultRunner, error) {
 	if cfg.MaxToolCalls <= 0 {
 		cfg.MaxToolCalls = defaults.MaxToolCalls
 	}
+	if cfg.MaxTotalTokens <= 0 {
+		cfg.MaxTotalTokens = defaults.MaxTotalTokens
+	}
 	if cfg.Retry.MaxAttempts <= 0 {
 		cfg.Retry.MaxAttempts = defaults.Retry.MaxAttempts
 	}
@@ -73,6 +76,17 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 	if maxRounds <= 0 {
 		maxRounds = runner.cfg.DefaultMaxRounds
 	}
+	maxToolCalls := runner.cfg.MaxToolCalls
+	maxTotalTokens := runner.cfg.MaxTotalTokens
+	if runner.cfg.BudgetProvider != nil {
+		budget := runner.cfg.BudgetProvider(selectedSkill.Name())
+		if budget.MaxToolCalls > 0 {
+			maxToolCalls = budget.MaxToolCalls
+		}
+		if budget.MaxTotalTokens > 0 {
+			maxTotalTokens = budget.MaxTotalTokens
+		}
+	}
 
 	now := time.Now().UTC()
 	taskID := strings.TrimSpace(req.TaskID)
@@ -80,18 +94,35 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 		taskID = newTaskID()
 	}
 	currentTask := &task.Task{
-		ID:        taskID,
-		Skill:     selectedSkill.Name(),
+		ID:             taskID,
+		Skill:          selectedSkill.Name(),
 		ConversationID: strings.TrimSpace(req.ConversationID),
-		Status:    task.StatusQueued,
-		Stage:     "queued",
-		Progress:  0,
-		Input:     req.Input,
-		MaxRounds: maxRounds,
-		Provider:  string(runner.cfg.Client.Provider()),
-		CreatedAt: now,
-		UpdatedAt: now,
+		Status:         task.StatusQueued,
+		Stage:          "queued",
+		Progress:       0,
+		Input:          req.Input,
+		MaxRounds:      maxRounds,
+		Provider:       string(runner.cfg.Client.Provider()),
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
+	runStarted := time.Now()
+	runner.observe(Observation{
+		Type: "task_started", TaskID: currentTask.ID, ConversationID: currentTask.ConversationID,
+		Skill: currentTask.Skill, Provider: currentTask.Provider, Status: string(currentTask.Status),
+	})
+	defer func() {
+		errorType := ""
+		if currentTask.Status != task.StatusSucceeded {
+			errorType = currentTask.Stage
+		}
+		runner.observe(Observation{
+			Type: "task_finished", TaskID: currentTask.ID, ConversationID: currentTask.ConversationID,
+			Skill: currentTask.Skill, Provider: currentTask.Provider, Model: currentTask.Model,
+			Status: string(currentTask.Status), ErrorType: errorType, Error: currentTask.Error,
+			Round: currentTask.Round, DurationMs: elapsedMilliseconds(runStarted), Usage: currentTask.Usage,
+		})
+	}()
 	runner.record(currentTask, task.StatusQueued, "queued", 0, "agent task created")
 
 	runCtx, cancel := context.WithTimeout(ctx, runner.cfg.Timeout)
@@ -150,11 +181,15 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			return nil, runner.fail(currentTask, "llm_failed", fmt.Errorf("LLM returned an empty response"))
 		}
 		mergeUsage(&currentTask.Usage, response.Usage)
+		if maxTotalTokens > 0 && currentTask.Usage.TotalTokens > maxTotalTokens {
+			return nil, runner.fail(currentTask, "token_budget_exceeded", fmt.Errorf("agent exceeded %d total tokens", maxTotalTokens))
+		}
 		if response.Model != "" {
 			currentTask.Model = response.Model
 		}
 		runner.appendRuntimeMessage(currentTask.ID, &messages, llm.Message{Role: llm.RoleAssistant, Content: response.Content})
 		if isTruncatedFinishReason(response.FinishReason) {
+			runner.observeRepair(currentTask, "truncated_response")
 			feedback := repairFeedback("truncated_response", "LLM response was truncated by the output token limit")
 			runner.appendRuntimeMessage(currentTask.ID, &messages, feedback)
 			runner.record(currentTask, task.StatusRunning, "repairing_response", progress+1, "LLM response was truncated")
@@ -163,6 +198,7 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 
 		decision, err := parseDecision(response.Content)
 		if err != nil {
+			runner.observeRepair(currentTask, "decision_protocol")
 			feedback := repairFeedback("decision_protocol", err.Error())
 			runner.appendRuntimeMessage(currentTask.ID, &messages, feedback)
 			runner.record(currentTask, task.StatusRunning, "repairing_decision", progress+1, err.Error())
@@ -174,8 +210,8 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			return nil, runner.fail(currentTask, "agent_error", fmt.Errorf("agent error: %s", decision.Error))
 		case "tool":
 			toolCalls++
-			if toolCalls > runner.cfg.MaxToolCalls {
-				return nil, runner.fail(currentTask, "tool_limit_exceeded", fmt.Errorf("agent exceeded %d tool calls", runner.cfg.MaxToolCalls))
+			if toolCalls > maxToolCalls {
+				return nil, runner.fail(currentTask, "tool_limit_exceeded", fmt.Errorf("agent exceeded %d tool calls", maxToolCalls))
 			}
 			if !allowedTools[decision.Tool] {
 				return nil, runner.fail(currentTask, "tool_not_allowed", fmt.Errorf("skill %q does not allow tool %q", selectedSkill.Name(), decision.Tool))
@@ -202,6 +238,17 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			value, toolErr := selectedTool.Execute(toolCtx, arguments)
 			cancelTool()
 			duration := time.Since(toolStarted)
+			toolStatus, toolErrorType, toolError := "success", "", ""
+			if toolErr != nil {
+				toolStatus = "error"
+				toolErrorType = classifyError(toolErr)
+				toolError = toolErr.Error()
+			}
+			runner.observe(Observation{
+				Type: "tool_call", TaskID: currentTask.ID, ConversationID: currentTask.ConversationID,
+				Skill: currentTask.Skill, Provider: currentTask.Provider, Model: currentTask.Model, Tool: selectedTool.Name(),
+				Status: toolStatus, ErrorType: toolErrorType, Error: toolError, Round: currentTask.Round, DurationMs: duration.Milliseconds(),
+			})
 			maxResultBytes := runner.cfg.MaxToolResultBytes
 			if metadata.MaxResultBytes > 0 && (maxResultBytes <= 0 || metadata.MaxResultBytes < maxResultBytes) {
 				maxResultBytes = metadata.MaxResultBytes
@@ -229,6 +276,7 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 				}
 			}
 			if len(missingTools) > 0 {
+				runner.observeRepair(currentTask, "required_tools")
 				sort.Strings(missingTools)
 				err := fmt.Errorf("required tools must succeed before final: %s", strings.Join(missingTools, ", "))
 				feedback := repairFeedback("required_tools", err.Error())
@@ -241,11 +289,24 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			if provider, ok := selectedSkill.(skill.RunValidatorProvider); ok {
 				validatorForFinal = provider.ValidatorForRun(skillRequest, toolResults)
 			}
+			validationStarted := time.Now()
 			value, err := validatorForFinal.Validate(runCtx, decision.Result)
+			validationStatus, validationError := "success", ""
+			if err != nil {
+				validationStatus = "error"
+				validationError = err.Error()
+			}
+			runner.observe(Observation{
+				Type: "validation", TaskID: currentTask.ID, ConversationID: currentTask.ConversationID,
+				Skill: currentTask.Skill, Provider: currentTask.Provider, Model: currentTask.Model,
+				Status: validationStatus, ErrorType: map[bool]string{true: "validation_error", false: ""}[err != nil],
+				Error: validationError, Round: currentTask.Round, DurationMs: elapsedMilliseconds(validationStarted),
+			})
 			if runner.cfg.ValidationHook != nil {
 				runner.cfg.ValidationHook(currentTask.ID, append(json.RawMessage(nil), decision.Result...), err)
 			}
 			if err != nil {
+				runner.observeRepair(currentTask, "final_validation")
 				feedback := repairFeedback("final_validation", err.Error())
 				runner.appendRuntimeMessage(currentTask.ID, &messages, feedback)
 				runner.record(currentTask, task.StatusRunning, "repairing_final", min(progress+5, 96), err.Error())

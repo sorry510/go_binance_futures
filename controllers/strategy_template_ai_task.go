@@ -10,8 +10,12 @@ import (
 	"sync"
 	"time"
 
+	agentapp "go_binance_futures/agent/app"
 	conversationstore "go_binance_futures/agent/conversation"
+	"go_binance_futures/agent/observability"
+	"go_binance_futures/agent/permission"
 	agentruntime "go_binance_futures/agent/runtime"
+	"go_binance_futures/agent/security"
 	"go_binance_futures/agent/skill"
 	strategybuilder "go_binance_futures/agent/skills/strategybuilder"
 	"go_binance_futures/agent/task"
@@ -64,6 +68,8 @@ type strategyTemplateAIGenerationTask struct {
 }
 
 var newStrategyBuilderLLMClient = llm.NewFromConfig
+var admitStrategyBuilderSkill = agentapp.AdmitSkill
+var strategyBuilderBudgetProvider = agentapp.RuntimeBudget
 var strategyTemplateConversationStore conversationstore.Store = conversationstore.NewORMStore()
 var strategyTemplatePersistentTaskStore task.Store = task.NewORMStore()
 
@@ -130,6 +136,9 @@ func (ctrl *StrategyTemplateController) ImportAIGeneratedTemplate() {
 }
 
 func startStrategyTemplateAITask(request strategyTemplateAIGenerationRequest) (strategyTemplateAIGenerationTask, error) {
+	if err := admitStrategyBuilderSkill(strategybuilder.Name); err != nil {
+		return strategyTemplateAIGenerationTask{}, err
+	}
 	ctx := context.Background()
 	conversationID := strings.TrimSpace(request.ConversationID)
 	if conversationID == "" {
@@ -240,8 +249,9 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 
 	runner, err := agentruntime.NewRunner(agentruntime.Config{
 		Client: client, Skills: skills, Tools: toolRegistry, Tasks: strategyTemplatePersistentTaskStore,
+		Policy: permission.AllowWritesFor(nil), BudgetProvider: strategyBuilderBudgetProvider, Observer: observability.Default(),
 		Timeout: 15 * time.Minute, DefaultMaxRounds: maxStrategyTemplateAIRounds,
-		MaxContextBytes: maxStrategyTemplateAIContextSize, MaxToolResultBytes: 256 * 1024, MaxToolCalls: maxStrategyTemplateAIRounds,
+		MaxContextBytes: maxStrategyTemplateAIContextSize, MaxToolResultBytes: 256 * 1024,
 		Retry:     agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 		EventHook: func(event task.Event) { handleStrategyTemplateAIRuntimeEvent(taskID, event) },
 		MessageHook: func(_ string, message llm.Message) {
@@ -265,7 +275,7 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 		Metadata: map[string]any{strategybuilder.HistoryMetadataKey: history},
 	})
 	if err != nil {
-		logs.Error("strategy builder runtime task %s: %s", taskID, err.Error())
+		logs.Error("strategy builder runtime task %s: %s", taskID, security.RedactText(err.Error()))
 		failStrategyTemplateAITask(taskID, truncateStrategyTemplateAIError(err.Error()))
 		return
 	}

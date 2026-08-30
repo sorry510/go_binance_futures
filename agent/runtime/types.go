@@ -34,6 +34,33 @@ type RetryPolicy struct {
 	Delay       time.Duration
 }
 
+type Budget struct {
+	MaxToolCalls   int `json:"max_tool_calls"`
+	MaxTotalTokens int `json:"max_total_tokens"`
+}
+
+type BudgetProvider func(skill string) Budget
+
+type Observation struct {
+	Type           string     `json:"type"`
+	TaskID         string     `json:"task_id"`
+	ConversationID string     `json:"conversation_id,omitempty"`
+	Skill          string     `json:"skill"`
+	Provider       string     `json:"provider,omitempty"`
+	Model          string     `json:"model,omitempty"`
+	Tool           string     `json:"tool,omitempty"`
+	Status         string     `json:"status,omitempty"`
+	ErrorType      string     `json:"error_type,omitempty"`
+	Error          string     `json:"error,omitempty"`
+	Round          int        `json:"round,omitempty"`
+	DurationMs     int64      `json:"duration_ms,omitempty"`
+	Usage          task.Usage `json:"usage,omitempty"`
+}
+
+type Observer interface {
+	Observe(Observation)
+}
+
 type Config struct {
 	Client             llm.Client
 	Skills             *skill.Registry
@@ -45,6 +72,9 @@ type Config struct {
 	MaxContextBytes    int
 	MaxToolResultBytes int
 	MaxToolCalls       int
+	MaxTotalTokens     int
+	BudgetProvider     BudgetProvider
+	Observer           Observer
 	Retry              RetryPolicy
 	EventHook          func(task.Event)
 	MessageHook        func(taskID string, message llm.Message)
@@ -62,6 +92,7 @@ func DefaultConfig() Config {
 		MaxContextBytes:    256 * 1024,
 		MaxToolResultBytes: 128 * 1024,
 		MaxToolCalls:       20,
+		MaxTotalTokens:     120000,
 		Retry:              RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 	}
 }
