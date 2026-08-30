@@ -450,11 +450,3 @@ bee pack -be GOOS=windows
 
 - [ ] binance_announcement
 - [ ] binance_news
-
-### AI TODO
-- [X] ai 写自定义策略的 skill
-- [X] mcp 服务，通过 HTTP 提供白名单业务接口，使用登录 token 鉴权
-- [X] ai 自动判定当前市场的大环境
-- [ ] ai 驱动的监听报警和自动买卖(可以通过 mcp 实现)
-- [ ] 编写一个 agent 用于 趋势分析，单个问币策略，定时分析所有合约，生成 ai 策略
-- [ ] ai 配置采用 db 存储，支持类型参考 workbuddy
