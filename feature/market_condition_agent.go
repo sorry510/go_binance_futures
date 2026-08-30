@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	agentapp "go_binance_futures/agent/app"
 	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/skill"
 	marketregime "go_binance_futures/agent/skills/marketregime"
@@ -18,11 +19,47 @@ import (
 var newMarketRegimeLLMClient = llm.NewFromConfig
 
 func analyzeMarketConditionWithRuntime(snapshot marketservice.RegimeSnapshot, progressCallback MarketConditionProgressCallback) (MarketConditionResult, error) {
-	client, err := newMarketRegimeLLMClient()
+	payload, err := json.Marshal(snapshot)
 	if err != nil {
-		return MarketConditionResult{}, fmt.Errorf("initialize market regime LLM client: %w", err)
+		return MarketConditionResult{}, fmt.Errorf("encode market regime snapshot: %w", err)
 	}
-	return analyzeMarketConditionWithRuntimeClient(snapshot, client, progressCallback)
+	manager, err := agentapp.DefaultManager()
+	if err != nil {
+		return MarketConditionResult{}, fmt.Errorf("initialize market regime manager: %w", err)
+	}
+	item, err := manager.Start(agentruntime.Request{Skill: marketregime.Name, Input: string(payload)})
+	if err != nil {
+		return MarketConditionResult{}, fmt.Errorf("start market regime task: %w", err)
+	}
+	deadline := time.Now().Add(marketConditionLLMTimeout)
+	lastStage := ""
+	for {
+		current, err := manager.Get(context.Background(), item.ID)
+		if err != nil {
+			return MarketConditionResult{}, fmt.Errorf("get market regime task: %w", err)
+		}
+		if current.Stage != lastStage {
+			reportMarketRegimeAgentProgress(progressCallback, task.Event{Stage: current.Stage})
+			lastStage = current.Stage
+		}
+		if task.IsTerminalStatus(current.Status) {
+			if current.Status != task.StatusSucceeded {
+				return MarketConditionResult{}, fmt.Errorf("market regime task %s: %s", current.Status, current.Error)
+			}
+			var analysis marketregime.Analysis
+			if err := json.Unmarshal(current.Result, &analysis); err != nil {
+				return MarketConditionResult{}, fmt.Errorf("decode market regime task result: %w", err)
+			}
+			return MarketConditionResult{
+				MarketCondition: analysis.MarketCondition, Name: markettypes.MarketConditionName(analysis.MarketCondition),
+				Source: "llm", Confidence: analysis.Confidence, Reason: marketservice.SanitizeReason(analysis.Reason),
+			}, nil
+		}
+		if time.Now().After(deadline) {
+			return MarketConditionResult{}, fmt.Errorf("market regime task timeout")
+		}
+		time.Sleep(300 * time.Millisecond)
+	}
 }
 func analyzeMarketConditionWithRuntimeClient(snapshot marketservice.RegimeSnapshot, client llm.Client, progressCallback MarketConditionProgressCallback) (MarketConditionResult, error) {
 	payload, err := json.Marshal(snapshot)

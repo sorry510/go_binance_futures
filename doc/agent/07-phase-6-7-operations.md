@@ -6,12 +6,13 @@
 
 把散落在 `main.go` 的 AI 周期任务逐步迁移为统一调度定义，但非 AI 高频交易循环不强制迁移。
 
-第一批只迁移：
+第一批实际迁移：
 
 ```text
-market_regime      every 60m
-market_scan        configurable
+market_regime      default every 60m, configurable
 ```
+
+`market_scan` 当前项目尚无对应 Skill，因此 Phase 6 不注册空 Job；后续实现该 Skill 后直接挂入统一 Scheduler。
 
 Scheduler 只负责“何时触发哪个 Skill”，不包含 Prompt、LLM 或业务分析逻辑。
 
@@ -40,7 +41,11 @@ input_tokens, output_tokens, total_tokens
 created_at, started_at, updated_at, completed_at
 ```
 
-敏感 Tool Result 不应无条件全量持久化；对可能包含账户/订单信息的数据使用白名单字段或脱敏摘要。
+当前实现使用 `agent_tasks`、`agent_task_events`、`agent_conversations`、`agent_conversation_messages` 四张表。
+Task 每次阶段更新直接写数据库；服务启动时把遗留的 queued/running/waiting 状态标记为 `interrupted`。
+Task Input/Result/Error/Event 及 Conversation Message 在持久化前对 API Key、Authorization、Token、Password、Secret 等字段进行脱敏。
+
+敏感 Tool Result 不应无条件全量持久化；对可能包含账户/订单信息的数据继续使用白名单字段或脱敏摘要。
 
 ## Conversation 与 Task 分离
 
@@ -48,14 +53,16 @@ created_at, started_at, updated_at, completed_at
 - Conversation = 用户连续交互，可包含多个 Task。
 - Memory = 未来可选的长期业务偏好，不属于第一版必须项。
 
-Strategy Builder 的 `conversationId` 迁移时应映射为 Conversation，而不是继续复用 Task ID。
+Strategy Builder 的 `conversationId` 已映射为独立 Conversation，而不是继续复用 Task ID。每次续聊创建新的 Task，并复用同一个 Conversation；消息历史写入数据库，浏览器保存最近的 Conversation ID / Task ID 以支持页面刷新后的恢复。
 
 ## Phase 6 验收
 
-- 进程重启后可查看已完成 Task 历史。
-- 运行中的任务重启后明确标记 interrupted/failed，不伪装为 running。
-- Scheduler 不会重复执行同一 `skip_if_running` Job。
-- UI 不再依赖进程内 map 才能查看历史结果。
+- [x] 进程重启后可查看已完成 Task 历史。
+- [x] 运行中的任务重启后明确标记 `interrupted`，不伪装为 running。
+- [x] Scheduler 不会重复执行同一 `skip_if_running` Job。
+- [x] Scheduler interval 动态修改后会重新计算 next run。
+- [x] AI → 任务中心可查看持久化 Task、Events 和 Scheduler 状态。
+- [x] Strategy Builder 的 Conversation 与 Task 分离并持久化消息。
 ## Phase 7：权限、预算、监控与灰度
 
 ### Permission

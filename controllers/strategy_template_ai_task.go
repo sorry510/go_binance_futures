@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	conversationstore "go_binance_futures/agent/conversation"
 	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/skill"
 	strategybuilder "go_binance_futures/agent/skills/strategybuilder"
@@ -46,6 +47,7 @@ type strategyTemplateAIProgressEvent struct {
 
 type strategyTemplateAIGenerationTask struct {
 	TaskID          string                            `json:"taskId"`
+	ConversationID  string                            `json:"conversationId"`
 	Status          string                            `json:"status"`
 	Progress        int                               `json:"progress"`
 	Stage           string                            `json:"stage"`
@@ -59,10 +61,11 @@ type strategyTemplateAIGenerationTask struct {
 	CreatedAt       time.Time                         `json:"createdAt"`
 	UpdatedAt       time.Time                         `json:"updatedAt"`
 	CompletedAt     *time.Time                        `json:"completedAt,omitempty"`
-	Messages        []llm.Message                     `json:"-"`
 }
 
 var newStrategyBuilderLLMClient = llm.NewFromConfig
+var strategyTemplateConversationStore conversationstore.Store = conversationstore.NewORMStore()
+var strategyTemplatePersistentTaskStore task.Store = task.NewORMStore()
 
 var strategyTemplateAITaskStore = struct {
 	sync.RWMutex
@@ -127,40 +130,70 @@ func (ctrl *StrategyTemplateController) ImportAIGeneratedTemplate() {
 }
 
 func startStrategyTemplateAITask(request strategyTemplateAIGenerationRequest) (strategyTemplateAIGenerationTask, error) {
+	ctx := context.Background()
+	conversationID := strings.TrimSpace(request.ConversationID)
+	if conversationID == "" {
+		conversation, err := strategyTemplateConversationStore.Create(ctx, strategybuilder.Name)
+		if err != nil {
+			return strategyTemplateAIGenerationTask{}, err
+		}
+		conversationID = conversation.ID
+	} else {
+		conversation, err := strategyTemplateConversationStore.Get(ctx, conversationID)
+		if err != nil {
+			return strategyTemplateAIGenerationTask{}, fmt.Errorf("续聊对话不存在或已过期: %w", err)
+		}
+		if conversation.Skill != strategybuilder.Name {
+			return strategyTemplateAIGenerationTask{}, fmt.Errorf("对话类型不匹配")
+		}
+		if conversation.Status != conversationstore.StatusActive {
+			return strategyTemplateAIGenerationTask{}, fmt.Errorf("该对话已经结束，不能继续生成")
+		}
+		if hasRunningStrategyTemplateConversation(conversationID) {
+			return strategyTemplateAIGenerationTask{}, fmt.Errorf("当前对话仍有生成任务在运行")
+		}
+	}
+
 	now := time.Now().UTC()
+	taskID := newStrategyTemplateAITaskID()
+	item := &strategyTemplateAIGenerationTask{
+		TaskID: taskID, ConversationID: conversationID, Status: "queued", Stage: "queued",
+		MaxRounds: maxStrategyTemplateAIRounds, CreatedAt: now, UpdatedAt: now,
+	}
+	appendStrategyTemplateAIEventLocked(item, 0, "queued", "生成任务已创建")
 	strategyTemplateAITaskStore.Lock()
 	cleanupStrategyTemplateAITasksLocked(now)
-	taskID := strings.TrimSpace(request.ConversationID)
-	var item *strategyTemplateAIGenerationTask
-	if taskID != "" {
-		item = strategyTemplateAITaskStore.tasks[taskID]
-		if item == nil {
-			strategyTemplateAITaskStore.Unlock()
-			return strategyTemplateAIGenerationTask{}, fmt.Errorf("续聊任务不存在或已过期")
-		}
-		if item.Status == "queued" || item.Status == "running" {
-			strategyTemplateAITaskStore.Unlock()
-			return strategyTemplateAIGenerationTask{}, fmt.Errorf("当前生成任务仍在运行")
-		}
-		if item.Imported {
-			strategyTemplateAITaskStore.Unlock()
-			return strategyTemplateAIGenerationTask{}, fmt.Errorf("该对话已成功导入，不能继续生成")
-		}
-		item.Status, item.Stage, item.Progress, item.Round = "queued", "queued", 0, 0
-		item.Error, item.ValidationError = "", ""
-		item.CompletedAt = nil
-		appendStrategyTemplateAIEventLocked(item, 0, "queued", "已保留历史对话，开始新一轮生成")
-	} else {
-		taskID = newStrategyTemplateAITaskID()
-		item = &strategyTemplateAIGenerationTask{TaskID: taskID, Status: "queued", Stage: "queued", MaxRounds: maxStrategyTemplateAIRounds, CreatedAt: now, UpdatedAt: now}
-		strategyTemplateAITaskStore.tasks[taskID] = item
-		appendStrategyTemplateAIEventLocked(item, 0, "queued", "生成任务已创建")
-	}
-	item.MaxRounds = maxStrategyTemplateAIRounds
+	strategyTemplateAITaskStore.tasks[taskID] = item
 	result := cloneStrategyTemplateAITask(item)
 	strategyTemplateAITaskStore.Unlock()
+
+	request.ConversationID = conversationID
+	inputJSON, _ := json.Marshal(request)
+	persistent := &task.Task{
+		ID: taskID, Skill: strategybuilder.Name, ConversationID: conversationID,
+		Status: task.StatusQueued, Stage: "queued", Progress: 0, Input: string(inputJSON),
+		MaxRounds: maxStrategyTemplateAIRounds, CreatedAt: now, UpdatedAt: now,
+	}
+	if err := strategyTemplatePersistentTaskStore.Save(ctx, persistent); err != nil {
+		strategyTemplateAITaskStore.Lock()
+		delete(strategyTemplateAITaskStore.tasks, taskID)
+		strategyTemplateAITaskStore.Unlock()
+		return strategyTemplateAIGenerationTask{}, fmt.Errorf("保存 Agent Task 失败: %w", err)
+	}
+
 	go runStrategyTemplateAITask(taskID, request)
 	return result, nil
+}
+
+func hasRunningStrategyTemplateConversation(conversationID string) bool {
+	strategyTemplateAITaskStore.RLock()
+	defer strategyTemplateAITaskStore.RUnlock()
+	for _, item := range strategyTemplateAITaskStore.tasks {
+		if item.ConversationID == conversationID && (item.Status == "queued" || item.Status == "running") {
+			return true
+		}
+	}
+	return false
 }
 
 func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerationRequest) {
@@ -170,8 +203,9 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 		failStrategyTemplateAITask(taskID, "LLM 配置不可用: "+err.Error())
 		return
 	}
-	history, exists := getStrategyTemplateAIMessages(taskID)
-	if !exists {
+	history, err := strategyTemplateConversationStore.Messages(context.Background(), request.ConversationID)
+	if err != nil {
+		failStrategyTemplateAITask(taskID, "读取对话历史失败: "+err.Error())
 		return
 	}
 	input := strategybuilder.Input{Prompt: request.Prompt, PreviousJSON: request.PreviousJSON, ValidationError: request.ValidationError}
@@ -180,7 +214,13 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 		failStrategyTemplateAITask(taskID, "构造 Agent 输入失败: "+err.Error())
 		return
 	}
-	appendStrategyTemplateAIMessage(taskID, llm.RoleUser, strategybuilder.BuildUserPrompt(input))
+	if err := strategyTemplateConversationStore.Append(
+		context.Background(), request.ConversationID, taskID,
+		llm.Message{Role: llm.RoleUser, Content: strategybuilder.BuildUserPrompt(input)},
+	); err != nil {
+		failStrategyTemplateAITask(taskID, "保存对话消息失败: "+err.Error())
+		return
+	}
 
 	skills := skill.NewRegistry()
 	builder := strategybuilder.New(strategybuilder.Options{
@@ -199,13 +239,15 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 	}
 
 	runner, err := agentruntime.NewRunner(agentruntime.Config{
-		Client: client, Skills: skills, Tools: toolRegistry,
+		Client: client, Skills: skills, Tools: toolRegistry, Tasks: strategyTemplatePersistentTaskStore,
 		Timeout: 15 * time.Minute, DefaultMaxRounds: maxStrategyTemplateAIRounds,
 		MaxContextBytes: maxStrategyTemplateAIContextSize, MaxToolResultBytes: 256 * 1024, MaxToolCalls: maxStrategyTemplateAIRounds,
 		Retry:     agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 		EventHook: func(event task.Event) { handleStrategyTemplateAIRuntimeEvent(taskID, event) },
 		MessageHook: func(_ string, message llm.Message) {
-			appendStrategyTemplateAIMessage(taskID, message.Role, message.Content)
+			if err := strategyTemplateConversationStore.Append(context.Background(), request.ConversationID, taskID, message); err != nil {
+				logs.Error("persist strategy builder conversation message:", err)
+			}
 		},
 		ValidationHook: func(_ string, raw json.RawMessage, validationErr error) {
 			if validationErr != nil {
@@ -219,7 +261,7 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 	}
 
 	result, err := runner.Run(context.Background(), agentruntime.Request{
-		Skill: strategybuilder.Name, Input: string(inputJSON), ConversationID: taskID,
+		TaskID: taskID, Skill: strategybuilder.Name, Input: string(inputJSON), ConversationID: request.ConversationID,
 		Metadata: map[string]any{strategybuilder.HistoryMetadataKey: history},
 	})
 	if err != nil {
@@ -290,34 +332,9 @@ func updateStrategyTemplateAIRound(taskID string, round, progress int, message s
 	appendStrategyTemplateAIEventLocked(item, progress, "agent_round", message)
 }
 
-func appendStrategyTemplateAIMessage(taskID, role, content string) {
-	strategyTemplateAITaskStore.Lock()
-	defer strategyTemplateAITaskStore.Unlock()
-	item := strategyTemplateAITaskStore.tasks[taskID]
-	if item == nil {
-		return
-	}
-	appendStrategyTemplateAIMessageLocked(item, role, content)
-}
-
-func appendStrategyTemplateAIMessageLocked(item *strategyTemplateAIGenerationTask, role, content string) {
-	last := len(item.Messages) - 1
-	if last >= 0 && item.Messages[last].Role == role {
-		item.Messages[last].Content += "\n\n" + content
-	} else {
-		item.Messages = append(item.Messages, llm.Message{Role: role, Content: content})
-	}
-	item.UpdatedAt = time.Now().UTC()
-}
-
-func getStrategyTemplateAIMessages(taskID string) ([]llm.Message, bool) {
-	strategyTemplateAITaskStore.RLock()
-	defer strategyTemplateAITaskStore.RUnlock()
-	item := strategyTemplateAITaskStore.tasks[taskID]
-	if item == nil {
-		return nil, false
-	}
-	return append([]llm.Message(nil), item.Messages...), true
+func getStrategyTemplateAIMessages(conversationID string) ([]llm.Message, bool) {
+	messages, err := strategyTemplateConversationStore.Messages(context.Background(), conversationID)
+	return messages, err == nil
 }
 
 func recordStrategyTemplateAICandidate(taskID, generatedJSON, validationError string) {
@@ -363,10 +380,8 @@ func finishStrategyTemplateAITask(taskID, generatedJSON, summary string) {
 }
 
 func ensureStrategyTemplateAITaskCanImport(taskID string) error {
-	strategyTemplateAITaskStore.RLock()
-	defer strategyTemplateAITaskStore.RUnlock()
-	item := strategyTemplateAITaskStore.tasks[taskID]
-	if item == nil {
+	item, ok := getStrategyTemplateAITask(taskID)
+	if !ok {
 		return fmt.Errorf("AI 生成任务不存在或已过期")
 	}
 	if item.Status == "queued" || item.Status == "running" {
@@ -375,15 +390,35 @@ func ensureStrategyTemplateAITaskCanImport(taskID string) error {
 	if item.Imported {
 		return fmt.Errorf("该 AI 生成任务已经成功导入")
 	}
+	if item.Status != "succeeded" || strings.TrimSpace(item.JSON) == "" {
+		return fmt.Errorf("AI 生成任务尚未生成可导入结果")
+	}
 	return nil
 }
 
 func recordStrategyTemplateAIImportError(taskID, generatedJSON, errorMessage string) {
 	payload, _ := json.Marshal(map[string]string{"error": errorMessage, "json": generatedJSON})
-	appendStrategyTemplateAIMessage(taskID, llm.RoleUser, "IMPORT_ERROR\n"+string(payload)+"\nThe user may provide a revised prompt. Preserve prior evidence and generate a complete corrected JSON when asked.")
+	strategyTemplateAITaskStore.RLock()
+	item := strategyTemplateAITaskStore.tasks[taskID]
+	conversationID := ""
+	if item != nil {
+		conversationID = item.ConversationID
+	}
+	strategyTemplateAITaskStore.RUnlock()
+	if conversationID == "" {
+		if restored, ok := restoreStrategyTemplateAITask(taskID); ok {
+			conversationID = restored.ConversationID
+		}
+	}
+	if conversationID != "" {
+		_ = strategyTemplateConversationStore.Append(
+			context.Background(), conversationID, taskID,
+			llm.Message{Role: llm.RoleUser, Content: "IMPORT_ERROR\n" + string(payload) + "\nThe user may provide a revised prompt. Preserve prior evidence and generate a complete corrected JSON when asked."},
+		)
+	}
 	strategyTemplateAITaskStore.Lock()
 	defer strategyTemplateAITaskStore.Unlock()
-	item := strategyTemplateAITaskStore.tasks[taskID]
+	item = strategyTemplateAITaskStore.tasks[taskID]
 	if item == nil {
 		return
 	}
@@ -393,16 +428,27 @@ func recordStrategyTemplateAIImportError(taskID, generatedJSON, errorMessage str
 
 func markStrategyTemplateAITaskImported(taskID string) {
 	strategyTemplateAITaskStore.Lock()
-	defer strategyTemplateAITaskStore.Unlock()
 	item := strategyTemplateAITaskStore.tasks[taskID]
-	if item == nil {
-		return
+	conversationID := ""
+	if item != nil {
+		item.Imported, item.Status = true, "succeeded"
+		item.Error, item.ValidationError = "", ""
+		conversationID = item.ConversationID
+		appendStrategyTemplateAIEventLocked(item, 100, "imported", "策略模板已成功导入，对话上下文已结束")
+		completedAt := item.UpdatedAt
+		item.CompletedAt = &completedAt
 	}
-	item.Imported, item.Status = true, "succeeded"
-	item.Error, item.ValidationError, item.Messages = "", "", nil
-	appendStrategyTemplateAIEventLocked(item, 100, "imported", "策略模板已成功导入，对话上下文已结束")
-	completedAt := item.UpdatedAt
-	item.CompletedAt = &completedAt
+	strategyTemplateAITaskStore.Unlock()
+	if conversationID == "" {
+		if restored, ok := restoreStrategyTemplateAITask(taskID); ok {
+			conversationID = restored.ConversationID
+		}
+	}
+	if conversationID != "" {
+		if err := strategyTemplateConversationStore.Close(context.Background(), conversationID); err != nil {
+			logs.Error("close strategy builder conversation:", err)
+		}
+	}
 }
 
 func failStrategyTemplateAITask(taskID, errorMessage string) {
@@ -420,18 +466,55 @@ func failStrategyTemplateAITask(taskID, errorMessage string) {
 
 func getStrategyTemplateAITask(taskID string) (strategyTemplateAIGenerationTask, bool) {
 	strategyTemplateAITaskStore.RLock()
-	defer strategyTemplateAITaskStore.RUnlock()
 	item, exists := strategyTemplateAITaskStore.tasks[taskID]
-	if !exists {
+	if exists {
+		cloned := cloneStrategyTemplateAITask(item)
+		strategyTemplateAITaskStore.RUnlock()
+		return cloned, true
+	}
+	strategyTemplateAITaskStore.RUnlock()
+	return restoreStrategyTemplateAITask(taskID)
+}
+
+func restoreStrategyTemplateAITask(taskID string) (strategyTemplateAIGenerationTask, bool) {
+	stored, err := strategyTemplatePersistentTaskStore.Get(context.Background(), strings.TrimSpace(taskID))
+	if err != nil || stored.Skill != strategybuilder.Name {
 		return strategyTemplateAIGenerationTask{}, false
 	}
-	return cloneStrategyTemplateAITask(item), true
+	status := "running"
+	switch stored.Status {
+	case task.StatusQueued:
+		status = "queued"
+	case task.StatusSucceeded:
+		status = "succeeded"
+	case task.StatusFailed, task.StatusCancelled, task.StatusInterrupted:
+		status = "failed"
+	}
+	item := strategyTemplateAIGenerationTask{
+		TaskID: stored.ID, ConversationID: stored.ConversationID, Status: status, Stage: stored.Stage,
+		Progress: stored.Progress, Error: stored.Error, Round: stored.Round, MaxRounds: stored.MaxRounds,
+		CreatedAt: stored.CreatedAt, UpdatedAt: stored.UpdatedAt, CompletedAt: stored.CompletedAt,
+	}
+	if len(stored.Result) > 0 {
+		item.JSON = formatStrategyTemplateJSON(string(stored.Result))
+	}
+	item.Events = make([]strategyTemplateAIProgressEvent, 0, len(stored.Events))
+	for _, event := range stored.Events {
+		item.Events = append(item.Events, strategyTemplateAIProgressEvent{
+			Progress: event.Progress, Stage: event.Stage, Tool: event.Tool, Message: event.Message, Time: event.Time,
+		})
+	}
+	if stored.ConversationID != "" {
+		if conversation, err := strategyTemplateConversationStore.Get(context.Background(), stored.ConversationID); err == nil {
+			item.Imported = conversation.Status == conversationstore.StatusClosed
+		}
+	}
+	return item, true
 }
 
 func cloneStrategyTemplateAITask(item *strategyTemplateAIGenerationTask) strategyTemplateAIGenerationTask {
 	cloned := *item
 	cloned.Events = append([]strategyTemplateAIProgressEvent(nil), item.Events...)
-	cloned.Messages = nil
 	return cloned
 }
 
