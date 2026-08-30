@@ -98,6 +98,8 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"AgentAlertCooldownSec": systemConfig.AgentAlertCooldownSec,
 			"AgentAlertMaxConcurrent": systemConfig.AgentAlertMaxConcurrent,
 			"AgentAlertMaxPerMinute": systemConfig.AgentAlertMaxPerMinute,
+			"AgentMarketRegimeScheduleEnable": systemConfig.AgentMarketRegimeScheduleEnable,
+			"AgentMarketRegimeIntervalMin": systemConfig.AgentMarketRegimeIntervalMin,
 			
 			"externalLinks": externalLinks,
 		},

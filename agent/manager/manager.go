@@ -73,7 +73,7 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	if maxRounds <= 0 {
 		maxRounds = agentruntime.DefaultConfig().DefaultMaxRounds
 	}
-	item := &task.Task{ID: taskID, Skill: selectedSkill.Name(), Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds, Provider: string(client.Provider()), CreatedAt: now, UpdatedAt: now}
+	item := &task.Task{ID: taskID, Skill: selectedSkill.Name(), ConversationID: strings.TrimSpace(req.ConversationID), Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds, Provider: string(client.Provider()), CreatedAt: now, UpdatedAt: now}
 	if err := manager.cfg.Store.Save(context.Background(), item); err != nil {
 		return nil, err
 	}
@@ -94,4 +94,8 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 
 func (manager *Manager) Get(ctx context.Context, taskID string) (*task.Task, error) {
 	return manager.cfg.Store.Get(ctx, strings.TrimSpace(taskID))
+}
+
+func (manager *Manager) List(ctx context.Context, options task.ListOptions) (task.ListResult, error) {
+	return manager.cfg.Store.List(ctx, options)
 }

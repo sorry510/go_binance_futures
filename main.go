@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	agentapp "go_binance_futures/agent/app"
 	"go_binance_futures/command"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
@@ -85,6 +86,10 @@ func registerModels() {
 	orm.RegisterModel(new(models.NotifyConfig))
 	orm.RegisterModel(new(models.FuturesLiquidationOrder))
 	orm.RegisterModel(new(models.SymbolAnalysisHistory))
+	orm.RegisterModel(new(models.AgentTask))
+	orm.RegisterModel(new(models.AgentTaskEvent))
+	orm.RegisterModel(new(models.AgentConversation))
+	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.Notification))
 
 	setDriver(driver) // 设置数据库驱动
@@ -188,13 +193,10 @@ func main() {
 
 	// 读取最新配置信息
 	loopRun(updateSystemConfig, time.Second*2) // 每 2 秒更新一次系统配置信息
-	// 更新当前行情趋势
-	loopRun(func() {
-		if _, err := feature.UpdateMarketCondition(&SystemConfig); err != nil {
-			logs.Error("UpdateMarketCondition:", err.Error())
-		}
-	}, time.Minute*60) // 60分钟更新一次市场行情趋势
-
+	// Agent 周期任务统一由 Scheduler 触发。
+	if err := agentapp.StartDefaultScheduler(context.Background(), func() models.Config { return SystemConfig }); err != nil {
+		logs.Error("start agent scheduler:", err)
+	}
 	// 自动追加币种 和 更新币种交易精度
 	go func() {
 		for {
