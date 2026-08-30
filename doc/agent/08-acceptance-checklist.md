@@ -28,7 +28,7 @@
 - [x] 原多轮工具调用和 Repair 行为迁移到 Runtime。
 - [x] 策略 JSON 继续执行真实业务校验和 expr 编译检查。
 - [x] “AI 生成成功”和“导入数据库”仍是两个动作。
-- [ ] 续聊使用 Conversation 概念，不依赖内存 Task ID 语义。
+- [x] 续聊使用 Conversation 概念，不依赖内存 Task ID 语义。
 ## Symbol Analysis
 
 - [x] 指定任意有效 USDT 合约可以启动分析。
@@ -47,10 +47,10 @@
 
 ## Scheduler / Store
 
-- [ ] AI 周期任务通过统一 Scheduler 触发。
-- [ ] `skip_if_running` 防止任务重叠。
-- [ ] Task 历史可持久化并在重启后查询。
-- [ ] Task、Conversation、Memory 概念分离。
+- [x] 已迁移的 AI 周期任务通过统一 Scheduler 触发。
+- [x] `skip_if_running` 防止任务重叠。
+- [x] Task 历史可持久化并在重启后查询。
+- [x] Task、Conversation、Memory 概念分离。
 
 ## 安全与运行
 
