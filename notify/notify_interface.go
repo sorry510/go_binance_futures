@@ -106,17 +106,6 @@ type FuturesPositionConvertParams struct {
 	UnRealizedProfit string
 }
 
-type FuturesLiquidationAggregateParams struct {
-	Title             string
-	Symbol            string
-	LiquidationSide   string
-	AggregateNotional float64
-	OrderCount        int
-	WindowSec         int
-	Threshold         float64
-	WindowStart       int64
-	WindowEnd         int64
-}
 
 type AgentAlertParams struct {
 	Title         string
@@ -141,7 +130,6 @@ type Pusher interface {
 	TestPusher()
 	FuturesCustomStrategyTest(params FuturesTestParams)
 	FuturesPositionConvert(params FuturesPositionConvertParams)
-	FuturesLiquidationAggregate(params FuturesLiquidationAggregateParams)
 	AgentAlert(params AgentAlertParams) (int64, error)
 	
 	FuturesOpenOrder(params FuturesOrderParams)

@@ -83,7 +83,6 @@ func registerModels() {
 	orm.RegisterModel(new(models.FuturesPosition))
 	orm.RegisterModel(new(models.FuturesOrder))
 	orm.RegisterModel(new(models.NotifyConfig))
-	orm.RegisterModel(new(models.FuturesMarketNoticeLog))
 	orm.RegisterModel(new(models.FuturesLiquidationOrder))
 	orm.RegisterModel(new(models.SymbolAnalysisHistory))
 	orm.RegisterModel(new(models.Notification))
@@ -296,8 +295,6 @@ func main() {
 	// 	}
 	// }()
 
-	// 合约市场通知日志每日清理，删除 10 天前的数据
-	go binance.StartMarketNoticeLogCleanupTask()
 	// 合约强平订单每日清理，删除 10 天前的数据
 	go binance.StartFuturesLiquidationOrderCleanupTask()
 	// 清理过期消息通知

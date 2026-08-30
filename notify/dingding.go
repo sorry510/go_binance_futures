@@ -444,43 +444,6 @@ func (pusher DingDing) FuturesPriceChangeNotice(params FuturesNoticeParams) {
   DingDingApi(text, pusher)
 }
 
-func (pusher DingDing) FuturesLiquidationAggregate(params FuturesLiquidationAggregateParams) {
-	text := `
-## %s
-#### **{futures.coin}**：<font color="#008000">%s</font>
-#### **{futures.liquidation_side}**：<font color="#FF0000">%s</font>
-#### **{futures.aggregate_notional}**：<font color="#FF0000">%.2f USDT</font>
-#### **{futures.order_count}**：<font color="#008000">%d</font>
-#### **{futures.aggregate_window}**：<font color="#008000">%d s</font>
-#### **{futures.notional_threshold}**：<font color="#008000">%.2f USDT</font>
-#### **{futures.window_start}**：%s
-#### **{futures.window_end}**：%s
-
-> author <sorry510sf@gmail.com>`
-
-	text = fmt.Sprintf(lang.LangMatch(text),
-		params.Symbol+params.Title,
-		params.Symbol,
-		lang.Lang("futures.liquidation_"+params.LiquidationSide),
-		params.AggregateNotional,
-		params.OrderCount,
-		params.WindowSec,
-		params.Threshold,
-		formatMillis(params.WindowStart),
-		formatMillis(params.WindowEnd),
-	)
-	dingDingAPI(text, pusher, webnotification.PublishOptions{
-		Level:             "warning",
-		EventType:         "futures_liquidation_aggregate",
-		Symbol:            params.Symbol,
-		LiquidationSide:   params.LiquidationSide,
-		AggregateNotional: params.AggregateNotional,
-		OrderCount:        params.OrderCount,
-		WindowStart:       params.WindowStart,
-		WindowEnd:         params.WindowEnd,
-	})
-}
-
 func (pusher DingDing) AgentAlert(params AgentAlertParams) (int64, error) {
 	pusher.ModuleName = agentAlertModule(params)
 	notification, err := dingDingAPI(agentAlertContent(params), pusher, agentAlertPublishOptions(params))
