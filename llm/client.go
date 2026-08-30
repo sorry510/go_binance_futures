@@ -16,7 +16,7 @@ func NewClient(cfg Config) (Client, error) {
 	}
 
 	switch cfg.Provider {
-	case ProviderOpenAI, ProviderOpenAICompatible:
+	case ProviderOpenAI, ProviderOpenAICompatible, ProviderDeepSeek, ProviderGLM, ProviderMoonshot, ProviderOllama, ProviderGemini:
 		return newOpenAIClient(cfg)
 	case ProviderAnthropic:
 		return newAnthropicClient(cfg)

@@ -1,6 +1,6 @@
 ### Change Log
 
-## v0.4.2
+## v1.0.0
 - 重构 ai 相关功能，增加自己的 ai agent
 - llm 配置改为页面配置
 - 增加 Event 驱动，把旧的通知相关接入到 Event 中

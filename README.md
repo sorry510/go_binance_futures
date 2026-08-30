@@ -47,6 +47,10 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | 菜单 | 页面与用途 |
 | --- | --- |
 | 配置中心 | 管理合约交易、WebSocket、抢新、币种提醒、市场监听、资金费率监听、通知通道、调试推送和外部链接等全局开关与参数 |
+| AI → 单币分析 | 选择或输入 USDT 永续合约，可补充关注方向并启动 AI 分析；查看方向、置信度、市场环境、价格变化和分析总结等历史结果 |
+| AI → 任务中心 | 查看 Agent 治理与运行指标、各 Skill 指标、Scheduler 状态和 Agent Task 历史 |
+| AI → Skill 管理 | 管理数据库中的 Skill 注册信息、显示名称、描述和启用状态；执行实现仍由后端代码提供 |
+| AI → LLM 配置 | 新增、编辑、测试和切换数据库中的 LLM 模型配置；新任务无需重启即可使用当前模型 |
 | 合约交易 → 合约交易 | 按 `自选`、`USDT`、`USDC` 查看币种；新增、查询、批量编辑、全部开启或全部关闭币种配置 |
 | 合约交易 → 合约订单 | 查询真实合约订单，可按币种和时间筛选 |
 | 合约交易 → 合约账户 | 查看币安合约资产、持仓和当前挂单 |
@@ -67,6 +71,18 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 
 #### 配置中心
 ![UI - 配置中心](./img/ui/dashboard.jpg)
+
+#### AI - 单币分析
+![UI - AI 单币分析](./img/ui/ai-symbol-analysis.png)
+
+#### AI - 任务中心
+![UI - AI 任务中心](./img/ui/ai-task-center.png)
+
+#### AI - Skill 管理
+![UI - AI Skill 管理](./img/ui/ai-skill-management.png)
+
+#### AI - LLM 配置
+![UI - AI LLM 配置](./img/ui/ai-llm-config.png)
 
 #### 合约交易
 ![UI - 合约交易](./img/ui/futures-symbols.png)
@@ -115,6 +131,29 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 
 #### 日志
 ![UI - 日志](./img/ui/service-logs.jpg)
+
+## AI 功能
+
+### 单币分析
+
+选择或输入一个 USDT 永续合约，并可补充希望 AI 重点判断的方向。系统会启动 `symbol_analysis` Skill，读取该合约最近一次成功分析并与当前行情比较，输出结构化 TradingPlan。历史列表展示分析状态、方向、置信度、市场环境、当时价格、当前价格、后续涨跌和总结。
+
+### 任务中心
+
+- **Agent 治理与运行指标**：查看每分钟/每小时启动额度、接受与拒绝次数、任务成功率、LLM/Tool 错误率、Token、延迟、平均轮次和 Signal 到通知的转化情况。
+- **各 Skill 运行指标**：按 Skill 查看任务量、成功率、错误率、Token 和 P95 延迟。
+- **Agent Scheduler**：查看调度任务的启用状态、周期、运行状态、执行/跳过次数、下次执行时间和上次状态。
+- **Agent Task 历史**：按 Skill 和状态筛选任务，查看阶段、进度、Provider、模型、Token、Conversation ID 和任务详情。
+
+### Skill 管理
+
+Skill 的注册与治理配置保存在数据库中。页面支持新增、编辑、启用、停用和删除 Skill，并维护显示名称与描述；Skill implementation 由后端代码提供，数据库记录被删除后对应 Skill 将无法启动。
+
+内置 Skill 包括事件报警分析（`alert_analysis`）、市场趋势分析（`market_regime`）、策略生成（`strategy_builder`）和单币分析（`symbol_analysis`）。
+
+### LLM 配置
+
+LLM 配置保存在数据库中。页面支持选择 Provider 模板，维护配置名称、API 地址、API Key、模型名称、请求超时和 Temperature，测试连接，并把模型设为当前模型。Agent 新任务会直接读取当前配置，切换后无需重启服务；API Key 不会由接口回传明文，Token 与 Tool 上限仍由全局 Agent 治理配置控制。
 
 ## 合约交易
 
