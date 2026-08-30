@@ -647,23 +647,49 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 		"INSERT INTO `symbols` "+
 			"(`symbol`, `percentChange`, `close`, `open`, `low`, `high`, `enable`, `updateTime`, `lastClose`, `lastUpdateTime`, `baseVolume`, `quoteVolume`, `closeQty`, `tradeCount`, `leverage`, `marginType`, `tickSize`, `stepSize`, `usdt`, `profit`, `loss`, `kline_interval`, `technology`, `strategy`, `strategy_type`, `pin`, `sort`, `type`) "+
 			"VALUES %s "+
-			"ON DUPLICATE KEY UPDATE "+
-			"`lastClose` = `close`, "+
-			"`lastUpdateTime` = `updateTime`, "+
-			"`percentChange` = VALUES(`percentChange`), "+
-			"`close` = VALUES(`close`), "+
-			"`open` = VALUES(`open`), "+
-			"`low` = VALUES(`low`), "+
-			"`high` = VALUES(`high`), "+
-			"`updateTime` = VALUES(`updateTime`), "+
-			"`baseVolume` = VALUES(`baseVolume`), "+
-			"`quoteVolume` = VALUES(`quoteVolume`), "+
-			"`closeQty` = VALUES(`closeQty`), "+
-			"`tradeCount` = VALUES(`tradeCount`), "+
-			"`type` = VALUES(`type`)",
+			"%s",
 		strings.Join(valueParts, ", "),
+		batchUpdateSymbolsUpsertClause(),
 	)
 	return query, args
+}
+
+// batchUpdateSymbolsUpsertClause returns the driver specific upsert clause.
+// MySQL uses "ON DUPLICATE KEY UPDATE", while SQLite/Postgres use "ON CONFLICT ... DO UPDATE".
+func batchUpdateSymbolsUpsertClause() string {
+	driver, _ := config.String("database::driver")
+	if driver == "mysql" {
+		return "ON DUPLICATE KEY UPDATE " +
+			"`lastClose` = `close`, " +
+			"`lastUpdateTime` = `updateTime`, " +
+			"`percentChange` = VALUES(`percentChange`), " +
+			"`close` = VALUES(`close`), " +
+			"`open` = VALUES(`open`), " +
+			"`low` = VALUES(`low`), " +
+			"`high` = VALUES(`high`), " +
+			"`updateTime` = VALUES(`updateTime`), " +
+			"`baseVolume` = VALUES(`baseVolume`), " +
+			"`quoteVolume` = VALUES(`quoteVolume`), " +
+			"`closeQty` = VALUES(`closeQty`), " +
+			"`tradeCount` = VALUES(`tradeCount`), " +
+			"`type` = VALUES(`type`)"
+	}
+	// SQLite (default) syntax: unqualified columns on the right side refer to the existing row,
+	// "excluded" refers to the row proposed for insertion.
+	return "ON CONFLICT(`symbol`) DO UPDATE SET " +
+		"`lastClose` = `symbols`.`close`, " +
+		"`lastUpdateTime` = `symbols`.`updateTime`, " +
+		"`percentChange` = excluded.`percentChange`, " +
+		"`close` = excluded.`close`, " +
+		"`open` = excluded.`open`, " +
+		"`low` = excluded.`low`, " +
+		"`high` = excluded.`high`, " +
+		"`updateTime` = excluded.`updateTime`, " +
+		"`baseVolume` = excluded.`baseVolume`, " +
+		"`quoteVolume` = excluded.`quoteVolume`, " +
+		"`closeQty` = excluded.`closeQty`, " +
+		"`tradeCount` = excluded.`tradeCount`, " +
+		"`type` = excluded.`type`"
 }
 
 func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
