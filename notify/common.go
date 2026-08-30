@@ -12,12 +12,6 @@ func nowTime() string {
 	return time.Now().Format("2006-01-02 15:04:05")
 }
 
-func formatMillis(timestamp int64) string {
-	if timestamp <= 0 {
-		return "-"
-	}
-	return time.UnixMilli(timestamp).Format("2006-01-02 15:04:05")
-}
 
 func getStatusColor(status string) string {
 	var color string

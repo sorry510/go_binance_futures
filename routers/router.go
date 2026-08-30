@@ -13,6 +13,10 @@ func init() {
 	web.Router("/test-pusher", &controllers.IndexController{}, "post:TestPusher") // 测试推送
 	web.Router("/update-market-condition", &controllers.IndexController{}, "post:UpdateMarketCondition") // 手动触发更新市场状态
 	web.Router("/update-market-condition/:taskId", &controllers.IndexController{}, "get:GetMarketConditionUpdateTask") // 查询市场状态更新进度
+	web.Router("/agents/tasks", &controllers.AgentController{}, "post:StartTask") // 创建统一 Agent 任务
+	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask") // 查询统一 Agent 任务
+	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory") // 查询单币分析历史
+	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus") // 查询事件报警链路状态与追踪
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post") // 列表查询和新增
 	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit") // 更新和删除
 	web.Router("/notifications", &controllers.NotificationController{}, "get:Get") // 网页通知列表
@@ -64,7 +68,6 @@ func init() {
 	web.Router("/futures/local/positions", &controllers.AccountController{}, "get:GetLocalFuturesPositions") // 获取本地存储的合约持仓信息
 	web.Router("/futures/local/positions/:id", &controllers.AccountController{}, "put:EditLocalFuturesPositions;delete:DelLocalFuturesPositions") // 修复和删除本地存储的合约持仓信息
 	web.Router("/futures/local/open-orders", &controllers.AccountController{}, "get:GetLocalFuturesOpenOrders") // 获取本地存储的挂单信息
-	web.Router("/futures/market-notice-logs", &controllers.FuturesMarketNoticeLogController{}, "get:Get") // 合约市场通知日志查询
 	web.Router("/futures/liquidation-orders", &controllers.FuturesLiquidationOrderController{}, "get:Get") // 合约强平订单查询
 	
 	web.Router("/fund-rate/eat", &controllers.EatRateController{}, "get:Get;post:Post") // 列表查询和新增

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_binance_futures/lang"
+	"go_binance_futures/models"
 	"go_binance_futures/webnotification"
 	"io"
 	"net/http"
@@ -43,17 +44,18 @@ func SlackApi(content string, pusher Pusher) {
 	slackAPI(content, pusher, webnotification.PublishOptions{})
 }
 
-func slackAPI(content string, pusher Pusher, options webnotification.PublishOptions) {
-  if _, err := webnotification.PublishWithOptions(pusher.GetModuleName(), content, options); err != nil {
+func slackAPI(content string, pusher Pusher, options webnotification.PublishOptions) (*models.Notification, error) {
+  notification, err := webnotification.PublishWithOptions(pusher.GetModuleName(), content, options)
+  if err != nil {
     logs.Error("save web notification error:", err)
-		return
+		return nil, err
   }
   slack_token := g_slack_token
   slack_channel_id := g_slack_channel_id
 	// 放到单独执行，避免主进程阻塞(未知原因突然不能在 goroutine 中执行了)
 	notifyConfig := GetNotifyConfig(pusher)
 	if !IsModulePushEnabled(notifyConfig) {
-		return
+		return notification, nil
 	}
 	if notifyConfig.SlackToken != "" {
 		// 读取模块配置信息，覆盖全局
@@ -114,6 +116,7 @@ func slackAPI(content string, pusher Pusher, options webnotification.PublishOpti
 			fmt.Println("Unexpected status code:", resp.StatusCode)
 		}
 	}()
+	return notification, nil
 }
 
 func (pusher Slack) SetModuleName(name string) Pusher {
@@ -443,39 +446,11 @@ func (pusher Slack) FuturesPriceChangeNotice(params FuturesNoticeParams) {
   DingDingApi(text, pusher)
 }
 
-func (pusher Slack) FuturesLiquidationAggregate(params FuturesLiquidationAggregateParams) {
-	text := `
-## %s
-{futures.coin}：%s
-{futures.liquidation_side}：%s
-{futures.aggregate_notional}：%.2f USDT
-{futures.order_count}：%d
-{futures.aggregate_window}：%d s
-{futures.notional_threshold}：%.2f USDT
-{futures.window_start}：%s
-{futures.window_end}：%s
-
-> author <sorry510sf@gmail.com>`
-
-	text = fmt.Sprintf(lang.LangMatch(text),
-		params.Symbol+params.Title,
-		params.Symbol,
-		lang.Lang("futures.liquidation_"+params.LiquidationSide),
-		params.AggregateNotional,
-		params.OrderCount,
-		params.WindowSec,
-		params.Threshold,
-		formatMillis(params.WindowStart),
-		formatMillis(params.WindowEnd),
-	)
-	slackAPI(text, pusher, webnotification.PublishOptions{
-		Level:             "warning",
-		EventType:         "futures_liquidation_aggregate",
-		Symbol:            params.Symbol,
-		LiquidationSide:   params.LiquidationSide,
-		AggregateNotional: params.AggregateNotional,
-		OrderCount:        params.OrderCount,
-		WindowStart:       params.WindowStart,
-		WindowEnd:         params.WindowEnd,
-	})
+func (pusher Slack) AgentAlert(params AgentAlertParams) (int64, error) {
+	pusher.ModuleName = agentAlertModule(params)
+	notification, err := slackAPI(agentAlertContent(params), pusher, agentAlertPublishOptions(params))
+	if err != nil {
+		return 0, err
+	}
+	return notification.ID, nil
 }
