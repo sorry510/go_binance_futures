@@ -80,7 +80,7 @@ Strategy Builder 的 `conversationId` 已映射为独立 Conversation，而不�
 建议增加：
 
 - 每个 Task 最大 LLM rounds。
-- 每个 Skill 最大 Tool calls。
+- 全局单 Task 最大 Tool calls；不再为单个 Skill 单独配置 Tool/Token 预算。
 - 每分钟/每小时 Agent 调用数。
 - Alert Agent 并发上限。
 - 单 Task 最大 input/output token 或估算成本阈值。
@@ -94,12 +94,21 @@ Strategy Builder 的 `conversationId` 已映射为独立 Conversation，而不�
 
 ### 灰度与回滚
 
-每个迁移 Skill 都有独立 enable flag。新旧路径切换应是配置行为；上线顺序固定为开发环境、手动任务、影子模式、少量请求、全量。
+每个迁移 Skill 都由 `agent_skills` 表独立管理启用状态；Token/Tool 调用预算统一使用全局配置。新旧路径切换应是配置行为；上线顺序固定为开发环境、手动任务、影子模式、少量请求、全量。
+
+### 当前实施状态（已完成）
+
+- `agent_skills` 持久化 Skill 注册、显示信息和启用状态，Web 支持创建、编辑、软删除和恢复；Runtime admission 每次启动均读取数据库状态。
+- Tool Permission 在 Runtime 强制执行：read 需 Skill Tool 白名单，write 需 Skill Tool 白名单 + Permission 双授权，trade 第一版全局拒绝。
+- 全局治理配置统一限制每分钟/每小时 Agent 启动数、单 Task Token 和 Tool 调用数；Alert 额外保留并发和每分钟 AI 预算。
+- Runtime Collector 统计全局和 per-Skill 的 Task 成功率、LLM/Tool 错误率、Validator/Repair、Token、平均轮数及 P50/P95；Alert 统计有效 Signal→Notify 转化率与 Fallback 率。
+- Task、Conversation 和结构化错误日志共用 `agent/security` 脱敏；覆盖 API Key、Authorization、Token、Password、Secret、数据库密码、DSN 和 URI 凭据。
+- Alert AI 启动失败或 Task 失败自动规则 fallback；Scheduler Agent 启动失败调用 fallback hook，故障与 WS/交易主循环隔离。
 
 ## Phase 7 验收
 
-- 可快速关闭任一 AI Skill 而不影响基础行情/交易程序运行。
-- API Key、Authorization、数据库密码不会进入 Agent Messages/Task Event/日志。
-- LLM 服务异常不会拖死 WS、交易循环和 Web 服务。
-- 所有写/交易 Tool 的权限行为有测试。
-- 有可量化指标判断新 Agent 是否比旧实现更稳定。
+- [x] 可快速关闭任一 AI Skill 而不影响基础行情/交易程序运行。
+- [x] API Key、Authorization、数据库密码不会进入持久化 Agent Messages/Task Event/结构化日志。
+- [x] LLM/Tool 服务异常不会拖死 WS、交易循环和 Web 服务，Alert/Scheduler 有明确 fallback。
+- [x] 所有 write/trade Tool 的权限行为有 Runtime/Policy 测试。
+- [x] 有 Task 成功率、LLM/Tool 错误率、P50/P95、Token、Validator/Repair、Alert 转化/Fallback 等量化指标。

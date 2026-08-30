@@ -161,7 +161,26 @@ func TestPipelineAIStartFailureFallsBack(t *testing.T) {
 	pipeline.Start(ctx)
 	pipeline.Emit(testSignal("failure"))
 	waitFor(t, func() bool { return pipeline.Stats().AIFallbacks == 1 })
+	stats := pipeline.Stats()
 	if len(h.notifications) != 1 || !h.notifications[0].Fallback {
 		t.Fatalf("AI failure did not fallback: %+v", h.notifications)
+	}
+	if stats.EligibleSignals != 1 || stats.SignalNotifyRate != 1 || stats.AIFallbackRate != 1 {
+		t.Fatalf("unexpected fallback rates: %+v", stats)
+	}
+}
+
+func TestPipelineFailedAITaskFallsBack(t *testing.T) {
+	h := newPipelineTestHarness()
+	h.settings.AIEnabled = true
+	h.tasks["task-test"] = &task.Task{ID: "task-test", Skill: alertanalysis.Name, Status: task.StatusFailed, Error: "tool unavailable"}
+	pipeline := h.newPipeline(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	pipeline.Start(ctx)
+	pipeline.Emit(testSignal("task-failure"))
+	waitFor(t, func() bool { return pipeline.Stats().AIFallbacks == 1 })
+	if len(h.notifications) != 1 || !h.notifications[0].Fallback || h.notifications[0].TaskID != "task-test" {
+		t.Fatalf("failed AI task did not fallback: %+v", h.notifications)
 	}
 }
