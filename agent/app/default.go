@@ -6,6 +6,8 @@ import (
 	"time"
 
 	agentmanager "go_binance_futures/agent/manager"
+	"go_binance_futures/agent/observability"
+	"go_binance_futures/agent/permission"
 	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/skill"
 	alertanalysis "go_binance_futures/agent/skills/alertanalysis"
@@ -45,15 +47,18 @@ func DefaultManager() (*agentmanager.Manager, error) {
 		}
 		defaultManager, defaultManagerErr = agentmanager.New(agentmanager.Config{
 			Skills:         skills,
+			Admission:      AdmitSkill,
 			Store:          store,
 			Tools:          tools,
 			CompletionHook: persistTaskCompletion,
 			RuntimeConfig: agentruntime.Config{
 				Timeout:            3 * time.Minute,
+				Policy:             permission.AllowWritesFor(nil),
+				BudgetProvider:     RuntimeBudget,
+				Observer:           observability.Default(),
 				DefaultMaxRounds:   8,
 				MaxContextBytes:    256 * 1024,
 				MaxToolResultBytes: 256 * 1024,
-				MaxToolCalls:       12,
 				Retry:              agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 			},
 		})

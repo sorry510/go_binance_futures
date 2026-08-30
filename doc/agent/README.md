@@ -40,7 +40,9 @@
 - Phase 3：已完成 Market Regime 与 Strategy Builder 迁移，两项 AI 能力都只使用统一 Runtime。
 - Phase 4：已完成 `symbol_analysis`、聚合 Context Builder、`TradingPlanV1` 和统一 Agent Task API。
 - Phase 5：已完成进程内 Event Bus、Signal Engine、`alert_analysis`、AI 调用保护、规则 fallback 与通知追踪；首批接入 FastMove / LiquidationSpike。
-- 下一步：Phase 6，统一 Scheduler 与 Task 持久化。
+- Phase 6：已完成统一 Scheduler、数据库 Task/Event Store、Conversation 持久化、重启中断恢复与任务中心。
+- Phase 7：已完成 `agent_skills` 数据库治理、Tool Permission、全局预算、敏感信息脱敏、故障 fallback、运行指标与 Skill 管理页面。
+- Agent 第一版 Phase 0-7 已全部完成，后续进入新增 Skill/业务能力阶段。
 
 ## 分阶段路线
 
@@ -52,8 +54,8 @@
 | Phase 3 ✅ | 迁移已有 AI 能力 | Market Regime 与 Strategy Builder 均接入统一 Runtime |
 | Phase 4 ✅ | 实现单币分析 | `symbol_analysis` Skill、市场数据 Context、结构化 TradingPlan |
 | Phase 5 ✅ | 实现事件驱动报警 | Event Bus、Signal Engine、Alert Skill，WS 不直接调用 LLM |
-| Phase 6 | 统一调度与持久化 | Scheduler、Task Store、Conversation、运行历史、配置管理 |
-| Phase 7 | 风控、可观测与灰度 | Permission、预算、指标、审计、回归测试、逐步切流 |
+| Phase 6 ✅ | 统一调度与持久化 | Scheduler、Task Store、Conversation、运行历史、配置管理 |
+| Phase 7 ✅ | 风控、可观测与灰度 | Permission、预算、指标、审计、回归测试、Skill DB 治理 |
 
 ## 推荐实施顺序
 

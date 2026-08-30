@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -42,6 +43,15 @@ func (manager *fakeManager) finish() {
 	item.Status = task.StatusSucceeded
 	item.Stage = "completed"
 	item.CompletedAt = &now
+}
+
+type failingManager struct{ err error }
+
+func (manager *failingManager) Start(agentruntime.Request) (*task.Task, error) {
+	return nil, manager.err
+}
+func (manager *failingManager) Get(context.Context, string) (*task.Task, error) {
+	return nil, manager.err
 }
 
 func TestSchedulerSkipIfRunning(t *testing.T) {
@@ -97,5 +107,34 @@ func TestSchedulerRebasesNextRunWhenIntervalChanges(t *testing.T) {
 	want := later.Add(5 * time.Minute).UnixMilli()
 	if delta := second - want; delta < -10 || delta > 10 {
 		t.Fatalf("next run=%d want approximately %d", second, want)
+	}
+}
+
+func TestSchedulerStartFailureInvokesFallbackHook(t *testing.T) {
+	manager := &failingManager{err: errors.New("agent skill disabled")}
+	fallback := make(chan error, 1)
+	scheduler, err := New(manager, []Job{{
+		Name: "market_regime", Skill: "market_regime", Interval: func() time.Duration { return time.Hour },
+		BuildInput: func(context.Context) (string, error) { return `{}`, nil },
+		OnError:    func(_ context.Context, err error) { fallback <- err },
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = scheduler.Trigger(context.Background(), "market_regime")
+	if err == nil || err.Error() != "agent skill disabled" {
+		t.Fatalf("unexpected trigger error: %v", err)
+	}
+	select {
+	case got := <-fallback:
+		if got == nil || got.Error() != "agent skill disabled" {
+			t.Fatalf("unexpected fallback error: %v", got)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("scheduler did not invoke fallback hook")
+	}
+	status := scheduler.Status()[0]
+	if status.Running || status.LastStatus != "error" {
+		t.Fatalf("unexpected failure status: %+v", status)
 	}
 }

@@ -113,7 +113,20 @@ func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.
 	}
 	var lastErr error
 	for attempt := 1; attempt <= attempts; attempt++ {
+		started := time.Now()
 		response, err := runner.cfg.Client.Generate(ctx, request)
+		status := "success"
+		errorType, errorMessage := "", ""
+		if err != nil {
+			status = "error"
+			errorType = classifyError(err)
+			errorMessage = err.Error()
+		}
+		runner.observe(Observation{
+			Type: "llm_call", TaskID: item.ID, ConversationID: item.ConversationID, Skill: item.Skill,
+			Provider: item.Provider, Model: item.Model, Status: status, ErrorType: errorType, Error: errorMessage,
+			Round: item.Round, DurationMs: elapsedMilliseconds(started),
+		})
 		if err == nil {
 			return response, nil
 		}
