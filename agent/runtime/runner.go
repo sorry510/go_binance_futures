@@ -75,8 +75,12 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 	}
 
 	now := time.Now().UTC()
+	taskID := strings.TrimSpace(req.TaskID)
+	if taskID == "" {
+		taskID = newTaskID()
+	}
 	currentTask := &task.Task{
-		ID:        newTaskID(),
+		ID:        taskID,
 		Skill:     selectedSkill.Name(),
 		Status:    task.StatusQueued,
 		Stage:     "queued",
@@ -114,6 +118,11 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 		}
 	}
 	successfulTools := make(map[string]bool, len(requiredTools))
+	toolResults := make(map[string]any)
+	finalValidator := selectedSkill.Validator()
+	if provider, ok := selectedSkill.(skill.RequestValidatorProvider); ok {
+		finalValidator = provider.ValidatorFor(skillRequest)
+	}
 	toolCalls := 0
 
 	for round := 1; round <= maxRounds; round++ {
@@ -203,6 +212,7 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			runner.appendRuntimeMessage(currentTask.ID, &messages, toolMessage)
 			if toolErr == nil {
 				successfulTools[selectedTool.Name()] = true
+				toolResults[selectedTool.Name()] = value
 			}
 			outcome := "success"
 			if toolErr != nil {
@@ -226,7 +236,11 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 				continue
 			}
 			runner.record(currentTask, task.StatusValidating, "validating", min(progress+4, 95), "validating final result")
-			value, err := selectedSkill.Validator().Validate(runCtx, decision.Result)
+			validatorForFinal := finalValidator
+			if provider, ok := selectedSkill.(skill.RunValidatorProvider); ok {
+				validatorForFinal = provider.ValidatorForRun(skillRequest, toolResults)
+			}
+			value, err := validatorForFinal.Validate(runCtx, decision.Result)
 			if runner.cfg.ValidationHook != nil {
 				runner.cfg.ValidationHook(currentTask.ID, append(json.RawMessage(nil), decision.Result...), err)
 			}

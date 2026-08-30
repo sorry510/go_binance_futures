@@ -508,6 +508,18 @@ func GetFundingRate(params FundingRateParams) (res []*futures.PremiumIndex, err 
 	return res, err
 }
 
+func GetOpenInterest(symbol string) (*futures.OpenInterest, error) {
+	return futuresClient.NewGetOpenInterestService().Symbol(symbol).Do(context.Background())
+}
+
+func GetOpenInterestStatistics(symbol, period string, limit int) ([]*futures.OpenInterestStatistic, error) {
+	return futuresClient.NewOpenInterestStatisticsService().Symbol(symbol).Period(period).Limit(limit).Do(context.Background())
+}
+
+func GetTakerLongShortRatio(symbol, period string, limit uint32) ([]*futures.TakerLongShortRatio, error) {
+	return futuresClient.NewTakerLongShortRatioService().Symbol(symbol).Period(period).Limit(limit).Do(context.Background())
+}
+
 // 资金费率历史记录(整点时刻4或8h的历史记录) 限制 500/5min/IP
 // @see https://binance-docs.github.io/apidocs/futures/cn/#31dbeb24c4
 // @returns /doc/fundingRateHistory.js

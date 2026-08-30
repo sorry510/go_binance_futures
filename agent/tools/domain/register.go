@@ -15,18 +15,20 @@ import (
 	marketservice "go_binance_futures/service/market"
 	strategyservice "go_binance_futures/service/strategy"
 	symbolservice "go_binance_futures/service/symbol"
+	symbolanalysisservice "go_binance_futures/service/symbolanalysis"
 )
 
 type Dependencies struct {
-	GetSymbol           func(context.Context, string) (any, error)
-	ListSymbols         func(context.Context, symbolservice.ListOptions) (symbolservice.ListResult, error)
-	GetKlines           func(context.Context, string, string, int) (any, error)
-	GetFundingRate      func(context.Context, string) (any, error)
-	GetMarketCondition  func(context.Context) (any, error)
-	ListLiquidations    func(context.Context, liquidationservice.ListOptions) (liquidationservice.ListResult, error)
-	ScanSymbols         func(context.Context, scanner.PrefilterOptions) (*scanner.PrefilterResult, error)
-	ListTestResults     func(context.Context, strategyservice.TestResultsOptions) (strategyservice.TestResultsResult, error)
-	GetStrategyTemplate func(context.Context, strategyservice.TemplateQuery) (any, error)
+	GetSymbol                  func(context.Context, string) (any, error)
+	ListSymbols                func(context.Context, symbolservice.ListOptions) (symbolservice.ListResult, error)
+	GetKlines                  func(context.Context, string, string, int) (any, error)
+	GetFundingRate             func(context.Context, string) (any, error)
+	GetMarketCondition         func(context.Context) (any, error)
+	ListLiquidations           func(context.Context, liquidationservice.ListOptions) (liquidationservice.ListResult, error)
+	ScanSymbols                func(context.Context, scanner.PrefilterOptions) (*scanner.PrefilterResult, error)
+	ListTestResults            func(context.Context, strategyservice.TestResultsOptions) (strategyservice.TestResultsResult, error)
+	GetStrategyTemplate        func(context.Context, strategyservice.TemplateQuery) (any, error)
+	BuildSymbolAnalysisContext func(context.Context, string) (symbolanalysisservice.Context, error)
 }
 
 func DefaultDependencies() Dependencies {
@@ -48,6 +50,9 @@ func DefaultDependencies() Dependencies {
 		GetStrategyTemplate: func(ctx context.Context, query strategyservice.TemplateQuery) (any, error) {
 			return strategies.GetTemplate(ctx, query)
 		},
+		BuildSymbolAnalysisContext: func(ctx context.Context, symbol string) (symbolanalysisservice.Context, error) {
+			return symbolanalysisservice.Build(ctx, symbol, symbolanalysisservice.DefaultDependencies())
+		},
 	}
 }
 
@@ -57,7 +62,7 @@ func RegisterReadOnly(registry *agenttools.Registry, deps Dependencies) error {
 	}
 	definitions := []agenttools.Tool{
 		newFeaturesTool(deps), newSymbolSnapshotTool(deps), newKlinesTool(deps), newFundingRateTool(deps), newLiquidationsTool(deps),
-		newMarketConditionTool(deps), newScanSymbolsTool(deps), newTestResultsTool(deps), newStrategyTemplateTool(deps),
+		newMarketConditionTool(deps), newSymbolAnalysisContextTool(deps), newScanSymbolsTool(deps), newTestResultsTool(deps), newStrategyTemplateTool(deps),
 	}
 	for _, tool := range definitions {
 		if err := registry.Register(tool); err != nil {
@@ -164,6 +169,24 @@ func newMarketConditionTool(deps Dependencies) agenttools.Tool {
 				return nil, fmt.Errorf("market service is unavailable")
 			}
 			return deps.GetMarketCondition(ctx)
+		}}
+}
+
+func newSymbolAnalysisContextTool(deps Dependencies) agenttools.Tool {
+	type input struct {
+		Symbol string `json:"symbol"`
+	}
+	return agenttools.Func{ToolName: "get_symbol_analysis_context", ToolDescription: "聚合单个 USDT 永续合约分析上下文：行情快照、MarketCondition、多周期 K 线特征、Funding、OI、Taker、Depth 与最近强平；失败项写入 data_missing", ToolRisk: permission.RiskRead,
+		ToolMetadata: metadata(`{"type":"object","required":["symbol"],"additionalProperties":false,"properties":{"symbol":{"type":"string"}}}`, 40*time.Second, 96<<10),
+		ExecuteFunc: func(ctx context.Context, raw json.RawMessage) (any, error) {
+			var in input
+			if err := strictDecode(raw, &in); err != nil {
+				return nil, err
+			}
+			if deps.BuildSymbolAnalysisContext == nil {
+				return nil, fmt.Errorf("symbol analysis context service is unavailable")
+			}
+			return deps.BuildSymbolAnalysisContext(ctx, in.Symbol)
 		}}
 }
 
