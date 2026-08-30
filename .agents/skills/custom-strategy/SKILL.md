@@ -53,16 +53,39 @@ Useful pairings:
 - RSI, ROC, MFI, or OBV change for one focused confirmation;
 - ATR for price-scale-independent stop and take-profit distances.
 
+## Branch entries on the current market condition when requested
+
+When the user asks for a strategy to follow the market trend, current market, current行情, or equivalent wording, treat `MarketCondition`-aware entry logic as mandatory.
+
+1. Reference the built-in `MarketCondition` variable directly in the enabled `long` and `short` entry programs, unless the user explicitly disables one side. It is a string, so compare it with string literals such as `MarketCondition == "1"`, never numeric literals.
+2. Partition all valid values into explicit entry regimes and cover every value from `"1"` through `"11"`: strong bull, bull, sideways, bear, strong bear, bullish divergence, bearish divergence, broad rise, broad decline, high-volatility sideways, and low-volatility consolidation.
+3. Do not create eleven near-duplicate rules. Prefer one cohesive rule per side with short Boolean bindings and grouped `and`/`or` branches. Similar values may share a regime; a useful starting partition is bullish direction `{"1", "2", "8"}`, bearish direction `{"4", "5", "9"}`, divergence `{"6", "7"}`, ordinary sideways `{"3"}`, high-volatility sideways `{"10"}`, and low-volatility consolidation `{"11"}`. Adapt the grouping when the strategy thesis requires it.
+4. Give different regimes materially different entry behavior, confirmation, or thresholds. Merely mentioning `MarketCondition` in a condition that otherwise applies the same trigger to every value does not satisfy the request.
+5. Across the enabled `long` and `short` entry logic, map every valid value to an intentional branch. A branch may explicitly block one side when opening it would contradict the regime, but omission is not coverage. Unknown or empty values must fail closed instead of falling through to a permissive entry.
+6. Before finalizing, write a compact coverage map from values `"1"`–`"11"` to the grouped branch and its long/short behavior. Reject the strategy if any value is missing. In deterministic validation, compile and run each enabled entry program with `MarketCondition` set to every valid string value.
+
 ## Write four cohesive rules
 
 Include one enabled rule for each type unless the user narrows the request:
 
 - `long`: higher-timeframe bullish direction, lower-timeframe trigger, and no-chase filter;
 - `short`: structurally symmetric bearish conditions;
-- `close_long`: hard loss, hard profit, developed-profit protection, setup invalidation, and optional time exit;
+- `close_long`: emergency hard loss, market-confirmed profit realization, market-confirmed setup invalidation, and optional time exit;
 - `close_short`: symmetric short-side exits.
 
 Keep each expr program readable and make its last expression Boolean. Use short `let` bindings, valid array indexes, and no unnecessary loops over long ranges. Prefer one cohesive close rule per side because multiple close rules have OR semantics.
+
+## Require market-aware close decisions
+
+Do not reduce `close_long` or `close_short` to reaching a profit or loss number. The symbol's outer `profit/loss` settings already decide when `CanOrderComplete` may evaluate the close expression; crossing that gate is eligibility for a decision, not sufficient evidence to close.
+
+1. Except for a deliberately deeper catastrophic stop, reject any close program containing a complete branch whose only effective condition is `ROI >= threshold` or `ROI <= threshold`. Do not disguise the same behavior behind an `or` branch that becomes true as soon as the outer gate is crossed.
+2. Make every normal profit-taking or loss-cutting branch combine `ROI`, an explicit `MarketCondition` regime, and at least one independent symbol-level confirmation. Useful confirmations include higher-timeframe direction failure, EMA or Supertrend reversal, Donchian or BOLL structure break, momentum deterioration or recovery, volume confirmation, ATR-normalized displacement, and a reliable position-age condition.
+3. Use grouped `MarketCondition` branches instead of one universal close threshold. In favorable directional regimes, require stronger reversal evidence or allow more room; in adverse or broad directional regimes, tighten invalidation; in ordinary sideways, high-volatility sideways, and low-volatility consolidation regimes, use different structure or volatility thresholds; handle bullish and bearish divergence according to the position side. Cover all values `"1"`–`"11"` across each enabled side's intentional hold-or-close behavior. Unknown values must not accidentally satisfy a permissive normal close branch, while the emergency stop remains available.
+4. Preserve one explicit catastrophic-loss branch when risk assumptions require it. Set it beyond the normal outer `loss` gate and allow it to close without market confirmation; label it as the emergency exception, not the primary loss logic. A fixed profit target is not an emergency and still requires market confirmation.
+5. Structure the expression so that market evidence is conjunctive at the branch level, for example `roiZone and adverseRegime and (trendBreak or momentumReversal)`. Avoid a flat list of weak `or` conditions where any noisy indicator can close the position alone. Do not count multiple fields from the same indicator as independent evidence without a clear reason.
+6. Keep long and short exits structurally comparable but direction-aware. Do not mechanically invert thresholds when the relevant market regimes, volatility, or indicator behavior is asymmetric.
+7. Before finalizing, produce a close-decision matrix covering `LONG` and `SHORT`, profit-side and loss-side outer gates, every grouped `MarketCondition` regime, confirmed and unconfirmed reversal cases, and the catastrophic stop. Deterministic tests must prove that crossing the ordinary ROI gate alone returns `false`, a supported market-confirmed branch returns `true`, and the emergency stop returns `true`.
 
 Before finalizing close rules, compare every internal ROI trigger with the target symbols' outer `profit` and `loss` settings. The evaluator does not run the close expression while ROI is inside `(-loss, profit)`. Therefore a profit-protection trigger below `profit`, a setup-failure trigger near zero, or a stop whose magnitude is smaller than `loss` cannot fire at its intended level. Align the operational settings or redesign the thresholds, and report the required `profit/loss` values with the strategy.
 
@@ -147,4 +170,4 @@ Always explain these project-specific constraints:
 - `Position.CreateTime` time exits are reliable only for positions with a recorded local creation time.
 - Database insertion does not constitute assignment, activation, backtesting, or evidence of returns.
 
-Deliver the JSON path, database result when authorized, concise rule explanations, passed checks, blocked checks, and required operational settings.
+Deliver the JSON path, database result when authorized, concise rule explanations, passed checks, blocked checks, and required operational settings. When market-condition-aware entry logic was requested, also include the grouped entry coverage map. Always include the close-decision matrix and identify the emergency-stop exception for generated strategies.

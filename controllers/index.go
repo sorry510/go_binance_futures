@@ -92,6 +92,12 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"WsFuturesLiquidationAlertWindowSec": systemConfig.WsFuturesLiquidationAlertWindowSec,
 			"WsFuturesLiquidationAlertNotionalThreshold": systemConfig.WsFuturesLiquidationAlertNotionalThreshold,
 			"WsFuturesLiquidationAlertCooldownSec": systemConfig.WsFuturesLiquidationAlertCooldownSec,
+			"AgentAlertPipelineEnable": systemConfig.AgentAlertPipelineEnable,
+			"AgentAlertAnalysisEnable": systemConfig.AgentAlertAnalysisEnable,
+			"AgentAlertMinSeverity": systemConfig.AgentAlertMinSeverity,
+			"AgentAlertCooldownSec": systemConfig.AgentAlertCooldownSec,
+			"AgentAlertMaxConcurrent": systemConfig.AgentAlertMaxConcurrent,
+			"AgentAlertMaxPerMinute": systemConfig.AgentAlertMaxPerMinute,
 			
 			"externalLinks": externalLinks,
 		},

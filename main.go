@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"go_binance_futures/command"
 	"go_binance_futures/feature"
@@ -9,6 +10,7 @@ import (
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
 	_ "go_binance_futures/routers"
+	alertpipeline "go_binance_futures/service/alertpipeline"
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
@@ -81,8 +83,8 @@ func registerModels() {
 	orm.RegisterModel(new(models.FuturesPosition))
 	orm.RegisterModel(new(models.FuturesOrder))
 	orm.RegisterModel(new(models.NotifyConfig))
-	orm.RegisterModel(new(models.FuturesMarketNoticeLog))
 	orm.RegisterModel(new(models.FuturesLiquidationOrder))
+	orm.RegisterModel(new(models.SymbolAnalysisHistory))
 	orm.RegisterModel(new(models.Notification))
 
 	setDriver(driver) // 设置数据库驱动
@@ -164,6 +166,9 @@ func updateSystemConfig() {
 }
 
 func main() {
+	if err := alertpipeline.StartDefault(context.Background(), func() models.Config { return SystemConfig }); err != nil {
+		logs.Error("start alert pipeline:", err)
+	}
 	// debug
 	if debug == "1" {
 		updateSystemConfig()
@@ -290,8 +295,6 @@ func main() {
 	// 	}
 	// }()
 
-	// 合约市场通知日志每日清理，删除 10 天前的数据
-	go binance.StartMarketNoticeLogCleanupTask()
 	// 合约强平订单每日清理，删除 10 天前的数据
 	go binance.StartFuturesLiquidationOrderCleanupTask()
 	// 清理过期消息通知

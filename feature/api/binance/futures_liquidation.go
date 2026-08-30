@@ -3,6 +3,8 @@ package binance
 import (
 	"database/sql/driver"
 	"errors"
+	"fmt"
+	agentevent "go_binance_futures/agent/event"
 	"go_binance_futures/models"
 	"strconv"
 	"strings"
@@ -45,9 +47,7 @@ func CollectFuturesLiquidationOrders(systemConfig *models.Config) {
 				logs.Error("save futures liquidation order error:", err)
 				return
 			}
-			if _, err := defaultFuturesLiquidationAlertAggregator.Evaluate(item, systemConfig); err != nil {
-				logs.Error("check futures liquidation aggregate alert error:", err)
-			}
+			publishFuturesLiquidationEvent(item)
 		}, func(err error) {
 			logs.Error("futures liquidation ws run error:", err)
 		})
@@ -167,6 +167,45 @@ func calculateLiquidationNotional(order futures.WsLiquidationOrder) float64 {
 		quantity, _ = strconv.ParseFloat(order.OrigQuantity, 64)
 	}
 	return price * quantity
+}
+
+func liquidationPositionSide(orderSide string) (string, bool) {
+	switch strings.ToUpper(strings.TrimSpace(orderSide)) {
+	case "SELL":
+		return "long", true
+	case "BUY":
+		return "short", true
+	default:
+		return "", false
+	}
+}
+
+func futuresLiquidationEventKey(item models.FuturesLiquidationOrder) string {
+	return fmt.Sprintf("%s|%s|%d|%d|%s|%s|%s|%.8f",
+		strings.ToUpper(strings.TrimSpace(item.Symbol)),
+		strings.ToUpper(strings.TrimSpace(item.Side)),
+		item.EventTime, item.TradeTime, item.AvgPrice, item.Price,
+		item.AccumulatedFilledQty, item.Notional,
+	)
+}
+
+func publishFuturesLiquidationEvent(item models.FuturesLiquidationOrder) {
+	liquidationSide, ok := liquidationPositionSide(item.Side)
+	if !ok || item.Notional <= 0 {
+		return
+	}
+	price, _ := strconv.ParseFloat(item.AvgPrice, 64)
+	if price <= 0 {
+		price, _ = strconv.ParseFloat(item.Price, 64)
+	}
+	quantity, _ := strconv.ParseFloat(item.AccumulatedFilledQty, 64)
+	if quantity <= 0 {
+		quantity, _ = strconv.ParseFloat(item.OrigQuantity, 64)
+	}
+	value := agentevent.NewLiquidation(item.Symbol, "binance_ws_all_liquidation", item.EventTime,
+		item.Side, price, quantity, item.Notional, liquidationSide)
+	value.Meta.EventID = agentevent.StableID("liq", futuresLiquidationEventKey(item))
+	agentevent.DefaultBus().Publish(value)
 }
 
 func CleanupOldFuturesLiquidationOrders(keepDays int) (int64, error) {

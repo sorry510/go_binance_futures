@@ -7,6 +7,9 @@ type Notification struct {
 	Module            string  `orm:"size(64);index;column(module)" json:"module"`
 	Level             string  `orm:"size(20);default(info);column(level)" json:"level"`
 	EventType         string  `orm:"size(64);index;null;column(event_type)" json:"event_type"`
+	EventID           string  `orm:"size(96);index;null;column(event_id)" json:"event_id"`
+	SignalID          string  `orm:"size(96);index;null;column(signal_id)" json:"signal_id"`
+	TaskID            string  `orm:"size(96);index;null;column(task_id)" json:"task_id"`
 	Symbol            string  `orm:"size(32);index;null;column(symbol)" json:"symbol"`
 	LiquidationSide   string  `orm:"size(16);index;null;column(liquidation_side)" json:"liquidation_side"`
 	AggregateNotional float64 `orm:"null;column(aggregate_notional);digits(30);decimals(8)" json:"aggregate_notional"`

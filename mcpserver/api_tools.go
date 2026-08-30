@@ -43,7 +43,7 @@ var apiHTTPClient = &http.Client{
 	},
 }
 
-var executeAPIRequest = executeInternalAPIRequest
+var executeAPIRequest = executeAPIRequestDefault
 var getInternalAPIBaseURL = defaultInternalAPIBaseURL
 
 var apiToolDefinitions = []APIToolDefinition{
