@@ -25,29 +25,64 @@ var excludeRoutes = []string{
 	"/" + webIndex,
 }
 
+// rejectUnauthorized answers a request that failed authentication.
+//
+// A browser navigating to a page should land back on the login screen, but an
+// XHR from the already loaded single page app needs a payload it can recognise.
+// Redirecting both meant an expired token made the API answer an HTML body with
+// status 401, which the frontend could not tell apart from an empty result, so
+// pages rendered as "no data" instead of prompting for login.
+func rejectUnauthorized(ctx *context.Context) {
+	if isPageRequest(ctx) {
+		ctx.Redirect(http.StatusUnauthorized, "/"+webIndex+"/index.html")
+		return
+	}
+	ctx.Output.SetStatus(http.StatusUnauthorized)
+	_ = ctx.Output.JSON(map[string]interface{}{
+		"code": http.StatusUnauthorized,
+		"msg":  "登录已过期或未登录",
+		"data": nil,
+	}, false, false)
+}
+
+// isPageRequest reports whether the caller is a browser asking for a document
+// rather than the app asking for data.
+func isPageRequest(ctx *context.Context) bool {
+	if strings.HasSuffix(ctx.Request.URL.Path, ".html") {
+		return true
+	}
+	if ctx.Request.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+		return false
+	}
+	// Browsers ask for documents with an Accept that prefers text/html, while
+	// fetch and axios default to application/json or */*.
+	accept := ctx.Request.Header.Get("Accept")
+	return strings.Contains(accept, "text/html")
+}
+
 func JwtMiddleware(ctx *context.Context) {
-    request := ctx.Request
+	request := ctx.Request
 	path := ctx.Request.URL.Path
-	
+
 	// 跳过白名单
 	for _, excludeRoute := range excludeRoutes {
-        if match, _ := pathMatch(path, excludeRoute); match {
+		if match, _ := pathMatch(path, excludeRoute); match {
 			return
-        }
-    }
-	
-    // 获取请求头中的JWT Token
-    authHeader := request.Header.Get("Authorization")
-    if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		ctx.Redirect(http.StatusUnauthorized, "/" + webIndex + "/index.html")
+		}
+	}
+
+	// 获取请求头中的JWT Token
+	authHeader := request.Header.Get("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		rejectUnauthorized(ctx)
 		return
-    }
+	}
 
 	claims, err := ValidateAuthorization(authHeader)
 	if err != nil {
-        ctx.Redirect(http.StatusUnauthorized, "/" + webIndex + "/index.html")
-        return
-    }
+		rejectUnauthorized(ctx)
+		return
+	}
 	ctx.Input.SetData("user", claims)
 }
 
