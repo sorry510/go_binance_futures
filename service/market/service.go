@@ -65,6 +65,42 @@ func (Service) FundingRate(ctx context.Context, symbol string) ([]*futures.Premi
 	return result, nil
 }
 
+func (Service) OpenInterest(ctx context.Context, symbol string) (*futures.OpenInterest, error) {
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	if symbol == "" {
+		return nil, fmt.Errorf("symbol is required")
+	}
+	result, err := binance.GetOpenInterest(symbol)
+	if err != nil {
+		return nil, fmt.Errorf("get open interest: %w", err)
+	}
+	return result, ctx.Err()
+}
+
+func (Service) OpenInterestStatistics(ctx context.Context, symbol, period string, limit int) ([]*futures.OpenInterestStatistic, error) {
+	result, err := binance.GetOpenInterestStatistics(strings.ToUpper(strings.TrimSpace(symbol)), period, limit)
+	if err != nil {
+		return nil, fmt.Errorf("get open interest statistics: %w", err)
+	}
+	return result, ctx.Err()
+}
+
+func (Service) TakerLongShortRatio(ctx context.Context, symbol, period string, limit int) ([]*futures.TakerLongShortRatio, error) {
+	result, err := binance.GetTakerLongShortRatio(strings.ToUpper(strings.TrimSpace(symbol)), period, uint32(limit))
+	if err != nil {
+		return nil, fmt.Errorf("get taker buy/sell ratio: %w", err)
+	}
+	return result, ctx.Err()
+}
+
+func (Service) Depth(ctx context.Context, symbol string, limit int) (*futures.DepthResponse, error) {
+	result, err := binance.GetDepth(strings.ToUpper(strings.TrimSpace(symbol)), limit)
+	if err != nil {
+		return nil, fmt.Errorf("get depth: %w", err)
+	}
+	return result, ctx.Err()
+}
+
 func (Service) MarketCondition(ctx context.Context) (Condition, error) {
 	if err := ctx.Err(); err != nil {
 		return Condition{}, err

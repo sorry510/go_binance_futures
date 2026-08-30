@@ -17,6 +17,18 @@ type ToolRequirementProvider interface {
 	RequiredTools(req Request) []string
 }
 
+type InputValidator interface {
+	ValidateInput(req Request) error
+}
+
+type RequestValidatorProvider interface {
+	ValidatorFor(req Request) validator.FinalValidator
+}
+
+type RunValidatorProvider interface {
+	ValidatorForRun(req Request, toolResults map[string]any) validator.FinalValidator
+}
+
 type Skill interface {
 	Name() string
 	SystemPrompt() string

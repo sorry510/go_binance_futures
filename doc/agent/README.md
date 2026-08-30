@@ -36,9 +36,10 @@
 
 - Phase 0：已完成基线记录与旧 AI 输出契约测试。
 - Phase 1：已完成第一版通用 Runtime。
-- Phase 2：已完成共享 Domain Service、9 个只读 Agent Tool，以及部分 MCP 进程内 Service 复用。
+- Phase 2：已完成共享 Domain Service、10 个只读 Agent Tool，以及部分 MCP 进程内 Service 复用。
 - Phase 3：已完成 Market Regime 与 Strategy Builder 迁移，两项 AI 能力都只使用统一 Runtime。
-- 下一步：Phase 4，实现 `symbol_analysis`。
+- Phase 4：已完成 `symbol_analysis`、聚合 Context Builder、`TradingPlanV1` 和统一 Agent Task API。
+- 下一步：Phase 5，实现事件驱动报警。
 
 ## 分阶段路线
 
@@ -48,7 +49,7 @@
 | Phase 1 ✅ | 建立 Agent Runtime | Runner、Decision、Skill、Tool Registry、Validator、Task 抽象 |
 | Phase 2 ✅ | 建立共享业务 Tool/Service 层 | Binance/DB/Scanner/Notify 能力以 Tool 复用，MCP 与 Agent 解耦 Controller |
 | Phase 3 ✅ | 迁移已有 AI 能力 | Market Regime 与 Strategy Builder 均接入统一 Runtime |
-| Phase 4 | 实现单币分析 | `symbol_analysis` Skill、市场数据 Context、结构化 TradingPlan |
+| Phase 4 ✅ | 实现单币分析 | `symbol_analysis` Skill、市场数据 Context、结构化 TradingPlan |
 | Phase 5 | 实现事件驱动报警 | Event Bus、Signal Engine、Alert Skill，WS 不直接调用 LLM |
 | Phase 6 | 统一调度与持久化 | Scheduler、Task Store、Conversation、运行历史、配置管理 |
 | Phase 7 | 风控、可观测与灰度 | Permission、预算、指标、审计、回归测试、逐步切流 |

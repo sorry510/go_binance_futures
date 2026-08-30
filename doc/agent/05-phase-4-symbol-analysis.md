@@ -87,6 +87,19 @@ GET  /agents/tasks/:id
 
 前端显示 Task Progress、Tool 使用状态、最终结构化计划。后端同时保留原始 JSON 和适合 UI 的字段。
 
+
+## 当前实施状态（已完成）
+
+- 新增 `service/symbolanalysis` Context Builder；先读取本地 snapshot，再并发聚合 Phase 3A `MarketCondition`、5m/15m/1h/4h Kline、Funding、OI、Taker、Depth 与最近 1 小时强平。
+- Kline 在 Go 中压缩为趋势、区间涨跌、波动率、区间高低和 taker buy share 等 Feature，不固定把原始 Kline 全量塞入 LLM。
+- 除 symbol snapshot/价格不可用会终止外，其余数据源失败均写入 `data_missing`；本地 snapshot 超过 3 分钟额外标记 `symbol_snapshot_stale`。
+- 新增只读 `get_symbol_analysis_context` Tool；Skill 默认必须成功调用该 Tool，仍允许按需补充 `get_klines`、`get_funding_rate`、`get_liquidations`、`get_symbol_snapshot`、`get_market_condition`。
+- 新增 `symbol_analysis` Skill 和严格 `TradingPlanV1` Validator，校验 symbol、RFC3339 `as_of`、MarketCondition、方向、confidence、价格关系、neutral 语义和数组字段。
+- Runtime 新增 run-level Validator 能力，将本轮成功 Tool Result 提供给 Skill；最终计划必须保留 Context Builder 的 `data_missing`、匹配实际 MarketCondition，且 `evidence.source` 必须来自本轮实际成功调用的 Tool。
+- 新增通用 `agent/manager` 与 Memory Task Store 入口；Manager 预分配 Task ID，Runtime 使用同一个 ID 写入 queued/running/tool/validating/succeeded/failed 状态。
+- 新增统一 API：`POST /agents/tasks`、`GET /agents/tasks/:taskId`。Controller 不维护 `symbol_analysis` 私有 Agent Loop。
+- Phase 4 不注册任何 write/trade Tool，不调用真实下单 API。
+
 ## 测试
 
 - BTC/ETH 等高流动性正常数据。

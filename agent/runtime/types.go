@@ -13,6 +13,7 @@ import (
 )
 
 type Request struct {
+	TaskID         string         `json:"task_id,omitempty"`
 	Skill          string         `json:"skill"`
 	Input          string         `json:"input"`
 	ConversationID string         `json:"conversation_id,omitempty"`
