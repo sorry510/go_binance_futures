@@ -32,7 +32,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 2 // 每次变动数据库版本号 +1
+var dbVersion int64 = 1 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -128,18 +128,22 @@ func setDriver(d string) {
 
 func syncDb() {
 	config, err := utils.GetSystemConfig()
+	hasSync := false
 	if err != nil {
-		logs.Info("database does not exist, create and initialize")
+		logs.Info("The config table does not exist or has changed, it is automatically updating...")
 		orm.RunSyncdb("default", false, false) // 根据 model 创建数据表
-		command.InitData(0)                    // 初始化配置信息
-		config, err = utils.GetSystemConfig()  // 重新获取配置信息
+		hasSync = true
+		command.InitData(0)                   // 初始化配置信息
+		config, err = utils.GetSystemConfig() // 重新获取配置信息
 		if err != nil {
 			logs.Error("get system config error", err)
 			return
 		}
 	}
 	// 根据旧版本更新数据库
-	orm.RunSyncdb("default", false, false) // 根据 model 更新新创建的数据表
+	if !hasSync {
+		orm.RunSyncdb("default", false, false) // 根据 model 更新新创建的数据表
+	}
 	oldVersion := config.Version
 	if oldVersion < dbVersion {
 		err = command.UpdateDatabase(oldVersion, dbVersion)
