@@ -52,6 +52,7 @@ type Config struct {
 	MarketCondition                            int     `orm:"column(market_condition)" json:"market_condition"`                                     // Market condition code; see types/market_condition.go.
 	MarketConditionIsAuto                      int     `orm:"column(market_condition_is_auto)" json:"market_condition_is_auto"`                     // 0:手动 1:自动
 	FutureTestAutoTradeCountLimit              int     `orm:"column(future_test_auto_trade_count_limit)" json:"future_test_auto_trade_count_limit"` // 测试交易与真实交易自动切换的连续盈利次数限制，为0则不启用
+	FutureTestFeeRate                          float64 `orm:"column(future_test_fee_rate);digits(12);decimals(8);default(0.0005)" json:"future_test_fee_rate"`                    // 测试策略单边手续费率，例如 0.0005 = 0.05%
 }
 
 // 切记需要注册model后才能使用
@@ -242,6 +243,8 @@ type TestStrategyResults struct {
 	CloseStrategy string `orm:"column(close_strategy);type(text)" json:"close_strategy"` // 平仓策略
 	ClosePrice    string `orm:"column(close_price)" json:"close_price"`                  // 触发平仓策略时通知价格
 	CloseProfit   string `orm:"column(close_profit)" json:"close_profit"`                // 触发平仓策略时收益 usdt
+	OpenFeeRate   float64 `orm:"column(open_fee_rate);digits(12);decimals(8);default(0)" json:"open_fee_rate"`   // 开仓手续费率快照
+	CloseFeeRate  float64 `orm:"column(close_fee_rate);digits(12);decimals(8);default(0)" json:"close_fee_rate"` // 平仓手续费率快照
 	CreateTime    int64  `orm:"column(createTime)" json:"createTime"`
 	UpdateTime    int64  `orm:"column(updateTime)" json:"updateTime"`
 }
