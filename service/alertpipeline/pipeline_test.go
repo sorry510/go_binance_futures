@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -87,6 +88,25 @@ func testSignal(id string) signalservice.Signal {
 	value.Labels["direction"] = "up"
 	value.Evidence = []signalservice.Evidence{{Source: "price_tick", Finding: "BTCUSDT up 25%"}}
 	return value
+}
+
+func TestFallbackNotificationRendersLocalizedValuesWithoutFormatErrors(t *testing.T) {
+	fastMove := fallbackNotification(testSignal("localized-fast-move"), "task-1", "AI unavailable")
+	liquidation := signalservice.NewSignal("evt-liquidation", "BTCUSDT", signalservice.TypeLiquidationSpike, signalservice.SeverityCritical, "1m")
+	liquidation.Metrics["aggregate_notional"] = 8_000_000
+	liquidation.Metrics["order_count"] = 4
+	liquidation.Metrics["threshold_notional"] = 5_000_000
+	liquidation.Labels["liquidation_side"] = "long"
+	liquidationAlert := fallbackNotification(liquidation, "task-2", "")
+
+	for _, params := range []notify.AgentAlertParams{fastMove, liquidationAlert} {
+		if strings.Contains(params.Summary, "%!") || strings.Contains(params.MarketContext, "%!") {
+			t.Fatalf("localized fallback contains a format error: %+v", params)
+		}
+		if strings.TrimSpace(params.Summary) == "" || strings.TrimSpace(params.MarketContext) == "" || len(params.ConfirmedBy) == 0 {
+			t.Fatalf("localized fallback is incomplete: %+v", params)
+		}
+	}
 }
 
 func waitFor(t *testing.T, condition func() bool) {

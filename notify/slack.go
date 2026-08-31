@@ -443,12 +443,12 @@ func (pusher Slack) FuturesPriceChangeNotice(params FuturesNoticeParams) {
     params.Price,
     nowTime(),
   )
-  DingDingApi(text, pusher)
+  SlackApi(text, pusher)
 }
 
 func (pusher Slack) AgentAlert(params AgentAlertParams) (int64, error) {
 	pusher.ModuleName = agentAlertModule(params)
-	notification, err := slackAPI(agentAlertContent(params), pusher, agentAlertPublishOptions(params))
+	notification, err := slackAPI(agentAlertSlackContent(params), pusher, agentAlertPublishOptions(params))
 	if err != nil {
 		return 0, err
 	}

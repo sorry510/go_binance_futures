@@ -10,6 +10,7 @@ import (
 
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/validator"
+	"go_binance_futures/lang"
 	"go_binance_futures/llm"
 	signalservice "go_binance_futures/service/signal"
 	symbolanalysisservice "go_binance_futures/service/symbolanalysis"
@@ -46,9 +47,15 @@ type AlertV1 struct {
 
 type Definition struct{}
 
-func New() *Definition                   { return &Definition{} }
-func (*Definition) Name() string         { return Name }
-func (*Definition) SystemPrompt() string { return systemPrompt }
+func New() *Definition           { return &Definition{} }
+func (*Definition) Name() string { return Name }
+func (*Definition) SystemPrompt() string {
+	language := "English"
+	if strings.HasPrefix(strings.ToLower(lang.GetLanguage()), "zh") {
+		language = "Simplified Chinese"
+	}
+	return systemPrompt + "\nAll human-readable values in summary, market_context, confirmed_by, risks, data_missing and evidence.finding must use " + language + ". Preserve symbols, IDs, enum values, tool names and market units exactly."
+}
 func (*Definition) Tools() []string {
 	return []string{"get_symbol_analysis_context", "get_klines", "get_funding_rate", "get_liquidations", "get_symbol_snapshot", "get_market_condition"}
 }
