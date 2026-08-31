@@ -6,6 +6,7 @@ import (
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
@@ -124,7 +125,7 @@ func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 						logs.Error("Error NowPrice Symbol: ", coin.Symbol)
 						continue
 					}
-					testOrder := createTestResult(coin, floatNowPrice, strings.ToUpper(strategy.Type), strategy.Code)
+					testOrder := createTestResult(coin, floatNowPrice, strings.ToUpper(strategy.Type), strategy.Code, systemConfig.FutureTestFeeRate)
 					quantity, _ := strconv.ParseFloat(testOrder.PositionAmt, 64)
 					pusher.SetModuleName("futures_test").FuturesCustomStrategyTest(notify.FuturesTestParams{
 						Title:        lang.Lang("futures.custom_strategy_test"),
@@ -219,15 +220,26 @@ func CheckTestResults(systemConfig *models.Config) {
 			continue
 		}
 
+		// 使用策略环境中的最新价格重新计算盈亏。ROI 保留旧的毛收益语义，新增净收益变量向前兼容。
+		unRealizedProfit = (floatNowPrice - enterPrice_float64) * positionAmtFloat
+		nowProfit = (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
+		tradeProfit := strategyservice.CalculateTestTradeProfit(
+			enterPrice_float64, floatNowPrice, positionAmtFloat, result.Leverage,
+			result.OpenFeeRate, result.CloseFeeRate,
+		)
+
 		// 模拟仓位信息
 		position := types.FuturesPosition{
 			MarkPrice:        strconv.FormatFloat(floatNowPrice, 'f', -1, 64),   // 当前标记价格
-			UnrealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64), // 未实现盈亏
+			UnrealizedProfit: strconv.FormatFloat(unRealizedProfit, 'f', 3, 64), // 未实现盈亏（毛收益，兼容旧策略）
 			CreateTime:       result.CreateTime,
 			SourceType:       "local",
 		}
 
-		env["ROI"] = nowProfit // 当前收益率
+		env["ROI"] = nowProfit // 毛收益率，保留旧策略语义
+		env["NetROI"] = tradeProfit.NetProfitPercent
+		env["Fee"] = tradeProfit.TotalFee
+		env["NetProfit"] = tradeProfit.NetProfit
 		env["Position"] = types.FuturesPositionCode{
 			Symbol:           result.Symbol,
 			EntryPrice:       enterPrice_float64,
@@ -267,7 +279,7 @@ func CheckTestResults(systemConfig *models.Config) {
 				findStrategy = true // 发现有正常能执行的平仓策略
 				if res, ok := output.(bool); ok && res {
 					result.ClosePrice = position.MarkPrice
-					result.CloseProfit = position.UnrealizedProfit
+					result.CloseProfit = strconv.FormatFloat(tradeProfit.NetProfit, 'f', 3, 64)
 					result.CloseStrategy = strategy.Code
 					result.UpdateTime = time.Now().Unix() * 1000
 					orm.NewOrm().Update(result)
@@ -296,7 +308,7 @@ func CheckTestResults(systemConfig *models.Config) {
 		if !findStrategy && (nowProfit > 10 || nowProfit < -10) {
 			// 没有定义平仓策略，使用超过 10 % 就平仓
 			result.ClosePrice = position.MarkPrice
-			result.CloseProfit = position.UnrealizedProfit
+			result.CloseProfit = strconv.FormatFloat(tradeProfit.NetProfit, 'f', 3, 64)
 			result.UpdateTime = time.Now().Unix() * 1000
 			orm.NewOrm().Update(result)
 			// 平仓通知
@@ -333,7 +345,7 @@ func getSymbols(offsetId int, limit int) (coins []*models.Symbols, err error) {
 }
 
 // 生成测试的开仓数据
-func createTestResult(coin *models.Symbols, nowPrice float64, positionSide string, openStrategyCode string) (result *models.TestStrategyResults) {
+func createTestResult(coin *models.Symbols, nowPrice float64, positionSide string, openStrategyCode string, feeRate float64) (result *models.TestStrategyResults) {
 	usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64)           // 交易金额
 	buyPrice := utils.GetTradePrecision(nowPrice, coin.TickSize)   // 合理精度的价格
 	quantity := (usdt_float64 / buyPrice) * float64(coin.Leverage) // 购买数量
@@ -358,6 +370,8 @@ func createTestResult(coin *models.Symbols, nowPrice float64, positionSide strin
 	result.OpenStrategy = openStrategyCode
 	result.ClosePrice = "0"
 	result.CloseProfit = "0"
+	result.OpenFeeRate = feeRate
+	result.CloseFeeRate = feeRate
 	result.CreateTime = time.Now().Unix() * 1000
 	result.UpdateTime = time.Now().Unix() * 1000
 

@@ -16,8 +16,23 @@ type Service struct{}
 
 type TestResult struct {
 	models.TestStrategyResults
-	NowPrice      string `orm:"column(now_price)" json:"now_price"`
-	ProfitPercent string `json:"profit_percent"`
+	NowPrice           string `orm:"column(now_price)" json:"now_price"`
+	GrossProfit        string `json:"gross_profit"`
+	OpenFee            string `json:"open_fee"`
+	CloseFee           string `json:"close_fee"`
+	TotalFee           string `json:"total_fee"`
+	GrossProfitPercent string `json:"gross_profit_percent"`
+	ProfitPercent      string `json:"profit_percent"`
+}
+
+type TestTradeProfit struct {
+	GrossProfit        float64
+	OpenFee            float64
+	CloseFee           float64
+	TotalFee           float64
+	NetProfit          float64
+	GrossProfitPercent float64
+	NetProfitPercent   float64
 }
 
 type TestResultsOptions struct {
@@ -69,10 +84,10 @@ func (Service) ListTestResults(ctx context.Context, opts TestResultsOptions) (Te
 	if err != nil {
 		return TestResultsResult{}, err
 	}
-	listSQL := `SELECT t.id, t.symbol, t.price, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.createTime, t.updateTime, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where +
+	listSQL := `SELECT t.id, t.symbol, t.price, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.open_fee_rate, t.close_fee_rate, t.createTime, t.updateTime, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where +
 		" ORDER BY t.createTime DESC LIMIT " + strconv.Itoa(limit) + " OFFSET " + strconv.Itoa(offset)
 	countSQL := `SELECT COUNT(*) FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where
-	profitSQL := `SELECT t.price, t.leverage, t.position_amt, t.close_price, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where
+	profitSQL := `SELECT t.price, t.leverage, t.position_amt, t.close_price, t.open_fee_rate, t.close_fee_rate, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where
 	o := orm.NewOrm()
 	var list []TestResult
 	var profitResults []TestResult
@@ -140,33 +155,76 @@ func QueryTemplatePage(o orm.Ormer, name string, limit, offset int) ([]models.St
 	return templates, total, err
 }
 
+func CalculateTestTradeProfit(entryPrice, exitPrice, positionAmt float64, leverage int64, openFeeRate, closeFeeRate float64) TestTradeProfit {
+	quantity := math.Abs(positionAmt)
+	if entryPrice <= 0 || exitPrice <= 0 || quantity == 0 {
+		return TestTradeProfit{}
+	}
+	if openFeeRate < 0 {
+		openFeeRate = 0
+	}
+	if closeFeeRate < 0 {
+		closeFeeRate = 0
+	}
+
+	grossProfit := (exitPrice - entryPrice) * positionAmt
+	openFee := entryPrice * quantity * openFeeRate
+	closeFee := exitPrice * quantity * closeFeeRate
+	totalFee := openFee + closeFee
+	netProfit := grossProfit - totalFee
+	positionValue := quantity * exitPrice
+	grossProfitPercent := grossProfit / positionValue * float64(leverage) * 100
+	netProfitPercent := netProfit / positionValue * float64(leverage) * 100
+
+	return TestTradeProfit{
+		GrossProfit: grossProfit, OpenFee: openFee, CloseFee: closeFee,
+		TotalFee: totalFee, NetProfit: netProfit,
+		GrossProfitPercent: grossProfitPercent, NetProfitPercent: netProfitPercent,
+	}
+}
+
 func CalculateTestResultMetrics(result *TestResult) float64 {
 	entryPrice, errEntry := strconv.ParseFloat(result.Price, 64)
 	positionAmt, errAmount := strconv.ParseFloat(result.PositionAmt, 64)
 	closePrice, _ := strconv.ParseFloat(result.ClosePrice, 64)
 	if errEntry != nil || errAmount != nil {
-		result.CloseProfit, result.ProfitPercent = "0.000", "0.000"
+		setZeroTestResultMetrics(result)
 		return 0
 	}
 	effectivePrice := closePrice
 	if effectivePrice <= 0 {
 		currentPrice, err := strconv.ParseFloat(result.NowPrice, 64)
 		if err != nil {
-			result.CloseProfit, result.ProfitPercent = "0.000", "0.000"
+			setZeroTestResultMetrics(result)
 			return 0
 		}
 		effectivePrice = currentPrice
 	}
+	metrics := CalculateTestTradeProfit(entryPrice, effectivePrice, positionAmt, result.Leverage, result.OpenFeeRate, result.CloseFeeRate)
 	if effectivePrice <= 0 || positionAmt == 0 {
-		result.CloseProfit, result.ProfitPercent = "0.000", "0.000"
+		setZeroTestResultMetrics(result)
 		return 0
 	}
-	profit := (effectivePrice - entryPrice) * positionAmt
-	profitPercent := profit / (math.Abs(positionAmt) * effectivePrice) * float64(result.Leverage) * 100
-	result.CloseProfit = strconv.FormatFloat(profit, 'f', 3, 64)
-	result.ProfitPercent = strconv.FormatFloat(profitPercent, 'f', 3, 64)
+
+	result.GrossProfit = strconv.FormatFloat(metrics.GrossProfit, 'f', 3, 64)
+	result.OpenFee = strconv.FormatFloat(metrics.OpenFee, 'f', 3, 64)
+	result.CloseFee = strconv.FormatFloat(metrics.CloseFee, 'f', 3, 64)
+	result.TotalFee = strconv.FormatFloat(metrics.TotalFee, 'f', 3, 64)
+	result.CloseProfit = strconv.FormatFloat(metrics.NetProfit, 'f', 3, 64)
+	result.GrossProfitPercent = strconv.FormatFloat(metrics.GrossProfitPercent, 'f', 3, 64)
+	result.ProfitPercent = strconv.FormatFloat(metrics.NetProfitPercent, 'f', 3, 64)
 	formatted, _ := strconv.ParseFloat(result.CloseProfit, 64)
 	return formatted
+}
+
+func setZeroTestResultMetrics(result *TestResult) {
+	result.GrossProfit = "0.000"
+	result.OpenFee = "0.000"
+	result.CloseFee = "0.000"
+	result.TotalFee = "0.000"
+	result.CloseProfit = "0.000"
+	result.GrossProfitPercent = "0.000"
+	result.ProfitPercent = "0.000"
 }
 
 func CalculateCurrentProfit(results []TestResult) string {
