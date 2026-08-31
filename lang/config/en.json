@@ -97,5 +97,57 @@
     "notice_auto_order": "notice auto order",
     "new_coin_rush_buy": "new coin rush buy",
     "new_coin_rush_sell": "new coin rush sell"
+  },
+  "notification": {
+    "agent_alert_title": "AI Abnormal Market Analysis",
+    "rule_alert_title": "Abnormal Market Rule Alert",
+    "none": "none",
+    "separator": "; ",
+    "fallback": "fallback mode",
+    "fallback_reason": "AI fallback reason: %s",
+    "rule_unverified": "The rule alert has not completed full AI cross-validation",
+    "label": {
+      "symbol": "Symbol",
+      "signal": "Signal Type",
+      "severity": "Severity",
+      "source": "Source",
+      "summary": "Summary",
+      "market_context": "Market Context",
+      "confirmed_by": "Confirmed By",
+      "risks": "Risks",
+      "signal_id": "Signal ID",
+      "task_id": "Task ID"
+    },
+    "source": {
+      "rule": "Rule Engine"
+    },
+    "signal_type": {
+      "fast_move": "Fast Market Move",
+      "liquidation_spike": "Large Liquidation Spike"
+    },
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "direction": {
+      "up": "rose rapidly",
+      "down": "fell rapidly"
+    },
+    "liquidation_side": {
+      "long": "long-side",
+      "short": "short-side"
+    },
+    "fallback_summary": {
+      "fast_move": "%s %s by %.2f%% within %s",
+      "fast_move_context": "Current price %.8g; rule threshold %.2f%%",
+      "fast_move_evidence": "%s %s by %.4f%% within %s",
+      "liquidation": "%s triggered an abnormal %s liquidation aggregate",
+      "liquidation_context": "Aggregate notional %.2f USDT across %.0f orders; threshold %.2f USDT",
+      "liquidation_evidence": "%s had %s liquidations totaling %.2f USDT across %.0f orders",
+      "generic": "%s triggered the %s signal",
+      "generic_context": "The deterministic Signal Engine matched its rule"
+    }
   }
 }

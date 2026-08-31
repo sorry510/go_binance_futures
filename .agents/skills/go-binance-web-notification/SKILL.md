@@ -1,7 +1,7 @@
 ---
 name: go-binance-web-notification
-description: Implement and verify persisted browser notifications with authenticated WebSocket delivery across go_binance_futures and go_binance_futrues_new_ui.
-version: 1.0.1
+description: Implement and verify localized browser, DingTalk, and Slack notifications across go_binance_futures and go_binance_futrues_new_ui, including persistence, WebSocket delivery, external-channel rendering, and visual severity hierarchy.
+version: 1.0.3
 ---
 # Go Binance Web Notification
 
@@ -49,3 +49,11 @@ Use this skill when adding or changing browser notification persistence, real-ti
 - A normal history page should support title/content keyword, module, read status, start/end time, pagination, read-one, and read-all, with Chinese and English labels.
 - `notify_config.enable` is the module's external-channel switch. Query the latest active-channel row without filtering by `enable`; no row means enabled by default, while an existing row with `enable = 0` must return before DingTalk or Slack network I/O. Web persistence must happen before this return.
 - On create, distinguish an omitted `enable` field from an explicit zero: omitted defaults to enabled, explicit zero remains disabled.
+
+## External-channel localization and visual hierarchy
+
+1. Audit every producer that reaches `DingDingApi`, `SlackApi`, `dingDingAPI`, or `slackAPI`; browser persistence and the selected external channel must receive the same localized meaning. Verify each `Pusher` method calls its own channel API.
+2. Put user-facing titles, labels, enum display values, fallback summaries, and empty-state text in `lang/config/zh.json` and `lang/config/en.json`. Keep both locale key trees identical. Preserve symbols, IDs, market units, `token`, `tool`, `skill`, and other intentionally technical identifiers. Unknown dynamic values must fall back to the original value.
+3. Require AI-generated human-readable fields to use the configured notification language, while preserving JSON field names, enum values, tool names, IDs, symbols, and units. Deterministic fallback summaries and evidence must use the same locale rather than hardcoded Chinese or English.
+4. Separate each row's label from its content. DingTalk may render normal content in green (`#008000`) and important severity, risk, error, or fallback content in red (`#FF0000`). Slack does not support inline text colors; use green/red status indicators or supported Block Kit/attachment color affordances, and never send DingTalk `<font>` markup to Slack.
+5. Add pure renderer tests for both channels and both locale shapes. Assert professional terms remain unchanged, important values use the red treatment, ordinary values use the green treatment, Slack contains no unsupported HTML, formatted locale templates contain no `%!` errors, and `conf/app.conf` remains untouched.
