@@ -446,7 +446,7 @@ func (pusher DingDing) FuturesPriceChangeNotice(params FuturesNoticeParams) {
 
 func (pusher DingDing) AgentAlert(params AgentAlertParams) (int64, error) {
 	pusher.ModuleName = agentAlertModule(params)
-	notification, err := dingDingAPI(agentAlertContent(params), pusher, agentAlertPublishOptions(params))
+	notification, err := dingDingAPI(agentAlertDingTalkContent(params), pusher, agentAlertPublishOptions(params))
 	if err != nil {
 		return 0, err
 	}

@@ -13,6 +13,7 @@ import (
 	agentruntime "go_binance_futures/agent/runtime"
 	alertanalysis "go_binance_futures/agent/skills/alertanalysis"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/lang"
 	"go_binance_futures/notify"
 	signalservice "go_binance_futures/service/signal"
 )
@@ -219,7 +220,7 @@ func (pipeline *Pipeline) applyAIResult(value signalservice.Signal, result alert
 		return
 	}
 	params := notify.AgentAlertParams{
-		Title: "AI 异常行情分析", EventID: value.EventID, SignalID: value.SignalID,
+		Title: "notification.agent_alert_title", EventID: value.EventID, SignalID: value.SignalID,
 		TaskID: trace.TaskID, Symbol: value.Symbol, SignalType: string(value.Type), Severity: string(result.Severity),
 		Summary: result.Summary, MarketContext: result.MarketContext, ConfirmedBy: result.ConfirmedBy,
 		Risks: result.Risks, Source: "AI", Fallback: false,
@@ -257,13 +258,13 @@ func (pipeline *Pipeline) sendNotification(params notify.AgentAlertParams, trace
 func fallbackNotification(value signalservice.Signal, taskID, reason string) notify.AgentAlertParams {
 	summary, contextText := fallbackSummary(value)
 	if strings.TrimSpace(reason) != "" {
-		contextText += "；AI fallback: " + strings.TrimSpace(reason)
+		contextText += lang.Lang("notification.separator") + fmt.Sprintf(lang.Lang("notification.fallback_reason"), strings.TrimSpace(reason))
 	}
 	return notify.AgentAlertParams{
-		Title: "异常行情规则报警", EventID: value.EventID, SignalID: value.SignalID, TaskID: taskID,
+		Title: "notification.rule_alert_title", EventID: value.EventID, SignalID: value.SignalID, TaskID: taskID,
 		Symbol: value.Symbol, SignalType: string(value.Type), Severity: string(value.Severity),
 		Summary: summary, MarketContext: contextText, ConfirmedBy: signalEvidence(value),
-		Risks: []string{"规则报警未经过完整 AI 交叉验证"}, Source: "RULE", Fallback: true,
+		Risks: []string{lang.Lang("notification.rule_unverified")}, Source: "RULE", Fallback: true,
 	}
 }
 func fallbackSummary(value signalservice.Signal) (string, string) {
@@ -272,19 +273,42 @@ func fallbackSummary(value signalservice.Signal) (string, string) {
 		change := value.Metrics["change_percent"]
 		price := value.Metrics["price"]
 		direction := value.Labels["direction"]
-		return fmt.Sprintf("%s 在 %s 内%s %.2f%%", value.Symbol, value.Window, directionText(direction), mathAbs(change)),
-			fmt.Sprintf("当前价格 %.8g，规则阈值 %.2f%%", price, value.Metrics["threshold_percent"])
+		return fmt.Sprintf(lang.Lang("notification.fallback_summary.fast_move"), value.Symbol, directionText(direction), mathAbs(change), value.Window),
+			fmt.Sprintf(lang.Lang("notification.fallback_summary.fast_move_context"), price, value.Metrics["threshold_percent"])
 	case signalservice.TypeLiquidationSpike:
 		side := value.Labels["liquidation_side"]
-		return fmt.Sprintf("%s 出现%s强平聚合异常", value.Symbol, sideText(side)),
-			fmt.Sprintf("聚合名义金额 %.2f USDT，订单数 %.0f，阈值 %.2f USDT",
+		return fmt.Sprintf(lang.Lang("notification.fallback_summary.liquidation"), value.Symbol, sideText(side)),
+			fmt.Sprintf(lang.Lang("notification.fallback_summary.liquidation_context"),
 				value.Metrics["aggregate_notional"], value.Metrics["order_count"], value.Metrics["threshold_notional"])
 	default:
-		return fmt.Sprintf("%s 触发 %s 信号", value.Symbol, value.Type), "确定性 Signal Engine 已命中规则"
+		signalType := lang.Lang("notification.signal_type." + string(value.Type))
+		if signalType == "notification.signal_type."+string(value.Type) {
+			signalType = string(value.Type)
+		}
+		return fmt.Sprintf(lang.Lang("notification.fallback_summary.generic"), value.Symbol, signalType),
+			lang.Lang("notification.fallback_summary.generic_context")
 	}
 }
 
 func signalEvidence(value signalservice.Signal) []string {
+	switch value.Type {
+	case signalservice.TypeFastMove:
+		return []string{fmt.Sprintf(
+			lang.Lang("notification.fallback_summary.fast_move_evidence"),
+			value.Symbol,
+			directionText(value.Labels["direction"]),
+			mathAbs(value.Metrics["change_percent"]),
+			value.Window,
+		)}
+	case signalservice.TypeLiquidationSpike:
+		return []string{fmt.Sprintf(
+			lang.Lang("notification.fallback_summary.liquidation_evidence"),
+			value.Symbol,
+			sideText(value.Labels["liquidation_side"]),
+			value.Metrics["aggregate_notional"],
+			value.Metrics["order_count"],
+		)}
+	}
 	result := make([]string, 0, len(value.Evidence))
 	for _, item := range value.Evidence {
 		finding := strings.TrimSpace(item.Finding)
@@ -297,16 +321,16 @@ func signalEvidence(value signalservice.Signal) []string {
 
 func directionText(value string) string {
 	if value == "down" {
-		return "快速下跌"
+		return lang.Lang("notification.direction.down")
 	}
-	return "快速上涨"
+	return lang.Lang("notification.direction.up")
 }
 
 func sideText(value string) string {
 	if value == "short" {
-		return "空头"
+		return lang.Lang("notification.liquidation_side.short")
 	}
-	return "多头"
+	return lang.Lang("notification.liquidation_side.long")
 }
 
 func mathAbs(value float64) float64 {

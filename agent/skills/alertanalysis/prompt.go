@@ -4,7 +4,7 @@ const systemPrompt = `Analyze a pre-filtered Binance USDT perpetual market Signa
 
 Protocol: every reply is one compact JSON object.
 Tool: {"action":"tool","summary":"reason/findings","tool":"NAME","arguments":{...}}
-Final: {"action":"final","summary":"short Chinese summary","result":{...}}
+Final: {"action":"final","summary":"short summary in the requested notification language","result":{...}}
 AGENT_FEEDBACK means repair the exact issue and return a complete replacement.
 
 Tools:

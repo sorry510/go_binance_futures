@@ -97,5 +97,57 @@
     "notice_auto_order": "通知后自动下单",
     "new_coin_rush_buy": "新币抢购",
     "new_coin_rush_sell": "新币挖矿抢卖"
+  },
+  "notification": {
+    "agent_alert_title": "AI 异常行情分析",
+    "rule_alert_title": "异常行情规则告警",
+    "none": "无",
+    "separator": "；",
+    "fallback": "回退模式",
+    "fallback_reason": "AI 回退原因：%s",
+    "rule_unverified": "规则告警未经过完整 AI 交叉验证",
+    "label": {
+      "symbol": "交易对",
+      "signal": "信号类型",
+      "severity": "严重程度",
+      "source": "来源",
+      "summary": "摘要",
+      "market_context": "市场背景",
+      "confirmed_by": "确认依据",
+      "risks": "风险",
+      "signal_id": "信号 ID",
+      "task_id": "任务 ID"
+    },
+    "source": {
+      "rule": "规则引擎"
+    },
+    "signal_type": {
+      "fast_move": "快速行情波动",
+      "liquidation_spike": "大额强平"
+    },
+    "severity": {
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "critical": "严重"
+    },
+    "direction": {
+      "up": "快速上涨",
+      "down": "快速下跌"
+    },
+    "liquidation_side": {
+      "long": "多头",
+      "short": "空头"
+    },
+    "fallback_summary": {
+      "fast_move": "%s %s %.2f%%（%s 内）",
+      "fast_move_context": "当前价格 %.8g，规则阈值 %.2f%%",
+      "fast_move_evidence": "%s %s %.4f%%（%s 内）",
+      "liquidation": "%s 出现%s强平聚合异常",
+      "liquidation_context": "聚合名义金额 %.2f USDT，订单数 %.0f，阈值 %.2f USDT",
+      "liquidation_evidence": "%s 出现%s强平，累计 %.2f USDT，共 %.0f 笔订单",
+      "generic": "%s 触发 %s 信号",
+      "generic_context": "确定性 Signal Engine 已命中规则"
+    }
   }
 }
