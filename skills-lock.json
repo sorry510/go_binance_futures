@@ -26,6 +26,11 @@
       "sourceType": "local",
       "computedHash": "9ea59fb098fd311e"
     },
+    "go-binance-ui-i18n": {
+      "source": "/Users/zhz/.skillmax/drafts/go-binance-ui-i18n",
+      "sourceType": "local",
+      "computedHash": "700299ab66738a69"
+    },
     "go-binance-web-notification": {
       "source": ".agents/skills/go-binance-web-notification",
       "sourceType": "local",
