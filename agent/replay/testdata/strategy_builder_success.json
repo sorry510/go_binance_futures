@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "name": "strategy-builder-success",
+  "skill": "strategy_builder",
+  "model_config_id": 102,
+  "input": "{\"prompt\": \"生成一个简单的基础测试策略\"}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\": \"final\", \"summary\": \"策略生成完成\", \"result\": {\"name\": \"baseline-strategy\", \"technology\": {}, \"strategy\": [{\"name\": \"long_signal\", \"type\": \"long\", \"code\": \"NowPrice > 0\", \"fullScreen\": false, \"enable\": true}]}}"
+    }
+  ]
+}

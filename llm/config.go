@@ -10,6 +10,7 @@ const defaultTimeout = 60 * time.Second
 const defaultAnthropicMaxTokens = 4096
 
 type Config struct {
+	ID          int64
 	Provider    Provider
 	Model       string
 	APIURL      string

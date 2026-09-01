@@ -56,6 +56,20 @@ func TestStoreMasksKeyAndSwitchesActiveConfig(t *testing.T) {
 	if second.Enabled != 1 {
 		t.Fatalf("second config not enabled: %+v", second)
 	}
+	active, err := store.ActiveConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if active.ID != second.ID {
+		t.Fatalf("active config identity lost: got %d want %d", active.ID, second.ID)
+	}
+	client, err := NewClient(active)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ConfigID(client) != second.ID {
+		t.Fatalf("client config identity = %d, want %d", ConfigID(client), second.ID)
+	}
 	items, err := store.List(ctx)
 	if err != nil {
 		t.Fatal(err)
