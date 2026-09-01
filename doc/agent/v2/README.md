@@ -47,36 +47,60 @@ Task / Conversation / Memory / Eval / Trace / Security / Versioning
 
 ## 3. Phase 索引
 
+V2 从现在开始严格按照 Phase 编号顺序开发，不再使用“编号顺序”和“实际开发顺序”两套顺序。前一 Phase 未通过 Gate 时，不进入下一 Phase。
+
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
 | [V2-0](./00-phase-v2-0-baseline.md) | P0 ✅ | 冻结 V1 契约、Fixture、版本和 Replay 基线 |
 | [V2-1](./01-phase-v2-1-runtime.md) | P0 | Runtime V2、ExecutionStep、Checkpoint、恢复 |
 | [V2-2](./02-phase-v2-2-context-evidence.md) | P0 | Context Engine、Evidence、Token/Freshness 管理 |
 | [V2-3](./03-phase-v2-3-tool-runtime.md) | P0 | Tool Runtime、Schema、Envelope、并行、缓存 |
-| [V2-4](./04-phase-v2-4-mcp-integration.md) | P0 | 第三方 HTTP MCP Client、远端能力发现与治理 |
-| [V2-5](./05-phase-v2-5-agent-skills.md) | P0 | 标准 Agent Skills 导入、版本、加载与安全 |
-| [V2-6](./06-phase-v2-6-model-gateway.md) | P1 | Model Capability、Router、Health、Fallback |
-| [V2-7](./07-phase-v2-7-memory.md) | P1 | 长期 Memory、TTL、Scope 与管理 |
-| [V2-8](./08-phase-v2-8-eval-replay.md) | P0 | Eval、Replay、Prompt Version、CI Gate |
-| [V2-9](./09-phase-v2-9-workflows.md) | P1 | market_scan、strategy_review 等业务 Workflow |
-| [V2-10](./10-phase-v2-10-risk-execution.md) | P2 | Proposal、Risk Engine、Approval、受控执行 |
-| [V2-11](./11-phase-v2-11-observability.md) | P1 | Trace、长期指标、运营与管理页面 |
+| [V2-4](./04-phase-v2-4-eval-replay.md) | P0 | Eval、Replay、Prompt/Skill Version、回归 Gate |
+| [V2-5](./05-phase-v2-5-mcp-integration.md) | P0 | 第三方 HTTP MCP Client、远端能力发现与治理 |
+| [V2-6](./06-phase-v2-6-agent-skills.md) | P0 | 标准 Agent Skills 导入、版本、加载与安全 |
+| [V2-7](./07-phase-v2-7-model-gateway.md) | P1 | Model Capability、Router、Health、Fallback |
+| [V2-8](./08-phase-v2-8-memory.md) | P1 | 长期 Memory、TTL、Scope 与管理 |
+| [V2-9](./09-phase-v2-9-observability.md) | P1 | Trace、长期指标、运营与管理页面 |
+| [V2-10](./10-phase-v2-10-workflows.md) | P1 | market_scan、strategy_review 等业务 Workflow |
+| [V2-11](./11-phase-v2-11-risk-execution.md) | P2 | Proposal、Risk Engine、Approval、受控执行 |
 
-## 4. 推荐实际开发顺序
+## 4. 严格开发顺序
 
 ```text
-V2-0 -> V2-1 -> V2-2 -> V2-3 -> V2-8
-                              |
-                              +-> V2-4 -> V2-5
-                                      |
-                                      +-> V2-6 -> V2-7 -> V2-11
-                                                      |
-                                                      +-> V2-9 -> V2-10
+V2-0 Baseline
+  ↓
+V2-1 Runtime
+  ↓
+V2-2 Context / Evidence
+  ↓
+V2-3 Tool Runtime
+  ↓
+V2-4 Eval / Replay
+  ↓
+V2-5 HTTP MCP Client
+  ↓
+V2-6 Agent Skills
+  ↓
+V2-7 Model Gateway
+  ↓
+V2-8 Memory
+  ↓
+V2-9 Observability
+  ↓
+V2-10 Workflows
+  ↓
+V2-11 Risk / Execution
 ```
 
-Eval 编号虽然是 V2-8，但必须在 Model Router、Memory 和大量新 Skill 上线前形成第一版，否则后续只能凭主观感觉判断质量变化。
+顺序约束：
 
-MCP 和 Agent Skills 放在基础 Tool/Context 层之后：外部能力必须先进入统一 Tool Runtime/Context Engine，再允许 Agent 使用，不能绕开现有 Permission、Budget、Trace。
+- 每次只实施当前 Phase，不提前开发后续 Phase 的业务能力。
+- 当前 Phase 可以预留接口，但不能以“后续需要”为理由提前落完整实现。
+- 每个 Phase 完成后先执行该 Phase 的自动测试、Replay/Eval Gate 和必要的手动验收，再进入下一 Phase。
+- V2-4 在外部 MCP、可导入 Skill、Model Router 和 Memory 之前落地，确保后续能力都能被量化回归。
+- V2-5 MCP 必须建立在 V2-3 Tool Runtime 之上；V2-6 Imported Skill 必须使用已经完成的 Context/Tool/Permission 边界。
+- V2-10 只在基础设施、治理和可观测性完成后增加新的复杂业务 Workflow。
+- V2-11 最后实施真实执行边界，Agent 在此之前始终只产生分析结果或 Proposal。
 
 ## 5. 统一原则
 
