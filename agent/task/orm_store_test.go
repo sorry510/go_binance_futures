@@ -41,6 +41,8 @@ func TestORMStorePersistsTaskEventsAndRedactsSecrets(t *testing.T) {
 	now := time.Now().UTC()
 	item := &Task{
 		ID: "task-persist", Skill: "symbol_analysis", ConversationID: "conv-1", Status: StatusRunning,
+		RuntimeVersion: "1.0.0", SkillVersion: "1.0.0", PromptVersion: "1.0.0", PromptHash: "hash",
+		ModelConfigID: 77, InputContractVersion: "input_v1", OutputContractVersion: "output_v1", SkillSource: "native", SkillSourceVersion: "v1",
 		Stage: "waiting_tool", Progress: 45, Input: `{"symbol":"BTCUSDT","api_key":"secret-value"}`,
 		Error: "authorization=top-secret", CreatedAt: now, UpdatedAt: now,
 		Events: []Event{{TaskID: "task-persist", Stage: "queued", Message: "Bearer super-secret", Time: now}},
@@ -54,6 +56,9 @@ func TestORMStorePersistsTaskEventsAndRedactsSecrets(t *testing.T) {
 	}
 	if got.ConversationID != "conv-1" || len(got.Events) != 1 {
 		t.Fatalf("unexpected persisted task: %+v", got)
+	}
+	if got.RuntimeVersion != "1.0.0" || got.PromptHash != "hash" || got.ModelConfigID != 77 || got.OutputContractVersion != "output_v1" || got.SkillSource != "native" {
+		t.Fatalf("version metadata was not persisted: %+v", got.VersionMetadata())
 	}
 	if strings.Contains(got.Input, "secret-value") || strings.Contains(got.Error, "top-secret") || strings.Contains(got.Events[0].Message, "super-secret") {
 		t.Fatalf("sensitive value persisted: %+v", got)

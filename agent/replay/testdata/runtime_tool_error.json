@@ -1,0 +1,20 @@
+{
+  "version": "agent_replay_v1",
+  "skill": "test",
+  "name": "runtime-tool-error",
+  "llm": [
+    {
+      "content": "{\"action\":\"tool\",\"tool\":\"echo\",\"arguments\":{}}"
+    },
+    {
+      "content": "{\"action\":\"final\",\"result\":{\"ok\":true}}"
+    }
+  ],
+  "tools": {
+    "echo": [
+      {
+        "error": "fixture upstream failure"
+      }
+    ]
+  }
+}

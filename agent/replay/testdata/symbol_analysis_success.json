@@ -1,0 +1,42 @@
+{
+  "version": "agent_replay_v1",
+  "name": "symbol-analysis-success",
+  "skill": "symbol_analysis",
+  "model_config_id": 103,
+  "input": "{\"symbol\": \"BTCUSDT\", \"prompt\": \"分析当前是否适合交易\"}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\": \"tool\", \"summary\": \"读取聚合上下文\", \"tool\": \"get_symbol_analysis_context\", \"arguments\": {\"symbol\": \"BTCUSDT\"}}"
+    },
+    {
+      "model": "fixture-model",
+      "content": "{\"action\": \"final\", \"summary\": \"保持中性\", \"result\": {\"version\": \"trading_plan_v1\", \"symbol\": \"BTCUSDT\", \"as_of\": \"2026-08-01T00:00:00Z\", \"market_condition\": null, \"direction\": \"neutral\", \"confidence\": 0.55, \"summary\": \"证据不足，暂不建立方向仓位\", \"entry_zones\": [], \"stop_loss\": null, \"take_profits\": [], \"long_trigger\": \"\", \"short_trigger\": \"\", \"invalidation_conditions\": [\"出现新的多周期一致趋势后重新评估\"], \"risks\": [\"当前上下文仅用于固定回放基线\"], \"data_missing\": [], \"evidence\": [{\"source\": \"get_symbol_analysis_context\", \"finding\": \"当前固定上下文未提供明确方向优势\"}]}}"
+    }
+  ],
+  "tools": {
+    "get_symbol_analysis_context": [
+      {
+        "result": {
+          "symbol": "BTCUSDT",
+          "as_of": "2026-08-01T00:00:00Z",
+          "snapshot": {
+            "symbol": "BTCUSDT",
+            "price": 100,
+            "percent_change_24h": 0,
+            "open_24h": 100,
+            "high_24h": 101,
+            "low_24h": 99,
+            "quote_volume_24h": 1000000,
+            "trade_count_24h": 1000,
+            "updated_at_ms": 0,
+            "data_age_ms": 0
+          },
+          "klines": [],
+          "previous_analyses": [],
+          "data_missing": []
+        }
+      }
+    ]
+  }
+}

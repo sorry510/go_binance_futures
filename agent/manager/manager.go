@@ -63,6 +63,8 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	if err != nil {
 		return nil, fmt.Errorf("initialize LLM client: %w", err)
 	}
+	executionSnapshot := agentruntime.FreezeExecution(selectedSkill, client)
+	req.ExecutionSnapshot = &executionSnapshot
 	runtimeConfig := manager.cfg.RuntimeConfig
 	runtimeConfig.Client = client
 	runtimeConfig.Skills = manager.cfg.Skills
@@ -80,6 +82,7 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 		maxRounds = agentruntime.DefaultConfig().DefaultMaxRounds
 	}
 	item := &task.Task{ID: taskID, Skill: selectedSkill.Name(), ConversationID: strings.TrimSpace(req.ConversationID), Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds, Provider: string(client.Provider()), CreatedAt: now, UpdatedAt: now}
+	item.ApplyVersionMetadata(executionSnapshot.Version)
 	if err := manager.cfg.Store.Save(context.Background(), item); err != nil {
 		return nil, err
 	}

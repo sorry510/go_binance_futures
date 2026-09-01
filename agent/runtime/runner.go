@@ -72,6 +72,12 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 	if !exists {
 		return nil, fmt.Errorf("skill %q is not registered", req.Skill)
 	}
+	snapshot := req.ExecutionSnapshot
+	if snapshot == nil {
+		frozen := FreezeExecution(selectedSkill, runner.cfg.Client)
+		snapshot = &frozen
+	}
+	systemPrompt := snapshot.SystemPrompt
 	maxRounds := selectedSkill.MaxRounds()
 	if maxRounds <= 0 {
 		maxRounds = runner.cfg.DefaultMaxRounds
@@ -106,6 +112,7 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 		CreatedAt:      now,
 		UpdatedAt:      now,
 	}
+	currentTask.ApplyVersionMetadata(snapshot.Version)
 	runStarted := time.Now()
 	runner.observe(Observation{
 		Type: "task_started", TaskID: currentTask.ID, ConversationID: currentTask.ConversationID,
@@ -162,14 +169,14 @@ func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, err
 			return nil, runner.finishContextError(currentTask, err)
 		}
 		currentTask.Round = round
-		if contextSize(selectedSkill.SystemPrompt(), messages) > runner.cfg.MaxContextBytes {
+		if contextSize(systemPrompt, messages) > runner.cfg.MaxContextBytes {
 			return nil, runner.fail(currentTask, "context_too_large", fmt.Errorf("agent context exceeds %d bytes", runner.cfg.MaxContextBytes))
 		}
 
 		progress := 5 + (round-1)*80/maxRounds
 		runner.record(currentTask, task.StatusWaitingLLM, "waiting_llm", progress, fmt.Sprintf("agent round %d/%d", round, maxRounds))
 		response, err := runner.generateWithRetry(runCtx, llm.Request{
-			System: selectedSkill.SystemPrompt(), Messages: messages,
+			System: systemPrompt, Messages: messages,
 		}, currentTask, progress)
 		if err != nil {
 			if runCtx.Err() != nil {

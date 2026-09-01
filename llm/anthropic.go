@@ -50,6 +50,8 @@ func (client *anthropicClient) Provider() Provider {
 	return ProviderAnthropic
 }
 
+func (client *anthropicClient) ConfigID() int64 { return client.cfg.ID }
+
 func (client *anthropicClient) Generate(ctx context.Context, request Request) (*Response, error) {
 	messages := make([]anthropicMessage, 0, len(request.Messages))
 	systemParts := make([]string, 0, 2)
