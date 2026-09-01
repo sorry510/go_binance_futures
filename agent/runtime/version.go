@@ -6,11 +6,11 @@ import (
 	"go_binance_futures/llm"
 )
 
-const CurrentVersion = "1.0.0"
+const CurrentVersion = "2.0.0"
 
 type ExecutionSnapshot struct {
-	SystemPrompt string
-	Version      task.VersionMetadata
+	SystemPrompt string               `json:"system_prompt"`
+	Version      task.VersionMetadata `json:"version"`
 }
 
 func FreezeExecution(selectedSkill skill.Skill, client llm.Client) ExecutionSnapshot {

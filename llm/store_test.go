@@ -144,3 +144,21 @@ func TestDeletingActiveConfigLeavesRuntimeUnconfigured(t *testing.T) {
 		t.Fatalf("expected unconfigured runtime, got %v", err)
 	}
 }
+
+func TestNewFromConfigIDUsesRequestedConfiguration(t *testing.T) {
+	store := setupLLMStoreTest(t)
+	ctx := context.Background()
+	item, err := store.Create(ctx, ConfigInput{
+		Name: "resume-frozen", Provider: "ollama", Model: "qwen-resume", TimeoutSeconds: 30, Temperature: 0.2, Enabled: 1,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := NewFromConfigID(item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ConfigID(client) != item.ID {
+		t.Fatalf("client config id = %d, want %d", ConfigID(client), item.ID)
+	}
+}

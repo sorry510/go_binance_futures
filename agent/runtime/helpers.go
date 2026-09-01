@@ -46,6 +46,36 @@ func (runner *DefaultRunner) record(item *task.Task, status task.Status, stage s
 	item.Progress = progress
 	item.UpdatedAt = now
 	event := task.Event{TaskID: item.ID, Stage: stage, Progress: progress, Round: item.Round, Message: message, Skill: item.Skill, Time: now}
+	runner.persistEvent(item, event)
+}
+
+func (runner *DefaultRunner) recordStep(item *task.Task, state *RunState, stepID string, status task.Status, stage string, progress int, message, errorType string, checkpoint bool) {
+	now := time.Now().UTC()
+	item.Status = status
+	item.Stage = stage
+	item.Progress = progress
+	item.UpdatedAt = now
+	state.syncTask(item)
+	event := task.Event{TaskID: item.ID, StepID: stepID, Stage: stage, Progress: progress, Round: item.Round, Message: message, Skill: item.Skill, ErrorType: errorType, Checkpoint: checkpoint, Time: now}
+	if step := state.step(stepID); step != nil {
+		event.StepType = string(step.Type)
+		event.Status = string(step.Status)
+	}
+	runner.persistEvent(item, event)
+}
+
+func (runner *DefaultRunner) recordToolStep(item *task.Task, state *RunState, stepID string, status task.Status, stage string, progress int, toolName, outcome, errorType string, checkpoint bool, duration time.Duration, message string) {
+	now := time.Now().UTC()
+	item.Status = status
+	item.Stage = stage
+	item.Progress = progress
+	item.UpdatedAt = now
+	state.syncTask(item)
+	event := task.Event{TaskID: item.ID, StepID: stepID, StepType: string(StepTool), Stage: stage, Progress: progress, Round: item.Round, Message: message, Skill: item.Skill, Tool: toolName, Status: outcome, ErrorType: errorType, Checkpoint: checkpoint, DurationMs: duration.Milliseconds(), Time: now}
+	runner.persistEvent(item, event)
+}
+
+func (runner *DefaultRunner) persistEvent(item *task.Task, event task.Event) {
 	item.Events = append(item.Events, event)
 	_ = runner.cfg.Tasks.Save(context.Background(), item)
 	if runner.cfg.EventHook != nil {
@@ -106,7 +136,7 @@ func (runner *DefaultRunner) finishContextError(item *task.Task, err error) erro
 	return runner.fail(item, "timeout", err)
 }
 
-func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.Request, item *task.Task, progress int) (*llm.Response, error) {
+func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.Request, item *task.Task, state *RunState, stepID string, progress int) (*llm.Response, error) {
 	attempts := runner.cfg.Retry.MaxAttempts
 	if attempts < 1 {
 		attempts = 1
@@ -134,8 +164,8 @@ func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.
 		if ctx.Err() != nil || !retryableLLMError(err) || attempt == attempts {
 			break
 		}
-		runner.record(item, task.StatusWaitingLLM, "retrying_llm", min(progress+1, 94),
-			fmt.Sprintf("LLM request failed; retrying attempt %d/%d: %s", attempt+1, attempts, err.Error()))
+		runner.recordStep(item, state, stepID, task.StatusWaitingLLM, "retrying_llm", min(progress+1, 94),
+			fmt.Sprintf("LLM request failed; retrying attempt %d/%d: %s", attempt+1, attempts, err.Error()), classifyError(err), false)
 		if runner.cfg.Retry.Delay > 0 {
 			timer := time.NewTimer(runner.cfg.Retry.Delay)
 			select {

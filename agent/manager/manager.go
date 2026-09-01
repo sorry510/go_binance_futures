@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	agentruntime "go_binance_futures/agent/runtime"
@@ -15,6 +16,7 @@ import (
 
 type Config struct {
 	NewClient      func() (llm.Client, error)
+	NewClientByID  func(int64) (llm.Client, error)
 	Admission      func(skill string) error
 	Skills         *skill.Registry
 	Tools          *agenttools.Registry
@@ -24,7 +26,9 @@ type Config struct {
 }
 
 type Manager struct {
-	cfg Config
+	cfg     Config
+	mu      sync.Mutex
+	cancels map[string]context.CancelFunc
 }
 
 func New(cfg Config) (*Manager, error) {
@@ -40,7 +44,10 @@ func New(cfg Config) (*Manager, error) {
 	if cfg.NewClient == nil {
 		cfg.NewClient = llm.NewFromConfig
 	}
-	return &Manager{cfg: cfg}, nil
+	if cfg.NewClientByID == nil {
+		cfg.NewClientByID = llm.NewFromConfigID
+	}
+	return &Manager{cfg: cfg, cancels: make(map[string]context.CancelFunc)}, nil
 }
 func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	req.Skill = strings.TrimSpace(req.Skill)
@@ -87,16 +94,13 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 		return nil, err
 	}
 	req.TaskID = taskID
+	runCtx, cancel := context.WithCancel(context.Background())
+	manager.registerCancel(taskID, cancel)
 	go func() {
-		result, runErr := runner.Run(context.Background(), req)
-		if manager.cfg.CompletionHook == nil {
-			return
-		}
-		stored, getErr := manager.cfg.Store.Get(context.Background(), taskID)
-		if getErr != nil {
-			return
-		}
-		_ = manager.cfg.CompletionHook(req, stored, result, runErr)
+		defer manager.unregisterCancel(taskID)
+		defer cancel()
+		result, runErr := runner.Run(runCtx, req)
+		manager.runCompletionHook(req, taskID, result, runErr)
 	}()
 	return manager.cfg.Store.Get(context.Background(), taskID)
 }
@@ -107,4 +111,92 @@ func (manager *Manager) Get(ctx context.Context, taskID string) (*task.Task, err
 
 func (manager *Manager) List(ctx context.Context, options task.ListOptions) (task.ListResult, error) {
 	return manager.cfg.Store.List(ctx, options)
+}
+
+func (manager *Manager) Cancel(ctx context.Context, taskID string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	taskID = strings.TrimSpace(taskID)
+	manager.mu.Lock()
+	cancel := manager.cancels[taskID]
+	manager.mu.Unlock()
+	if cancel == nil {
+		item, err := manager.cfg.Store.Get(ctx, taskID)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("task %q is not actively running (status=%s)", item.ID, item.Status)
+	}
+	cancel()
+	return nil
+}
+
+func (manager *Manager) Resume(ctx context.Context, taskID string) (*task.Task, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	taskID = strings.TrimSpace(taskID)
+	item, err := manager.cfg.Store.Get(ctx, taskID)
+	if err != nil {
+		return nil, err
+	}
+	selectedSkill, ok := manager.cfg.Skills.Get(item.Skill)
+	if !ok {
+		return nil, fmt.Errorf("skill %q is not registered", item.Skill)
+	}
+	if manager.cfg.Admission != nil {
+		if err := manager.cfg.Admission(selectedSkill.Name()); err != nil {
+			return nil, err
+		}
+	}
+	client, err := manager.cfg.NewClientByID(item.ModelConfigID)
+	if err != nil {
+		return nil, fmt.Errorf("initialize frozen LLM client: %w", err)
+	}
+	runtimeConfig := manager.cfg.RuntimeConfig
+	runtimeConfig.Client = client
+	runtimeConfig.Skills = manager.cfg.Skills
+	runtimeConfig.Tools = manager.cfg.Tools
+	runtimeConfig.Tasks = manager.cfg.Store
+	runner, err := agentruntime.NewRunner(runtimeConfig)
+	if err != nil {
+		return nil, err
+	}
+	req, err := runner.ResumeRequest(ctx, taskID)
+	if err != nil {
+		return nil, err
+	}
+	runCtx, cancel := context.WithCancel(context.Background())
+	manager.registerCancel(taskID, cancel)
+	go func() {
+		defer manager.unregisterCancel(taskID)
+		defer cancel()
+		result, runErr := runner.Resume(runCtx, taskID)
+		manager.runCompletionHook(req, taskID, result, runErr)
+	}()
+	return manager.cfg.Store.Get(ctx, taskID)
+}
+
+func (manager *Manager) registerCancel(taskID string, cancel context.CancelFunc) {
+	manager.mu.Lock()
+	manager.cancels[taskID] = cancel
+	manager.mu.Unlock()
+}
+
+func (manager *Manager) unregisterCancel(taskID string) {
+	manager.mu.Lock()
+	delete(manager.cancels, taskID)
+	manager.mu.Unlock()
+}
+
+func (manager *Manager) runCompletionHook(req agentruntime.Request, taskID string, result *agentruntime.Result, runErr error) {
+	if manager.cfg.CompletionHook == nil {
+		return
+	}
+	stored, getErr := manager.cfg.Store.Get(context.Background(), taskID)
+	if getErr != nil {
+		return
+	}
+	_ = manager.cfg.CompletionHook(req, stored, result, runErr)
 }
