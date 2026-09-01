@@ -1,4 +1,4 @@
-# Phase V2-6：Model Gateway、Capability 与 Router
+# Phase V2-7：Model Gateway、Capability 与 Router
 
 ## 目标
 

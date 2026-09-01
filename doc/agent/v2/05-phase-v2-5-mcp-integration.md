@@ -1,10 +1,10 @@
-# Phase V2-4：第三方 HTTP MCP Client 接入
+# Phase V2-5：第三方 HTTP MCP Client 接入
 
 ## 目标
 
 本 Phase 只建设 **MCP Client/Host** 能力：`go_binance_futures` 主动连接第三方提供的标准 HTTP MCP Server，并把远端 Tool、Resource、Prompt 纳入现有 Agent Runtime。
 
-本 Phase **不建设、不升级、不验收本项目自身的 MCP Server**；现有 `mcpserver/` 与 `/mcp` 对外服务不属于 V2-4 范围，除非未来另开独立任务处理。
+本 Phase **不建设、不升级、不验收本项目自身的 MCP Server**；现有 `mcpserver/` 与 `/mcp` 对外服务不属于 V2-5 范围，除非未来另开独立任务处理。
 
 核心链路：
 
@@ -210,4 +210,4 @@ Task 保存 `mcp_server_id`、`protocol_version`、`catalog_hash`、tool canonic
 
 ## Definition of Done
 
-V2-4 完成后，第三方 HTTP MCP Server 对 Runtime 来说只是另一种受治理的 Tool/Context Provider。Agent 不需要知道 HTTP、OAuth 或 MCP 协议细节，也不能因为接入外部 MCP 而获得新的权限绕过路径。
+V2-5 完成后，第三方 HTTP MCP Server 对 Runtime 来说只是另一种受治理的 Tool/Context Provider。Agent 不需要知道 HTTP、OAuth 或 MCP 协议细节，也不能因为接入外部 MCP 而获得新的权限绕过路径。
