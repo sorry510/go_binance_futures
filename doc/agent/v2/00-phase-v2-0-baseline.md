@@ -117,6 +117,56 @@ llm/client.go
 - [x] 后续 Phase 可以复用同一 Replay Runner。
 - [x] `go test ./...` 全量通过。
 
+## 手动验收建议
+
+V2-0 不改变 Agent 的分析能力，因此手动测试重点是版本身份和兼容性，而不是比较分析质量。
+
+### 1. 新 Task 版本身份
+
+在现有 Web 中执行一次“AI -> 单币分析”，等待任务完成后，通过任务中心或 `GET /agents/tasks/:taskId` 查看 Task。新 Task 应至少满足：
+
+```text
+runtime_version = 1.0.0
+skill_version = 1.0.0
+prompt_version = 1.0.0
+prompt_hash = 64 位 SHA-256 十六进制字符串
+model_config_id > 0（使用数据库 LLM 配置时）
+input_contract_version = symbol_analysis_input_v1
+output_contract_version = trading_plan_v1
+skill_source = native
+skill_source_version = v1
+```
+
+同一版本下连续执行两次 `symbol_analysis`，`prompt_hash` 应保持一致。
+
+### 2. LLM 配置切换后的历史身份冻结
+
+先用当前启用的 LLM 创建任务 A，记录 `model_config_id`；然后在 LLM 配置页面切换到另一条配置，再创建任务 B。预期：
+
+- A 的 `model_config_id` 永远保持原值。
+- B 使用新的 `model_config_id`。
+- 再次查询 A，不会因为当前启用模型改变而被覆盖。
+
+### 3. 历史 Task 向前兼容
+
+查询 V2-0 上线前已经存在的 Agent Task。旧记录应仍可正常 List/Get；新增版本字段允许为空字符串或 0，不应导致页面、API 或 ORM 读取失败。
+
+### 4. ORM 自动同步
+
+正常重启一次后端，确认启动过程没有要求执行新的 `command/sql/version/*.sql`，并且新 Task 可以正常写入上述版本字段。V2-0 没有新增 migration SQL。
+
+### 5. Replay 开发者手测
+
+可在项目根目录执行：
+
+```bash
+go test ./agent/replay -v
+```
+
+该测试使用固定 LLM/Tool Fixture，不调用真实 LLM 或实时 Binance。成功表示四个 V1 Skill 契约以及 JSON Repair、Tool Error、Timeout、Context Too Large 等基线仍可重放。
+
+以上 1～4 是推荐的人工验收；第 5 项主要用于开发阶段回归。
+
 ## Phase V2-1 的 Gate
 
 V2-1 拆分 `DefaultRunner.Run()` 时，必须首先运行 `agent/replay`。除非 V2-1 文档明确声明并解释行为变化，否则上述 Replay Case 的 Task terminal status、关键 stage、版本身份、四个 Skill output contract 均视为兼容契约。

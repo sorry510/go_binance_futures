@@ -1,4 +1,4 @@
-# Phase V2-8：Eval、Replay 与 Prompt/Skill Version
+# Phase V2-4：Eval、Replay 与 Prompt/Skill Version
 
 ## 目标
 

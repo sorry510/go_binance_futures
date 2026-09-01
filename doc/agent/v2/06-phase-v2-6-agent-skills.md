@@ -1,4 +1,4 @@
-# Phase V2-5：标准 Agent Skills 包、导入与运行
+# Phase V2-6：标准 Agent Skills 包、导入与运行
 
 ## 目标
 
