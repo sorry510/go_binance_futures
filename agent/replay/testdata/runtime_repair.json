@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "skill": "test",
+  "name": "runtime-repair",
+  "llm": [
+    {
+      "content": "not-json"
+    },
+    {
+      "content": "{\"action\":\"final\",\"result\":{\"ok\":true}}"
+    }
+  ]
+}

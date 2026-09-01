@@ -43,6 +43,7 @@ type Definition struct {
 	Prompt            string
 	AllowedTools      []string
 	Rounds            int
+	Version           VersionInfo
 	BuildInputFunc    func(context.Context, Request) ([]llm.Message, error)
 	FinalValidator    validator.FinalValidator
 	RequiredToolsFunc func(Request) []string
@@ -53,7 +54,8 @@ func (definition Definition) SystemPrompt() string { return definition.Prompt }
 func (definition Definition) Tools() []string {
 	return append([]string(nil), definition.AllowedTools...)
 }
-func (definition Definition) MaxRounds() int { return definition.Rounds }
+func (definition Definition) MaxRounds() int           { return definition.Rounds }
+func (definition Definition) VersionInfo() VersionInfo { return definition.Version }
 func (definition Definition) BuildInput(ctx context.Context, req Request) ([]llm.Message, error) {
 	if definition.BuildInputFunc != nil {
 		return definition.BuildInputFunc(ctx, req)

@@ -158,6 +158,9 @@ func toModel(item *Task) models.AgentTask {
 		ID: item.ID, Skill: item.Skill, ConversationID: item.ConversationID, Status: string(item.Status), Stage: item.Stage, Progress: item.Progress,
 		InputJSON: sanitizePayload(item.Input), ResultJSON: sanitizePayload(string(item.Result)), Error: sanitizeText(item.Error),
 		Round: item.Round, MaxRounds: item.MaxRounds, Provider: item.Provider, Model: item.Model,
+		RuntimeVersion: item.RuntimeVersion, SkillVersion: item.SkillVersion, PromptVersion: item.PromptVersion,
+		PromptHash: item.PromptHash, ModelConfigID: item.ModelConfigID, InputContractVersion: item.InputContractVersion,
+		OutputContractVersion: item.OutputContractVersion, SkillSource: item.SkillSource, SkillSourceVersion: item.SkillSourceVersion,
 		InputTokens: item.Usage.InputTokens, OutputTokens: item.Usage.OutputTokens, TotalTokens: item.Usage.TotalTokens,
 		CreatedAt: item.CreatedAt.UnixMilli(), UpdatedAt: item.UpdatedAt.UnixMilli(),
 	}
@@ -175,6 +178,9 @@ func fromModel(row models.AgentTask) *Task {
 		ID: row.ID, Skill: row.Skill, ConversationID: row.ConversationID, Status: Status(row.Status), Stage: row.Stage, Progress: row.Progress,
 		Input: row.InputJSON, Result: json.RawMessage(row.ResultJSON), Error: row.Error,
 		Round: row.Round, MaxRounds: row.MaxRounds, Provider: row.Provider, Model: row.Model,
+		RuntimeVersion: row.RuntimeVersion, SkillVersion: row.SkillVersion, PromptVersion: row.PromptVersion,
+		PromptHash: row.PromptHash, ModelConfigID: row.ModelConfigID, InputContractVersion: row.InputContractVersion,
+		OutputContractVersion: row.OutputContractVersion, SkillSource: row.SkillSource, SkillSourceVersion: row.SkillSourceVersion,
 		Usage:     Usage{InputTokens: row.InputTokens, OutputTokens: row.OutputTokens, TotalTokens: row.TotalTokens},
 		CreatedAt: time.UnixMilli(row.CreatedAt).UTC(), UpdatedAt: time.UnixMilli(row.UpdatedAt).UTC(),
 	}

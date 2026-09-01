@@ -38,26 +38,73 @@ type Usage struct {
 	TotalTokens  int `json:"total_tokens,omitempty"`
 }
 
+type VersionMetadata struct {
+	RuntimeVersion        string `json:"runtime_version"`
+	SkillVersion          string `json:"skill_version"`
+	PromptVersion         string `json:"prompt_version"`
+	PromptHash            string `json:"prompt_hash"`
+	ModelConfigID         int64  `json:"model_config_id"`
+	InputContractVersion  string `json:"input_contract_version"`
+	OutputContractVersion string `json:"output_contract_version"`
+	SkillSource           string `json:"skill_source"`
+	SkillSourceVersion    string `json:"skill_source_version,omitempty"`
+}
+
 type Task struct {
-	ID          string          `json:"id"`
-	Skill          string          `json:"skill"`
-	ConversationID string          `json:"conversation_id,omitempty"`
-	Status      Status          `json:"status"`
-	Stage       string          `json:"stage"`
-	Progress    int             `json:"progress"`
-	Input       string          `json:"input"`
-	Result      json.RawMessage `json:"result,omitempty"`
-	Error       string          `json:"error,omitempty"`
-	Round       int             `json:"round"`
-	MaxRounds   int             `json:"max_rounds"`
-	Provider    string          `json:"provider,omitempty"`
-	Model       string          `json:"model,omitempty"`
-	Usage       Usage           `json:"usage,omitempty"`
-	CreatedAt   time.Time       `json:"created_at"`
-	StartedAt   *time.Time      `json:"started_at,omitempty"`
-	UpdatedAt   time.Time       `json:"updated_at"`
-	CompletedAt *time.Time      `json:"completed_at,omitempty"`
-	Events         []Event         `json:"events,omitempty"`
+	ID                    string          `json:"id"`
+	Skill                 string          `json:"skill"`
+	ConversationID        string          `json:"conversation_id,omitempty"`
+	Status                Status          `json:"status"`
+	Stage                 string          `json:"stage"`
+	Progress              int             `json:"progress"`
+	Input                 string          `json:"input"`
+	Result                json.RawMessage `json:"result,omitempty"`
+	Error                 string          `json:"error,omitempty"`
+	Round                 int             `json:"round"`
+	MaxRounds             int             `json:"max_rounds"`
+	Provider              string          `json:"provider,omitempty"`
+	Model                 string          `json:"model,omitempty"`
+	RuntimeVersion        string          `json:"runtime_version"`
+	SkillVersion          string          `json:"skill_version"`
+	PromptVersion         string          `json:"prompt_version"`
+	PromptHash            string          `json:"prompt_hash"`
+	ModelConfigID         int64           `json:"model_config_id"`
+	InputContractVersion  string          `json:"input_contract_version"`
+	OutputContractVersion string          `json:"output_contract_version"`
+	SkillSource           string          `json:"skill_source"`
+	SkillSourceVersion    string          `json:"skill_source_version,omitempty"`
+	Usage                 Usage           `json:"usage,omitempty"`
+	CreatedAt             time.Time       `json:"created_at"`
+	StartedAt             *time.Time      `json:"started_at,omitempty"`
+	UpdatedAt             time.Time       `json:"updated_at"`
+	CompletedAt           *time.Time      `json:"completed_at,omitempty"`
+	Events                []Event         `json:"events,omitempty"`
+}
+
+func (item *Task) ApplyVersionMetadata(value VersionMetadata) {
+	if item == nil {
+		return
+	}
+	item.RuntimeVersion = value.RuntimeVersion
+	item.SkillVersion = value.SkillVersion
+	item.PromptVersion = value.PromptVersion
+	item.PromptHash = value.PromptHash
+	item.ModelConfigID = value.ModelConfigID
+	item.InputContractVersion = value.InputContractVersion
+	item.OutputContractVersion = value.OutputContractVersion
+	item.SkillSource = value.SkillSource
+	item.SkillSourceVersion = value.SkillSourceVersion
+}
+
+func (item *Task) VersionMetadata() VersionMetadata {
+	if item == nil {
+		return VersionMetadata{}
+	}
+	return VersionMetadata{
+		RuntimeVersion: item.RuntimeVersion, SkillVersion: item.SkillVersion, PromptVersion: item.PromptVersion,
+		PromptHash: item.PromptHash, ModelConfigID: item.ModelConfigID, InputContractVersion: item.InputContractVersion,
+		OutputContractVersion: item.OutputContractVersion, SkillSource: item.SkillSource, SkillSourceVersion: item.SkillSourceVersion,
+	}
 }
 
 func IsRunningStatus(status Status) bool {

@@ -37,6 +37,8 @@ func (client *bridgeClient) Provider() Provider {
 	return client.cfg.Provider
 }
 
+func (client *bridgeClient) ConfigID() int64 { return client.cfg.ID }
+
 func (client *bridgeClient) Generate(ctx context.Context, request Request) (*Response, error) {
 	if len(request.Messages) == 0 {
 		return nil, fmt.Errorf("at least one message is required")

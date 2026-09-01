@@ -16,6 +16,12 @@ import (
 
 const Name = "market_regime"
 
+var versionInfo = skill.VersionInfo{
+	SkillVersion: "1.0.0", PromptVersion: "1.0.0",
+	InputContractVersion: "market_regime_snapshot_v1", OutputContractVersion: "market_regime_analysis_v1",
+	Source: skill.DefaultSource, SourceVersion: "v1",
+}
+
 const systemPrompt = `You are a cryptocurrency futures market-regime classifier.
 Analyze only the supplied deterministic market snapshot.
 Do not give trading advice, positions, leverage, orders, or tool calls.
@@ -34,6 +40,7 @@ func New() skill.Skill {
 		SkillName:      Name,
 		Prompt:         systemPrompt,
 		Rounds:         2,
+		Version:        versionInfo,
 		BuildInputFunc: buildInput,
 		FinalValidator: validator.Func(validateFinal),
 	}

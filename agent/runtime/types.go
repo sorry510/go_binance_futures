@@ -13,11 +13,12 @@ import (
 )
 
 type Request struct {
-	TaskID         string         `json:"task_id,omitempty"`
-	Skill          string         `json:"skill"`
-	Input          string         `json:"input"`
-	ConversationID string         `json:"conversation_id,omitempty"`
-	Metadata       map[string]any `json:"metadata,omitempty"`
+	TaskID            string             `json:"task_id,omitempty"`
+	Skill             string             `json:"skill"`
+	Input             string             `json:"input"`
+	ConversationID    string             `json:"conversation_id,omitempty"`
+	Metadata          map[string]any     `json:"metadata,omitempty"`
+	ExecutionSnapshot *ExecutionSnapshot `json:"-"`
 }
 
 type Result struct {

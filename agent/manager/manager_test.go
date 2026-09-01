@@ -16,13 +16,14 @@ type fakeClient struct {
 }
 
 func (*fakeClient) Provider() llm.Provider { return llm.ProviderOpenAICompatible }
+func (*fakeClient) ConfigID() int64        { return 42 }
 func (client *fakeClient) Generate(context.Context, llm.Request) (*llm.Response, error) {
 	return &llm.Response{Model: "fake", Content: client.response}, nil
 }
 
 func TestManagerStartsAndPersistsRuntimeTask(t *testing.T) {
 	skills := skill.NewRegistry()
-	if err := skills.Register(skill.Definition{SkillName: "test", Prompt: "test", Rounds: 2}); err != nil {
+	if err := skills.Register(skill.Definition{SkillName: "test", Prompt: "test", Rounds: 2, Version: skill.VersionInfo{SkillVersion: "1.2.3", PromptVersion: "2.0.0", InputContractVersion: "input_v1", OutputContractVersion: "output_v1", Source: skill.DefaultSource, SourceVersion: "builtin-v1"}}); err != nil {
 		t.Fatal(err)
 	}
 	store := task.NewMemoryStore()
@@ -44,6 +45,9 @@ func TestManagerStartsAndPersistsRuntimeTask(t *testing.T) {
 	if started.ID == "" || started.Status != task.StatusQueued {
 		t.Fatalf("unexpected started task: %+v", started)
 	}
+	if started.RuntimeVersion != agentruntime.CurrentVersion || started.SkillVersion != "1.2.3" || started.PromptVersion != "2.0.0" || started.PromptHash != skill.HashPrompt("test") || started.ModelConfigID != 42 {
+		t.Fatalf("task version identity was not frozen at start: %+v", started.VersionMetadata())
+	}
 
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
@@ -52,6 +56,9 @@ func TestManagerStartsAndPersistsRuntimeTask(t *testing.T) {
 			t.Fatal(getErr)
 		}
 		if stored.Status == task.StatusSucceeded {
+			if stored.VersionMetadata() != started.VersionMetadata() {
+				t.Fatalf("task version identity changed while running: start=%+v stored=%+v", started.VersionMetadata(), stored.VersionMetadata())
+			}
 			if stored.ID != started.ID || stored.Progress != 100 || string(stored.Result) != `{"ok":true}` {
 				t.Fatalf("unexpected completed task: %+v", stored)
 			}

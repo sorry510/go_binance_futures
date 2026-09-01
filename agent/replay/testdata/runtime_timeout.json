@@ -1,0 +1,12 @@
+{
+  "version": "agent_replay_v1",
+  "skill": "test",
+  "name": "runtime-timeout",
+  "timeout_ms": 10,
+  "llm": [
+    {
+      "delay_ms": 80,
+      "content": "{\"action\":\"final\",\"result\":{}}"
+    }
+  ]
+}
