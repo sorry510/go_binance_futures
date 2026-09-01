@@ -43,9 +43,11 @@ func TestORMStorePersistsTaskEventsAndRedactsSecrets(t *testing.T) {
 		ID: "task-persist", Skill: "symbol_analysis", ConversationID: "conv-1", Status: StatusRunning,
 		RuntimeVersion: "1.0.0", SkillVersion: "1.0.0", PromptVersion: "1.0.0", PromptHash: "hash",
 		ModelConfigID: 77, InputContractVersion: "input_v1", OutputContractVersion: "output_v1", SkillSource: "native", SkillSourceVersion: "v1",
-		Stage: "waiting_tool", Progress: 45, Input: `{"symbol":"BTCUSDT","api_key":"secret-value"}`,
+		ExecutionMode: "react", Steps: []byte(`[{"step_id":"step-001","type":"tool","status":"succeeded"}]`), ResumeCount: 1,
+		CheckpointJSON: `{"token":"secret-checkpoint","safe":true}`,
+		Stage:          "waiting_tool", Progress: 45, Input: `{"symbol":"BTCUSDT","api_key":"secret-value"}`,
 		Error: "authorization=top-secret", CreatedAt: now, UpdatedAt: now,
-		Events: []Event{{TaskID: "task-persist", Stage: "queued", Message: "Bearer super-secret", Time: now}},
+		Events: []Event{{TaskID: "task-persist", StepID: "step-001", StepType: "tool", Stage: "tool_result", Status: "success", ErrorType: "", Checkpoint: true, Message: "Bearer super-secret", Time: now}},
 	}
 	if err := store.Save(context.Background(), item); err != nil {
 		t.Fatal(err)
@@ -56,6 +58,31 @@ func TestORMStorePersistsTaskEventsAndRedactsSecrets(t *testing.T) {
 	}
 	if got.ConversationID != "conv-1" || len(got.Events) != 1 {
 		t.Fatalf("unexpected persisted task: %+v", got)
+	}
+	if got.ExecutionMode != "react" || got.ResumeCount != 1 || !strings.Contains(string(got.Steps), "step-001") {
+		t.Fatalf("runtime execution state was not persisted: %+v", got)
+	}
+	if got.Events[0].StepID != "step-001" || got.Events[0].StepType != "tool" || !got.Events[0].Checkpoint {
+		t.Fatalf("structured step event was not persisted: %+v", got.Events[0])
+	}
+	if strings.Contains(got.CheckpointJSON, "secret-checkpoint") {
+		t.Fatalf("checkpoint secret was not redacted: %s", got.CheckpointJSON)
+	}
+	if err := store.SaveCheckpoint(context.Background(), item.ID, `{"safe":true,"token":"another-secret"}`); err != nil {
+		t.Fatal(err)
+	}
+	checkpoint, err := store.LoadCheckpoint(context.Background(), item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(checkpoint, `"safe":true`) || strings.Contains(checkpoint, "another-secret") {
+		t.Fatalf("unexpected persisted checkpoint: %s", checkpoint)
+	}
+	if err := store.ClearCheckpoint(context.Background(), item.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.LoadCheckpoint(context.Background(), item.ID); err == nil {
+		t.Fatal("expected cleared checkpoint to be unavailable")
 	}
 	if got.RuntimeVersion != "1.0.0" || got.PromptHash != "hash" || got.ModelConfigID != 77 || got.OutputContractVersion != "output_v1" || got.SkillSource != "native" {
 		t.Fatalf("version metadata was not persisted: %+v", got.VersionMetadata())

@@ -1,9 +1,27 @@
 package llm
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func NewFromConfig() (Client, error) {
 	cfg, err := LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+	return NewClient(cfg)
+}
+
+func NewFromConfigID(id int64) (Client, error) {
+	if id <= 0 {
+		return NewFromConfig()
+	}
+	row, err := (Store{}).Get(context.Background(), id)
+	if err != nil {
+		return nil, fmt.Errorf("load LLM configuration %d: %w", id, err)
+	}
+	cfg, err := configFromModel(*row)
 	if err != nil {
 		return nil, err
 	}

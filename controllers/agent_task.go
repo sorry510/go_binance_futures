@@ -144,3 +144,32 @@ func (ctrl *AgentController) GetAlertPipelineStatus() {
 		"msg":  "success",
 	})
 }
+
+func (ctrl *AgentController) CancelTask() {
+	manager, err := agentapp.DefaultManager()
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, "初始化 Agent Manager 失败: "+err.Error()))
+		return
+	}
+	taskID := strings.TrimSpace(ctrl.Ctx.Input.Param(":taskId"))
+	if err := manager.Cancel(ctrl.Ctx.Request.Context(), taskID); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "msg": "cancel accepted"})
+}
+
+func (ctrl *AgentController) ResumeTask() {
+	manager, err := agentapp.DefaultManager()
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, "初始化 Agent Manager 失败: "+err.Error()))
+		return
+	}
+	taskID := strings.TrimSpace(ctrl.Ctx.Input.Param(":taskId"))
+	item, err := manager.Resume(ctrl.Ctx.Request.Context(), taskID)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "resume accepted"})
+}
