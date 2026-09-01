@@ -31,6 +31,15 @@ type Store interface {
 	MarkInterrupted(ctx context.Context, at time.Time) (int64, error)
 }
 
+// CheckpointStore is an optional extension implemented by the built-in task stores.
+// Runtime uses it to persist an opaque recovery checkpoint without exposing the
+// checkpoint through the normal Task JSON API.
+type CheckpointStore interface {
+	SaveCheckpoint(ctx context.Context, taskID string, checkpoint string) error
+	LoadCheckpoint(ctx context.Context, taskID string) (string, error)
+	ClearCheckpoint(ctx context.Context, taskID string) error
+}
+
 type MemoryStore struct {
 	mu    sync.RWMutex
 	items map[string]*Task
@@ -67,6 +76,40 @@ func (store *MemoryStore) Get(ctx context.Context, id string) (*Task, error) {
 		return nil, fmt.Errorf("task %q not found", id)
 	}
 	return clone(item), nil
+}
+
+func (store *MemoryStore) SaveCheckpoint(ctx context.Context, taskID string, checkpoint string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	item := store.items[strings.TrimSpace(taskID)]
+	if item == nil {
+		return fmt.Errorf("task %q not found", taskID)
+	}
+	item.CheckpointJSON = checkpoint
+	return nil
+}
+
+func (store *MemoryStore) LoadCheckpoint(ctx context.Context, taskID string) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+	item := store.items[strings.TrimSpace(taskID)]
+	if item == nil {
+		return "", fmt.Errorf("task %q not found", taskID)
+	}
+	if strings.TrimSpace(item.CheckpointJSON) == "" {
+		return "", fmt.Errorf("task %q has no recovery checkpoint", taskID)
+	}
+	return item.CheckpointJSON, nil
+}
+
+func (store *MemoryStore) ClearCheckpoint(ctx context.Context, taskID string) error {
+	return store.SaveCheckpoint(ctx, taskID, "")
 }
 
 func (store *MemoryStore) List(ctx context.Context, options ListOptions) (ListResult, error) {
@@ -149,6 +192,8 @@ func markInterrupted(item *Task, at time.Time) {
 func clone(item *Task) *Task {
 	copyItem := *item
 	copyItem.Result = append([]byte(nil), item.Result...)
+	copyItem.Plan = append([]byte(nil), item.Plan...)
+	copyItem.Steps = append([]byte(nil), item.Steps...)
 	copyItem.Events = append([]Event(nil), item.Events...)
 	return &copyItem
 }

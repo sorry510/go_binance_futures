@@ -21,6 +21,8 @@ const (
 
 type Event struct {
 	TaskID     string    `json:"task_id"`
+	StepID     string    `json:"step_id,omitempty"`
+	StepType   string    `json:"step_type,omitempty"`
 	Stage      string    `json:"stage"`
 	Progress   int       `json:"progress"`
 	Round      int       `json:"round,omitempty"`
@@ -28,6 +30,8 @@ type Event struct {
 	Skill      string    `json:"skill,omitempty"`
 	Tool       string    `json:"tool,omitempty"`
 	Status     string    `json:"status,omitempty"`
+	ErrorType  string    `json:"error_type,omitempty"`
+	Checkpoint bool      `json:"checkpoint,omitempty"`
 	DurationMs int64     `json:"duration_ms,omitempty"`
 	Time       time.Time `json:"time"`
 }
@@ -64,6 +68,11 @@ type Task struct {
 	MaxRounds             int             `json:"max_rounds"`
 	Provider              string          `json:"provider,omitempty"`
 	Model                 string          `json:"model,omitempty"`
+	ExecutionMode         string          `json:"execution_mode,omitempty"`
+	Plan                  json.RawMessage `json:"plan,omitempty"`
+	Steps                 json.RawMessage `json:"steps,omitempty"`
+	ResumeCount           int             `json:"resume_count,omitempty"`
+	CheckpointJSON        string          `json:"-"`
 	RuntimeVersion        string          `json:"runtime_version"`
 	SkillVersion          string          `json:"skill_version"`
 	PromptVersion         string          `json:"prompt_version"`

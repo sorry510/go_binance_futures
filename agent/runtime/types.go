@@ -75,6 +75,7 @@ type Config struct {
 	MaxToolCalls       int
 	MaxTotalTokens     int
 	BudgetProvider     BudgetProvider
+	Planner            Planner
 	Observer           Observer
 	Retry              RetryPolicy
 	EventHook          func(task.Event)

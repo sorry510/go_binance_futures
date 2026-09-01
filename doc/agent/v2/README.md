@@ -52,7 +52,7 @@ V2 从现在开始严格按照 Phase 编号顺序开发，不再使用“编号�
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
 | [V2-0](./00-phase-v2-0-baseline.md) | P0 ✅ | 冻结 V1 契约、Fixture、版本和 Replay 基线 |
-| [V2-1](./01-phase-v2-1-runtime.md) | P0 | Runtime V2、ExecutionStep、Checkpoint、恢复 |
+| [V2-1](./01-phase-v2-1-runtime.md) | P0 ✅ | Runtime V2、ExecutionStep、Checkpoint、恢复 |
 | [V2-2](./02-phase-v2-2-context-evidence.md) | P0 | Context Engine、Evidence、Token/Freshness 管理 |
 | [V2-3](./03-phase-v2-3-tool-runtime.md) | P0 | Tool Runtime、Schema、Envelope、并行、缓存 |
 | [V2-4](./04-phase-v2-4-eval-replay.md) | P0 | Eval、Replay、Prompt/Skill Version、回归 Gate |
