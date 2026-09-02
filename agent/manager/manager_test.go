@@ -16,13 +16,14 @@ type fakeClient struct {
 }
 
 func (*fakeClient) Provider() llm.Provider { return llm.ProviderOpenAICompatible }
+func (*fakeClient) ConfigID() int64        { return 42 }
 func (client *fakeClient) Generate(context.Context, llm.Request) (*llm.Response, error) {
 	return &llm.Response{Model: "fake", Content: client.response}, nil
 }
 
 func TestManagerStartsAndPersistsRuntimeTask(t *testing.T) {
 	skills := skill.NewRegistry()
-	if err := skills.Register(skill.Definition{SkillName: "test", Prompt: "test", Rounds: 2}); err != nil {
+	if err := skills.Register(skill.Definition{SkillName: "test", Prompt: "test", Rounds: 2, Version: skill.VersionInfo{SkillVersion: "1.2.3", PromptVersion: "2.0.0", InputContractVersion: "input_v1", OutputContractVersion: "output_v1", Source: skill.DefaultSource, SourceVersion: "builtin-v1"}}); err != nil {
 		t.Fatal(err)
 	}
 	store := task.NewMemoryStore()
@@ -44,6 +45,9 @@ func TestManagerStartsAndPersistsRuntimeTask(t *testing.T) {
 	if started.ID == "" || started.Status != task.StatusQueued {
 		t.Fatalf("unexpected started task: %+v", started)
 	}
+	if started.RuntimeVersion != agentruntime.CurrentVersion || started.SkillVersion != "1.2.3" || started.PromptVersion != "2.0.0" || started.PromptHash != skill.HashPrompt("test") || started.ModelConfigID != 42 {
+		t.Fatalf("task version identity was not frozen at start: %+v", started.VersionMetadata())
+	}
 
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
@@ -52,6 +56,9 @@ func TestManagerStartsAndPersistsRuntimeTask(t *testing.T) {
 			t.Fatal(getErr)
 		}
 		if stored.Status == task.StatusSucceeded {
+			if stored.VersionMetadata() != started.VersionMetadata() {
+				t.Fatalf("task version identity changed while running: start=%+v stored=%+v", started.VersionMetadata(), stored.VersionMetadata())
+			}
 			if stored.ID != started.ID || stored.Progress != 100 || string(stored.Result) != `{"ok":true}` {
 				t.Fatalf("unexpected completed task: %+v", stored)
 			}
@@ -100,4 +107,91 @@ func TestManagerCallsCompletionHook(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("completion hook was not called")
 	}
+}
+
+type managerBlockingClient struct {
+	started chan struct{}
+}
+
+func (*managerBlockingClient) Provider() llm.Provider { return llm.ProviderOpenAICompatible }
+func (*managerBlockingClient) ConfigID() int64        { return 42 }
+func (client *managerBlockingClient) Generate(ctx context.Context, _ llm.Request) (*llm.Response, error) {
+	select {
+	case client.started <- struct{}{}:
+	default:
+	}
+	<-ctx.Done()
+	return nil, ctx.Err()
+}
+
+func TestManagerCancelAndResumeUsesFrozenModelConfig(t *testing.T) {
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "resume", Prompt: "resume", Rounds: 3}); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	blocking := &managerBlockingClient{started: make(chan struct{}, 1)}
+	var requestedConfigID int64
+	manager, err := New(Config{
+		Skills: skills,
+		Store:  store,
+		NewClient: func() (llm.Client, error) {
+			return blocking, nil
+		},
+		NewClientByID: func(id int64) (llm.Client, error) {
+			requestedConfigID = id
+			return &fakeClient{response: `{"action":"final","result":{"ok":true}}`}, nil
+		},
+		RuntimeConfig: agentruntime.Config{Timeout: time.Second, Retry: agentruntime.RetryPolicy{MaxAttempts: 1}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	started, err := manager.Start(agentruntime.Request{Skill: "resume", Input: "hello"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	<-blocking.started
+	if err := manager.Cancel(context.Background(), started.ID); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		item, getErr := store.Get(context.Background(), started.ID)
+		if getErr != nil {
+			t.Fatal(getErr)
+		}
+		if item.Status == task.StatusCancelled {
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	cancelled, err := store.Get(context.Background(), started.ID)
+	if err != nil || cancelled.Status != task.StatusCancelled {
+		t.Fatalf("task was not cancelled: %+v err=%v", cancelled, err)
+	}
+	if _, err := manager.Resume(context.Background(), started.ID); err != nil {
+		t.Fatal(err)
+	}
+	if requestedConfigID != 42 {
+		t.Fatalf("resume model config id = %d, want 42", requestedConfigID)
+	}
+	deadline = time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		item, getErr := store.Get(context.Background(), started.ID)
+		if getErr != nil {
+			t.Fatal(getErr)
+		}
+		if item.Status == task.StatusSucceeded {
+			if item.ResumeCount != 1 {
+				t.Fatalf("resume count = %d, want 1", item.ResumeCount)
+			}
+			return
+		}
+		if item.Status == task.StatusFailed {
+			t.Fatalf("resumed task failed: %+v", item)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	t.Fatal("resumed task did not complete")
 }

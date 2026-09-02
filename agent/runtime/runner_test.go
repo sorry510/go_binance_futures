@@ -478,3 +478,326 @@ func TestRunnerRepairsTruncatedResponse(t *testing.T) {
 		t.Fatalf("truncation feedback missing: %+v", request.Messages)
 	}
 }
+
+type checkpointClient struct {
+	mu       sync.Mutex
+	calls    int
+	blocking chan struct{}
+}
+
+func (client *checkpointClient) Provider() llm.Provider { return llm.ProviderOpenAICompatible }
+func (client *checkpointClient) Generate(ctx context.Context, _ llm.Request) (*llm.Response, error) {
+	client.mu.Lock()
+	client.calls++
+	call := client.calls
+	client.mu.Unlock()
+	if call == 1 {
+		return &llm.Response{Content: `{"action":"tool","tool":"echo","arguments":{"value":7}}`}, nil
+	}
+	select {
+	case client.blocking <- struct{}{}:
+	default:
+	}
+	<-ctx.Done()
+	return nil, ctx.Err()
+}
+
+func TestRunnerResumeFromSafeToolCheckpointDoesNotRepeatTool(t *testing.T) {
+	client := &checkpointClient{blocking: make(chan struct{}, 1)}
+	var toolCalls atomic.Int32
+	echoTool := tools.Func{
+		ToolName: "echo", ToolRisk: permission.RiskRead,
+		ToolMetadata: tools.Metadata{Idempotent: true},
+		ExecuteFunc: func(_ context.Context, args json.RawMessage) (any, error) {
+			toolCalls.Add(1)
+			var value map[string]int
+			if err := json.Unmarshal(args, &value); err != nil {
+				return nil, err
+			}
+			return value, nil
+		},
+	}
+	definition := skill.Definition{SkillName: "resume", AllowedTools: []string{"echo"}, Rounds: 4}
+	runner, store := newTestRunner(t, client, definition, echoTool)
+	ctx, cancel := context.WithCancel(context.Background())
+	resultC := make(chan error, 1)
+	go func() {
+		_, err := runner.Run(ctx, Request{TaskID: "resume-task", Skill: "resume", Input: "test", Metadata: map[string]any{"scheduler_job": "market_regime", "ignored_complex": []string{"not", "persisted"}}})
+		resultC <- err
+	}()
+	<-client.blocking
+	cancel()
+	if err := <-resultC; err == nil || !strings.Contains(err.Error(), "context canceled") {
+		t.Fatalf("unexpected cancellation: %v", err)
+	}
+	cancelled, err := store.Get(context.Background(), "resume-task")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cancelled.Status != task.StatusCancelled || cancelled.CheckpointJSON == "" {
+		t.Fatalf("expected resumable cancelled task: %+v", cancelled)
+	}
+	if toolCalls.Load() != 1 {
+		t.Fatalf("tool calls before resume = %d, want 1", toolCalls.Load())
+	}
+
+	resumeClient := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}}}}
+	resumeRunner, err := NewRunner(Config{
+		Client: resumeClient, Skills: runner.cfg.Skills, Tools: runner.cfg.Tools, Tasks: store,
+		Policy: permission.AllowReadOnly(), Retry: RetryPolicy{MaxAttempts: 1}, Timeout: time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resumeRequest, err := resumeRunner.ResumeRequest(context.Background(), "resume-task")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resumeRequest.Metadata["scheduler_job"] != "market_regime" {
+		t.Fatalf("runtime-owned resume metadata was not preserved: %+v", resumeRequest.Metadata)
+	}
+	if _, exists := resumeRequest.Metadata["ignored_complex"]; exists {
+		t.Fatalf("arbitrary skill metadata leaked into checkpoint: %+v", resumeRequest.Metadata)
+	}
+	result, err := resumeRunner.Resume(context.Background(), "resume-task")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result == nil || toolCalls.Load() != 1 {
+		t.Fatalf("resume repeated safe tool: result=%+v calls=%d", result, toolCalls.Load())
+	}
+	stored, err := store.Get(context.Background(), "resume-task")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.Status != task.StatusSucceeded || stored.ResumeCount != 1 || stored.ExecutionMode != string(ExecutionModeReact) {
+		t.Fatalf("unexpected resumed task: %+v", stored)
+	}
+	var steps []ExecutionStep
+	if err := json.Unmarshal(stored.Steps, &steps); err != nil || len(steps) < 4 {
+		t.Fatalf("execution steps not persisted: %s err=%v", stored.Steps, err)
+	}
+	foundCheckpoint := false
+	for _, event := range stored.Events {
+		if event.StepID != "" && event.Checkpoint {
+			foundCheckpoint = true
+			break
+		}
+	}
+	if !foundCheckpoint {
+		t.Fatalf("checkpoint step event missing: %+v", stored.Events)
+	}
+}
+
+func TestRunnerUnsafeToolClearsRecoveryCheckpointBeforeExecution(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{Content: `{"action":"tool","tool":"write","arguments":{}}`}}}}
+	writeTool := tools.Func{
+		ToolName: "write", ToolRisk: permission.RiskWrite,
+		ToolMetadata: tools.Metadata{Idempotent: true},
+		ExecuteFunc:  func(context.Context, json.RawMessage) (any, error) { return map[string]bool{"ok": true}, nil },
+	}
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "unsafe", AllowedTools: []string{"write"}, Rounds: 1}); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	runner, err := NewRunner(Config{
+		Client: client, Skills: skills, Tools: func() *tools.Registry {
+			registry := tools.NewRegistry()
+			_ = registry.Register(writeTool)
+			return registry
+		}(),
+		Tasks: store, Policy: permission.AllowWritesFor(map[string][]string{"unsafe": {"write"}}),
+		Retry: RetryPolicy{MaxAttempts: 1}, Timeout: time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = runner.Run(context.Background(), Request{TaskID: "unsafe-task", Skill: "unsafe", Input: "test"})
+	stored, err := store.Get(context.Background(), "unsafe-task")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.CheckpointJSON != "" {
+		t.Fatalf("unsafe tool left resumable checkpoint: %s", stored.CheckpointJSON)
+	}
+}
+
+type fakePlanner struct {
+	plan Plan
+	err  error
+}
+
+func (planner fakePlanner) Plan(context.Context, PlanRequest) (Plan, error) {
+	return planner.plan, planner.err
+}
+
+func TestPlanExecuteUsesNormalToolPermissionBoundary(t *testing.T) {
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "planned", Mode: string(ExecutionModePlanExecute), AllowedTools: []string{"write"}, Rounds: 2}); err != nil {
+		t.Fatal(err)
+	}
+	registry := tools.NewRegistry()
+	if err := registry.Register(tools.Func{
+		ToolName: "write", ToolRisk: permission.RiskWrite, ToolMetadata: tools.Metadata{Idempotent: true},
+		ExecuteFunc: func(context.Context, json.RawMessage) (any, error) { return map[string]bool{"ok": true}, nil },
+	}); err != nil {
+		t.Fatal(err)
+	}
+	runner, err := NewRunner(Config{
+		Client: &fakeLLMClient{}, Skills: skills, Tools: registry, Tasks: task.NewMemoryStore(),
+		Policy: permission.AllowReadOnly(), Planner: fakePlanner{plan: Plan{Steps: []PlannedStep{{StepID: "write-1", Type: StepTool, Tool: "write"}}}},
+		Retry: RetryPolicy{MaxAttempts: 1}, Timeout: time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = runner.Run(context.Background(), Request{TaskID: "plan-denied", Skill: "planned", Input: "test"})
+	if err == nil || !strings.Contains(err.Error(), "exceeds allowed risk") {
+		t.Fatalf("planner bypassed tool permission: %v", err)
+	}
+}
+
+func TestPlanExecuteRunsPlannedReadToolThenReactFinal(t *testing.T) {
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "planned", Mode: string(ExecutionModePlanExecute), AllowedTools: []string{"echo"}, Rounds: 2}); err != nil {
+		t.Fatal(err)
+	}
+	var calls atomic.Int32
+	registry := tools.NewRegistry()
+	if err := registry.Register(tools.Func{
+		ToolName: "echo", ToolRisk: permission.RiskRead, ToolMetadata: tools.Metadata{Idempotent: true},
+		ExecuteFunc: func(context.Context, json.RawMessage) (any, error) {
+			calls.Add(1)
+			return map[string]bool{"ok": true}, nil
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}}}}
+	runner, err := NewRunner(Config{
+		Client: client, Skills: skills, Tools: registry, Tasks: store, Policy: permission.AllowReadOnly(),
+		Planner: fakePlanner{plan: Plan{Summary: "prefetch", Steps: []PlannedStep{{StepID: "read-1", Type: StepTool, Tool: "echo", Arguments: json.RawMessage(`{}`)}}}},
+		Retry:   RetryPolicy{MaxAttempts: 1}, Timeout: time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runner.Run(context.Background(), Request{TaskID: "plan-success", Skill: "planned", Input: "test"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result == nil || calls.Load() != 1 {
+		t.Fatalf("unexpected plan execution: result=%+v calls=%d", result, calls.Load())
+	}
+	stored, err := store.Get(context.Background(), "plan-success")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.ExecutionMode != string(ExecutionModePlanExecute) || !strings.Contains(string(stored.Plan), "read-1") {
+		t.Fatalf("plan was not tracked: mode=%s plan=%s", stored.ExecutionMode, stored.Plan)
+	}
+}
+
+func TestPlanExecuteRejectsPlanOverToolBudget(t *testing.T) {
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "budget-plan", Mode: string(ExecutionModePlanExecute), AllowedTools: []string{"echo"}, Rounds: 2}); err != nil {
+		t.Fatal(err)
+	}
+	registry := tools.NewRegistry()
+	_ = registry.Register(tools.Func{ToolName: "echo", ToolRisk: permission.RiskRead, ToolMetadata: tools.Metadata{Idempotent: true}})
+	runner, err := NewRunner(Config{
+		Client: &fakeLLMClient{}, Skills: skills, Tools: registry, Tasks: task.NewMemoryStore(), Policy: permission.AllowReadOnly(), MaxToolCalls: 1,
+		Planner: fakePlanner{plan: Plan{Steps: []PlannedStep{{Tool: "echo"}, {Tool: "echo"}}}}, Retry: RetryPolicy{MaxAttempts: 1}, Timeout: time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = runner.Run(context.Background(), Request{TaskID: "plan-budget", Skill: "budget-plan", Input: "test"})
+	if err == nil || !strings.Contains(err.Error(), "budget allows 1") {
+		t.Fatalf("planner bypassed tool budget: %v", err)
+	}
+}
+
+type blockingPlanner struct {
+	started chan struct{}
+}
+
+func (planner blockingPlanner) Plan(ctx context.Context, _ PlanRequest) (Plan, error) {
+	select {
+	case planner.started <- struct{}{}:
+	default:
+	}
+	<-ctx.Done()
+	return Plan{}, ctx.Err()
+}
+
+func TestPlanExecuteRejectsSelfDependency(t *testing.T) {
+	plan := Plan{Steps: []PlannedStep{{StepID: "self", Type: StepTool, Tool: "echo", DependsOn: []string{"self"}}}}
+	err := validatePlan(plan, map[string]bool{"echo": true}, 1)
+	if err == nil || !strings.Contains(err.Error(), "cannot depend on itself") {
+		t.Fatalf("self dependency was accepted: %v", err)
+	}
+}
+
+func TestPlanExecutePlannerTimeoutUsesRuntimeTimeoutState(t *testing.T) {
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "planned-timeout", Mode: string(ExecutionModePlanExecute), Rounds: 2}); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	runner, err := NewRunner(Config{
+		Client: &fakeLLMClient{}, Skills: skills, Tasks: store, Policy: permission.AllowReadOnly(),
+		Planner: blockingPlanner{started: make(chan struct{}, 1)}, Timeout: 25 * time.Millisecond,
+		Retry: RetryPolicy{MaxAttempts: 1},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = runner.Run(context.Background(), Request{TaskID: "plan-timeout", Skill: "planned-timeout", Input: "test"})
+	if err == nil || !strings.Contains(err.Error(), "deadline exceeded") {
+		t.Fatalf("unexpected planner timeout error: %v", err)
+	}
+	stored, getErr := store.Get(context.Background(), "plan-timeout")
+	if getErr != nil {
+		t.Fatal(getErr)
+	}
+	if stored.Status != task.StatusFailed || stored.Stage != "timeout" {
+		t.Fatalf("planner timeout bypassed runtime terminal state: %+v", stored)
+	}
+}
+
+func TestPlanExecutePlannerCancellationUsesRuntimeCancelledState(t *testing.T) {
+	started := make(chan struct{}, 1)
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "planned-cancel", Mode: string(ExecutionModePlanExecute), Rounds: 2}); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	runner, err := NewRunner(Config{
+		Client: &fakeLLMClient{}, Skills: skills, Tasks: store, Policy: permission.AllowReadOnly(),
+		Planner: blockingPlanner{started: started}, Timeout: time.Second, Retry: RetryPolicy{MaxAttempts: 1},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	resultC := make(chan error, 1)
+	go func() {
+		_, runErr := runner.Run(ctx, Request{TaskID: "plan-cancel", Skill: "planned-cancel", Input: "test"})
+		resultC <- runErr
+	}()
+	<-started
+	cancel()
+	if runErr := <-resultC; runErr == nil || !strings.Contains(runErr.Error(), "context canceled") {
+		t.Fatalf("unexpected planner cancellation error: %v", runErr)
+	}
+	stored, getErr := store.Get(context.Background(), "plan-cancel")
+	if getErr != nil {
+		t.Fatal(getErr)
+	}
+	if stored.Status != task.StatusCancelled || stored.Stage != "cancelled" {
+		t.Fatalf("planner cancellation bypassed runtime terminal state: %+v", stored)
+	}
+}

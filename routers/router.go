@@ -15,6 +15,8 @@ func init() {
 	web.Router("/update-market-condition/:taskId", &controllers.IndexController{}, "get:GetMarketConditionUpdateTask") // 查询市场状态更新进度
 	web.Router("/agents/tasks", &controllers.AgentController{}, "get:ListTasks;post:StartTask")                        // 创建/查询统一 Agent 任务
 	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask")                                 // 查询统一 Agent 任务
+	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                      // 取消运行中的 Agent 任务
+	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                      // 从安全 Checkpoint 恢复 Agent 任务
 	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory")      // 查询单币分析历史
 	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus")                  // 查询事件报警链路状态与追踪
 	web.Router("/agents/scheduler/status", &controllers.AgentController{}, "get:GetSchedulerStatus")                   // 查询 Agent Scheduler 状态
@@ -23,8 +25,8 @@ func init() {
 	web.Router("/agents/skills", &controllers.AgentSkillController{}, "get:Get;post:Post")                             // Agent Skill 配置
 	web.Router("/agents/skills/:id", &controllers.AgentSkillController{}, "put:Put;delete:Delete")                     // Agent Skill 更新/删除
 	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                           // LLM Provider 预设
-	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                  // 测试 LLM 配置
-	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                               // LLM 配置列表/新增
+	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                   // 测试 LLM 配置
+	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                                // LLM 配置列表/新增
 	web.Router("/llm/configs/:id", &controllers.LLMConfigController{}, "put:Put;delete:Delete")                        // LLM 配置更新/删除
 	web.Router("/agents/scheduler/jobs/:name/trigger", &controllers.AgentController{}, "post:TriggerSchedulerJob")     // 手动触发 Scheduler Job
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post")                           // 列表查询和新增

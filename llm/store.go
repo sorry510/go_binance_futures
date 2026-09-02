@@ -252,10 +252,15 @@ func configFromInput(input ConfigInput) (Config, error) {
 }
 
 func configFromModel(row models.LLMConfig) (Config, error) {
-	return configFromInput(ConfigInput{
+	cfg, err := configFromInput(ConfigInput{
 		Name: row.Name, Provider: row.Provider, APIURL: row.APIURL, APIKey: row.APIKey, Model: row.Model,
 		APIVersion: row.APIVersion, TimeoutSeconds: row.TimeoutSeconds, Temperature: row.Temperature, Enabled: row.Enabled,
 	})
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.ID = row.ID
+	return cfg, nil
 }
 func modelFromInput(input ConfigInput) models.LLMConfig {
 	return models.LLMConfig{
