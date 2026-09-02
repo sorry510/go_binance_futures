@@ -2,6 +2,7 @@ package binance
 
 import (
 	"context"
+	"go_binance_futures/binanceproxy"
 	"go_binance_futures/models"
 	"go_binance_futures/utils"
 	"sort"
@@ -21,14 +22,21 @@ import (
 var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
 var proxy_url, _ = config.String("binance::proxy_url")
+var proxyPool *binanceproxy.Pool
 
 var client *binance.Client
 
 func init() {
-	if proxy_url == "" {
-		client = binance.NewClient(api_key, api_secret)
-	} else {
-		client = binance.NewProxiedClient(api_key, api_secret, proxy_url)
+	var err error
+	proxyPool, err = binanceproxy.New(proxy_url)
+	if err != nil {
+		logs.Error("invalid binance proxy config:", err)
+		proxyPool, _ = binanceproxy.New("")
+	}
+
+	client = binance.NewClient(api_key, api_secret)
+	if proxyPool.Enabled() {
+		client.HTTPClient = proxyPool.HTTPClient()
 	}
 }
 
@@ -249,7 +257,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		var lock = false
 		var o = orm.NewOrm()
 		runErrCh := make(chan error, 1)
-		doneC, _, err := binance.WsAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
+		doneC, _, err := wsSpotAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
 			if systemConfig.WsSpotEnable == 1 {
 				if flagWsSpot == 0 {
 					logs.Info("spot ws start")

@@ -37,7 +37,7 @@ func UpdateDeliveryCoinByWs(systemConfig *models.Config) {
 	// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
 	var lock = false
 	var o = orm.NewOrm()
-	_, _, err := delivery.WsAllMarketTickerServe(func(event delivery.WsAllMarketTickerEvent) {
+	_, _, err := wsDeliveryAllMarketTickerServe(func(event delivery.WsAllMarketTickerEvent) {
 		if (systemConfig.WsDeliveryEnable == 1) {
 			if (flagWsDelivery == 0) {
 				logs.Info("delivery ws start")
