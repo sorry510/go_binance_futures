@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"fmt"
+	"go_binance_futures/binanceproxy"
 	agentevent "go_binance_futures/agent/event"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
@@ -28,6 +29,7 @@ import (
 var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
 var proxy_url, _ = config.String("binance::proxy_url")
+var proxyPool *binanceproxy.Pool
 var pusher = notify.GetNotifyChannel()
 
 const (
@@ -48,12 +50,18 @@ var futuresClient *futures.Client
 var deliveryClient *delivery.Client
 
 func init() {
-	if proxy_url == "" {
-		futuresClient = futures.NewClient(api_key, api_secret)
-		deliveryClient = delivery.NewClient(api_key, api_secret)
-	} else {
-		futuresClient = futures.NewProxiedClient(api_key, api_secret, proxy_url)
-		deliveryClient = delivery.NewClient(api_key, api_secret) // 暂不支持代理
+	var err error
+	proxyPool, err = binanceproxy.New(proxy_url)
+	if err != nil {
+		logs.Error("invalid binance proxy config:", err)
+		proxyPool, _ = binanceproxy.New("")
+	}
+
+	futuresClient = futures.NewClient(api_key, api_secret)
+	deliveryClient = delivery.NewClient(api_key, api_secret)
+	if proxyPool.Enabled() {
+		futuresClient.HTTPClient = proxyPool.HTTPClient()
+		deliveryClient.HTTPClient = proxyPool.HTTPClient()
 	}
 }
 
@@ -688,7 +696,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		var lastAlertAt atomic.Int64
 		// futures.WebsocketKeepalive = true
 		
-		doneC, _, err := futures.WsAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
+		doneC, _, err := wsFuturesAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
 			lastRecvAt.Store(time.Now().UnixMilli())
 			lastAlertAt.Store(0)
 			if systemConfig.WsFuturesEnable == 1 {
@@ -854,7 +862,7 @@ func WsUserData() {
 	}
 	logs.Info("futures_user_data ws start: auto update db futures position")
 	o := orm.NewOrm()
-	doneC, _, err := futures.WsUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
+	doneC, _, err := wsFuturesUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
 		if (event.Event == "ACCOUNT_UPDATE") {
 			for _, v := range event.AccountUpdate.Positions {
 				floatAmount, _ := strconv.ParseFloat(v.Amount, 64)
@@ -948,7 +956,7 @@ func WsUserData() {
 
 // @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams
 func WsKlineData(symbol string, interval string, callback func(kline futures.WsKline)) {
-	_, _, err := futures.WsKlineServe(symbol, interval, func(event *futures.WsKlineEvent) {
+	_, _, err := wsFuturesKlineServe(symbol, interval, func(event *futures.WsKlineEvent) {
 		callback(event.Kline)
 	}, func(err error) {
 		logs.Error("futures ws kline data error:", err)

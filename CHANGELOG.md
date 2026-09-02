@@ -1,5 +1,11 @@
 ### Change Log
 
+## v1.0.1
+- 升级优化 ai agent
+- 增加 binance proxy 代理池配置项(支持 http 和 ws)
+- 升级项目依赖
+- 修复发现的 bug
+
 ## v1.0.0
 - 重构 ai 相关功能，增加自己的 ai agent
 - llm 配置改为页面配置

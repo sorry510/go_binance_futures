@@ -37,7 +37,7 @@ func CollectFuturesLiquidationOrders(systemConfig *models.Config) {
 		}
 		logs.Info("futures liquidation websocket start: collect liquidation orders")
 
-		doneC, stopC, err := futures.WsAllLiquidationOrderServe(func(event *futures.WsLiquidationOrderEvent) {
+		doneC, stopC, err := wsFuturesAllLiquidationOrderServe(func(event *futures.WsLiquidationOrderEvent) {
 			if systemConfig.WsFuturesLiquidationEnable != 1 {
 				return
 			}
