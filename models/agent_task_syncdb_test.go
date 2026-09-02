@@ -10,6 +10,15 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+func testStringPointer(value string) *string { return &value }
+
+func testStringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
 const legacyAgentTaskDDL = `CREATE TABLE agent_tasks (
 	id varchar(64) primary key,
 	skill varchar(64),
@@ -119,14 +128,14 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	if err := o.Read(&legacy); err != nil {
 		t.Fatalf("beego ORM must read NULL V2 text fields as empty strings: %v", err)
 	}
-	if legacy.PlanJSON != "" || legacy.StepsJSON != "" || legacy.CheckpointJSON != "" {
-		t.Fatalf("unexpected legacy V2 state: plan=%q steps=%q checkpoint=%q", legacy.PlanJSON, legacy.StepsJSON, legacy.CheckpointJSON)
+	if testStringValue(legacy.PlanJSON) != "" || testStringValue(legacy.StepsJSON) != "" || testStringValue(legacy.CheckpointJSON) != "" {
+		t.Fatalf("unexpected legacy V2 state: plan=%q steps=%q checkpoint=%q", testStringValue(legacy.PlanJSON), testStringValue(legacy.StepsJSON), testStringValue(legacy.CheckpointJSON))
 	}
 
 	fresh := AgentTask{
 		ID: "fresh-task", Skill: "symbol_analysis", Status: "succeeded", Stage: "completed",
-		ExecutionMode: "react", PlanJSON: `{"summary":"ok"}`, StepsJSON: `[{"step_id":"step-001"}]`,
-		CheckpointJSON: `{"safe":true}`, ResumeCount: 1, RuntimeVersion: "2.0.0",
+		ExecutionMode: "react", PlanJSON: testStringPointer(`{"summary":"ok"}`), StepsJSON: testStringPointer(`[{"step_id":"step-001"}]`),
+		CheckpointJSON: testStringPointer(`{"safe":true}`), ResumeCount: 1, RuntimeVersion: "2.0.0",
 		SkillVersion: "1.0.0", PromptVersion: "1.0.0", PromptHash: strings.Repeat("a", 64),
 		ModelConfigID: 7, InputContractVersion: "symbol_analysis_input_v1",
 		OutputContractVersion: "trading_plan_v1", SkillSource: "native", SkillSourceVersion: "v1",
@@ -139,7 +148,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	if err := o.Read(&got); err != nil {
 		t.Fatalf("read current V2 task after upgrade: %v", err)
 	}
-	if got.ExecutionMode != "react" || got.ResumeCount != 1 || !strings.Contains(got.CheckpointJSON, "safe") {
+	if got.ExecutionMode != "react" || got.ResumeCount != 1 || !strings.Contains(testStringValue(got.CheckpointJSON), "safe") {
 		t.Fatalf("V2 fields did not round-trip after upgrade: %+v", got)
 	}
 }

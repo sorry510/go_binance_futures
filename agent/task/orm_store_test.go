@@ -125,3 +125,14 @@ func TestORMStoreListsPersistedTasks(t *testing.T) {
 		t.Fatalf("expected persisted tasks, got %+v", result)
 	}
 }
+
+func TestToModelKeepsEmptyRuntimeTextExplicitForStrictSQLSchemas(t *testing.T) {
+	now := time.Now().UTC()
+	row := toModel(&Task{ID: "strict-schema", Skill: "symbol_analysis", Status: StatusQueued, CreatedAt: now, UpdatedAt: now})
+	if row.PlanJSON == nil || row.StepsJSON == nil || row.CheckpointJSON == nil {
+		t.Fatalf("runtime text columns must be explicit non-nil values: plan=%v steps=%v checkpoint=%v", row.PlanJSON, row.StepsJSON, row.CheckpointJSON)
+	}
+	if *row.PlanJSON != "" || *row.StepsJSON != "" || *row.CheckpointJSON != "" {
+		t.Fatalf("empty runtime state must persist as empty strings: plan=%q steps=%q checkpoint=%q", *row.PlanJSON, *row.StepsJSON, *row.CheckpointJSON)
+	}
+}
