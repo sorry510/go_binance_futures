@@ -3,9 +3,11 @@ package runtime
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/llm"
 )
@@ -42,46 +44,51 @@ const (
 )
 
 type ExecutionStep struct {
-	StepID        string     `json:"step_id"`
-	Type          StepType   `json:"type"`
-	Status        StepStatus `json:"status"`
-	Attempt       int        `json:"attempt"`
-	DependsOn     []string   `json:"depends_on,omitempty"`
-	InputSummary  string     `json:"input_summary,omitempty"`
-	OutputSummary string     `json:"output_summary,omitempty"`
-	StartedAt     *time.Time `json:"started_at,omitempty"`
-	CompletedAt   *time.Time `json:"completed_at,omitempty"`
-	ErrorType     string     `json:"error_type,omitempty"`
-	Error         string     `json:"error,omitempty"`
-	Checkpoint    bool       `json:"checkpoint,omitempty"`
+	StepID        string                    `json:"step_id"`
+	Type          StepType                  `json:"type"`
+	Status        StepStatus                `json:"status"`
+	Attempt       int                       `json:"attempt"`
+	DependsOn     []string                  `json:"depends_on,omitempty"`
+	InputSummary  string                    `json:"input_summary,omitempty"`
+	OutputSummary string                    `json:"output_summary,omitempty"`
+	StartedAt     *time.Time                `json:"started_at,omitempty"`
+	CompletedAt   *time.Time                `json:"completed_at,omitempty"`
+	ErrorType     string                    `json:"error_type,omitempty"`
+	Error         string                    `json:"error,omitempty"`
+	Checkpoint    bool                      `json:"checkpoint,omitempty"`
+	ContextTrace  *contextengine.BuildTrace `json:"context_trace,omitempty"`
+	Evidence      []contextengine.Evidence  `json:"evidence,omitempty"`
 }
 
 type RunState struct {
-	Version         string                     `json:"version"`
-	TaskID          string                     `json:"task_id"`
-	Skill           string                     `json:"skill"`
-	Mode            ExecutionMode              `json:"mode"`
-	Snapshot        ExecutionSnapshot          `json:"snapshot"`
-	Messages        []llm.Message              `json:"messages"`
-	Round           int                        `json:"round"`
-	NextRound       int                        `json:"next_round"`
-	MaxRounds       int                        `json:"max_rounds"`
-	ToolCalls       int                        `json:"tool_calls"`
-	MaxToolCalls    int                        `json:"max_tool_calls"`
-	MaxTotalTokens  int                        `json:"max_total_tokens"`
-	RequiredTools   map[string]bool            `json:"required_tools,omitempty"`
-	SuccessfulTools map[string]bool            `json:"successful_tools,omitempty"`
-	ToolResults     map[string]json.RawMessage `json:"tool_results,omitempty"`
-	Plan            *Plan                      `json:"plan,omitempty"`
-	PlanCursor      int                        `json:"plan_cursor,omitempty"`
-	Steps           []ExecutionStep            `json:"steps"`
-	StepSequence    int                        `json:"step_sequence"`
-	ResumeSafe      bool                       `json:"resume_safe"`
-	CheckpointAt    *time.Time                 `json:"checkpoint_at,omitempty"`
-	ResumeMetadata  map[string]string          `json:"resume_metadata,omitempty"`
+	Version          string                            `json:"version"`
+	TaskID           string                            `json:"task_id"`
+	Skill            string                            `json:"skill"`
+	Mode             ExecutionMode                     `json:"mode"`
+	Snapshot         ExecutionSnapshot                 `json:"snapshot"`
+	Messages         []llm.Message                     `json:"-"`
+	Round            int                               `json:"round"`
+	NextRound        int                               `json:"next_round"`
+	MaxRounds        int                               `json:"max_rounds"`
+	ToolCalls        int                               `json:"tool_calls"`
+	MaxToolCalls     int                               `json:"max_tool_calls"`
+	MaxTotalTokens   int                               `json:"max_total_tokens"`
+	RequiredTools    map[string]bool                   `json:"required_tools,omitempty"`
+	SuccessfulTools  map[string]bool                   `json:"successful_tools,omitempty"`
+	ToolResults      map[string]json.RawMessage        `json:"tool_results,omitempty"`
+	Plan             *Plan                             `json:"plan,omitempty"`
+	PlanCursor       int                               `json:"plan_cursor,omitempty"`
+	Steps            []ExecutionStep                   `json:"steps"`
+	StepSequence     int                               `json:"step_sequence"`
+	ResumeSafe       bool                              `json:"resume_safe"`
+	CheckpointAt     *time.Time                        `json:"checkpoint_at,omitempty"`
+	ResumeMetadata   map[string]string                 `json:"resume_metadata,omitempty"`
+	ContextBlocks    []contextengine.ContextBlock      `json:"context_blocks,omitempty"`
+	Evidence         map[string]contextengine.Evidence `json:"evidence,omitempty"`
+	LastContextTrace contextengine.BuildTrace          `json:"last_context_trace,omitempty"`
 }
 
-const runStateVersion = "runtime_state_v1"
+const runStateVersion = "runtime_state_v2"
 
 func newRunState(taskID, skillName string, mode ExecutionMode, snapshot ExecutionSnapshot, maxRounds, maxToolCalls, maxTotalTokens int) *RunState {
 	return &RunState{
@@ -89,6 +96,7 @@ func newRunState(taskID, skillName string, mode ExecutionMode, snapshot Executio
 		NextRound: 1, MaxRounds: maxRounds, MaxToolCalls: maxToolCalls, MaxTotalTokens: maxTotalTokens,
 		RequiredTools: map[string]bool{}, SuccessfulTools: map[string]bool{}, ToolResults: map[string]json.RawMessage{},
 		Steps: []ExecutionStep{}, ResumeSafe: true, ResumeMetadata: map[string]string{},
+		ContextBlocks: []contextengine.ContextBlock{}, Evidence: map[string]contextengine.Evidence{},
 	}
 }
 
@@ -130,6 +138,72 @@ func (state *RunState) markCheckpoint(stepID string) {
 			return
 		}
 	}
+}
+
+func (state *RunState) setContextTrace(stepID string, trace contextengine.BuildTrace) {
+	state.LastContextTrace = trace
+	for index := range state.Steps {
+		if state.Steps[index].StepID == stepID {
+			copy := trace
+			state.Steps[index].ContextTrace = &copy
+			return
+		}
+	}
+}
+
+func (state *RunState) addEvidence(stepID string, values []contextengine.Evidence) {
+	if state.Evidence == nil {
+		state.Evidence = map[string]contextengine.Evidence{}
+	}
+	for _, value := range values {
+		if value.ID != "" {
+			state.Evidence[value.ID] = value
+		}
+	}
+	for index := range state.Steps {
+		if state.Steps[index].StepID == stepID {
+			state.Steps[index].Evidence = append(state.Steps[index].Evidence, values...)
+			return
+		}
+	}
+}
+
+func (state *RunState) appendContextBlock(block contextengine.ContextBlock) {
+	block.Order = len(state.ContextBlocks)
+	state.ContextBlocks = append(state.ContextBlocks, block)
+}
+
+func (state *RunState) restoreMessagesFromContextBlocks() {
+	state.Messages = state.Messages[:0]
+	for _, block := range state.ContextBlocks {
+		if strings.TrimSpace(block.Role) == "" || strings.TrimSpace(block.Content) == "" {
+			continue
+		}
+		state.Messages = append(state.Messages, llm.Message{Role: block.Role, Content: block.Content})
+	}
+}
+
+func (state *RunState) allEvidence() []contextengine.Evidence {
+	ids := make([]string, 0, len(state.Evidence))
+	for id := range state.Evidence {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	result := make([]contextengine.Evidence, 0, len(ids))
+	for _, id := range ids {
+		result = append(result, state.Evidence[id])
+	}
+	return result
+}
+
+func (state *RunState) evidenceBySource(source string) []contextengine.Evidence {
+	result := []contextengine.Evidence{}
+	for _, value := range state.Evidence {
+		if value.Source == source {
+			result = append(result, value)
+		}
+	}
+	return result
 }
 
 func (state *RunState) step(stepID string) *ExecutionStep {

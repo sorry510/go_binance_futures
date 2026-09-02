@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/validator"
@@ -109,12 +110,56 @@ func (coordinator *coordinator) buildContext(ctx context.Context, session *runSe
 		return coordinator.runner.fail(currentTask, "build_input_failed", err)
 	}
 	state.Messages = messages
-	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages", len(messages)), "", nil)
+	state.ContextBlocks = contextengine.InitialMessageBlocks(messages)
+	resourceCount := 0
+	if provider, ok := session.selectedSkill.(skill.ContextResourceProvider); ok {
+		resources, loadErr := coordinator.runner.cfg.ContextEngine.LoadResources(ctx, provider.ContextResources(session.skillRequest), requestedContextResourceIDs(session.req.Metadata))
+		if loadErr != nil {
+			state.finishStep(stepID, StepFailed, "", "context_resource_failed", loadErr)
+			state.syncTask(currentTask)
+			return coordinator.runner.fail(currentTask, "build_input_failed", loadErr)
+		}
+		for _, block := range resources {
+			state.appendContextBlock(block)
+		}
+		resourceCount = len(resources)
+	}
+	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages, %d resources", len(messages), resourceCount), "", nil)
 	if err := coordinator.runner.saveCheckpoint(ctx, currentTask, state, stepID, 1); err != nil {
 		return coordinator.runner.fail(currentTask, "checkpoint_failed", err)
 	}
 	coordinator.runner.recordStep(currentTask, state, stepID, task.StatusRunning, "input_built", 4, "skill input built", "", true)
 	return nil
+}
+
+func requestedContextResourceIDs(metadata map[string]any) []string {
+	if metadata == nil {
+		return nil
+	}
+	value, exists := metadata["context_resource_ids"]
+	if !exists {
+		return nil
+	}
+	result := []string{}
+	switch typed := value.(type) {
+	case []string:
+		result = append(result, typed...)
+	case []any:
+		for _, item := range typed {
+			if text, ok := item.(string); ok {
+				result = append(result, text)
+			}
+		}
+	case string:
+		result = strings.Split(typed, ",")
+	}
+	clean := result[:0]
+	for _, item := range result {
+		if item = strings.TrimSpace(item); item != "" {
+			clean = append(clean, item)
+		}
+	}
+	return clean
 }
 
 func (coordinator *coordinator) prepareResume(ctx context.Context, taskID string) (*runSession, error) {

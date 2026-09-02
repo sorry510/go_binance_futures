@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/validator"
 	"go_binance_futures/lang"
@@ -147,6 +148,21 @@ func (*Definition) ValidatorForRun(req skill.Request, toolResults map[string]any
 			return nil, err
 		}
 		return alert, nil
+	})
+}
+
+func (definition *Definition) ValidatorForRunWithEvidence(req skill.Request, toolResults map[string]any, evidence map[string]contextengine.Evidence) validator.FinalValidator {
+	base := definition.ValidatorForRun(req, toolResults)
+	return validator.Func(func(ctx context.Context, raw json.RawMessage) (any, error) {
+		value, err := base.Validate(ctx, raw)
+		if err != nil {
+			return nil, err
+		}
+		result := value.(AlertV1)
+		if err := validateStructuredEvidenceSources(result.Evidence, evidence); err != nil {
+			return nil, err
+		}
+		return result, nil
 	})
 }
 
@@ -292,6 +308,30 @@ func validateEvidence(items []Evidence) error {
 	}
 	if !hasContext {
 		return fmt.Errorf("evidence must include get_symbol_analysis_context")
+	}
+	return nil
+}
+
+func validateStructuredEvidenceSources(items []Evidence, registry map[string]contextengine.Evidence) error {
+	for index, item := range items {
+		source := strings.TrimSpace(item.Source)
+		found := false
+		usable := false
+		for _, evidence := range registry {
+			if strings.TrimSpace(evidence.Source) != source {
+				continue
+			}
+			found = true
+			if evidence.ContentHash != "" && evidence.Freshness != contextengine.FreshnessMissing {
+				usable = true
+			}
+		}
+		if !found {
+			return fmt.Errorf("evidence %d source %q has no structured runtime evidence", index+1, source)
+		}
+		if !usable {
+			return fmt.Errorf("evidence %d source %q has no usable structured runtime evidence", index+1, source)
+		}
 	}
 	return nil
 }

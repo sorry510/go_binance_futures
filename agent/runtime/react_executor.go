@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/llm"
@@ -32,14 +33,25 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 		state.Round = round
 		state.NextRound = round
 		item.Round = round
-		if contextSize(state.Snapshot.SystemPrompt, messages) > executor.runner.cfg.MaxContextBytes {
-			return nil, executor.runner.fail(item, "context_too_large", fmt.Errorf("agent context exceeds %d bytes", executor.runner.cfg.MaxContextBytes))
-		}
-
 		progress := 5 + (round-1)*80/state.MaxRounds
 		llmStep := state.startStep(StepLLM, 1, fmt.Sprintf("agent round %d/%d", round, state.MaxRounds))
+		requestMessages, contextTrace, contextErr := executor.runner.cfg.ContextEngine.Build(contextengine.BuildOptions{
+			SystemPrompt: state.Snapshot.SystemPrompt, Blocks: state.ContextBlocks,
+			MaxTokens: executor.runner.cfg.MaxContextTokens, MaxBytes: executor.runner.cfg.MaxContextBytes, Now: time.Now().UTC(),
+		})
+		state.setContextTrace(llmStep, contextTrace)
+		state.syncTask(item)
+		if contextErr != nil {
+			state.finishStep(llmStep, StepFailed, "context build failed", "context_too_large", contextErr)
+			state.syncTask(item)
+			return nil, executor.runner.fail(item, "context_too_large", contextErr)
+		}
+		if contextTrace.TrimmedBlocks > 0 {
+			executor.runner.recordStep(item, state, llmStep, task.StatusRunning, "context_trimmed", progress,
+				fmt.Sprintf("context trimmed %d/%d blocks to %d estimated tokens", contextTrace.TrimmedBlocks, contextTrace.InputBlocks, contextTrace.SelectedTokens), "", false)
+		}
 		executor.runner.recordStep(item, state, llmStep, task.StatusWaitingLLM, "waiting_llm", progress, fmt.Sprintf("agent round %d/%d", round, state.MaxRounds), "", false)
-		response, err := executor.runner.generateWithRetry(ctx, llm.Request{System: state.Snapshot.SystemPrompt, Messages: messages}, item, state, llmStep, progress)
+		response, err := executor.runner.generateWithRetry(ctx, llm.Request{System: state.Snapshot.SystemPrompt, Messages: requestMessages}, item, state, llmStep, progress)
 		if err != nil {
 			state.finishStep(llmStep, StepFailed, "", classifyError(err), err)
 			state.syncTask(item)
@@ -64,7 +76,7 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 		if response.Model != "" {
 			item.Model = response.Model
 		}
-		executor.runner.appendRuntimeMessage(item.ID, &messages, llm.Message{Role: llm.RoleAssistant, Content: response.Content})
+		executor.runner.appendRuntimeMessage(item.ID, state, &messages, llm.Message{Role: llm.RoleAssistant, Content: response.Content})
 		state.Messages = messages
 		state.finishStep(llmStep, StepSucceeded, "LLM response received", "", nil)
 		state.syncTask(item)
@@ -72,7 +84,7 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 		if isTruncatedFinishReason(response.FinishReason) {
 			executor.runner.observeRepair(item, "truncated_response")
 			feedback := repairFeedback("truncated_response", "LLM response was truncated by the output token limit")
-			executor.runner.appendRuntimeMessage(item.ID, &messages, feedback)
+			executor.runner.appendRuntimeMessage(item.ID, state, &messages, feedback)
 			state.Messages = messages
 			executor.runner.recordStep(item, state, llmStep, task.StatusRunning, "repairing_response", progress+1, "LLM response was truncated", "truncated_response", false)
 			if err := executor.runner.saveCheckpoint(ctx, item, state, llmStep, round+1); err != nil {
@@ -85,7 +97,7 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 		if err != nil {
 			executor.runner.observeRepair(item, "decision_protocol")
 			feedback := repairFeedback("decision_protocol", err.Error())
-			executor.runner.appendRuntimeMessage(item.ID, &messages, feedback)
+			executor.runner.appendRuntimeMessage(item.ID, state, &messages, feedback)
 			state.Messages = messages
 			executor.runner.recordStep(item, state, llmStep, task.StatusRunning, "repairing_decision", progress+1, err.Error(), "decision_protocol", false)
 			if checkpointErr := executor.runner.saveCheckpoint(ctx, item, state, llmStep, round+1); checkpointErr != nil {
@@ -170,23 +182,45 @@ func (executor *reactExecutor) executeTool(ctx context.Context, session *runSess
 	if metadata.MaxResultBytes > 0 && (maxResultBytes <= 0 || metadata.MaxResultBytes < maxResultBytes) {
 		maxResultBytes = metadata.MaxResultBytes
 	}
-	toolMessage, err := buildToolResultMessage(selectedTool.Name(), value, toolErr, maxResultBytes)
+	var conversion contextengine.ToolConversion
+	evidence := []contextengine.Evidence{}
+	if toolErr == nil {
+		var conversionErr error
+		conversion, conversionErr = executor.runner.cfg.ContextEngine.ConvertToolResult(selectedTool.Name(), value, time.Now().UTC())
+		if conversionErr != nil {
+			state.finishStep(stepID, StepFailed, "", "evidence_conversion_failed", conversionErr)
+			state.syncTask(item)
+			return executor.runner.fail(item, "tool_result_failed", conversionErr)
+		}
+		evidence = conversion.Evidence
+		state.addEvidence(stepID, evidence)
+	}
+	toolMessage, err := buildToolResultMessage(selectedTool.Name(), value, toolErr, maxResultBytes, evidence)
 	if err != nil {
 		state.finishStep(stepID, StepFailed, "", "tool_result_failed", err)
 		state.syncTask(item)
 		return executor.runner.fail(item, "tool_result_failed", err)
 	}
-	executor.runner.appendRuntimeMessage(item.ID, messages, toolMessage)
+	if toolErr == nil {
+		conversion.Block.ID = "tool-" + stepID
+		executor.runner.appendRuntimeMessage(item.ID, state, messages, toolMessage, conversion.Block)
+	} else {
+		executor.runner.appendRuntimeMessage(item.ID, state, messages, toolMessage)
+	}
 	state.Messages = *messages
 	if toolErr == nil {
 		state.SuccessfulTools[selectedTool.Name()] = true
 		session.toolResults[selectedTool.Name()] = value
 		if safeCheckpoint {
-			raw, marshalErr := json.Marshal(value)
-			if marshalErr != nil {
-				state.finishStep(stepID, StepFailed, "", "checkpoint_encode_failed", marshalErr)
-				state.syncTask(item)
-				return executor.runner.fail(item, "checkpoint_failed", marshalErr)
+			raw := conversion.ResultJSON
+			if len(raw) == 0 {
+				var marshalErr error
+				raw, marshalErr = json.Marshal(value)
+				if marshalErr != nil {
+					state.finishStep(stepID, StepFailed, "", "checkpoint_encode_failed", marshalErr)
+					state.syncTask(item)
+					return executor.runner.fail(item, "checkpoint_failed", marshalErr)
+				}
 			}
 			state.ToolResults[selectedTool.Name()] = raw
 		}
@@ -222,7 +256,7 @@ func (executor *reactExecutor) executeFinal(ctx context.Context, session *runSes
 		sort.Strings(missingTools)
 		err := fmt.Errorf("required tools must succeed before final: %s", strings.Join(missingTools, ", "))
 		feedback := repairFeedback("required_tools", err.Error())
-		executor.runner.appendRuntimeMessage(item.ID, messages, feedback)
+		executor.runner.appendRuntimeMessage(item.ID, state, messages, feedback)
 		state.Messages = *messages
 		executor.runner.recordStep(item, state, dependsOn, task.StatusRunning, "repairing_required_tools", min(progress+4, 95), err.Error(), "required_tools", false)
 		if checkpointErr := executor.runner.saveCheckpoint(ctx, item, state, dependsOn, round+1); checkpointErr != nil {
@@ -234,7 +268,9 @@ func (executor *reactExecutor) executeFinal(ctx context.Context, session *runSes
 	stepID := state.startStep(StepValidate, 1, "validate final result", dependsOn)
 	executor.runner.recordStep(item, state, stepID, task.StatusValidating, "validating", min(progress+4, 95), "validating final result", "", false)
 	validatorForFinal := session.finalValidator
-	if provider, ok := session.selectedSkill.(skill.RunValidatorProvider); ok {
+	if provider, ok := session.selectedSkill.(skill.StructuredEvidenceValidatorProvider); ok {
+		validatorForFinal = provider.ValidatorForRunWithEvidence(session.skillRequest, session.toolResults, state.Evidence)
+	} else if provider, ok := session.selectedSkill.(skill.RunValidatorProvider); ok {
 		validatorForFinal = provider.ValidatorForRun(session.skillRequest, session.toolResults)
 	}
 	validationStarted := time.Now()
@@ -257,7 +293,7 @@ func (executor *reactExecutor) executeFinal(ctx context.Context, session *runSes
 		state.finishStep(stepID, StepFailed, "validation failed", "validation_error", err)
 		executor.runner.observeRepair(item, "final_validation")
 		feedback := repairFeedback("final_validation", err.Error())
-		executor.runner.appendRuntimeMessage(item.ID, messages, feedback)
+		executor.runner.appendRuntimeMessage(item.ID, state, messages, feedback)
 		state.Messages = *messages
 		executor.runner.recordStep(item, state, stepID, task.StatusRunning, "repairing_final", min(progress+5, 96), err.Error(), "validation_error", false)
 		if checkpointErr := executor.runner.saveCheckpoint(ctx, item, state, stepID, round+1); checkpointErr != nil {
@@ -265,6 +301,7 @@ func (executor *reactExecutor) executeFinal(ctx context.Context, session *runSes
 		}
 		return nil, false, nil
 	}
+	state.addEvidence(stepID, state.allEvidence())
 	state.finishStep(stepID, StepSucceeded, "final result valid", "", nil)
 
 	finalizeStep := state.startStep(StepFinalize, 1, "finalize task", stepID)
