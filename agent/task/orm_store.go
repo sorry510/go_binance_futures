@@ -155,10 +155,10 @@ func (store *ORMStore) LoadCheckpoint(ctx context.Context, taskID string) (strin
 	if err := store.orm().QueryTable(new(models.AgentTask)).Filter("id", strings.TrimSpace(taskID)).One(&row, "CheckpointJSON"); err != nil {
 		return "", err
 	}
-	if strings.TrimSpace(row.CheckpointJSON) == "" {
+	if strings.TrimSpace(stringValue(row.CheckpointJSON)) == "" {
 		return "", fmt.Errorf("task %q has no recovery checkpoint", taskID)
 	}
-	return row.CheckpointJSON, nil
+	return stringValue(row.CheckpointJSON), nil
 }
 
 func (store *ORMStore) ClearCheckpoint(ctx context.Context, taskID string) error {
@@ -189,12 +189,24 @@ func (store *ORMStore) appendMissingEvents(o orm.Ormer, item *Task) error {
 	return nil
 }
 
+func stringPointer(value string) *string {
+	copy := value
+	return &copy
+}
+
+func stringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
 func toModel(item *Task) models.AgentTask {
 	row := models.AgentTask{
 		ID: item.ID, Skill: item.Skill, ConversationID: item.ConversationID, Status: string(item.Status), Stage: item.Stage, Progress: item.Progress,
 		InputJSON: sanitizePayload(item.Input), ResultJSON: sanitizePayload(string(item.Result)), Error: sanitizeText(item.Error),
 		Round: item.Round, MaxRounds: item.MaxRounds, Provider: item.Provider, Model: item.Model,
-		ExecutionMode: item.ExecutionMode, PlanJSON: sanitizePayload(string(item.Plan)), StepsJSON: sanitizePayload(string(item.Steps)), CheckpointJSON: sanitizePayload(item.CheckpointJSON), ResumeCount: item.ResumeCount,
+		ExecutionMode: item.ExecutionMode, PlanJSON: stringPointer(sanitizePayload(string(item.Plan))), StepsJSON: stringPointer(sanitizePayload(string(item.Steps))), CheckpointJSON: stringPointer(sanitizePayload(item.CheckpointJSON)), ResumeCount: item.ResumeCount,
 		RuntimeVersion: item.RuntimeVersion, SkillVersion: item.SkillVersion, PromptVersion: item.PromptVersion,
 		PromptHash: item.PromptHash, ModelConfigID: item.ModelConfigID, InputContractVersion: item.InputContractVersion,
 		OutputContractVersion: item.OutputContractVersion, SkillSource: item.SkillSource, SkillSourceVersion: item.SkillSourceVersion,
@@ -215,7 +227,7 @@ func fromModel(row models.AgentTask) *Task {
 		ID: row.ID, Skill: row.Skill, ConversationID: row.ConversationID, Status: Status(row.Status), Stage: row.Stage, Progress: row.Progress,
 		Input: row.InputJSON, Result: json.RawMessage(row.ResultJSON), Error: row.Error,
 		Round: row.Round, MaxRounds: row.MaxRounds, Provider: row.Provider, Model: row.Model,
-		ExecutionMode: row.ExecutionMode, Plan: json.RawMessage(row.PlanJSON), Steps: json.RawMessage(row.StepsJSON), CheckpointJSON: row.CheckpointJSON, ResumeCount: row.ResumeCount,
+		ExecutionMode: row.ExecutionMode, Plan: json.RawMessage(stringValue(row.PlanJSON)), Steps: json.RawMessage(stringValue(row.StepsJSON)), CheckpointJSON: stringValue(row.CheckpointJSON), ResumeCount: row.ResumeCount,
 		RuntimeVersion: row.RuntimeVersion, SkillVersion: row.SkillVersion, PromptVersion: row.PromptVersion,
 		PromptHash: row.PromptHash, ModelConfigID: row.ModelConfigID, InputContractVersion: row.InputContractVersion,
 		OutputContractVersion: row.OutputContractVersion, SkillSource: row.SkillSource, SkillSourceVersion: row.SkillSourceVersion,
