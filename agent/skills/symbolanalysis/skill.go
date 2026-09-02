@@ -55,6 +55,13 @@ type Definition struct{}
 func New() *Definition                   { return &Definition{} }
 func (*Definition) Name() string         { return Name }
 func (*Definition) SystemPrompt() string { return systemPrompt }
+func (*Definition) VersionInfo() skill.VersionInfo {
+	return skill.VersionInfo{
+		SkillVersion: "1.0.0", PromptVersion: "1.0.0",
+		InputContractVersion: "symbol_analysis_input_v1", OutputContractVersion: "trading_plan_v1",
+		Source: skill.DefaultSource, SourceVersion: "v1",
+	}
+}
 func (*Definition) Tools() []string {
 	return []string{"get_symbol_analysis_context", "get_klines", "get_funding_rate", "get_liquidations", "get_symbol_snapshot", "get_market_condition"}
 }

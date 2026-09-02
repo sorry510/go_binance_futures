@@ -131,7 +131,10 @@ func syncDb() {
 	hasSync := false
 	if err != nil {
 		logs.Info("The config table does not exist or has changed, it is automatically updating...")
-		orm.RunSyncdb("default", false, false) // 根据 model 创建数据表
+		if syncErr := orm.RunSyncdb("default", false, false); syncErr != nil { // 根据 model 创建数据表
+			logs.Error("sync database schema error:", syncErr)
+			panic(syncErr)
+		}
 		hasSync = true
 		command.InitData(0)                   // 初始化配置信息
 		config, err = utils.GetSystemConfig() // 重新获取配置信息
@@ -142,7 +145,10 @@ func syncDb() {
 	}
 	// 根据旧版本更新数据库
 	if !hasSync {
-		orm.RunSyncdb("default", false, false) // 根据 model 更新新创建的数据表
+		if syncErr := orm.RunSyncdb("default", false, false); syncErr != nil { // 根据 model 更新新创建的数据表
+			logs.Error("sync database schema error:", syncErr)
+			panic(syncErr)
+		}
 	}
 	oldVersion := config.Version
 	if oldVersion < dbVersion {

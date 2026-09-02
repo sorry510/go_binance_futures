@@ -52,6 +52,8 @@ func (client *openAIClient) Provider() Provider {
 	return client.cfg.Provider
 }
 
+func (client *openAIClient) ConfigID() int64 { return client.cfg.ID }
+
 func (client *openAIClient) Generate(ctx context.Context, request Request) (*Response, error) {
 	messages := make([]openAIMessage, 0, len(request.Messages)+1)
 	if request.System != "" {

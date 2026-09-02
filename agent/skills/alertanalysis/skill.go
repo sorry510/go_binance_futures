@@ -49,6 +49,13 @@ type Definition struct{}
 
 func New() *Definition           { return &Definition{} }
 func (*Definition) Name() string { return Name }
+func (*Definition) VersionInfo() skill.VersionInfo {
+	return skill.VersionInfo{
+		SkillVersion: "1.0.0", PromptVersion: "1.0.0",
+		InputContractVersion: "alert_analysis_input_v1", OutputContractVersion: "alert_v1",
+		Source: skill.DefaultSource, SourceVersion: "v1",
+	}
+}
 func (*Definition) SystemPrompt() string {
 	language := "English"
 	if strings.HasPrefix(strings.ToLower(lang.GetLanguage()), "zh") {

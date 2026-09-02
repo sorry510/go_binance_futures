@@ -1,9 +1,27 @@
 package llm
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func NewFromConfig() (Client, error) {
 	cfg, err := LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+	return NewClient(cfg)
+}
+
+func NewFromConfigID(id int64) (Client, error) {
+	if id <= 0 {
+		return NewFromConfig()
+	}
+	row, err := (Store{}).Get(context.Background(), id)
+	if err != nil {
+		return nil, fmt.Errorf("load LLM configuration %d: %w", id, err)
+	}
+	cfg, err := configFromModel(*row)
 	if err != nil {
 		return nil, err
 	}
@@ -25,4 +43,14 @@ func NewClient(cfg Config) (Client, error) {
 	default:
 		return nil, fmt.Errorf("unsupported llm provider %q", cfg.Provider)
 	}
+}
+
+// ConfigID returns the persisted LLM configuration id when the client was
+// created from database-backed configuration. Test/custom clients may return 0.
+func ConfigID(client Client) int64 {
+	type configIdentified interface{ ConfigID() int64 }
+	if identified, ok := client.(configIdentified); ok {
+		return identified.ConfigID()
+	}
+	return 0
 }

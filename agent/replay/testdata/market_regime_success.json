@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "name": "market-regime-success",
+  "skill": "market_regime",
+  "model_config_id": 101,
+  "input": "{\"as_of\": \"2026-08-01T00:00:00Z\", \"symbol_count\": 10, \"advancing_count\": 5, \"declining_count\": 5}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\": \"final\", \"summary\": \"市场震荡\", \"result\": {\"market_condition\": 3, \"confidence\": 0.72, \"reason\": \"上涨与下跌家数接近，方向性不足\"}}"
+    }
+  ]
+}

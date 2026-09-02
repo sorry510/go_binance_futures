@@ -129,6 +129,42 @@ func (store *ORMStore) MarkInterrupted(ctx context.Context, at time.Time) (int64
 	return int64(len(rows)), nil
 }
 
+func (store *ORMStore) SaveCheckpoint(ctx context.Context, taskID string, checkpoint string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	taskID = strings.TrimSpace(taskID)
+	if taskID == "" {
+		return fmt.Errorf("task id is required")
+	}
+	count, err := store.orm().QueryTable(new(models.AgentTask)).Filter("id", taskID).Update(orm.Params{"CheckpointJSON": sanitizePayload(checkpoint)})
+	if err != nil {
+		return fmt.Errorf("save agent task checkpoint: %w", err)
+	}
+	if count == 0 {
+		return fmt.Errorf("task %q not found", taskID)
+	}
+	return nil
+}
+
+func (store *ORMStore) LoadCheckpoint(ctx context.Context, taskID string) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+	var row models.AgentTask
+	if err := store.orm().QueryTable(new(models.AgentTask)).Filter("id", strings.TrimSpace(taskID)).One(&row, "CheckpointJSON"); err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(stringValue(row.CheckpointJSON)) == "" {
+		return "", fmt.Errorf("task %q has no recovery checkpoint", taskID)
+	}
+	return stringValue(row.CheckpointJSON), nil
+}
+
+func (store *ORMStore) ClearCheckpoint(ctx context.Context, taskID string) error {
+	return store.SaveCheckpoint(ctx, taskID, "")
+}
+
 func (store *ORMStore) orm() orm.Ormer {
 	if strings.TrimSpace(store.Alias) != "" {
 		return orm.NewOrmUsingDB(store.Alias)
@@ -153,11 +189,27 @@ func (store *ORMStore) appendMissingEvents(o orm.Ormer, item *Task) error {
 	return nil
 }
 
+func stringPointer(value string) *string {
+	copy := value
+	return &copy
+}
+
+func stringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
 func toModel(item *Task) models.AgentTask {
 	row := models.AgentTask{
 		ID: item.ID, Skill: item.Skill, ConversationID: item.ConversationID, Status: string(item.Status), Stage: item.Stage, Progress: item.Progress,
 		InputJSON: sanitizePayload(item.Input), ResultJSON: sanitizePayload(string(item.Result)), Error: sanitizeText(item.Error),
 		Round: item.Round, MaxRounds: item.MaxRounds, Provider: item.Provider, Model: item.Model,
+		ExecutionMode: item.ExecutionMode, PlanJSON: stringPointer(sanitizePayload(string(item.Plan))), StepsJSON: stringPointer(sanitizePayload(string(item.Steps))), CheckpointJSON: stringPointer(sanitizePayload(item.CheckpointJSON)), ResumeCount: item.ResumeCount,
+		RuntimeVersion: item.RuntimeVersion, SkillVersion: item.SkillVersion, PromptVersion: item.PromptVersion,
+		PromptHash: item.PromptHash, ModelConfigID: item.ModelConfigID, InputContractVersion: item.InputContractVersion,
+		OutputContractVersion: item.OutputContractVersion, SkillSource: item.SkillSource, SkillSourceVersion: item.SkillSourceVersion,
 		InputTokens: item.Usage.InputTokens, OutputTokens: item.Usage.OutputTokens, TotalTokens: item.Usage.TotalTokens,
 		CreatedAt: item.CreatedAt.UnixMilli(), UpdatedAt: item.UpdatedAt.UnixMilli(),
 	}
@@ -175,6 +227,10 @@ func fromModel(row models.AgentTask) *Task {
 		ID: row.ID, Skill: row.Skill, ConversationID: row.ConversationID, Status: Status(row.Status), Stage: row.Stage, Progress: row.Progress,
 		Input: row.InputJSON, Result: json.RawMessage(row.ResultJSON), Error: row.Error,
 		Round: row.Round, MaxRounds: row.MaxRounds, Provider: row.Provider, Model: row.Model,
+		ExecutionMode: row.ExecutionMode, Plan: json.RawMessage(stringValue(row.PlanJSON)), Steps: json.RawMessage(stringValue(row.StepsJSON)), CheckpointJSON: stringValue(row.CheckpointJSON), ResumeCount: row.ResumeCount,
+		RuntimeVersion: row.RuntimeVersion, SkillVersion: row.SkillVersion, PromptVersion: row.PromptVersion,
+		PromptHash: row.PromptHash, ModelConfigID: row.ModelConfigID, InputContractVersion: row.InputContractVersion,
+		OutputContractVersion: row.OutputContractVersion, SkillSource: row.SkillSource, SkillSourceVersion: row.SkillSourceVersion,
 		Usage:     Usage{InputTokens: row.InputTokens, OutputTokens: row.OutputTokens, TotalTokens: row.TotalTokens},
 		CreatedAt: time.UnixMilli(row.CreatedAt).UTC(), UpdatedAt: time.UnixMilli(row.UpdatedAt).UTC(),
 	}
@@ -191,16 +247,16 @@ func fromModel(row models.AgentTask) *Task {
 
 func toEventModel(event Event, sequence int) models.AgentTaskEvent {
 	return models.AgentTaskEvent{
-		TaskID: event.TaskID, Sequence: sequence, Stage: event.Stage, Progress: event.Progress, Round: event.Round,
-		Message: sanitizeText(event.Message), Skill: event.Skill, Tool: event.Tool, Status: event.Status,
+		TaskID: event.TaskID, Sequence: sequence, StepID: event.StepID, StepType: event.StepType, Stage: event.Stage, Progress: event.Progress, Round: event.Round,
+		Message: sanitizeText(event.Message), Skill: event.Skill, Tool: event.Tool, Status: event.Status, ErrorType: event.ErrorType, Checkpoint: event.Checkpoint,
 		DurationMs: event.DurationMs, EventTime: event.Time.UnixMilli(),
 	}
 }
 
 func fromEventModel(row models.AgentTaskEvent) Event {
 	return Event{
-		TaskID: row.TaskID, Stage: row.Stage, Progress: row.Progress, Round: row.Round, Message: row.Message,
-		Skill: row.Skill, Tool: row.Tool, Status: row.Status, DurationMs: row.DurationMs,
+		TaskID: row.TaskID, StepID: row.StepID, StepType: row.StepType, Stage: row.Stage, Progress: row.Progress, Round: row.Round, Message: row.Message,
+		Skill: row.Skill, Tool: row.Tool, Status: row.Status, ErrorType: row.ErrorType, Checkpoint: row.Checkpoint, DurationMs: row.DurationMs,
 		Time: time.UnixMilli(row.EventTime).UTC(),
 	}
 }

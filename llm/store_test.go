@@ -56,6 +56,20 @@ func TestStoreMasksKeyAndSwitchesActiveConfig(t *testing.T) {
 	if second.Enabled != 1 {
 		t.Fatalf("second config not enabled: %+v", second)
 	}
+	active, err := store.ActiveConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if active.ID != second.ID {
+		t.Fatalf("active config identity lost: got %d want %d", active.ID, second.ID)
+	}
+	client, err := NewClient(active)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ConfigID(client) != second.ID {
+		t.Fatalf("client config identity = %d, want %d", ConfigID(client), second.ID)
+	}
 	items, err := store.List(ctx)
 	if err != nil {
 		t.Fatal(err)
@@ -128,5 +142,23 @@ func TestDeletingActiveConfigLeavesRuntimeUnconfigured(t *testing.T) {
 	}
 	if _, err := store.ActiveConfig(); err == nil || !strings.Contains(err.Error(), "no enabled LLM configuration") {
 		t.Fatalf("expected unconfigured runtime, got %v", err)
+	}
+}
+
+func TestNewFromConfigIDUsesRequestedConfiguration(t *testing.T) {
+	store := setupLLMStoreTest(t)
+	ctx := context.Background()
+	item, err := store.Create(ctx, ConfigInput{
+		Name: "resume-frozen", Provider: "ollama", Model: "qwen-resume", TimeoutSeconds: 30, Temperature: 0.2, Enabled: 1,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := NewFromConfigID(item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ConfigID(client) != item.ID {
+		t.Fatalf("client config id = %d, want %d", ConfigID(client), item.ID)
 	}
 }
