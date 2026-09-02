@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
@@ -71,11 +72,13 @@ type Config struct {
 	Timeout            time.Duration
 	DefaultMaxRounds   int
 	MaxContextBytes    int
+	MaxContextTokens   int
 	MaxToolResultBytes int
 	MaxToolCalls       int
 	MaxTotalTokens     int
 	BudgetProvider     BudgetProvider
 	Planner            Planner
+	ContextEngine      *contextengine.Engine
 	Observer           Observer
 	Retry              RetryPolicy
 	EventHook          func(task.Event)
@@ -92,6 +95,7 @@ func DefaultConfig() Config {
 		Timeout:            2 * time.Minute,
 		DefaultMaxRounds:   8,
 		MaxContextBytes:    256 * 1024,
+		MaxContextTokens:   64 * 1024,
 		MaxToolResultBytes: 128 * 1024,
 		MaxToolCalls:       20,
 		MaxTotalTokens:     120000,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/tools"
@@ -39,6 +40,12 @@ func NewRunner(cfg Config) (*DefaultRunner, error) {
 	}
 	if cfg.MaxContextBytes <= 0 {
 		cfg.MaxContextBytes = defaults.MaxContextBytes
+	}
+	if cfg.MaxContextTokens <= 0 {
+		cfg.MaxContextTokens = defaults.MaxContextTokens
+	}
+	if cfg.ContextEngine == nil {
+		cfg.ContextEngine = contextengine.New()
 	}
 	if cfg.MaxToolResultBytes <= 0 {
 		cfg.MaxToolResultBytes = defaults.MaxToolResultBytes
