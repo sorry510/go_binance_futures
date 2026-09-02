@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/tools"
@@ -80,6 +81,13 @@ func (runner *DefaultRunner) loadCheckpoint(ctx context.Context, taskID string) 
 	if state.ToolResults == nil {
 		state.ToolResults = map[string]json.RawMessage{}
 	}
+	if state.Evidence == nil {
+		state.Evidence = map[string]contextengine.Evidence{}
+	}
+	if state.ContextBlocks == nil {
+		state.ContextBlocks = []contextengine.ContextBlock{}
+	}
+	state.restoreMessagesFromContextBlocks()
 	return &state, nil
 }
 
