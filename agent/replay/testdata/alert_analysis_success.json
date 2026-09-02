@@ -1,0 +1,42 @@
+{
+  "version": "agent_replay_v1",
+  "name": "alert-analysis-success",
+  "skill": "alert_analysis",
+  "model_config_id": 104,
+  "input": "{\"alert_id\": \"alt-sig-1\", \"signal\": {\"signal_id\": \"sig-1\", \"event_id\": \"evt-1\", \"symbol\": \"BTCUSDT\", \"type\": \"fast_move\", \"severity\": \"high\", \"window\": \"3m\", \"metrics\": {\"change_percent\": 12}, \"labels\": {\"direction\": \"up\"}, \"evidence\": [{\"source\": \"price_tick\", \"finding\": \"3m +12%\"}], \"created_at\": 0}}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\": \"tool\", \"summary\": \"读取聚合上下文\", \"tool\": \"get_symbol_analysis_context\", \"arguments\": {\"symbol\": \"BTCUSDT\"}}"
+    },
+    {
+      "model": "fixture-model",
+      "content": "{\"action\": \"final\", \"summary\": \"确认报警\", \"result\": {\"version\": \"alert_v1\", \"alert_id\": \"alt-sig-1\", \"signal_id\": \"sig-1\", \"symbol\": \"BTCUSDT\", \"type\": \"fast_move\", \"severity\": \"high\", \"summary\": \"快速上涨信号得到固定上下文确认\", \"market_context\": \"短周期价格快速上行\", \"confirmed_by\": [\"价格快速上涨\"], \"risks\": [\"高波动可能快速回撤\"], \"action\": \"notify\", \"cooldown_until\": \"{{NOW_PLUS_10M_RFC3339}}\", \"data_missing\": [], \"evidence\": [{\"source\": \"get_symbol_analysis_context\", \"finding\": \"固定上下文用于验证报警链路\"}]}}"
+    }
+  ],
+  "tools": {
+    "get_symbol_analysis_context": [
+      {
+        "result": {
+          "symbol": "BTCUSDT",
+          "as_of": "2026-08-01T00:00:00Z",
+          "snapshot": {
+            "symbol": "BTCUSDT",
+            "price": 100,
+            "percent_change_24h": 0,
+            "open_24h": 100,
+            "high_24h": 101,
+            "low_24h": 99,
+            "quote_volume_24h": 1000000,
+            "trade_count_24h": 1000,
+            "updated_at_ms": 0,
+            "data_age_ms": 0
+          },
+          "klines": [],
+          "previous_analyses": [],
+          "data_missing": []
+        }
+      }
+    ]
+  }
+}

@@ -178,6 +178,13 @@ func newSymbolAnalysisContextTool(deps Dependencies) agenttools.Tool {
 	}
 	return agenttools.Func{ToolName: "get_symbol_analysis_context", ToolDescription: "聚合单个 USDT 永续合约分析上下文：行情快照、MarketCondition、多周期 K 线特征、Funding、OI、Taker、Depth 与最近强平；失败项写入 data_missing", ToolRisk: permission.RiskRead,
 		ToolMetadata: metadata(`{"type":"object","required":["symbol"],"additionalProperties":false,"properties":{"symbol":{"type":"string"}}}`, 40*time.Second, 96<<10),
+		RestoreCheckpointFunc: func(raw json.RawMessage) (any, error) {
+			var value symbolanalysisservice.Context
+			if err := json.Unmarshal(raw, &value); err != nil {
+				return nil, err
+			}
+			return value, nil
+		},
 		ExecuteFunc: func(ctx context.Context, raw json.RawMessage) (any, error) {
 			var in input
 			if err := strictDecode(raw, &in); err != nil {

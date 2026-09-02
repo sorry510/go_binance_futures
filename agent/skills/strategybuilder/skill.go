@@ -34,6 +34,13 @@ type Builder struct{ options Options }
 func New(options Options) *Builder    { return &Builder{options: options} }
 func (*Builder) Name() string         { return Name }
 func (*Builder) SystemPrompt() string { return systemPrompt }
+func (*Builder) VersionInfo() skill.VersionInfo {
+	return skill.VersionInfo{
+		SkillVersion: "1.0.0", PromptVersion: "1.0.0",
+		InputContractVersion: "strategy_builder_input_v1", OutputContractVersion: "strategy_template_v1",
+		Source: skill.DefaultSource, SourceVersion: "v1",
+	}
+}
 func (*Builder) Tools() []string {
 	return []string{"get_features", "get_test_strategy_results", "get_market_condition"}
 }

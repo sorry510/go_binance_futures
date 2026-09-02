@@ -1,0 +1,10 @@
+{
+  "version": "agent_replay_v1",
+  "skill": "test",
+  "name": "runtime-llm-json-error",
+  "llm": [
+    {
+      "content": "not-json"
+    }
+  ]
+}
