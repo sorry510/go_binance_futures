@@ -18,8 +18,9 @@ log_level = 6
 [binance]
 api_key = ""
 api_secret = ""
-# 本地代理(如果不需要改为"")
-proxy_url = "http://127.0.0.1:7890"
+# Binance HTTP/WebSocket SOCKS5 代理，不需要时留空；多个代理使用英文逗号分隔并轮询使用
+# 支持 socks5:// 与 socks5h://，可使用 socks5://user:password@host:port
+proxy_url = ""
 
 [database]
 # mysql
