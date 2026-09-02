@@ -91,10 +91,23 @@ func (service HistoryService) Save(ctx context.Context, req HistorySaveRequest) 
 		o = orm.NewOrm()
 	}
 	var existing models.SymbolAnalysisHistory
-	err := o.QueryTable(new(models.SymbolAnalysisHistory)).Filter("task_id", req.TaskID).One(&existing)
+	query := o.QueryTable(new(models.SymbolAnalysisHistory)).Filter("task_id", req.TaskID)
+	err := query.One(&existing)
 	if err == orm.ErrNoRows {
-		_, err = o.Insert(&item)
-		return err
+		if _, insertErr := o.Insert(&item); insertErr == nil {
+			return nil
+		} else {
+			// CompletionHook and EnsureCompletion can persist the same terminal task concurrently.
+			// If another writer won the unique task_id insert race, reload that row and update it.
+			if retryErr := query.One(&existing); retryErr == nil {
+				item.ID = existing.ID
+				_, updateErr := o.Update(&item)
+				return updateErr
+			} else if retryErr != orm.ErrNoRows {
+				return fmt.Errorf("insert symbol analysis history: %v; reload after insert failure: %w", insertErr, retryErr)
+			}
+			return insertErr
+		}
 	}
 	if err != nil {
 		return fmt.Errorf("find symbol analysis history: %w", err)

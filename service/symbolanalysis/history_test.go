@@ -3,6 +3,7 @@ package symbolanalysis
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
@@ -18,7 +19,8 @@ func TestHistoryServicePersistsAndListsAnalysis(t *testing.T) {
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
-	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "history.db")); err != nil {
+	dataSource := filepath.Join(t.TempDir(), "history.db") + "?_busy_timeout=5000&_journal_mode=WAL"
+	if err := orm.RegisterDataBase(alias, "sqlite3", dataSource); err != nil {
 		t.Fatal(err)
 	}
 	orm.RegisterModel(new(models.SymbolAnalysisHistory))
@@ -62,5 +64,33 @@ func TestHistoryServicePersistsAndListsAnalysis(t *testing.T) {
 	}
 	if string(item.Result) != string(result) {
 		t.Fatalf("result json mismatch: %s", string(item.Result))
+	}
+
+	const concurrentTaskID = "task-concurrent"
+	const workers = 16
+	start := make(chan struct{})
+	errC := make(chan error, workers)
+	for i := 0; i < workers; i++ {
+		go func(index int) {
+			<-start
+			errC <- service.Save(context.Background(), HistorySaveRequest{
+				TaskID: concurrentTaskID, Symbol: "ONGUSDT", Prompt: fmt.Sprintf("并发分析-%d", index),
+				Status: "succeeded", Result: result, Provider: "test", Model: "fake",
+				AnalysisPrice: 100 + float64(index), CreatedAt: now.UnixMilli(), CompletedAt: now.Add(time.Second).UnixMilli(),
+			})
+		}(i)
+	}
+	close(start)
+	for i := 0; i < workers; i++ {
+		if err := <-errC; err != nil {
+			t.Fatalf("concurrent history save failed: %v", err)
+		}
+	}
+	count, err := orm.NewOrmUsingDB(alias).QueryTable(new(models.SymbolAnalysisHistory)).Filter("task_id", concurrentTaskID).Count()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 1 {
+		t.Fatalf("expected one history row for concurrent task, got %d", count)
 	}
 }
