@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/agent/toolruntime"
 	"go_binance_futures/agent/tools"
 	"go_binance_futures/llm"
 )
@@ -55,6 +57,10 @@ type Observation struct {
 	Error          string     `json:"error,omitempty"`
 	Round          int        `json:"round,omitempty"`
 	DurationMs     int64      `json:"duration_ms,omitempty"`
+	CacheHit       bool       `json:"cache_hit,omitempty"`
+	Partial        bool       `json:"partial,omitempty"`
+	RawSize        int        `json:"raw_size,omitempty"`
+	ContentHash    string     `json:"content_hash,omitempty"`
 	Usage          task.Usage `json:"usage,omitempty"`
 }
 
@@ -63,24 +69,28 @@ type Observer interface {
 }
 
 type Config struct {
-	Client             llm.Client
-	Skills             *skill.Registry
-	Tools              *tools.Registry
-	Tasks              task.Store
-	Policy             permission.Policy
-	Timeout            time.Duration
-	DefaultMaxRounds   int
-	MaxContextBytes    int
-	MaxToolResultBytes int
-	MaxToolCalls       int
-	MaxTotalTokens     int
-	BudgetProvider     BudgetProvider
-	Planner            Planner
-	Observer           Observer
-	Retry              RetryPolicy
-	EventHook          func(task.Event)
-	MessageHook        func(taskID string, message llm.Message)
-	ValidationHook     func(taskID string, raw json.RawMessage, err error)
+	Client               llm.Client
+	Skills               *skill.Registry
+	Tools                *tools.Registry
+	Tasks                task.Store
+	Policy               permission.Policy
+	Timeout              time.Duration
+	DefaultMaxRounds     int
+	MaxContextBytes      int
+	MaxContextTokens     int
+	MaxToolResultBytes   int
+	MaxToolCalls         int
+	MaxParallelToolCalls int
+	MaxTotalTokens       int
+	BudgetProvider       BudgetProvider
+	Planner              Planner
+	ContextEngine        *contextengine.Engine
+	ToolRuntime          *toolruntime.Runtime
+	Observer             Observer
+	Retry                RetryPolicy
+	EventHook            func(task.Event)
+	MessageHook          func(taskID string, message llm.Message)
+	ValidationHook       func(taskID string, raw json.RawMessage, err error)
 }
 
 type Runner interface {
@@ -89,12 +99,14 @@ type Runner interface {
 
 func DefaultConfig() Config {
 	return Config{
-		Timeout:            2 * time.Minute,
-		DefaultMaxRounds:   8,
-		MaxContextBytes:    256 * 1024,
-		MaxToolResultBytes: 128 * 1024,
-		MaxToolCalls:       20,
-		MaxTotalTokens:     120000,
-		Retry:              RetryPolicy{MaxAttempts: 2, Delay: time.Second},
+		Timeout:              2 * time.Minute,
+		DefaultMaxRounds:     8,
+		MaxContextBytes:      256 * 1024,
+		MaxContextTokens:     64 * 1024,
+		MaxToolResultBytes:   128 * 1024,
+		MaxToolCalls:         20,
+		MaxParallelToolCalls: 4,
+		MaxTotalTokens:       120000,
+		Retry:                RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 	}
 }

@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
+	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/agent/toolruntime"
 	"go_binance_futures/agent/tools"
 )
 
@@ -40,11 +43,27 @@ func NewRunner(cfg Config) (*DefaultRunner, error) {
 	if cfg.MaxContextBytes <= 0 {
 		cfg.MaxContextBytes = defaults.MaxContextBytes
 	}
+	if cfg.MaxContextTokens <= 0 {
+		cfg.MaxContextTokens = defaults.MaxContextTokens
+	}
+	if cfg.ContextEngine == nil {
+		cfg.ContextEngine = contextengine.New()
+	}
 	if cfg.MaxToolResultBytes <= 0 {
 		cfg.MaxToolResultBytes = defaults.MaxToolResultBytes
 	}
+	if cfg.ToolRuntime == nil {
+		toolExecutor, err := toolruntime.New(toolruntime.Config{Registry: cfg.Tools, Policy: cfg.Policy, ContextEngine: cfg.ContextEngine, DefaultMaxResultBytes: cfg.MaxToolResultBytes})
+		if err != nil {
+			return nil, fmt.Errorf("create tool runtime: %w", err)
+		}
+		cfg.ToolRuntime = toolExecutor
+	}
 	if cfg.MaxToolCalls <= 0 {
 		cfg.MaxToolCalls = defaults.MaxToolCalls
+	}
+	if cfg.MaxParallelToolCalls <= 0 {
+		cfg.MaxParallelToolCalls = defaults.MaxParallelToolCalls
 	}
 	if cfg.MaxTotalTokens <= 0 {
 		cfg.MaxTotalTokens = defaults.MaxTotalTokens
@@ -56,6 +75,14 @@ func NewRunner(cfg Config) (*DefaultRunner, error) {
 		return nil, fmt.Errorf("agent retry delay cannot be negative")
 	}
 	return &DefaultRunner{cfg: cfg}, nil
+}
+
+func (runner *DefaultRunner) FreezeExecution(selectedSkill skill.Skill) ExecutionSnapshot {
+	snapshot := FreezeExecution(selectedSkill, runner.cfg.Client)
+	if runner.cfg.ToolRuntime != nil {
+		snapshot.Version.ToolCatalogHash = runner.cfg.ToolRuntime.CatalogHash(selectedSkill.Tools())
+	}
+	return snapshot
 }
 
 func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, error) {

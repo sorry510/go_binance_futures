@@ -21,7 +21,7 @@ func TestRegisterReadOnlyRegistersExpectedTools(t *testing.T) {
 			t.Fatalf("tool %q not registered", name)
 		}
 		meta := tool.Metadata()
-		if meta.Timeout <= 0 || meta.MaxResultBytes <= 0 || !meta.Idempotent || len(meta.InputSchema) == 0 || len(meta.OutputSchema) == 0 {
+		if meta.Timeout <= 0 || meta.MaxResultBytes <= 0 || !meta.Idempotent || meta.CacheTTL <= 0 || meta.SourceType != "native" || len(meta.InputSchema) == 0 || len(meta.OutputSchema) == 0 {
 			t.Fatalf("incomplete metadata for %s: %+v", name, meta)
 		}
 	}

@@ -14,6 +14,9 @@ type Metadata struct {
 	Timeout        time.Duration   `json:"-"`
 	MaxResultBytes int             `json:"max_result_bytes,omitempty"`
 	Idempotent     bool            `json:"idempotent"`
+	SourceType     string          `json:"source_type,omitempty"`
+	ProviderRef    string          `json:"provider_ref,omitempty"`
+	CacheTTL       time.Duration   `json:"-"`
 }
 
 type Tool interface {

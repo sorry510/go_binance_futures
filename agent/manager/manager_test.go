@@ -45,7 +45,7 @@ func TestManagerStartsAndPersistsRuntimeTask(t *testing.T) {
 	if started.ID == "" || started.Status != task.StatusQueued {
 		t.Fatalf("unexpected started task: %+v", started)
 	}
-	if started.RuntimeVersion != agentruntime.CurrentVersion || started.SkillVersion != "1.2.3" || started.PromptVersion != "2.0.0" || started.PromptHash != skill.HashPrompt("test") || started.ModelConfigID != 42 {
+	if started.RuntimeVersion != agentruntime.CurrentVersion || started.SkillVersion != "1.2.3" || started.PromptVersion != "2.0.0" || started.PromptHash != skill.HashPrompt("test") || started.ModelConfigID != 42 || len(started.SkillPackageHash) != 64 || len(started.ToolCatalogHash) != 64 {
 		t.Fatalf("task version identity was not frozen at start: %+v", started.VersionMetadata())
 	}
 
