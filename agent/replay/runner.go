@@ -29,7 +29,7 @@ func Run(ctx context.Context, fixture Fixture, definition skill.Skill) RunResult
 	}
 	toolRegistry := agenttools.NewRegistry()
 	for name, steps := range fixture.Tools {
-		if err := toolRegistry.Register(&fixtureTool{name: name, steps: append([]ToolStep(nil), steps...)}); err != nil {
+		if err := toolRegistry.Register(&fixtureTool{name: name, metadata: fixture.ToolMetadata[name], steps: append([]ToolStep(nil), steps...)}); err != nil {
 			return RunResult{Err: err}
 		}
 	}

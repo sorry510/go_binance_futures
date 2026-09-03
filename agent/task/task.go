@@ -52,6 +52,8 @@ type VersionMetadata struct {
 	OutputContractVersion string `json:"output_contract_version"`
 	SkillSource           string `json:"skill_source"`
 	SkillSourceVersion    string `json:"skill_source_version,omitempty"`
+	ToolCatalogHash       string `json:"tool_catalog_hash,omitempty"`
+	SkillPackageHash      string `json:"skill_package_hash,omitempty"`
 }
 
 type Task struct {
@@ -82,6 +84,8 @@ type Task struct {
 	OutputContractVersion string          `json:"output_contract_version"`
 	SkillSource           string          `json:"skill_source"`
 	SkillSourceVersion    string          `json:"skill_source_version,omitempty"`
+	ToolCatalogHash       string          `json:"tool_catalog_hash,omitempty"`
+	SkillPackageHash      string          `json:"skill_package_hash,omitempty"`
 	Usage                 Usage           `json:"usage,omitempty"`
 	CreatedAt             time.Time       `json:"created_at"`
 	StartedAt             *time.Time      `json:"started_at,omitempty"`
@@ -103,6 +107,8 @@ func (item *Task) ApplyVersionMetadata(value VersionMetadata) {
 	item.OutputContractVersion = value.OutputContractVersion
 	item.SkillSource = value.SkillSource
 	item.SkillSourceVersion = value.SkillSourceVersion
+	item.ToolCatalogHash = value.ToolCatalogHash
+	item.SkillPackageHash = value.SkillPackageHash
 }
 
 func (item *Task) VersionMetadata() VersionMetadata {
@@ -113,6 +119,7 @@ func (item *Task) VersionMetadata() VersionMetadata {
 		RuntimeVersion: item.RuntimeVersion, SkillVersion: item.SkillVersion, PromptVersion: item.PromptVersion,
 		PromptHash: item.PromptHash, ModelConfigID: item.ModelConfigID, InputContractVersion: item.InputContractVersion,
 		OutputContractVersion: item.OutputContractVersion, SkillSource: item.SkillSource, SkillSourceVersion: item.SkillSourceVersion,
+		ToolCatalogHash: item.ToolCatalogHash, SkillPackageHash: item.SkillPackageHash,
 	}
 }
 

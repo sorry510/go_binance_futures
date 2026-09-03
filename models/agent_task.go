@@ -32,6 +32,8 @@ type AgentTask struct {
 	OutputContractVersion string  `orm:"column(output_contract_version);size(96)" json:"output_contract_version"`
 	SkillSource           string  `orm:"column(skill_source);size(32);default(native)" json:"skill_source"`
 	SkillSourceVersion    string  `orm:"column(skill_source_version);size(128)" json:"skill_source_version"`
+	ToolCatalogHash       string  `orm:"column(tool_catalog_hash);size(64)" json:"tool_catalog_hash"`
+	SkillPackageHash      string  `orm:"column(skill_package_hash);size(64)" json:"skill_package_hash"`
 	InputTokens           int     `orm:"column(input_tokens)" json:"input_tokens"`
 	OutputTokens          int     `orm:"column(output_tokens)" json:"output_tokens"`
 	TotalTokens           int     `orm:"column(total_tokens)" json:"total_tokens"`
