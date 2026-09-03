@@ -14,6 +14,7 @@ require (
 	github.com/lib/pq v1.12.3
 	github.com/mattn/go-sqlite3 v1.14.50
 	github.com/modelcontextprotocol/go-sdk v1.3.1
+	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/smartystreets/goconvey v1.8.1
 	golang.org/x/net v0.41.0
 )

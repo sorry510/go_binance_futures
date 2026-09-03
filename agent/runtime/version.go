@@ -6,7 +6,7 @@ import (
 	"go_binance_futures/llm"
 )
 
-const CurrentVersion = "2.1.0"
+const CurrentVersion = "2.2.0"
 
 type ExecutionSnapshot struct {
 	SystemPrompt string               `json:"system_prompt"`
