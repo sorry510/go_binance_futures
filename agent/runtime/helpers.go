@@ -15,6 +15,7 @@ import (
 
 	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/agent/toolruntime"
 	"go_binance_futures/llm"
 )
 
@@ -196,22 +197,17 @@ func retryableLLMError(err error) bool {
 	return errors.As(err, &httpError) && (httpError.StatusCode == 429 || httpError.StatusCode >= 500)
 }
 
-func buildToolResultMessage(name string, value any, toolErr error, maxBytes int, evidence []contextengine.Evidence) (llm.Message, error) {
-	payload := map[string]any{"tool": name, "ok": toolErr == nil}
+func buildToolResultMessage(envelope toolruntime.ToolResultEnvelope, evidence []contextengine.Evidence, toolErr error) (llm.Message, error) {
+	payload := map[string]any{"tool": envelope.Source, "ok": toolErr == nil, "result": envelope}
+	if len(evidence) > 0 {
+		payload["evidence"] = evidence
+	}
 	if toolErr != nil {
 		payload["error"] = toolErr.Error()
-	} else {
-		payload["result"] = value
-		if len(evidence) > 0 {
-			payload["evidence"] = evidence
-		}
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {
-		return llm.Message{}, fmt.Errorf("encode tool result: %w", err)
-	}
-	if maxBytes > 0 && len(data) > maxBytes {
-		return llm.Message{}, fmt.Errorf("tool %q result exceeds %d bytes", name, maxBytes)
+		return llm.Message{}, fmt.Errorf("encode tool result envelope: %w", err)
 	}
 	return llm.Message{Role: llm.RoleUser, Content: "TOOL_RESULT\n" + string(data)}, nil
 }

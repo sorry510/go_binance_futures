@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"go_binance_futures/agent/contextengine"
+	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/agent/toolruntime"
 	"go_binance_futures/llm"
 )
 
@@ -113,6 +115,10 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 			if err := executor.executeTool(ctx, session, &messages, decision, progress, round, llmStep, nil); err != nil {
 				return nil, err
 			}
+		case "parallel_tools":
+			if err := executor.executeParallelTools(ctx, session, &messages, decision, progress, round, llmStep); err != nil {
+				return nil, err
+			}
 		case "final":
 			result, done, err := executor.executeFinal(ctx, session, &messages, decision, progress, round, llmStep)
 			if err != nil {
@@ -133,104 +139,96 @@ func (executor *reactExecutor) executeTool(ctx context.Context, session *runSess
 	if state.ToolCalls > state.MaxToolCalls {
 		return executor.runner.fail(item, "tool_limit_exceeded", fmt.Errorf("agent exceeded %d tool calls", state.MaxToolCalls))
 	}
-	if !session.allowedTools[decision.Tool] {
-		return executor.runner.fail(item, "tool_not_allowed", fmt.Errorf("skill %q does not allow tool %q", session.selectedSkill.Name(), decision.Tool))
+	request := toolruntime.ExecuteRequest{
+		SkillName: session.selectedSkill.Name(), AllowedTools: session.allowedTools,
+		ToolName: decision.Tool, Arguments: decision.Arguments,
+		MaxResultBytes: executor.runner.cfg.MaxToolResultBytes, CallIndex: state.ToolCalls, CallBudget: state.MaxToolCalls,
 	}
-	selectedTool, exists := executor.runner.cfg.Tools.Get(decision.Tool)
-	if !exists {
-		return executor.runner.fail(item, "tool_not_registered", fmt.Errorf("tool %q is not registered", decision.Tool))
+	descriptor, checkErr := executor.runner.cfg.ToolRuntime.Check(request)
+	if checkErr != nil {
+		stage := "tool_runtime_failed"
+		switch toolruntime.TypeOf(checkErr) {
+		case toolruntime.ErrorNotFound:
+			stage = "tool_not_registered"
+		case toolruntime.ErrorPermission:
+			if strings.Contains(checkErr.Error(), "does not allow tool") {
+				stage = "tool_not_allowed"
+			} else {
+				stage = "tool_permission_denied"
+			}
+		}
+		return executor.runner.fail(item, stage, checkErr)
 	}
-	if err := executor.runner.cfg.Policy.Allow(session.selectedSkill.Name(), selectedTool.Name(), selectedTool.Risk()); err != nil {
-		return executor.runner.fail(item, "tool_permission_denied", err)
-	}
-	arguments := decision.Arguments
-	if len(arguments) == 0 || string(arguments) == "null" {
-		arguments = json.RawMessage(`{}`)
-	}
-	stepID := state.startStep(StepTool, 1, selectedTool.Name(), dependsOn)
-	executor.runner.recordToolStep(item, state, stepID, task.StatusWaitingTool, "waiting_tool", progress+2, selectedTool.Name(), "running", "", false, 0, "calling "+selectedTool.Name())
+	stepID := state.startStep(StepTool, 1, descriptor.CanonicalName, dependsOn)
+	executor.runner.recordToolStep(item, state, stepID, task.StatusWaitingTool, "waiting_tool", progress+2, descriptor.CanonicalName, "running", "", false, 0, "calling "+descriptor.CanonicalName)
 
-	safeCheckpoint := toolCreatesSafeCheckpoint(selectedTool)
+	safeCheckpoint := descriptor.Idempotent && descriptor.Risk == permission.RiskRead
 	if !safeCheckpoint {
 		if err := executor.runner.clearCheckpoint(ctx, item, state); err != nil {
 			state.finishStep(stepID, StepFailed, "", "checkpoint_clear_failed", err)
 			return executor.runner.fail(item, "checkpoint_failed", err)
 		}
 	}
-	toolCtx := ctx
-	cancelTool := func() {}
-	metadata := selectedTool.Metadata()
-	if metadata.Timeout > 0 {
-		toolCtx, cancelTool = context.WithTimeout(ctx, metadata.Timeout)
+	toolResult, runtimeErr := executor.runner.cfg.ToolRuntime.Execute(ctx, request)
+	if runtimeErr != nil {
+		state.finishStep(stepID, StepFailed, "", string(toolruntime.TypeOf(runtimeErr)), runtimeErr)
+		state.syncTask(item)
+		return executor.runner.fail(item, "tool_result_failed", runtimeErr)
 	}
-	toolStarted := time.Now()
-	value, toolErr := selectedTool.Execute(toolCtx, arguments)
-	cancelTool()
-	duration := time.Since(toolStarted)
-	toolStatus, toolErrorType, toolError := "success", "", ""
-	if toolErr != nil {
-		toolStatus = "error"
-		toolErrorType = classifyError(toolErr)
-		toolError = toolErr.Error()
+	if ctx.Err() != nil {
+		state.finishStep(stepID, StepFailed, "", classifyError(ctx.Err()), ctx.Err())
+		state.syncTask(item)
+		return executor.runner.finishContextError(item, ctx.Err())
+	}
+	state.setToolTrace(stepID, toolResult.Trace)
+	if len(toolResult.Evidence) > 0 {
+		state.addEvidence(stepID, toolResult.Evidence)
+	}
+	toolStatus := "success"
+	toolError := ""
+	if toolResult.ToolError != nil {
+		toolStatus, toolError = "error", toolResult.ToolError.Error()
 	}
 	executor.runner.observe(Observation{
 		Type: "tool_call", TaskID: item.ID, ConversationID: item.ConversationID,
-		Skill: item.Skill, Provider: item.Provider, Model: item.Model, Tool: selectedTool.Name(),
-		Status: toolStatus, ErrorType: toolErrorType, Error: toolError, Round: item.Round, DurationMs: duration.Milliseconds(),
+		Skill: item.Skill, Provider: item.Provider, Model: item.Model, Tool: descriptor.CanonicalName,
+		Status: toolStatus, ErrorType: string(toolResult.Envelope.ErrorType), Error: toolError, Round: item.Round,
+		DurationMs: toolResult.Envelope.DurationMs, CacheHit: toolResult.Envelope.CacheHit, Partial: toolResult.Envelope.Partial,
+		RawSize: toolResult.Envelope.RawSize, ContentHash: toolResult.Envelope.ContentHash,
 	})
-	maxResultBytes := executor.runner.cfg.MaxToolResultBytes
-	if metadata.MaxResultBytes > 0 && (maxResultBytes <= 0 || metadata.MaxResultBytes < maxResultBytes) {
-		maxResultBytes = metadata.MaxResultBytes
-	}
-	var conversion contextengine.ToolConversion
-	evidence := []contextengine.Evidence{}
-	if toolErr == nil {
-		var conversionErr error
-		conversion, conversionErr = executor.runner.cfg.ContextEngine.ConvertToolResult(selectedTool.Name(), value, time.Now().UTC())
-		if conversionErr != nil {
-			state.finishStep(stepID, StepFailed, "", "evidence_conversion_failed", conversionErr)
-			state.syncTask(item)
-			return executor.runner.fail(item, "tool_result_failed", conversionErr)
-		}
-		evidence = conversion.Evidence
-		state.addEvidence(stepID, evidence)
-	}
-	toolMessage, err := buildToolResultMessage(selectedTool.Name(), value, toolErr, maxResultBytes, evidence)
+	toolMessage, err := buildToolResultMessage(toolResult.Envelope, toolResult.Evidence, toolResult.ToolError)
 	if err != nil {
 		state.finishStep(stepID, StepFailed, "", "tool_result_failed", err)
 		state.syncTask(item)
 		return executor.runner.fail(item, "tool_result_failed", err)
 	}
-	if toolErr == nil {
-		conversion.Block.ID = "tool-" + stepID
-		executor.runner.appendRuntimeMessage(item.ID, state, messages, toolMessage, conversion.Block)
+	if toolResult.ToolError == nil {
+		block := toolResult.ContextBlock
+		block.ID = "tool-" + stepID
+		executor.runner.appendRuntimeMessage(item.ID, state, messages, toolMessage, block)
+		state.SuccessfulTools[descriptor.CanonicalName] = true
+		session.toolResults[descriptor.CanonicalName] = toolResult.Value
+		if safeCheckpoint && len(toolResult.Raw) > 0 {
+			state.ToolResults[descriptor.CanonicalName] = append(json.RawMessage(nil), toolResult.Raw...)
+		}
 	} else {
 		executor.runner.appendRuntimeMessage(item.ID, state, messages, toolMessage)
 	}
 	state.Messages = *messages
-	if toolErr == nil {
-		state.SuccessfulTools[selectedTool.Name()] = true
-		session.toolResults[selectedTool.Name()] = value
-		if safeCheckpoint {
-			raw := conversion.ResultJSON
-			if len(raw) == 0 {
-				var marshalErr error
-				raw, marshalErr = json.Marshal(value)
-				if marshalErr != nil {
-					state.finishStep(stepID, StepFailed, "", "checkpoint_encode_failed", marshalErr)
-					state.syncTask(item)
-					return executor.runner.fail(item, "checkpoint_failed", marshalErr)
-				}
-			}
-			state.ToolResults[selectedTool.Name()] = raw
-		}
-	}
 	stepStatus := StepSucceeded
-	if toolErr != nil {
+	if toolResult.ToolError != nil {
 		stepStatus = StepFailed
 	}
-	state.finishStep(stepID, stepStatus, "tool result received", toolErrorType, toolErr)
-	executor.runner.recordToolStep(item, state, stepID, task.StatusRunning, "tool_result", progress+3, selectedTool.Name(), toolStatus, toolErrorType, false, duration, "tool result received")
+	outputSummary := "tool result received"
+	if toolResult.Envelope.CacheHit {
+		outputSummary = "tool result received from cache"
+	}
+	if toolResult.Envelope.Partial {
+		outputSummary += " (partial)"
+	}
+	state.finishStep(stepID, stepStatus, outputSummary, string(toolResult.Envelope.ErrorType), toolResult.ToolError)
+	duration := time.Duration(toolResult.Envelope.DurationMs) * time.Millisecond
+	executor.runner.recordToolStep(item, state, stepID, task.StatusRunning, "tool_result", progress+3, descriptor.CanonicalName, toolStatus, string(toolResult.Envelope.ErrorType), false, duration, outputSummary)
 	if safeCheckpoint {
 		if beforeCheckpoint != nil {
 			beforeCheckpoint()
@@ -238,8 +236,143 @@ func (executor *reactExecutor) executeTool(ctx context.Context, session *runSess
 		if err := executor.runner.saveCheckpoint(ctx, item, state, stepID, round+1); err != nil {
 			return executor.runner.fail(item, "checkpoint_failed", err)
 		}
-		executor.runner.recordToolStep(item, state, stepID, task.StatusRunning, "tool_checkpoint", progress+3, selectedTool.Name(), toolStatus, toolErrorType, true, duration, "safe tool checkpoint saved")
+		executor.runner.recordToolStep(item, state, stepID, task.StatusRunning, "tool_checkpoint", progress+3, descriptor.CanonicalName, toolStatus, string(toolResult.Envelope.ErrorType), true, duration, "safe tool checkpoint saved")
 	}
+	return nil
+}
+
+func (executor *reactExecutor) executeParallelTools(ctx context.Context, session *runSession, messages *[]llm.Message, decision decision, progress, round int, dependsOn string) error {
+	state, item := session.state, session.currentTask
+	count := len(decision.Tools)
+	if count < 2 {
+		return executor.runner.fail(item, "invalid_parallel_tools", fmt.Errorf("parallel tool batch requires at least two calls"))
+	}
+	if state.ToolCalls+count > state.MaxToolCalls {
+		return executor.runner.fail(item, "tool_limit_exceeded", fmt.Errorf("agent parallel batch requires %d tool calls but only %d remain", count, state.MaxToolCalls-state.ToolCalls))
+	}
+	parentStepID := state.startStep(StepParallelTools, 1, fmt.Sprintf("%d independent read tools", count), dependsOn)
+	executor.runner.recordStep(item, state, parentStepID, task.StatusWaitingTool, "waiting_tool", progress+2, fmt.Sprintf("calling %d tools in parallel", count), "", false)
+
+	baseCallIndex := state.ToolCalls
+	batch := make([]toolruntime.BatchRequest, count)
+	childSteps := make([]string, count)
+	descriptors := make([]toolruntime.ToolDescriptor, count)
+	seen := map[string]bool{}
+	for index, call := range decision.Tools {
+		request := toolruntime.ExecuteRequest{
+			SkillName: session.selectedSkill.Name(), AllowedTools: session.allowedTools,
+			ToolName: call.Tool, Arguments: call.Arguments,
+			MaxResultBytes: executor.runner.cfg.MaxToolResultBytes,
+			CallIndex:      baseCallIndex + index + 1, CallBudget: state.MaxToolCalls,
+		}
+		descriptor, checkErr := executor.runner.cfg.ToolRuntime.Check(request)
+		if checkErr != nil {
+			state.finishStep(parentStepID, StepFailed, "parallel tool preflight failed", string(toolruntime.TypeOf(checkErr)), checkErr)
+			stage := "tool_runtime_failed"
+			switch toolruntime.TypeOf(checkErr) {
+			case toolruntime.ErrorNotFound:
+				stage = "tool_not_registered"
+			case toolruntime.ErrorPermission:
+				if strings.Contains(checkErr.Error(), "does not allow tool") {
+					stage = "tool_not_allowed"
+				} else {
+					stage = "tool_permission_denied"
+				}
+			}
+			state.syncTask(item)
+			return executor.runner.fail(item, stage, checkErr)
+		}
+		if descriptor.Risk != permission.RiskRead || !descriptor.Idempotent {
+			err := fmt.Errorf("parallel tool %q must be read and idempotent", descriptor.CanonicalName)
+			state.finishStep(parentStepID, StepFailed, "parallel tool safety check failed", "parallel_tool_not_safe", err)
+			state.syncTask(item)
+			return executor.runner.fail(item, "parallel_tool_not_safe", err)
+		}
+		if seen[descriptor.CanonicalName] {
+			err := fmt.Errorf("parallel tool batch contains duplicate tool %q", descriptor.CanonicalName)
+			state.finishStep(parentStepID, StepFailed, "parallel tool safety check failed", "invalid_parallel_tools", err)
+			state.syncTask(item)
+			return executor.runner.fail(item, "invalid_parallel_tools", err)
+		}
+		seen[descriptor.CanonicalName] = true
+		descriptors[index] = descriptor
+		childSteps[index] = state.startStep(StepTool, 1, descriptor.CanonicalName, dependsOn)
+		executor.runner.recordToolStep(item, state, childSteps[index], task.StatusWaitingTool, "waiting_tool", progress+2, descriptor.CanonicalName, "running", "", false, 0, "queued in parallel tool batch")
+		batch[index] = toolruntime.BatchRequest{Request: request}
+	}
+	state.ToolCalls += count
+	results := executor.runner.cfg.ToolRuntime.ExecuteBatch(ctx, batch, executor.runner.cfg.MaxParallelToolCalls)
+	if ctx.Err() != nil {
+		state.finishStep(parentStepID, StepFailed, "parallel tool batch cancelled", classifyError(ctx.Err()), ctx.Err())
+		state.syncTask(item)
+		return executor.runner.finishContextError(item, ctx.Err())
+	}
+
+	for index, batchResult := range results {
+		stepID := childSteps[index]
+		descriptor := descriptors[index]
+		if batchResult.Err != nil {
+			state.finishStep(stepID, StepFailed, "tool runtime failed", string(toolruntime.TypeOf(batchResult.Err)), batchResult.Err)
+			state.finishStep(parentStepID, StepFailed, "parallel tool runtime failed", string(toolruntime.TypeOf(batchResult.Err)), batchResult.Err)
+			state.syncTask(item)
+			return executor.runner.fail(item, "tool_result_failed", batchResult.Err)
+		}
+		toolResult := batchResult.Result
+		state.setToolTrace(stepID, toolResult.Trace)
+		if len(toolResult.Evidence) > 0 {
+			state.addEvidence(stepID, toolResult.Evidence)
+		}
+		toolStatus, toolError := "success", ""
+		if toolResult.ToolError != nil {
+			toolStatus, toolError = "error", toolResult.ToolError.Error()
+		}
+		executor.runner.observe(Observation{
+			Type: "tool_call", TaskID: item.ID, ConversationID: item.ConversationID,
+			Skill: item.Skill, Provider: item.Provider, Model: item.Model, Tool: descriptor.CanonicalName,
+			Status: toolStatus, ErrorType: string(toolResult.Envelope.ErrorType), Error: toolError, Round: item.Round,
+			DurationMs: toolResult.Envelope.DurationMs, CacheHit: toolResult.Envelope.CacheHit, Partial: toolResult.Envelope.Partial,
+			RawSize: toolResult.Envelope.RawSize, ContentHash: toolResult.Envelope.ContentHash,
+		})
+		toolMessage, err := buildToolResultMessage(toolResult.Envelope, toolResult.Evidence, toolResult.ToolError)
+		if err != nil {
+			state.finishStep(stepID, StepFailed, "", "tool_result_failed", err)
+			state.finishStep(parentStepID, StepFailed, "parallel tool result encoding failed", "tool_result_failed", err)
+			state.syncTask(item)
+			return executor.runner.fail(item, "tool_result_failed", err)
+		}
+		if toolResult.ToolError == nil {
+			block := toolResult.ContextBlock
+			block.ID = "tool-" + stepID
+			executor.runner.appendRuntimeMessage(item.ID, state, messages, toolMessage, block)
+			state.SuccessfulTools[descriptor.CanonicalName] = true
+			session.toolResults[descriptor.CanonicalName] = toolResult.Value
+			if len(toolResult.Raw) > 0 {
+				state.ToolResults[descriptor.CanonicalName] = append(json.RawMessage(nil), toolResult.Raw...)
+			}
+		} else {
+			executor.runner.appendRuntimeMessage(item.ID, state, messages, toolMessage)
+		}
+		stepStatus := StepSucceeded
+		if toolResult.ToolError != nil {
+			stepStatus = StepFailed
+		}
+		outputSummary := "parallel tool result received"
+		if toolResult.Envelope.CacheHit {
+			outputSummary = "parallel tool result received from cache"
+		}
+		if toolResult.Envelope.Partial {
+			outputSummary += " (partial)"
+		}
+		state.finishStep(stepID, stepStatus, outputSummary, string(toolResult.Envelope.ErrorType), toolResult.ToolError)
+		duration := time.Duration(toolResult.Envelope.DurationMs) * time.Millisecond
+		executor.runner.recordToolStep(item, state, stepID, task.StatusRunning, "tool_result", progress+3, descriptor.CanonicalName, toolStatus, string(toolResult.Envelope.ErrorType), false, duration, outputSummary)
+	}
+	state.Messages = *messages
+	state.finishStep(parentStepID, StepSucceeded, fmt.Sprintf("parallel batch completed with %d tool results", count), "", nil)
+	if err := executor.runner.saveCheckpoint(ctx, item, state, parentStepID, round+1); err != nil {
+		return executor.runner.fail(item, "checkpoint_failed", err)
+	}
+	executor.runner.recordStep(item, state, parentStepID, task.StatusRunning, "tool_checkpoint", progress+3, "parallel read-tool checkpoint saved", "", true)
 	return nil
 }
 
