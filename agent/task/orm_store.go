@@ -210,6 +210,7 @@ func toModel(item *Task) models.AgentTask {
 		RuntimeVersion: item.RuntimeVersion, SkillVersion: item.SkillVersion, PromptVersion: item.PromptVersion,
 		PromptHash: item.PromptHash, ModelConfigID: item.ModelConfigID, InputContractVersion: item.InputContractVersion,
 		OutputContractVersion: item.OutputContractVersion, SkillSource: item.SkillSource, SkillSourceVersion: item.SkillSourceVersion,
+		ToolCatalogHash: item.ToolCatalogHash, SkillPackageHash: item.SkillPackageHash,
 		InputTokens: item.Usage.InputTokens, OutputTokens: item.Usage.OutputTokens, TotalTokens: item.Usage.TotalTokens,
 		CreatedAt: item.CreatedAt.UnixMilli(), UpdatedAt: item.UpdatedAt.UnixMilli(),
 	}
@@ -231,6 +232,7 @@ func fromModel(row models.AgentTask) *Task {
 		RuntimeVersion: row.RuntimeVersion, SkillVersion: row.SkillVersion, PromptVersion: row.PromptVersion,
 		PromptHash: row.PromptHash, ModelConfigID: row.ModelConfigID, InputContractVersion: row.InputContractVersion,
 		OutputContractVersion: row.OutputContractVersion, SkillSource: row.SkillSource, SkillSourceVersion: row.SkillSourceVersion,
+		ToolCatalogHash: row.ToolCatalogHash, SkillPackageHash: row.SkillPackageHash,
 		Usage:     Usage{InputTokens: row.InputTokens, OutputTokens: row.OutputTokens, TotalTokens: row.TotalTokens},
 		CreatedAt: time.UnixMilli(row.CreatedAt).UTC(), UpdatedAt: time.UnixMilli(row.UpdatedAt).UTC(),
 	}

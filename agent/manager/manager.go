@@ -70,8 +70,6 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	if err != nil {
 		return nil, fmt.Errorf("initialize LLM client: %w", err)
 	}
-	executionSnapshot := agentruntime.FreezeExecution(selectedSkill, client)
-	req.ExecutionSnapshot = &executionSnapshot
 	runtimeConfig := manager.cfg.RuntimeConfig
 	runtimeConfig.Client = client
 	runtimeConfig.Skills = manager.cfg.Skills
@@ -81,6 +79,8 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	if err != nil {
 		return nil, err
 	}
+	executionSnapshot := runner.FreezeExecution(selectedSkill)
+	req.ExecutionSnapshot = &executionSnapshot
 
 	now := time.Now().UTC()
 	taskID := task.NewID()

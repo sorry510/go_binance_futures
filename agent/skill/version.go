@@ -3,6 +3,8 @@ package skill
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
+	"sort"
 	"strings"
 )
 
@@ -32,6 +34,36 @@ func ResolveVersionInfo(value Skill, prompt string) VersionInfo {
 	}
 	info.PromptHash = HashPrompt(prompt)
 	return info
+}
+
+func PackageHash(value Skill, prompt string) string {
+	if value == nil {
+		return ""
+	}
+	info := ResolveVersionInfo(value, prompt)
+	tools := append([]string(nil), value.Tools()...)
+	for index := range tools {
+		tools[index] = strings.TrimSpace(tools[index])
+	}
+	sort.Strings(tools)
+	identity := struct {
+		SkillName             string   `json:"skill_name"`
+		SkillVersion          string   `json:"skill_version"`
+		PromptVersion         string   `json:"prompt_version"`
+		PromptHash            string   `json:"prompt_hash"`
+		InputContractVersion  string   `json:"input_contract_version"`
+		OutputContractVersion string   `json:"output_contract_version"`
+		Source                string   `json:"source"`
+		SourceVersion         string   `json:"source_version"`
+		Tools                 []string `json:"tools"`
+	}{
+		SkillName: value.Name(), SkillVersion: info.SkillVersion, PromptVersion: info.PromptVersion, PromptHash: info.PromptHash,
+		InputContractVersion: info.InputContractVersion, OutputContractVersion: info.OutputContractVersion,
+		Source: info.Source, SourceVersion: info.SourceVersion, Tools: tools,
+	}
+	raw, _ := json.Marshal(identity)
+	sum := sha256.Sum256(raw)
+	return hex.EncodeToString(sum[:])
 }
 
 func HashPrompt(prompt string) string {
