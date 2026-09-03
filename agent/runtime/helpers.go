@@ -13,7 +13,9 @@ import (
 	"syscall"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/agent/toolruntime"
 	"go_binance_futures/llm"
 )
 
@@ -195,19 +197,17 @@ func retryableLLMError(err error) bool {
 	return errors.As(err, &httpError) && (httpError.StatusCode == 429 || httpError.StatusCode >= 500)
 }
 
-func buildToolResultMessage(name string, value any, toolErr error, maxBytes int) (llm.Message, error) {
-	payload := map[string]any{"tool": name, "ok": toolErr == nil}
+func buildToolResultMessage(envelope toolruntime.ToolResultEnvelope, evidence []contextengine.Evidence, toolErr error) (llm.Message, error) {
+	payload := map[string]any{"tool": envelope.Source, "ok": toolErr == nil, "result": envelope}
+	if len(evidence) > 0 {
+		payload["evidence"] = evidence
+	}
 	if toolErr != nil {
 		payload["error"] = toolErr.Error()
-	} else {
-		payload["result"] = value
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {
-		return llm.Message{}, fmt.Errorf("encode tool result: %w", err)
-	}
-	if maxBytes > 0 && len(data) > maxBytes {
-		return llm.Message{}, fmt.Errorf("tool %q result exceeds %d bytes", name, maxBytes)
+		return llm.Message{}, fmt.Errorf("encode tool result envelope: %w", err)
 	}
 	return llm.Message{Role: llm.RoleUser, Content: "TOOL_RESULT\n" + string(data)}, nil
 }
@@ -221,8 +221,20 @@ func repairFeedback(kind, message string) llm.Message {
 	}
 }
 
-func (runner *DefaultRunner) appendRuntimeMessage(taskID string, messages *[]llm.Message, message llm.Message) {
+func (runner *DefaultRunner) appendRuntimeMessage(taskID string, state *RunState, messages *[]llm.Message, message llm.Message, override ...contextengine.ContextBlock) {
 	*messages = append(*messages, message)
+	if state != nil {
+		var block contextengine.ContextBlock
+		if len(override) > 0 {
+			block = override[0]
+			block.Content = message.Content
+			block.ContentHash = contextengine.ContentHash(message.Content)
+			block.Role = message.Role
+		} else {
+			block = contextengine.RuntimeMessageBlock(fmt.Sprintf("runtime-%03d", len(state.ContextBlocks)+1), message)
+		}
+		state.appendContextBlock(block)
+	}
 	if runner.cfg.MessageHook != nil {
 		runner.cfg.MessageHook(taskID, message)
 	}

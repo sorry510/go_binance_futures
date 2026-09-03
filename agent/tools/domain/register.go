@@ -73,7 +73,7 @@ func RegisterReadOnly(registry *agenttools.Registry, deps Dependencies) error {
 }
 
 func metadata(inputSchema string, timeout time.Duration, maxBytes int) agenttools.Metadata {
-	return agenttools.Metadata{InputSchema: json.RawMessage(inputSchema), OutputSchema: json.RawMessage(`{"type":["object","array"]}`), Timeout: timeout, MaxResultBytes: maxBytes, Idempotent: true}
+	return agenttools.Metadata{InputSchema: json.RawMessage(inputSchema), OutputSchema: json.RawMessage(`{"type":["object","array"]}`), Timeout: timeout, MaxResultBytes: maxBytes, Idempotent: true, SourceType: "native", CacheTTL: 2 * time.Second}
 }
 
 func newFeaturesTool(deps Dependencies) agenttools.Tool {

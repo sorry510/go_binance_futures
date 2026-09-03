@@ -53,9 +53,9 @@ V2 从现在开始严格按照 Phase 编号顺序开发，不再使用“编号�
 | --- | --- | --- |
 | [V2-0](./00-phase-v2-0-baseline.md) | P0 ✅ | 冻结 V1 契约、Fixture、版本和 Replay 基线 |
 | [V2-1](./01-phase-v2-1-runtime.md) | P0 ✅ | Runtime V2、ExecutionStep、Checkpoint、恢复 |
-| [V2-2](./02-phase-v2-2-context-evidence.md) | P0 | Context Engine、Evidence、Token/Freshness 管理 |
-| [V2-3](./03-phase-v2-3-tool-runtime.md) | P0 | Tool Runtime、Schema、Envelope、并行、缓存 |
-| [V2-4](./04-phase-v2-4-eval-replay.md) | P0 | Eval、Replay、Prompt/Skill Version、回归 Gate |
+| [V2-2](./02-phase-v2-2-context-evidence.md) | P0 ✅ | Context Engine、Evidence、Token/Freshness 管理 |
+| [V2-3](./03-phase-v2-3-tool-runtime.md) | P0 ✅ | Tool Runtime、Schema、Envelope、并行、缓存 |
+| [V2-4](./04-phase-v2-4-eval-replay.md) | P0 ✅ | Eval、Replay、Prompt/Skill Version、回归 Gate |
 | [V2-5](./05-phase-v2-5-mcp-integration.md) | P0 | 第三方 HTTP MCP Client、远端能力发现与治理 |
 | [V2-6](./06-phase-v2-6-agent-skills.md) | P0 | 标准 Agent Skills 导入、版本、加载与安全 |
 | [V2-7](./07-phase-v2-7-model-gateway.md) | P1 | Model Capability、Router、Health、Fallback |

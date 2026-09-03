@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/validator"
-	"go_binance_futures/llm"
 )
 
 type runSession struct {
@@ -67,8 +67,18 @@ func (coordinator *coordinator) prepareNew(ctx context.Context, req Request) (*r
 	}
 	snapshot := req.ExecutionSnapshot
 	if snapshot == nil {
-		frozen := FreezeExecution(selectedSkill, coordinator.runner.cfg.Client)
+		frozen := coordinator.runner.FreezeExecution(selectedSkill)
 		snapshot = &frozen
+	} else {
+		copy := *snapshot
+		currentIdentity := coordinator.runner.FreezeExecution(selectedSkill)
+		if copy.Version.SkillPackageHash == "" {
+			copy.Version.SkillPackageHash = currentIdentity.Version.SkillPackageHash
+		}
+		if copy.Version.ToolCatalogHash == "" {
+			copy.Version.ToolCatalogHash = currentIdentity.Version.ToolCatalogHash
+		}
+		snapshot = &copy
 	}
 	maxRounds := selectedSkill.MaxRounds()
 	if maxRounds <= 0 {
@@ -109,12 +119,56 @@ func (coordinator *coordinator) buildContext(ctx context.Context, session *runSe
 		return coordinator.runner.fail(currentTask, "build_input_failed", err)
 	}
 	state.Messages = messages
-	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages", len(messages)), "", nil)
+	state.ContextBlocks = contextengine.InitialMessageBlocks(messages)
+	resourceCount := 0
+	if provider, ok := session.selectedSkill.(skill.ContextResourceProvider); ok {
+		resources, loadErr := coordinator.runner.cfg.ContextEngine.LoadResources(ctx, provider.ContextResources(session.skillRequest), requestedContextResourceIDs(session.req.Metadata))
+		if loadErr != nil {
+			state.finishStep(stepID, StepFailed, "", "context_resource_failed", loadErr)
+			state.syncTask(currentTask)
+			return coordinator.runner.fail(currentTask, "build_input_failed", loadErr)
+		}
+		for _, block := range resources {
+			state.appendContextBlock(block)
+		}
+		resourceCount = len(resources)
+	}
+	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages, %d resources", len(messages), resourceCount), "", nil)
 	if err := coordinator.runner.saveCheckpoint(ctx, currentTask, state, stepID, 1); err != nil {
 		return coordinator.runner.fail(currentTask, "checkpoint_failed", err)
 	}
 	coordinator.runner.recordStep(currentTask, state, stepID, task.StatusRunning, "input_built", 4, "skill input built", "", true)
 	return nil
+}
+
+func requestedContextResourceIDs(metadata map[string]any) []string {
+	if metadata == nil {
+		return nil
+	}
+	value, exists := metadata["context_resource_ids"]
+	if !exists {
+		return nil
+	}
+	result := []string{}
+	switch typed := value.(type) {
+	case []string:
+		result = append(result, typed...)
+	case []any:
+		for _, item := range typed {
+			if text, ok := item.(string); ok {
+				result = append(result, text)
+			}
+		}
+	case string:
+		result = strings.Split(typed, ",")
+	}
+	clean := result[:0]
+	for _, item := range result {
+		if item = strings.TrimSpace(item); item != "" {
+			clean = append(clean, item)
+		}
+	}
+	return clean
 }
 
 func (coordinator *coordinator) prepareResume(ctx context.Context, taskID string) (*runSession, error) {
@@ -137,7 +191,7 @@ func (coordinator *coordinator) prepareResumeState(ctx context.Context, taskID s
 	if !exists {
 		return nil, fmt.Errorf("skill %q is not registered", item.Skill)
 	}
-	if err := validateResumeIdentity(item, state, selectedSkill, coordinator.runner.cfg.Client); err != nil {
+	if err := validateResumeIdentity(item, state, coordinator.runner.FreezeExecution(selectedSkill)); err != nil {
 		return nil, err
 	}
 	toolResults, err := coordinator.runner.restoreToolResults(state)
@@ -261,14 +315,13 @@ func isResumableTask(item *task.Task) bool {
 	return item.Status == task.StatusFailed && item.Stage == "timeout"
 }
 
-func validateResumeIdentity(item *task.Task, state *RunState, selectedSkill skill.Skill, client llm.Client) error {
+func validateResumeIdentity(item *task.Task, state *RunState, current ExecutionSnapshot) error {
 	if state.TaskID != item.ID || state.Skill != item.Skill {
 		return fmt.Errorf("runtime checkpoint identity does not match task")
 	}
 	if item.RuntimeVersion != CurrentVersion || state.Snapshot.Version.RuntimeVersion != CurrentVersion {
 		return fmt.Errorf("task runtime version %q cannot be resumed by runtime %q", item.RuntimeVersion, CurrentVersion)
 	}
-	current := FreezeExecution(selectedSkill, client)
 	if item.ModelConfigID > 0 && current.Version.ModelConfigID != item.ModelConfigID {
 		return fmt.Errorf("resume requires frozen model config id %d, got %d", item.ModelConfigID, current.Version.ModelConfigID)
 	}
@@ -276,7 +329,8 @@ func validateResumeIdentity(item *task.Task, state *RunState, selectedSkill skil
 	actual := current.Version
 	if stored.SkillVersion != actual.SkillVersion || stored.InputContractVersion != actual.InputContractVersion ||
 		stored.OutputContractVersion != actual.OutputContractVersion || stored.SkillSource != actual.SkillSource ||
-		stored.SkillSourceVersion != actual.SkillSourceVersion {
+		stored.SkillSourceVersion != actual.SkillSourceVersion || stored.SkillPackageHash != actual.SkillPackageHash ||
+		stored.ToolCatalogHash != actual.ToolCatalogHash {
 		return fmt.Errorf("skill implementation changed since checkpoint; refusing unsafe resume")
 	}
 	return nil

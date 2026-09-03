@@ -3,6 +3,7 @@ package skill
 import (
 	"context"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/validator"
 	"go_binance_futures/llm"
 )
@@ -29,8 +30,16 @@ type RunValidatorProvider interface {
 	ValidatorForRun(req Request, toolResults map[string]any) validator.FinalValidator
 }
 
+type StructuredEvidenceValidatorProvider interface {
+	ValidatorForRunWithEvidence(req Request, toolResults map[string]any, evidence map[string]contextengine.Evidence) validator.FinalValidator
+}
+
 type ExecutionModeProvider interface {
 	ExecutionMode() string
+}
+
+type ContextResourceProvider interface {
+	ContextResources(req Request) []contextengine.Resource
 }
 
 type Skill interface {
@@ -43,15 +52,16 @@ type Skill interface {
 }
 
 type Definition struct {
-	SkillName         string
-	Prompt            string
-	AllowedTools      []string
-	Rounds            int
-	Mode              string
-	Version           VersionInfo
-	BuildInputFunc    func(context.Context, Request) ([]llm.Message, error)
-	FinalValidator    validator.FinalValidator
-	RequiredToolsFunc func(Request) []string
+	SkillName            string
+	Prompt               string
+	AllowedTools         []string
+	Rounds               int
+	Mode                 string
+	Version              VersionInfo
+	BuildInputFunc       func(context.Context, Request) ([]llm.Message, error)
+	FinalValidator       validator.FinalValidator
+	RequiredToolsFunc    func(Request) []string
+	ContextResourcesFunc func(Request) []contextengine.Resource
 }
 
 func (definition Definition) Name() string         { return definition.SkillName }
@@ -81,4 +91,11 @@ func (definition Definition) RequiredTools(req Request) []string {
 		return nil
 	}
 	return append([]string(nil), definition.RequiredToolsFunc(req)...)
+}
+
+func (definition Definition) ContextResources(req Request) []contextengine.Resource {
+	if definition.ContextResourcesFunc == nil {
+		return nil
+	}
+	return append([]contextengine.Resource(nil), definition.ContextResourcesFunc(req)...)
 }
