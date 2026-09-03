@@ -6,6 +6,7 @@ import (
 
 	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
+	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/toolruntime"
 	"go_binance_futures/agent/tools"
@@ -74,6 +75,14 @@ func NewRunner(cfg Config) (*DefaultRunner, error) {
 		return nil, fmt.Errorf("agent retry delay cannot be negative")
 	}
 	return &DefaultRunner{cfg: cfg}, nil
+}
+
+func (runner *DefaultRunner) FreezeExecution(selectedSkill skill.Skill) ExecutionSnapshot {
+	snapshot := FreezeExecution(selectedSkill, runner.cfg.Client)
+	if runner.cfg.ToolRuntime != nil {
+		snapshot.Version.ToolCatalogHash = runner.cfg.ToolRuntime.CatalogHash(selectedSkill.Tools())
+	}
+	return snapshot
 }
 
 func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, error) {

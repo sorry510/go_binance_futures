@@ -13,17 +13,29 @@ import (
 )
 
 type fixtureTool struct {
-	name  string
-	mu    sync.Mutex
-	steps []ToolStep
-	index int
+	name     string
+	metadata ToolMetadata
+	mu       sync.Mutex
+	steps    []ToolStep
+	index    int
 }
 
-func (tool *fixtureTool) Name() string               { return tool.name }
-func (tool *fixtureTool) Description() string        { return "fixed replay fixture tool" }
-func (tool *fixtureTool) Risk() permission.RiskLevel { return permission.RiskRead }
+func (tool *fixtureTool) Name() string        { return tool.name }
+func (tool *fixtureTool) Description() string { return "fixed replay fixture tool" }
+func (tool *fixtureTool) Risk() permission.RiskLevel {
+	if tool.metadata.Risk == "" {
+		return permission.RiskRead
+	}
+	return tool.metadata.Risk
+}
 func (tool *fixtureTool) Metadata() agenttools.Metadata {
-	return agenttools.Metadata{Idempotent: true}
+	return agenttools.Metadata{
+		InputSchema: tool.metadata.InputSchema, OutputSchema: tool.metadata.OutputSchema,
+		Timeout: time.Duration(tool.metadata.TimeoutMs) * time.Millisecond, MaxResultBytes: tool.metadata.MaxResultBytes,
+		Idempotent: tool.metadata.Idempotent || tool.metadata.Risk == "" || tool.metadata.Risk == permission.RiskRead,
+		SourceType: tool.metadata.SourceType, ProviderRef: tool.metadata.ProviderRef,
+		CacheTTL: time.Duration(tool.metadata.CacheTTLms) * time.Millisecond,
+	}
 }
 
 func (tool *fixtureTool) Execute(ctx context.Context, _ json.RawMessage) (any, error) {

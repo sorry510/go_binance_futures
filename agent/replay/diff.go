@@ -24,5 +24,7 @@ func CompareVersions(from, to task.VersionMetadata) []VersionDifference {
 	compare("output_contract_version", from.OutputContractVersion, to.OutputContractVersion)
 	compare("skill_source", from.SkillSource, to.SkillSource)
 	compare("skill_source_version", from.SkillSourceVersion, to.SkillSourceVersion)
+	compare("tool_catalog_hash", from.ToolCatalogHash, to.ToolCatalogHash)
+	compare("skill_package_hash", from.SkillPackageHash, to.SkillPackageHash)
 	return result
 }
