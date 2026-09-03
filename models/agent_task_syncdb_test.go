@@ -95,7 +95,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		"runtime_version", "skill_version", "prompt_version", "prompt_hash",
 		"model_config_id", "input_contract_version", "output_contract_version",
 		"skill_source", "skill_source_version", "execution_mode", "plan_json",
-		"steps_json", "checkpoint_json", "resume_count",
+		"steps_json", "checkpoint_json", "resume_count", "tool_catalog_hash", "skill_package_hash",
 	})
 	requireAgentColumns(t, db, "agent_task_events", []string{
 		"step_id", "step_type", "error_type", "checkpoint",
@@ -139,6 +139,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		SkillVersion: "1.0.0", PromptVersion: "1.0.0", PromptHash: strings.Repeat("a", 64),
 		ModelConfigID: 7, InputContractVersion: "symbol_analysis_input_v1",
 		OutputContractVersion: "trading_plan_v1", SkillSource: "native", SkillSourceVersion: "v1",
+		ToolCatalogHash: strings.Repeat("b", 64), SkillPackageHash: strings.Repeat("c", 64),
 		CreatedAt: 1700000000001, UpdatedAt: 1700000000001,
 	}
 	if _, err := o.Insert(&fresh); err != nil {
@@ -148,7 +149,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	if err := o.Read(&got); err != nil {
 		t.Fatalf("read current V2 task after upgrade: %v", err)
 	}
-	if got.ExecutionMode != "react" || got.ResumeCount != 1 || !strings.Contains(testStringValue(got.CheckpointJSON), "safe") {
+	if got.ExecutionMode != "react" || got.ResumeCount != 1 || got.ToolCatalogHash != strings.Repeat("b", 64) || got.SkillPackageHash != strings.Repeat("c", 64) || !strings.Contains(testStringValue(got.CheckpointJSON), "safe") {
 		t.Fatalf("V2 fields did not round-trip after upgrade: %+v", got)
 	}
 }

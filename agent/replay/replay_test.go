@@ -42,7 +42,7 @@ func TestV1SkillReplayFixtures(t *testing.T) {
 			if out.Task.RuntimeVersion == "" || out.Task.SkillVersion != "1.0.0" || out.Task.PromptVersion != "1.0.0" {
 				t.Fatalf("missing frozen version metadata: %+v", out.Task.VersionMetadata())
 			}
-			if len(out.Task.PromptHash) != 64 || out.Task.ModelConfigID != fixture.ModelConfigID {
+			if len(out.Task.PromptHash) != 64 || len(out.Task.ToolCatalogHash) != 64 || len(out.Task.SkillPackageHash) != 64 || out.Task.ModelConfigID != fixture.ModelConfigID {
 				t.Fatalf("unexpected prompt/model identity: %+v", out.Task.VersionMetadata())
 			}
 			if out.Task.InputContractVersion != tc.inputContract || out.Task.OutputContractVersion != tc.contract || out.Task.SkillSource != skill.DefaultSource {
@@ -127,9 +127,11 @@ func TestVersionDifferenceReportsPromptChange(t *testing.T) {
 	to := from
 	to.PromptVersion = "1.0.1"
 	to.PromptHash = "bbb"
+	to.ToolCatalogHash = "catalog-b"
+	to.SkillPackageHash = "package-b"
 	diff := CompareVersions(from, to)
 	raw, _ := json.Marshal(diff)
-	if len(diff) != 2 || !strings.Contains(string(raw), "prompt_version") || !strings.Contains(string(raw), "prompt_hash") {
+	if len(diff) != 4 || !strings.Contains(string(raw), "prompt_version") || !strings.Contains(string(raw), "prompt_hash") || !strings.Contains(string(raw), "tool_catalog_hash") || !strings.Contains(string(raw), "skill_package_hash") {
 		t.Fatalf("unexpected version diff: %s", raw)
 	}
 }

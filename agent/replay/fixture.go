@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"go_binance_futures/agent/permission"
 	"go_binance_futures/llm"
 )
 
@@ -27,16 +28,29 @@ type ToolStep struct {
 	DelayMs int             `json:"delay_ms,omitempty"`
 }
 
+type ToolMetadata struct {
+	Risk           permission.RiskLevel `json:"risk,omitempty"`
+	Idempotent     bool                 `json:"idempotent,omitempty"`
+	SourceType     string               `json:"source_type,omitempty"`
+	ProviderRef    string               `json:"provider_ref,omitempty"`
+	TimeoutMs      int                  `json:"timeout_ms,omitempty"`
+	CacheTTLms     int                  `json:"cache_ttl_ms,omitempty"`
+	MaxResultBytes int                  `json:"max_result_bytes,omitempty"`
+	InputSchema    json.RawMessage      `json:"input_schema,omitempty"`
+	OutputSchema   json.RawMessage      `json:"output_schema,omitempty"`
+}
+
 type Fixture struct {
-	Version         string                `json:"version"`
-	Name            string                `json:"name"`
-	Skill           string                `json:"skill"`
-	Input           string                `json:"input"`
-	ModelConfigID   int64                 `json:"model_config_id,omitempty"`
-	LLM             []LLMStep             `json:"llm"`
-	Tools           map[string][]ToolStep `json:"tools,omitempty"`
-	TimeoutMs       int                   `json:"timeout_ms,omitempty"`
-	MaxContextBytes int                   `json:"max_context_bytes,omitempty"`
+	Version         string                  `json:"version"`
+	Name            string                  `json:"name"`
+	Skill           string                  `json:"skill"`
+	Input           string                  `json:"input"`
+	ModelConfigID   int64                   `json:"model_config_id,omitempty"`
+	LLM             []LLMStep               `json:"llm"`
+	Tools           map[string][]ToolStep   `json:"tools,omitempty"`
+	ToolMetadata    map[string]ToolMetadata `json:"tool_metadata,omitempty"`
+	TimeoutMs       int                     `json:"timeout_ms,omitempty"`
+	MaxContextBytes int                     `json:"max_context_bytes,omitempty"`
 }
 
 func Load(path string) (Fixture, error) {

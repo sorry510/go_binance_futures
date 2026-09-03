@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
@@ -799,5 +800,142 @@ func TestPlanExecutePlannerCancellationUsesRuntimeCancelledState(t *testing.T) {
 	}
 	if stored.Status != task.StatusCancelled || stored.Stage != "cancelled" {
 		t.Fatalf("planner cancellation bypassed runtime terminal state: %+v", stored)
+	}
+}
+
+func TestRunnerPersistsStructuredEvidenceAndContextTrace(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Content: `{"action":"tool","tool":"get_symbol_snapshot","arguments":{}}`}},
+		{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}},
+	}}
+	old := time.Now().UTC().Add(-10 * time.Minute).UnixMilli()
+	snapshotTool := tools.Func{
+		ToolName: "get_symbol_snapshot", ToolRisk: permission.RiskRead, ToolMetadata: tools.Metadata{Idempotent: true},
+		ExecuteFunc: func(context.Context, json.RawMessage) (any, error) {
+			return map[string]any{"symbol": "BTCUSDT", "price": 100.0, "updated_at_ms": old}, nil
+		},
+	}
+	definition := skill.Definition{SkillName: "evidence", AllowedTools: []string{"get_symbol_snapshot"}, Rounds: 3}
+	runner, store := newTestRunner(t, client, definition, snapshotTool)
+	result, err := runner.Run(context.Background(), Request{TaskID: "evidence-task", Skill: "evidence", Input: "analyze"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second := client.request(1)
+	joined := ""
+	for _, message := range second.Messages {
+		joined += message.Content + "\n"
+	}
+	if !strings.Contains(joined, `"evidence"`) || !strings.Contains(joined, "CONTEXT_FRESHNESS") || !strings.Contains(joined, "status=stale") {
+		t.Fatalf("structured/stale evidence was not injected into LLM context: %s", joined)
+	}
+	stored, err := store.Get(context.Background(), result.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var steps []ExecutionStep
+	if err := json.Unmarshal(stored.Steps, &steps); err != nil {
+		t.Fatal(err)
+	}
+	foundEvidence := false
+	foundTrace := false
+	for _, step := range steps {
+		if step.Type == StepTool && len(step.Evidence) == 1 {
+			foundEvidence = step.Evidence[0].Source == "get_symbol_snapshot" && step.Evidence[0].ContentHash != "" && step.Evidence[0].Freshness == contextengine.FreshnessStale
+		}
+		if step.Type == StepLLM && step.ContextTrace != nil && step.ContextTrace.SelectedBlocks > 0 {
+			foundTrace = true
+		}
+	}
+	if !foundEvidence || !foundTrace {
+		t.Fatalf("V2-2 audit data not persisted in steps: %s", stored.Steps)
+	}
+}
+
+func TestRunnerTrimsLowPriorityHistoryInsteadOfFailingContext(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}}}}
+	definition := skill.Definition{
+		SkillName: "trim-context", Rounds: 2,
+		BuildInputFunc: func(context.Context, skill.Request) ([]llm.Message, error) {
+			return []llm.Message{
+				{Role: llm.RoleUser, Content: strings.Repeat("old-history-a ", 80)},
+				{Role: llm.RoleAssistant, Content: strings.Repeat("old-history-b ", 80)},
+				{Role: llm.RoleUser, Content: "current BTCUSDT task"},
+			}, nil
+		},
+	}
+	skills := skill.NewRegistry()
+	if err := skills.Register(definition); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	runner, err := NewRunner(Config{
+		Client: client, Skills: skills, Tools: tools.NewRegistry(), Tasks: store,
+		Policy: permission.AllowReadOnly(), MaxContextTokens: 32, MaxContextBytes: 4096,
+		Retry: RetryPolicy{MaxAttempts: 1}, Timeout: time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runner.Run(context.Background(), Request{TaskID: "trim-context-task", Skill: "trim-context", Input: "ignored"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := client.request(0)
+	joined := ""
+	for _, message := range request.Messages {
+		joined += message.Content
+	}
+	if !strings.Contains(joined, "current BTCUSDT task") || strings.Contains(joined, "old-history-a") {
+		t.Fatalf("context priority trimming is wrong: %q", joined)
+	}
+	stored, err := store.Get(context.Background(), result.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	foundTrimEvent := false
+	for _, event := range stored.Events {
+		if event.Stage == "context_trimmed" {
+			foundTrimEvent = true
+			break
+		}
+	}
+	if !foundTrimEvent {
+		t.Fatalf("context trim event missing: %+v", stored.Events)
+	}
+}
+
+func TestRunnerLoadsOnlyActivatedAndRequestedSkillResources(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}}}}
+	loaded := []string{}
+	definition := skill.Definition{
+		SkillName: "resources", Rounds: 2,
+		ContextResourcesFunc: func(skill.Request) []contextengine.Resource {
+			return []contextengine.Resource{
+				{ID: "skill-md", Type: contextengine.BlockSkillInstruction, Disclosure: contextengine.DisclosureActivation, Load: func(context.Context) (string, error) {
+					loaded = append(loaded, "skill")
+					return "activated skill instructions", nil
+				}},
+				{ID: "reference", Type: contextengine.BlockSkillInstruction, Disclosure: contextengine.DisclosureOnDemand, Load: func(context.Context) (string, error) {
+					loaded = append(loaded, "reference")
+					return "requested reference content", nil
+				}},
+			}
+		},
+	}
+	runner, _ := newTestRunner(t, client, definition)
+	if _, err := runner.Run(context.Background(), Request{TaskID: "resources-task", Skill: "resources", Input: "hello", Metadata: map[string]any{"context_resource_ids": []string{"reference"}}}); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(loaded, ",") != "skill,reference" {
+		t.Fatalf("unexpected progressive disclosure loads: %v", loaded)
+	}
+	request := client.request(0)
+	joined := ""
+	for _, message := range request.Messages {
+		joined += message.Content + "\n"
+	}
+	if !strings.Contains(joined, "activated skill instructions") || !strings.Contains(joined, "requested reference content") {
+		t.Fatalf("resource context missing: %q", joined)
 	}
 }
