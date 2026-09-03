@@ -6,11 +6,17 @@ import (
 	"strings"
 )
 
+type toolDecision struct {
+	Tool      string          `json:"tool"`
+	Arguments json.RawMessage `json:"arguments,omitempty"`
+}
+
 type decision struct {
 	Action    string          `json:"action"`
 	Summary   string          `json:"summary,omitempty"`
 	Tool      string          `json:"tool,omitempty"`
 	Arguments json.RawMessage `json:"arguments,omitempty"`
+	Tools     []toolDecision  `json:"tools,omitempty"`
 	Result    json.RawMessage `json:"result,omitempty"`
 	Error     string          `json:"error,omitempty"`
 }
@@ -30,6 +36,16 @@ func parseDecision(content string) (decision, error) {
 	case "tool":
 		if parsed.Tool == "" {
 			return parsed, fmt.Errorf("tool decision requires tool")
+		}
+	case "parallel_tools":
+		if len(parsed.Tools) < 2 {
+			return parsed, fmt.Errorf("parallel_tools decision requires at least two tools")
+		}
+		for index := range parsed.Tools {
+			parsed.Tools[index].Tool = strings.TrimSpace(parsed.Tools[index].Tool)
+			if parsed.Tools[index].Tool == "" {
+				return parsed, fmt.Errorf("parallel_tools[%d] requires tool", index)
+			}
 		}
 	case "final":
 		if len(parsed.Result) == 0 || string(parsed.Result) == "null" {

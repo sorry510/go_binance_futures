@@ -9,6 +9,7 @@ import (
 
 	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/agent/toolruntime"
 	"go_binance_futures/llm"
 )
 
@@ -58,6 +59,7 @@ type ExecutionStep struct {
 	Checkpoint    bool                      `json:"checkpoint,omitempty"`
 	ContextTrace  *contextengine.BuildTrace `json:"context_trace,omitempty"`
 	Evidence      []contextengine.Evidence  `json:"evidence,omitempty"`
+	ToolTrace     *toolruntime.Trace        `json:"tool_trace,omitempty"`
 }
 
 type RunState struct {
@@ -88,7 +90,7 @@ type RunState struct {
 	LastContextTrace contextengine.BuildTrace          `json:"last_context_trace,omitempty"`
 }
 
-const runStateVersion = "runtime_state_v2"
+const runStateVersion = "runtime_state_v3"
 
 func newRunState(taskID, skillName string, mode ExecutionMode, snapshot ExecutionSnapshot, maxRounds, maxToolCalls, maxTotalTokens int) *RunState {
 	return &RunState{
@@ -146,6 +148,16 @@ func (state *RunState) setContextTrace(stepID string, trace contextengine.BuildT
 		if state.Steps[index].StepID == stepID {
 			copy := trace
 			state.Steps[index].ContextTrace = &copy
+			return
+		}
+	}
+}
+
+func (state *RunState) setToolTrace(stepID string, trace toolruntime.Trace) {
+	for index := range state.Steps {
+		if state.Steps[index].StepID == stepID {
+			copy := trace
+			state.Steps[index].ToolTrace = &copy
 			return
 		}
 	}

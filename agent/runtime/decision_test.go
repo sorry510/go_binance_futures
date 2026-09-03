@@ -43,3 +43,14 @@ func TestParseDecisionKeepsStrictValidJSON(t *testing.T) {
 		t.Fatalf("unexpected decision: %+v", parsed)
 	}
 }
+
+func TestParseDecisionAcceptsParallelTools(t *testing.T) {
+	content := `{"action":"parallel_tools","tools":[{"tool":"get_funding_rate","arguments":{"symbol":"BTCUSDT"}},{"tool":"get_market_condition","arguments":{}}]}`
+	parsed, err := parseDecision(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if parsed.Action != "parallel_tools" || len(parsed.Tools) != 2 || parsed.Tools[0].Tool != "get_funding_rate" {
+		t.Fatalf("unexpected decision: %+v", parsed)
+	}
+}

@@ -7,6 +7,7 @@ import (
 	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/agent/toolruntime"
 	"go_binance_futures/agent/tools"
 )
 
@@ -50,8 +51,18 @@ func NewRunner(cfg Config) (*DefaultRunner, error) {
 	if cfg.MaxToolResultBytes <= 0 {
 		cfg.MaxToolResultBytes = defaults.MaxToolResultBytes
 	}
+	if cfg.ToolRuntime == nil {
+		toolExecutor, err := toolruntime.New(toolruntime.Config{Registry: cfg.Tools, Policy: cfg.Policy, ContextEngine: cfg.ContextEngine, DefaultMaxResultBytes: cfg.MaxToolResultBytes})
+		if err != nil {
+			return nil, fmt.Errorf("create tool runtime: %w", err)
+		}
+		cfg.ToolRuntime = toolExecutor
+	}
 	if cfg.MaxToolCalls <= 0 {
 		cfg.MaxToolCalls = defaults.MaxToolCalls
+	}
+	if cfg.MaxParallelToolCalls <= 0 {
+		cfg.MaxParallelToolCalls = defaults.MaxParallelToolCalls
 	}
 	if cfg.MaxTotalTokens <= 0 {
 		cfg.MaxTotalTokens = defaults.MaxTotalTokens
