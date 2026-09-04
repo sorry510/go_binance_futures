@@ -17,6 +17,9 @@ type AgentMCPServer struct {
 	LastErrorAt     int64  `orm:"column(last_error_at);index" json:"last_error_at,omitempty"`
 	LastError       string `orm:"column(last_error);type(text);null" json:"last_error,omitempty"`
 	CatalogHash     string `orm:"column(catalog_hash);size(64)" json:"catalog_hash,omitempty"`
+	OAuthStatus     string `orm:"column(oauth_status);size(32)" json:"oauth_status,omitempty"`
+	OAuthIssuer     string `orm:"column(oauth_issuer);size(512)" json:"oauth_issuer,omitempty"`
+	OAuthExpiresAt  int64  `orm:"column(oauth_expires_at);index" json:"oauth_expires_at,omitempty"`
 	CreatedAt       int64  `orm:"column(created_at);index" json:"created_at"`
 	UpdatedAt       int64  `orm:"column(updated_at);index" json:"updated_at"`
 }
@@ -92,3 +95,25 @@ type AgentMCPPermission struct {
 }
 
 func (*AgentMCPPermission) TableName() string { return "agent_mcp_permissions" }
+
+type AgentMCPSecret struct {
+	ID         int64  `orm:"column(id);auto" json:"id"`
+	ServerID   int64  `orm:"column(server_id);unique" json:"server_id"`
+	Kind       string `orm:"column(kind);size(32)" json:"kind"`
+	Ciphertext string `orm:"column(ciphertext);type(text)" json:"-"`
+	CreatedAt  int64  `orm:"column(created_at);index" json:"created_at"`
+	UpdatedAt  int64  `orm:"column(updated_at);index" json:"updated_at"`
+}
+
+func (*AgentMCPSecret) TableName() string { return "agent_mcp_secrets" }
+
+type AgentMCPOAuthState struct {
+	ID         int64  `orm:"column(id);auto" json:"id"`
+	ServerID   int64  `orm:"column(server_id);index" json:"server_id"`
+	StateHash  string `orm:"column(state_hash);size(64);unique" json:"-"`
+	Ciphertext string `orm:"column(ciphertext);type(text)" json:"-"`
+	ExpiresAt  int64  `orm:"column(expires_at);index" json:"expires_at"`
+	CreatedAt  int64  `orm:"column(created_at);index" json:"created_at"`
+}
+
+func (*AgentMCPOAuthState) TableName() string { return "agent_mcp_oauth_states" }

@@ -29,6 +29,9 @@ func init() {
 	web.Router("/agents/mcp/servers/:id/catalog", &controllers.AgentMCPController{}, "get:GetCatalog")                 // MCP Catalog
 	web.Router("/agents/mcp/servers/:id/test", &controllers.AgentMCPController{}, "post:TestConnection")               // MCP 连接测试
 	web.Router("/agents/mcp/servers/:id/refresh", &controllers.AgentMCPController{}, "post:RefreshCatalog")            // MCP Catalog 刷新
+	web.Router("/agents/mcp/servers/:id/oauth/start", &controllers.AgentMCPController{}, "post:StartOAuth")            // MCP OAuth 授权开始
+	web.Router("/agents/mcp/oauth/client-metadata", &controllers.AgentMCPController{}, "get:OAuthClientMetadata")      // MCP OAuth Client ID Metadata Document
+	web.Router("/agents/mcp/oauth/callback", &controllers.AgentMCPController{}, "get:OAuthCallback")                   // MCP OAuth callback
 	web.Router("/agents/mcp/tools/:id", &controllers.AgentMCPController{}, "put:UpdateTool")                           // MCP Tool 分类/治理
 	web.Router("/agents/mcp/permissions", &controllers.AgentMCPController{}, "post:SavePermission")                    // Skill -> MCP capability 授权
 	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                           // LLM Provider 预设

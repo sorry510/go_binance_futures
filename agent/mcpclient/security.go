@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/auth"
@@ -116,7 +117,37 @@ func (h staticOAuthHandler) Authorize(context.Context, *http.Request, *http.Resp
 	return errors.New("MCP OAuth authorization is required; refresh the managed credential")
 }
 
-func oauthSource(ctx context.Context, raw string, allowPrivate bool) (oauth2.TokenSource, error) {
+type savingOAuthTokenSource struct {
+	mu         sync.Mutex
+	source     oauth2.TokenSource
+	credential OAuthCredential
+	persist    func(OAuthCredential) error
+}
+
+func (s *savingOAuthTokenSource) Token() (*oauth2.Token, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	token, err := s.source.Token()
+	if err != nil {
+		return nil, err
+	}
+	if token.AccessToken != s.credential.AccessToken || token.RefreshToken != s.credential.RefreshToken || !token.Expiry.Equal(s.credential.Expiry) {
+		updated := s.credential
+		updated.AccessToken, updated.TokenType, updated.RefreshToken, updated.Expiry = token.AccessToken, token.TokenType, token.RefreshToken, token.Expiry
+		if updated.RefreshToken == "" {
+			updated.RefreshToken = s.credential.RefreshToken
+		}
+		if s.persist != nil {
+			if err := s.persist(updated); err != nil {
+				return nil, fmt.Errorf("persist refreshed MCP OAuth credential: %w", err)
+			}
+		}
+		s.credential = updated
+	}
+	return token, nil
+}
+
+func oauthSource(ctx context.Context, raw string, allowPrivate bool, persist func(OAuthCredential) error) (oauth2.TokenSource, error) {
 	var credential OAuthCredential
 	if err := json.Unmarshal([]byte(raw), &credential); err != nil {
 		return nil, fmt.Errorf("decode oauth2 managed credential: %w", err)
@@ -138,8 +169,12 @@ func oauthSource(ctx context.Context, raw string, allowPrivate bool) (oauth2.Tok
 		return nil, fmt.Errorf("invalid oauth2 token endpoint: %w", err)
 	}
 	oauthCtx := context.WithValue(ctx, oauth2.HTTPClient, oauthClient)
-	cfg := oauth2.Config{ClientID: credential.ClientID, ClientSecret: credential.ClientSecret, Endpoint: oauth2.Endpoint{TokenURL: credential.TokenURL}, Scopes: credential.Scopes}
-	return cfg.TokenSource(oauthCtx, token), nil
+	cfg := oauth2.Config{ClientID: credential.ClientID, ClientSecret: credential.ClientSecret, Endpoint: oauth2.Endpoint{TokenURL: credential.TokenURL, AuthStyle: tokenAuthStyle(credential.TokenAuthMethod)}, Scopes: credential.Scopes}
+	source := oauth2.TokenSource(cfg.TokenSource(oauthCtx, token))
+	if persist != nil {
+		source = &savingOAuthTokenSource{source: source, credential: credential, persist: persist}
+	}
+	return source, nil
 }
 
 func buildHTTPClient(ctx context.Context, server models.AgentMCPServer, resolver SecretResolver) (*http.Client, auth.OAuthHandler, error) {
@@ -148,7 +183,7 @@ func buildHTTPClient(ctx context.Context, server models.AgentMCPServer, resolver
 		return nil, nil, err
 	}
 	if resolver == nil {
-		resolver = ResolveEnvironmentSecret
+		resolver = ResolveManagedSecret
 	}
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	// Do not inherit HTTP_PROXY/HTTPS_PROXY. A proxy would move DialContext away
@@ -217,7 +252,13 @@ func buildHTTPClient(ctx context.Context, server models.AgentMCPServer, resolver
 	}
 	var oauth auth.OAuthHandler
 	if authType == AuthOAuth2 {
-		source, err := oauthSource(ctx, secret, server.AllowPrivate == 1)
+		var persist func(OAuthCredential) error
+		if strings.HasPrefix(server.SecretRef, oauthSecretPrefix) && server.ID > 0 {
+			persist = func(updated OAuthCredential) error {
+				return saveOAuthCredential(context.Background(), server.ID, updated, server.OAuthIssuer)
+			}
+		}
+		source, err := oauthSource(ctx, secret, server.AllowPrivate == 1, persist)
 		if err != nil {
 			return nil, nil, err
 		}

@@ -80,8 +80,8 @@ links = [{"url": "url1", "title": "title1"}]
 
 [mcp]
 # MCP 仅使用 Streamable HTTP，地址为当前 Web 服务的 /mcp，使用登录接口返回的 Bearer Token 鉴权
-mcp_enable = 0
-
-
-# LLM Provider/Model 配置已迁移到数据库。
-# 请在 Web 的【AI -> LLM 配置】页面新增、编辑、启用和测试模型。
+mcp_server_enable = 0
+# 第三方 MCP Interactive OAuth 本地开发地址。生产接 Binance 等远端 OAuth Provider 时必须改成公网 HTTPS。
+oauth_public_base_url = "http://127.0.0.1:3333"
+# 仅供本地开发的固定 32-byte AES-GCM key；生产必须替换并长期保存。
+oauth_encryption_key = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"

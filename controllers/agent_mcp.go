@@ -135,6 +135,66 @@ func (ctrl *AgentMCPController) refresh(testOnly bool) {
 	}
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": result, "msg": "success"})
 }
+
+func (ctrl *AgentMCPController) StartOAuth() {
+	id, err := parseMCPID(ctrl)
+	if err != nil || id <= 0 {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "MCP server id 无效"))
+		return
+	}
+	gateway, err := agentapp.DefaultMCPGateway()
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, err.Error()))
+		return
+	}
+	result, err := gateway.StartOAuth(ctrl.Ctx.Request.Context(), id)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": result, "msg": "success"})
+}
+
+func (ctrl *AgentMCPController) OAuthClientMetadata() {
+	metadata, err := mcpclient.OAuthClientMetadata()
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Output.Header("Content-Type", "application/json; charset=utf-8")
+	ctrl.Ctx.Resp(metadata)
+}
+
+func (ctrl *AgentMCPController) OAuthCallback() {
+	gateway, err := agentapp.DefaultMCPGateway()
+	if err != nil {
+		ctrl.writeOAuthCallbackPage(0, "failed")
+		return
+	}
+	result, err := gateway.CompleteOAuth(
+		ctrl.Ctx.Request.Context(),
+		ctrl.GetString("state"), ctrl.GetString("code"), ctrl.GetString("iss"),
+		ctrl.GetString("error"), ctrl.GetString("error_description"),
+	)
+	if err != nil {
+		serverID := result.ServerID
+		ctrl.writeOAuthCallbackPage(serverID, "failed")
+		return
+	}
+	ctrl.writeOAuthCallbackPage(result.ServerID, result.Status)
+}
+
+func (ctrl *AgentMCPController) writeOAuthCallbackPage(serverID int64, status string) {
+	statusText := "授权完成，可以关闭此窗口。"
+	if status != "authorized" {
+		statusText = "授权失败，请关闭此窗口并返回 MCP 页面重试。"
+	}
+	html := "<!doctype html><html><head><meta charset=\"utf-8\"><title>MCP OAuth</title></head><body>" +
+		"<p>" + statusText + "</p><script>setTimeout(function(){window.close();},500);</script></body></html>"
+	ctrl.Ctx.Output.Header("Content-Type", "text/html; charset=utf-8")
+	ctrl.Ctx.WriteString(html)
+}
+
 func (ctrl *AgentMCPController) UpdateTool() {
 	id, err := parseMCPID(ctrl)
 	if err != nil || id <= 0 {
