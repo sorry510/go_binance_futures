@@ -170,3 +170,7 @@ go test ./agent/replay -v
 ## Phase V2-1 的 Gate
 
 V2-1 拆分 `DefaultRunner.Run()` 时，必须首先运行 `agent/replay`。除非 V2-1 文档明确声明并解释行为变化，否则上述 Replay Case 的 Task terminal status、关键 stage、版本身份、四个 Skill output contract 均视为兼容契约。
+
+### LLM API Key 显式查看
+
+`GET /llm/configs` 继续只返回 `has_api_key` 和掩码，不在普通列表中返回明文。编辑页面只有在用户主动切换“显示 API 密钥”时才调用受登录鉴权保护的 `GET /llm/configs/:id/api-key` 读取该配置的明文 Key；关闭显示后仅改变 UI 可见性。这样避免列表/自动刷新无意携带 Secret，同时允许管理员显式核对已配置 Token。

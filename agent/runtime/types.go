@@ -44,6 +44,9 @@ type Budget struct {
 
 type BudgetProvider func(skill string) Budget
 
+type ToolAllowlistProvider func(context.Context, string) ([]string, error)
+type ContextResourceProvider func(context.Context, string, skill.Request) ([]contextengine.Resource, error)
+
 type Observation struct {
 	Type           string     `json:"type"`
 	TaskID         string     `json:"task_id"`
@@ -69,28 +72,30 @@ type Observer interface {
 }
 
 type Config struct {
-	Client               llm.Client
-	Skills               *skill.Registry
-	Tools                *tools.Registry
-	Tasks                task.Store
-	Policy               permission.Policy
-	Timeout              time.Duration
-	DefaultMaxRounds     int
-	MaxContextBytes      int
-	MaxContextTokens     int
-	MaxToolResultBytes   int
-	MaxToolCalls         int
-	MaxParallelToolCalls int
-	MaxTotalTokens       int
-	BudgetProvider       BudgetProvider
-	Planner              Planner
-	ContextEngine        *contextengine.Engine
-	ToolRuntime          *toolruntime.Runtime
-	Observer             Observer
-	Retry                RetryPolicy
-	EventHook            func(task.Event)
-	MessageHook          func(taskID string, message llm.Message)
-	ValidationHook       func(taskID string, raw json.RawMessage, err error)
+	Client                  llm.Client
+	Skills                  *skill.Registry
+	Tools                   *tools.Registry
+	Tasks                   task.Store
+	Policy                  permission.Policy
+	Timeout                 time.Duration
+	DefaultMaxRounds        int
+	MaxContextBytes         int
+	MaxContextTokens        int
+	MaxToolResultBytes      int
+	MaxToolCalls            int
+	MaxParallelToolCalls    int
+	MaxTotalTokens          int
+	BudgetProvider          BudgetProvider
+	ToolAllowlistProvider   ToolAllowlistProvider
+	ContextResourceProvider ContextResourceProvider
+	Planner                 Planner
+	ContextEngine           *contextengine.Engine
+	ToolRuntime             *toolruntime.Runtime
+	Observer                Observer
+	Retry                   RetryPolicy
+	EventHook               func(task.Event)
+	MessageHook             func(taskID string, message llm.Message)
+	ValidationHook          func(taskID string, raw json.RawMessage, err error)
 }
 
 type Runner interface {

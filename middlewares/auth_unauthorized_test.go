@@ -109,10 +109,18 @@ func TestUnauthorizedPageRequestRedirects(t *testing.T) {
 	}
 }
 
+func TestMCPOAuthStartRequiresAuth(t *testing.T) {
+	ctx, recorder := newRequestContext("/agents/mcp/servers/1/oauth/start", map[string]string{"X-Requested-With": "XMLHttpRequest"})
+	JwtMiddleware(ctx)
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+	}
+}
+
 // The excluded routes must stay reachable without a token, otherwise login and
 // the notification websocket handshake break.
 func TestExcludedRoutesSkipAuth(t *testing.T) {
-	for _, path := range []string{"/login", "/ws/notifications"} {
+	for _, path := range []string{"/login", "/ws/notifications", "/agents/mcp/oauth/client-metadata", "/agents/mcp/oauth/callback"} {
 		t.Run(path, func(t *testing.T) {
 			ctx, recorder := newRequestContext(path, nil)
 			JwtMiddleware(ctx)

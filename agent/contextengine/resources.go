@@ -32,9 +32,13 @@ func (engine *Engine) LoadResources(ctx context.Context, resources []Resource, r
 		if blockType == "" {
 			blockType = BlockSkillInstruction
 		}
+		freshness := resource.Freshness
+		if freshness == "" {
+			freshness = FreshnessUnknown
+		}
 		blocks = append(blocks, ContextBlock{
 			ID: "resource-" + resource.ID, Type: blockType, Source: resource.Source, Priority: resource.Priority,
-			Sensitive: resource.Sensitive, Freshness: FreshnessUnknown, Content: content,
+			AsOf: resource.AsOf, Sensitive: resource.Sensitive, Freshness: freshness, Content: content,
 		})
 	}
 	return blocks, nil

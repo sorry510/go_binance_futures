@@ -199,3 +199,42 @@ func TestFatalLookupErrorTaxonomy(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestUniqueAllowedMCPToolAliasResolvesToCanonicalName(t *testing.T) {
+	tool := tools.Func{ToolName: "mcp.coingecko-free.get-crypto-news", ToolRisk: permission.RiskRead}
+	runtime := testRuntime(t, permission.AllowReadOnly(), tool)
+	descriptor, err := runtime.Check(ExecuteRequest{
+		SkillName:    "symbol_analysis",
+		AllowedTools: map[string]bool{"mcp.coingecko-free.get-crypto-news": true},
+		ToolName:     "get_crypto_news",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if descriptor.CanonicalName != "mcp.coingecko-free.get-crypto-news" {
+		t.Fatalf("canonical tool = %q", descriptor.CanonicalName)
+	}
+}
+
+func TestMCPToolAliasFailsClosedWhenAmbiguousOrNotAllowed(t *testing.T) {
+	left := tools.Func{ToolName: "mcp.left.get-crypto-news", ToolRisk: permission.RiskRead}
+	right := tools.Func{ToolName: "mcp.right.get_crypto_news", ToolRisk: permission.RiskRead}
+	runtime := testRuntime(t, permission.AllowReadOnly(), left, right)
+	_, err := runtime.Check(ExecuteRequest{
+		SkillName:    "symbol_analysis",
+		AllowedTools: map[string]bool{left.Name(): true, right.Name(): true},
+		ToolName:     "get_crypto_news",
+	})
+	if err == nil || TypeOf(err) != ErrorNotFound || !strings.Contains(err.Error(), "ambiguous") {
+		t.Fatalf("ambiguous alias error = %v", err)
+	}
+
+	_, err = runtime.Check(ExecuteRequest{
+		SkillName:    "symbol_analysis",
+		AllowedTools: map[string]bool{left.Name(): false},
+		ToolName:     "get_crypto_news",
+	})
+	if err == nil || TypeOf(err) != ErrorNotFound {
+		t.Fatalf("disallowed alias unexpectedly resolved: %v", err)
+	}
+}

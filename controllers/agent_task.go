@@ -145,6 +145,31 @@ func (ctrl *AgentController) GetAlertPipelineStatus() {
 	})
 }
 
+func (ctrl *AgentController) ListAlertPipelineTraces() {
+	page, _ := strconv.Atoi(ctrl.GetString("page", "1"))
+	limit, _ := strconv.Atoi(ctrl.GetString("limit", "20"))
+	options := alertpipeline.TraceListOptions{
+		Page: page, Limit: limit, Symbol: ctrl.GetString("symbol"), Type: ctrl.GetString("type"),
+		Severity: ctrl.GetString("severity"), Status: ctrl.GetString("status"),
+	}
+	if value := strings.TrimSpace(ctrl.GetString("fallback")); value == "0" || value == "1" {
+		parsed, _ := strconv.Atoi(value)
+		options.Fallback = &parsed
+	}
+	if value := strings.TrimSpace(ctrl.GetString("has_notification")); value == "0" || value == "1" {
+		parsed := value == "1"
+		options.HasNotification = &parsed
+	}
+	options.StartTime, _ = strconv.ParseInt(ctrl.GetString("start_time"), 10, 64)
+	options.EndTime, _ = strconv.ParseInt(ctrl.GetString("end_time"), 10, 64)
+	result, err := (alertpipeline.ORMTraceStore{}).List(ctrl.Ctx.Request.Context(), options)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": result, "msg": "success"})
+}
+
 func (ctrl *AgentController) CancelTask() {
 	manager, err := agentapp.DefaultManager()
 	if err != nil {

@@ -66,7 +66,7 @@ func (*Definition) VersionInfo() skill.VersionInfo {
 func (*Definition) Tools() []string {
 	return []string{"get_symbol_analysis_context", "get_klines", "get_funding_rate", "get_liquidations", "get_symbol_snapshot", "get_market_condition"}
 }
-func (*Definition) MaxRounds() int { return 8 }
+func (*Definition) MaxRounds() int { return 15 }
 
 func (*Definition) RequiredTools(skill.Request) []string {
 	return []string{"get_symbol_analysis_context"}
@@ -348,7 +348,7 @@ func validateEvidence(items []Evidence) error {
 	if len(items) == 0 {
 		return fmt.Errorf("evidence must contain at least one tool-backed item")
 	}
-	allowed := map[string]bool{
+	allowedNative := map[string]bool{
 		"get_symbol_analysis_context": true,
 		"get_klines":                  true,
 		"get_funding_rate":            true,
@@ -359,7 +359,7 @@ func validateEvidence(items []Evidence) error {
 	hasContext := false
 	for index, item := range items {
 		item.Source = strings.TrimSpace(item.Source)
-		if !allowed[item.Source] {
+		if !allowedNative[item.Source] && !strings.HasPrefix(item.Source, "mcp.") {
 			return fmt.Errorf("evidence %d has unsupported source %q", index+1, item.Source)
 		}
 		if strings.TrimSpace(item.Finding) == "" {
