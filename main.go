@@ -17,6 +17,7 @@ import (
 	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"go_binance_futures/webnotification"
+	"os"
 	"sync/atomic"
 	"time"
 
@@ -54,7 +55,10 @@ func init() {
 	web.BConfig.CopyRequestBody = true        // post 参数
 	web.SetStaticPath("/"+webIndex, "static") // 设置静态文件
 
-	registerModels()      // 注册模型
+	registerModels() // 注册模型和数据库驱动
+	if isSyncDatabaseCommand(os.Args[1:]) {
+		return
+	}
 	registerMiddlewares() // 添加中间件
 	if mcpServerEnable {
 		registerMCPHTTP() // 注册 MCP HTTP 服务
@@ -103,16 +107,6 @@ func registerModels() {
 	orm.RegisterModel(new(models.Notification))
 
 	setDriver(driver) // 设置数据库驱动
-	syncDb()          // 同步数据库
-	if err := agentapp.EnsureDefaultSkillConfigs(); err != nil {
-		logs.Error("initialize agent skill configs:", err)
-	}
-	if err := llm.EnsureDatabaseConfigFromLegacy(context.Background()); err != nil {
-		logs.Error("initialize LLM database config:", err)
-	}
-	if err := feature.BackfillEmptyFuturesSymbolTypes(); err != nil {
-		logs.Error("backfill empty futures symbol types error:", err)
-	}
 }
 
 func setDriver(d string) {
@@ -167,43 +161,40 @@ func configureDatabasePool() {
 	db.SetConnMaxIdleTime(databaseDuration("conn_max_idle_time_seconds", time.Minute))
 }
 
-func syncDb() {
-	config, err := utils.GetSystemConfig()
-	hasSync := false
+func initializeRuntimeDatabase() {
+	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
-		logs.Info("The config table does not exist or has changed, it is automatically updating...")
-		if syncErr := orm.RunSyncdb("default", false, false); syncErr != nil { // 根据 model 创建数据表
-			logs.Error("sync database schema error:", syncErr)
-			panic(syncErr)
-		}
-		hasSync = true
-		command.InitData(0)                   // 初始化配置信息
-		config, err = utils.GetSystemConfig() // 重新获取配置信息
-		if err != nil {
-			logs.Error("get system config error", err)
-			return
-		}
+		panic(fmt.Errorf("load system config: %w; run `go_binance_futures sync db` first", err))
 	}
-	// 根据旧版本更新数据库
-	if !hasSync {
-		if syncErr := orm.RunSyncdb("default", false, false); syncErr != nil { // 根据 model 更新新创建的数据表
-			logs.Error("sync database schema error:", syncErr)
-			panic(syncErr)
-		}
+	if systemConfig.Version < dbVersion {
+		panic(fmt.Errorf("database version %d is older than required version %d; run `go_binance_futures sync db` first", systemConfig.Version, dbVersion))
 	}
-	oldVersion := config.Version
-	if oldVersion < dbVersion {
-		err = command.UpdateDatabase(oldVersion, dbVersion)
-		if err != nil {
-			logs.Error("!!! update database error !!!:", err)
-			panic(err)
-		} else {
-			logs.Info("@@@ update database success @@@")
-			config.Version = dbVersion
-			orm.NewOrm().Update(&config)
-		}
+	SystemConfig = systemConfig
+
+	if err := agentapp.EnsureDefaultSkillConfigs(); err != nil {
+		logs.Error("initialize agent skill configs:", err)
 	}
-	SystemConfig = config
+	if err := llm.EnsureDatabaseConfigFromLegacy(context.Background()); err != nil {
+		logs.Error("initialize LLM database config:", err)
+	}
+	if err := feature.BackfillEmptyFuturesSymbolTypes(); err != nil {
+		logs.Error("backfill empty futures symbol types error:", err)
+	}
+}
+
+func isSyncDatabaseCommand(args []string) bool {
+	return len(args) == 2 && args[0] == "sync" && args[1] == "db"
+}
+
+func runCommand(args []string) bool {
+	if !isSyncDatabaseCommand(args) {
+		return false
+	}
+	if err := command.SyncDatabase(dbVersion); err != nil {
+		logs.Error("sync database failed:", err)
+		os.Exit(1)
+	}
+	return true
 }
 
 func registerMiddlewares() {
@@ -231,6 +222,11 @@ func updateSystemConfig() {
 }
 
 func main() {
+	if runCommand(os.Args[1:]) {
+		return
+	}
+	initializeRuntimeDatabase()
+
 	if err := alertpipeline.StartDefault(context.Background(), func() models.Config { return SystemConfig }); err != nil {
 		logs.Error("start alert pipeline:", err)
 	}
