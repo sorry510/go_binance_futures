@@ -9,14 +9,17 @@ import (
 )
 
 type Metadata struct {
-	InputSchema    json.RawMessage `json:"input_schema,omitempty"`
-	OutputSchema   json.RawMessage `json:"output_schema,omitempty"`
-	Timeout        time.Duration   `json:"-"`
-	MaxResultBytes int             `json:"max_result_bytes,omitempty"`
-	Idempotent     bool            `json:"idempotent"`
-	SourceType     string          `json:"source_type,omitempty"`
-	ProviderRef    string          `json:"provider_ref,omitempty"`
-	CacheTTL       time.Duration   `json:"-"`
+	InputSchema     json.RawMessage `json:"input_schema,omitempty"`
+	OutputSchema    json.RawMessage `json:"output_schema,omitempty"`
+	Timeout         time.Duration   `json:"-"`
+	MaxResultBytes  int             `json:"max_result_bytes,omitempty"`
+	Idempotent      bool            `json:"idempotent"`
+	SourceType      string          `json:"source_type,omitempty"`
+	ProviderRef     string          `json:"provider_ref,omitempty"`
+	ProtocolVersion string          `json:"protocol_version,omitempty"`
+	CatalogHash     string          `json:"catalog_hash,omitempty"`
+	SchemaHash      string          `json:"schema_hash,omitempty"`
+	CacheTTL        time.Duration   `json:"-"`
 }
 
 type Tool interface {

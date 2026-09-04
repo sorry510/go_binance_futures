@@ -134,7 +134,6 @@ func TestRunnerRejectsUnavailableOrUnauthorizedTools(t *testing.T) {
 		want       string
 	}{
 		{name: "not allowed", allowed: nil, registered: []tools.Tool{tools.Func{ToolName: "echo", ToolRisk: permission.RiskRead, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) { return nil, nil }}}, want: "does not allow"},
-		{name: "not registered", allowed: []string{"echo"}, want: "not registered"},
 		{name: "risk denied", allowed: []string{"trade"}, registered: []tools.Tool{tools.Func{ToolName: "trade", ToolRisk: permission.RiskTrade, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) { return nil, nil }}}, want: "globally disabled"},
 	}
 	for _, testCase := range cases {
@@ -937,5 +936,77 @@ func TestRunnerLoadsOnlyActivatedAndRequestedSkillResources(t *testing.T) {
 	}
 	if !strings.Contains(joined, "activated skill instructions") || !strings.Contains(joined, "requested reference content") {
 		t.Fatalf("resource context missing: %q", joined)
+	}
+}
+
+func TestRunnerDynamicToolAllowlistAndExternalContext(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Content: `{"action":"tool","tool":"mcp.fixture.lookup","arguments":{}}`}},
+		{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}},
+	}}
+	definition := skill.Definition{SkillName: "dynamic", Prompt: "dynamic", Rounds: 3}
+	skills := skill.NewRegistry()
+	if err := skills.Register(definition); err != nil {
+		t.Fatal(err)
+	}
+	registry := tools.NewRegistry()
+	remote := tools.Func{ToolName: "mcp.fixture.lookup", ToolRisk: permission.RiskRead,
+		ToolMetadata: tools.Metadata{Idempotent: true, SourceType: "mcp", ProviderRef: "mcp-server:1", ProtocolVersion: "2026-07-28", CatalogHash: strings.Repeat("a", 64), SchemaHash: strings.Repeat("b", 64)},
+		ExecuteFunc:  func(context.Context, json.RawMessage) (any, error) { return map[string]any{"ok": true}, nil }}
+	if err := registry.Register(remote); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	runner, err := NewRunner(Config{Client: client, Skills: skills, Tools: registry, Tasks: store, Policy: permission.AllowReadOnly(), Retry: RetryPolicy{MaxAttempts: 1}, Timeout: 2 * time.Second,
+		ToolAllowlistProvider: func(context.Context, string) ([]string, error) { return []string{"mcp.fixture.lookup"}, nil },
+		ContextResourceProvider: func(context.Context, string, skill.Request) ([]contextengine.Resource, error) {
+			return []contextengine.Resource{{ID: "mcp-resource:1", Type: contextengine.BlockMCPResource, Source: "mcp:fixture:resource", Disclosure: contextengine.DisclosureActivation, Load: func(context.Context) (string, error) { return "remote resource", nil }}}, nil
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot, err := runner.FreezeExecutionChecked(context.Background(), definition)
+	if err != nil || snapshot.Version.ToolCatalogHash == "" {
+		t.Fatalf("dynamic catalog freeze failed: %+v err=%v", snapshot.Version, err)
+	}
+	if _, err := runner.Run(context.Background(), Request{Skill: "dynamic", Input: "run", ExecutionSnapshot: &snapshot}); err != nil {
+		t.Fatal(err)
+	}
+	first := client.request(0)
+	found := false
+	for _, message := range first.Messages {
+		if strings.Contains(message.Content, "remote resource") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("external MCP context missing from first request: %+v", first.Messages)
+	}
+}
+
+func TestRunnerRepairsUnknownToolNameWithoutConsumingToolBudget(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Content: `{"action":"tool","tool":"totally_unknown_news_tool","arguments":{}}`}},
+		{response: &llm.Response{Content: `{"action":"tool","tool":"mcp.coingecko-free.get-crypto-news","arguments":{}}`}},
+		{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}},
+	}}
+	var calls atomic.Int32
+	news := tools.Func{ToolName: "mcp.coingecko-free.get-crypto-news", ToolRisk: permission.RiskRead, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) {
+		calls.Add(1)
+		return map[string]any{"ok": true}, nil
+	}}
+	runner, _ := newTestRunner(t, client, skill.Definition{SkillName: "test", AllowedTools: []string{news.Name()}, Rounds: 4}, news)
+	result, err := runner.Run(context.Background(), Request{Skill: "test", Input: "news"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result == nil || calls.Load() != 1 {
+		t.Fatalf("result=%+v calls=%d", result, calls.Load())
+	}
+	second := client.request(1)
+	last := second.Messages[len(second.Messages)-1].Content
+	if !strings.Contains(last, "AGENT_FEEDBACK") || !strings.Contains(last, news.Name()) || !strings.Contains(last, "exact allowed tool name") {
+		t.Fatalf("missing exact tool-name repair feedback: %s", last)
 	}
 }

@@ -31,6 +31,12 @@ type Store interface {
 	MarkInterrupted(ctx context.Context, at time.Time) (int64, error)
 }
 
+// CreateStore is an optional fast path for callers that know a task ID is new.
+// It avoids existence checks and extra read-backs on latency-sensitive task creation.
+type CreateStore interface {
+	Create(ctx context.Context, item *Task) error
+}
+
 // CheckpointStore is an optional extension implemented by the built-in task stores.
 // Runtime uses it to persist an opaque recovery checkpoint without exposing the
 // checkpoint through the normal Task JSON API.
@@ -47,6 +53,22 @@ type MemoryStore struct {
 
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{items: make(map[string]*Task)}
+}
+
+func (store *MemoryStore) Create(ctx context.Context, item *Task) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if store == nil || item == nil || item.ID == "" {
+		return fmt.Errorf("task store requires a task id")
+	}
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	if _, exists := store.items[item.ID]; exists {
+		return fmt.Errorf("task %q already exists", item.ID)
+	}
+	store.items[item.ID] = clone(item)
+	return nil
 }
 
 func (store *MemoryStore) Save(ctx context.Context, item *Task) error {

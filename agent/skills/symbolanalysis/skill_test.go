@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/skill"
 	marketservice "go_binance_futures/service/market"
 	symbolanalysisservice "go_binance_futures/service/symbolanalysis"
@@ -109,6 +110,45 @@ func TestValidatorAllowsNeutralWithoutEntries(t *testing.T) {
 	}
 }
 
+func TestRunValidatorAllowsSuccessfulMCPEvidenceSource(t *testing.T) {
+	now := time.Now().UTC().Truncate(time.Second)
+	contextValue := testAnalysisContext(now)
+	mcpSource := "mcp.coingecko-free.get-crypto-news"
+	toolResults := map[string]any{
+		"get_symbol_analysis_context": contextValue,
+		mcpSource:                     map[string]any{"articles": []any{}},
+	}
+	evidence := map[string]contextengine.Evidence{
+		"native": {ID: "native", SourceType: "tool", Source: "get_symbol_analysis_context", ObservedAt: now.Format(time.RFC3339), ContentHash: "native-hash", Freshness: contextengine.FreshnessFresh},
+		"mcp":    {ID: "mcp", SourceType: "tool", Source: mcpSource, ObservedAt: now.Format(time.RFC3339), ContentHash: "mcp-hash", Freshness: contextengine.FreshnessFresh},
+	}
+	raw := validPlan(now, "ONGUSDT", 2, []string{"funding_rate"}, 99, 100, 95, []float64{105})
+	var plan TradingPlanV1
+	if err := json.Unmarshal(raw, &plan); err != nil {
+		t.Fatal(err)
+	}
+	plan.Evidence = append(plan.Evidence, Evidence{Source: mcpSource, Finding: "latest news is neutral"})
+	raw, _ = json.Marshal(plan)
+	if _, err := New().ValidatorForRunWithEvidence(skill.Request{Input: `{"symbol":"ONGUSDT"}`}, toolResults, evidence).Validate(context.Background(), raw); err != nil {
+		t.Fatalf("successful MCP evidence should be accepted: %v", err)
+	}
+}
+
+func TestValidatorRejectsUnknownNonMCPSource(t *testing.T) {
+	now := time.Now().UTC().Truncate(time.Second)
+	raw := validPlan(now, "ONGUSDT", 2, []string{"funding_rate"}, 99, 100, 95, []float64{105})
+	var plan TradingPlanV1
+	if err := json.Unmarshal(raw, &plan); err != nil {
+		t.Fatal(err)
+	}
+	plan.Evidence = append(plan.Evidence, Evidence{Source: "invented_external_source", Finding: "unsupported"})
+	raw, _ = json.Marshal(plan)
+	_, err := New().ValidatorFor(skill.Request{Input: `{"symbol":"ONGUSDT"}`}).Validate(context.Background(), raw)
+	if err == nil || !strings.Contains(err.Error(), "unsupported source") {
+		t.Fatalf("expected unknown source rejection, got %v", err)
+	}
+}
+
 func TestRunValidatorRejectsUnusedEvidenceSource(t *testing.T) {
 	now := time.Now().UTC().Truncate(time.Second)
 	contextValue := testAnalysisContext(now)
@@ -125,5 +165,11 @@ func TestRunValidatorRejectsUnusedEvidenceSource(t *testing.T) {
 	_, err := validator.Validate(context.Background(), raw)
 	if err == nil || !strings.Contains(err.Error(), "was not successfully called") {
 		t.Fatalf("expected unused evidence source rejection, got %v", err)
+	}
+}
+
+func TestSymbolAnalysisMaxRounds(t *testing.T) {
+	if got := New().MaxRounds(); got != 15 {
+		t.Fatalf("MaxRounds() = %d, want 15", got)
 	}
 }

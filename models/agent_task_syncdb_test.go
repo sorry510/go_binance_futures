@@ -42,6 +42,27 @@ const legacyAgentTaskDDL = `CREATE TABLE agent_tasks (
 	completed_at integer
 )`
 
+const legacyMCPServerDDL = `CREATE TABLE agent_mcp_servers (
+	id integer primary key autoincrement,
+	name varchar(64),
+	endpoint varchar(512),
+	enabled integer,
+	auth_type varchar(32),
+	secret_ref varchar(255),
+	custom_header varchar(128),
+	allow_private integer,
+	protocol_version varchar(32),
+	server_name varchar(128),
+	server_version varchar(64),
+	status varchar(32),
+	last_success_at integer,
+	last_error_at integer,
+	last_error text,
+	catalog_hash varchar(64),
+	created_at integer,
+	updated_at integer
+)`
+
 const legacyAgentTaskEventDDL = `CREATE TABLE agent_task_events (
 	id integer primary key autoincrement,
 	task_id varchar(64),
@@ -75,6 +96,14 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	if _, err := db.Exec(legacyAgentTaskEventDDL); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := db.Exec(legacyMCPServerDDL); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`INSERT INTO agent_mcp_servers
+		(name, endpoint, enabled, auth_type, allow_private, status, created_at, updated_at)
+		VALUES ('legacy-mcp', 'https://example.com/mcp', 1, 'none', 0, 'disconnected', 1700000000000, 1700000000000)`); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := db.Exec(`INSERT INTO agent_tasks
 		(id, skill, status, stage, progress, round, max_rounds, created_at, updated_at)
 		VALUES ('legacy-task', 'symbol_analysis', 'succeeded', 'completed', 100, 2, 8, 1700000000000, 1700000000000)`); err != nil {
@@ -86,7 +115,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent))
+	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace))
 	if err := orm.RunSyncdb("default", false, false); err != nil {
 		t.Fatalf("RunSyncdb must upgrade an existing database with rows: %v", err)
 	}
@@ -100,6 +129,30 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	requireAgentColumns(t, db, "agent_task_events", []string{
 		"step_id", "step_type", "error_type", "checkpoint",
 	})
+	for _, table := range []string{"agent_mcp_servers", "agent_mcp_tools", "agent_mcp_resources", "agent_mcp_prompts", "agent_mcp_permissions", "agent_mcp_secrets", "agent_mcp_oauth_states", "agent_alert_pipeline_traces"} {
+		var count int
+		if err := db.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?`, table).Scan(&count); err != nil {
+			t.Fatal(err)
+		}
+		if count != 1 {
+			t.Fatalf("RunSyncdb did not create V2-5 table %s", table)
+		}
+	}
+
+	requireAgentColumns(t, db, "agent_mcp_tools", []string{
+		"remote_name", "canonical_name", "input_schema", "output_schema", "schema_hash",
+		"risk", "enabled", "idempotent_hint", "idempotent", "timeout_ms", "cache_ttl_ms", "max_result_bytes",
+	})
+	requireAgentColumns(t, db, "agent_mcp_servers", []string{
+		"oauth_status", "oauth_issuer", "oauth_expires_at", "description",
+	})
+	var legacyMCPName string
+	if err := db.QueryRow(`SELECT name FROM agent_mcp_servers WHERE name='legacy-mcp'`).Scan(&legacyMCPName); err != nil {
+		t.Fatalf("legacy MCP server row became unreadable after OAuth upgrade: %v", err)
+	}
+	if legacyMCPName != "legacy-mcp" {
+		t.Fatalf("legacy MCP server row changed during sync: %q", legacyMCPName)
+	}
 
 	for _, column := range []string{"plan_json", "steps_json", "checkpoint_json"} {
 		if notNull := sqliteColumnNotNull(t, db, "agent_tasks", column); notNull {
