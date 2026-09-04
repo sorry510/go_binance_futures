@@ -1,213 +1,244 @@
-# Phase V2-5：第三方 HTTP MCP Client 接入
+# V2-5：第三方 HTTP MCP Integration ✅
 
-## 目标
+## 1. 阶段状态
 
-本 Phase 只建设 **MCP Client/Host** 能力：`go_binance_futures` 主动连接第三方提供的标准 HTTP MCP Server，并把远端 Tool、Resource、Prompt 纳入现有 Agent Runtime。
+V2-5 已完成。范围限定为 **Agent Host 主动连接第三方 Streamable HTTP MCP Server**；本项目已有的 `/mcp` Server 不在本阶段改造范围内，Imported Skill 仍留给 V2-6。
 
-本 Phase **不建设、不升级、不验收本项目自身的 MCP Server**；现有 `mcpserver/` 与 `/mcp` 对外服务不属于 V2-5 范围，除非未来另开独立任务处理。
-
-核心链路：
+运行时身份：
 
 ```text
-Agent Runtime
-    |
-Tool Runtime / Context Engine
-    |
-MCP Client Gateway
-    |
-Streamable HTTP
-    |
-Third-party MCP Server
+runtime_version = 2.4.0
+checkpoint_state = runtime_state_v5
+MCP Go SDK = v1.7.0
+Go baseline = 1.25.x
 ```
 
-任何第三方 MCP 能力都不能绕过 Tool Runtime、Permission、Budget、Trace 和 Security。
+Go 1.25 是官方 MCP Go SDK v1.7.0 的最低工具链要求；Release workflow 已同步到 Go 1.25。
 
-## 协议与 Transport 范围
-
-首版只支持远程 `Streamable HTTP` MCP Server。目标协议跟进 MCP `2026-07-28`，同时尽量通过官方 Go SDK 的协议探测/协商兼容较旧的标准 MCP Server。
-
-当前项目使用 `github.com/modelcontextprotocol/go-sdk v0.4.0`，实现本 Phase 前应先验证并升级到满足目标 Client 协议能力的稳定版本。升级只服务于 Client Gateway，不要求同步重构现有 MCP Server。
-
-明确暂不做：
-
-- 不把本项目对外 `/mcp` Server 纳入本 Phase。
-- 首版不支持本地 `stdio` MCP Server。
-- 首版不主动实现旧 HTTP+SSE transport；如真实第三方服务仍只有 SSE，再独立增加 legacy adapter。
-- 不允许 LLM 动态指定任意 MCP URL。
-
-## Remote MCP Registry
-
-新增第三方 MCP 连接注册表。建议实体包含：
+## 2. 已实现架构
 
 ```text
-id
-name
-endpoint
-enabled
-auth_type
-secret_ref
+AI Skill
+  -> Runtime dynamic allowlist / Context resource provider
+  -> V2-3 Tool Runtime
+  -> MCP Remote Tool Adapter
+  -> MCP Gateway
+  -> Streamable HTTP MCP Server
+```
+
+MCP Tool 不存在独立旁路，仍执行统一的 Schema、Risk、Permission、Budget、Timeout、Cache、Evidence 和 Trace。
+
+Resource / Prompt 不注册为 Tool，而是进入 V2-2 Context Engine。远端 Prompt 固定带 `EXTERNAL_MCP_PROMPT` 边界声明，只能作为不可信外部 Context，不能覆盖 System Policy、Risk、Permission 或 Budget。
+
+## 3. Registry 与治理模型
+
+新增 ORM 模型：
+
+- `agent_mcp_servers`
+- `agent_mcp_tools`
+- `agent_mcp_resources`
+- `agent_mcp_prompts`
+- `agent_mcp_permissions`
+
+没有新增 `command/sql/version/2.sql`；仍由现有 `orm.RunSyncdb` 管理结构。SQLite legacy upgrade regression 已验证旧 Agent Task 数据存在时可以安全创建 V2-5 新表。
+
+新发现 Tool 默认：
+
+```text
+status = unclassified
+enabled = 0
+```
+
+Tool 必须经过两层本地治理后才可调用：
+
+```text
+Tool 本地分类/启用
++ Skill -> MCP Tool grant
++ Runtime global Risk Policy
+```
+
+远端 `readOnlyHint` / `idempotentHint` 只保存为参考信息。缓存、并行和 safe checkpoint 使用管理员本地确认的 `risk` 与 `idempotent`，不信任远端 annotation。
+
+当 Input/Output Schema hash 变化时：
+
+```text
+Tool -> needs_review
+Tool -> disabled
+已有 Skill grant -> disabled
+```
+
+管理员必须重新审核 Tool 并重新授权 Skill，Catalog refresh 不会静默扩大权限。
+
+## 4. MCP Gateway
+
+Gateway 基于官方 `github.com/modelcontextprotocol/go-sdk/mcp`：
+
+- `StreamableClientTransport`
+- protocol negotiation
+- `tools/list` + pagination
+- `resources/list` + pagination
+- `prompts/list` + pagination
+- `tools/call`
+- `resources/read`
+- `prompts/get`
+
+支持的鉴权模式：
+
+- `none`
+- `bearer`
+- `custom_header`
+- `oauth2` managed credential
+
+OAuth2 支持已受管的 access token，以及具备 refresh token / token URL / client identity 时的 refresh。Agent Runtime **不执行浏览器交互式 OAuth 授权流程**。
+
+Secret 只保存 `secret_ref`；当前默认 resolver 支持 `env:VARIABLE_NAME`。API/UI 只返回 `has_secret`，不会返回引用名或凭据值；Secret 解析错误也不会泄漏环境变量名称。
+
+## 5. 网络安全边界
+
+第三方 MCP outbound 具备：
+
+- 默认要求 HTTPS
+- `allow_private=1` 才允许 HTTP / localhost / 私网
+- endpoint 不允许 URL userinfo / fragment
+- 每次 Dial 重新 DNS resolve 并检查实际 IP
+- 阻断 loopback/private/unspecified/link-local/multicast（除非显式 allow_private）
+- redirect 仅允许相同 scheme/host，且限制跳转次数
+- connect/header/overall timeout
+- response size 上限
+- 每 Server 最大 4 个并发请求
+- 连续失败 circuit breaker
+- **MCP transport 不继承 HTTP_PROXY / HTTPS_PROXY**，避免代理绕过目标 IP SSRF 校验
+- OAuth refresh `token_url` 使用同一套 endpoint、DNS/IP 和 redirect 限制
+
+## 6. Schema 与 Tool Runtime
+
+Tool Runtime JSON Schema validator 使用 Draft 2020-12。
+
+MCP Tool Descriptor/Trace 包含：
+
+```text
+canonical_name
+source_type=mcp
+risk
+idempotent
+timeout/cache/max_result_bytes
+provider_ref
 protocol_version
-server_name
-server_version
-status
-last_success_at
-last_error_at
-last_error
 catalog_hash
-created_at
-updated_at
+schema_hash
 ```
 
-`endpoint` 必须由管理员显式配置。Agent 只能引用已注册的 Server ID/Name，不能把用户输入直接当 URL 发起连接。
+远端没有 `outputSchema` 时按“无 Output Schema”处理，不再错误保存为 JSON `null`。
 
-Secret 不写入 Prompt、Task Input、Task Event 和普通日志；数据库只保存 `secret_ref` 或受保护的凭据引用。
+Tool result 继续转换为 V2-2 Evidence / ContextBlock，并接受 Result size、freshness 和 sensitive redaction 规则。
 
-## 鉴权
+## 7. Resource / Prompt Context
 
-按第三方服务实际能力支持：
-
-1. `none`：公开 MCP Server。
-2. `bearer`：固定 Bearer Token。
-3. `oauth2`：按 MCP 标准授权流程接入远程授权服务器。
-4. `custom_header`：只作为受管兼容模式，Header 名和值由管理员配置并进入 Secret 管理，不允许 Skill/LLM 动态生成。
-
-OAuth Token 的获取、刷新和失效处理属于 MCP Client Gateway，不进入 Skill Prompt。
-
-## Client Gateway
-
-建议新增：
+Skill 可以分别授权 MCP Resource / Prompt，并配置：
 
 ```text
-agent/mcpclient/
-├── client.go
-├── registry.go
-├── connector.go
-├── auth.go
-├── catalog.go
-├── adapter.go
-├── health.go
-└── security.go
+auto_load = 1 -> activation
+auto_load = 0 -> on_demand
 ```
 
-Runtime 不直接依赖 MCP SDK；MCP 协议细节全部封装在 `mcpclient` 内。
+Resource 的远端 `lastModified` 会记录到 ContextBlock `as_of`，但默认保持 `freshness=unknown`；不会仅凭远端声明擅自判定为 fresh。
 
-## Discovery
+带必填参数的 Prompt 不允许配置 auto-load，避免 BuildContext 阶段无参数调用。
 
-连接第三方 Server 后发现其 Capability，并同步：`tools`、`resources`、`prompts`。
+## 8. Multi-Round-Trip / Approval 边界
 
-远端能力保存 Catalog Snapshot 与 hash，用于审计、权限审批和 Replay。Catalog 刷新不能自动扩大 Agent 权限。
-
-远端 Server 新增 Tool 时：
+官方 SDK 的自动 Multi-Round-Trip middleware 已显式关闭。Server 返回 `input_required` 时，Gateway 会保留 `request_state` / input requests，并通过统一 Tool error taxonomy 返回：
 
 ```text
-discovered -> unclassified -> disabled -> admin review -> granted
+error_type = input_required
 ```
 
-删除或修改 Tool Schema 时，应使相关授权进入 `needs_review` 或重新校验状态，避免旧权限静默套用到新语义。
+V2-5 **不会自动接受远端 elicitation/confirmation，也不会让 MCP Server 自动获得用户权限**。当前 Agent 可以根据该结构化错误降级或结束。持久化 `waiting_input`、Web 人工确认和确认后续跑属于后续统一 Approval / Execution 能力，不在本阶段伪装为已完成。
 
-## Tool 映射
+## 9. Runtime 动态接入
 
-MCP Tool 统一映射到 Tool Runtime，canonical name 使用命名空间：
+Runtime 新增动态 provider：
+
+- MCP Tool allowlist provider
+- MCP Context resource provider
+
+Native `Skill.Tools()` 保持静态契约；数据库 MCP grant 在 Task 启动时动态追加。实际 Native + MCP Tool Catalog 会进入 `tool_catalog_hash`，provider 查询失败时 Task 启动直接失败，不会使用不完整目录继续运行。
+
+Resume 继续遵守冻结身份校验；Runtime 2.3.x / `runtime_state_v4` checkpoint 不跨版本恢复。
+
+## 10. Web 管理
+
+新增 `AI -> MCP`：
+
+- MCP Server CRUD
+- Test Connection
+- Refresh Catalog
+- Tools / Resources / Prompts 查看
+- Tool Risk / Enable / Idempotent / Timeout / Cache / Max Result Bytes
+- Skill -> Tool/Resource/Prompt 授权
+- Resource/Prompt auto-load
+
+Task Center Tool Trace 新增展示：
+
+- MCP Provider Ref
+- Protocol Version
+- Catalog Hash
+- Schema Hash
+
+Secret 输入只接受受管引用，编辑时留空保留已有引用。
+
+## 11. HTTP API
 
 ```text
-mcp.<server-name>.<tool-name>
+GET    /agents/mcp/servers
+POST   /agents/mcp/servers
+PUT    /agents/mcp/servers/:id
+DELETE /agents/mcp/servers/:id
+GET    /agents/mcp/servers/:id/catalog
+POST   /agents/mcp/servers/:id/test
+POST   /agents/mcp/servers/:id/refresh
+PUT    /agents/mcp/tools/:id
+POST   /agents/mcp/permissions
 ```
 
-例如 `mcp.coinalyze.get-liquidations`。MCP Tool 仍转换为统一 `ToolDescriptor` 和 `ToolResultEnvelope`，继续使用 JSON Schema、timeout、result size、error taxonomy、cache、Permission/Risk、Budget、Trace/Evidence。
+Server/Tool/Catalog 变化会热同步到默认 Tool Registry，不要求重启后端。Skill grant 在每个新 Task 启动时动态读取。
 
-远端 Tool annotation、description、readOnlyHint 等只能作为分类参考，**最终 Risk Level 必须由本系统决定**。
+## 12. 自动回归覆盖
 
-## Resource 接入
+真实 E2E 使用官方 MCP Go SDK Server + `httptest` Streamable HTTP Handler，覆盖：
 
-MCP Resource 不直接拼进 System Prompt，而是进入 Context Engine：
+- protocol discovery
+- Tool/Resource/Prompt catalog
+- 新 Tool 默认禁用
+- Tool Runtime 实际远端调用
+- Resource/Prompt Context
+- MCP Trace identity
+- Schema change 自动撤权
+- Skill grant 自动撤权
+- `input_required` 原样上浮
+- Bearer Authorization Header 实际发送
+- Secret API/错误信息不泄漏
+- private/loopback endpoint guard
+- OAuth token endpoint guard
+- no-output-schema Tool compatibility
 
-```text
-MCP Resource -> MCP Client Gateway -> ContextBlock
-             -> freshness / size / sensitivity check
-             -> Agent Context
-```
+V2-4 Eval/Replay 全量回归继续通过。
 
-需要记录 `server_id`、`uri`、`mime_type`、`as_of`、`content_hash`、cache hint。Skill 只能读取被授权 Server/Resource 范围。
+## 13. Phase Gate
 
-## Prompt 接入
+- [x] 至少一个 Streamable HTTP MCP Server 可通过真实协议 E2E 发现 Tool/Resource/Prompt
+- [x] 新 Tool 默认不可调用，必须完成本地治理和 Skill grant
+- [x] MCP Tool 统一经过 V2-3 Tool Runtime
+- [x] MCP Tool failure 可通过结构化 error taxonomy 返回 Agent
+- [x] MCP Prompt 不能进入 system trust boundary
+- [x] Secret 不进入 Prompt / Task / Event / API response
+- [x] SSRF、redirect、timeout、size、concurrency、circuit breaker 有边界
+- [x] Schema drift 自动撤销 Tool 与 Skill 权限
+- [x] MCP identity 进入 Tool Trace / Tool Catalog Hash
+- [x] Web 管理能力完成
+- [x] Go Release baseline 与 MCP SDK 要求一致
+- [x] `go test ./...` 通过
+- [x] 核心 Race Gate 通过
+- [x] 前端 typecheck/build 通过
 
-MCP Prompt 视为外部模板资源，而不是系统级指令：
-
-- 不允许覆盖 Runtime System Policy。
-- 不允许扩大 Tool Permission。
-- 不允许修改 Risk Policy、Budget 或 Skill trust。
-- 标记来源为 `external_mcp_prompt`。
-- 进入 Context 时按外部不可信内容处理。
-
-## HTTP、网络与 SSRF 安全
-
-因为这是服务端主动连接第三方 HTTP 地址，必须显式处理 SSRF：
-
-- Endpoint 只能由管理员创建/修改。
-- 默认要求 HTTPS；localhost/私网地址只有管理员显式允许时开放。
-- DNS 解析后的实际 IP 仍执行网络策略校验，防止 DNS rebinding。
-- 禁止自动跟随到未授权 Host 的重定向。
-- 每个 Server 配置 connect/read/overall timeout。
-- 限制响应体大小、并发数和单 Task 调用次数。
-- 远端故障进入熔断/退避，不阻塞行情、WebSocket、交易主循环。
-
-## Cache 与 Catalog 刷新
-
-对于支持 cache hint 的标准 MCP Server，优先遵循 Server 返回 TTL/cache scope，同时受本系统最大 TTL 限制。
-
-至少缓存 Tool/Resource/Prompt catalog。实时 Tool 执行结果是否缓存仍由 Tool Runtime 决定。
-
-## 多轮输入 / Confirmation
-
-如果远端 MCP 调用返回需要额外用户输入或确认的标准多轮结果，Gateway 将其转换为本系统统一 `waiting_input` / Approval 状态。
-
-远端 Server 不能直接控制前端，也不能自行批准 write/trade 行为；输入完成后由 Runtime 决定是否继续原 MCP 调用。
-
-## Web 管理
-
-新增 `AI -> MCP`，定位为 **第三方 MCP 连接管理**：
-
-- Server Name / Endpoint / Enabled。
-- Auth 类型与 Secret 状态。
-- Test Connection。
-- 协议版本、Server Info、Capabilities。
-- Tools / Resources / Prompts Catalog。
-- Tool Risk 分类和授权。
-- Skill -> MCP Tool 授权关系。
-- 最近连接状态、错误、耗时。
-- Refresh Catalog / Disable / Kill Switch。
-
-页面不提供“将本项目暴露成 MCP Server”的 V2 配置。
-
-## 数据模型建议
-
-新增 `agent_mcp_servers`、`agent_mcp_tools`、`agent_mcp_permissions`。Resource/Prompt Catalog 可按数量决定是否独立表；普通结构变化继续使用 ORM Model + `orm.RunSyncdb`。
-
-## 与 Agent Skills 的关系
-
-标准 Skill 可以在 `allowed-tools` 中申请 `mcp.<server>.<tool>`，但只代表请求。实际可用必须同时满足：Server enabled + Tool healthy/classified + system permission + Skill allowlist + Runtime budget。
-
-因此导入 Skill 绝不会自动安装、连接或授权任意第三方 MCP Server。
-
-## Eval / Replay
-
-MCP Tool 必须支持 Fixture 化。离线 Eval 不调用真实第三方服务器，而是回放规范化后的 `ToolResultEnvelope`。
-
-Task 保存 `mcp_server_id`、`protocol_version`、`catalog_hash`、tool canonical name、tool schema hash，确保第三方 Server 后续变化后历史 Task 仍可解释。
-
-## 验收
-
-- [ ] 可配置并连接至少一个第三方 Streamable HTTP MCP Server。
-- [ ] 能发现并显示远端 Tools、Resources、Prompts。
-- [ ] MCP Tool 通过统一 Tool Runtime 执行，而不是 Runtime 直接调用 SDK。
-- [ ] MCP Resource 通过 Context Engine 注入。
-- [ ] 新发现 Tool 默认不可被 Skill 调用。
-- [ ] Bearer/OAuth 等 Secret 不进入 Agent Context 或普通日志。
-- [ ] Endpoint 有 SSRF、防重定向和网络范围保护。
-- [ ] 第三方 MCP 故障不会影响核心行情和交易循环。
-- [ ] MCP Tool 调用可追踪到 Server/Catalog/Schema 版本。
-- [ ] Offline Eval 可使用 MCP Fixture，不依赖真实第三方服务。
-
-## Definition of Done
-
-V2-5 完成后，第三方 HTTP MCP Server 对 Runtime 来说只是另一种受治理的 Tool/Context Provider。Agent 不需要知道 HTTP、OAuth 或 MCP 协议细节，也不能因为接入外部 MCP 而获得新的权限绕过路径。
+V2-5 完成后，下一阶段严格进入 **V2-6 Imported / Portable Skills**。

@@ -11,15 +11,16 @@ import (
 type ErrorType string
 
 const (
-	ErrorInvalidInput ErrorType = "invalid_input"
-	ErrorNotFound     ErrorType = "not_found"
-	ErrorRateLimit    ErrorType = "rate_limit"
-	ErrorTimeout      ErrorType = "timeout"
-	ErrorUpstream     ErrorType = "upstream"
-	ErrorStale        ErrorType = "stale"
-	ErrorPartial      ErrorType = "partial"
-	ErrorPermission   ErrorType = "permission"
-	ErrorInternal     ErrorType = "internal"
+	ErrorInvalidInput  ErrorType = "invalid_input"
+	ErrorNotFound      ErrorType = "not_found"
+	ErrorRateLimit     ErrorType = "rate_limit"
+	ErrorTimeout       ErrorType = "timeout"
+	ErrorUpstream      ErrorType = "upstream"
+	ErrorStale         ErrorType = "stale"
+	ErrorPartial       ErrorType = "partial"
+	ErrorPermission    ErrorType = "permission"
+	ErrorInternal      ErrorType = "internal"
+	ErrorInputRequired ErrorType = "input_required"
 )
 
 type Error struct {
@@ -63,6 +64,10 @@ func TypeOf(err error) ErrorType {
 func classifyToolError(err error) ErrorType {
 	if err == nil {
 		return ""
+	}
+	var inputRequired interface{ InputRequired() bool }
+	if errors.As(err, &inputRequired) && inputRequired.InputRequired() {
+		return ErrorInputRequired
 	}
 	if errors.Is(err, context.DeadlineExceeded) {
 		return ErrorTimeout

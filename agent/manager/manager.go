@@ -79,7 +79,10 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	executionSnapshot := runner.FreezeExecution(selectedSkill)
+	executionSnapshot, err := runner.FreezeExecutionChecked(context.Background(), selectedSkill)
+	if err != nil {
+		return nil, err
+	}
 	req.ExecutionSnapshot = &executionSnapshot
 
 	now := time.Now().UTC()

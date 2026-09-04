@@ -26,17 +26,20 @@ func NewCachePolicy(ttl time.Duration) CachePolicy {
 }
 
 type ToolDescriptor struct {
-	CanonicalName  string               `json:"canonical_name"`
-	SourceType     SourceType           `json:"source_type"`
-	Description    string               `json:"description,omitempty"`
-	InputSchema    json.RawMessage      `json:"input_schema,omitempty"`
-	OutputSchema   json.RawMessage      `json:"output_schema,omitempty"`
-	Risk           permission.RiskLevel `json:"risk"`
-	Idempotent     bool                 `json:"idempotent"`
-	TimeoutMs      int64                `json:"timeout_ms,omitempty"`
-	CachePolicy    CachePolicy          `json:"cache_policy"`
-	ProviderRef    string               `json:"provider_ref,omitempty"`
-	MaxResultBytes int                  `json:"max_result_bytes,omitempty"`
+	CanonicalName   string               `json:"canonical_name"`
+	SourceType      SourceType           `json:"source_type"`
+	Description     string               `json:"description,omitempty"`
+	InputSchema     json.RawMessage      `json:"input_schema,omitempty"`
+	OutputSchema    json.RawMessage      `json:"output_schema,omitempty"`
+	Risk            permission.RiskLevel `json:"risk"`
+	Idempotent      bool                 `json:"idempotent"`
+	TimeoutMs       int64                `json:"timeout_ms,omitempty"`
+	CachePolicy     CachePolicy          `json:"cache_policy"`
+	ProviderRef     string               `json:"provider_ref,omitempty"`
+	ProtocolVersion string               `json:"protocol_version,omitempty"`
+	CatalogHash     string               `json:"catalog_hash,omitempty"`
+	SchemaHash      string               `json:"schema_hash,omitempty"`
+	MaxResultBytes  int                  `json:"max_result_bytes,omitempty"`
 }
 
 type ToolResultEnvelope struct {
@@ -53,23 +56,27 @@ type ToolResultEnvelope struct {
 }
 
 type Trace struct {
-	CanonicalName string               `json:"canonical_name"`
-	SourceType    SourceType           `json:"source_type"`
-	Risk          permission.RiskLevel `json:"risk"`
-	Idempotent    bool                 `json:"idempotent"`
-	TimeoutMs     int64                `json:"timeout_ms,omitempty"`
-	CacheTTLms    int64                `json:"cache_ttl_ms,omitempty"`
-	ArgumentsHash string               `json:"arguments_hash,omitempty"`
-	CallIndex     int                  `json:"call_index,omitempty"`
-	CallBudget    int                  `json:"call_budget,omitempty"`
-	DurationMs    int64                `json:"duration_ms"`
-	CacheHit      bool                 `json:"cache_hit"`
-	Partial       bool                 `json:"partial"`
-	ErrorType     ErrorType            `json:"error_type,omitempty"`
-	RawSize       int                  `json:"raw_size"`
-	ContentHash   string               `json:"content_hash,omitempty"`
-	AsOf          string               `json:"as_of,omitempty"`
-	Warnings      []string             `json:"warnings,omitempty"`
+	CanonicalName   string               `json:"canonical_name"`
+	SourceType      SourceType           `json:"source_type"`
+	Risk            permission.RiskLevel `json:"risk"`
+	Idempotent      bool                 `json:"idempotent"`
+	TimeoutMs       int64                `json:"timeout_ms,omitempty"`
+	CacheTTLms      int64                `json:"cache_ttl_ms,omitempty"`
+	ArgumentsHash   string               `json:"arguments_hash,omitempty"`
+	CallIndex       int                  `json:"call_index,omitempty"`
+	CallBudget      int                  `json:"call_budget,omitempty"`
+	DurationMs      int64                `json:"duration_ms"`
+	CacheHit        bool                 `json:"cache_hit"`
+	Partial         bool                 `json:"partial"`
+	ErrorType       ErrorType            `json:"error_type,omitempty"`
+	RawSize         int                  `json:"raw_size"`
+	ContentHash     string               `json:"content_hash,omitempty"`
+	AsOf            string               `json:"as_of,omitempty"`
+	Warnings        []string             `json:"warnings,omitempty"`
+	ProviderRef     string               `json:"provider_ref,omitempty"`
+	ProtocolVersion string               `json:"protocol_version,omitempty"`
+	CatalogHash     string               `json:"catalog_hash,omitempty"`
+	SchemaHash      string               `json:"schema_hash,omitempty"`
 }
 
 type ExecuteRequest struct {
