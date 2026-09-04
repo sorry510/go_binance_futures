@@ -1,4 +1,4 @@
-# Phase V2-11：Proposal、Risk Engine 与受控执行
+# Phase V2-12：Proposal、Risk Engine 与受控执行
 
 ## 目标
 
