@@ -1,4 +1,4 @@
-# Phase V2-8：长期 Memory 与历史知识管理
+# Phase V2-9：长期 Memory 与历史知识管理
 
 ## 目标
 

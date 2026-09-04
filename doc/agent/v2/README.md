@@ -58,11 +58,12 @@ V2 从现在开始严格按照 Phase 编号顺序开发，不再使用“编号�
 | [V2-4](./04-phase-v2-4-eval-replay.md) | P0 ✅ | Eval、Replay、Prompt/Skill Version、回归 Gate |
 | [V2-5](./05-phase-v2-5-mcp-integration.md) | P0 ✅ | 第三方 HTTP MCP Client、Interactive OAuth、远端能力发现与治理 |
 | [V2-6](./06-phase-v2-6-agent-skills.md) | P0 ✅ | 标准 Agent Skills 导入、版本、加载与安全 |
-| [V2-7](./07-phase-v2-7-model-gateway.md) | P1 | Model Capability、Router、Health、Fallback |
-| [V2-8](./08-phase-v2-8-memory.md) | P1 | 长期 Memory、TTL、Scope 与管理 |
-| [V2-9](./09-phase-v2-9-observability.md) | P1 | Trace、长期指标、运营与管理页面 |
-| [V2-10](./10-phase-v2-10-workflows.md) | P1 | market_scan、strategy_review 等业务 Workflow |
-| [V2-11](./11-phase-v2-11-risk-execution.md) | P2 | Proposal、Risk Engine、Approval、受控执行 |
+| [V2-7](./07-phase-v2-7-agent-chat.md) | P0 | Agent 对话入口、Conversation Context、Slash Skill 调用 |
+| [V2-8](./08-phase-v2-8-model-gateway.md) | P1 | Model Capability、Router、Health、Fallback |
+| [V2-9](./09-phase-v2-9-memory.md) | P1 | 长期 Memory、TTL、Scope 与管理 |
+| [V2-10](./10-phase-v2-10-observability.md) | P1 | Trace、长期指标、运营与管理页面 |
+| [V2-11](./11-phase-v2-11-workflows.md) | P1 | market_scan、strategy_review 等业务 Workflow |
+| [V2-12](./12-phase-v2-12-risk-execution.md) | P2 | Proposal、Risk Engine、Approval、受控执行 |
 
 ## 4. 严格开发顺序
 
@@ -81,15 +82,17 @@ V2-5 HTTP MCP Client
   ↓
 V2-6 Agent Skills
   ↓
-V2-7 Model Gateway
+V2-7 Agent Chat
   ↓
-V2-8 Memory
+V2-8 Model Gateway
   ↓
-V2-9 Observability
+V2-9 Memory
   ↓
-V2-10 Workflows
+V2-10 Observability
   ↓
-V2-11 Risk / Execution
+V2-11 Workflows
+  ↓
+V2-12 Risk / Execution
 ```
 
 顺序约束：
@@ -99,8 +102,9 @@ V2-11 Risk / Execution
 - 每个 Phase 完成后先执行该 Phase 的自动测试、Replay/Eval Gate 和必要的手动验收，再进入下一 Phase。
 - V2-4 在外部 MCP、可导入 Skill、Model Router 和 Memory 之前落地，确保后续能力都能被量化回归。
 - V2-5 MCP 必须建立在 V2-3 Tool Runtime 之上；V2-6 Imported Skill 必须使用已经完成的 Context/Tool/Permission 边界。
-- V2-10 只在基础设施、治理和可观测性完成后增加新的复杂业务 Workflow。
-- V2-11 最后实施真实执行边界，Agent 在此之前始终只产生分析结果或 Proposal。
+- V2-7 Chat 只是现有 Agent 平台的人类入口，必须复用 Conversation、Manager、Runtime、Context、Tool、Permission 和 Task，不允许形成第二套执行体系。
+- V2-11 只在基础设施、治理和可观测性完成后增加新的复杂业务 Workflow。
+- V2-12 最后实施真实执行边界，Agent 在此之前始终只产生分析结果或 Proposal。
 
 ## 5. 统一原则
 
@@ -123,6 +127,7 @@ V2 完成时应满足：
 - Tool Runtime 能统一管理本地 Tool 和 MCP Tool。
 - 系统可作为 MCP Client 安全连接第三方标准 HTTP MCP Server，并治理其 Tool/Resource/Prompt。
 - 系统可严格导入 Agent Skills 标准 Skill，并支持版本、回滚和权限审批。
+- 系统提供统一 Agent 对话入口，可在同一 Conversation 中显式选择并切换 Chat-capable Native/Portable Skill。
 - Model、Prompt、Skill、Runtime 版本可追踪，核心能力有固定 Eval/Replay。
 - Conversation、Memory、Task、Skill Package 职责清晰。
 - 新 Skill 不复制 Runtime/Tool/Task/Permission 基础逻辑。
