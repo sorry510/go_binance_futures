@@ -43,16 +43,16 @@ type Config struct {
 	AgentMarketRegimeIntervalMin               int     `orm:"column(agent_market_regime_interval_min);default(60)" json:"agent_market_regime_interval_min"`
 	AgentMaxStartsPerMinute                    int     `orm:"column(agent_max_starts_per_minute);default(30)" json:"agent_max_starts_per_minute"`
 	AgentMaxStartsPerHour                      int     `orm:"column(agent_max_starts_per_hour);default(300)" json:"agent_max_starts_per_hour"`
-	AgentMaxTokensPerTask                      int     `orm:"column(agent_max_tokens_per_task);default(120000)" json:"agent_max_tokens_per_task"`
+	AgentMaxTokensPerTask                      int     `orm:"column(agent_max_tokens_per_task);default(240000)" json:"agent_max_tokens_per_task"`
 	AgentMaxToolCallsPerTask                   int     `orm:"column(agent_max_tool_calls_per_task);default(12)" json:"agent_max_tool_calls_per_task"`
 	WsSpotEnable                               int     `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
 	WsDeliveryEnable                           int     `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
-	LossMaxCount                               int     `orm:"column(loss_max_count)" json:"loss_max_count"`                                         // 允许开仓的最大亏损仓位临界值
-	LossAutoScale                              int     `orm:"column(loss_auto_scale)" json:"loss_auto_scale"`                                       // 是否自动缩放 loss_max_count
-	MarketCondition                            int     `orm:"column(market_condition)" json:"market_condition"`                                     // Market condition code; see types/market_condition.go.
-	MarketConditionIsAuto                      int     `orm:"column(market_condition_is_auto)" json:"market_condition_is_auto"`                     // 0:手动 1:自动
-	FutureTestAutoTradeCountLimit              int     `orm:"column(future_test_auto_trade_count_limit)" json:"future_test_auto_trade_count_limit"` // 测试交易与真实交易自动切换的连续盈利次数限制，为0则不启用
-	FutureTestFeeRate                          float64 `orm:"column(future_test_fee_rate);digits(12);decimals(8);default(0.0005)" json:"future_test_fee_rate"`                    // 测试策略单边手续费率，例如 0.0005 = 0.05%
+	LossMaxCount                               int     `orm:"column(loss_max_count)" json:"loss_max_count"`                                                    // 允许开仓的最大亏损仓位临界值
+	LossAutoScale                              int     `orm:"column(loss_auto_scale)" json:"loss_auto_scale"`                                                  // 是否自动缩放 loss_max_count
+	MarketCondition                            int     `orm:"column(market_condition)" json:"market_condition"`                                                // Market condition code; see types/market_condition.go.
+	MarketConditionIsAuto                      int     `orm:"column(market_condition_is_auto)" json:"market_condition_is_auto"`                                // 0:手动 1:自动
+	FutureTestAutoTradeCountLimit              int     `orm:"column(future_test_auto_trade_count_limit)" json:"future_test_auto_trade_count_limit"`            // 测试交易与真实交易自动切换的连续盈利次数限制，为0则不启用
+	FutureTestFeeRate                          float64 `orm:"column(future_test_fee_rate);digits(12);decimals(8);default(0.0005)" json:"future_test_fee_rate"` // 测试策略单边手续费率，例如 0.0005 = 0.05%
 }
 
 // 切记需要注册model后才能使用
@@ -226,27 +226,27 @@ type StrategyTemplates struct {
 }
 
 type TestStrategyResults struct {
-	ID            int64  `orm:"column(id)" json:"id"`
-	Symbol        string `orm:"column(symbol)" json:"symbol"`
-	Price         string `orm:"column(price)" json:"price"`                              // 触发开仓策略时通知价格
-	Leverage      int64  `orm:"column(leverage)" json:"leverage"`                        // 合约倍数
-	TickSize      string `orm:"column(tickSize)" json:"tickSize"`                        // 交易金额精度
-	StepSize      string `orm:"column(stepSize)" json:"stepSize"`                        // 交易数量精度
-	Usdt          string `orm:"column(usdt)" json:"usdt"`                                // 交易金额
-	Profit        string `orm:"column(profit)" json:"profit"`                            // 盈利率
-	Loss          string `orm:"column(loss)" json:"loss"`                                // 损失率
-	PositionAmt   string `orm:"column(position_amt)" json:"position_amt"`                // 买入的数量, 做多为正, 做空为负
-	PositionSide  string `orm:"column(position_side)" json:"position_side"`              // LONG, SHORT
-	Technology    string `orm:"column(technology);type(text)" json:"technology"`         // 技术指标配置 json
-	Strategy      string `orm:"column(strategy);type(text)" json:"strategy"`             // 策略 json
-	OpenStrategy  string `orm:"column(open_strategy);type(text)" json:"open_strategy"`   // 开仓策略
-	CloseStrategy string `orm:"column(close_strategy);type(text)" json:"close_strategy"` // 平仓策略
-	ClosePrice    string `orm:"column(close_price)" json:"close_price"`                  // 触发平仓策略时通知价格
-	CloseProfit   string `orm:"column(close_profit)" json:"close_profit"`                // 触发平仓策略时收益 usdt
+	ID            int64   `orm:"column(id)" json:"id"`
+	Symbol        string  `orm:"column(symbol)" json:"symbol"`
+	Price         string  `orm:"column(price)" json:"price"`                                                     // 触发开仓策略时通知价格
+	Leverage      int64   `orm:"column(leverage)" json:"leverage"`                                               // 合约倍数
+	TickSize      string  `orm:"column(tickSize)" json:"tickSize"`                                               // 交易金额精度
+	StepSize      string  `orm:"column(stepSize)" json:"stepSize"`                                               // 交易数量精度
+	Usdt          string  `orm:"column(usdt)" json:"usdt"`                                                       // 交易金额
+	Profit        string  `orm:"column(profit)" json:"profit"`                                                   // 盈利率
+	Loss          string  `orm:"column(loss)" json:"loss"`                                                       // 损失率
+	PositionAmt   string  `orm:"column(position_amt)" json:"position_amt"`                                       // 买入的数量, 做多为正, 做空为负
+	PositionSide  string  `orm:"column(position_side)" json:"position_side"`                                     // LONG, SHORT
+	Technology    string  `orm:"column(technology);type(text)" json:"technology"`                                // 技术指标配置 json
+	Strategy      string  `orm:"column(strategy);type(text)" json:"strategy"`                                    // 策略 json
+	OpenStrategy  string  `orm:"column(open_strategy);type(text)" json:"open_strategy"`                          // 开仓策略
+	CloseStrategy string  `orm:"column(close_strategy);type(text)" json:"close_strategy"`                        // 平仓策略
+	ClosePrice    string  `orm:"column(close_price)" json:"close_price"`                                         // 触发平仓策略时通知价格
+	CloseProfit   string  `orm:"column(close_profit)" json:"close_profit"`                                       // 触发平仓策略时收益 usdt
 	OpenFeeRate   float64 `orm:"column(open_fee_rate);digits(12);decimals(8);default(0)" json:"open_fee_rate"`   // 开仓手续费率快照
 	CloseFeeRate  float64 `orm:"column(close_fee_rate);digits(12);decimals(8);default(0)" json:"close_fee_rate"` // 平仓手续费率快照
-	CreateTime    int64  `orm:"column(createTime)" json:"createTime"`
-	UpdateTime    int64  `orm:"column(updateTime)" json:"updateTime"`
+	CreateTime    int64   `orm:"column(createTime)" json:"createTime"`
+	UpdateTime    int64   `orm:"column(updateTime)" json:"updateTime"`
 }
 
 func (u *Config) TableName() string {

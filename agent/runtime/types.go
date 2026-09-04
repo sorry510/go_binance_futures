@@ -111,7 +111,7 @@ func DefaultConfig() Config {
 		MaxToolResultBytes:   128 * 1024,
 		MaxToolCalls:         20,
 		MaxParallelToolCalls: 4,
-		MaxTotalTokens:       120000,
+		MaxTotalTokens:       240000,
 		Retry:                RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 	}
 }
