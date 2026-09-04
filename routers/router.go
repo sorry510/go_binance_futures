@@ -18,15 +18,27 @@ func init() {
 	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                      // 取消运行中的 Agent 任务
 	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                      // 从安全 Checkpoint 恢复 Agent 任务
 	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory")      // 查询单币分析历史
-	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus")                  // 查询事件报警链路状态与追踪
+	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus")                  // 查询事件报警链路状态与最近追踪
+	web.Router("/agents/alerts/traces", &controllers.AgentController{}, "get:ListAlertPipelineTraces")                 // 分页查询完整事件→信号→任务→通知链路
 	web.Router("/agents/scheduler/status", &controllers.AgentController{}, "get:GetSchedulerStatus")                   // 查询 Agent Scheduler 状态
 	web.Router("/agents/governance/status", &controllers.AgentController{}, "get:GetGovernanceStatus")                 // 查询 Agent 权限、预算和运行指标
 	web.Router("/agents/skills/implementations", &controllers.AgentSkillController{}, "get:GetImplementations")        // 可用 Skill implementation
 	web.Router("/agents/skills", &controllers.AgentSkillController{}, "get:Get;post:Post")                             // Agent Skill 配置
 	web.Router("/agents/skills/:id", &controllers.AgentSkillController{}, "put:Put;delete:Delete")                     // Agent Skill 更新/删除
+	web.Router("/agents/mcp/servers", &controllers.AgentMCPController{}, "get:ListServers;post:CreateServer")          // 第三方 MCP Server 列表/新增
+	web.Router("/agents/mcp/servers/:id", &controllers.AgentMCPController{}, "put:UpdateServer;delete:DeleteServer")   // 第三方 MCP Server 更新/删除
+	web.Router("/agents/mcp/servers/:id/catalog", &controllers.AgentMCPController{}, "get:GetCatalog")                 // MCP Catalog
+	web.Router("/agents/mcp/servers/:id/test", &controllers.AgentMCPController{}, "post:TestConnection")               // MCP 连接测试
+	web.Router("/agents/mcp/servers/:id/refresh", &controllers.AgentMCPController{}, "post:RefreshCatalog")            // MCP Catalog 刷新
+	web.Router("/agents/mcp/servers/:id/oauth/start", &controllers.AgentMCPController{}, "post:StartOAuth")            // MCP OAuth 授权开始
+	web.Router("/agents/mcp/oauth/client-metadata", &controllers.AgentMCPController{}, "get:OAuthClientMetadata")      // MCP OAuth Client ID Metadata Document
+	web.Router("/agents/mcp/oauth/callback", &controllers.AgentMCPController{}, "get:OAuthCallback")                   // MCP OAuth callback
+	web.Router("/agents/mcp/tools/:id", &controllers.AgentMCPController{}, "put:UpdateTool")                           // MCP Tool 分类/治理
+	web.Router("/agents/mcp/permissions", &controllers.AgentMCPController{}, "post:SavePermission")                    // Skill -> MCP capability 授权
 	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                           // LLM Provider 预设
 	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                   // 测试 LLM 配置
 	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                                // LLM 配置列表/新增
+	web.Router("/llm/configs/:id/api-key", &controllers.LLMConfigController{}, "get:GetAPIKey")                        // 显式查看单个 LLM API Key
 	web.Router("/llm/configs/:id", &controllers.LLMConfigController{}, "put:Put;delete:Delete")                        // LLM 配置更新/删除
 	web.Router("/agents/scheduler/jobs/:name/trigger", &controllers.AgentController{}, "post:TriggerSchedulerJob")     // 手动触发 Scheduler Job
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post")                           // 列表查询和新增

@@ -90,7 +90,7 @@ type RunState struct {
 	LastContextTrace contextengine.BuildTrace          `json:"last_context_trace,omitempty"`
 }
 
-const runStateVersion = "runtime_state_v4"
+const runStateVersion = "runtime_state_v5"
 
 func newRunState(taskID, skillName string, mode ExecutionMode, snapshot ExecutionSnapshot, maxRounds, maxToolCalls, maxTotalTokens int) *RunState {
 	return &RunState{

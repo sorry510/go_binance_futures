@@ -15,6 +15,8 @@ import (
 	"go_binance_futures/agent/task"
 	"go_binance_futures/lang"
 	"go_binance_futures/notify"
+
+	"github.com/beego/beego/v2/core/logs"
 	signalservice "go_binance_futures/service/signal"
 )
 
@@ -34,16 +36,18 @@ type Config struct {
 	Workers      int
 	PollInterval time.Duration
 	TaskTimeout  time.Duration
+	TraceStore   TraceRepository
 }
 
 type Pipeline struct {
-	cfg       Config
-	queue     chan signalservice.Signal
-	startOnce sync.Once
-	mu        sync.Mutex
-	lastRun   map[string]int64
-	aiCalls   []int64
-	traces    []Trace
+	cfg        Config
+	queue      chan signalservice.Signal
+	traceQueue chan Trace
+	startOnce  sync.Once
+	mu         sync.Mutex
+	lastRun    map[string]int64
+	aiCalls    []int64
+	traces     []Trace
 
 	signalsReceived    atomic.Uint64
 	signalsDropped     atomic.Uint64
@@ -76,15 +80,22 @@ func New(cfg Config) (*Pipeline, error) {
 	if cfg.TaskTimeout <= 0 {
 		cfg.TaskTimeout = 2 * time.Minute
 	}
-	return &Pipeline{
+	pipeline := &Pipeline{
 		cfg: cfg, queue: make(chan signalservice.Signal, cfg.QueueSize), lastRun: map[string]int64{},
-	}, nil
+	}
+	if cfg.TraceStore != nil {
+		pipeline.traceQueue = make(chan Trace, 2048)
+	}
+	return pipeline, nil
 }
 func (pipeline *Pipeline) Start(ctx context.Context) {
 	if pipeline == nil {
 		return
 	}
 	pipeline.startOnce.Do(func() {
+		if pipeline.traceQueue != nil {
+			go pipeline.tracePersistenceWorker(ctx)
+		}
 		for index := 0; index < pipeline.cfg.Workers; index++ {
 			go pipeline.worker(ctx)
 		}
@@ -391,16 +402,50 @@ func newTrace(value signalservice.Signal, status string) Trace {
 func (pipeline *Pipeline) addTrace(value Trace) {
 	value.UpdatedAt = time.Now().UnixMilli()
 	pipeline.mu.Lock()
-	defer pipeline.mu.Unlock()
+	replaced := false
 	for index := len(pipeline.traces) - 1; index >= 0; index-- {
 		if pipeline.traces[index].SignalID == value.SignalID {
 			pipeline.traces[index] = value
-			return
+			replaced = true
+			break
 		}
 	}
-	pipeline.traces = append(pipeline.traces, value)
-	if len(pipeline.traces) > 100 {
-		pipeline.traces = append([]Trace(nil), pipeline.traces[len(pipeline.traces)-100:]...)
+	if !replaced {
+		pipeline.traces = append(pipeline.traces, value)
+		if len(pipeline.traces) > 100 {
+			pipeline.traces = append([]Trace(nil), pipeline.traces[len(pipeline.traces)-100:]...)
+		}
+	}
+	pipeline.mu.Unlock()
+	if pipeline.traceQueue != nil {
+		pipeline.traceQueue <- value
+	}
+}
+
+func (pipeline *Pipeline) tracePersistenceWorker(ctx context.Context) {
+	for {
+		select {
+		case value := <-pipeline.traceQueue:
+			pipeline.persistTrace(value)
+		case <-ctx.Done():
+			for {
+				select {
+				case value := <-pipeline.traceQueue:
+					pipeline.persistTrace(value)
+				default:
+					return
+				}
+			}
+		}
+	}
+}
+
+func (pipeline *Pipeline) persistTrace(value Trace) {
+	traceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	err := pipeline.cfg.TraceStore.Save(traceCtx, value)
+	cancel()
+	if err != nil {
+		logs.Error("persist alert pipeline trace:", err)
 	}
 }
 

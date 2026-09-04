@@ -1,4 +1,4 @@
-# MCP 服务说明
+# MCP 服务器说明
 
 ## 概述
 
@@ -6,7 +6,7 @@
 
 - MCP 地址：`http://<host>:<web.port>/mcp`
 - 默认示例：`http://localhost:3333/mcp`
-- 开关：`conf/app.conf` 中的 `mcp::mcp_enable`
+- 开关：`conf/app.conf` 中的 `mcp::mcp_server_enable`
 - 鉴权：使用 `/login` 返回的 JWT，在 MCP HTTP 请求中添加 `Authorization: Bearer <token>`
 - 工具总数：12
 
@@ -20,7 +20,7 @@ MCP 使用显式白名单，不会自动暴露项目中的其他 HTTP 接口。�
 
 ```ini
 [mcp]
-mcp_enable = 1
+mcp_server_enable = 1
 ```
 
 启动项目后，所有 MCP 初始化、工具发现和工具调用请求都必须携带登录 JWT。

@@ -92,6 +92,8 @@ type Resource struct {
 	ID         string
 	Type       BlockType
 	Source     string
+	AsOf       string
+	Freshness  Freshness
 	Priority   int
 	Sensitive  bool
 	Disclosure Disclosure

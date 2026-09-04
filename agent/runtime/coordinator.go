@@ -67,11 +67,17 @@ func (coordinator *coordinator) prepareNew(ctx context.Context, req Request) (*r
 	}
 	snapshot := req.ExecutionSnapshot
 	if snapshot == nil {
-		frozen := coordinator.runner.FreezeExecution(selectedSkill)
+		frozen, freezeErr := coordinator.runner.FreezeExecutionChecked(ctx, selectedSkill)
+		if freezeErr != nil {
+			return nil, freezeErr
+		}
 		snapshot = &frozen
 	} else {
 		copy := *snapshot
-		currentIdentity := coordinator.runner.FreezeExecution(selectedSkill)
+		currentIdentity, freezeErr := coordinator.runner.FreezeExecutionChecked(ctx, selectedSkill)
+		if freezeErr != nil {
+			return nil, freezeErr
+		}
 		if copy.Version.SkillPackageHash == "" {
 			copy.Version.SkillPackageHash = currentIdentity.Version.SkillPackageHash
 		}
@@ -104,7 +110,9 @@ func (coordinator *coordinator) prepareNew(ctx context.Context, req Request) (*r
 	startedAt := time.Now().UTC()
 	currentTask.StartedAt = &startedAt
 	session.skillRequest = skill.Request{Input: req.Input, ConversationID: req.ConversationID, Metadata: req.Metadata}
-	coordinator.initializeSkillRuntime(session)
+	if err := coordinator.initializeSkillRuntime(ctx, session); err != nil {
+		return nil, err
+	}
 	return session, nil
 }
 
@@ -132,6 +140,24 @@ func (coordinator *coordinator) buildContext(ctx context.Context, session *runSe
 			state.appendContextBlock(block)
 		}
 		resourceCount = len(resources)
+	}
+	if coordinator.runner.cfg.ContextResourceProvider != nil {
+		externalResources, providerErr := coordinator.runner.cfg.ContextResourceProvider(ctx, session.selectedSkill.Name(), session.skillRequest)
+		if providerErr != nil {
+			state.finishStep(stepID, StepFailed, "", "context_resource_failed", providerErr)
+			state.syncTask(currentTask)
+			return coordinator.runner.fail(currentTask, "build_input_failed", providerErr)
+		}
+		resources, loadErr := coordinator.runner.cfg.ContextEngine.LoadResources(ctx, externalResources, requestedContextResourceIDs(session.req.Metadata))
+		if loadErr != nil {
+			state.finishStep(stepID, StepFailed, "", "context_resource_failed", loadErr)
+			state.syncTask(currentTask)
+			return coordinator.runner.fail(currentTask, "build_input_failed", loadErr)
+		}
+		for _, block := range resources {
+			state.appendContextBlock(block)
+		}
+		resourceCount += len(resources)
 	}
 	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages, %d resources", len(messages), resourceCount), "", nil)
 	if err := coordinator.runner.saveCheckpoint(ctx, currentTask, state, stepID, 1); err != nil {
@@ -191,7 +217,11 @@ func (coordinator *coordinator) prepareResumeState(ctx context.Context, taskID s
 	if !exists {
 		return nil, fmt.Errorf("skill %q is not registered", item.Skill)
 	}
-	if err := validateResumeIdentity(item, state, coordinator.runner.FreezeExecution(selectedSkill)); err != nil {
+	currentIdentity, err := coordinator.runner.FreezeExecutionChecked(ctx, selectedSkill)
+	if err != nil {
+		return nil, err
+	}
+	if err := validateResumeIdentity(item, state, currentIdentity); err != nil {
 		return nil, err
 	}
 	toolResults, err := coordinator.runner.restoreToolResults(state)
@@ -204,7 +234,9 @@ func (coordinator *coordinator) prepareResumeState(ctx context.Context, taskID s
 		skillRequest: skill.Request{Input: item.Input, ConversationID: item.ConversationID},
 		currentTask:  item, state: state, toolResults: toolResults,
 	}
-	coordinator.initializeSkillRuntime(session)
+	if err := coordinator.initializeSkillRuntime(ctx, session); err != nil {
+		return nil, err
+	}
 	if !mutate {
 		return session, nil
 	}
@@ -216,12 +248,14 @@ func (coordinator *coordinator) prepareResumeState(ctx context.Context, taskID s
 	return session, nil
 }
 
-func (coordinator *coordinator) initializeSkillRuntime(session *runSession) {
-	session.allowedTools = make(map[string]bool, len(session.selectedSkill.Tools()))
-	for _, name := range session.selectedSkill.Tools() {
-		if name = strings.TrimSpace(name); name != "" {
-			session.allowedTools[name] = true
-		}
+func (coordinator *coordinator) initializeSkillRuntime(ctx context.Context, session *runSession) error {
+	toolNames, err := coordinator.runner.effectiveToolNames(ctx, session.selectedSkill)
+	if err != nil {
+		return err
+	}
+	session.allowedTools = make(map[string]bool, len(toolNames))
+	for _, name := range toolNames {
+		session.allowedTools[name] = true
 	}
 	if len(session.state.RequiredTools) == 0 {
 		if provider, ok := session.selectedSkill.(skill.ToolRequirementProvider); ok {
@@ -239,6 +273,7 @@ func (coordinator *coordinator) initializeSkillRuntime(session *runSession) {
 	if provider, ok := session.selectedSkill.(skill.RequestValidatorProvider); ok {
 		session.finalValidator = provider.ValidatorFor(session.skillRequest)
 	}
+	return nil
 }
 
 func (coordinator *coordinator) execute(ctx context.Context, session *runSession) (*Result, error) {

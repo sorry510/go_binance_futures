@@ -45,7 +45,7 @@ var port, _ = config.String("database::port")
 var dbname, _ = config.String("database::dbname")
 var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var tradeKey, _ = config.String("binance::api_key")
-var mcpEnable, _ = config.Bool("mcp::mcp_enable")
+var mcpServerEnable, _ = config.Bool("mcp::mcp_server_enable")
 var SystemConfig models.Config
 
 func init() {
@@ -53,11 +53,10 @@ func init() {
 	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix()*1000))
 	web.BConfig.CopyRequestBody = true        // post 参数
 	web.SetStaticPath("/"+webIndex, "static") // 设置静态文件
-	logs.Info("server web index:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
 
 	registerModels()      // 注册模型
 	registerMiddlewares() // 添加中间件
-	if mcpEnable {
+	if mcpServerEnable {
 		registerMCPHTTP() // 注册 MCP HTTP 服务
 	}
 }
@@ -89,9 +88,17 @@ func registerModels() {
 	orm.RegisterModel(new(models.SymbolAnalysisHistory))
 	orm.RegisterModel(new(models.AgentTask))
 	orm.RegisterModel(new(models.AgentTaskEvent))
+	orm.RegisterModel(new(models.AgentAlertPipelineTrace))
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.AgentSkill))
+	orm.RegisterModel(new(models.AgentMCPServer))
+	orm.RegisterModel(new(models.AgentMCPTool))
+	orm.RegisterModel(new(models.AgentMCPResource))
+	orm.RegisterModel(new(models.AgentMCPPrompt))
+	orm.RegisterModel(new(models.AgentMCPPermission))
+	orm.RegisterModel(new(models.AgentMCPSecret))
+	orm.RegisterModel(new(models.AgentMCPOAuthState))
 	orm.RegisterModel(new(models.LLMConfig))
 	orm.RegisterModel(new(models.Notification))
 
@@ -116,7 +123,16 @@ func setDriver(d string) {
 		orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
 	case "mysql":
 		orm.RegisterDriver(d, orm.DRMySQL)
-		orm.RegisterDataBase("default", "mysql", username+":"+password+"@tcp("+host+":"+port+")/"+dbname+"?charset=utf8mb4&collation=utf8mb4_0900_ai_ci")
+		connectTimeout := databaseDuration("connect_timeout_seconds", 5*time.Second)
+		readTimeout := databaseDuration("read_timeout_seconds", 30*time.Second)
+		writeTimeout := databaseDuration("write_timeout_seconds", 30*time.Second)
+		dsn := username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname +
+			"?charset=utf8mb4&collation=utf8mb4_0900_ai_ci&timeout=" + connectTimeout.String() +
+			"&readTimeout=" + readTimeout.String() + "&writeTimeout=" + writeTimeout.String()
+		if err := orm.RegisterDataBase("default", "mysql", dsn); err != nil {
+			panic(fmt.Errorf("register mysql database: %w", err))
+		}
+		configureDatabasePool()
 	case "postgres":
 		orm.RegisterDriver(d, orm.DRPostgres)
 		orm.RegisterDataBase("default", "postgres", "user="+username+" password="+password+" host="+host+" port="+port+" dbname="+dbname+" sslmode=disable")
@@ -124,6 +140,31 @@ func setDriver(d string) {
 		orm.RegisterDriver(d, orm.DRSqlite)
 		orm.RegisterDataBase("default", "sqlite3", dbPath)
 	}
+}
+
+func databaseInt(name string, fallback int) int {
+	value, err := config.Int("database::" + name)
+	if err != nil || value <= 0 {
+		return fallback
+	}
+	return value
+}
+
+func databaseDuration(name string, fallback time.Duration) time.Duration {
+	value := databaseInt(name, int(fallback/time.Second))
+	return time.Duration(value) * time.Second
+}
+
+func configureDatabasePool() {
+	db, err := orm.GetDB("default")
+	if err != nil {
+		logs.Error("get database pool:", err)
+		return
+	}
+	db.SetMaxOpenConns(databaseInt("max_open_conns", 30))
+	db.SetMaxIdleConns(databaseInt("max_idle_conns", 10))
+	db.SetConnMaxLifetime(databaseDuration("conn_max_lifetime_seconds", 5*time.Minute))
+	db.SetConnMaxIdleTime(databaseDuration("conn_max_idle_time_seconds", time.Minute))
 }
 
 func syncDb() {
@@ -198,7 +239,7 @@ func main() {
 		updateSystemConfig()
 		go binance.UpdateCoinByWs(&SystemConfig, 0)
 		// web
-		logs.Info("Web service startup completed")
+		logs.Info("server web index:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
 		web.Run(":" + webPort)
 		return
 	}
@@ -323,7 +364,7 @@ func main() {
 	go webnotification.StartNotificationCleanupTask()
 
 	// web
-	logs.Info("Web service startup completed")
+	logs.Info("server web index:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
 	web.Run(":" + webPort)
 }
 

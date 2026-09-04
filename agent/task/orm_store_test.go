@@ -36,6 +36,25 @@ func setupORMStoreTest(t *testing.T) *ORMStore {
 	return &ORMStore{Alias: "agent_task_test"}
 }
 
+func TestORMStoreCreatePersistsNewTaskWithoutReadBack(t *testing.T) {
+	store := setupORMStoreTest(t)
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	item := &Task{ID: "create-fast-path", Skill: "symbol_analysis", Status: StatusQueued, Stage: "queued", Input: `{"symbol":"BTCUSDT"}`, CreatedAt: now, UpdatedAt: now}
+	if err := store.Create(context.Background(), item); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := store.Get(context.Background(), item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.ID != item.ID || stored.Status != StatusQueued || stored.Skill != item.Skill {
+		t.Fatalf("unexpected created task: %+v", stored)
+	}
+	if err := store.Create(context.Background(), item); err == nil {
+		t.Fatal("duplicate Create unexpectedly succeeded")
+	}
+}
+
 func TestORMStorePersistsTaskEventsAndRedactsSecrets(t *testing.T) {
 	store := setupORMStoreTest(t)
 	now := time.Now().UTC()
@@ -70,6 +89,12 @@ func TestORMStorePersistsTaskEventsAndRedactsSecrets(t *testing.T) {
 	}
 	if err := store.SaveCheckpoint(context.Background(), item.ID, `{"safe":true,"token":"another-secret"}`); err != nil {
 		t.Fatal(err)
+	}
+	// Checkpoint persistence is idempotent. MySQL may report affected_rows=0
+	// when the second UPDATE writes the same value, which must not be treated as
+	// a missing task.
+	if err := store.SaveCheckpoint(context.Background(), item.ID, `{"safe":true,"token":"another-secret"}`); err != nil {
+		t.Fatalf("saving an unchanged checkpoint must succeed: %v", err)
 	}
 	checkpoint, err := store.LoadCheckpoint(context.Background(), item.ID)
 	if err != nil {
