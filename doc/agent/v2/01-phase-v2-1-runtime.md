@@ -16,7 +16,7 @@ Coordinator
     ├── Execution Mode
     │     ├── react → React Executor
     │     ├── plan_execute → Planner → Tool Executor → React Final
-    │     └── workflow → 协议预留，V2-10 实现业务编排
+    │     └── workflow → 协议预留，V2-11 实现业务编排
     ├── RunState / ExecutionStep
     └── Checkpoint / Resume
 ```
@@ -51,7 +51,7 @@ runtime_state_version = runtime_state_v1
 
 - `react`：默认模式，兼容 V1 四个 Skill。
 - `plan_execute`：可选 Planner 先生成受约束 Tool Plan，再进入统一 Tool 执行路径和 ReAct Final。
-- `workflow`：模式和 Step 类型已预留，但 V2-1 不实现业务 Workflow，留给 V2-10。
+- `workflow`：模式和 Step 类型已预留，但 V2-1 不实现业务 Workflow，留给 V2-11。
 
 Skill 通过可选 `ExecutionModeProvider` 声明模式，不修改原有 `Skill` 核心接口。
 
