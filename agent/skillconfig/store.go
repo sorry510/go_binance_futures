@@ -85,7 +85,7 @@ func (store Store) Create(ctx context.Context, input CreateInput) (*models.Agent
 	}
 	item := &models.AgentSkill{
 		Name: input.Name, DisplayName: input.DisplayName, Description: strings.TrimSpace(input.Description),
-		Enabled: input.Enabled, CreatedAt: now, UpdatedAt: now,
+		Type: "native", Enabled: input.Enabled, CreatedAt: now, UpdatedAt: now,
 	}
 	id, err := o.Insert(item)
 	if err != nil {
@@ -132,14 +132,25 @@ func (store Store) EnsureDefaults(ctx context.Context, defaults []CreateInput) e
 		return err
 	}
 	o := store.ormer()
-	count, err := o.QueryTable(new(models.AgentSkill)).Count()
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		return nil
-	}
 	for _, input := range defaults {
+		var existing models.AgentSkill
+		err := o.QueryTable(new(models.AgentSkill)).Filter("Name", strings.TrimSpace(input.Name)).One(&existing)
+		if err == nil {
+			if existing.Type != "" && existing.Type != "native" {
+				return fmt.Errorf("default native skill %s conflicts with %s skill", input.Name, existing.Type)
+			}
+			if existing.Type == "" {
+				existing.Type = "native"
+				_, err = o.Update(&existing, "Type")
+			}
+			if err != nil {
+				return err
+			}
+			continue
+		}
+		if err != orm.ErrNoRows {
+			return err
+		}
 		if _, err := store.Create(ctx, input); err != nil {
 			return fmt.Errorf("create default skill %s: %w", input.Name, err)
 		}

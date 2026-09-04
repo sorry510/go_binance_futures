@@ -42,6 +42,10 @@ func DefaultManager() (*agentmanager.Manager, error) {
 			defaultManagerErr = err
 			return
 		}
+		if err := initializeDefaultPortableSkills(skills, tools); err != nil {
+			defaultManagerErr = err
+			return
+		}
 		store := task.NewORMStore()
 		if interrupted, err := store.MarkInterrupted(context.Background(), time.Now().UTC()); err != nil {
 			defaultManagerErr = err
@@ -59,7 +63,7 @@ func DefaultManager() (*agentmanager.Manager, error) {
 				Timeout:                 10 * time.Minute,
 				Policy:                  permission.AllowWritesFor(nil),
 				BudgetProvider:          RuntimeBudget,
-				ToolAllowlistProvider:   MCPToolAllowlist,
+				ToolAllowlistProvider:   EffectiveToolAllowlist,
 				ContextResourceProvider: MCPContextResources,
 				Observer:                observability.Default(),
 				DefaultMaxRounds:        8,
