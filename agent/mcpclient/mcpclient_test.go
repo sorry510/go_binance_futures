@@ -81,6 +81,37 @@ func registerFixtureTool(server *mcp.Server, changed bool) {
 		return &mcp.CallToolResult{StructuredContent: map[string]any{"ok": true}}, nil
 	})
 }
+func TestMCPReadRetryIsFailSafe(t *testing.T) {
+	attempts := 0
+	value, err := withMCPReadRetry(context.Background(), func(context.Context) (string, error) {
+		attempts++
+		if attempts == 1 {
+			return "", errors.New("upstream status 503 service unavailable")
+		}
+		return "ok", nil
+	})
+	if err != nil || value != "ok" || attempts != 2 {
+		t.Fatalf("transient MCP read retry: value=%q attempts=%d err=%v", value, attempts, err)
+	}
+
+	attempts = 0
+	_, err = withMCPReadRetry(context.Background(), func(context.Context) (string, error) {
+		attempts++
+		return "", errors.New("remote MCP tool returned invalid arguments")
+	})
+	if err == nil || attempts != 1 {
+		t.Fatalf("application MCP error must not retry: attempts=%d err=%v", attempts, err)
+	}
+
+	canceled, cancel := context.WithCancel(context.Background())
+	cancel()
+	attempts = 0
+	_, err = withMCPReadRetry(canceled, func(context.Context) (string, error) { attempts++; return "", nil })
+	if !errors.Is(err, context.Canceled) || attempts != 0 {
+		t.Fatalf("canceled parent context must not call MCP: attempts=%d err=%v", attempts, err)
+	}
+}
+
 func TestOAuthPublicBaseConfigAllowsLoopbackHTTPOnly(t *testing.T) {
 	setMCPConfigForTest(t, oauthPublicBaseConfig, "http://127.0.0.1:3333")
 	base, metadata, callback, err := oauthPublicURLs()
@@ -110,7 +141,7 @@ func TestConnectionOnlyInitializesWithoutRefreshingCatalog(t *testing.T) {
 	ctx := context.Background()
 	store := setupMCPTestStore(t)
 	_, httpServer := testMCPServer(t)
-	view, err := store.SaveServer(ctx, 0, ServerInput{Name: "connection-only", Endpoint: httpServer.URL, Enabled: 1, AuthType: AuthNone, AllowPrivate: 1})
+	view, err := store.SaveServer(ctx, 0, ServerInput{Name: "connection-only", Description: "fixture server description", Endpoint: httpServer.URL, Enabled: 1, AuthType: AuthNone, AllowPrivate: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,6 +165,9 @@ func TestConnectionOnlyInitializesWithoutRefreshingCatalog(t *testing.T) {
 	}
 	if catalog.Server.Status != "healthy" || catalog.Server.ProtocolVersion == "" {
 		t.Fatalf("connection test did not update server health: %+v", catalog.Server)
+	}
+	if catalog.Server.Description != "fixture server description" {
+		t.Fatalf("MCP server description was not persisted: %+v", catalog.Server)
 	}
 }
 
@@ -159,6 +193,9 @@ func TestStreamableHTTPDiscoveryGovernanceAndRuntime(t *testing.T) {
 	}
 	if len(catalog.Tools) != 1 || catalog.Tools[0].Status != ToolUnclassified || catalog.Tools[0].Enabled != 0 {
 		t.Fatalf("new tool was not disabled/unclassified: %+v", catalog.Tools)
+	}
+	if catalog.Tools[0].TimeoutMs != defaultToolTimeoutMs {
+		t.Fatalf("new MCP tool timeout = %d, want %d", catalog.Tools[0].TimeoutMs, defaultToolTimeoutMs)
 	}
 	toolRow, err := store.UpdateTool(ctx, catalog.Tools[0].ID, ToolUpdateInput{Risk: permission.RiskRead, Enabled: 1, Idempotent: true, TimeoutMs: 5000, CacheTTLms: 1000, MaxResultBytes: 65536})
 	if err != nil {

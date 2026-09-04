@@ -88,6 +88,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.SymbolAnalysisHistory))
 	orm.RegisterModel(new(models.AgentTask))
 	orm.RegisterModel(new(models.AgentTaskEvent))
+	orm.RegisterModel(new(models.AgentAlertPipelineTrace))
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.AgentSkill))
@@ -122,7 +123,16 @@ func setDriver(d string) {
 		orm.RegisterDataBase("default", "sqlite3", dbPath) // WAL 模式允许多个读操作和写操作并发进行，而不会互相阻塞，busy_timeout 参数来增加 SQLite 在遇到锁定时的等待时间
 	case "mysql":
 		orm.RegisterDriver(d, orm.DRMySQL)
-		orm.RegisterDataBase("default", "mysql", username+":"+password+"@tcp("+host+":"+port+")/"+dbname+"?charset=utf8mb4&collation=utf8mb4_0900_ai_ci")
+		connectTimeout := databaseDuration("connect_timeout_seconds", 5*time.Second)
+		readTimeout := databaseDuration("read_timeout_seconds", 30*time.Second)
+		writeTimeout := databaseDuration("write_timeout_seconds", 30*time.Second)
+		dsn := username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname +
+			"?charset=utf8mb4&collation=utf8mb4_0900_ai_ci&timeout=" + connectTimeout.String() +
+			"&readTimeout=" + readTimeout.String() + "&writeTimeout=" + writeTimeout.String()
+		if err := orm.RegisterDataBase("default", "mysql", dsn); err != nil {
+			panic(fmt.Errorf("register mysql database: %w", err))
+		}
+		configureDatabasePool()
 	case "postgres":
 		orm.RegisterDriver(d, orm.DRPostgres)
 		orm.RegisterDataBase("default", "postgres", "user="+username+" password="+password+" host="+host+" port="+port+" dbname="+dbname+" sslmode=disable")
@@ -130,6 +140,31 @@ func setDriver(d string) {
 		orm.RegisterDriver(d, orm.DRSqlite)
 		orm.RegisterDataBase("default", "sqlite3", dbPath)
 	}
+}
+
+func databaseInt(name string, fallback int) int {
+	value, err := config.Int("database::" + name)
+	if err != nil || value <= 0 {
+		return fallback
+	}
+	return value
+}
+
+func databaseDuration(name string, fallback time.Duration) time.Duration {
+	value := databaseInt(name, int(fallback/time.Second))
+	return time.Duration(value) * time.Second
+}
+
+func configureDatabasePool() {
+	db, err := orm.GetDB("default")
+	if err != nil {
+		logs.Error("get database pool:", err)
+		return
+	}
+	db.SetMaxOpenConns(databaseInt("max_open_conns", 30))
+	db.SetMaxIdleConns(databaseInt("max_idle_conns", 10))
+	db.SetConnMaxLifetime(databaseDuration("conn_max_lifetime_seconds", 5*time.Minute))
+	db.SetConnMaxIdleTime(databaseDuration("conn_max_idle_time_seconds", time.Minute))
 }
 
 func syncDb() {

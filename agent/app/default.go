@@ -56,7 +56,7 @@ func DefaultManager() (*agentmanager.Manager, error) {
 			Tools:          tools,
 			CompletionHook: persistTaskCompletion,
 			RuntimeConfig: agentruntime.Config{
-				Timeout:                 3 * time.Minute,
+				Timeout:                 10 * time.Minute,
 				Policy:                  permission.AllowWritesFor(nil),
 				BudgetProvider:          RuntimeBudget,
 				ToolAllowlistProvider:   MCPToolAllowlist,

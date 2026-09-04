@@ -28,6 +28,8 @@ AI Skill
 
 MCP Tool 不存在独立旁路，仍执行统一的 Schema、Risk、Permission、Budget、Timeout、Cache、Evidence 和 Trace。
 
+Tool 名使用 canonical identity。LLM 若仅改变远端 Tool basename 的大小写/`-`/`_` 等形式，Runtime 只在“当前 Skill 已授权且已注册”的候选中做唯一匹配并恢复 canonical name；0 个或多个候选时 fail-closed，不猜 Provider，并进入一轮 `tool_name` repair feedback，明确返回允许的精确 canonical names。该兼容层不能绕过 Skill grant、Risk Policy 或 Registry。
+
 Resource / Prompt 不注册为 Tool，而是进入 V2-2 Context Engine。远端 Prompt 固定带 `EXTERNAL_MCP_PROMPT` 边界声明，只能作为不可信外部 Context，不能覆盖 System Policy、Risk、Permission 或 Budget。
 
 ## 3. Registry 与治理模型
@@ -137,6 +139,9 @@ API/UI 不返回 `secret_ref` 或任何 credential value，只返回 `has_secret
 - connect/header/overall timeout
 - response size 上限
 - 每 Server 最大 4 个并发请求
+- 新 MCP Tool 默认总执行预算为 60 秒；MCP initialize 与 HTTP 单请求限制 30 秒，Response Header 限制 25 秒
+- 仅本地确认 `risk=read + idempotent=true` 的 Tool 对 timeout / 临时网络故障自动重试 1 次；write/trade 永不自动重试
+- 当前项目已将现有 V2-5 早期默认的 `timeout_ms=10000` Tool 一次性迁移为 `60000`；不覆盖其它管理员自定义 timeout
 - 连续失败 circuit breaker
 - **MCP transport 不继承 HTTP_PROXY / HTTPS_PROXY**，避免代理绕过目标 IP SSRF 校验
 - OAuth metadata、DCR、token exchange、refresh 使用受限 HTTP Client；不会继承系统 HTTP proxy
@@ -297,6 +302,37 @@ Allow Private: off
 
 Binance 当前 challenge/metadata 组合为 RFC 9728 Protected Resource Metadata + Authorization Code + PKCE S256 + Client ID Metadata Document；不应通过 Binance API Key 或手工 Bearer token 绕过该流程。
 
+
+
+### MCP Server 显示信息与 canonical name
+
+`agent_mcp_servers` 额外保存管理员维护的 `description TEXT`，用于说明该 MCP Server 的业务用途；该描述不参与鉴权、Catalog Hash 或权限判断。
+
+当前 canonical Tool 命名仍使用：
+
+```text
+mcp.<normalized Server.Name>.<normalized remote tool name>
+```
+
+因此修改 `Server.Name` 后，下一次刷新能力目录会同步改变该 Server 下 Tool 的 canonical name。Skill 授权按 `capability_id/tool_id` 保存，不会仅因改名丢失；历史 Task、Evidence、Trace 中已经冻结的旧 canonical name不会回写。管理页面必须明确提示这一点。
+
+### Agent Runtime 超时预算
+
+接入远端 MCP 后，一个 Agent run 可能包含多个 LLM round 与多个远端只读 Tool。默认 Agent Runtime 与 market-regime Scheduler 的单任务总预算统一为 **5 分钟**；单个 MCP Tool 仍受自己的 `timeout_ms` 独立约束。这样不会用总任务 timeout 代替 Tool timeout，也避免正常 MCP 多轮任务因 3 分钟预算过紧而被误判为 timeout。
+
+### MCP 接入后的 AI 延迟与 Evidence 兼容
+
+V2-5 上线后验证过以下生产问题，已作为实现约束修复：
+
+- `symbol_analysis` Final Validator 必须接受本轮真实成功调用并产生 Structured Evidence 的 `mcp.*` source；未知或未实际调用的 source 仍 fail-closed。
+- MCP Skill Tool Grant 查询不得按 Tool 数量逐条访问数据库。`GrantedTools` 使用 Permission + `id__in` Tool 两次批量查询，Tool Catalog Context 复用批量结果。
+- MCP Resource/Prompt Context 使用批量 Server/Resource/Prompt 查询，不允许按授权数量产生 N+1 公网数据库往返。
+- 新 Agent Task 创建使用 Store `Create` 快路径：已知新 Task 直接 INSERT，不先查存在，不对空 Event 做 COUNT，也不在 HTTP 返回前重新 SELECT Task/Event。
+- 公网 MySQL 配置 connect/read/write timeout、连接池大小、max lifetime 与 max idle time，降低 stale connection 复用导致的 `unexpected EOF`。
+- Web AI API 不再继承旧的 10 秒全局等待：普通 Agent/AI API 为 30 秒，MCP connect/OAuth 为 45 秒，Catalog refresh 为 120 秒；这些是 HTTP 等待预算，不替代 Runtime/Tool timeout。
+
+一次实际 `symbol_analysis` 回归中，native context、Coinfuty 与 CoinGecko MCP Tool 均成功，最终 MCP Evidence 通过 Validator 并完成 Task；历史失败任务确认原先的 `context deadline exceeded` 是错误 Evidence 拒绝触发额外 repair 后撞到总 Runtime timeout，而不是 MCP Tool 本身失败。
+
 ## 13. 自动回归覆盖
 
 真实 E2E 使用官方 MCP Go SDK Server + `httptest` Streamable HTTP Handler，覆盖：
@@ -325,6 +361,9 @@ Binance 当前 challenge/metadata 组合为 RFC 9728 Protected Resource Metadata
 - 未授权 OAuth Server fail-closed
 - OAuth public callback/metadata 与 protected start route
 - 已有 MCP Server 行的 additive ORM upgrade
+- MCP Tool/Resource/Prompt grant 批量查询，避免 N+1
+- 新 Task Create fast path，不同步 read-back
+- `symbol_analysis` MCP Structured Evidence Final Validation
 
 V2-4 Eval/Replay 全量回归继续通过。
 

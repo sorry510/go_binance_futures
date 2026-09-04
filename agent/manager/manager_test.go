@@ -72,6 +72,49 @@ func TestManagerStartsAndPersistsRuntimeTask(t *testing.T) {
 	t.Fatal("runtime task did not complete")
 }
 
+type createFastPathStore struct {
+	*task.MemoryStore
+	createCalls int
+	getCalls    int
+}
+
+func (store *createFastPathStore) Create(ctx context.Context, item *task.Task) error {
+	store.createCalls++
+	return store.MemoryStore.Create(ctx, item)
+}
+
+func (store *createFastPathStore) Get(ctx context.Context, id string) (*task.Task, error) {
+	store.getCalls++
+	return store.MemoryStore.Get(ctx, id)
+}
+
+func TestManagerStartUsesCreateFastPathWithoutReadBack(t *testing.T) {
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{SkillName: "fast", Prompt: "fast", Rounds: 1}); err != nil {
+		t.Fatal(err)
+	}
+	blocking := &managerBlockingClient{started: make(chan struct{}, 1)}
+	store := &createFastPathStore{MemoryStore: task.NewMemoryStore()}
+	manager, err := New(Config{
+		Skills: skills, Store: store,
+		NewClient:     func() (llm.Client, error) { return blocking, nil },
+		RuntimeConfig: agentruntime.Config{Timeout: time.Second, Retry: agentruntime.RetryPolicy{MaxAttempts: 1}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	started, err := manager.Start(agentruntime.Request{Skill: "fast", Input: "hello"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if started.Status != task.StatusQueued || store.createCalls != 1 || store.getCalls != 0 {
+		t.Fatalf("unexpected start fast path: task=%+v create=%d get=%d", started, store.createCalls, store.getCalls)
+	}
+	if err := manager.Cancel(context.Background(), started.ID); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestManagerCallsCompletionHook(t *testing.T) {
 	skills := skill.NewRegistry()
 	if err := skills.Register(skill.Definition{SkillName: "test", Rounds: 1}); err != nil {

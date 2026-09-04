@@ -230,7 +230,7 @@ func syncTools(o orm.Ormer, server models.AgentMCPServer, discovered []*mcp.Tool
 		row, exists := byName[remote.Name]
 		schemaChanged := false
 		if !exists {
-			row = models.AgentMCPTool{ServerID: server.ID, RemoteName: remote.Name, CanonicalName: canonical, Status: ToolUnclassified, Risk: "read", Enabled: 0, TimeoutMs: 10000, MaxResultBytes: 128 << 10, CreatedAt: now}
+			row = models.AgentMCPTool{ServerID: server.ID, RemoteName: remote.Name, CanonicalName: canonical, Status: ToolUnclassified, Risk: "read", Enabled: 0, TimeoutMs: defaultToolTimeoutMs, MaxResultBytes: 128 << 10, CreatedAt: now}
 		} else if row.SchemaHash != "" && row.SchemaHash != schemaHash {
 			row.Status, row.Enabled = ToolNeedsReview, 0
 			schemaChanged = true

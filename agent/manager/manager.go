@@ -93,9 +93,15 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	}
 	item := &task.Task{ID: taskID, Skill: selectedSkill.Name(), ConversationID: strings.TrimSpace(req.ConversationID), Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds, Provider: string(client.Provider()), CreatedAt: now, UpdatedAt: now}
 	item.ApplyVersionMetadata(executionSnapshot.Version)
-	if err := manager.cfg.Store.Save(context.Background(), item); err != nil {
+	if creator, ok := manager.cfg.Store.(task.CreateStore); ok {
+		if err := creator.Create(context.Background(), item); err != nil {
+			return nil, err
+		}
+	} else if err := manager.cfg.Store.Save(context.Background(), item); err != nil {
 		return nil, err
 	}
+	started := *item
+	started.Events = append([]task.Event(nil), item.Events...)
 	req.TaskID = taskID
 	runCtx, cancel := context.WithCancel(context.Background())
 	manager.registerCancel(taskID, cancel)
@@ -105,7 +111,7 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 		result, runErr := runner.Run(runCtx, req)
 		manager.runCompletionHook(req, taskID, result, runErr)
 	}()
-	return manager.cfg.Store.Get(context.Background(), taskID)
+	return &started, nil
 }
 
 func (manager *Manager) Get(ctx context.Context, taskID string) (*task.Task, error) {
