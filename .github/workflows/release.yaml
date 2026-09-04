@@ -26,9 +26,9 @@ jobs:
         sudo apt-get install -y mingw-w64
 
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
-        go-version: 1.21.x  # 使用所需的 Go 版本
+        go-version: 1.25.x  # MCP Go SDK v1.7.0 requires Go 1.25+
         cache: true
     - name: Install Bee tool
       run: | # 安装 Bee 工具

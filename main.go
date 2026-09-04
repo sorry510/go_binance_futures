@@ -53,7 +53,6 @@ func init() {
 	config.Set("system_start_time", fmt.Sprintf("%d", time.Now().Unix()*1000))
 	web.BConfig.CopyRequestBody = true        // post 参数
 	web.SetStaticPath("/"+webIndex, "static") // 设置静态文件
-	logs.Info("server web index:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
 
 	registerModels()      // 注册模型
 	registerMiddlewares() // 添加中间件
@@ -92,6 +91,11 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.AgentSkill))
+	orm.RegisterModel(new(models.AgentMCPServer))
+	orm.RegisterModel(new(models.AgentMCPTool))
+	orm.RegisterModel(new(models.AgentMCPResource))
+	orm.RegisterModel(new(models.AgentMCPPrompt))
+	orm.RegisterModel(new(models.AgentMCPPermission))
 	orm.RegisterModel(new(models.LLMConfig))
 	orm.RegisterModel(new(models.Notification))
 
@@ -198,7 +202,7 @@ func main() {
 		updateSystemConfig()
 		go binance.UpdateCoinByWs(&SystemConfig, 0)
 		// web
-		logs.Info("Web service startup completed")
+		logs.Info("server web index:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
 		web.Run(":" + webPort)
 		return
 	}
@@ -323,7 +327,7 @@ func main() {
 	go webnotification.StartNotificationCleanupTask()
 
 	// web
-	logs.Info("Web service startup completed")
+	logs.Info("server web index:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
 	web.Run(":" + webPort)
 }
 

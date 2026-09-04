@@ -40,3 +40,25 @@ func (registry *Registry) Get(name string) (Tool, bool) {
 	tool, exists := registry.tools[strings.TrimSpace(name)]
 	return tool, exists
 }
+
+func (registry *Registry) Upsert(tool Tool) error {
+	if registry == nil {
+		return fmt.Errorf("tool registry is nil")
+	}
+	if tool == nil || strings.TrimSpace(tool.Name()) == "" {
+		return fmt.Errorf("tool name is required")
+	}
+	registry.mu.Lock()
+	registry.tools[strings.TrimSpace(tool.Name())] = tool
+	registry.mu.Unlock()
+	return nil
+}
+
+func (registry *Registry) Unregister(name string) {
+	if registry == nil {
+		return
+	}
+	registry.mu.Lock()
+	delete(registry.tools, strings.TrimSpace(name))
+	registry.mu.Unlock()
+}

@@ -86,7 +86,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent))
+	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission))
 	if err := orm.RunSyncdb("default", false, false); err != nil {
 		t.Fatalf("RunSyncdb must upgrade an existing database with rows: %v", err)
 	}
@@ -99,6 +99,20 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	})
 	requireAgentColumns(t, db, "agent_task_events", []string{
 		"step_id", "step_type", "error_type", "checkpoint",
+	})
+	for _, table := range []string{"agent_mcp_servers", "agent_mcp_tools", "agent_mcp_resources", "agent_mcp_prompts", "agent_mcp_permissions"} {
+		var count int
+		if err := db.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?`, table).Scan(&count); err != nil {
+			t.Fatal(err)
+		}
+		if count != 1 {
+			t.Fatalf("RunSyncdb did not create V2-5 table %s", table)
+		}
+	}
+
+	requireAgentColumns(t, db, "agent_mcp_tools", []string{
+		"remote_name", "canonical_name", "input_schema", "output_schema", "schema_hash",
+		"risk", "enabled", "idempotent_hint", "idempotent", "timeout_ms", "cache_ttl_ms", "max_result_bytes",
 	})
 
 	for _, column := range []string{"plan_json", "steps_json", "checkpoint_json"} {
