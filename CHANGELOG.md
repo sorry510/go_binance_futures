@@ -1,5 +1,11 @@
 ### Change Log
 
+## v1.0.2
+- 升级优化 ai agent, 接入标准 mcp 和 标准 skill
+- 修改项目启动逻辑，不再每次自动更新数据库，改为有需要时执行 `./go_binance_futures sync db`
+- 升级项目依赖
+- 修复发现的 bug
+
 ## v1.0.1
 - 升级优化 ai agent
 - 增加 binance proxy 代理池配置项(支持 http 和 ws)

@@ -142,11 +142,22 @@ Skill 管理增加：导入 ZIP/SKILL.md、标准校验结果、来源、package
 
 ## 验收
 
-- [ ] 官方规范有效 Skill 可导入。
-- [ ] 非法 name/frontmatter/目录结构被明确拒绝。
-- [ ] ZIP traversal、zip bomb、symlink Case 被拒绝。
-- [ ] 同名 Skill 支持 revision 和 rollback。
-- [ ] `allowed-tools` 不会自动升级权限。
-- [ ] Imported Skill 不需要编译 Go 代码即可运行。
-- [ ] Native Go Skill 行为保持兼容。
-- [ ] Script 默认不可执行。
+- [x] 官方规范有效 Skill 可导入。
+- [x] 非法 name/frontmatter/目录结构被明确拒绝。
+- [x] ZIP traversal、zip bomb、symlink Case 被拒绝。
+- [x] 同名 Skill 支持 revision 和 rollback。
+- [x] `allowed-tools` 不会自动升级权限。
+- [x] Imported Skill 不需要编译 Go 代码即可运行。
+- [x] Native Go Skill 行为保持兼容。
+- [x] Script 默认不可执行。
+
+
+## 实施结果
+
+- Portable Skill 包存储：`./data/agent-skills/<name>/<package_hash>/`；服务器目录导入仅限 `./data/agent-skill-imports/`。
+- 数据库：`agent_skills` 增加 `type/active_version_id`，新增 `agent_skill_versions` 与 `agent_skill_permissions`；通过 `go_binance_futures sync db` 做 ORM additive sync。
+- Runtime：Native 与 Portable 共用同一 Registry、Context、Tool Runtime、Budget、Task/Trace；Portable revision 使用 package hash 冻结执行身份。
+- Progressive disclosure：激活时加载 `SKILL.md`，资源仅通过 `skill.<name>.read-resource` 按需读取；`scripts/` 只读且禁止执行。
+- `allowed-tools` 仅产生 requested permission，管理员审批后才进入动态 allowlist；write/trade 仍受 Runtime Policy 二次约束。
+- Web：Skill 管理支持 ZIP/SKILL.md 导入、版本历史、激活/回滚、文件浏览、权限审批。
+- Runtime 版本保持 `2.4.0`、state 保持 `runtime_state_v5`；本 Phase 未改变 Checkpoint/Resume state schema。

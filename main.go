@@ -96,6 +96,8 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.AgentSkill))
+	orm.RegisterModel(new(models.AgentSkillVersion))
+	orm.RegisterModel(new(models.AgentSkillPermission))
 	orm.RegisterModel(new(models.AgentMCPServer))
 	orm.RegisterModel(new(models.AgentMCPTool))
 	orm.RegisterModel(new(models.AgentMCPResource))
