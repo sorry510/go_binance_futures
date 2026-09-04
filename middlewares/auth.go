@@ -19,6 +19,8 @@ var secretKey, _ = config.String("web::secret_key")
 var excludeRoutes = []string{
 	"/login",
 	"/ws/notifications",
+	"/agents/mcp/oauth/client-metadata",
+	"/agents/mcp/oauth/callback",
 	"/pull",
 	"/pm2-log",
 	"/pm2-log2",
@@ -111,9 +113,9 @@ func ValidateAuthorization(authorization string) (jwt.MapClaims, error) {
 }
 
 func pathMatch(actualPath, pattern string) (bool, error) {
-    if strings.HasSuffix(pattern, "/*") {
-        prefix := pattern[:len(pattern)-2]
-        return strings.HasPrefix(actualPath, prefix), nil
-    }
-    return actualPath == pattern, nil
+	if strings.HasSuffix(pattern, "/*") {
+		prefix := pattern[:len(pattern)-2]
+		return strings.HasPrefix(actualPath, prefix), nil
+	}
+	return actualPath == pattern, nil
 }

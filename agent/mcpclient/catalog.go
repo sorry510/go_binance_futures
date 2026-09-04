@@ -152,12 +152,16 @@ func (g *Gateway) TestConnection(ctx context.Context, serverID int64) (RefreshRe
 		}
 	}
 	now := time.Now().UTC().UnixMilli()
-	_, err = g.Store.orm().QueryTable(new(models.AgentMCPServer)).Filter("id", serverID).Update(orm.Params{
+	params := orm.Params{
 		"protocol_version": result.ProtocolVersion,
 		"server_name":      result.ServerName,
 		"server_version":   result.ServerVersion,
 		"status":           "healthy", "last_success_at": now, "last_error": nil, "updated_at": now,
-	})
+	}
+	if server.AuthType == AuthOAuth2 {
+		params["oauth_status"] = "authorized"
+	}
+	_, err = g.Store.orm().QueryTable(new(models.AgentMCPServer)).Filter("id", serverID).Update(params)
 	if err != nil {
 		return RefreshResult{}, err
 	}
@@ -189,13 +193,17 @@ func (g *Gateway) syncCatalog(ctx context.Context, server models.AgentMCPServer,
 		return err
 	}
 	now := time.Now().UTC().UnixMilli()
-	_, err := o.QueryTable(new(models.AgentMCPServer)).Filter("id", server.ID).Update(orm.Params{
+	params := orm.Params{
 		"protocol_version": discovery.ProtocolVersion,
 		"server_name":      discovery.ServerName,
 		"server_version":   discovery.ServerVersion,
 		"status":           "healthy", "last_success_at": now, "last_error": nil,
 		"catalog_hash": catalogHash, "updated_at": now,
-	})
+	}
+	if server.AuthType == AuthOAuth2 {
+		params["oauth_status"] = "authorized"
+	}
+	_, err := o.QueryTable(new(models.AgentMCPServer)).Filter("id", server.ID).Update(params)
 	return err
 }
 
