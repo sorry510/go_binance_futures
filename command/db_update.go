@@ -12,9 +12,10 @@ import (
 )
 
 func InitData(version int64) error {
-	createConfig(version)
-	createStrategyTemplates()
-	return nil
+	if err := createConfig(version); err != nil {
+		return err
+	}
+	return createStrategyTemplates()
 }
 
 func createConfig(version int64) error {
@@ -163,5 +164,48 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 		logs.Error("commit transaction error:", err)
 		return err
 	}
+	return nil
+}
+
+// SyncDatabase updates the registered default database to the schema and data
+// version required by the current binary.
+func SyncDatabase(targetVersion int64) error {
+	logs.Info("database sync start, target version:", targetVersion)
+	logs.Info("sync database schema...")
+	if err := orm.RunSyncdb("default", false, false); err != nil {
+		return fmt.Errorf("sync database schema: %w", err)
+	}
+	logs.Info("sync database schema success")
+
+	systemConfig, err := utils.GetSystemConfig()
+	if err != nil {
+		logs.Info("system config not found, initializing database data...")
+		if err := InitData(0); err != nil {
+			return fmt.Errorf("initialize database data: %w", err)
+		}
+		systemConfig, err = utils.GetSystemConfig()
+		if err != nil {
+			return fmt.Errorf("load system config after initialization: %w", err)
+		}
+		logs.Info("initialize database data success")
+	}
+
+	if systemConfig.Version < targetVersion {
+		logs.Info("update database version:", systemConfig.Version, "->", targetVersion)
+		if err := UpdateDatabase(systemConfig.Version, targetVersion); err != nil {
+			return err
+		}
+		systemConfig.Version = targetVersion
+		if _, err := orm.NewOrm().Update(&systemConfig, "Version"); err != nil {
+			return fmt.Errorf("save database version: %w", err)
+		}
+		logs.Info("update database version success:", targetVersion)
+	} else if systemConfig.Version > targetVersion {
+		logs.Warning("database version is newer than current binary:", systemConfig.Version, ">", targetVersion)
+	} else {
+		logs.Info("database version is already up to date:", systemConfig.Version)
+	}
+
+	logs.Info("database sync completed")
 	return nil
 }

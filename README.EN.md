@@ -6,8 +6,36 @@
 
 # Binance-trade-bot
 
-## update database
-> If it is the first time to use the program, you can just run it directly. If you have been using it for a while, when downloading the new version of the program, you can directly place the old database file in the `db` directory and then run the program.
+## Update database
+
+Database schema updates are handled by a dedicated command instead of the normal application startup path. After configuring the database connection in `conf/app.conf`, run:
+
+```bash
+./go_binance_futures sync db
+```
+
+The command performs the database work required by the current binary:
+
+1. Synchronizes the database schema from the registered Models, creating missing tables and columns.
+2. Initializes base data such as `config` and the default strategy templates for a new database.
+3. Runs version migrations from `command/sql/version/*.sql` according to the database version.
+4. Updates the stored database version and prints progress logs.
+5. Exits immediately after completion; it does not start the Web server, WebSocket connections, Scheduler, trading services, or Agents.
+
+Run `sync db` in these situations:
+
+- **First deployment:** configure the database, run `./go_binance_futures sync db`, then start the application normally.
+- **Application upgrade:** after replacing the binary with a newer release, run `./go_binance_futures sync db` before starting the new version.
+- **Database restore or migration:** after copying an existing SQLite database, restoring a MySQL/PostgreSQL backup, or switching databases, run the command before normal startup.
+- **Startup reports an uninitialized or outdated database:** stop the service, run the command, and restart only after it succeeds.
+
+Normal startup:
+
+```bash
+./go_binance_futures
+```
+
+Normal startup **does not automatically synchronize the schema or run database version migrations**. If the database has not been initialized or its version is older than the current binary requires, the application will instruct you to run `go_binance_futures sync db`. Back up the database before production upgrades and preferably run the sync command while the service is stopped.
 
 ## peculiarity
 
@@ -302,9 +330,19 @@ dbname = ""
 ### how to run
 > !!!Please note that after modifying the `app.conf` configuration, the program must be restarted, otherwise the configuration will not take effect!!!
 
+For a first deployment, application upgrade, or restored database, synchronize the database first:
+
+```bash
+./go_binance_futures sync db
 ```
+
+After the command completes successfully and exits, start the service normally:
+
+```bash
 ./go_binance_futures
 ```
+
+Normal startup does not modify the database schema or run database version migrations automatically.
 
 ### web page
 
