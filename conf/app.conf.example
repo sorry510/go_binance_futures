@@ -86,6 +86,12 @@ slack_channel_id = ""
 # 外部链接
 links = [{"url": "url1", "title": "title1"}]
 
+[agent_skills]
+# 标准 Agent Skills 持久化目录
+data_dir = "./data/agent-skills"
+# 服务器目录导入只允许访问此目录下的相对路径
+import_dir = "./data/agent-skill-imports"
+
 [mcp]
 # MCP 仅使用 Streamable HTTP，地址为当前 Web 服务的 /mcp，使用登录接口返回的 Bearer Token 鉴权
 mcp_server_enable = 0

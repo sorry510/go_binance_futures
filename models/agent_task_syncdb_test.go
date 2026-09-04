@@ -63,6 +63,17 @@ const legacyMCPServerDDL = `CREATE TABLE agent_mcp_servers (
 	updated_at integer
 )`
 
+const legacyAgentSkillDDL = `CREATE TABLE agent_skills (
+	id integer primary key autoincrement,
+	name varchar(96) unique,
+	display_name varchar(128),
+	description text,
+	enabled integer,
+	created_at integer,
+	updated_at integer,
+	deleted integer
+)`
+
 const legacyAgentTaskEventDDL = `CREATE TABLE agent_task_events (
 	id integer primary key autoincrement,
 	task_id varchar(64),
@@ -99,6 +110,12 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	if _, err := db.Exec(legacyMCPServerDDL); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := db.Exec(legacyAgentSkillDDL); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`INSERT INTO agent_skills (name, display_name, description, enabled, created_at, updated_at, deleted) VALUES ('symbol_analysis', 'Symbol', 'legacy native', 1, 1700000000000, 1700000000000, 0)`); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := db.Exec(`INSERT INTO agent_mcp_servers
 		(name, endpoint, enabled, auth_type, allow_private, status, created_at, updated_at)
 		VALUES ('legacy-mcp', 'https://example.com/mcp', 1, 'none', 0, 'disconnected', 1700000000000, 1700000000000)`); err != nil {
@@ -115,7 +132,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace))
+	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace))
 	if err := orm.RunSyncdb("default", false, false); err != nil {
 		t.Fatalf("RunSyncdb must upgrade an existing database with rows: %v", err)
 	}
@@ -129,7 +146,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	requireAgentColumns(t, db, "agent_task_events", []string{
 		"step_id", "step_type", "error_type", "checkpoint",
 	})
-	for _, table := range []string{"agent_mcp_servers", "agent_mcp_tools", "agent_mcp_resources", "agent_mcp_prompts", "agent_mcp_permissions", "agent_mcp_secrets", "agent_mcp_oauth_states", "agent_alert_pipeline_traces"} {
+	for _, table := range []string{"agent_skill_versions", "agent_skill_permissions", "agent_mcp_servers", "agent_mcp_tools", "agent_mcp_resources", "agent_mcp_prompts", "agent_mcp_permissions", "agent_mcp_secrets", "agent_mcp_oauth_states", "agent_alert_pipeline_traces"} {
 		var count int
 		if err := db.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?`, table).Scan(&count); err != nil {
 			t.Fatal(err)
@@ -139,6 +156,9 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		}
 	}
 
+	requireAgentColumns(t, db, "agent_skills", []string{"type", "active_version_id"})
+	requireAgentColumns(t, db, "agent_skill_versions", []string{"skill_id", "package_hash", "version", "metadata_json", "requested_tools_json", "validation_status", "source", "package_path"})
+	requireAgentColumns(t, db, "agent_skill_permissions", []string{"skill_id", "version_id", "requested_name", "resolved_name", "risk", "status", "granted"})
 	requireAgentColumns(t, db, "agent_mcp_tools", []string{
 		"remote_name", "canonical_name", "input_schema", "output_schema", "schema_hash",
 		"risk", "enabled", "idempotent_hint", "idempotent", "timeout_ms", "cache_ttl_ms", "max_result_bytes",
@@ -146,6 +166,15 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	requireAgentColumns(t, db, "agent_mcp_servers", []string{
 		"oauth_status", "oauth_issuer", "oauth_expires_at", "description",
 	})
+	var legacySkillType string
+	var legacyActiveVersion int64
+	if err := db.QueryRow(`SELECT type, active_version_id FROM agent_skills WHERE name='symbol_analysis'`).Scan(&legacySkillType, &legacyActiveVersion); err != nil {
+		t.Fatalf("legacy AgentSkill row became unreadable after V2-6 upgrade: %v", err)
+	}
+	if legacySkillType != "native" || legacyActiveVersion != 0 {
+		t.Fatalf("legacy AgentSkill defaults changed unexpectedly: type=%q active=%d", legacySkillType, legacyActiveVersion)
+	}
+
 	var legacyMCPName string
 	if err := db.QueryRow(`SELECT name FROM agent_mcp_servers WHERE name='legacy-mcp'`).Scan(&legacyMCPName); err != nil {
 		t.Fatalf("legacy MCP server row became unreadable after OAuth upgrade: %v", err)
