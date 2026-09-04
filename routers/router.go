@@ -24,6 +24,13 @@ func init() {
 	web.Router("/agents/skills/implementations", &controllers.AgentSkillController{}, "get:GetImplementations")        // 可用 Skill implementation
 	web.Router("/agents/skills", &controllers.AgentSkillController{}, "get:Get;post:Post")                             // Agent Skill 配置
 	web.Router("/agents/skills/:id", &controllers.AgentSkillController{}, "put:Put;delete:Delete")                     // Agent Skill 更新/删除
+	web.Router("/agents/mcp/servers", &controllers.AgentMCPController{}, "get:ListServers;post:CreateServer")          // 第三方 MCP Server 列表/新增
+	web.Router("/agents/mcp/servers/:id", &controllers.AgentMCPController{}, "put:UpdateServer;delete:DeleteServer")   // 第三方 MCP Server 更新/删除
+	web.Router("/agents/mcp/servers/:id/catalog", &controllers.AgentMCPController{}, "get:GetCatalog")                 // MCP Catalog
+	web.Router("/agents/mcp/servers/:id/test", &controllers.AgentMCPController{}, "post:TestConnection")               // MCP 连接测试
+	web.Router("/agents/mcp/servers/:id/refresh", &controllers.AgentMCPController{}, "post:RefreshCatalog")            // MCP Catalog 刷新
+	web.Router("/agents/mcp/tools/:id", &controllers.AgentMCPController{}, "put:UpdateTool")                           // MCP Tool 分类/治理
+	web.Router("/agents/mcp/permissions", &controllers.AgentMCPController{}, "post:SavePermission")                    // Skill -> MCP capability 授权
 	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                           // LLM Provider 预设
 	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                   // 测试 LLM 配置
 	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                                // LLM 配置列表/新增

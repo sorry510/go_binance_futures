@@ -3,6 +3,7 @@ package runtime
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
@@ -78,11 +79,44 @@ func NewRunner(cfg Config) (*DefaultRunner, error) {
 }
 
 func (runner *DefaultRunner) FreezeExecution(selectedSkill skill.Skill) ExecutionSnapshot {
+	snapshot, err := runner.FreezeExecutionChecked(context.Background(), selectedSkill)
+	if err == nil {
+		return snapshot
+	}
+	return FreezeExecution(selectedSkill, runner.cfg.Client)
+}
+
+func (runner *DefaultRunner) FreezeExecutionChecked(ctx context.Context, selectedSkill skill.Skill) (ExecutionSnapshot, error) {
 	snapshot := FreezeExecution(selectedSkill, runner.cfg.Client)
 	if runner.cfg.ToolRuntime != nil {
-		snapshot.Version.ToolCatalogHash = runner.cfg.ToolRuntime.CatalogHash(selectedSkill.Tools())
+		names, err := runner.effectiveToolNames(ctx, selectedSkill)
+		if err != nil {
+			return ExecutionSnapshot{}, err
+		}
+		snapshot.Version.ToolCatalogHash = runner.cfg.ToolRuntime.CatalogHash(names)
 	}
-	return snapshot
+	return snapshot, nil
+}
+
+func (runner *DefaultRunner) effectiveToolNames(ctx context.Context, selectedSkill skill.Skill) ([]string, error) {
+	names := append([]string(nil), selectedSkill.Tools()...)
+	if runner.cfg.ToolAllowlistProvider != nil {
+		extra, err := runner.cfg.ToolAllowlistProvider(ctx, selectedSkill.Name())
+		if err != nil {
+			return nil, fmt.Errorf("load dynamic tool allowlist for skill %q: %w", selectedSkill.Name(), err)
+		}
+		names = append(names, extra...)
+	}
+	seen := map[string]bool{}
+	clean := names[:0]
+	for _, name := range names {
+		name = strings.TrimSpace(name)
+		if name != "" && !seen[name] {
+			seen[name] = true
+			clean = append(clean, name)
+		}
+	}
+	return clean, nil
 }
 
 func (runner *DefaultRunner) Run(ctx context.Context, req Request) (*Result, error) {

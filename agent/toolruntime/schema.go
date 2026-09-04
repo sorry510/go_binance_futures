@@ -58,7 +58,7 @@ func (validator *schemaValidator) compile(raw json.RawMessage) (*jsonschema.Sche
 		return schema, nil
 	}
 	compiler := jsonschema.NewCompiler()
-	compiler.Draft = jsonschema.Draft7
+	compiler.Draft = jsonschema.Draft2020
 	uri := "mem://tool-schema/" + key + ".json"
 	if err := compiler.AddResource(uri, strings.NewReader(string(raw))); err != nil {
 		return nil, fmt.Errorf("load JSON schema: %w", err)

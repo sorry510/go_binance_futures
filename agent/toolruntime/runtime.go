@@ -77,6 +77,7 @@ func descriptorFromTool(selected tools.Tool) ToolDescriptor {
 		Description: strings.TrimSpace(selected.Description()), InputSchema: append(json.RawMessage(nil), metadata.InputSchema...),
 		OutputSchema: append(json.RawMessage(nil), metadata.OutputSchema...), Risk: selected.Risk(), Idempotent: metadata.Idempotent,
 		TimeoutMs: metadata.Timeout.Milliseconds(), CachePolicy: NewCachePolicy(metadata.CacheTTL), ProviderRef: strings.TrimSpace(metadata.ProviderRef),
+		ProtocolVersion: metadata.ProtocolVersion, CatalogHash: metadata.CatalogHash, SchemaHash: metadata.SchemaHash,
 		MaxResultBytes: metadata.MaxResultBytes,
 	}
 }
@@ -210,7 +211,11 @@ func (runtime *Runtime) errorResult(descriptor ToolDescriptor, trace Trace, star
 }
 
 func newTrace(descriptor ToolDescriptor, argumentsHash string, request ExecuteRequest) Trace {
-	return Trace{CanonicalName: descriptor.CanonicalName, SourceType: descriptor.SourceType, Risk: descriptor.Risk, Idempotent: descriptor.Idempotent, TimeoutMs: descriptor.TimeoutMs, CacheTTLms: descriptor.CachePolicy.TTLms, ArgumentsHash: argumentsHash, CallIndex: request.CallIndex, CallBudget: request.CallBudget}
+	return Trace{
+		CanonicalName: descriptor.CanonicalName, SourceType: descriptor.SourceType, Risk: descriptor.Risk, Idempotent: descriptor.Idempotent,
+		TimeoutMs: descriptor.TimeoutMs, CacheTTLms: descriptor.CachePolicy.TTLms, ArgumentsHash: argumentsHash, CallIndex: request.CallIndex, CallBudget: request.CallBudget,
+		ProviderRef: descriptor.ProviderRef, ProtocolVersion: descriptor.ProtocolVersion, CatalogHash: descriptor.CatalogHash, SchemaHash: descriptor.SchemaHash,
+	}
 }
 
 func normalizeArguments(raw json.RawMessage) json.RawMessage {
