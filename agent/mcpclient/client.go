@@ -38,7 +38,7 @@ type Gateway struct {
 func NewGateway(store Store) *Gateway {
 	return &Gateway{
 		Store:         store,
-		ResolveSecret: ResolveEnvironmentSecret,
+		ResolveSecret: ResolveManagedSecret,
 		breakers:      map[int64]breakerState{},
 		slots:         map[int64]chan struct{}{},
 	}
@@ -60,7 +60,18 @@ func (g *Gateway) acquire(ctx context.Context, serverID int64) (func(), error) {
 	}
 }
 
+type OAuthAuthorizationRequiredError struct {
+	ServerID int64
+}
+
+func (err *OAuthAuthorizationRequiredError) Error() string {
+	return fmt.Sprintf("remote MCP server %d requires OAuth authorization; complete authorization from the MCP management page first", err.ServerID)
+}
+
 func (g *Gateway) connect(ctx context.Context, server models.AgentMCPServer) (*mcp.ClientSession, error) {
+	if server.AuthType == AuthOAuth2 && strings.TrimSpace(server.SecretRef) == "" {
+		return nil, &OAuthAuthorizationRequiredError{ServerID: server.ID}
+	}
 	if err := g.allowRequest(server.ID); err != nil {
 		return nil, err
 	}

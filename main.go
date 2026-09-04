@@ -45,7 +45,7 @@ var port, _ = config.String("database::port")
 var dbname, _ = config.String("database::dbname")
 var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var tradeKey, _ = config.String("binance::api_key")
-var mcpEnable, _ = config.Bool("mcp::mcp_enable")
+var mcpServerEnable, _ = config.Bool("mcp::mcp_server_enable")
 var SystemConfig models.Config
 
 func init() {
@@ -56,7 +56,7 @@ func init() {
 
 	registerModels()      // 注册模型
 	registerMiddlewares() // 添加中间件
-	if mcpEnable {
+	if mcpServerEnable {
 		registerMCPHTTP() // 注册 MCP HTTP 服务
 	}
 }
@@ -96,6 +96,8 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentMCPResource))
 	orm.RegisterModel(new(models.AgentMCPPrompt))
 	orm.RegisterModel(new(models.AgentMCPPermission))
+	orm.RegisterModel(new(models.AgentMCPSecret))
+	orm.RegisterModel(new(models.AgentMCPOAuthState))
 	orm.RegisterModel(new(models.LLMConfig))
 	orm.RegisterModel(new(models.Notification))
 

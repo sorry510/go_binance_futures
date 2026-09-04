@@ -7,11 +7,14 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
 
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/config"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"go_binance_futures/agent/contextengine"
@@ -24,11 +27,24 @@ import (
 var setupMCPStoreOnce sync.Once
 var setupMCPStoreErr error
 
+func setMCPConfigForTest(t *testing.T, key, value string) {
+	t.Helper()
+	previous, _ := config.String(key)
+	if err := config.Set(key, value); err != nil {
+		t.Fatalf("set config %s: %v", key, err)
+	}
+	t.Cleanup(func() {
+		if err := config.Set(key, previous); err != nil {
+			t.Fatalf("restore config %s: %v", key, err)
+		}
+	})
+}
+
 func setupMCPTestStore(t *testing.T) Store {
 	t.Helper()
 	setupMCPStoreOnce.Do(func() {
 		_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
-		orm.RegisterModel(new(models.AgentMCPServer), new(models.AgentMCPTool), new(models.AgentMCPResource), new(models.AgentMCPPrompt), new(models.AgentMCPPermission))
+		orm.RegisterModel(new(models.AgentMCPServer), new(models.AgentMCPTool), new(models.AgentMCPResource), new(models.AgentMCPPrompt), new(models.AgentMCPPermission), new(models.AgentMCPSecret), new(models.AgentMCPOAuthState))
 		setupMCPStoreErr = orm.RegisterDataBase("default", "sqlite3", "file:mcp_e2e?mode=memory&cache=shared")
 	})
 	if setupMCPStoreErr != nil {
@@ -65,6 +81,31 @@ func registerFixtureTool(server *mcp.Server, changed bool) {
 		return &mcp.CallToolResult{StructuredContent: map[string]any{"ok": true}}, nil
 	})
 }
+func TestOAuthPublicBaseConfigAllowsLoopbackHTTPOnly(t *testing.T) {
+	setMCPConfigForTest(t, oauthPublicBaseConfig, "http://127.0.0.1:3333")
+	base, metadata, callback, err := oauthPublicURLs()
+	if err != nil {
+		t.Fatalf("loopback OAuth public base should be accepted: %v", err)
+	}
+	if base != "http://127.0.0.1:3333" || metadata != base+"/agents/mcp/oauth/client-metadata" || callback != base+"/agents/mcp/oauth/callback" {
+		t.Fatalf("unexpected OAuth public URLs: base=%q metadata=%q callback=%q", base, metadata, callback)
+	}
+
+	if err := config.Set(oauthPublicBaseConfig, "http://203.0.113.10:3333"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, _, err := oauthPublicURLs(); err == nil {
+		t.Fatal("non-loopback HTTP OAuth public base was accepted")
+	}
+
+	if err := config.Set(oauthPublicBaseConfig, "https://agent-host.example.com"); err != nil {
+		t.Fatal(err)
+	}
+	if base, _, _, err := oauthPublicURLs(); err != nil || base != "https://agent-host.example.com" {
+		t.Fatalf("HTTPS OAuth public base rejected: base=%q err=%v", base, err)
+	}
+}
+
 func TestConnectionOnlyInitializesWithoutRefreshingCatalog(t *testing.T) {
 	ctx := context.Background()
 	store := setupMCPTestStore(t)
@@ -235,7 +276,7 @@ func TestEndpointAndSecretSafety(t *testing.T) {
 		AccessToken: "expired", RefreshToken: "refresh", ClientID: "client",
 		TokenURL: "http://127.0.0.1/token",
 	})
-	if _, err := oauthSource(context.Background(), string(oauthRaw), false); err == nil {
+	if _, err := oauthSource(context.Background(), string(oauthRaw), false, nil); err == nil {
 		t.Fatal("OAuth private/plain HTTP token endpoint unexpectedly allowed")
 	}
 
@@ -277,5 +318,125 @@ func TestBearerCredentialIsSentAsAuthorizationHeader(t *testing.T) {
 	response.Body.Close()
 	if got := <-received; got != "Bearer "+token {
 		t.Fatalf("authorization header = %q", got)
+	}
+}
+
+func TestInteractiveOAuthPKCEPersistenceAndReconnect(t *testing.T) {
+	ctx := context.Background()
+	store := setupMCPTestStore(t)
+	mcpServer := mcp.NewServer(&mcp.Implementation{Name: "oauth-fixture", Version: "1.0.0"}, nil)
+	mcpHandler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return mcpServer }, &mcp.StreamableHTTPOptions{Stateless: true, JSONResponse: true})
+	var fixture *httptest.Server
+	refreshCount := 0
+	fixture = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/mcp":
+			if r.Header.Get("Authorization") != "Bearer access-2" {
+				w.Header().Set("WWW-Authenticate", `Bearer resource_metadata="`+fixture.URL+`/.well-known/oauth-protected-resource/mcp"`)
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			mcpHandler.ServeHTTP(w, r)
+		case "/.well-known/oauth-protected-resource/mcp":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{"resource": fixture.URL + "/mcp", "authorization_servers": []string{fixture.URL}})
+		case "/.well-known/oauth-authorization-server":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"issuer": fixture.URL, "authorization_endpoint": fixture.URL + "/authorize", "token_endpoint": fixture.URL + "/token",
+				"token_endpoint_auth_methods_supported": []string{"none"}, "response_types_supported": []string{"code"},
+				"grant_types_supported": []string{"authorization_code", "refresh_token"}, "code_challenge_methods_supported": []string{"S256"},
+				"client_id_metadata_document_supported": true,
+			})
+		case "/token":
+			if err := r.ParseForm(); err != nil {
+				t.Errorf("token form: %v", err)
+				w.WriteHeader(400)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			if r.Form.Get("grant_type") == "refresh_token" {
+				refreshCount++
+				if r.Form.Get("refresh_token") != "refresh-1" {
+					t.Errorf("refresh token = %q", r.Form.Get("refresh_token"))
+				}
+				_, _ = w.Write([]byte(`{"access_token":"access-2","token_type":"Bearer","refresh_token":"refresh-2","expires_in":3600}`))
+				return
+			}
+			if r.Form.Get("code") != "fixture-code" || r.Form.Get("code_verifier") == "" {
+				t.Errorf("invalid code exchange: %#v", r.Form)
+				w.WriteHeader(400)
+				return
+			}
+			if r.Form.Get("resource") != fixture.URL+"/mcp" {
+				t.Errorf("resource = %q", r.Form.Get("resource"))
+			}
+			if r.Form.Get("client_id") != fixture.URL+"/agents/mcp/oauth/client-metadata" {
+				t.Errorf("client_id = %q", r.Form.Get("client_id"))
+			}
+			_, _ = w.Write([]byte(`{"access_token":"access-1","token_type":"Bearer","refresh_token":"refresh-1","expires_in":1}`))
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer fixture.Close()
+
+	setMCPConfigForTest(t, oauthPublicBaseConfig, fixture.URL)
+	setMCPConfigForTest(t, oauthEncryptionConfig, strings.Repeat("11", 32))
+	view, err := store.SaveServer(ctx, 0, ServerInput{Name: "oauth", Endpoint: fixture.URL + "/mcp", Enabled: 1, AuthType: AuthOAuth2, AllowPrivate: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	gateway := NewGateway(store)
+	start, err := gateway.StartOAuth(ctx, view.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(start.AuthorizationURL, fixture.URL+"/authorize?") {
+		t.Fatalf("authorization URL = %s", start.AuthorizationURL)
+	}
+	if !strings.Contains(start.AuthorizationURL, "code_challenge_method=S256") || !strings.Contains(start.AuthorizationURL, "resource=") {
+		t.Fatalf("authorization URL missing PKCE/resource: %s", start.AuthorizationURL)
+	}
+	authURL, _ := url.Parse(start.AuthorizationURL)
+	state := authURL.Query().Get("state")
+	if state == "" {
+		t.Fatal("missing OAuth state")
+	}
+	result, err := gateway.CompleteOAuth(ctx, state, "fixture-code", "", "", "")
+	if err != nil || result.Status != "authorized" {
+		t.Fatalf("complete OAuth: result=%+v err=%v", result, err)
+	}
+	if _, err := gateway.CompleteOAuth(ctx, state, "fixture-code", "", "", ""); err == nil {
+		t.Fatal("OAuth state replay was accepted")
+	}
+
+	var secret models.AgentMCPSecret
+	if err := store.orm().QueryTable(new(models.AgentMCPSecret)).Filter("server_id", view.ID).One(&secret); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(secret.Ciphertext, "access-1") || strings.Contains(secret.Ciphertext, "refresh-1") {
+		t.Fatal("OAuth token stored in plaintext")
+	}
+	freshGateway := NewGateway(store)
+	if _, err := freshGateway.TestConnection(ctx, view.ID); err != nil {
+		t.Fatalf("reconnect with persisted OAuth credential: %v", err)
+	}
+	if refreshCount != 1 {
+		t.Fatalf("refresh count = %d, want 1", refreshCount)
+	}
+	raw, err := ResolveManagedSecret(ctx, oauthSecretPrefix+strconv.FormatInt(view.ID, 10))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(raw, "access-2") || !strings.Contains(raw, "refresh-2") {
+		t.Fatalf("rotated OAuth credential was not persisted: %s", raw)
+	}
+	serverRow, err := store.GetServer(ctx, view.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if serverRow.OAuthStatus != "authorized" || serverRow.SecretRef == "" {
+		t.Fatalf("OAuth server state not authorized: %+v", serverRow)
 	}
 }

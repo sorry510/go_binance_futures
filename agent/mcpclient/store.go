@@ -54,6 +54,8 @@ func (s Store) SaveServer(ctx context.Context, id int64, input ServerInput) (Ser
 	input.Name = strings.TrimSpace(input.Name)
 	input.Endpoint = strings.TrimSpace(input.Endpoint)
 	input.AuthType = strings.TrimSpace(input.AuthType)
+	input.SecretRef = strings.TrimSpace(input.SecretRef)
+	input.CustomHeader = strings.TrimSpace(input.CustomHeader)
 	if input.AuthType == "" {
 		input.AuthType = AuthNone
 	}
@@ -68,33 +70,80 @@ func (s Store) SaveServer(ctx context.Context, id int64, input ServerInput) (Ser
 	default:
 		return ServerView{}, fmt.Errorf("unsupported MCP auth_type %q", input.AuthType)
 	}
-	if input.AuthType == AuthCustomHeader && !validHeaderName(strings.TrimSpace(input.CustomHeader)) {
+	if input.SecretRef != "" && !strings.HasPrefix(input.SecretRef, "env:") {
+		return ServerView{}, fmt.Errorf("MCP credential input must use an env: managed reference")
+	}
+	if input.AuthType == AuthCustomHeader && !validHeaderName(input.CustomHeader) {
 		return ServerView{}, fmt.Errorf("invalid MCP custom header name")
 	}
+	if input.AuthType != AuthCustomHeader {
+		input.CustomHeader = ""
+	}
 	now := time.Now().UTC().UnixMilli()
-	row := models.AgentMCPServer{ID: id, Name: strings.TrimSpace(input.Name), Endpoint: strings.TrimSpace(input.Endpoint), Enabled: input.Enabled, AuthType: strings.TrimSpace(input.AuthType), SecretRef: strings.TrimSpace(input.SecretRef), CustomHeader: strings.TrimSpace(input.CustomHeader), AllowPrivate: input.AllowPrivate, UpdatedAt: now}
+	row := models.AgentMCPServer{
+		ID: id, Name: input.Name, Endpoint: input.Endpoint, Enabled: input.Enabled,
+		AuthType: input.AuthType, SecretRef: input.SecretRef, CustomHeader: input.CustomHeader,
+		AllowPrivate: input.AllowPrivate, UpdatedAt: now,
+	}
 	o := s.orm()
 	if id == 0 {
+		if (input.AuthType == AuthBearer || input.AuthType == AuthCustomHeader) && input.SecretRef == "" {
+			return ServerView{}, fmt.Errorf("MCP %s authentication requires secret_ref", input.AuthType)
+		}
 		row.CreatedAt = now
 		row.Status = "disconnected"
+		if input.AuthType == AuthOAuth2 {
+			if input.SecretRef == "" {
+				row.OAuthStatus = "authorization_required"
+			} else {
+				row.OAuthStatus = "configured"
+			}
+		}
 		newID, err := o.Insert(&row)
 		if err != nil {
 			return ServerView{}, err
 		}
 		row.ID = newID
-	} else {
-		existing, err := s.GetServer(ctx, id)
-		if err != nil {
+		return serverView(row), nil
+	}
+
+	existing, err := s.GetServer(ctx, id)
+	if err != nil {
+		return ServerView{}, err
+	}
+	sameCredentialScope := existing.AuthType == row.AuthType && existing.Endpoint == row.Endpoint
+	if row.SecretRef == "" && sameCredentialScope {
+		row.SecretRef = existing.SecretRef
+	}
+	if (row.AuthType == AuthBearer || row.AuthType == AuthCustomHeader) && row.SecretRef == "" {
+		return ServerView{}, fmt.Errorf("MCP %s authentication requires secret_ref", row.AuthType)
+	}
+	if strings.HasPrefix(existing.SecretRef, oauthSecretPrefix) && !sameCredentialScope {
+		if _, err := o.QueryTable(new(models.AgentMCPSecret)).Filter("server_id", id).Delete(); err != nil {
 			return ServerView{}, err
+		}
+		if _, err := o.QueryTable(new(models.AgentMCPOAuthState)).Filter("server_id", id).Delete(); err != nil {
+			return ServerView{}, err
+		}
+		row.SecretRef = ""
+	}
+	row.CreatedAt = existing.CreatedAt
+	row.ProtocolVersion, row.ServerName, row.ServerVersion = existing.ProtocolVersion, existing.ServerName, existing.ServerVersion
+	row.Status, row.LastSuccessAt, row.LastErrorAt, row.LastError, row.CatalogHash = existing.Status, existing.LastSuccessAt, existing.LastErrorAt, existing.LastError, existing.CatalogHash
+	if row.AuthType == AuthOAuth2 {
+		if sameCredentialScope {
+			row.OAuthStatus, row.OAuthIssuer, row.OAuthExpiresAt = existing.OAuthStatus, existing.OAuthIssuer, existing.OAuthExpiresAt
 		}
 		if row.SecretRef == "" {
-			row.SecretRef = existing.SecretRef
+			row.OAuthStatus, row.OAuthIssuer, row.OAuthExpiresAt = "authorization_required", "", 0
+		} else if row.OAuthStatus == "" {
+			row.OAuthStatus = "configured"
 		}
-		row.CreatedAt, row.ProtocolVersion, row.ServerName, row.ServerVersion = existing.CreatedAt, existing.ProtocolVersion, existing.ServerName, existing.ServerVersion
-		row.Status, row.LastSuccessAt, row.LastErrorAt, row.LastError, row.CatalogHash = existing.Status, existing.LastSuccessAt, existing.LastErrorAt, existing.LastError, existing.CatalogHash
-		if _, err := o.Update(&row); err != nil {
-			return ServerView{}, err
-		}
+	} else {
+		row.OAuthStatus, row.OAuthIssuer, row.OAuthExpiresAt = "", "", 0
+	}
+	if _, err := o.Update(&row); err != nil {
+		return ServerView{}, err
 	}
 	return serverView(row), nil
 }
@@ -110,7 +159,7 @@ func (s Store) DeleteServer(ctx context.Context, id int64) error {
 		return err
 	}
 	o := s.orm()
-	for _, model := range []any{new(models.AgentMCPPermission), new(models.AgentMCPTool), new(models.AgentMCPResource), new(models.AgentMCPPrompt)} {
+	for _, model := range []any{new(models.AgentMCPPermission), new(models.AgentMCPTool), new(models.AgentMCPResource), new(models.AgentMCPPrompt), new(models.AgentMCPSecret), new(models.AgentMCPOAuthState)} {
 		if _, err := o.QueryTable(model).Filter("server_id", id).Delete(); err != nil {
 			return err
 		}

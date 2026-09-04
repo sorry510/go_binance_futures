@@ -76,14 +76,15 @@ type RefreshResult struct {
 }
 
 type OAuthCredential struct {
-	AccessToken  string    `json:"access_token"`
-	TokenType    string    `json:"token_type,omitempty"`
-	RefreshToken string    `json:"refresh_token,omitempty"`
-	Expiry       time.Time `json:"expiry,omitempty"`
-	TokenURL     string    `json:"token_url,omitempty"`
-	ClientID     string    `json:"client_id,omitempty"`
-	ClientSecret string    `json:"client_secret,omitempty"`
-	Scopes       []string  `json:"scopes,omitempty"`
+	AccessToken     string    `json:"access_token"`
+	TokenType       string    `json:"token_type,omitempty"`
+	RefreshToken    string    `json:"refresh_token,omitempty"`
+	Expiry          time.Time `json:"expiry,omitempty"`
+	TokenURL        string    `json:"token_url,omitempty"`
+	ClientID        string    `json:"client_id,omitempty"`
+	ClientSecret    string    `json:"client_secret,omitempty"`
+	TokenAuthMethod string    `json:"token_auth_method,omitempty"`
+	Scopes          []string  `json:"scopes,omitempty"`
 }
 
 func marshalJSON(value any) string {
