@@ -3,6 +3,7 @@ package models
 type AgentMCPServer struct {
 	ID              int64  `orm:"column(id);auto" json:"id"`
 	Name            string `orm:"column(name);size(64);unique" json:"name"`
+	Description     string `orm:"column(description);type(text);null" json:"description,omitempty"`
 	Endpoint        string `orm:"column(endpoint);size(512)" json:"endpoint"`
 	Enabled         int    `orm:"column(enabled);default(1);index" json:"enabled"`
 	AuthType        string `orm:"column(auth_type);size(32);default(none)" json:"auth_type"`

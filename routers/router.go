@@ -18,7 +18,8 @@ func init() {
 	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                      // 取消运行中的 Agent 任务
 	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                      // 从安全 Checkpoint 恢复 Agent 任务
 	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory")      // 查询单币分析历史
-	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus")                  // 查询事件报警链路状态与追踪
+	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus")                  // 查询事件报警链路状态与最近追踪
+	web.Router("/agents/alerts/traces", &controllers.AgentController{}, "get:ListAlertPipelineTraces")                 // 分页查询完整事件→信号→任务→通知链路
 	web.Router("/agents/scheduler/status", &controllers.AgentController{}, "get:GetSchedulerStatus")                   // 查询 Agent Scheduler 状态
 	web.Router("/agents/governance/status", &controllers.AgentController{}, "get:GetGovernanceStatus")                 // 查询 Agent 权限、预算和运行指标
 	web.Router("/agents/skills/implementations", &controllers.AgentSkillController{}, "get:GetImplementations")        // 可用 Skill implementation
@@ -37,6 +38,7 @@ func init() {
 	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                           // LLM Provider 预设
 	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                   // 测试 LLM 配置
 	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                                // LLM 配置列表/新增
+	web.Router("/llm/configs/:id/api-key", &controllers.LLMConfigController{}, "get:GetAPIKey")                        // 显式查看单个 LLM API Key
 	web.Router("/llm/configs/:id", &controllers.LLMConfigController{}, "put:Put;delete:Delete")                        // LLM 配置更新/删除
 	web.Router("/agents/scheduler/jobs/:name/trigger", &controllers.AgentController{}, "post:TriggerSchedulerJob")     // 手动触发 Scheduler Job
 	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post")                           // 列表查询和新增

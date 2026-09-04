@@ -22,10 +22,14 @@ const (
 	ToolDisabled     = "disabled"
 	ToolGranted      = "granted"
 	ToolNeedsReview  = "needs_review"
+
+	defaultToolTimeoutMs int64 = 60000
+	maxToolTimeoutMs     int64 = 120000
 )
 
 type ServerInput struct {
 	Name         string `json:"name"`
+	Description  string `json:"description"`
 	Endpoint     string `json:"endpoint"`
 	Enabled      int    `json:"enabled"`
 	AuthType     string `json:"auth_type"`

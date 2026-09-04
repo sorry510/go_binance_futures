@@ -69,6 +69,24 @@ func (ctrl *LLMConfigController) Put() {
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
 }
 
+func (ctrl *LLMConfigController) GetAPIKey() {
+	id, err := parseLLMConfigID(ctrl)
+	if err != nil || id <= 0 {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "LLM config id 无效"))
+		return
+	}
+	row, err := (llm.Store{}).Get(ctrl.Ctx.Request.Context(), id)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(404, nil, "LLM config not found"))
+		return
+	}
+	ctrl.Ctx.Output.Header("Cache-Control", "no-store")
+	ctrl.Ctx.Output.Header("Pragma", "no-cache")
+	ctrl.Ctx.Resp(map[string]interface{}{
+		"code": 200, "data": map[string]string{"api_key": row.APIKey}, "msg": "success",
+	})
+}
+
 func (ctrl *LLMConfigController) Delete() {
 	id, err := parseLLMConfigID(ctrl)
 	if err != nil || id <= 0 {

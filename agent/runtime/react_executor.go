@@ -135,10 +135,6 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 
 func (executor *reactExecutor) executeTool(ctx context.Context, session *runSession, messages *[]llm.Message, decision decision, progress, round int, dependsOn string, beforeCheckpoint func()) error {
 	state, item := session.state, session.currentTask
-	state.ToolCalls++
-	if state.ToolCalls > state.MaxToolCalls {
-		return executor.runner.fail(item, "tool_limit_exceeded", fmt.Errorf("agent exceeded %d tool calls", state.MaxToolCalls))
-	}
 	request := toolruntime.ExecuteRequest{
 		SkillName: session.selectedSkill.Name(), AllowedTools: session.allowedTools,
 		ToolName: decision.Tool, Arguments: decision.Arguments,
@@ -146,11 +142,11 @@ func (executor *reactExecutor) executeTool(ctx context.Context, session *runSess
 	}
 	descriptor, checkErr := executor.runner.cfg.ToolRuntime.Check(request)
 	if checkErr != nil {
+		if toolruntime.TypeOf(checkErr) == toolruntime.ErrorNotFound {
+			return executor.repairToolName(ctx, session, messages, dependsOn, progress, round, checkErr)
+		}
 		stage := "tool_runtime_failed"
-		switch toolruntime.TypeOf(checkErr) {
-		case toolruntime.ErrorNotFound:
-			stage = "tool_not_registered"
-		case toolruntime.ErrorPermission:
+		if toolruntime.TypeOf(checkErr) == toolruntime.ErrorPermission {
 			if strings.Contains(checkErr.Error(), "does not allow tool") {
 				stage = "tool_not_allowed"
 			} else {
@@ -159,6 +155,12 @@ func (executor *reactExecutor) executeTool(ctx context.Context, session *runSess
 		}
 		return executor.runner.fail(item, stage, checkErr)
 	}
+	state.ToolCalls++
+	if state.ToolCalls > state.MaxToolCalls {
+		return executor.runner.fail(item, "tool_limit_exceeded", fmt.Errorf("agent exceeded %d tool calls", state.MaxToolCalls))
+	}
+	request.ToolName = descriptor.CanonicalName
+	request.CallIndex = state.ToolCalls
 	stepID := state.startStep(StepTool, 1, descriptor.CanonicalName, dependsOn)
 	executor.runner.recordToolStep(item, state, stepID, task.StatusWaitingTool, "waiting_tool", progress+2, descriptor.CanonicalName, "running", "", false, 0, "calling "+descriptor.CanonicalName)
 
@@ -241,6 +243,29 @@ func (executor *reactExecutor) executeTool(ctx context.Context, session *runSess
 	return nil
 }
 
+func (executor *reactExecutor) repairToolName(ctx context.Context, session *runSession, messages *[]llm.Message, stepID string, progress, round int, cause error) error {
+	state, item := session.state, session.currentTask
+	names := make([]string, 0, len(session.allowedTools))
+	for name, allowed := range session.allowedTools {
+		if allowed {
+			names = append(names, name)
+		}
+	}
+	sort.Strings(names)
+	message := cause.Error()
+	if len(names) > 0 {
+		message += ". Use one exact allowed tool name without translating, shortening, or changing punctuation: " + strings.Join(names, ", ")
+	}
+	feedback := repairFeedback("tool_name", message)
+	executor.runner.appendRuntimeMessage(item.ID, state, messages, feedback)
+	state.Messages = *messages
+	executor.runner.recordStep(item, state, stepID, task.StatusRunning, "repairing_tool_name", progress+1, message, "tool_not_registered", false)
+	if err := executor.runner.saveCheckpoint(ctx, item, state, stepID, round+1); err != nil {
+		return executor.runner.fail(item, "checkpoint_failed", err)
+	}
+	return nil
+}
+
 func (executor *reactExecutor) executeParallelTools(ctx context.Context, session *runSession, messages *[]llm.Message, decision decision, progress, round int, dependsOn string) error {
 	state, item := session.state, session.currentTask
 	count := len(decision.Tools)
@@ -268,11 +293,11 @@ func (executor *reactExecutor) executeParallelTools(ctx context.Context, session
 		descriptor, checkErr := executor.runner.cfg.ToolRuntime.Check(request)
 		if checkErr != nil {
 			state.finishStep(parentStepID, StepFailed, "parallel tool preflight failed", string(toolruntime.TypeOf(checkErr)), checkErr)
+			if toolruntime.TypeOf(checkErr) == toolruntime.ErrorNotFound {
+				return executor.repairToolName(ctx, session, messages, parentStepID, progress, round, checkErr)
+			}
 			stage := "tool_runtime_failed"
-			switch toolruntime.TypeOf(checkErr) {
-			case toolruntime.ErrorNotFound:
-				stage = "tool_not_registered"
-			case toolruntime.ErrorPermission:
+			if toolruntime.TypeOf(checkErr) == toolruntime.ErrorPermission {
 				if strings.Contains(checkErr.Error(), "does not allow tool") {
 					stage = "tool_not_allowed"
 				} else {
@@ -282,6 +307,7 @@ func (executor *reactExecutor) executeParallelTools(ctx context.Context, session
 			state.syncTask(item)
 			return executor.runner.fail(item, stage, checkErr)
 		}
+		request.ToolName = descriptor.CanonicalName
 		if descriptor.Risk != permission.RiskRead || !descriptor.Idempotent {
 			err := fmt.Errorf("parallel tool %q must be read and idempotent", descriptor.CanonicalName)
 			state.finishStep(parentStepID, StepFailed, "parallel tool safety check failed", "parallel_tool_not_safe", err)

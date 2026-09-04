@@ -7,8 +7,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"go_binance_futures/agent/contextengine"
@@ -86,9 +88,9 @@ func (runtime *Runtime) Check(request ExecuteRequest) (ToolDescriptor, error) {
 	if runtime == nil {
 		return ToolDescriptor{}, newError(ErrorInternal, request.ToolName, nil, "tool runtime is nil")
 	}
-	selected, exists := runtime.registry.Get(strings.TrimSpace(request.ToolName))
-	if !exists {
-		return ToolDescriptor{}, newError(ErrorNotFound, request.ToolName, nil, "tool %q is not registered", request.ToolName)
+	selected, resolveErr := runtime.resolveAllowedTool(request.ToolName, request.AllowedTools)
+	if resolveErr != nil {
+		return ToolDescriptor{}, resolveErr
 	}
 	descriptor := descriptorFromTool(selected)
 	if request.AllowedTools != nil && !request.AllowedTools[descriptor.CanonicalName] {
@@ -98,6 +100,60 @@ func (runtime *Runtime) Check(request ExecuteRequest) (ToolDescriptor, error) {
 		return descriptor, newError(ErrorPermission, descriptor.CanonicalName, err, "%s", err.Error())
 	}
 	return descriptor, nil
+}
+
+func (runtime *Runtime) resolveAllowedTool(requested string, allowed map[string]bool) (tools.Tool, error) {
+	requested = strings.TrimSpace(requested)
+	if selected, exists := runtime.registry.Get(requested); exists {
+		return selected, nil
+	}
+	if requested == "" || allowed == nil {
+		return nil, newError(ErrorNotFound, requested, nil, "tool %q is not registered", requested)
+	}
+	key := toolAliasKey(requested)
+	if key == "" {
+		return nil, newError(ErrorNotFound, requested, nil, "tool %q is not registered", requested)
+	}
+	candidates := make([]string, 0, 1)
+	for canonicalName, enabled := range allowed {
+		if !enabled {
+			continue
+		}
+		selected, exists := runtime.registry.Get(canonicalName)
+		if !exists {
+			continue
+		}
+		if toolAliasKey(toolBaseName(selected.Name())) == key {
+			candidates = append(candidates, selected.Name())
+		}
+	}
+	if len(candidates) == 1 {
+		selected, _ := runtime.registry.Get(candidates[0])
+		return selected, nil
+	}
+	if len(candidates) > 1 {
+		sort.Strings(candidates)
+		return nil, newError(ErrorNotFound, requested, nil, "tool alias %q is ambiguous; use an exact canonical tool name: %s", requested, strings.Join(candidates, ", "))
+	}
+	return nil, newError(ErrorNotFound, requested, nil, "tool %q is not registered", requested)
+}
+
+func toolBaseName(name string) string {
+	name = strings.TrimSpace(name)
+	if index := strings.LastIndex(name, "."); index >= 0 && index+1 < len(name) {
+		return name[index+1:]
+	}
+	return name
+}
+
+func toolAliasKey(name string) string {
+	var builder strings.Builder
+	for _, r := range strings.ToLower(strings.TrimSpace(name)) {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			builder.WriteRune(r)
+		}
+	}
+	return builder.String()
 }
 
 func (runtime *Runtime) Execute(ctx context.Context, request ExecuteRequest) (ExecuteResult, error) {

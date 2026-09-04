@@ -220,7 +220,7 @@ func buildHTTPClient(ctx context.Context, server models.AgentMCPServer, resolver
 		}
 		return nil, lastErr
 	}
-	transport.ResponseHeaderTimeout = 15 * time.Second
+	transport.ResponseHeaderTimeout = 25 * time.Second
 	secret := ""
 	if server.AuthType != AuthNone {
 		secret, err = resolver(ctx, server.SecretRef)

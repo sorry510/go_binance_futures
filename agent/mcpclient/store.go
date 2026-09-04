@@ -52,6 +52,7 @@ func (s Store) SaveServer(ctx context.Context, id int64, input ServerInput) (Ser
 		return ServerView{}, err
 	}
 	input.Name = strings.TrimSpace(input.Name)
+	input.Description = strings.TrimSpace(input.Description)
 	input.Endpoint = strings.TrimSpace(input.Endpoint)
 	input.AuthType = strings.TrimSpace(input.AuthType)
 	input.SecretRef = strings.TrimSpace(input.SecretRef)
@@ -81,7 +82,7 @@ func (s Store) SaveServer(ctx context.Context, id int64, input ServerInput) (Ser
 	}
 	now := time.Now().UTC().UnixMilli()
 	row := models.AgentMCPServer{
-		ID: id, Name: input.Name, Endpoint: input.Endpoint, Enabled: input.Enabled,
+		ID: id, Name: input.Name, Description: input.Description, Endpoint: input.Endpoint, Enabled: input.Enabled,
 		AuthType: input.AuthType, SecretRef: input.SecretRef, CustomHeader: input.CustomHeader,
 		AllowPrivate: input.AllowPrivate, UpdatedAt: now,
 	}
@@ -212,8 +213,8 @@ func (s Store) UpdateTool(ctx context.Context, id int64, input ToolUpdateInput) 
 	if input.TimeoutMs < 0 || input.CacheTTLms < 0 || input.MaxResultBytes < 0 {
 		return models.AgentMCPTool{}, fmt.Errorf("MCP tool runtime limits cannot be negative")
 	}
-	if input.TimeoutMs > 120000 {
-		return models.AgentMCPTool{}, fmt.Errorf("MCP tool timeout_ms cannot exceed 120000")
+	if input.TimeoutMs > maxToolTimeoutMs {
+		return models.AgentMCPTool{}, fmt.Errorf("MCP tool timeout_ms cannot exceed %d", maxToolTimeoutMs)
 	}
 	if input.CacheTTLms > 86400000 {
 		return models.AgentMCPTool{}, fmt.Errorf("MCP tool cache_ttl_ms cannot exceed 86400000")
@@ -329,20 +330,59 @@ func (s Store) validateCapability(ctx context.Context, serverID int64, capabilit
 	return nil
 }
 
-func (s Store) GrantedToolNames(ctx context.Context, skillName string) ([]string, error) {
+func (s Store) GrantedTools(ctx context.Context, skillName string) ([]models.AgentMCPTool, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 	var perms []models.AgentMCPPermission
-	if _, err := s.orm().QueryTable(new(models.AgentMCPPermission)).Filter("skill_name", strings.TrimSpace(skillName)).Filter("capability_type", CapabilityTool).Filter("enabled", 1).All(&perms); err != nil {
+	if _, err := s.orm().QueryTable(new(models.AgentMCPPermission)).
+		Filter("skill_name", strings.TrimSpace(skillName)).
+		Filter("capability_type", CapabilityTool).
+		Filter("enabled", 1).
+		All(&perms); err != nil {
 		return nil, err
 	}
-	names := make([]string, 0, len(perms))
-	for _, p := range perms {
-		var tool models.AgentMCPTool
-		if err := s.orm().QueryTable(new(models.AgentMCPTool)).Filter("id", p.CapabilityID).Filter("server_id", p.ServerID).Filter("enabled", 1).Filter("status", ToolGranted).One(&tool); err == nil {
-			names = append(names, tool.CanonicalName)
+	if len(perms) == 0 {
+		return []models.AgentMCPTool{}, nil
+	}
+
+	capabilityIDs := make([]interface{}, 0, len(perms))
+	grantedPairs := make(map[[2]int64]struct{}, len(perms))
+	seenIDs := make(map[int64]struct{}, len(perms))
+	for _, permission := range perms {
+		grantedPairs[[2]int64{permission.ServerID, permission.CapabilityID}] = struct{}{}
+		if _, seen := seenIDs[permission.CapabilityID]; !seen {
+			seenIDs[permission.CapabilityID] = struct{}{}
+			capabilityIDs = append(capabilityIDs, permission.CapabilityID)
 		}
+	}
+
+	var rows []models.AgentMCPTool
+	if _, err := s.orm().QueryTable(new(models.AgentMCPTool)).
+		Filter("id__in", capabilityIDs...).
+		Filter("enabled", 1).
+		Filter("status", ToolGranted).
+		OrderBy("canonical_name").
+		All(&rows); err != nil {
+		return nil, err
+	}
+	result := make([]models.AgentMCPTool, 0, len(rows))
+	for _, row := range rows {
+		if _, granted := grantedPairs[[2]int64{row.ServerID, row.ID}]; granted {
+			result = append(result, row)
+		}
+	}
+	return result, nil
+}
+
+func (s Store) GrantedToolNames(ctx context.Context, skillName string) ([]string, error) {
+	tools, err := s.GrantedTools(ctx, skillName)
+	if err != nil {
+		return nil, err
+	}
+	names := make([]string, 0, len(tools))
+	for _, tool := range tools {
+		names = append(names, tool.CanonicalName)
 	}
 	return names, nil
 }
