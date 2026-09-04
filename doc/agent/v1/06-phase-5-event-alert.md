@@ -116,3 +116,10 @@ Phase 5 第一版已经完成，并已完成 FastMove / Liquidation 最终切流
 - [x] 关闭 AI Alert 后，基础确定性报警仍能工作。
 - [x] 重复行情不会突破 cooldown 连续发送相同报警。
 - [x] Agent/Notify 失败不会影响 WS 数据持续写入和价格刷新。
+## 持久化链路审计
+
+原有 Dashboard `最近事件 → 信号 → 任务 → 通知链路` 只保存进程内最近 100 条 Trace，不能用于长期审计。现在新增 `agent_alert_pipeline_traces`：每个 `signal_id` 保存一条最新链路状态，并在状态推进时 upsert。持久化通过 Pipeline 内独立有序队列执行，避免公网 MySQL RTT 阻塞 Signal/通知主链。
+
+新增 `GET /agents/alerts/traces` 提供分页查询，并支持 Symbol、Signal Type、Severity、Status、Fallback、是否已生成 Notification、时间范围筛选。返回结果批量关联 Agent Task 状态/阶段/错误和本地 Notification 内容。Web 端 `AI → 报警链路历史` 展示完整分页数据，Dashboard 的最近列表保留并提供“查看全部”入口。
+
+注意：`notification_id > 0` 代表本地通知记录已经创建并进入外部推送流程。当前 DingTalk HTTP 请求仍异步发送，远端 HTTP delivery receipt 未持久化，因此审计页用于与实际 DingTalk 消息人工比对，不把本地 Notification 误表示为远端已确认送达。持久化历史从该功能上线后开始；之前只存在于内存且未生成 Notification 的旧 Trace 无法恢复。

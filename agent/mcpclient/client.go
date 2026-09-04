@@ -91,7 +91,7 @@ func (g *Gateway) connect(ctx context.Context, server models.AgentMCPServer) (*m
 			MultiRoundTrip: &mcp.MultiRoundTripOptions{Disabled: true},
 		},
 	)
-	connectCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	connectCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	session, err := client.Connect(connectCtx, transport, nil)
 	if err != nil {

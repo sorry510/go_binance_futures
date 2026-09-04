@@ -21,6 +21,27 @@ func NewORMStore() *ORMStore {
 	return &ORMStore{}
 }
 
+func (store *ORMStore) Create(ctx context.Context, item *Task) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if item == nil || strings.TrimSpace(item.ID) == "" {
+		return fmt.Errorf("task store requires a task id")
+	}
+	o := store.orm()
+	row := toModel(item)
+	if _, err := o.Insert(&row); err != nil {
+		return fmt.Errorf("insert agent task: %w", err)
+	}
+	for index, event := range item.Events {
+		eventRow := toEventModel(event, index+1)
+		if _, err := o.Insert(&eventRow); err != nil {
+			return fmt.Errorf("insert agent task event: %w", err)
+		}
+	}
+	return nil
+}
+
 func (store *ORMStore) Save(ctx context.Context, item *Task) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -137,11 +158,19 @@ func (store *ORMStore) SaveCheckpoint(ctx context.Context, taskID string, checkp
 	if taskID == "" {
 		return fmt.Errorf("task id is required")
 	}
-	count, err := store.orm().QueryTable(new(models.AgentTask)).Filter("id", taskID).Update(orm.Params{"CheckpointJSON": sanitizePayload(checkpoint)})
+	o := store.orm()
+	count, err := o.QueryTable(new(models.AgentTask)).Filter("id", taskID).Update(orm.Params{"CheckpointJSON": sanitizePayload(checkpoint)})
 	if err != nil {
 		return fmt.Errorf("save agent task checkpoint: %w", err)
 	}
-	if count == 0 {
+	if count > 0 {
+		return nil
+	}
+	// MySQL reports changed rows by default. Updating a checkpoint with the same
+	// value can therefore return 0 even when the task row exists. Treat that as
+	// an idempotent success and only return not-found after an existence check.
+	exists := o.QueryTable(new(models.AgentTask)).Filter("id", taskID).Exist()
+	if !exists {
 		return fmt.Errorf("task %q not found", taskID)
 	}
 	return nil
@@ -173,6 +202,9 @@ func (store *ORMStore) orm() orm.Ormer {
 }
 
 func (store *ORMStore) appendMissingEvents(o orm.Ormer, item *Task) error {
+	if len(item.Events) == 0 {
+		return nil
+	}
 	count, err := o.QueryTable(new(models.AgentTaskEvent)).Filter("task_id", item.ID).Count()
 	if err != nil {
 		return fmt.Errorf("count agent task events: %w", err)

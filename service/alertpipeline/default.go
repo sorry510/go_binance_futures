@@ -48,7 +48,7 @@ func StartDefault(ctx context.Context, provider ConfigProvider) error {
 			Notify: func(params notify.AgentAlertParams) (int64, error) {
 				return notify.GetNotifyChannel().AgentAlert(params)
 			},
-			QueueSize: 512, Workers: 4,
+			QueueSize: 512, Workers: 4, TraceStore: ORMTraceStore{},
 		})
 		if err != nil {
 			defaultErr = err

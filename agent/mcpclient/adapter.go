@@ -45,7 +45,13 @@ func (tool *RemoteTool) Execute(ctx context.Context, arguments json.RawMessage) 
 	if tool.server.Enabled != 1 || tool.tool.Enabled != 1 || tool.tool.Status != ToolGranted {
 		return nil, fmt.Errorf("MCP tool %q is not granted", tool.tool.CanonicalName)
 	}
-	return tool.gateway.CallTool(ctx, tool.server.ID, tool.tool.RemoteName, arguments)
+	call := func(attemptCtx context.Context) (any, error) {
+		return tool.gateway.CallTool(attemptCtx, tool.server.ID, tool.tool.RemoteName, arguments)
+	}
+	if tool.tool.Risk == string(permission.RiskRead) && tool.tool.Idempotent {
+		return withMCPReadRetry(ctx, call)
+	}
+	return call(ctx)
 }
 
 func (tool *RemoteTool) RestoreCheckpoint(raw json.RawMessage) (any, error) {

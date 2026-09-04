@@ -49,7 +49,7 @@ func StartDefaultScheduler(ctx context.Context, provider SchedulerConfigProvider
 					}
 					return time.Duration(minutes) * time.Minute
 				},
-				Timeout:           3 * time.Minute,
+				Timeout:           5 * time.Minute,
 				ConcurrencyPolicy: scheduler.SkipIfRunning,
 				BuildInput: func(buildCtx context.Context) (string, error) {
 					symbols, err := marketservice.LoadRegimeSymbols(buildCtx)

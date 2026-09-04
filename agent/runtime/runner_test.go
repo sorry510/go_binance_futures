@@ -134,7 +134,6 @@ func TestRunnerRejectsUnavailableOrUnauthorizedTools(t *testing.T) {
 		want       string
 	}{
 		{name: "not allowed", allowed: nil, registered: []tools.Tool{tools.Func{ToolName: "echo", ToolRisk: permission.RiskRead, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) { return nil, nil }}}, want: "does not allow"},
-		{name: "not registered", allowed: []string{"echo"}, want: "not registered"},
 		{name: "risk denied", allowed: []string{"trade"}, registered: []tools.Tool{tools.Func{ToolName: "trade", ToolRisk: permission.RiskTrade, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) { return nil, nil }}}, want: "globally disabled"},
 	}
 	for _, testCase := range cases {
@@ -983,5 +982,31 @@ func TestRunnerDynamicToolAllowlistAndExternalContext(t *testing.T) {
 	}
 	if !found {
 		t.Fatalf("external MCP context missing from first request: %+v", first.Messages)
+	}
+}
+
+func TestRunnerRepairsUnknownToolNameWithoutConsumingToolBudget(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Content: `{"action":"tool","tool":"totally_unknown_news_tool","arguments":{}}`}},
+		{response: &llm.Response{Content: `{"action":"tool","tool":"mcp.coingecko-free.get-crypto-news","arguments":{}}`}},
+		{response: &llm.Response{Content: `{"action":"final","result":{"ok":true}}`}},
+	}}
+	var calls atomic.Int32
+	news := tools.Func{ToolName: "mcp.coingecko-free.get-crypto-news", ToolRisk: permission.RiskRead, ExecuteFunc: func(context.Context, json.RawMessage) (any, error) {
+		calls.Add(1)
+		return map[string]any{"ok": true}, nil
+	}}
+	runner, _ := newTestRunner(t, client, skill.Definition{SkillName: "test", AllowedTools: []string{news.Name()}, Rounds: 4}, news)
+	result, err := runner.Run(context.Background(), Request{Skill: "test", Input: "news"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result == nil || calls.Load() != 1 {
+		t.Fatalf("result=%+v calls=%d", result, calls.Load())
+	}
+	second := client.request(1)
+	last := second.Messages[len(second.Messages)-1].Content
+	if !strings.Contains(last, "AGENT_FEEDBACK") || !strings.Contains(last, news.Name()) || !strings.Contains(last, "exact allowed tool name") {
+		t.Fatalf("missing exact tool-name repair feedback: %s", last)
 	}
 }

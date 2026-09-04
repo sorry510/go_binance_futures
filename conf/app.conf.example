@@ -30,6 +30,14 @@ password = ""
 host= ""
 port= ""
 dbname = ""
+# 远程 MySQL 连接稳定性与连接池
+connect_timeout_seconds = 5
+read_timeout_seconds = 30
+write_timeout_seconds = 30
+max_open_conns = 30
+max_idle_conns = 10
+conn_max_lifetime_seconds = 300
+conn_max_idle_time_seconds = 60
 
 # sqlite
 # driver = "sqlite"
