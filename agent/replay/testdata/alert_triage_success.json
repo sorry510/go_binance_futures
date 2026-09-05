@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "name": "alert-triage-success",
+  "skill": "alert_triage",
+  "model_config_id": 201,
+  "input": "{\"version\":\"alert_triage_input_v1\",\"window_start\":1779999900000,\"window_end\":1780000000000,\"candidates\":[{\"candidate_id\":\"inc_a\",\"window_start\":1779999900000,\"window_end\":1780000000000,\"symbols\":[\"AAAUSDT\"],\"signals\":[{\"signal_id\":\"sig1\",\"symbol\":\"AAAUSDT\",\"type\":\"fast_move\",\"severity\":\"high\",\"created_at\":1779999950000},{\"signal_id\":\"sig2\",\"symbol\":\"AAAUSDT\",\"type\":\"liquidation_spike\",\"severity\":\"high\",\"created_at\":1779999960000}]}]}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\":\"final\",\"summary\":\"ok\",\"result\":{\"version\":\"incident_set_v1\",\"as_of\":\"2026-09-05T12:00:00Z\",\"incidents\":[{\"incident_id\":\"incident-1\",\"signal_ids\":[\"sig1\",\"sig2\"],\"symbols\":[\"AAAUSDT\"],\"severity\":\"high\",\"action\":\"notify\",\"summary\":\"same volatility event\",\"rationale\":\"same symbol and time window\"}]}}"
+    }
+  ]
+}

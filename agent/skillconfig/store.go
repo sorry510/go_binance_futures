@@ -20,11 +20,27 @@ type CreateInput struct {
 	DisplayName string `json:"display_name"`
 	Description string `json:"description"`
 	Enabled     int    `json:"enabled"`
+	ChatEnabled int    `json:"chat_enabled"`
 }
 type UpdateInput struct {
 	DisplayName string `json:"display_name"`
 	Description string `json:"description"`
 	Enabled     int    `json:"enabled"`
+	ChatEnabled int    `json:"chat_enabled"`
+}
+
+type ListOptions struct {
+	Type    string
+	Keyword string
+	Page    int
+	Limit   int
+}
+
+type ListResult struct {
+	Page  int                 `json:"page"`
+	Limit int                 `json:"limit"`
+	Total int                 `json:"total"`
+	List  []models.AgentSkill `json:"list"`
 }
 
 func (store Store) ormer() orm.Ormer {
@@ -34,9 +50,9 @@ func (store Store) ormer() orm.Ormer {
 	return orm.NewOrm()
 }
 
-func validateEnabled(enabled int) error {
-	if enabled != 0 && enabled != 1 {
-		return fmt.Errorf("enabled must be 0 or 1")
+func validateToggle(name string, value int) error {
+	if value != 0 && value != 1 {
+		return fmt.Errorf("%s must be 0 or 1", name)
 	}
 	return nil
 }
@@ -47,6 +63,47 @@ func (store Store) List(ctx context.Context) ([]models.AgentSkill, error) {
 	items := make([]models.AgentSkill, 0)
 	_, err := store.ormer().QueryTable(new(models.AgentSkill)).Filter("Deleted", 0).OrderBy("id").All(&items)
 	return items, err
+}
+
+func (store Store) ListPage(ctx context.Context, options ListOptions) (ListResult, error) {
+	items, err := store.List(ctx)
+	if err != nil {
+		return ListResult{}, err
+	}
+	kind := strings.ToLower(strings.TrimSpace(options.Type))
+	keyword := strings.ToLower(strings.TrimSpace(options.Keyword))
+	filtered := make([]models.AgentSkill, 0, len(items))
+	for _, item := range items {
+		if kind != "" && strings.ToLower(strings.TrimSpace(item.Type)) != kind {
+			continue
+		}
+		if keyword != "" {
+			haystack := strings.ToLower(strings.Join([]string{item.Name, item.DisplayName, item.Description}, "\n"))
+			if !strings.Contains(haystack, keyword) {
+				continue
+			}
+		}
+		filtered = append(filtered, item)
+	}
+	page, limit := options.Page, options.Limit
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	start := (page - 1) * limit
+	if start > len(filtered) {
+		start = len(filtered)
+	}
+	end := start + limit
+	if end > len(filtered) {
+		end = len(filtered)
+	}
+	return ListResult{Page: page, Limit: limit, Total: len(filtered), List: filtered[start:end]}, nil
 }
 
 func (store Store) GetByName(ctx context.Context, name string) (*models.AgentSkill, error) {
@@ -71,7 +128,10 @@ func (store Store) Create(ctx context.Context, input CreateInput) (*models.Agent
 	if input.Name == "" {
 		return nil, fmt.Errorf("skill name is required")
 	}
-	if err := validateEnabled(input.Enabled); err != nil {
+	if err := validateToggle("enabled", input.Enabled); err != nil {
+		return nil, err
+	}
+	if err := validateToggle("chat_enabled", input.ChatEnabled); err != nil {
 		return nil, err
 	}
 	now := time.Now().UnixMilli()
@@ -79,13 +139,13 @@ func (store Store) Create(ctx context.Context, input CreateInput) (*models.Agent
 	existing := &models.AgentSkill{Name: input.Name}
 	if err := o.Read(existing, "Name"); err == nil && existing.Deleted == 1 {
 		existing.DisplayName, existing.Description, existing.Enabled = input.DisplayName, strings.TrimSpace(input.Description), input.Enabled
-		existing.Deleted, existing.UpdatedAt = 0, now
-		_, err = o.Update(existing, "DisplayName", "Description", "Enabled", "Deleted", "UpdatedAt")
+		existing.ChatEnabled, existing.Deleted, existing.UpdatedAt = input.ChatEnabled, 0, now
+		_, err = o.Update(existing, "DisplayName", "Description", "Enabled", "ChatEnabled", "Deleted", "UpdatedAt")
 		return existing, err
 	}
 	item := &models.AgentSkill{
 		Name: input.Name, DisplayName: input.DisplayName, Description: strings.TrimSpace(input.Description),
-		Type: "native", Enabled: input.Enabled, CreatedAt: now, UpdatedAt: now,
+		Type: "native", Enabled: input.Enabled, ChatEnabled: input.ChatEnabled, CreatedAt: now, UpdatedAt: now,
 	}
 	id, err := o.Insert(item)
 	if err != nil {
@@ -98,7 +158,10 @@ func (store Store) Update(ctx context.Context, id int64, input UpdateInput) (*mo
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	if err := validateEnabled(input.Enabled); err != nil {
+	if err := validateToggle("enabled", input.Enabled); err != nil {
+		return nil, err
+	}
+	if err := validateToggle("chat_enabled", input.ChatEnabled); err != nil {
 		return nil, err
 	}
 	item := &models.AgentSkill{ID: id}
@@ -109,8 +172,9 @@ func (store Store) Update(ctx context.Context, id int64, input UpdateInput) (*mo
 	item.DisplayName = strings.TrimSpace(input.DisplayName)
 	item.Description = strings.TrimSpace(input.Description)
 	item.Enabled = input.Enabled
+	item.ChatEnabled = input.ChatEnabled
 	item.UpdatedAt = time.Now().UnixMilli()
-	_, err := o.Update(item, "DisplayName", "Description", "Enabled", "UpdatedAt")
+	_, err := o.Update(item, "DisplayName", "Description", "Enabled", "ChatEnabled", "UpdatedAt")
 	return item, err
 }
 
@@ -139,9 +203,17 @@ func (store Store) EnsureDefaults(ctx context.Context, defaults []CreateInput) e
 			if existing.Type != "" && existing.Type != "native" {
 				return fmt.Errorf("default native skill %s conflicts with %s skill", input.Name, existing.Type)
 			}
+			fields := make([]string, 0, 2)
 			if existing.Type == "" {
 				existing.Type = "native"
-				_, err = o.Update(&existing, "Type")
+				fields = append(fields, "Type")
+			}
+			if existing.ChatEnabled != 0 && existing.ChatEnabled != 1 {
+				existing.ChatEnabled = input.ChatEnabled
+				fields = append(fields, "ChatEnabled")
+			}
+			if len(fields) > 0 {
+				_, err = o.Update(&existing, fields...)
 			}
 			if err != nil {
 				return err

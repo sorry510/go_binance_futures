@@ -35,6 +35,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.StrategyTemplates),
 		new(models.Symbols),
 		new(models.SpotSymbols),
+		new(models.AgentSkill),
 	)
 
 	if err := SyncDatabase(1); err != nil {
@@ -47,8 +48,34 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if config.Version != 1 {
 		t.Fatalf("expected database version 1, got %d", config.Version)
 	}
+	o := orm.NewOrm()
+	for _, item := range []*models.AgentSkill{
+		{Name: "symbol_analysis", DisplayName: "Symbol", Type: "native", Enabled: 1, ChatEnabled: -1},
+		{Name: "alert_analysis", DisplayName: "Alert", Type: "native", Enabled: 1, ChatEnabled: -1},
+		{Name: "portable_demo", DisplayName: "Portable", Type: "portable", Enabled: 1, ChatEnabled: -1},
+	} {
+		if _, err := o.Insert(item); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := SyncDatabase(2); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 2 {
+		t.Fatalf("expected database version 2 after chat migration, config=%+v err=%v", config, err)
+	}
+	for name, want := range map[string]int{"symbol_analysis": 1, "alert_analysis": 0, "portable_demo": 1} {
+		var got int
+		if err := o.Raw("SELECT chat_enabled FROM agent_skills WHERE name = ?", name).QueryRow(&got); err != nil {
+			t.Fatal(err)
+		}
+		if got != want {
+			t.Fatalf("chat_enabled for %s = %d, want %d", name, got, want)
+		}
+	}
 
-	if err := SyncDatabase(1); err != nil {
-		t.Fatalf("second sync should be idempotent: %v", err)
+	if err := SyncDatabase(2); err != nil {
+		t.Fatalf("second version-2 sync should be idempotent: %v", err)
 	}
 }

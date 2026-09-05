@@ -22,8 +22,9 @@ const Name = "symbol_analysis"
 var chatSymbolPattern = regexp.MustCompile(`(?i)([A-Z0-9]{2,20}USDT)\b`)
 
 type Input struct {
-	Symbol string `json:"symbol"`
+	Symbol string `json:"symbol,omitempty"`
 	Prompt string `json:"prompt,omitempty"`
+	Chat   bool   `json:"chat,omitempty"`
 }
 
 type PriceZone struct {
@@ -74,26 +75,39 @@ func (*Definition) ModelRequirements() llm.ModelRequirements {
 }
 func (*Definition) MaxRounds() int { return 15 }
 
-func (*Definition) ChatEnabled() bool { return true }
+func (*Definition) ChatEnabled() bool           { return true }
+func (*Definition) PlainTextFinalAllowed() bool { return true }
 
 func (*Definition) BuildChatInput(ctx context.Context, content string) (string, error) {
-	return buildChatInput(ctx, content, nil)
+	return buildChatInput(ctx, content, nil, "")
 }
 
 func (*Definition) BuildChatInputWithContext(ctx context.Context, content string, previousInputs []string) (string, error) {
-	return buildChatInput(ctx, content, previousInputs)
+	return buildChatInput(ctx, content, previousInputs, "")
 }
 
-func buildChatInput(ctx context.Context, content string, previousInputs []string) (string, error) {
+func (*Definition) BuildChatInputWithOptions(ctx context.Context, content string, previousInputs []string, options skill.ChatInputOptions) (string, error) {
+	return buildChatInput(ctx, content, previousInputs, options.Symbol)
+}
+
+func buildChatInput(ctx context.Context, content string, previousInputs []string, explicitSymbol string) (string, error) {
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
 	content = strings.TrimSpace(content)
-	symbol := ""
-	if match := chatSymbolPattern.FindStringSubmatch(content); len(match) >= 2 {
-		symbol = strings.ToUpper(match[1])
+	if content == "" {
+		return "", fmt.Errorf("chat content is required")
+	}
+	symbol := strings.ToUpper(strings.TrimSpace(explicitSymbol))
+	if symbol != "" && !strings.HasSuffix(symbol, "USDT") {
+		return "", fmt.Errorf("selected symbol must be a USDT futures contract")
 	}
 	if symbol == "" {
+		if match := chatSymbolPattern.FindStringSubmatch(content); len(match) >= 2 {
+			symbol = strings.ToUpper(match[1])
+		}
+	}
+	if symbol == "" && !strings.Contains(strings.ToUpper(content), "USDT") && shouldReusePreviousSymbol(content) {
 		for _, previous := range previousInputs {
 			var input Input
 			if json.Unmarshal([]byte(previous), &input) == nil {
@@ -105,17 +119,28 @@ func buildChatInput(ctx context.Context, content string, previousInputs []string
 			}
 		}
 	}
-	if symbol == "" {
-		return "", fmt.Errorf("请在消息中明确指定 USDT 合约，例如 BTCUSDT")
-	}
-	raw, err := json.Marshal(Input{Symbol: symbol, Prompt: content})
+	raw, err := json.Marshal(Input{Symbol: symbol, Prompt: content, Chat: true})
 	if err != nil {
 		return "", err
 	}
 	return string(raw), nil
 }
 
-func (*Definition) RequiredTools(skill.Request) []string {
+func shouldReusePreviousSymbol(content string) bool {
+	normalized := strings.ToLower(strings.TrimSpace(content))
+	for _, marker := range []string{"刚才", "之前", "上面", "这个币", "该币", "它", "继续", "刚刚", "previous", "above", "this coin", "continue"} {
+		if strings.Contains(normalized, marker) {
+			return true
+		}
+	}
+	return false
+}
+
+func (*Definition) RequiredTools(req skill.Request) []string {
+	input, err := decodeInput(req.Input)
+	if err == nil && input.Chat && input.Symbol == "" {
+		return nil
+	}
 	return []string{"get_symbol_analysis_context"}
 }
 
@@ -133,6 +158,10 @@ func (*Definition) BuildInput(ctx context.Context, req skill.Request) ([]llm.Mes
 		return nil, err
 	}
 	focus := strings.TrimSpace(input.Prompt)
+	if input.Chat && input.Symbol == "" {
+		content := "[CHAT_MODE_NO_SYMBOL]\nUser message: " + focus + "\nNo exact Binance USDT contract symbol was resolved deterministically. Treat this as a normal conversation under the symbol-analysis skill. Do not invent a ticker or market data, and do not call symbol market-data tools without an exact valid symbol. If the user is not asking for a specific coin analysis, answer naturally."
+		return []llm.Message{{Role: llm.RoleUser, Content: content}}, nil
+	}
 	if focus == "" {
 		focus = "分析当前是否适合交易，并给出结构化交易计划"
 	}
@@ -151,6 +180,9 @@ func (*Definition) ValidatorFor(req skill.Request) validator.FinalValidator {
 	if err != nil {
 		return validator.Func(func(context.Context, json.RawMessage) (any, error) { return nil, err })
 	}
+	if input.Chat && input.Symbol == "" {
+		return chatTextValidator()
+	}
 	return validator.Func(func(ctx context.Context, raw json.RawMessage) (any, error) {
 		return validatePlan(ctx, raw, input.Symbol)
 	})
@@ -160,6 +192,9 @@ func (*Definition) ValidatorForRun(req skill.Request, toolResults map[string]any
 	input, err := decodeInput(req.Input)
 	if err != nil {
 		return validator.Func(func(context.Context, json.RawMessage) (any, error) { return nil, err })
+	}
+	if input.Chat && input.Symbol == "" {
+		return chatTextValidator()
 	}
 	contextValue, ok := toolResults["get_symbol_analysis_context"]
 	if !ok {
@@ -196,12 +231,19 @@ func (*Definition) ValidatorForRun(req skill.Request, toolResults map[string]any
 
 func (definition *Definition) ValidatorForRunWithEvidence(req skill.Request, toolResults map[string]any, evidence map[string]contextengine.Evidence) validator.FinalValidator {
 	base := definition.ValidatorForRun(req, toolResults)
+	input, err := decodeInput(req.Input)
+	if err == nil && input.Chat && input.Symbol == "" {
+		return base
+	}
 	return validator.Func(func(ctx context.Context, raw json.RawMessage) (any, error) {
 		value, err := base.Validate(ctx, raw)
 		if err != nil {
 			return nil, err
 		}
-		result := value.(TradingPlanV1)
+		result, ok := value.(TradingPlanV1)
+		if !ok {
+			return nil, fmt.Errorf("unexpected symbol analysis result type %T", value)
+		}
 		if err := validateStructuredEvidenceSources(result.Evidence, evidence); err != nil {
 			return nil, err
 		}
@@ -220,10 +262,37 @@ func decodeInput(raw string) (Input, error) {
 		return Input{}, err
 	}
 	input.Symbol = strings.ToUpper(strings.TrimSpace(input.Symbol))
+	input.Prompt = strings.TrimSpace(input.Prompt)
+	if input.Chat {
+		if input.Prompt == "" {
+			return Input{}, fmt.Errorf("chat prompt is required")
+		}
+		if input.Symbol != "" && !strings.HasSuffix(input.Symbol, "USDT") {
+			return Input{}, fmt.Errorf("symbol must be a USDT futures contract when provided")
+		}
+		return input, nil
+	}
 	if input.Symbol == "" || !strings.HasSuffix(input.Symbol, "USDT") {
 		return Input{}, fmt.Errorf("symbol must be a USDT futures contract")
 	}
 	return input, nil
+}
+
+func chatTextValidator() validator.FinalValidator {
+	return validator.Func(func(ctx context.Context, raw json.RawMessage) (any, error) {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		var text string
+		if err := json.Unmarshal(raw, &text); err != nil {
+			return nil, fmt.Errorf("chat result must be a JSON string: %w", err)
+		}
+		text = strings.TrimSpace(text)
+		if text == "" {
+			return nil, fmt.Errorf("chat result must not be empty")
+		}
+		return text, nil
+	})
 }
 func validatePlan(ctx context.Context, raw json.RawMessage, expectedSymbol string) (any, error) {
 	if err := ctx.Err(); err != nil {

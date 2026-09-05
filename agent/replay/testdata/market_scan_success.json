@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "name": "market-scan-success",
+  "skill": "market_scan",
+  "model_config_id": 201,
+  "input": "{\"version\":\"market_scan_input_v1\",\"generated_at\":1780000000000,\"market_condition\":3,\"candidates\":[{\"rank\":1,\"symbol\":\"AAAUSDT\",\"score\":88,\"grade\":\"A\",\"price\":1,\"percent_change_24h\":5,\"quote_volume_24h\":100000000,\"trade_count_24h\":1000,\"high_24h\":1.1,\"low_24h\":0.9,\"open_24h\":0.95,\"center_offset_pct\":2,\"upper_wick_ratio\":0.1,\"retrace_from_high_pct\":3,\"local_momentum_pct\":1,\"not_chase\":true,\"reasons\":[\"liquid\"],\"risks\":[\"volatility\"],\"missing\":[],\"last_update_time\":1780000000000}],\"data_missing\":[]}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\":\"final\",\"summary\":\"ok\",\"result\":{\"version\":\"opportunity_set_v1\",\"as_of\":\"2026-09-05T12:00:00Z\",\"market_condition\":3,\"opportunities\":[{\"rank\":1,\"symbol\":\"AAAUSDT\",\"score\":90,\"direction\":\"watch\",\"confidence\":0.7,\"thesis\":\"liquid candidate\",\"risks\":[\"volatility\"],\"evidence\":[\"scanner rank 1\"]}],\"data_missing\":[]}}"
+    }
+  ]
+}

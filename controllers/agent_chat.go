@@ -19,6 +19,7 @@ type AgentChatController struct {
 type agentChatMessageRequest struct {
 	Skill   string `json:"skill"`
 	Content string `json:"content"`
+	Symbol  string `json:"symbol,omitempty"`
 }
 
 func (ctrl *AgentChatController) ListConversations() {
@@ -112,7 +113,7 @@ func (ctrl *AgentChatController) SendMessage() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "请求格式错误: "+err.Error()))
 		return
 	}
-	item, err := agentapp.StartChatMessage(ctrl.Ctx.Request.Context(), id, request.Skill, request.Content)
+	item, err := agentapp.StartChatMessage(ctrl.Ctx.Request.Context(), id, request.Skill, request.Content, request.Symbol)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return

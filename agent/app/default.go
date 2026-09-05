@@ -14,6 +14,7 @@ import (
 	alertanalysis "go_binance_futures/agent/skills/alertanalysis"
 	marketregime "go_binance_futures/agent/skills/marketregime"
 	symbolanalysis "go_binance_futures/agent/skills/symbolanalysis"
+	workflowSkills "go_binance_futures/agent/skills/workflows"
 	"go_binance_futures/agent/task"
 	agenttools "go_binance_futures/agent/tools"
 	domaintools "go_binance_futures/agent/tools/domain"
@@ -28,7 +29,7 @@ var defaultManagerErr error
 func DefaultManager() (*agentmanager.Manager, error) {
 	defaultManagerOnce.Do(func() {
 		skills := skill.NewRegistry()
-		for _, definition := range []skill.Skill{symbolanalysis.New(), alertanalysis.New(), marketregime.New()} {
+		for _, definition := range []skill.Skill{symbolanalysis.New(), alertanalysis.New(), marketregime.New(), newWorkflowChatSkill(workflowSkills.MarketScan()), newWorkflowChatSkill(workflowSkills.StrategyReview()), workflowSkills.StrategyExperimentPropose(), workflowSkills.StrategyExperimentSummary(), workflowSkills.AlertTriage(), newWorkflowChatSkill(workflowSkills.DailyMarketBrief())} {
 			if err := skills.Register(definition); err != nil {
 				defaultManagerErr = err
 				return

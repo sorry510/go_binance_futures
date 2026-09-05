@@ -11,6 +11,7 @@ import (
 
 	agentruntime "go_binance_futures/agent/runtime"
 	alertanalysis "go_binance_futures/agent/skills/alertanalysis"
+	workflowSkills "go_binance_futures/agent/skills/workflows"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/notify"
 	signalservice "go_binance_futures/service/signal"
@@ -30,6 +31,7 @@ func newPipelineTestHarness() *pipelineTestHarness {
 	settings.AIEnabled = false
 	settings.MinSeverity = signalservice.SeverityMedium
 	settings.Cooldown = time.Hour
+	settings.TriageWindow = 5 * time.Millisecond
 	return &pipelineTestHarness{settings: settings, tasks: map[string]*task.Task{}}
 }
 func (h *pipelineTestHarness) newPipeline(t *testing.T) *Pipeline {
@@ -180,7 +182,7 @@ func TestPipelineAIStartFailureFallsBack(t *testing.T) {
 	defer cancel()
 	pipeline.Start(ctx)
 	pipeline.Emit(testSignal("failure"))
-	waitFor(t, func() bool { return pipeline.Stats().AIFallbacks == 1 })
+	waitFor(t, func() bool { return pipeline.Stats().Notifications == 1 })
 	stats := pipeline.Stats()
 	if len(h.notifications) != 1 || !h.notifications[0].Fallback {
 		t.Fatalf("AI failure did not fallback: %+v", h.notifications)
@@ -199,8 +201,65 @@ func TestPipelineFailedAITaskFallsBack(t *testing.T) {
 	defer cancel()
 	pipeline.Start(ctx)
 	pipeline.Emit(testSignal("task-failure"))
-	waitFor(t, func() bool { return pipeline.Stats().AIFallbacks == 1 })
+	waitFor(t, func() bool { return pipeline.Stats().Notifications == 1 })
 	if len(h.notifications) != 1 || !h.notifications[0].Fallback || h.notifications[0].TaskID != "task-test" {
 		t.Fatalf("failed AI task did not fallback: %+v", h.notifications)
+	}
+}
+
+func testLiquidationSignal(id string) signalservice.Signal {
+	value := signalservice.NewSignal("evt-"+id, "BTCUSDT", signalservice.TypeLiquidationSpike, signalservice.SeverityHigh, "1m")
+	value.SignalID = "sig-" + id
+	value.Metrics["aggregate_notional"] = 8_000_000
+	value.Metrics["order_count"] = 4
+	value.Metrics["threshold_notional"] = 5_000_000
+	value.Labels["liquidation_side"] = "long"
+	return value
+}
+
+func TestPipelineAIEnabledCoalescesCrossTypeSignalsIntoOneIncidentNotification(t *testing.T) {
+	h := newPipelineTestHarness()
+	h.settings.AIEnabled = true
+	result := workflowSkills.IncidentSetV1{
+		Version: "incident_set_v1", AsOf: time.Now().UTC().Format(time.RFC3339),
+		Incidents: []workflowSkills.Incident{{
+			IncidentID: "incident-btc-1", SignalIDs: []string{"sig-fast", "sig-liquidation"}, Symbols: []string{"BTCUSDT"},
+			Severity: "high", Action: "notify", Summary: "同一轮 BTC 波动与强平事件", Rationale: "同一交易对且时间高度重叠",
+		}},
+	}
+	raw, _ := json.Marshal(result)
+	h.tasks["task-test"] = &task.Task{ID: "task-test", Skill: workflowSkills.AlertTriageName, Status: task.StatusSucceeded, Result: raw}
+	pipeline := h.newPipeline(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	pipeline.Start(ctx)
+	pipeline.Emit(testSignal("fast"))
+	pipeline.Emit(testLiquidationSignal("liquidation"))
+	waitFor(t, func() bool { return pipeline.Stats().Notifications == 1 })
+	stats := pipeline.Stats()
+	if len(h.notifications) != 1 || h.notifications[0].SignalID != "incident-btc-1" || h.notifications[0].Fallback {
+		t.Fatalf("signals were not coalesced into one incident notification: %+v", h.notifications)
+	}
+	if stats.TriageBatches != 1 || stats.TriageSignals != 2 || stats.TriageTasksStarted != 1 || stats.AITasksStarted != 1 {
+		t.Fatalf("unexpected triage stats: %+v", stats)
+	}
+}
+
+func TestPipelineAIDisabledKeepsDeterministicPerSignalFallback(t *testing.T) {
+	h := newPipelineTestHarness()
+	h.settings.AIEnabled = false
+	pipeline := h.newPipeline(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	pipeline.Start(ctx)
+	pipeline.Emit(testSignal("fast-off"))
+	pipeline.Emit(testLiquidationSignal("liquidation-off"))
+	waitFor(t, func() bool { return pipeline.Stats().Notifications == 2 })
+	stats := pipeline.Stats()
+	if len(h.notifications) != 2 || !h.notifications[0].Fallback || !h.notifications[1].Fallback {
+		t.Fatalf("AI-disabled deterministic fallback changed unexpectedly: %+v", h.notifications)
+	}
+	if stats.TriageBatches != 0 || stats.TriageTasksStarted != 0 {
+		t.Fatalf("AI-disabled signals unexpectedly entered triage: %+v", stats)
 	}
 }
