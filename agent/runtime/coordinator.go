@@ -153,6 +153,18 @@ func (coordinator *coordinator) buildContext(ctx context.Context, session *runSe
 			state.appendContextBlock(block)
 		}
 	}
+	memoryCount := 0
+	if coordinator.runner.cfg.MemoryContextProvider != nil {
+		memoryBlocks, memoryErr := coordinator.runner.cfg.MemoryContextProvider(ctx, session.selectedSkill.Name(), session.skillRequest)
+		if memoryErr != nil {
+			coordinator.runner.audit(currentTask, "memory_read", "error", "long-term memory unavailable: "+memoryErr.Error())
+		} else {
+			for _, block := range memoryBlocks {
+				state.appendContextBlock(block)
+			}
+			memoryCount = len(memoryBlocks)
+		}
+	}
 	for _, block := range contextengine.InitialMessageBlocks(messages) {
 		state.appendContextBlock(block)
 	}
@@ -187,7 +199,7 @@ func (coordinator *coordinator) buildContext(ctx context.Context, session *runSe
 		}
 		resourceCount += len(resources)
 	}
-	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages, %d resources", len(messages), resourceCount), "", nil)
+	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages, %d memories, %d resources", len(messages), memoryCount, resourceCount), "", nil)
 	if err := coordinator.runner.saveCheckpoint(ctx, currentTask, state, stepID, 1); err != nil {
 		return coordinator.runner.fail(currentTask, "checkpoint_failed", err)
 	}

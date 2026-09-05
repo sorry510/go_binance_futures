@@ -113,6 +113,20 @@ func (runner *DefaultRunner) recordTool(item *task.Task, stage string, progress 
 	}
 }
 
+func (runner *DefaultRunner) audit(item *task.Task, stage, status, message string) {
+	if item == nil {
+		return
+	}
+	now := time.Now().UTC()
+	event := task.Event{TaskID: item.ID, Stage: stage, Progress: item.Progress, Round: item.Round, Message: message, Skill: item.Skill, Status: status, Time: now}
+	item.Events = append(item.Events, event)
+	item.UpdatedAt = now
+	_ = runner.cfg.Tasks.Save(context.Background(), item)
+	if runner.cfg.EventHook != nil {
+		runner.cfg.EventHook(event)
+	}
+}
+
 func (runner *DefaultRunner) succeed(item *task.Task, stage, message string) {
 	now := time.Now().UTC()
 	item.CompletedAt = &now

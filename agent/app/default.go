@@ -67,6 +67,8 @@ func DefaultManager() (*agentmanager.Manager, error) {
 				BudgetProvider:              RuntimeBudget,
 				ToolAllowlistProvider:       EffectiveToolAllowlist,
 				ContextResourceProvider:     MCPContextResources,
+				MemoryContextProvider:       MemoryContext,
+				MemoryWriter:                MemoryWrite,
 				ConversationHistoryProvider: ConversationHistory,
 				Observer:                    observability.Default(),
 				DefaultMaxRounds:            8,
