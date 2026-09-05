@@ -14,7 +14,7 @@ func init() {
 	web.Router("/update-market-condition", &controllers.IndexController{}, "post:UpdateMarketCondition")                          // 手动触发更新市场状态
 	web.Router("/update-market-condition/:taskId", &controllers.IndexController{}, "get:GetMarketConditionUpdateTask")            // 查询市场状态更新进度
 	web.Router("/agents/chat/conversations", &controllers.AgentChatController{}, "get:ListConversations;post:CreateConversation") // Chat 对话列表/新建
-	web.Router("/agents/chat/conversations/:id", &controllers.AgentChatController{}, "put:UpdateConversation")                    // Chat 对话标题更新
+	web.Router("/agents/chat/conversations/:id", &controllers.AgentChatController{}, "put:UpdateConversation;delete:DeleteConversation") // Chat 对话标题更新/删除
 	web.Router("/agents/chat/conversations/:id/messages", &controllers.AgentChatController{}, "get:Messages;post:SendMessage")    // Chat 消息/发送
 	web.Router("/agents/chat/skills", &controllers.AgentChatController{}, "get:Skills")                                           // Chat-capable Skill 列表
 	web.Router("/agents/tasks", &controllers.AgentController{}, "get:ListTasks;post:StartTask")                                   // 创建/查询统一 Agent 任务

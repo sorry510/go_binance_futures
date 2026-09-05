@@ -84,6 +84,55 @@ func (store *ORMStore) SetTitle(ctx context.Context, id, title string) error {
 	return err
 }
 
+func (store *ORMStore) DeleteChat(ctx context.Context, id string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	id = strings.TrimSpace(id)
+	if id == "" {
+		return fmt.Errorf("conversation id is required")
+	}
+	o := store.orm()
+	var row models.AgentConversation
+	if err := o.QueryTable(new(models.AgentConversation)).Filter("id", id).One(&row); err != nil {
+		if err == orm.ErrNoRows {
+			return fmt.Errorf("chat conversation %q not found", id)
+		}
+		return err
+	}
+	if row.Skill != ChatSkill {
+		return fmt.Errorf("conversation %q is not a chat conversation", id)
+	}
+	runningStatuses := []interface{}{
+		string(task.StatusQueued), string(task.StatusRunning), string(task.StatusWaitingLLM),
+		string(task.StatusWaitingTool), string(task.StatusValidating),
+	}
+	if o.QueryTable(new(models.AgentTask)).Filter("conversation_id", id).Filter("status__in", runningStatuses...).Exist() {
+		return fmt.Errorf("chat conversation has a running task")
+	}
+	tx, err := o.Begin()
+	if err != nil {
+		return fmt.Errorf("begin delete chat conversation transaction: %w", err)
+	}
+	if _, err := tx.QueryTable(new(models.AgentConversationMessage)).Filter("conversation_id", id).Delete(); err != nil {
+		_ = tx.Rollback()
+		return fmt.Errorf("delete chat conversation messages: %w", err)
+	}
+	deleted, err := tx.QueryTable(new(models.AgentConversation)).Filter("id", id).Filter("skill", ChatSkill).Delete()
+	if err != nil {
+		_ = tx.Rollback()
+		return fmt.Errorf("delete chat conversation: %w", err)
+	}
+	if deleted == 0 {
+		_ = tx.Rollback()
+		return fmt.Errorf("chat conversation %q not found", id)
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit delete chat conversation: %w", err)
+	}
+	return nil
+}
+
 func (store *ORMStore) SetTitleFromFirstMessage(ctx context.Context, id, content string) error {
 	conversation, err := store.Get(ctx, id)
 	if err != nil {
