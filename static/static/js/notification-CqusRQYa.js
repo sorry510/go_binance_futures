@@ -1,1 +1,0 @@
-import{aF as a,aG as i}from"./index-C2l1KACd.js";const r=(t={})=>a.get(i("notifications"),{params:t}),s=t=>a.request("put",i(`notifications/${t}/read`)),e=()=>a.request("put",i("notifications/read-all"));export{e as a,r as g,s as r};

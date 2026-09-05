@@ -79,15 +79,18 @@ func (s Store) Install(ctx context.Context, version models.AgentSkillVersion, re
 		if err == nil && skill.Deleted == 1 {
 			skill.Deleted = 0
 			skill.Enabled = 0
+			if skill.ChatEnabled != 0 && skill.ChatEnabled != 1 {
+				skill.ChatEnabled = 1
+			}
 			skill.UpdatedAt = now
-			if _, updateErr := tx.Update(&skill, "Deleted", "Enabled", "UpdatedAt"); updateErr != nil {
+			if _, updateErr := tx.Update(&skill, "Deleted", "Enabled", "ChatEnabled", "UpdatedAt"); updateErr != nil {
 				return updateErr
 			}
 		}
 		if err == orm.ErrNoRows {
 			skill = models.AgentSkill{
 				Name: version.Name, DisplayName: version.Name, Description: version.Description,
-				Type: SkillTypePortable, Enabled: 0, CreatedAt: now, UpdatedAt: now,
+				Type: SkillTypePortable, Enabled: 0, ChatEnabled: 1, CreatedAt: now, UpdatedAt: now,
 			}
 			id, insertErr := tx.Insert(&skill)
 			if insertErr != nil {

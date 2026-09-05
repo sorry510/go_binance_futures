@@ -1,0 +1,1 @@
+{"version":"agent_eval_v1","name":"v2-11-market_scan","skill":"market_scan","fixture":"../../../replay/testdata/market_scan_success.json","tags":["core","v2-11"],"expectations":{"status":"succeeded","output_contract":"opportunity_set_v1","required_facts":[{"path":"version","equals":"opportunity_set_v1","critical":true}],"max_repairs":1,"max_tokens":3000,"max_duration_ms":2000}}

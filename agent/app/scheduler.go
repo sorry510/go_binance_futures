@@ -10,9 +10,11 @@ import (
 	"go_binance_futures/agent/scheduler"
 	"go_binance_futures/agent/security"
 	marketregime "go_binance_futures/agent/skills/marketregime"
+	workflowSkills "go_binance_futures/agent/skills/workflows"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/models"
 	marketservice "go_binance_futures/service/market"
+	workflowservice "go_binance_futures/service/workflow"
 
 	"github.com/beego/beego/v2/core/logs"
 )
@@ -69,6 +71,23 @@ func StartDefaultScheduler(ctx context.Context, provider SchedulerConfigProvider
 				},
 				OnError: func(callbackCtx context.Context, err error) {
 					applyMarketRegimeFallback(callbackCtx, provider, err.Error())
+				},
+			},
+			{
+				Name:    "daily_market_brief",
+				Skill:   workflowSkills.DailyMarketBriefName,
+				Enabled: func() bool { return provider().AgentDailyMarketBriefScheduleEnable == 1 },
+				Interval: func() time.Duration {
+					minutes := provider().AgentDailyMarketBriefIntervalMin
+					if minutes <= 0 {
+						minutes = 1440
+					}
+					return time.Duration(minutes) * time.Minute
+				},
+				Timeout:           8 * time.Minute,
+				ConcurrencyPolicy: scheduler.SkipIfRunning,
+				BuildInput: func(buildCtx context.Context) (string, error) {
+					return workflowservice.BuildDailyMarketBriefInput(buildCtx, 24)
 				},
 			},
 		})

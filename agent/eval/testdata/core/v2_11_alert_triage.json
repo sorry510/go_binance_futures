@@ -1,0 +1,1 @@
+{"version":"agent_eval_v1","name":"v2-11-alert_triage","skill":"alert_triage","fixture":"../../../replay/testdata/alert_triage_success.json","tags":["core","v2-11"],"expectations":{"status":"succeeded","output_contract":"incident_set_v1","required_facts":[{"path":"version","equals":"incident_set_v1","critical":true}],"max_repairs":1,"max_tokens":3000,"max_duration_ms":2000}}

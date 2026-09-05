@@ -18,6 +18,8 @@ func init() {
 	web.Router("/agents/chat/conversations/:id/messages", &controllers.AgentChatController{}, "get:Messages;post:SendMessage")           // Chat 消息/发送
 	web.Router("/agents/chat/skills", &controllers.AgentChatController{}, "get:Skills")                                                  // Chat-capable Skill 列表
 	web.Router("/agents/tasks", &controllers.AgentController{}, "get:ListTasks;post:StartTask")                                          // 创建/查询统一 Agent 任务
+	web.Router("/agents/workflows", &controllers.AgentWorkflowController{}, "get:List;post:Start")                                       // V2-11 业务 Workflow
+	web.Router("/agents/workflows/:id", &controllers.AgentWorkflowController{}, "get:Get")                                               // Workflow 详情
 	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask")                                                   // 查询统一 Agent 任务
 	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                                        // 取消运行中的 Agent 任务
 	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                                        // 从安全 Checkpoint 恢复 Agent 任务
