@@ -43,14 +43,14 @@ func AdmitSkill(skillName string) error {
 func RuntimeBudget(_ string) agentruntime.Budget {
 	cfg, err := utils.GetSystemConfig()
 	if err != nil {
-		return agentruntime.Budget{MaxToolCalls: 12, MaxTotalTokens: 120000}
+		return agentruntime.Budget{MaxToolCalls: 12, MaxTotalTokens: 240000}
 	}
 	budget := agentruntime.Budget{MaxToolCalls: cfg.AgentMaxToolCallsPerTask, MaxTotalTokens: cfg.AgentMaxTokensPerTask}
 	if budget.MaxToolCalls <= 0 {
 		budget.MaxToolCalls = 12
 	}
 	if budget.MaxTotalTokens <= 0 {
-		budget.MaxTotalTokens = 120000
+		budget.MaxTotalTokens = 240000
 	}
 	return budget
 }

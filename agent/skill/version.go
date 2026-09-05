@@ -24,6 +24,10 @@ type VersionProvider interface {
 	VersionInfo() VersionInfo
 }
 
+type PackageHashProvider interface {
+	PackageHash() string
+}
+
 func ResolveVersionInfo(value Skill, prompt string) VersionInfo {
 	info := VersionInfo{
 		SkillVersion: "v1", PromptVersion: "v1",
@@ -39,6 +43,11 @@ func ResolveVersionInfo(value Skill, prompt string) VersionInfo {
 func PackageHash(value Skill, prompt string) string {
 	if value == nil {
 		return ""
+	}
+	if provider, ok := value.(PackageHashProvider); ok {
+		if hash := strings.TrimSpace(provider.PackageHash()); len(hash) == 64 {
+			return hash
+		}
 	}
 	info := ResolveVersionInfo(value, prompt)
 	tools := append([]string(nil), value.Tools()...)

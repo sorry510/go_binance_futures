@@ -5,3 +5,5 @@ db/coin.db-wal
 db/coin.db
 *.session.sql
 .vscode/
+/data/agent-skills/
+/data/agent-skill-imports/

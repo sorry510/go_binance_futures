@@ -44,6 +44,7 @@ var password, _ = config.String("database::password")
 var host, _ = config.String("database::host")
 var port, _ = config.String("database::port")
 var dbname, _ = config.String("database::dbname")
+var dbCollation, _ = config.String("database::collation")
 var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var tradeKey, _ = config.String("binance::api_key")
 var mcpServerEnable, _ = config.Bool("mcp::mcp_server_enable")
@@ -96,6 +97,8 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.AgentSkill))
+	orm.RegisterModel(new(models.AgentSkillVersion))
+	orm.RegisterModel(new(models.AgentSkillPermission))
 	orm.RegisterModel(new(models.AgentMCPServer))
 	orm.RegisterModel(new(models.AgentMCPTool))
 	orm.RegisterModel(new(models.AgentMCPResource))
@@ -120,8 +123,12 @@ func setDriver(d string) {
 		connectTimeout := databaseDuration("connect_timeout_seconds", 5*time.Second)
 		readTimeout := databaseDuration("read_timeout_seconds", 30*time.Second)
 		writeTimeout := databaseDuration("write_timeout_seconds", 30*time.Second)
+		collation := dbCollation
+		if collation == "" {
+			collation = "utf8mb4_unicode_ci" // MySQL 5.6+ compatible; utf8mb4_0900_ai_ci requires MySQL 8.0.
+		}
 		dsn := username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname +
-			"?charset=utf8mb4&collation=utf8mb4_0900_ai_ci&timeout=" + connectTimeout.String() +
+			"?charset=utf8mb4&collation=" + collation + "&timeout=" + connectTimeout.String() +
 			"&readTimeout=" + readTimeout.String() + "&writeTimeout=" + writeTimeout.String()
 		if err := orm.RegisterDataBase("default", "mysql", dsn); err != nil {
 			panic(fmt.Errorf("register mysql database: %w", err))

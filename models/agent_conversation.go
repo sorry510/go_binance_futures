@@ -3,6 +3,7 @@ package models
 type AgentConversation struct {
 	ID        string `orm:"column(id);pk;size(64)" json:"id"`
 	Skill     string `orm:"column(skill);size(64);index" json:"skill"`
+	Title     string `orm:"column(title);size(255);null" json:"title"`
 	Status    string `orm:"column(status);size(32);index" json:"status"`
 	CreatedAt int64  `orm:"column(created_at);index" json:"created_at"`
 	UpdatedAt int64  `orm:"column(updated_at);index" json:"updated_at"`
@@ -15,6 +16,7 @@ type AgentConversationMessage struct {
 	ID             int64  `orm:"column(id);auto" json:"id"`
 	ConversationID string `orm:"column(conversation_id);size(64);index" json:"conversation_id"`
 	TaskID         string `orm:"column(task_id);size(64);index" json:"task_id"`
+	Skill          string `orm:"column(skill);size(96);null;index" json:"skill"`
 	Sequence       int    `orm:"column(sequence);index" json:"sequence"`
 	Role           string `orm:"column(role);size(32)" json:"role"`
 	Content        string `orm:"column(content);type(text)" json:"content"`

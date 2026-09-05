@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -61,4 +62,18 @@ func (registry *Registry) Unregister(name string) {
 	registry.mu.Lock()
 	delete(registry.tools, strings.TrimSpace(name))
 	registry.mu.Unlock()
+}
+
+func (registry *Registry) List() []Tool {
+	if registry == nil {
+		return nil
+	}
+	registry.mu.RLock()
+	items := make([]Tool, 0, len(registry.tools))
+	for _, item := range registry.tools {
+		items = append(items, item)
+	}
+	registry.mu.RUnlock()
+	sort.Slice(items, func(i, j int) bool { return items[i].Name() < items[j].Name() })
+	return items
 }
