@@ -33,7 +33,7 @@ func (engine *Engine) Build(options BuildOptions) ([]llm.Message, BuildTrace, er
 	trace := BuildTrace{
 		BudgetTokens: options.MaxTokens, BudgetBytes: options.MaxBytes,
 		SystemTokens: estimator.Estimate(options.SystemPrompt), InputBlocks: len(options.Blocks), BuiltAt: now.Format(time.RFC3339),
-		Trimmed: []TrimRecord{}, SelectedBlockIDs: []string{}, StaleEvidenceIDs: []string{},
+		Trimmed: []TrimRecord{}, SelectedBlockIDs: []string{}, SelectedMemoryIDs: []string{}, TrimmedMemoryIDs: []string{}, StaleEvidenceIDs: []string{},
 	}
 	if options.MaxTokens > 0 && trace.SystemTokens > options.MaxTokens {
 		return nil, trace, fmt.Errorf("required system context exceeds token budget: %d > %d", trace.SystemTokens, options.MaxTokens)
@@ -45,6 +45,11 @@ func (engine *Engine) Build(options BuildOptions) ([]llm.Message, BuildTrace, er
 	blocks := normalizeBlocks(options.Blocks, estimator)
 	blocks, duplicateTrim := deduplicateBlocks(blocks)
 	trace.Trimmed = append(trace.Trimmed, duplicateTrim...)
+	for _, trimmed := range duplicateTrim {
+		if trimmed.Type == BlockMemory {
+			trace.TrimmedMemoryIDs = append(trace.TrimmedMemoryIDs, trimmed.BlockID)
+		}
+	}
 
 	required := make([]ContextBlock, 0, len(blocks))
 	optional := make([]ContextBlock, 0, len(blocks))
@@ -86,6 +91,9 @@ func (engine *Engine) Build(options BuildOptions) ([]llm.Message, BuildTrace, er
 			reason = "byte_budget"
 		}
 		trace.Trimmed = append(trace.Trimmed, TrimRecord{BlockID: block.ID, Type: block.Type, Source: block.Source, EstimatedTokens: block.EstimatedTokens, Reason: reason})
+		if block.Type == BlockMemory {
+			trace.TrimmedMemoryIDs = append(trace.TrimmedMemoryIDs, block.ID)
+		}
 	}
 
 	sort.SliceStable(selected, func(i, j int) bool { return selected[i].Order < selected[j].Order })
@@ -101,6 +109,9 @@ func (engine *Engine) Build(options BuildOptions) ([]llm.Message, BuildTrace, er
 		}
 		messages = append(messages, llm.Message{Role: role, Content: content})
 		trace.SelectedBlockIDs = append(trace.SelectedBlockIDs, block.ID)
+		if block.Type == BlockMemory {
+			trace.SelectedMemoryIDs = append(trace.SelectedMemoryIDs, block.ID)
+		}
 		if block.Freshness == FreshnessStale || block.Freshness == FreshnessMissing {
 			trace.StaleEvidenceIDs = append(trace.StaleEvidenceIDs, block.EvidenceIDs...)
 		}

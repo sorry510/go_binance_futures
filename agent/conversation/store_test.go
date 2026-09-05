@@ -137,3 +137,55 @@ func TestChatAppendOnceAndSuccessfulHistory(t *testing.T) {
 		t.Fatalf("AppendOnce duplicated rows: %+v", messages)
 	}
 }
+
+func TestDeleteChatRemovesConversationAndMessagesButKeepsTaskHistory(t *testing.T) {
+	store := setupConversationStoreTest(t)
+	ctx := context.Background()
+	conv, err := store.Create(ctx, ChatSkill)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o := orm.NewOrmUsingDB("agent_conversation_test")
+	now := int64(1700000000100)
+	taskRow := models.AgentTask{ID: "chat-delete-history", Skill: "portable", ConversationID: conv.ID, Status: "succeeded", CreatedAt: now, UpdatedAt: now}
+	if _, err := o.Insert(&taskRow); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AppendOnce(ctx, conv.ID, taskRow.ID, "portable", llm.Message{Role: llm.RoleUser, Content: "delete me"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.DeleteChat(ctx, conv.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Get(ctx, conv.ID); err == nil {
+		t.Fatal("deleted conversation is still readable")
+	}
+	messageCount, err := o.QueryTable(new(models.AgentConversationMessage)).Filter("conversation_id", conv.ID).Count()
+	if err != nil || messageCount != 0 {
+		t.Fatalf("conversation messages were not deleted: count=%d err=%v", messageCount, err)
+	}
+	if !o.QueryTable(new(models.AgentTask)).Filter("id", taskRow.ID).Exist() {
+		t.Fatal("task history should be preserved when deleting a chat")
+	}
+}
+
+func TestDeleteChatRejectsConversationWithRunningTask(t *testing.T) {
+	store := setupConversationStoreTest(t)
+	ctx := context.Background()
+	conv, err := store.Create(ctx, ChatSkill)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o := orm.NewOrmUsingDB("agent_conversation_test")
+	now := int64(1700000000200)
+	if _, err := o.Insert(&models.AgentTask{ID: "chat-delete-running", Skill: "portable", ConversationID: conv.ID, Status: "running", CreatedAt: now, UpdatedAt: now}); err != nil {
+		t.Fatal(err)
+	}
+	err = store.DeleteChat(ctx, conv.ID)
+	if err == nil || !strings.Contains(err.Error(), "running task") {
+		t.Fatalf("expected running-task delete rejection, got %v", err)
+	}
+	if _, err := store.Get(ctx, conv.ID); err != nil {
+		t.Fatalf("conversation should remain after rejected delete: %v", err)
+	}
+}

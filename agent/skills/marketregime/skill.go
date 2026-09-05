@@ -37,12 +37,13 @@ type Analysis struct {
 
 func New() skill.Skill {
 	return skill.Definition{
-		SkillName:      Name,
-		Prompt:         systemPrompt,
-		Rounds:         2,
-		Version:        versionInfo,
-		BuildInputFunc: buildInput,
-		FinalValidator: validator.Func(validateFinal),
+		SkillName:              Name,
+		Prompt:                 systemPrompt,
+		Rounds:                 2,
+		Version:                versionInfo,
+		ModelRequirementsValue: llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 65},
+		BuildInputFunc:         buildInput,
+		FinalValidator:         validator.Func(validateFinal),
 	}
 }
 func buildInput(ctx context.Context, req skill.Request) ([]llm.Message, error) {

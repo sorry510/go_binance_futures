@@ -107,6 +107,7 @@
     "fallback_reason": "AI 回退原因：%s",
     "rule_unverified": "规则告警未经过完整 AI 交叉验证",
     "label": {
+      "event_time": "事件时间",
       "symbol": "交易对",
       "signal": "信号类型",
       "severity": "严重程度",

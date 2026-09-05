@@ -26,7 +26,7 @@ Fallback 必须记录原因，且不能突破 Budget/Permission。
 
 ## 验收
 
-- [ ] Router 可关闭并回退 V1 单模型行为。
-- [ ] Task 保存候选、最终模型和路由原因。
-- [ ] Provider 故障可按策略 fallback。
-- [ ] 模型切换通过 Eval Gate。
+- [x] Router 可关闭并回退 V1 单模型行为。
+- [x] Task 保存候选、最终模型和路由原因。
+- [x] Provider 故障可按策略 fallback。
+- [x] 模型切换通过 Eval Gate。

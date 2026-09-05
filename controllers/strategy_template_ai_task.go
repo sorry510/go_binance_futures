@@ -12,6 +12,7 @@ import (
 
 	agentapp "go_binance_futures/agent/app"
 	conversationstore "go_binance_futures/agent/conversation"
+	"go_binance_futures/agent/modelgateway"
 	"go_binance_futures/agent/observability"
 	"go_binance_futures/agent/permission"
 	agentruntime "go_binance_futures/agent/runtime"
@@ -67,9 +68,20 @@ type strategyTemplateAIGenerationTask struct {
 	CompletedAt     *time.Time                        `json:"completedAt,omitempty"`
 }
 
-var newStrategyBuilderLLMClient = llm.NewFromConfig
+var strategyBuilderModelRouter llm.Router = modelgateway.Default()
+
+func defaultStrategyBuilderLLMClient() (llm.Client, error) {
+	client, _, err := strategyBuilderModelRouter.Route(context.Background(), llm.RouteRequest{
+		Skill: strategybuilder.Name, Requirements: strategybuilder.ModelRequirements(),
+	})
+	return client, err
+}
+
+var newStrategyBuilderLLMClient = defaultStrategyBuilderLLMClient
 var admitStrategyBuilderSkill = agentapp.AdmitSkill
 var strategyBuilderBudgetProvider = agentapp.RuntimeBudget
+var strategyBuilderMemoryContextProvider = agentapp.MemoryContext
+var strategyBuilderMemoryWriter = agentapp.MemoryWrite
 var strategyTemplateConversationStore conversationstore.Store = conversationstore.NewORMStore()
 var strategyTemplatePersistentTaskStore task.Store = task.NewORMStore()
 
@@ -250,6 +262,7 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 	runner, err := agentruntime.NewRunner(agentruntime.Config{
 		Client: client, Skills: skills, Tools: toolRegistry, Tasks: strategyTemplatePersistentTaskStore,
 		Policy: permission.AllowWritesFor(nil), BudgetProvider: strategyBuilderBudgetProvider, Observer: observability.Default(),
+		MemoryContextProvider: strategyBuilderMemoryContextProvider, MemoryWriter: strategyBuilderMemoryWriter,
 		Timeout: 15 * time.Minute, DefaultMaxRounds: maxStrategyTemplateAIRounds,
 		MaxContextBytes: maxStrategyTemplateAIContextSize, MaxToolResultBytes: 256 * 1024,
 		Retry:     agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},

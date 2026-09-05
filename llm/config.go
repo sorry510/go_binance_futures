@@ -9,6 +9,20 @@ import (
 const defaultTimeout = 60 * time.Second
 const defaultAnthropicMaxTokens = 4096
 
+var modelIdentifierDashReplacer = strings.NewReplacer(
+	"\u2010", "-", // hyphen
+	"\u2011", "-", // non-breaking hyphen
+	"\u2012", "-", // figure dash
+	"\u2013", "-", // en dash
+	"\u2014", "-", // em dash
+	"\u2212", "-", // minus sign
+	"\uff0d", "-", // full-width hyphen-minus
+)
+
+func normalizeModelIdentifier(value string) string {
+	return modelIdentifierDashReplacer.Replace(strings.TrimSpace(value))
+}
+
 type Config struct {
 	ID          int64
 	Provider    Provider
