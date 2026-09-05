@@ -96,6 +96,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentAlertPipelineTrace))
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
+	orm.RegisterModel(new(models.AgentMemory))
 	orm.RegisterModel(new(models.AgentSkill))
 	orm.RegisterModel(new(models.AgentSkillVersion))
 	orm.RegisterModel(new(models.AgentSkillPermission))
@@ -107,6 +108,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentMCPSecret))
 	orm.RegisterModel(new(models.AgentMCPOAuthState))
 	orm.RegisterModel(new(models.LLMConfig))
+	orm.RegisterModel(new(models.LLMRouterSetting))
 	orm.RegisterModel(new(models.Notification))
 
 	setDriver(driver) // 设置数据库驱动

@@ -69,6 +69,9 @@ func (*Definition) VersionInfo() skill.VersionInfo {
 func (*Definition) Tools() []string {
 	return []string{"get_symbol_analysis_context", "get_klines", "get_funding_rate", "get_liquidations", "get_symbol_snapshot", "get_market_condition"}
 }
+func (*Definition) ModelRequirements() llm.ModelRequirements {
+	return llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 70}
+}
 func (*Definition) MaxRounds() int { return 15 }
 
 func (*Definition) ChatEnabled() bool { return true }

@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/validator"
+	"go_binance_futures/llm"
 )
 
 type runSession struct {
@@ -102,6 +104,18 @@ func (coordinator *coordinator) prepareNew(ctx context.Context, req Request) (*r
 		Provider: string(coordinator.runner.cfg.Client.Provider()), ExecutionMode: string(mode), CreatedAt: now, UpdatedAt: now,
 	}
 	currentTask.ApplyVersionMetadata(snapshot.Version)
+	if routeDecision, ok := llm.ClientRouteDecision(coordinator.runner.cfg.Client); ok {
+		if raw, marshalErr := json.Marshal(routeDecision.Candidates); marshalErr == nil {
+			currentTask.RouteCandidates = raw
+		}
+		currentTask.RouteReason = routeDecision.Reason
+		if routeDecision.Selected.ConfigID > 0 {
+			currentTask.ModelConfigID = routeDecision.Selected.ConfigID
+		}
+		if routeDecision.Selected.Model != "" {
+			currentTask.Model = routeDecision.Selected.Model
+		}
+	}
 	state := newRunState(taskID, selectedSkill.Name(), mode, *snapshot, maxRounds, maxToolCalls, maxTotalTokens)
 	state.ResumeMetadata = resumableMetadata(req.Metadata)
 	state.syncTask(currentTask)
@@ -139,6 +153,18 @@ func (coordinator *coordinator) buildContext(ctx context.Context, session *runSe
 			state.appendContextBlock(block)
 		}
 	}
+	memoryCount := 0
+	if coordinator.runner.cfg.MemoryContextProvider != nil {
+		memoryBlocks, memoryErr := coordinator.runner.cfg.MemoryContextProvider(ctx, session.selectedSkill.Name(), session.skillRequest)
+		if memoryErr != nil {
+			coordinator.runner.audit(currentTask, "memory_read", "error", "long-term memory unavailable: "+memoryErr.Error())
+		} else {
+			for _, block := range memoryBlocks {
+				state.appendContextBlock(block)
+			}
+			memoryCount = len(memoryBlocks)
+		}
+	}
 	for _, block := range contextengine.InitialMessageBlocks(messages) {
 		state.appendContextBlock(block)
 	}
@@ -173,7 +199,7 @@ func (coordinator *coordinator) buildContext(ctx context.Context, session *runSe
 		}
 		resourceCount += len(resources)
 	}
-	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages, %d resources", len(messages), resourceCount), "", nil)
+	state.finishStep(stepID, StepSucceeded, fmt.Sprintf("%d messages, %d memories, %d resources", len(messages), memoryCount, resourceCount), "", nil)
 	if err := coordinator.runner.saveCheckpoint(ctx, currentTask, state, stepID, 1); err != nil {
 		return coordinator.runner.fail(currentTask, "checkpoint_failed", err)
 	}

@@ -48,6 +48,9 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 			state.syncTask(item)
 			return nil, executor.runner.fail(item, "context_too_large", contextErr)
 		}
+		if len(contextTrace.SelectedMemoryIDs) > 0 && round == startRound {
+			executor.runner.audit(item, "memory_read", "success", fmt.Sprintf("selected long-term memories: %s", strings.Join(contextTrace.SelectedMemoryIDs, ",")))
+		}
 		if contextTrace.TrimmedBlocks > 0 {
 			executor.runner.recordStep(item, state, llmStep, task.StatusRunning, "context_trimmed", progress,
 				fmt.Sprintf("context trimmed %d/%d blocks to %d estimated tokens", contextTrace.TrimmedBlocks, contextTrace.InputBlocks, contextTrace.SelectedTokens), "", false)
@@ -77,6 +80,18 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 		}
 		if response.Model != "" {
 			item.Model = response.Model
+		}
+		if response.Provider != "" {
+			item.Provider = string(response.Provider)
+		}
+		if response.ConfigID > 0 {
+			item.FinalModelConfigID = response.ConfigID
+		}
+		if response.RouteTrace != nil {
+			item.RouteReason = response.RouteTrace.Reason
+			if raw, marshalErr := json.Marshal(response.RouteTrace.Attempts); marshalErr == nil {
+				item.RouteFallback = raw
+			}
 		}
 		executor.runner.appendRuntimeMessage(item.ID, state, &messages, llm.Message{Role: llm.RoleAssistant, Content: response.Content})
 		state.Messages = messages
@@ -486,8 +501,17 @@ func (executor *reactExecutor) executeFinal(ctx context.Context, session *runSes
 		_ = checkpointStore.ClearCheckpoint(context.Background(), item.ID)
 		item.CheckpointJSON = ""
 	}
-	return &Result{
+	result := &Result{
 		TaskID: item.ID, Skill: item.Skill, Summary: decision.Summary,
 		Raw: append([]byte(nil), decision.Result...), Value: value, Usage: item.Usage,
-	}, true, nil
+	}
+	if executor.runner.cfg.MemoryWriter != nil {
+		memoryIDs, memoryErr := executor.runner.cfg.MemoryWriter(context.Background(), session.req, item, result)
+		if memoryErr != nil {
+			executor.runner.audit(item, "memory_write", "error", "long-term memory write failed: "+memoryErr.Error())
+		} else if len(memoryIDs) > 0 {
+			executor.runner.audit(item, "memory_write", "success", fmt.Sprintf("persisted long-term memories: %s", strings.Join(memoryIDs, ",")))
+		}
+	}
+	return result, true, nil
 }

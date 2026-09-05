@@ -67,6 +67,9 @@ func (*Definition) SystemPrompt() string {
 func (*Definition) Tools() []string {
 	return []string{"get_symbol_analysis_context", "get_klines", "get_funding_rate", "get_liquidations", "get_symbol_snapshot", "get_market_condition"}
 }
+func (*Definition) ModelRequirements() llm.ModelRequirements {
+	return llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 70, PreferLowLatency: true}
+}
 func (*Definition) MaxRounds() int { return 6 }
 
 func (*Definition) RequiredTools(skill.Request) []string {

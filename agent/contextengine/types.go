@@ -67,18 +67,20 @@ type TrimRecord struct {
 }
 
 type BuildTrace struct {
-	BudgetTokens     int          `json:"budget_tokens"`
-	BudgetBytes      int          `json:"budget_bytes"`
-	SystemTokens     int          `json:"system_tokens"`
-	SelectedTokens   int          `json:"selected_tokens"`
-	SelectedBytes    int          `json:"selected_bytes"`
-	InputBlocks      int          `json:"input_blocks"`
-	SelectedBlocks   int          `json:"selected_blocks"`
-	TrimmedBlocks    int          `json:"trimmed_blocks"`
-	SelectedBlockIDs []string     `json:"selected_block_ids,omitempty"`
-	Trimmed          []TrimRecord `json:"trimmed,omitempty"`
-	StaleEvidenceIDs []string     `json:"stale_evidence_ids,omitempty"`
-	BuiltAt          string       `json:"built_at"`
+	BudgetTokens      int          `json:"budget_tokens"`
+	BudgetBytes       int          `json:"budget_bytes"`
+	SystemTokens      int          `json:"system_tokens"`
+	SelectedTokens    int          `json:"selected_tokens"`
+	SelectedBytes     int          `json:"selected_bytes"`
+	InputBlocks       int          `json:"input_blocks"`
+	SelectedBlocks    int          `json:"selected_blocks"`
+	TrimmedBlocks     int          `json:"trimmed_blocks"`
+	SelectedBlockIDs  []string     `json:"selected_block_ids,omitempty"`
+	SelectedMemoryIDs []string     `json:"selected_memory_ids,omitempty"`
+	TrimmedMemoryIDs  []string     `json:"trimmed_memory_ids,omitempty"`
+	Trimmed           []TrimRecord `json:"trimmed,omitempty"`
+	StaleEvidenceIDs  []string     `json:"stale_evidence_ids,omitempty"`
+	BuiltAt           string       `json:"built_at"`
 }
 
 type Disclosure string

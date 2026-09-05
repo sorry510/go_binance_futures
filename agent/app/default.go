@@ -6,6 +6,7 @@ import (
 	"time"
 
 	agentmanager "go_binance_futures/agent/manager"
+	"go_binance_futures/agent/modelgateway"
 	"go_binance_futures/agent/observability"
 	"go_binance_futures/agent/permission"
 	agentruntime "go_binance_futures/agent/runtime"
@@ -59,12 +60,15 @@ func DefaultManager() (*agentmanager.Manager, error) {
 			Store:          store,
 			Tools:          tools,
 			CompletionHook: persistTaskCompletion,
+			ModelRouter:    modelgateway.Default(),
 			RuntimeConfig: agentruntime.Config{
 				Timeout:                     10 * time.Minute,
 				Policy:                      permission.AllowWritesFor(nil),
 				BudgetProvider:              RuntimeBudget,
 				ToolAllowlistProvider:       EffectiveToolAllowlist,
 				ContextResourceProvider:     MCPContextResources,
+				MemoryContextProvider:       MemoryContext,
+				MemoryWriter:                MemoryWrite,
 				ConversationHistoryProvider: ConversationHistory,
 				Observer:                    observability.Default(),
 				DefaultMaxRounds:            8,

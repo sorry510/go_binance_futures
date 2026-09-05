@@ -202,3 +202,11 @@ func compactRepairHistory(messages []llm.Message) []llm.Message {
 	}
 	return result
 }
+
+func ModelRequirements() llm.ModelRequirements {
+	return llm.ModelRequirements{StructuredOutput: true, Reasoning: true, MinJSONReliability: 75}
+}
+
+func (*Builder) ModelRequirements() llm.ModelRequirements {
+	return ModelRequirements()
+}
