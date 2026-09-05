@@ -72,7 +72,11 @@ func TestStrategyTemplateAITaskUsesRuntimeAndPreservesConversation(t *testing.T)
 	original := newStrategyBuilderLLMClient
 	originalAdmission := admitStrategyBuilderSkill
 	originalBudget := strategyBuilderBudgetProvider
+	originalMemoryContext := strategyBuilderMemoryContextProvider
+	originalMemoryWriter := strategyBuilderMemoryWriter
 	newStrategyBuilderLLMClient = func() (llm.Client, error) { return client, nil }
+	strategyBuilderMemoryContextProvider = nil
+	strategyBuilderMemoryWriter = nil
 	admitStrategyBuilderSkill = func(string) error { return nil }
 	strategyBuilderBudgetProvider = func(string) agentruntime.Budget {
 		return agentruntime.Budget{MaxToolCalls: maxStrategyTemplateAIRounds, MaxTotalTokens: 120000}
@@ -81,6 +85,8 @@ func TestStrategyTemplateAITaskUsesRuntimeAndPreservesConversation(t *testing.T)
 		newStrategyBuilderLLMClient = original
 		admitStrategyBuilderSkill = originalAdmission
 		strategyBuilderBudgetProvider = originalBudget
+		strategyBuilderMemoryContextProvider = originalMemoryContext
+		strategyBuilderMemoryWriter = originalMemoryWriter
 	}()
 
 	first, err := startStrategyTemplateAITask(strategyTemplateAIGenerationRequest{Prompt: "生成一个简单策略"})
