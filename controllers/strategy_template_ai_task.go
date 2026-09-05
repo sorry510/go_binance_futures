@@ -12,6 +12,7 @@ import (
 
 	agentapp "go_binance_futures/agent/app"
 	conversationstore "go_binance_futures/agent/conversation"
+	"go_binance_futures/agent/modelgateway"
 	"go_binance_futures/agent/observability"
 	"go_binance_futures/agent/permission"
 	agentruntime "go_binance_futures/agent/runtime"
@@ -67,7 +68,16 @@ type strategyTemplateAIGenerationTask struct {
 	CompletedAt     *time.Time                        `json:"completedAt,omitempty"`
 }
 
-var newStrategyBuilderLLMClient = llm.NewFromConfig
+var strategyBuilderModelRouter llm.Router = modelgateway.Default()
+
+func defaultStrategyBuilderLLMClient() (llm.Client, error) {
+	client, _, err := strategyBuilderModelRouter.Route(context.Background(), llm.RouteRequest{
+		Skill: strategybuilder.Name, Requirements: strategybuilder.ModelRequirements(),
+	})
+	return client, err
+}
+
+var newStrategyBuilderLLMClient = defaultStrategyBuilderLLMClient
 var admitStrategyBuilderSkill = agentapp.AdmitSkill
 var strategyBuilderBudgetProvider = agentapp.RuntimeBudget
 var strategyTemplateConversationStore conversationstore.Store = conversationstore.NewORMStore()

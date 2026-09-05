@@ -15,6 +15,16 @@ import (
 	"go_binance_futures/llm"
 )
 
+type strategyBuilderFakeRouter struct {
+	request llm.RouteRequest
+	client  llm.Client
+}
+
+func (router *strategyBuilderFakeRouter) Route(_ context.Context, request llm.RouteRequest) (llm.Client, llm.RouteDecision, error) {
+	router.request = request
+	return router.client, llm.RouteDecision{}, nil
+}
+
 type strategyBuilderFakeClient struct {
 	mu        sync.Mutex
 	responses []string
@@ -31,6 +41,26 @@ func (client *strategyBuilderFakeClient) Generate(_ context.Context, request llm
 		return nil, fmt.Errorf("unexpected LLM call %d", index+1)
 	}
 	return &llm.Response{Model: "fake", Content: client.responses[index]}, nil
+}
+
+func TestDefaultStrategyBuilderClientUsesModelRouterCapabilities(t *testing.T) {
+	client := &strategyBuilderFakeClient{responses: []string{validStrategyBuilderEnvelope("router")}}
+	router := &strategyBuilderFakeRouter{client: client}
+	original := strategyBuilderModelRouter
+	strategyBuilderModelRouter = router
+	defer func() { strategyBuilderModelRouter = original }()
+
+	got, err := defaultStrategyBuilderLLMClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != client {
+		t.Fatal("strategy builder default client did not come from model router")
+	}
+	requirements := router.request.Requirements
+	if router.request.Skill != "strategy_builder" || !requirements.StructuredOutput || !requirements.Reasoning || requirements.MinJSONReliability != 75 {
+		t.Fatalf("unexpected route request: %+v", router.request)
+	}
 }
 
 func TestStrategyTemplateAITaskUsesRuntimeAndPreservesConversation(t *testing.T) {
