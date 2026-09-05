@@ -184,4 +184,45 @@ func TestInstallRevisionRollbackAndAllowedToolsRequireReview(t *testing.T) {
 	if rolled.ActiveVersionID != r1.Version.ID {
 		t.Fatal("rollback failed")
 	}
+
+	importDir := filepath.Join(t.TempDir(), "imports")
+	oldImportDir, _ := config.String("agent_skills::import_dir")
+	_ = config.Set("agent_skills::import_dir", importDir)
+	t.Cleanup(func() { _ = config.Set("agent_skills::import_dir", oldImportDir) })
+	makeSkill := func(name string) []byte {
+		return []byte("---\nname: " + name + "\ndescription: Import path regression skill.\nmetadata:\n  version: \"1.0.0\"\n---\nReturn IMPORT-OK.\n")
+	}
+	assertInstalled := func(result ImportResult, err error, name string) {
+		t.Helper()
+		if err != nil {
+			t.Fatalf("%s import failed: %v", name, err)
+		}
+		if result.Version.ID <= 0 || result.Version.PackageHash == "" {
+			t.Fatalf("%s import missing revision: %+v", name, result)
+		}
+		if _, statErr := os.Stat(filepath.Join(DataDir(), name, result.Version.PackageHash, "SKILL.md")); statErr != nil {
+			t.Fatalf("%s package was not installed: %v", name, statErr)
+		}
+	}
+
+	singleName := "portable-single-path"
+	single := makeSkill(singleName)
+	rSingle, err := (Importer{Store: store}).ImportFile(context.Background(), "SKILL.md", bytes.NewReader(single), int64(len(single)), false)
+	assertInstalled(rSingle, err, singleName)
+
+	zipName := "portable-zip-path"
+	zipData := zipBytes(t, map[string]string{zipName + "/SKILL.md": string(makeSkill(zipName))}, "")
+	rZip, err := (Importer{Store: store}).ImportFile(context.Background(), zipName+".zip", bytes.NewReader(zipData), int64(len(zipData)), false)
+	assertInstalled(rZip, err, zipName)
+
+	dirName := "portable-directory-path"
+	dirRoot := filepath.Join(importDir, dirName)
+	if err := os.MkdirAll(dirRoot, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dirRoot, "SKILL.md"), makeSkill(dirName), 0600); err != nil {
+		t.Fatal(err)
+	}
+	rDir, err := (Importer{Store: store}).ImportDirectory(context.Background(), dirName, false)
+	assertInstalled(rDir, err, dirName)
 }

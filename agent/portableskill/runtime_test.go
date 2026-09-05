@@ -147,3 +147,54 @@ func TestPortableResourceToolCannotEscapePackageOrExecuteScript(t *testing.T) {
 		t.Fatal("portable script unexpectedly executed")
 	}
 }
+
+func TestPortableSingleFilePlainTextCompletesInOneRound(t *testing.T) {
+	dataDir := filepath.Join(t.TempDir(), "agent-skills")
+	oldDataDir, _ := config.String("agent_skills::data_dir")
+	_ = config.Set("agent_skills::data_dir", dataDir)
+	t.Cleanup(func() { _ = config.Set("agent_skills::data_dir", oldDataDir) })
+
+	source := filepath.Join(t.TempDir(), "plain-skill")
+	if err := os.MkdirAll(source, 0700); err != nil {
+		t.Fatal(err)
+	}
+	body := "---\nname: plain-skill\ndescription: plain test\n---\nReturn signature plain-skill.\n"
+	if err := os.WriteFile(filepath.Join(source, "SKILL.md"), []byte(body), 0600); err != nil {
+		t.Fatal(err)
+	}
+	pkg, err := ParsePackage(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	packagePath := filepath.ToSlash(filepath.Join(pkg.Frontmatter.Name, pkg.PackageHash))
+	if err := copyPackage(source, filepath.Join(dataDir, filepath.FromSlash(packagePath))); err != nil {
+		t.Fatal(err)
+	}
+	adapter, err := LoadAdapter(models.AgentSkillVersion{ID: 51, Name: pkg.Frontmatter.Name, PackageHash: pkg.PackageHash, PackagePath: packagePath})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !adapter.PlainTextFinalAllowed() {
+		t.Fatal("single-file portable skill should allow plain-text final")
+	}
+
+	skills := skill.NewRegistry()
+	if err := skills.Register(adapter); err != nil {
+		t.Fatal(err)
+	}
+	client := &portableFakeClient{items: []*llm.Response{{Content: `signature: "plain-skill"`, Usage: llm.Usage{TotalTokens: 20}}}}
+	runner, err := agentruntime.NewRunner(agentruntime.Config{Client: client, Skills: skills, Tasks: task.NewMemoryStore(), Policy: permission.AllowReadOnly(), Timeout: time.Second, Retry: agentruntime.RetryPolicy{MaxAttempts: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runner.Run(context.Background(), agentruntime.Request{Skill: adapter.Name(), Input: "测试内容是什么"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result == nil || string(result.Raw) != `"signature: \"plain-skill\""` {
+		t.Fatalf("unexpected result: %+v raw=%s", result, result.Raw)
+	}
+	if len(client.requests) != 1 {
+		t.Fatalf("expected one LLM round, got %d", len(client.requests))
+	}
+}

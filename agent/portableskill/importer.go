@@ -90,6 +90,9 @@ func (i Importer) ImportFile(ctx context.Context, filename string, reader io.Rea
 }
 
 func (i Importer) ImportDirectory(ctx context.Context, relative string, activate bool) (ImportResult, error) {
+	if err := os.MkdirAll(ImportDir(), 0700); err != nil {
+		return ImportResult{}, err
+	}
 	rootBase, err := filepath.Abs(ImportDir())
 	if err != nil {
 		return ImportResult{}, err
@@ -136,7 +139,7 @@ func (i Importer) install(ctx context.Context, root, source, sourceRef string, a
 	cleanup := true
 	defer func() {
 		if cleanup {
-			_ = os.RemoveAll(finalPath)
+			cleanupFailedInstall(finalPath)
 		}
 	}()
 	metadataJSON, _ := json.Marshal(pkg.Frontmatter.Metadata)
@@ -149,6 +152,13 @@ func (i Importer) install(ctx context.Context, root, source, sourceRef string, a
 	}
 	cleanup = false
 	return result, nil
+}
+
+func cleanupFailedInstall(finalPath string) {
+	_ = os.RemoveAll(finalPath)
+	// Remove the skill-name parent only when it is empty. Existing revisions are
+	// therefore never touched, while failed first imports leave no empty shell.
+	_ = os.Remove(filepath.Dir(finalPath))
 }
 
 func newStagingDir() (string, error) {

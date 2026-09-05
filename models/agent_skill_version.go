@@ -27,8 +27,8 @@ type AgentSkillPermission struct {
 	ID            int64  `orm:"column(id);auto" json:"id"`
 	SkillID       int64  `orm:"column(skill_id);index" json:"skill_id"`
 	VersionID     int64  `orm:"column(version_id);index" json:"version_id"`
-	RequestedName string `orm:"column(requested_name);size(255)" json:"requested_name"`
-	ResolvedName  string `orm:"column(resolved_name);size(255);index" json:"resolved_name"`
+	RequestedName string `orm:"column(requested_name);size(180)" json:"requested_name"`
+	ResolvedName  string `orm:"column(resolved_name);size(191);index" json:"resolved_name"`
 	Risk          string `orm:"column(risk);size(16)" json:"risk"`
 	Status        string `orm:"column(status);size(32)" json:"status"`
 	Granted       int    `orm:"column(granted);default(0)" json:"granted"`

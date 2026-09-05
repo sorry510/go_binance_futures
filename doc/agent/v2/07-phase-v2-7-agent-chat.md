@@ -2,7 +2,7 @@
 
 ## 状态
 
-P0，待实施。V2-6 完成人工验收后进入本 Phase。
+P0，已实施；自动 Gate 与部署验证通过，待用户人工验收后标记完成。
 
 ## 目标
 
@@ -287,6 +287,16 @@ git diff --check
 本 Phase 预期只新增 Chat orchestration、Conversation schema/store 能力和 Runtime Context Provider，不改变已有 Checkpoint/Resume state schema。除非实施时确实修改 RunState 持久化结构，否则不因为新增 Web Chat 强行提升 `CurrentVersion` / `runStateVersion`。
 
 Chat Conversation 是人类交互入口，不是长期 Memory。后续 V2-9 Memory 只能作为 Context 的独立低优先级来源，不能把 Conversation 表重新解释为 Memory Store。
+
+## 实施结果（2026-09-04）
+
+已完成 Conversation additive schema、Chat Store、Chat Capability/Input Adapter、Conversation Context Provider、Chat API、Completion 幂等持久化，以及 `/ai/chat` 第一版 Web 页面。
+
+当前 Chat-capable Native Skill 为 `symbol_analysis`；Portable Skill 默认支持 Chat。`alert_analysis` 等结构化系统事件 Skill 不在 Slash 菜单中暴露。
+
+自动 Gate 已通过：`go test ./...`、指定包 `go test -race`、前端 `npm run typecheck`、`npm run build` 与 `git diff --check`。真实 MySQL 已通过 `go_binance_futures sync db` 增加 `agent_conversations.title` 与 `agent_conversation_messages.skill`。
+
+真实 HTTP 冒烟已验证 Chat Skill 列表、Conversation 创建/读取，以及 `symbol_analysis` 缺少明确 USDT 合约时的确定性拒绝。完整成功对话、Portable Skill read-resource/MCP、多轮与 Skill 切换保留给用户人工验收。
 
 ## Definition of Done
 

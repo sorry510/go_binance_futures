@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 )
 
 const Name = "symbol_analysis"
+
+var chatSymbolPattern = regexp.MustCompile(`(?i)([A-Z0-9]{2,20}USDT)\b`)
 
 type Input struct {
 	Symbol string `json:"symbol"`
@@ -67,6 +70,47 @@ func (*Definition) Tools() []string {
 	return []string{"get_symbol_analysis_context", "get_klines", "get_funding_rate", "get_liquidations", "get_symbol_snapshot", "get_market_condition"}
 }
 func (*Definition) MaxRounds() int { return 15 }
+
+func (*Definition) ChatEnabled() bool { return true }
+
+func (*Definition) BuildChatInput(ctx context.Context, content string) (string, error) {
+	return buildChatInput(ctx, content, nil)
+}
+
+func (*Definition) BuildChatInputWithContext(ctx context.Context, content string, previousInputs []string) (string, error) {
+	return buildChatInput(ctx, content, previousInputs)
+}
+
+func buildChatInput(ctx context.Context, content string, previousInputs []string) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+	content = strings.TrimSpace(content)
+	symbol := ""
+	if match := chatSymbolPattern.FindStringSubmatch(content); len(match) >= 2 {
+		symbol = strings.ToUpper(match[1])
+	}
+	if symbol == "" {
+		for _, previous := range previousInputs {
+			var input Input
+			if json.Unmarshal([]byte(previous), &input) == nil {
+				input.Symbol = strings.ToUpper(strings.TrimSpace(input.Symbol))
+				if strings.HasSuffix(input.Symbol, "USDT") {
+					symbol = input.Symbol
+					break
+				}
+			}
+		}
+	}
+	if symbol == "" {
+		return "", fmt.Errorf("请在消息中明确指定 USDT 合约，例如 BTCUSDT")
+	}
+	raw, err := json.Marshal(Input{Symbol: symbol, Prompt: content})
+	if err != nil {
+		return "", err
+	}
+	return string(raw), nil
+}
 
 func (*Definition) RequiredTools(skill.Request) []string {
 	return []string{"get_symbol_analysis_context"}

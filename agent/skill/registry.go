@@ -62,3 +62,16 @@ func (registry *Registry) Unregister(name string) {
 	delete(registry.skills, strings.TrimSpace(name))
 	registry.mu.Unlock()
 }
+
+func (registry *Registry) List() []Skill {
+	if registry == nil {
+		return nil
+	}
+	registry.mu.RLock()
+	defer registry.mu.RUnlock()
+	items := make([]Skill, 0, len(registry.skills))
+	for _, item := range registry.skills {
+		items = append(items, item)
+	}
+	return items
+}

@@ -24,6 +24,7 @@ const (
 type Conversation struct {
 	ID        string    `json:"id"`
 	Skill     string    `json:"skill"`
+	Title     string    `json:"title"`
 	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -51,7 +52,11 @@ func (store *ORMStore) Create(ctx context.Context, skill string) (Conversation, 
 		return Conversation{}, fmt.Errorf("conversation skill is required")
 	}
 	now := time.Now().UTC()
-	row := models.AgentConversation{ID: newID(), Skill: skill, Status: StatusActive, CreatedAt: now.UnixMilli(), UpdatedAt: now.UnixMilli()}
+	title := ""
+	if skill == ChatSkill {
+		title = DefaultTitle
+	}
+	row := models.AgentConversation{ID: newID(), Skill: skill, Title: title, Status: StatusActive, CreatedAt: now.UnixMilli(), UpdatedAt: now.UnixMilli()}
 	if _, err := store.orm().Insert(&row); err != nil {
 		return Conversation{}, fmt.Errorf("insert agent conversation: %w", err)
 	}
@@ -154,7 +159,12 @@ func (store *MemoryStore) Create(ctx context.Context, skill string) (Conversatio
 		return Conversation{}, err
 	}
 	now := time.Now().UTC()
-	item := &memoryConversation{Conversation: Conversation{ID: newID(), Skill: strings.TrimSpace(skill), Status: StatusActive, CreatedAt: now, UpdatedAt: now}}
+	cleanSkill := strings.TrimSpace(skill)
+	title := ""
+	if cleanSkill == ChatSkill {
+		title = DefaultTitle
+	}
+	item := &memoryConversation{Conversation: Conversation{ID: newID(), Skill: cleanSkill, Title: title, Status: StatusActive, CreatedAt: now, UpdatedAt: now}}
 	store.mu.Lock()
 	store.items[item.ID] = item
 	store.mu.Unlock()
@@ -220,7 +230,7 @@ func (store *MemoryStore) Close(ctx context.Context, id string) error {
 }
 
 func fromModel(row models.AgentConversation) Conversation {
-	item := Conversation{ID: row.ID, Skill: row.Skill, Status: row.Status, CreatedAt: time.UnixMilli(row.CreatedAt).UTC(), UpdatedAt: time.UnixMilli(row.UpdatedAt).UTC()}
+	item := Conversation{ID: row.ID, Skill: row.Skill, Title: row.Title, Status: row.Status, CreatedAt: time.UnixMilli(row.CreatedAt).UTC(), UpdatedAt: time.UnixMilli(row.UpdatedAt).UTC()}
 	if row.ClosedAt > 0 {
 		item.ClosedAt = time.UnixMilli(row.ClosedAt).UTC()
 	}
