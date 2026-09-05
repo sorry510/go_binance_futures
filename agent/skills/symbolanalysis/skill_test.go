@@ -173,3 +173,53 @@ func TestSymbolAnalysisMaxRounds(t *testing.T) {
 		t.Fatalf("MaxRounds() = %d, want 15", got)
 	}
 }
+func TestBuildChatInputConvertsNaturalLanguageToExistingContract(t *testing.T) {
+	definition := New()
+	raw, err := definition.BuildChatInput(context.Background(), "请重新分析 ongusdt 最近的走势")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var input Input
+	if err := json.Unmarshal([]byte(raw), &input); err != nil {
+		t.Fatal(err)
+	}
+	if input.Symbol != "ONGUSDT" || input.Prompt != "请重新分析 ongusdt 最近的走势" {
+		t.Fatalf("unexpected chat input: %+v", input)
+	}
+	if err := definition.ValidateInput(skill.Request{Input: raw}); err != nil {
+		t.Fatalf("chat adapter must preserve symbol_analysis_input_v1: %v", err)
+	}
+}
+
+func TestBuildChatInputRequiresExplicitUSDTContract(t *testing.T) {
+	_, err := New().BuildChatInput(context.Background(), "帮我分析一下比特币")
+	if err == nil || !strings.Contains(err.Error(), "BTCUSDT") {
+		t.Fatalf("expected explicit symbol guidance, got %v", err)
+	}
+}
+
+func TestBuildChatInputWithContextReusesPreviousSuccessfulSymbol(t *testing.T) {
+	raw, err := New().BuildChatInputWithContext(context.Background(), "刚才最需要注意的风险是什么？", []string{`{"symbol":"BTCUSDT","prompt":"分析 BTCUSDT"}`})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var input Input
+	if err := json.Unmarshal([]byte(raw), &input); err != nil {
+		t.Fatal(err)
+	}
+	if input.Symbol != "BTCUSDT" || input.Prompt != "刚才最需要注意的风险是什么？" {
+		t.Fatalf("unexpected contextual chat input: %+v", input)
+	}
+}
+
+func TestBuildChatInputWithContextPrefersCurrentExplicitSymbol(t *testing.T) {
+	raw, err := New().BuildChatInputWithContext(context.Background(), "改为分析 ETHUSDT", []string{`{"symbol":"BTCUSDT"}`})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var input Input
+	_ = json.Unmarshal([]byte(raw), &input)
+	if input.Symbol != "ETHUSDT" {
+		t.Fatalf("current explicit symbol must win: %+v", input)
+	}
+}

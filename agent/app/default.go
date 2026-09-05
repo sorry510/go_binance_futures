@@ -42,6 +42,10 @@ func DefaultManager() (*agentmanager.Manager, error) {
 			defaultManagerErr = err
 			return
 		}
+		if err := initializeDefaultPortableSkills(skills, tools); err != nil {
+			defaultManagerErr = err
+			return
+		}
 		store := task.NewORMStore()
 		if interrupted, err := store.MarkInterrupted(context.Background(), time.Now().UTC()); err != nil {
 			defaultManagerErr = err
@@ -56,16 +60,17 @@ func DefaultManager() (*agentmanager.Manager, error) {
 			Tools:          tools,
 			CompletionHook: persistTaskCompletion,
 			RuntimeConfig: agentruntime.Config{
-				Timeout:                 10 * time.Minute,
-				Policy:                  permission.AllowWritesFor(nil),
-				BudgetProvider:          RuntimeBudget,
-				ToolAllowlistProvider:   MCPToolAllowlist,
-				ContextResourceProvider: MCPContextResources,
-				Observer:                observability.Default(),
-				DefaultMaxRounds:        8,
-				MaxContextBytes:         256 * 1024,
-				MaxToolResultBytes:      256 * 1024,
-				Retry:                   agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},
+				Timeout:                     10 * time.Minute,
+				Policy:                      permission.AllowWritesFor(nil),
+				BudgetProvider:              RuntimeBudget,
+				ToolAllowlistProvider:       EffectiveToolAllowlist,
+				ContextResourceProvider:     MCPContextResources,
+				ConversationHistoryProvider: ConversationHistory,
+				Observer:                    observability.Default(),
+				DefaultMaxRounds:            8,
+				MaxContextBytes:             256 * 1024,
+				MaxToolResultBytes:          256 * 1024,
+				Retry:                       agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 			},
 		})
 	})
