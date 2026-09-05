@@ -23,7 +23,7 @@ func setupConversationStoreTest(t *testing.T) *ORMStore {
 		if conversationStoreTestErr != nil {
 			return
 		}
-		orm.RegisterModel(new(models.AgentConversation), new(models.AgentConversationMessage))
+		orm.RegisterModel(new(models.AgentConversation), new(models.AgentConversationMessage), new(models.AgentTask))
 		conversationStoreTestErr = orm.RegisterDataBase("agent_conversation_test", "sqlite3", "file:agent_conversation_test?mode=memory&cache=shared")
 		if conversationStoreTestErr != nil {
 			return
@@ -83,5 +83,57 @@ func TestORMStoreClosesConversation(t *testing.T) {
 	}
 	if got.Status != StatusClosed || got.ClosedAt.IsZero() {
 		t.Fatalf("conversation was not closed: %+v", got)
+	}
+}
+
+func TestChatAppendOnceAndSuccessfulHistory(t *testing.T) {
+	store := setupConversationStoreTest(t)
+	ctx := context.Background()
+	conv, err := store.Create(ctx, ChatSkill)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if conv.Title != DefaultTitle {
+		t.Fatalf("unexpected chat title %q", conv.Title)
+	}
+	o := orm.NewOrmUsingDB("agent_conversation_test")
+	now := int64(1700000000000)
+	for _, row := range []models.AgentTask{
+		{ID: "chat-ok", Skill: "portable", ConversationID: conv.ID, Status: "succeeded", CreatedAt: now, UpdatedAt: now},
+		{ID: "chat-failed", Skill: "portable", ConversationID: conv.ID, Status: "failed", CreatedAt: now + 1, UpdatedAt: now + 1},
+		{ID: "chat-current", Skill: "portable", ConversationID: conv.ID, Status: "succeeded", CreatedAt: now + 2, UpdatedAt: now + 2},
+	} {
+		if _, err := o.Insert(&row); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := store.AppendOnce(ctx, conv.ID, "chat-ok", "portable", llm.Message{Role: llm.RoleUser, Content: "first"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AppendOnce(ctx, conv.ID, "chat-ok", "portable", llm.Message{Role: llm.RoleAssistant, Content: "answer"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AppendOnce(ctx, conv.ID, "chat-ok", "portable", llm.Message{Role: llm.RoleAssistant, Content: "duplicate"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AppendOnce(ctx, conv.ID, "chat-failed", "portable", llm.Message{Role: llm.RoleUser, Content: "failed input"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AppendOnce(ctx, conv.ID, "chat-current", "portable", llm.Message{Role: llm.RoleUser, Content: "current input"}); err != nil {
+		t.Fatal(err)
+	}
+	history, err := store.SuccessfulHistory(ctx, conv.ID, "chat-current", 30)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(history) != 2 || history[0].Content != "first" || history[1].Content != "answer" {
+		t.Fatalf("unexpected history: %+v", history)
+	}
+	messages, err := store.MessagesDetailed(ctx, conv.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(messages) != 4 {
+		t.Fatalf("AppendOnce duplicated rows: %+v", messages)
 	}
 }
