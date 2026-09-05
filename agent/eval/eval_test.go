@@ -13,6 +13,7 @@ import (
 	marketregime "go_binance_futures/agent/skills/marketregime"
 	strategybuilder "go_binance_futures/agent/skills/strategybuilder"
 	symbolanalysis "go_binance_futures/agent/skills/symbolanalysis"
+	workflowSkills "go_binance_futures/agent/skills/workflows"
 	"go_binance_futures/agent/tools"
 	"go_binance_futures/llm"
 )
@@ -27,6 +28,18 @@ func coreDefinition(name string) skill.Skill {
 		return symbolanalysis.New()
 	case alertanalysis.Name:
 		return alertanalysis.New()
+	case workflowSkills.MarketScanName:
+		return workflowSkills.MarketScan()
+	case workflowSkills.StrategyReviewName:
+		return workflowSkills.StrategyReview()
+	case workflowSkills.StrategyExperimentProposeName:
+		return workflowSkills.StrategyExperimentPropose()
+	case workflowSkills.StrategyExperimentSummaryName:
+		return workflowSkills.StrategyExperimentSummary()
+	case workflowSkills.AlertTriageName:
+		return workflowSkills.AlertTriage()
+	case workflowSkills.DailyMarketBriefName:
+		return workflowSkills.DailyMarketBrief()
 	default:
 		return nil
 	}

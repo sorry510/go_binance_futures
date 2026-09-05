@@ -8,6 +8,7 @@ type AgentSkill struct {
 	Type            string `orm:"column(type);size(16);default(native)" json:"type"`
 	ActiveVersionID int64  `orm:"column(active_version_id);default(0);index" json:"active_version_id"`
 	Enabled         int    `orm:"column(enabled);default(1)" json:"enabled"`
+	ChatEnabled     int    `orm:"column(chat_enabled);default(-1)" json:"chat_enabled"`
 	CreatedAt       int64  `orm:"column(created_at)" json:"created_at"`
 	UpdatedAt       int64  `orm:"column(updated_at)" json:"updated_at"`
 	Deleted         int    `orm:"column(deleted);default(0)" json:"-"`

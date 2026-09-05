@@ -41,6 +41,8 @@ type Config struct {
 	AgentAlertMaxPerMinute                     int     `orm:"column(agent_alert_max_per_minute);default(6)" json:"agent_alert_max_per_minute"`
 	AgentMarketRegimeScheduleEnable            int     `orm:"column(agent_market_regime_schedule_enable);default(1)" json:"agent_market_regime_schedule_enable"`
 	AgentMarketRegimeIntervalMin               int     `orm:"column(agent_market_regime_interval_min);default(60)" json:"agent_market_regime_interval_min"`
+	AgentDailyMarketBriefScheduleEnable        int     `orm:"column(agent_daily_market_brief_schedule_enable);default(0)" json:"agent_daily_market_brief_schedule_enable"`
+	AgentDailyMarketBriefIntervalMin           int     `orm:"column(agent_daily_market_brief_interval_min);default(1440)" json:"agent_daily_market_brief_interval_min"`
 	AgentMaxStartsPerMinute                    int     `orm:"column(agent_max_starts_per_minute);default(30)" json:"agent_max_starts_per_minute"`
 	AgentMaxStartsPerHour                      int     `orm:"column(agent_max_starts_per_hour);default(300)" json:"agent_max_starts_per_hour"`
 	AgentMaxTokensPerTask                      int     `orm:"column(agent_max_tokens_per_task);default(240000)" json:"agent_max_tokens_per_task"`

@@ -42,19 +42,19 @@ func ChatSkills(ctx context.Context) ([]ChatSkill, error) {
 	}
 	configByName := make(map[string]struct {
 		display, description, kind string
-		enabled                    bool
+		enabled, chatEnabled       bool
 	}, len(configs))
 	for _, item := range configs {
 		configByName[item.Name] = struct {
 			display, description, kind string
-			enabled                    bool
-		}{item.DisplayName, item.Description, item.Type, item.Enabled == 1}
+			enabled, chatEnabled       bool
+		}{item.DisplayName, item.Description, item.Type, item.Enabled == 1, item.ChatEnabled == 1}
 	}
 	result := []ChatSkill{}
 	for _, runtimeSkill := range manager.Skills() {
 		adapter, ok := runtimeSkill.(skill.ChatAdapter)
 		cfg, exists := configByName[runtimeSkill.Name()]
-		if !ok || !adapter.ChatEnabled() || !exists || !cfg.enabled {
+		if !ok || !adapter.ChatEnabled() || !exists || !cfg.enabled || !cfg.chatEnabled {
 			continue
 		}
 		version := skill.ResolveVersionInfo(runtimeSkill, runtimeSkill.SystemPrompt())
@@ -64,10 +64,11 @@ func ChatSkills(ctx context.Context) ([]ChatSkill, error) {
 	return result, nil
 }
 
-func StartChatMessage(ctx context.Context, conversationID, skillName, content string) (*task.Task, error) {
+func StartChatMessage(ctx context.Context, conversationID, skillName, content, symbol string) (*task.Task, error) {
 	conversationID = strings.TrimSpace(conversationID)
 	skillName = strings.TrimSpace(skillName)
 	content = strings.TrimSpace(content)
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
 	if conversationID == "" || skillName == "" || content == "" {
 		return nil, fmt.Errorf("conversation_id, skill and content are required")
 	}
@@ -105,6 +106,16 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content st
 	if !ok || !adapter.ChatEnabled() {
 		return nil, fmt.Errorf("skill %q does not support chat", skillName)
 	}
+	config, err := (skillconfig.Store{}).GetByName(ctx, skillName)
+	if err != nil {
+		return nil, fmt.Errorf("load skill %q chat configuration: %w", skillName, err)
+	}
+	if config.Enabled != 1 {
+		return nil, fmt.Errorf("skill %q is disabled", skillName)
+	}
+	if config.ChatEnabled != 1 {
+		return nil, fmt.Errorf("skill %q is disabled for chat", skillName)
+	}
 	previousInputs := make([]string, 0, 8)
 	for _, previousTask := range tasks.List {
 		if previousTask.Skill == skillName && previousTask.Status == task.StatusSucceeded && strings.TrimSpace(previousTask.Input) != "" {
@@ -115,7 +126,9 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content st
 		}
 	}
 	var input string
-	if contextual, supportsContext := selected.(skill.ChatContextAdapter); supportsContext {
+	if optionsAdapter, supportsOptions := selected.(skill.ChatOptionsAdapter); supportsOptions {
+		input, err = optionsAdapter.BuildChatInputWithOptions(ctx, content, previousInputs, skill.ChatInputOptions{Symbol: symbol})
+	} else if contextual, supportsContext := selected.(skill.ChatContextAdapter); supportsContext {
 		input, err = contextual.BuildChatInputWithContext(ctx, content, previousInputs)
 	} else {
 		input, err = adapter.BuildChatInput(ctx, content)
@@ -123,7 +136,7 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content st
 	if err != nil {
 		return nil, err
 	}
-	item, err := manager.Start(agentruntime.Request{Skill: skillName, Input: input, ConversationID: conversationID})
+	item, err := manager.Start(agentruntime.Request{Skill: skillName, Input: input, ConversationID: conversationID, Metadata: map[string]any{"chat_symbol": symbol}})
 	if err != nil {
 		return nil, err
 	}
