@@ -80,6 +80,8 @@ func defaultStrategyBuilderLLMClient() (llm.Client, error) {
 var newStrategyBuilderLLMClient = defaultStrategyBuilderLLMClient
 var admitStrategyBuilderSkill = agentapp.AdmitSkill
 var strategyBuilderBudgetProvider = agentapp.RuntimeBudget
+var strategyBuilderMemoryContextProvider = agentapp.MemoryContext
+var strategyBuilderMemoryWriter = agentapp.MemoryWrite
 var strategyTemplateConversationStore conversationstore.Store = conversationstore.NewORMStore()
 var strategyTemplatePersistentTaskStore task.Store = task.NewORMStore()
 
@@ -260,6 +262,7 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 	runner, err := agentruntime.NewRunner(agentruntime.Config{
 		Client: client, Skills: skills, Tools: toolRegistry, Tasks: strategyTemplatePersistentTaskStore,
 		Policy: permission.AllowWritesFor(nil), BudgetProvider: strategyBuilderBudgetProvider, Observer: observability.Default(),
+		MemoryContextProvider: strategyBuilderMemoryContextProvider, MemoryWriter: strategyBuilderMemoryWriter,
 		Timeout: 15 * time.Minute, DefaultMaxRounds: maxStrategyTemplateAIRounds,
 		MaxContextBytes: maxStrategyTemplateAIContextSize, MaxToolResultBytes: 256 * 1024,
 		Retry:     agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},

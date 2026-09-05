@@ -46,6 +46,8 @@ type BudgetProvider func(skill string) Budget
 
 type ToolAllowlistProvider func(context.Context, string) ([]string, error)
 type ContextResourceProvider func(context.Context, string, skill.Request) ([]contextengine.Resource, error)
+type MemoryContextProvider func(context.Context, string, skill.Request) ([]contextengine.ContextBlock, error)
+type MemoryWriter func(context.Context, Request, *task.Task, *Result) ([]string, error)
 type ConversationHistoryProvider func(context.Context, string, string) ([]contextengine.ContextBlock, error)
 
 type Observation struct {
@@ -89,6 +91,8 @@ type Config struct {
 	BudgetProvider              BudgetProvider
 	ToolAllowlistProvider       ToolAllowlistProvider
 	ContextResourceProvider     ContextResourceProvider
+	MemoryContextProvider       MemoryContextProvider
+	MemoryWriter                MemoryWriter
 	ConversationHistoryProvider ConversationHistoryProvider
 	Planner                     Planner
 	ContextEngine               *contextengine.Engine

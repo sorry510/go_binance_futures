@@ -96,6 +96,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentAlertPipelineTrace))
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
+	orm.RegisterModel(new(models.AgentMemory))
 	orm.RegisterModel(new(models.AgentSkill))
 	orm.RegisterModel(new(models.AgentSkillVersion))
 	orm.RegisterModel(new(models.AgentSkillPermission))
