@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -17,6 +18,7 @@ import (
 type Config struct {
 	NewClient      func() (llm.Client, error)
 	NewClientByID  func(int64) (llm.Client, error)
+	ModelRouter    llm.Router
 	Admission      func(skill string) error
 	Skills         *skill.Registry
 	Tools          *agenttools.Registry
@@ -66,7 +68,18 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 			return nil, err
 		}
 	}
-	client, err := manager.cfg.NewClient()
+	var client llm.Client
+	var routeDecision llm.RouteDecision
+	var err error
+	if manager.cfg.ModelRouter != nil {
+		requirements := llm.ModelRequirements{}
+		if provider, ok := selectedSkill.(skill.ModelRequirementProvider); ok {
+			requirements = provider.ModelRequirements()
+		}
+		client, routeDecision, err = manager.cfg.ModelRouter.Route(context.Background(), llm.RouteRequest{Skill: selectedSkill.Name(), Requirements: requirements})
+	} else {
+		client, err = manager.cfg.NewClient()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("initialize LLM client: %w", err)
 	}
@@ -93,6 +106,14 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	}
 	item := &task.Task{ID: taskID, Skill: selectedSkill.Name(), ConversationID: strings.TrimSpace(req.ConversationID), Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds, Provider: string(client.Provider()), CreatedAt: now, UpdatedAt: now}
 	item.ApplyVersionMetadata(executionSnapshot.Version)
+	if len(routeDecision.Candidates) > 0 {
+		if raw, marshalErr := json.Marshal(routeDecision.Candidates); marshalErr == nil {
+			item.RouteCandidates = raw
+		}
+		item.RouteReason = routeDecision.Reason
+		item.Model = routeDecision.Selected.Model
+		item.ModelConfigID = routeDecision.Selected.ConfigID
+	}
 	if creator, ok := manager.cfg.Store.(task.CreateStore); ok {
 		if err := creator.Create(context.Background(), item); err != nil {
 			return nil, err

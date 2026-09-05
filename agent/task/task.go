@@ -80,6 +80,10 @@ type Task struct {
 	PromptVersion         string          `json:"prompt_version"`
 	PromptHash            string          `json:"prompt_hash"`
 	ModelConfigID         int64           `json:"model_config_id"`
+	FinalModelConfigID    int64           `json:"final_model_config_id,omitempty"`
+	RouteCandidates       json.RawMessage `json:"route_candidates,omitempty"`
+	RouteReason           string          `json:"route_reason,omitempty"`
+	RouteFallback         json.RawMessage `json:"route_fallback,omitempty"`
 	InputContractVersion  string          `json:"input_contract_version"`
 	OutputContractVersion string          `json:"output_contract_version"`
 	SkillSource           string          `json:"skill_source"`
