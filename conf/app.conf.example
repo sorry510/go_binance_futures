@@ -30,6 +30,8 @@ password = ""
 host= ""
 port= ""
 dbname = ""
+# MySQL 5.6+ 兼容；MySQL 8.0 如有需要可改为 utf8mb4_0900_ai_ci
+collation = "utf8mb4_unicode_ci"
 # 远程 MySQL 连接稳定性与连接池
 connect_timeout_seconds = 5
 read_timeout_seconds = 30

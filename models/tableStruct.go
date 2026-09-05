@@ -78,7 +78,7 @@ type Order struct {
 
 type Symbols struct {
 	ID             int64   `orm:"column(id)" json:"id"`
-	Symbol         string  `orm:"column(symbol)" json:"symbol"`
+	Symbol         string  `orm:"column(symbol);size(32)" json:"symbol"`
 	PercentChange  float64 `orm:"column(percentChange)" json:"percentChange"`   // 24小时涨跌幅
 	Close          string  `orm:"column(close)" json:"close"`                   // 最新成交价格
 	Open           string  `orm:"column(open)" json:"open"`                     // 24小时开盘价

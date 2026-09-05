@@ -1010,3 +1010,41 @@ func TestRunnerRepairsUnknownToolNameWithoutConsumingToolBudget(t *testing.T) {
 		t.Fatalf("missing exact tool-name repair feedback: %s", last)
 	}
 }
+
+func TestRunnerInjectsConversationHistoryBeforeCurrentInput(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{
+		Model: "fake", Content: `{"action":"final","summary":"done","result":{"ok":true}}`,
+	}}}}
+	skills := skill.NewRegistry()
+	definition := skill.Definition{SkillName: "chat-test", Prompt: "system", Rounds: 2}
+	if err := skills.Register(definition); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	runner, err := NewRunner(Config{
+		Client: client, Skills: skills, Tools: tools.NewRegistry(), Tasks: store,
+		Policy: permission.AllowReadOnly(), Retry: RetryPolicy{MaxAttempts: 1}, Timeout: 2 * time.Second,
+		ConversationHistoryProvider: func(_ context.Context, conversationID, currentTaskID string) ([]contextengine.ContextBlock, error) {
+			if conversationID != "conv-chat" || strings.TrimSpace(currentTaskID) == "" {
+				t.Fatalf("unexpected provider args: conversation=%q task=%q", conversationID, currentTaskID)
+			}
+			return []contextengine.ContextBlock{
+				{ID: "history-1", Type: contextengine.BlockHistory, Source: "conversation:conv-chat", Role: llm.RoleUser, Content: "old question"},
+				{ID: "history-2", Type: contextengine.BlockHistory, Source: "conversation:conv-chat", Role: llm.RoleAssistant, Content: "old answer"},
+			}, nil
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runner.Run(context.Background(), Request{Skill: "chat-test", Input: "current question", ConversationID: "conv-chat"}); err != nil {
+		t.Fatal(err)
+	}
+	request := client.request(0)
+	if len(request.Messages) != 3 {
+		t.Fatalf("unexpected messages: %+v", request.Messages)
+	}
+	if request.Messages[0].Content != "old question" || request.Messages[1].Content != "old answer" || request.Messages[2].Content != "current question" {
+		t.Fatalf("conversation history order is wrong: %+v", request.Messages)
+	}
+}

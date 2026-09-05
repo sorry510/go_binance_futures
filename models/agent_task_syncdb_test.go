@@ -74,6 +74,25 @@ const legacyAgentSkillDDL = `CREATE TABLE agent_skills (
 	deleted integer
 )`
 
+const legacyAgentConversationDDL = `CREATE TABLE agent_conversations (
+	id varchar(64) primary key,
+	skill varchar(64),
+	status varchar(32),
+	created_at integer,
+	updated_at integer,
+	closed_at integer
+)`
+
+const legacyAgentConversationMessageDDL = `CREATE TABLE agent_conversation_messages (
+	id integer primary key autoincrement,
+	conversation_id varchar(64),
+	task_id varchar(64),
+	sequence integer,
+	role varchar(32),
+	content text,
+	created_at integer
+)`
+
 const legacyAgentTaskEventDDL = `CREATE TABLE agent_task_events (
 	id integer primary key autoincrement,
 	task_id varchar(64),
@@ -113,6 +132,18 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	if _, err := db.Exec(legacyAgentSkillDDL); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := db.Exec(legacyAgentConversationDDL); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(legacyAgentConversationMessageDDL); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`INSERT INTO agent_conversations (id, skill, status, created_at, updated_at, closed_at) VALUES ('legacy-conv', 'strategy_builder', 'active', 1700000000000, 1700000000000, 0)`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`INSERT INTO agent_conversation_messages (conversation_id, task_id, sequence, role, content, created_at) VALUES ('legacy-conv', 'legacy-task', 1, 'user', 'legacy message', 1700000000000)`); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := db.Exec(`INSERT INTO agent_skills (name, display_name, description, enabled, created_at, updated_at, deleted) VALUES ('symbol_analysis', 'Symbol', 'legacy native', 1, 1700000000000, 1700000000000, 0)`); err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +163,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace))
+	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentConversation), new(AgentConversationMessage), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace))
 	if err := orm.RunSyncdb("default", false, false); err != nil {
 		t.Fatalf("RunSyncdb must upgrade an existing database with rows: %v", err)
 	}
@@ -154,6 +185,16 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		if count != 1 {
 			t.Fatalf("RunSyncdb did not create V2-5 table %s", table)
 		}
+	}
+
+	requireAgentColumns(t, db, "agent_conversations", []string{"title"})
+	requireAgentColumns(t, db, "agent_conversation_messages", []string{"skill"})
+	var legacyConversationSkill, legacyConversationTitle string
+	if err := db.QueryRow(`SELECT skill, COALESCE(title, '') FROM agent_conversations WHERE id='legacy-conv'`).Scan(&legacyConversationSkill, &legacyConversationTitle); err != nil {
+		t.Fatalf("legacy conversation became unreadable after V2-7 upgrade: %v", err)
+	}
+	if legacyConversationSkill != "strategy_builder" || legacyConversationTitle != "" {
+		t.Fatalf("legacy conversation changed unexpectedly: skill=%q title=%q", legacyConversationSkill, legacyConversationTitle)
 	}
 
 	requireAgentColumns(t, db, "agent_skills", []string{"type", "active_version_id"})

@@ -97,6 +97,20 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 
 		decision, err := parseDecision(response.Content)
 		if err != nil {
+			if adapter, ok := session.selectedSkill.(skill.PlainTextFinalAdapter); ok && adapter.PlainTextFinalAllowed() && extractJSONObject(response.Content) == "" {
+				plain := strings.TrimSpace(response.Content)
+				if plain != "" {
+					raw, marshalErr := json.Marshal(plain)
+					if marshalErr == nil {
+						decision.Action = "final"
+						decision.Summary = plain
+						decision.Result = raw
+						err = nil
+					}
+				}
+			}
+		}
+		if err != nil {
 			executor.runner.observeRepair(item, "decision_protocol")
 			feedback := repairFeedback("decision_protocol", err.Error())
 			executor.runner.appendRuntimeMessage(item.ID, state, &messages, feedback)

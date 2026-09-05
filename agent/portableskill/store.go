@@ -95,7 +95,7 @@ func (s Store) Install(ctx context.Context, version models.AgentSkillVersion, re
 			skill.ID = id
 		}
 		version.SkillID = skill.ID
-		id, insertErr := tx.Insert(&version)
+		id, insertErr := insertSkillVersion(tx, &version)
 		if insertErr != nil {
 			return insertErr
 		}
@@ -128,6 +128,42 @@ func (s Store) Install(ctx context.Context, version models.AgentSkillVersion, re
 		return nil
 	})
 	return result, err
+}
+
+func insertSkillVersion(tx orm.TxOrmer, version *models.AgentSkillVersion) (int64, error) {
+	id, err := tx.Insert(version)
+	if err == nil {
+		return id, nil
+	}
+	message := strings.ToLower(err.Error())
+	legacySchema := strings.Contains(message, "field 'metadata'") ||
+		strings.Contains(message, "agent_skill_versions.metadata") ||
+		strings.Contains(message, "field 'validation_error'") ||
+		strings.Contains(message, "agent_skill_versions.validation_error") ||
+		strings.Contains(message, "field 'skill_name'") ||
+		strings.Contains(message, "agent_skill_versions.skill_name")
+	if !legacySchema {
+		return 0, err
+	}
+	result, legacyErr := tx.Raw(`INSERT INTO agent_skill_versions (
+		skill_id, name, skill_name, package_hash, version, description, license, compatibility,
+		metadata, metadata_json, requested_tools_json, validation_status, validation_error,
+		validation_json, source, source_ref, package_path, file_count, total_bytes, created_at
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		version.SkillID, version.Name, version.Name, version.PackageHash, version.Version,
+		version.Description, version.License, version.Compatibility, version.MetadataJSON,
+		version.MetadataJSON, version.RequestedToolsJSON, version.ValidationStatus, "",
+		version.ValidationJSON, version.Source, version.SourceRef, version.PackagePath,
+		version.FileCount, version.TotalBytes, version.CreatedAt,
+	).Exec()
+	if legacyErr != nil {
+		return 0, fmt.Errorf("insert portable skill version using legacy-schema compatibility: %w (original: %v)", legacyErr, err)
+	}
+	id, legacyErr = result.LastInsertId()
+	if legacyErr != nil {
+		return 0, legacyErr
+	}
+	return id, nil
 }
 
 func (s Store) ListVersions(ctx context.Context, skillID int64) ([]models.AgentSkillVersion, error) {
