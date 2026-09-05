@@ -44,12 +44,15 @@ type Usage struct {
 }
 
 type Response struct {
-	ID           string `json:"id,omitempty"`
-	SessionID    string `json:"session_id,omitempty"`
-	Model        string `json:"model,omitempty"`
-	Content      string `json:"content"`
-	FinishReason string `json:"finish_reason,omitempty"`
-	Usage        Usage  `json:"usage,omitempty"`
+	ID           string      `json:"id,omitempty"`
+	SessionID    string      `json:"session_id,omitempty"`
+	Model        string      `json:"model,omitempty"`
+	Content      string      `json:"content"`
+	FinishReason string      `json:"finish_reason,omitempty"`
+	Usage        Usage       `json:"usage,omitempty"`
+	Provider     Provider    `json:"-"`
+	ConfigID     int64       `json:"-"`
+	RouteTrace   *RouteTrace `json:"-"`
 }
 
 type Client interface {

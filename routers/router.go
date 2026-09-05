@@ -46,6 +46,7 @@ func init() {
 	web.Router("/agents/mcp/oauth/callback", &controllers.AgentMCPController{}, "get:OAuthCallback")                              // MCP OAuth callback
 	web.Router("/agents/mcp/tools/:id", &controllers.AgentMCPController{}, "put:UpdateTool")                                      // MCP Tool 分类/治理
 	web.Router("/agents/mcp/permissions", &controllers.AgentMCPController{}, "post:SavePermission")                               // Skill -> MCP capability 授权
+	web.Router("/llm/router", &controllers.LLMRouterController{}, "get:Get;put:Put")                                              // Model Gateway Router 设置/健康
 	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                                      // LLM Provider 预设
 	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                              // 测试 LLM 配置
 	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                                           // LLM 配置列表/新增

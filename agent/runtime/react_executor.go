@@ -78,6 +78,18 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 		if response.Model != "" {
 			item.Model = response.Model
 		}
+		if response.Provider != "" {
+			item.Provider = string(response.Provider)
+		}
+		if response.ConfigID > 0 {
+			item.FinalModelConfigID = response.ConfigID
+		}
+		if response.RouteTrace != nil {
+			item.RouteReason = response.RouteTrace.Reason
+			if raw, marshalErr := json.Marshal(response.RouteTrace.Attempts); marshalErr == nil {
+				item.RouteFallback = raw
+			}
+		}
 		executor.runner.appendRuntimeMessage(item.ID, state, &messages, llm.Message{Role: llm.RoleAssistant, Content: response.Content})
 		state.Messages = messages
 		state.finishStep(llmStep, StepSucceeded, "LLM response received", "", nil)

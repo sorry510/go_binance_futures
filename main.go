@@ -107,6 +107,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentMCPSecret))
 	orm.RegisterModel(new(models.AgentMCPOAuthState))
 	orm.RegisterModel(new(models.LLMConfig))
+	orm.RegisterModel(new(models.LLMRouterSetting))
 	orm.RegisterModel(new(models.Notification))
 
 	setDriver(driver) // 设置数据库驱动

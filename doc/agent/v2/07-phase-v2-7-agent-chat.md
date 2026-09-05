@@ -271,16 +271,16 @@ git diff --check
 
 ## 人工验收
 
-- [ ] AI 菜单出现“对话”，刷新页面后 Conversation 历史仍存在。
-- [ ] 新建 Conversation，输入 `/` 能看到当前可运行的 Chat-capable Native + Portable Skill。
-- [ ] 选择 V2-6 导入的 Portable Skill，可以正常调用 `skill.<name>.read-resource` 并返回结果。
-- [ ] Portable Skill 已审批 MCP Tool 时可正常调用；未审批时仍被 Permission 拒绝。
-- [ ] `symbol_analysis` 可以从自然语言中确定交易对并执行现有结构化 Input Contract。
-- [ ] 同一 Conversation 第二轮能看到第一轮成功消息历史。
-- [ ] 同一 Conversation 可以从 Portable Skill 切换到另一个 Chat-capable Skill，Task 分别记录实际 Skill。
-- [ ] failed/cancelled Task 在 UI 显示错误，但不会作为成功 Assistant History 注入后续模型。
-- [ ] 同一 Conversation 运行中不能再次发送；不同 Conversation 可以并行。
-- [ ] 点击“查看任务详情”可以回到现有 Task 审计信息。
+- [x] AI 菜单出现“对话”，刷新页面后 Conversation 历史仍存在。
+- [x] 新建 Conversation，输入 `/` 能看到当前可运行的 Chat-capable Native + Portable Skill。
+- [x] 选择 V2-6 导入的 Portable Skill，可以正常调用 `skill.<name>.read-resource` 并返回结果。
+- [x] Portable Skill 已审批 MCP Tool 时可正常调用；未审批时仍被 Permission 拒绝。
+- [x] `symbol_analysis` 可以从自然语言中确定交易对并执行现有结构化 Input Contract。
+- [x] 同一 Conversation 第二轮能看到第一轮成功消息历史。
+- [x] 同一 Conversation 可以从 Portable Skill 切换到另一个 Chat-capable Skill，Task 分别记录实际 Skill。
+- [x] failed/cancelled Task 在 UI 显示错误，但不会作为成功 Assistant History 注入后续模型。
+- [x] 同一 Conversation 运行中不能再次发送；不同 Conversation 可以并行。
+- [x] 点击“查看任务详情”可以回到现有 Task 审计信息。
 
 ## 版本边界
 

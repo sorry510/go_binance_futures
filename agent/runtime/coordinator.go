@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/validator"
+	"go_binance_futures/llm"
 )
 
 type runSession struct {
@@ -102,6 +104,18 @@ func (coordinator *coordinator) prepareNew(ctx context.Context, req Request) (*r
 		Provider: string(coordinator.runner.cfg.Client.Provider()), ExecutionMode: string(mode), CreatedAt: now, UpdatedAt: now,
 	}
 	currentTask.ApplyVersionMetadata(snapshot.Version)
+	if routeDecision, ok := llm.ClientRouteDecision(coordinator.runner.cfg.Client); ok {
+		if raw, marshalErr := json.Marshal(routeDecision.Candidates); marshalErr == nil {
+			currentTask.RouteCandidates = raw
+		}
+		currentTask.RouteReason = routeDecision.Reason
+		if routeDecision.Selected.ConfigID > 0 {
+			currentTask.ModelConfigID = routeDecision.Selected.ConfigID
+		}
+		if routeDecision.Selected.Model != "" {
+			currentTask.Model = routeDecision.Selected.Model
+		}
+	}
 	state := newRunState(taskID, selectedSkill.Name(), mode, *snapshot, maxRounds, maxToolCalls, maxTotalTokens)
 	state.ResumeMetadata = resumableMetadata(req.Metadata)
 	state.syncTask(currentTask)

@@ -108,6 +108,32 @@ func TestStoreUpdatePreservesBlankAPIKey(t *testing.T) {
 		t.Fatalf("unexpected stored config: %+v", row)
 	}
 }
+func TestStorePersistsRoutingCapabilityProfile(t *testing.T) {
+	store := setupLLMStoreTest(t)
+	ctx := context.Background()
+	candidate, structured, reasoning, longContext, nativeTools := 1, 1, 1, 1, 1
+	reliability, contextTokens := 85, 128000
+	item, err := store.Create(ctx, ConfigInput{
+		Name: "router-gemini", Provider: "gemini", APIKey: "test-key", Model: "gemini-test",
+		TimeoutSeconds: 60, Temperature: 0.2, RouterCandidate: &candidate, StructuredOutput: &structured,
+		Reasoning: &reasoning, LongContext: &longContext, NativeToolCalling: &nativeTools,
+		JSONReliability: &reliability, MaxContextTokens: &contextTokens, CostClass: "low", LatencyClass: "low",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.RouterCandidate != 1 || item.StructuredOutput != 1 || item.Reasoning != 1 || item.JSONReliability != 85 {
+		t.Fatalf("routing capability profile was not persisted: %+v", item)
+	}
+	row, err := store.Get(ctx, item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if row.StructuredOutput != 1 || row.Reasoning != 1 || row.LongContext != 1 || row.NativeToolCalling != 1 || row.MaxContextTokens != 128000 {
+		t.Fatalf("stored routing profile mismatch: %+v", row)
+	}
+}
+
 func TestSupportedHTTPProviderConfigs(t *testing.T) {
 	providers := []string{"openai", "anthropic", "deepseek", "glm", "moonshot", "ollama", "gemini", "openai_compatible"}
 	for _, provider := range providers {
@@ -160,5 +186,33 @@ func TestNewFromConfigIDUsesRequestedConfiguration(t *testing.T) {
 	}
 	if ConfigID(client) != item.ID {
 		t.Fatalf("client config id = %d, want %d", ConfigID(client), item.ID)
+	}
+}
+
+func TestModelIdentifierNormalizesUnicodeDashesOnSave(t *testing.T) {
+	store := setupLLMStoreTest(t)
+	ctx := context.Background()
+	item, err := store.Create(ctx, ConfigInput{
+		Name: "gemini-unicode-dash", Provider: "gemini", APIKey: "test-key",
+		Model: "gemini‑3.5‑flash", TimeoutSeconds: 30, Temperature: 0.2,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Model != "gemini-3.5-flash" {
+		t.Fatalf("model = %q, want ASCII hyphens", item.Model)
+	}
+}
+
+func TestConfigFromModelNormalizesLegacyUnicodeDashesAtRuntime(t *testing.T) {
+	cfg, err := configFromModel(models.LLMConfig{
+		ID: 7, Name: "legacy-gemini", Provider: "gemini", APIURL: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+		APIKey: "test-key", Model: "gemini‑3.5‑flash", TimeoutSeconds: 30, Temperature: 0.2,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Model != "gemini-3.5-flash" {
+		t.Fatalf("runtime model = %q, want ASCII hyphens", cfg.Model)
 	}
 }

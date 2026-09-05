@@ -44,6 +44,15 @@ func (client *fakeLLMClient) Generate(_ context.Context, request llm.Request) (*
 	return client.items[index].response, client.items[index].err
 }
 
+type routeAwareFakeClient struct {
+	*fakeLLMClient
+	decision llm.RouteDecision
+}
+
+func (client *routeAwareFakeClient) RouteDecision() llm.RouteDecision {
+	return client.decision
+}
+
 func (client *fakeLLMClient) request(index int) llm.Request {
 	client.mu.Lock()
 	defer client.mu.Unlock()
@@ -91,6 +100,29 @@ func TestRunnerFinalCompletesTask(t *testing.T) {
 	stored, err := store.Get(context.Background(), result.TaskID)
 	if err != nil || stored.Status != task.StatusSucceeded || stored.Progress != 100 {
 		t.Fatalf("unexpected stored task: %+v err=%v", stored, err)
+	}
+}
+
+func TestRunnerPersistsClientRouteDecision(t *testing.T) {
+	base := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{
+		Model: "reasoning-model", Content: `{"action":"final","summary":"done","result":{"ok":true}}`,
+	}}}}
+	candidate := llm.RouteCandidate{ConfigID: 7, Provider: llm.ProviderGemini, Model: "reasoning-model", Score: 120}
+	client := &routeAwareFakeClient{fakeLLMClient: base, decision: llm.RouteDecision{
+		Enabled: true, Reason: "capability match", Candidates: []llm.RouteCandidate{candidate}, Selected: candidate,
+	}}
+	definition := skill.Definition{SkillName: "route-test", Prompt: "test", Rounds: 1}
+	runner, store := newTestRunner(t, client, definition)
+	result, err := runner.Run(context.Background(), Request{Skill: "route-test", Input: "hello"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stored, err := store.Get(context.Background(), result.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.ModelConfigID != 7 || stored.Model != "reasoning-model" || stored.RouteReason != "capability match" || len(stored.RouteCandidates) == 0 {
+		t.Fatalf("route metadata was not persisted: %+v", stored)
 	}
 }
 
