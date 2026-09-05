@@ -170,8 +170,8 @@ func (runner *DefaultRunner) generateWithRetry(ctx context.Context, request llm.
 		}
 		runner.observe(Observation{
 			Type: "llm_call", TaskID: item.ID, ConversationID: item.ConversationID, Skill: item.Skill,
-			Provider: item.Provider, Model: item.Model, Status: status, ErrorType: errorType, Error: errorMessage,
-			Round: item.Round, DurationMs: elapsedMilliseconds(started),
+			StepID: stepID, StepType: string(StepLLM), Provider: item.Provider, Model: item.Model,
+			Status: status, ErrorType: errorType, Error: errorMessage, Round: item.Round, DurationMs: elapsedMilliseconds(started),
 		})
 		if err == nil {
 			return response, nil

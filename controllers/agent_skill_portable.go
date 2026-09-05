@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	agentapp "go_binance_futures/agent/app"
+	"go_binance_futures/agent/observability"
 	"go_binance_futures/agent/portableskill"
 	"go_binance_futures/utils"
 
@@ -41,6 +42,7 @@ func (ctrl *AgentPortableSkillController) Import() {
 	activate := parseActivate(ctrl.GetString("activate"))
 	result, err := (portableskill.Importer{}).ImportFile(ctrl.Ctx.Request.Context(), header.Filename, file, header.Size, false)
 	if err != nil {
+		observability.RecordChange(ctrl.Ctx.Request.Context(), observability.ChangeEvent{Category: "skill", EntityType: "skill_import", EntityName: header.Filename, ChangeType: "import_validation_failed", Status: "error", Detail: map[string]any{"error": err.Error()}})
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
@@ -82,6 +84,7 @@ func (ctrl *AgentPortableSkillController) ImportDirectory() {
 	}
 	result, err := (portableskill.Importer{}).ImportDirectory(ctrl.Ctx.Request.Context(), request.Path, false)
 	if err != nil {
+		observability.RecordChange(ctrl.Ctx.Request.Context(), observability.ChangeEvent{Category: "skill", EntityType: "skill_import", EntityName: request.Path, ChangeType: "import_validation_failed", Status: "error", Detail: map[string]any{"error": err.Error()}})
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}

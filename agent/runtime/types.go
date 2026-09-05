@@ -51,23 +51,38 @@ type MemoryWriter func(context.Context, Request, *task.Task, *Result) ([]string,
 type ConversationHistoryProvider func(context.Context, string, string) ([]contextengine.ContextBlock, error)
 
 type Observation struct {
-	Type           string     `json:"type"`
-	TaskID         string     `json:"task_id"`
-	ConversationID string     `json:"conversation_id,omitempty"`
-	Skill          string     `json:"skill"`
-	Provider       string     `json:"provider,omitempty"`
-	Model          string     `json:"model,omitempty"`
-	Tool           string     `json:"tool,omitempty"`
-	Status         string     `json:"status,omitempty"`
-	ErrorType      string     `json:"error_type,omitempty"`
-	Error          string     `json:"error,omitempty"`
-	Round          int        `json:"round,omitempty"`
-	DurationMs     int64      `json:"duration_ms,omitempty"`
-	CacheHit       bool       `json:"cache_hit,omitempty"`
-	Partial        bool       `json:"partial,omitempty"`
-	RawSize        int        `json:"raw_size,omitempty"`
-	ContentHash    string     `json:"content_hash,omitempty"`
-	Usage          task.Usage `json:"usage,omitempty"`
+	Type            string     `json:"type"`
+	TaskID          string     `json:"task_id"`
+	ConversationID  string     `json:"conversation_id,omitempty"`
+	Skill           string     `json:"skill"`
+	StepID          string     `json:"step_id,omitempty"`
+	StepType        string     `json:"step_type,omitempty"`
+	Provider        string     `json:"provider,omitempty"`
+	Model           string     `json:"model,omitempty"`
+	Tool            string     `json:"tool,omitempty"`
+	ToolSource      string     `json:"tool_source,omitempty"`
+	ProviderRef     string     `json:"provider_ref,omitempty"`
+	ProtocolVersion string     `json:"protocol_version,omitempty"`
+	CatalogHash     string     `json:"catalog_hash,omitempty"`
+	SchemaHash      string     `json:"schema_hash,omitempty"`
+	Status          string     `json:"status,omitempty"`
+	ErrorType       string     `json:"error_type,omitempty"`
+	Error           string     `json:"error,omitempty"`
+	Round           int        `json:"round,omitempty"`
+	DurationMs      int64      `json:"duration_ms,omitempty"`
+	CacheHit        bool       `json:"cache_hit,omitempty"`
+	Partial         bool       `json:"partial,omitempty"`
+	RawSize         int        `json:"raw_size,omitempty"`
+	ContentHash     string     `json:"content_hash,omitempty"`
+	ContextTokens   int        `json:"context_tokens,omitempty"`
+	ContextBlocks   int        `json:"context_blocks,omitempty"`
+	TrimmedBlocks   int        `json:"trimmed_blocks,omitempty"`
+	MemorySelected  int        `json:"memory_selected,omitempty"`
+	MemoryTrimmed   int        `json:"memory_trimmed,omitempty"`
+	EvidenceCount   int        `json:"evidence_count,omitempty"`
+	EvalCase        string     `json:"eval_case,omitempty"`
+	EvalScore       float64    `json:"eval_score,omitempty"`
+	Usage           task.Usage `json:"usage,omitempty"`
 }
 
 type Observer interface {
