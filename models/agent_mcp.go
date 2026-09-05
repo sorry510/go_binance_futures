@@ -30,8 +30,8 @@ func (*AgentMCPServer) TableName() string { return "agent_mcp_servers" }
 type AgentMCPTool struct {
 	ID             int64  `orm:"column(id);auto" json:"id"`
 	ServerID       int64  `orm:"column(server_id);index" json:"server_id"`
-	RemoteName     string `orm:"column(remote_name);size(192);index" json:"remote_name"`
-	CanonicalName  string `orm:"column(canonical_name);size(255);unique" json:"canonical_name"`
+	RemoteName     string `orm:"column(remote_name);size(191);index" json:"remote_name"`
+	CanonicalName  string `orm:"column(canonical_name);size(191);unique" json:"canonical_name"`
 	Description    string `orm:"column(description);type(text);null" json:"description,omitempty"`
 	InputSchema    string `orm:"column(input_schema);type(text);null" json:"input_schema,omitempty"`
 	OutputSchema   string `orm:"column(output_schema);type(text);null" json:"output_schema,omitempty"`
@@ -72,7 +72,7 @@ func (*AgentMCPResource) TableName() string { return "agent_mcp_resources" }
 type AgentMCPPrompt struct {
 	ID          int64  `orm:"column(id);auto" json:"id"`
 	ServerID    int64  `orm:"column(server_id);index" json:"server_id"`
-	RemoteName  string `orm:"column(remote_name);size(192);index" json:"remote_name"`
+	RemoteName  string `orm:"column(remote_name);size(191);index" json:"remote_name"`
 	Title       string `orm:"column(title);size(255)" json:"title,omitempty"`
 	Description string `orm:"column(description);type(text);null" json:"description,omitempty"`
 	Arguments   string `orm:"column(arguments_json);type(text);null" json:"arguments_json,omitempty"`

@@ -30,6 +30,8 @@ password = ""
 host= ""
 port= ""
 dbname = ""
+# MySQL 5.6+ 兼容；MySQL 8.0 如有需要可改为 utf8mb4_0900_ai_ci
+collation = "utf8mb4_unicode_ci"
 # 远程 MySQL 连接稳定性与连接池
 connect_timeout_seconds = 5
 read_timeout_seconds = 30
@@ -85,6 +87,12 @@ slack_channel_id = ""
 [external]
 # 外部链接
 links = [{"url": "url1", "title": "title1"}]
+
+[agent_skills]
+# 标准 Agent Skills 持久化目录
+data_dir = "./data/agent-skills"
+# 服务器目录导入只允许访问此目录下的相对路径
+import_dir = "./data/agent-skill-imports"
 
 [mcp]
 # MCP 仅使用 Streamable HTTP，地址为当前 Web 服务的 /mcp，使用登录接口返回的 Bearer Token 鉴权

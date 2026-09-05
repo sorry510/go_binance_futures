@@ -118,6 +118,13 @@ func (manager *Manager) Get(ctx context.Context, taskID string) (*task.Task, err
 	return manager.cfg.Store.Get(ctx, strings.TrimSpace(taskID))
 }
 
+func (manager *Manager) Skills() []skill.Skill {
+	if manager == nil || manager.cfg.Skills == nil {
+		return nil
+	}
+	return manager.cfg.Skills.List()
+}
+
 func (manager *Manager) List(ctx context.Context, options task.ListOptions) (task.ListResult, error) {
 	return manager.cfg.Store.List(ctx, options)
 }

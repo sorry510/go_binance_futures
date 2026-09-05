@@ -142,6 +142,25 @@ func splitSQLStatements(content string) []string {
 	return statements
 }
 
+func prepareVersionCompatibility(executor rawExecutor, version int64) error {
+	if version != 1 {
+		return nil
+	}
+	var mysqlVersion string
+	if err := executor.Raw("SELECT VERSION()").QueryRow(&mysqlVersion); err != nil {
+		return nil // SQLite / non-MySQL: version SQL remains database-agnostic.
+	}
+	for _, query := range []string{
+		"ALTER TABLE `symbols` MODIFY COLUMN `symbol` VARCHAR(32) NOT NULL",
+		"ALTER TABLE `spot_symbols` MODIFY COLUMN `symbol` VARCHAR(32) NOT NULL",
+	} {
+		if _, err := executor.Raw(query).Exec(); err != nil {
+			return fmt.Errorf("prepare MySQL compatibility: %w, sql: %s", err, query)
+		}
+	}
+	return nil
+}
+
 func UpdateDatabase(oldVersion int64, newVersion int64) error {
 	o := orm.NewOrm()
 	to, err := o.Begin()
@@ -151,6 +170,10 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 	}
 	version := oldVersion + 1
 	for ; version <= newVersion; version++ {
+		if err := prepareVersionCompatibility(to, version); err != nil {
+			_ = to.Rollback()
+			return fmt.Errorf("prepare database version %d compatibility failed: %w", version, err)
+		}
 		// 逐个执行数据库更新脚本
 		filepath := fmt.Sprintf("./command/sql/version/%d.sql", version)
 		if err := readAndExecuteSQLFile(to, filepath); err != nil {

@@ -90,6 +90,9 @@ func (ctrl *AgentSkillController) Put() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
+	if item.Type == "portable" {
+		_ = agentapp.SyncDefaultPortableSkills(ctrl.Ctx.Request.Context())
+	}
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
 }
 
@@ -103,5 +106,6 @@ func (ctrl *AgentSkillController) Delete() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
+	_ = agentapp.SyncDefaultPortableSkills(ctrl.Ctx.Request.Context())
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "msg": "success"})
 }

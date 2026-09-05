@@ -127,7 +127,21 @@ func (coordinator *coordinator) buildContext(ctx context.Context, session *runSe
 		return coordinator.runner.fail(currentTask, "build_input_failed", err)
 	}
 	state.Messages = messages
-	state.ContextBlocks = contextengine.InitialMessageBlocks(messages)
+	state.ContextBlocks = nil
+	if coordinator.runner.cfg.ConversationHistoryProvider != nil && strings.TrimSpace(session.req.ConversationID) != "" {
+		history, historyErr := coordinator.runner.cfg.ConversationHistoryProvider(ctx, session.req.ConversationID, currentTask.ID)
+		if historyErr != nil {
+			state.finishStep(stepID, StepFailed, "", "conversation_history_failed", historyErr)
+			state.syncTask(currentTask)
+			return coordinator.runner.fail(currentTask, "build_input_failed", historyErr)
+		}
+		for _, block := range history {
+			state.appendContextBlock(block)
+		}
+	}
+	for _, block := range contextengine.InitialMessageBlocks(messages) {
+		state.appendContextBlock(block)
+	}
 	resourceCount := 0
 	if provider, ok := session.selectedSkill.(skill.ContextResourceProvider); ok {
 		resources, loadErr := coordinator.runner.cfg.ContextEngine.LoadResources(ctx, provider.ContextResources(session.skillRequest), requestedContextResourceIDs(session.req.Metadata))

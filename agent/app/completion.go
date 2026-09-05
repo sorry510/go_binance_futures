@@ -23,6 +23,9 @@ func persistTaskCompletion(req agentruntime.Request, item *task.Task, result *ag
 	if item == nil {
 		return nil
 	}
+	if err := persistChatCompletion(item, result); err != nil {
+		logs.Error("persist chat completion:", err)
+	}
 	if req.Skill == marketregime.Name {
 		if job, _ := req.Metadata["scheduler_job"].(string); job == "market_regime" {
 			return persistMarketRegimeCompletion(item, result)
@@ -87,6 +90,9 @@ func persistMarketRegimeCompletion(item *task.Task, result *agentruntime.Result)
 func EnsureCompletion(item *task.Task) error {
 	if item == nil || !task.IsTerminalStatus(item.Status) {
 		return nil
+	}
+	if err := persistChatCompletion(item, nil); err != nil {
+		logs.Error("ensure chat completion:", err)
 	}
 	if item.Skill == marketregime.Name {
 		return nil

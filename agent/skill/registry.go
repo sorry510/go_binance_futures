@@ -40,3 +40,38 @@ func (registry *Registry) Get(name string) (Skill, bool) {
 	item, exists := registry.skills[strings.TrimSpace(name)]
 	return item, exists
 }
+
+func (registry *Registry) Upsert(item Skill) error {
+	if registry == nil {
+		return fmt.Errorf("skill registry is nil")
+	}
+	if item == nil || strings.TrimSpace(item.Name()) == "" {
+		return fmt.Errorf("skill name is required")
+	}
+	registry.mu.Lock()
+	registry.skills[strings.TrimSpace(item.Name())] = item
+	registry.mu.Unlock()
+	return nil
+}
+
+func (registry *Registry) Unregister(name string) {
+	if registry == nil {
+		return
+	}
+	registry.mu.Lock()
+	delete(registry.skills, strings.TrimSpace(name))
+	registry.mu.Unlock()
+}
+
+func (registry *Registry) List() []Skill {
+	if registry == nil {
+		return nil
+	}
+	registry.mu.RLock()
+	defer registry.mu.RUnlock()
+	items := make([]Skill, 0, len(registry.skills))
+	for _, item := range registry.skills {
+		items = append(items, item)
+	}
+	return items
+}

@@ -102,7 +102,7 @@ skill_instruction
 mcp_resource
 ```
 
-其中 `memory` 和 `mcp_resource` 已定义协议，本阶段不提前实现 V2-5/V2-8 的具体数据源。
+其中 `memory` 和 `mcp_resource` 已定义协议，本阶段不提前实现 V2-5/V2-9 的具体数据源。
 
 ### 4.2 默认优先级
 
@@ -161,7 +161,7 @@ Token estimator 使用保守启发式：
 
 它不是 provider tokenizer 的精确替代，目标是在真正请求模型前提前做稳定裁剪。
 
-以后 V2-7 Model Gateway 可以根据模型 capability 覆盖 `MaxContextTokens`，本阶段 Runtime 已支持不同预算配置。
+以后 V2-8 Model Gateway 可以根据模型 capability 覆盖 `MaxContextTokens`，本阶段 Runtime 已支持不同预算配置。
 
 ### 5.1 裁剪规则
 
