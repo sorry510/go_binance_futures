@@ -232,7 +232,7 @@ func (pipeline *Pipeline) applyAIResult(value signalservice.Signal, result alert
 	}
 	params := notify.AgentAlertParams{
 		Title: "notification.agent_alert_title", EventID: value.EventID, SignalID: value.SignalID,
-		TaskID: trace.TaskID, Symbol: value.Symbol, SignalType: string(value.Type), Severity: string(result.Severity),
+		TaskID: trace.TaskID, EventTime: value.CreatedAt, Symbol: value.Symbol, SignalType: string(value.Type), Severity: string(result.Severity),
 		Summary: result.Summary, MarketContext: result.MarketContext, ConfirmedBy: result.ConfirmedBy,
 		Risks: result.Risks, Source: "AI", Fallback: false,
 	}
@@ -272,7 +272,7 @@ func fallbackNotification(value signalservice.Signal, taskID, reason string) not
 		contextText += lang.Lang("notification.separator") + fmt.Sprintf(lang.Lang("notification.fallback_reason"), strings.TrimSpace(reason))
 	}
 	return notify.AgentAlertParams{
-		Title: "notification.rule_alert_title", EventID: value.EventID, SignalID: value.SignalID, TaskID: taskID,
+		Title: "notification.rule_alert_title", EventID: value.EventID, SignalID: value.SignalID, TaskID: taskID, EventTime: value.CreatedAt,
 		Symbol: value.Symbol, SignalType: string(value.Type), Severity: string(value.Severity),
 		Summary: summary, MarketContext: contextText, ConfirmedBy: signalEvidence(value),
 		Risks: []string{lang.Lang("notification.rule_unverified")}, Source: "RULE", Fallback: true,

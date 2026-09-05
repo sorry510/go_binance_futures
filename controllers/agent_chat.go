@@ -72,6 +72,24 @@ func (ctrl *AgentChatController) UpdateConversation() {
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": updated, "msg": "success"})
 }
 
+func (ctrl *AgentChatController) DeleteConversation() {
+	id := strings.TrimSpace(ctrl.Ctx.Input.Param(":id"))
+	item, err := agentapp.ChatConversationStore().Get(ctrl.Ctx.Request.Context(), id)
+	if err != nil || item.Skill != conversation.ChatSkill {
+		ctrl.Ctx.Resp(utils.ResJson(404, nil, "chat conversation not found"))
+		return
+	}
+	if err := agentapp.ChatConversationStore().DeleteChat(ctrl.Ctx.Request.Context(), id); err != nil {
+		if strings.Contains(err.Error(), "running task") {
+			ctrl.Ctx.Resp(utils.ResJson(409, nil, err.Error()))
+			return
+		}
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "msg": "success"})
+}
+
 func (ctrl *AgentChatController) Messages() {
 	id := strings.TrimSpace(ctrl.Ctx.Input.Param(":id"))
 	item, err := agentapp.ChatConversationStore().Get(ctrl.Ctx.Request.Context(), id)

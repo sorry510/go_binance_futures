@@ -3,6 +3,7 @@ package notify
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"go_binance_futures/lang"
 	"go_binance_futures/webnotification"
@@ -69,6 +70,7 @@ func renderAgentAlertContent(params AgentAlertParams, format agentAlertFormat, t
 	}
 	title = translateAgentAlertValue(translate, "", title)
 	lines := []agentAlertLine{
+		{labelKey: "notification.label.event_time", content: agentAlertEventTime(params.EventTime)},
 		{labelKey: "notification.label.symbol", content: params.Symbol},
 		{labelKey: "notification.label.signal", content: translateAgentAlertValue(translate, "notification.signal_type", params.SignalType)},
 		{labelKey: "notification.label.severity", content: translateAgentAlertValue(translate, "notification.severity", severity), important: severity == "high" || severity == "critical"},
@@ -89,6 +91,13 @@ func renderAgentAlertContent(params AgentAlertParams, format agentAlertFormat, t
 		content.WriteByte('\n')
 	}
 	return content.String()
+}
+
+func agentAlertEventTime(value int64) string {
+	if value <= 0 {
+		return nowTime()
+	}
+	return time.UnixMilli(value).In(time.Local).Format("2006-01-02 15:04:05")
 }
 
 func renderAgentAlertLine(label, content string, important bool, format agentAlertFormat) string {
