@@ -107,6 +107,7 @@
     "fallback_reason": "AI fallback reason: %s",
     "rule_unverified": "The rule alert has not completed full AI cross-validation",
     "label": {
+      "event_time": "Event Time",
       "symbol": "Symbol",
       "signal": "Signal Type",
       "severity": "Severity",

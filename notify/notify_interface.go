@@ -113,6 +113,7 @@ type AgentAlertParams struct {
 	EventID       string
 	SignalID      string
 	TaskID        string
+	EventTime     int64
 	Symbol        string
 	SignalType    string
 	Severity      string
