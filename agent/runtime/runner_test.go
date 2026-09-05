@@ -44,6 +44,15 @@ func (client *fakeLLMClient) Generate(_ context.Context, request llm.Request) (*
 	return client.items[index].response, client.items[index].err
 }
 
+type routeAwareFakeClient struct {
+	*fakeLLMClient
+	decision llm.RouteDecision
+}
+
+func (client *routeAwareFakeClient) RouteDecision() llm.RouteDecision {
+	return client.decision
+}
+
 func (client *fakeLLMClient) request(index int) llm.Request {
 	client.mu.Lock()
 	defer client.mu.Unlock()
@@ -91,6 +100,29 @@ func TestRunnerFinalCompletesTask(t *testing.T) {
 	stored, err := store.Get(context.Background(), result.TaskID)
 	if err != nil || stored.Status != task.StatusSucceeded || stored.Progress != 100 {
 		t.Fatalf("unexpected stored task: %+v err=%v", stored, err)
+	}
+}
+
+func TestRunnerPersistsClientRouteDecision(t *testing.T) {
+	base := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{
+		Model: "reasoning-model", Content: `{"action":"final","summary":"done","result":{"ok":true}}`,
+	}}}}
+	candidate := llm.RouteCandidate{ConfigID: 7, Provider: llm.ProviderGemini, Model: "reasoning-model", Score: 120}
+	client := &routeAwareFakeClient{fakeLLMClient: base, decision: llm.RouteDecision{
+		Enabled: true, Reason: "capability match", Candidates: []llm.RouteCandidate{candidate}, Selected: candidate,
+	}}
+	definition := skill.Definition{SkillName: "route-test", Prompt: "test", Rounds: 1}
+	runner, store := newTestRunner(t, client, definition)
+	result, err := runner.Run(context.Background(), Request{Skill: "route-test", Input: "hello"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stored, err := store.Get(context.Background(), result.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.ModelConfigID != 7 || stored.Model != "reasoning-model" || stored.RouteReason != "capability match" || len(stored.RouteCandidates) == 0 {
+		t.Fatalf("route metadata was not persisted: %+v", stored)
 	}
 }
 
@@ -1046,5 +1078,103 @@ func TestRunnerInjectsConversationHistoryBeforeCurrentInput(t *testing.T) {
 	}
 	if request.Messages[0].Content != "old question" || request.Messages[1].Content != "old answer" || request.Messages[2].Content != "current question" {
 		t.Fatalf("conversation history order is wrong: %+v", request.Messages)
+	}
+}
+
+func TestRunnerTracesLongTermMemoryReadAndWrite(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{
+		Model: "fake", Content: `{"action":"final","summary":"memory done","result":{"ok":true}}`,
+	}}}}
+	definition := skill.Definition{SkillName: "memory-test", Prompt: "test", Rounds: 2}
+	skills := skill.NewRegistry()
+	if err := skills.Register(definition); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	runner, err := NewRunner(Config{
+		Client: client, Skills: skills, Tools: tools.NewRegistry(), Tasks: store, Policy: permission.AllowReadOnly(),
+		Retry: RetryPolicy{MaxAttempts: 1}, Timeout: 2 * time.Second,
+		MemoryContextProvider: func(context.Context, string, skill.Request) ([]contextengine.ContextBlock, error) {
+			return []contextengine.ContextBlock{{ID: "memory:42", Type: contextengine.BlockMemory, Source: "test-memory", Role: llm.RoleUser, Content: "remember preferred risk level", Freshness: contextengine.FreshnessFresh}}, nil
+		},
+		MemoryWriter: func(context.Context, Request, *task.Task, *Result) ([]string, error) {
+			return []string{"memory:99"}, nil
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runner.Run(context.Background(), Request{Skill: "memory-test", Input: "hello"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stored, err := store.Get(context.Background(), result.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	seenRead, seenWrite := false, false
+	for _, event := range stored.Events {
+		if event.Stage == "memory_read" && strings.Contains(event.Message, "memory:42") {
+			seenRead = true
+		}
+		if event.Stage == "memory_write" && strings.Contains(event.Message, "memory:99") {
+			seenWrite = true
+		}
+	}
+	if !seenRead || !seenWrite {
+		t.Fatalf("memory audit events missing: read=%v write=%v events=%+v", seenRead, seenWrite, stored.Events)
+	}
+	var steps []ExecutionStep
+	if err := json.Unmarshal(stored.Steps, &steps); err != nil {
+		t.Fatal(err)
+	}
+	selected := false
+	for _, step := range steps {
+		if step.ContextTrace != nil && len(step.ContextTrace.SelectedMemoryIDs) > 0 && step.ContextTrace.SelectedMemoryIDs[0] == "memory:42" {
+			selected = true
+		}
+	}
+	if !selected {
+		t.Fatalf("memory read missing from structured context trace: %+v", steps)
+	}
+}
+
+func TestRunnerDegradesWhenLongTermMemoryIsUnavailable(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{Content: `{"action":"final","summary":"ok","result":{"ok":true}}`}}}}
+	definition := skill.Definition{SkillName: "memory-degraded", Prompt: "test", Rounds: 1}
+	skills := skill.NewRegistry()
+	if err := skills.Register(definition); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	runner, err := NewRunner(Config{
+		Client: client, Skills: skills, Tools: tools.NewRegistry(), Tasks: store, Policy: permission.AllowReadOnly(),
+		Retry: RetryPolicy{MaxAttempts: 1}, Timeout: 2 * time.Second,
+		MemoryContextProvider: func(context.Context, string, skill.Request) ([]contextengine.ContextBlock, error) {
+			return nil, fmt.Errorf("memory database unavailable")
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runner.Run(context.Background(), Request{Skill: "memory-degraded", Input: "hello"})
+	if err != nil {
+		t.Fatalf("optional memory failure must not fail task: %v", err)
+	}
+	stored, err := store.Get(context.Background(), result.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.Status != task.StatusSucceeded {
+		t.Fatalf("status=%s", stored.Status)
+	}
+	found := false
+	for _, event := range stored.Events {
+		if event.Stage == "memory_read" && event.Status == "error" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("memory read failure was not audited: %+v", stored.Events)
 	}
 }

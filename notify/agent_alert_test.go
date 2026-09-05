@@ -11,6 +11,7 @@ func TestRenderAgentAlertContentLocalizesLabelsAndHighlightsImportantValues(t *t
 		"notification.none":                  "无",
 		"notification.separator":             "；",
 		"notification.fallback":              "回退模式",
+		"notification.label.event_time":      "事件时间",
 		"notification.label.symbol":          "交易对",
 		"notification.label.signal":          "信号类型",
 		"notification.label.severity":        "严重程度",
@@ -35,12 +36,14 @@ func TestRenderAgentAlertContentLocalizesLabelsAndHighlightsImportantValues(t *t
 		Risks:         []string{"可能快速反转"},
 		SignalID:      "sig-1",
 		TaskID:        "task-1",
+		EventTime:     1700000000000,
 		Source:        "AI",
 	}
 
 	content := renderAgentAlertContent(params, agentAlertDingTalk, translate)
 	for _, expected := range []string{
 		"## AI 异常行情分析",
+		`#### **事件时间**：<font color="#008000">` + agentAlertEventTime(1700000000000) + `</font>`,
 		`#### **交易对**：<font color="#008000">BTCUSDT</font>`,
 		`#### **信号类型**：<font color="#008000">快速行情波动</font>`,
 		`#### **严重程度**：<font color="#FF0000">严重</font>`,
@@ -65,6 +68,7 @@ func TestRenderAgentAlertContentUsesSlackColorIndicators(t *testing.T) {
 		"notification.none":                  "none",
 		"notification.separator":             "; ",
 		"notification.fallback":              "fallback mode",
+		"notification.label.event_time":      "Event Time",
 		"notification.label.symbol":          "Symbol",
 		"notification.label.signal":          "Signal Type",
 		"notification.label.severity":        "Severity",

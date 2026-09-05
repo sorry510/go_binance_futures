@@ -26,7 +26,19 @@ Context Engine 根据 task/scope/freshness 检索，预算不足时 Memory 优�
 
 ## 验收
 
-- [ ] Conversation/Memory/Task 清晰分离。
-- [ ] 市场记忆自动过期。
-- [ ] Memory 读写进入 Trace。
-- [ ] 用户可管理 Memory。
+- [x] Conversation/Memory/Task 清晰分离。
+- [x] 市场记忆自动过期。
+- [x] Memory 读写进入 Trace。
+- [x] 用户可管理 Memory。
+
+
+## 实现摘要
+
+- 新增 `agent_memories` 关系表与 `agent/memory` 独立包，Conversation、Task、Memory 使用独立表和生命周期。
+- 支持 `user_preference`、`strategy_fact`、`market_hypothesis`、`task_summary`、`lesson`，字段包含 Scope、source task、confidence、status、content hash、created/updated/expires time。
+- Scope 按 user / skill / symbol / strategy 的非空字段做交集匹配；Memory 以 `BlockMemory` 注入现有 Context Engine，优先级保持低于当前事实、Task 与 Skill 指令。
+- `market_hypothesis` 强制 TTL，未显式指定时默认 6 小时；过期后不再进入 Context，并在访问时收敛为 `expired` 状态。
+- Runtime 成功任务只自动持久化低风险 `task_summary`，默认 TTL 30 天并按 source task 幂等；`strategy_fact`、`market_hypothesis`、`user_preference` 不允许 Runtime 自动永久保存。
+- 支持 `candidate` 状态及人工审批；仅 `active` Memory 可以被 Context 检索。
+- Context Trace 新增 `selected_memory_ids` / `trimmed_memory_ids`；Runtime Task Event 新增 `memory_read` / `memory_write` 审计事件。
+- 新增 `/agents/memories` 管理 API，以及前端 `AI -> Memory 管理` 页面，支持筛选、新增、编辑、审批、禁用、启用、删除和查看过期状态。

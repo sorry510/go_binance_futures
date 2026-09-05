@@ -28,6 +28,10 @@ type AgentTask struct {
 	PromptVersion         string  `orm:"column(prompt_version);size(64)" json:"prompt_version"`
 	PromptHash            string  `orm:"column(prompt_hash);size(64)" json:"prompt_hash"`
 	ModelConfigID         int64   `orm:"column(model_config_id);index" json:"model_config_id"`
+	FinalModelConfigID    int64   `orm:"column(final_model_config_id);index" json:"final_model_config_id"`
+	RouteCandidatesJSON   *string `orm:"column(route_candidates_json);type(text);null" json:"-"`
+	RouteReason           *string `orm:"column(route_reason);type(text);null" json:"route_reason,omitempty"`
+	RouteFallbackJSON     *string `orm:"column(route_fallback_json);type(text);null" json:"-"`
 	InputContractVersion  string  `orm:"column(input_contract_version);size(96)" json:"input_contract_version"`
 	OutputContractVersion string  `orm:"column(output_contract_version);size(96)" json:"output_contract_version"`
 	SkillSource           string  `orm:"column(skill_source);size(32);default(native)" json:"skill_source"`

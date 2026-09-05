@@ -34,6 +34,10 @@ type StructuredEvidenceValidatorProvider interface {
 	ValidatorForRunWithEvidence(req Request, toolResults map[string]any, evidence map[string]contextengine.Evidence) validator.FinalValidator
 }
 
+type ModelRequirementProvider interface {
+	ModelRequirements() llm.ModelRequirements
+}
+
 type ExecutionModeProvider interface {
 	ExecutionMode() string
 }
@@ -52,16 +56,17 @@ type Skill interface {
 }
 
 type Definition struct {
-	SkillName            string
-	Prompt               string
-	AllowedTools         []string
-	Rounds               int
-	Mode                 string
-	Version              VersionInfo
-	BuildInputFunc       func(context.Context, Request) ([]llm.Message, error)
-	FinalValidator       validator.FinalValidator
-	RequiredToolsFunc    func(Request) []string
-	ContextResourcesFunc func(Request) []contextengine.Resource
+	SkillName              string
+	Prompt                 string
+	AllowedTools           []string
+	Rounds                 int
+	Mode                   string
+	Version                VersionInfo
+	BuildInputFunc         func(context.Context, Request) ([]llm.Message, error)
+	FinalValidator         validator.FinalValidator
+	RequiredToolsFunc      func(Request) []string
+	ContextResourcesFunc   func(Request) []contextengine.Resource
+	ModelRequirementsValue llm.ModelRequirements
 }
 
 func (definition Definition) Name() string         { return definition.SkillName }
@@ -69,8 +74,11 @@ func (definition Definition) SystemPrompt() string { return definition.Prompt }
 func (definition Definition) Tools() []string {
 	return append([]string(nil), definition.AllowedTools...)
 }
-func (definition Definition) MaxRounds() int           { return definition.Rounds }
-func (definition Definition) ExecutionMode() string    { return definition.Mode }
+func (definition Definition) MaxRounds() int        { return definition.Rounds }
+func (definition Definition) ExecutionMode() string { return definition.Mode }
+func (definition Definition) ModelRequirements() llm.ModelRequirements {
+	return definition.ModelRequirementsValue
+}
 func (definition Definition) VersionInfo() VersionInfo { return definition.Version }
 func (definition Definition) BuildInput(ctx context.Context, req Request) ([]llm.Message, error) {
 	if definition.BuildInputFunc != nil {
