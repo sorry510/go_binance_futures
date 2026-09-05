@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"go_binance_futures/agent/observability"
 	"go_binance_futures/agent/replay"
 	"go_binance_futures/agent/skill"
 )
@@ -23,5 +24,11 @@ func Evaluate(ctx context.Context, item Case, fixture replay.Fixture, definition
 	}
 	out := replay.Run(ctx, fixture, definition)
 	duration := now().Sub(started)
-	return score(item, out, duration)
+	report := score(item, out, duration)
+	status := "failed"
+	if report.Passed {
+		status = "passed"
+	}
+	observability.RecordEval(ctx, report.CaseName, report.Skill, status, report.Score, report.DurationMs, report.Error)
+	return report
 }

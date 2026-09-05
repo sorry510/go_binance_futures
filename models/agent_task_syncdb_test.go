@@ -163,7 +163,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentConversation), new(AgentConversationMessage), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace), new(AgentMemory), new(LLMConfig), new(LLMRouterSetting))
+	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentConversation), new(AgentConversationMessage), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace), new(AgentMemory), new(AgentObservation), new(AgentChangeEvent), new(LLMConfig), new(LLMRouterSetting))
 	if err := orm.RunSyncdb("default", false, false); err != nil {
 		t.Fatalf("RunSyncdb must upgrade an existing database with rows: %v", err)
 	}
@@ -177,7 +177,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	requireAgentColumns(t, db, "agent_task_events", []string{
 		"step_id", "step_type", "error_type", "checkpoint",
 	})
-	for _, table := range []string{"agent_skill_versions", "agent_skill_permissions", "agent_mcp_servers", "agent_mcp_tools", "agent_mcp_resources", "agent_mcp_prompts", "agent_mcp_permissions", "agent_mcp_secrets", "agent_mcp_oauth_states", "agent_alert_pipeline_traces", "agent_memories", "llm_configs", "llm_router_settings"} {
+	for _, table := range []string{"agent_skill_versions", "agent_skill_permissions", "agent_mcp_servers", "agent_mcp_tools", "agent_mcp_resources", "agent_mcp_prompts", "agent_mcp_permissions", "agent_mcp_secrets", "agent_mcp_oauth_states", "agent_alert_pipeline_traces", "agent_memories", "agent_observations", "agent_change_events", "llm_configs", "llm_router_settings"} {
 		var count int
 		if err := db.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?`, table).Scan(&count); err != nil {
 			t.Fatal(err)
@@ -188,6 +188,15 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	}
 
 	requireAgentColumns(t, db, "agent_conversations", []string{"title"})
+	requireAgentColumns(t, db, "agent_observations", []string{
+		"task_id", "type", "step_id", "step_type", "skill", "provider", "model", "tool", "tool_source", "provider_ref",
+		"protocol_version", "catalog_hash", "schema_hash", "status", "error_type", "duration_ms", "cache_hit", "partial",
+		"context_tokens", "context_blocks", "trimmed_blocks", "memory_selected", "memory_trimmed", "evidence_count", "eval_case", "eval_score", "created_at",
+	})
+	requireAgentColumns(t, db, "agent_change_events", []string{
+		"category", "entity_type", "entity_id", "entity_name", "change_type", "from_version", "to_version", "before_hash", "after_hash", "status", "detail_json", "created_at",
+	})
+
 	requireAgentColumns(t, db, "agent_conversation_messages", []string{"skill"})
 	var legacyConversationSkill, legacyConversationTitle string
 	if err := db.QueryRow(`SELECT skill, COALESCE(title, '') FROM agent_conversations WHERE id='legacy-conv'`).Scan(&legacyConversationSkill, &legacyConversationTitle); err != nil {

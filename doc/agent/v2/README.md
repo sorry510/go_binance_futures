@@ -61,7 +61,7 @@ V2 从现在开始严格按照 Phase 编号顺序开发，不再使用“编号�
 | [V2-7](./07-phase-v2-7-agent-chat.md) | P0 ✅ | Agent 对话入口、Conversation Context、Slash Skill 调用 |
 | [V2-8](./08-phase-v2-8-model-gateway.md) | P1 ✅ | Model Capability、Router、Health、Fallback |
 | [V2-9](./09-phase-v2-9-memory.md) | P1 ✅ | 长期 Memory、TTL、Scope 与管理 |
-| [V2-10](./10-phase-v2-10-observability.md) | P1 | Trace、长期指标、运营与管理页面 |
+| [V2-10](./10-phase-v2-10-observability.md) | P1 ✅ | Trace、长期指标、运营与管理页面 |
 | [V2-11](./11-phase-v2-11-workflows.md) | P1 | market_scan、strategy_review 等业务 Workflow |
 | [V2-12](./12-phase-v2-12-risk-execution.md) | P2 | Proposal、Risk Engine、Approval、受控执行 |
 

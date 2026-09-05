@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
+	"go_binance_futures/agent/observability"
 	"go_binance_futures/models"
 )
 
@@ -127,6 +128,9 @@ func (s Store) Install(ctx context.Context, version models.AgentSkillVersion, re
 		result = ImportResult{Skill: skill, Version: version}
 		return nil
 	})
+	if err == nil {
+		observability.RecordChange(ctx, observability.ChangeEvent{Category: "skill", EntityType: "skill_revision", EntityID: result.Version.ID, EntityName: result.Skill.Name, ChangeType: "import", ToVersion: result.Version.Version, AfterHash: result.Version.PackageHash, Status: result.Version.ValidationStatus, Detail: map[string]any{"skill_id": result.Skill.ID, "source": result.Version.Source, "activated": activate}})
+	}
 	return result, err
 }
 
@@ -254,12 +258,27 @@ func (s Store) Activate(ctx context.Context, versionID int64) (*models.AgentSkil
 	if skill.Type != SkillTypePortable {
 		return nil, fmt.Errorf("skill %q is not portable", skill.Name)
 	}
+	previousVersionID := skill.ActiveVersionID
+	var previousVersion *models.AgentSkillVersion
+	if previousVersionID > 0 {
+		previousVersion, _ = s.Version(ctx, previousVersionID)
+	}
 	skill.ActiveVersionID = version.ID
 	skill.Description = version.Description
 	skill.Enabled = 1
 	skill.Deleted = 0
 	skill.UpdatedAt = time.Now().UTC().UnixMilli()
 	_, err = s.orm().Update(skill, "ActiveVersionID", "Description", "Enabled", "Deleted", "UpdatedAt")
+	if err == nil && previousVersionID != version.ID {
+		changeType, fromVersion, beforeHash := "activate", "", ""
+		if previousVersion != nil {
+			fromVersion, beforeHash = previousVersion.Version, previousVersion.PackageHash
+			if previousVersion.CreatedAt > version.CreatedAt {
+				changeType = "rollback"
+			}
+		}
+		observability.RecordChange(ctx, observability.ChangeEvent{Category: "skill", EntityType: "skill", EntityID: skill.ID, EntityName: skill.Name, ChangeType: changeType, FromVersion: fromVersion, ToVersion: version.Version, BeforeHash: beforeHash, AfterHash: version.PackageHash, Status: "success", Detail: map[string]any{"from_version_id": previousVersionID, "to_version_id": version.ID}})
+	}
 	return skill, err
 }
 

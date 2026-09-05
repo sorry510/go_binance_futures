@@ -42,6 +42,12 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 			MaxTokens: executor.runner.cfg.MaxContextTokens, MaxBytes: executor.runner.cfg.MaxContextBytes, Now: time.Now().UTC(),
 		})
 		state.setContextTrace(llmStep, contextTrace)
+		executor.runner.observe(Observation{
+			Type: "context_build", TaskID: item.ID, ConversationID: item.ConversationID, Skill: item.Skill,
+			StepID: llmStep, StepType: string(StepLLM), Provider: item.Provider, Model: item.Model, Status: "success", Round: item.Round,
+			ContextTokens: contextTrace.SelectedTokens, ContextBlocks: contextTrace.SelectedBlocks, TrimmedBlocks: contextTrace.TrimmedBlocks,
+			MemorySelected: len(contextTrace.SelectedMemoryIDs), MemoryTrimmed: len(contextTrace.TrimmedMemoryIDs),
+		})
 		state.syncTask(item)
 		if contextErr != nil {
 			state.finishStep(llmStep, StepFailed, "context build failed", "context_too_large", contextErr)
@@ -221,11 +227,12 @@ func (executor *reactExecutor) executeTool(ctx context.Context, session *runSess
 		toolStatus, toolError = "error", toolResult.ToolError.Error()
 	}
 	executor.runner.observe(Observation{
-		Type: "tool_call", TaskID: item.ID, ConversationID: item.ConversationID,
-		Skill: item.Skill, Provider: item.Provider, Model: item.Model, Tool: descriptor.CanonicalName,
-		Status: toolStatus, ErrorType: string(toolResult.Envelope.ErrorType), Error: toolError, Round: item.Round,
+		Type: "tool_call", TaskID: item.ID, ConversationID: item.ConversationID, Skill: item.Skill,
+		StepID: stepID, StepType: string(StepTool), Provider: item.Provider, Model: item.Model, Tool: descriptor.CanonicalName,
+		ToolSource: string(toolResult.Trace.SourceType), ProviderRef: toolResult.Trace.ProviderRef, ProtocolVersion: toolResult.Trace.ProtocolVersion,
+		CatalogHash: toolResult.Trace.CatalogHash, SchemaHash: toolResult.Trace.SchemaHash, Status: toolStatus, ErrorType: string(toolResult.Envelope.ErrorType), Error: toolError, Round: item.Round,
 		DurationMs: toolResult.Envelope.DurationMs, CacheHit: toolResult.Envelope.CacheHit, Partial: toolResult.Envelope.Partial,
-		RawSize: toolResult.Envelope.RawSize, ContentHash: toolResult.Envelope.ContentHash,
+		RawSize: toolResult.Envelope.RawSize, ContentHash: toolResult.Envelope.ContentHash, EvidenceCount: len(toolResult.Evidence),
 	})
 	toolMessage, err := buildToolResultMessage(toolResult.Envelope, toolResult.Evidence, toolResult.ToolError)
 	if err != nil {
@@ -382,11 +389,12 @@ func (executor *reactExecutor) executeParallelTools(ctx context.Context, session
 			toolStatus, toolError = "error", toolResult.ToolError.Error()
 		}
 		executor.runner.observe(Observation{
-			Type: "tool_call", TaskID: item.ID, ConversationID: item.ConversationID,
-			Skill: item.Skill, Provider: item.Provider, Model: item.Model, Tool: descriptor.CanonicalName,
-			Status: toolStatus, ErrorType: string(toolResult.Envelope.ErrorType), Error: toolError, Round: item.Round,
+			Type: "tool_call", TaskID: item.ID, ConversationID: item.ConversationID, Skill: item.Skill,
+			StepID: stepID, StepType: string(StepTool), Provider: item.Provider, Model: item.Model, Tool: descriptor.CanonicalName,
+			ToolSource: string(toolResult.Trace.SourceType), ProviderRef: toolResult.Trace.ProviderRef, ProtocolVersion: toolResult.Trace.ProtocolVersion,
+			CatalogHash: toolResult.Trace.CatalogHash, SchemaHash: toolResult.Trace.SchemaHash, Status: toolStatus, ErrorType: string(toolResult.Envelope.ErrorType), Error: toolError, Round: item.Round,
 			DurationMs: toolResult.Envelope.DurationMs, CacheHit: toolResult.Envelope.CacheHit, Partial: toolResult.Envelope.Partial,
-			RawSize: toolResult.Envelope.RawSize, ContentHash: toolResult.Envelope.ContentHash,
+			RawSize: toolResult.Envelope.RawSize, ContentHash: toolResult.Envelope.ContentHash, EvidenceCount: len(toolResult.Evidence),
 		})
 		toolMessage, err := buildToolResultMessage(toolResult.Envelope, toolResult.Evidence, toolResult.ToolError)
 		if err != nil {
@@ -469,10 +477,10 @@ func (executor *reactExecutor) executeFinal(ctx context.Context, session *runSes
 		validationError = err.Error()
 	}
 	executor.runner.observe(Observation{
-		Type: "validation", TaskID: item.ID, ConversationID: item.ConversationID,
-		Skill: item.Skill, Provider: item.Provider, Model: item.Model,
+		Type: "validation", TaskID: item.ID, ConversationID: item.ConversationID, Skill: item.Skill,
+		StepID: stepID, StepType: string(StepValidate), Provider: item.Provider, Model: item.Model,
 		Status: validationStatus, ErrorType: map[bool]string{true: "validation_error", false: ""}[err != nil],
-		Error: validationError, Round: item.Round, DurationMs: elapsedMilliseconds(validationStarted),
+		Error: validationError, Round: item.Round, DurationMs: elapsedMilliseconds(validationStarted), EvidenceCount: len(state.Evidence),
 	})
 	if executor.runner.cfg.ValidationHook != nil {
 		executor.runner.cfg.ValidationHook(item.ID, append(json.RawMessage(nil), decision.Result...), err)
