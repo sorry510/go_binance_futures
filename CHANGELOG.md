@@ -1,5 +1,8 @@
 ### Change Log
 
+## v1.0.5
+- 修复 bug
+
 ## v1.0.4
 - 增加测试策略的各项统计(破坏性修改，需要删除了test_strategy_results 表数据)
 
