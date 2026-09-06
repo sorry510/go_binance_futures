@@ -18,7 +18,7 @@ import (
 
 var setupTradeTestDB sync.Once
 
-func prepareTradeTestDB(t *testing.T) {
+func prepareTradeTestDB(t testing.TB) {
 	t.Helper()
 	setupTradeTestDB.Do(func() {
 		_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
