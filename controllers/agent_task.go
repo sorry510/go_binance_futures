@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/agent/observability"
 	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/task"
+	agentteam "go_binance_futures/agent/team"
 	alertpipeline "go_binance_futures/service/alertpipeline"
 	symbolanalysisservice "go_binance_futures/service/symbolanalysis"
 	"go_binance_futures/utils"
@@ -41,7 +42,22 @@ func (ctrl *AgentController) StartTask() {
 		ctrl.Ctx.Resp(utils.ResJson(500, nil, "初始化 Agent Manager 失败: "+err.Error()))
 		return
 	}
-	item, err := manager.Start(agentruntime.Request{Skill: request.Skill, Input: string(request.Input)})
+	var item *task.Task
+	if request.Skill == agentteam.SymbolAnalysisTeam {
+		var input agentteam.Input
+		if err := json.Unmarshal(request.Input, &input); err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, "team input 格式错误: "+err.Error()))
+			return
+		}
+		runner, teamErr := agentapp.DefaultTeamRunner()
+		if teamErr != nil {
+			ctrl.Ctx.Resp(utils.ResJson(500, nil, "初始化 Team Runner 失败: "+teamErr.Error()))
+			return
+		}
+		item, err = runner.Start(input)
+	} else {
+		item, err = manager.Start(agentruntime.Request{Skill: request.Skill, Input: string(request.Input)})
+	}
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
@@ -58,7 +74,9 @@ func (ctrl *AgentController) ListTasks() {
 	page, _ := strconv.Atoi(ctrl.GetString("page", "1"))
 	limit, _ := strconv.Atoi(ctrl.GetString("limit", "20"))
 	result, err := manager.List(ctrl.Ctx.Request.Context(), task.ListOptions{
-		Skill: ctrl.GetString("skill"), Status: ctrl.GetString("status"), Page: page, Limit: limit,
+		Skill: ctrl.GetString("skill"), Status: ctrl.GetString("status"),
+		TeamRunID: ctrl.GetString("team_run_id"), ParentTaskID: ctrl.GetString("parent_task_id"),
+		Page: page, Limit: limit,
 	})
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
@@ -109,7 +127,15 @@ func (ctrl *AgentController) GetTask() {
 		ctrl.Ctx.Resp(utils.ResJson(404, nil, "task not found"))
 		return
 	}
-	_ = agentapp.EnsureCompletion(item)
+	if item.ExecutionMode != "team" {
+		_ = agentapp.EnsureCompletion(item)
+	}
+	if item.ExecutionMode == "team" {
+		children, listErr := manager.List(ctrl.Ctx.Request.Context(), task.ListOptions{ParentTaskID: item.ID, Page: 1, Limit: 20})
+		if listErr == nil {
+			item.TeamChildren = children.List
+		}
+	}
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
 }
 
@@ -177,7 +203,22 @@ func (ctrl *AgentController) CancelTask() {
 		return
 	}
 	taskID := strings.TrimSpace(ctrl.Ctx.Input.Param(":taskId"))
-	if err := manager.Cancel(ctrl.Ctx.Request.Context(), taskID); err != nil {
+	item, getErr := manager.Get(ctrl.Ctx.Request.Context(), taskID)
+	if getErr != nil {
+		ctrl.Ctx.Resp(utils.ResJson(404, nil, "task not found"))
+		return
+	}
+	if item.ExecutionMode == "team" {
+		runner, teamErr := agentapp.DefaultTeamRunner()
+		if teamErr != nil {
+			ctrl.Ctx.Resp(utils.ResJson(500, nil, teamErr.Error()))
+			return
+		}
+		if err := runner.Cancel(ctrl.Ctx.Request.Context(), taskID); err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+	} else if err := manager.Cancel(ctrl.Ctx.Request.Context(), taskID); err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}

@@ -82,7 +82,7 @@ func (ctrl *AgentSkillController) Post() {
 		request.Description = implementation.Description
 	}
 	item, err := (skillconfig.Store{}).Create(ctrl.Ctx.Request.Context(), skillconfig.CreateInput{
-		Name: request.Name, DisplayName: request.DisplayName, Description: request.Description,
+		Name: request.Name, DisplayName: request.DisplayName, Description: request.Description, Type: implementation.Type,
 		Enabled: enabled, ChatEnabled: chatEnabled,
 	})
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -187,6 +188,23 @@ func proposalTaskForService(now time.Time) *task.Task {
 	}
 	raw, _ := json.Marshal(plan)
 	return &task.Task{ID: "task-plan", Skill: symbolanalysis.Name, Status: task.StatusSucceeded, Result: raw}
+}
+
+func TestCreateFromTaskRejectsSucceededTeamAnalysis(t *testing.T) {
+	prepareTradeTestDB(t)
+	now := time.UnixMilli(1_800_000_000_000).UTC()
+	teamTask := &task.Task{
+		ID: "team-task", Skill: "symbol_analysis_team", Status: task.StatusSucceeded,
+		Result: json.RawMessage(`{"version":"symbol_analysis_team_v1","status":"succeeded","direction":"long"}`),
+	}
+	service := Service{
+		Store: Store{}, Tasks: fakeTaskReader{item: teamTask},
+		Risk: RiskEngine{Store: Store{}, Data: passingRiskData(now), Now: func() time.Time { return now }},
+		Now:  func() time.Time { return now },
+	}
+	if _, err := service.CreateFromTask(context.Background(), teamTask.ID); err == nil || !strings.Contains(err.Error(), "only symbol_analysis") {
+		t.Fatalf("team analysis must not create a trade proposal, err=%v", err)
+	}
 }
 
 func TestExecutionIsIdempotentAndNeverSubmitsTwice(t *testing.T) {

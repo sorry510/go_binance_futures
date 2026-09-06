@@ -11,6 +11,7 @@ func TestNativeSkillChatDefaults(t *testing.T) {
 	disabled := map[string]bool{
 		"alert_analysis": true, "market_regime": true, "strategy_builder": true,
 		"alert_triage": true, "strategy_experiment_propose": true, "strategy_experiment_summary": true,
+		"symbol_team_technical": true, "symbol_team_flow": true, "symbol_team_supervisor": true,
 	}
 	for _, item := range AvailableSkillImplementations() {
 		want := 1
@@ -32,5 +33,15 @@ func TestDefaultChatEnabledWorkflowSkillsImplementChatAdapter(t *testing.T) {
 		if !ok || !adapter.ChatEnabled() {
 			t.Fatalf("workflow %s must support ChatAdapter", definition.Name())
 		}
+	}
+}
+
+func TestSymbolAnalysisTeamCatalogEntryIsChatEnabledTeam(t *testing.T) {
+	item, ok := SkillImplementationByName("symbol_analysis_team")
+	if !ok {
+		t.Fatal("symbol_analysis_team implementation is missing")
+	}
+	if item.Type != "team" || item.ChatDefault != 1 {
+		t.Fatalf("unexpected team catalog entry: %+v", item)
 	}
 }
