@@ -283,6 +283,39 @@ func TestStreamableHTTPDiscoveryGovernanceAndRuntime(t *testing.T) {
 	}
 }
 
+func TestExternalMCPTradeCapabilitiesStayDisabledAndUngrantable(t *testing.T) {
+	ctx := context.Background()
+	store := setupMCPTestStore(t)
+	server := mcp.NewServer(&mcp.Implementation{Name: "trade-fixture", Version: "1.0.0"}, nil)
+	server.AddTool(&mcp.Tool{Name: "place_order", Description: "Place a futures order", InputSchema: map[string]any{"type": "object"}}, func(context.Context, *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		return &mcp.CallToolResult{StructuredContent: map[string]any{"ok": true}}, nil
+	})
+	handler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return server }, &mcp.StreamableHTTPOptions{Stateless: true, JSONResponse: true})
+	httpServer := httptest.NewServer(handler)
+	defer httpServer.Close()
+	view, err := store.SaveServer(ctx, 0, ServerInput{Name: "trade-fixture", Endpoint: httpServer.URL, Enabled: 1, AuthType: AuthNone, AllowPrivate: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewGateway(store).RefreshCatalog(ctx, view.ID); err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := store.Catalog(ctx, view.ID)
+	if err != nil || len(catalog.Tools) != 1 {
+		t.Fatalf("catalog: %+v err=%v", catalog, err)
+	}
+	tool := catalog.Tools[0]
+	if tool.Risk != string(permission.RiskTrade) || tool.Enabled != 0 || tool.Status != ToolNeedsReview {
+		t.Fatalf("external trade capability was not quarantined: %+v", tool)
+	}
+	if _, err := store.UpdateTool(ctx, tool.ID, ToolUpdateInput{Risk: permission.RiskTrade, Enabled: 1}); err == nil {
+		t.Fatal("external MCP RiskTrade tool was enabled")
+	}
+	if _, err := store.SavePermission(ctx, PermissionInput{ServerID: view.ID, SkillName: "unsafe", CapabilityType: CapabilityTool, CapabilityID: tool.ID, Enabled: 1}); err == nil {
+		t.Fatal("external MCP RiskTrade tool was granted to a Skill")
+	}
+}
+
 func TestEndpointAndSecretSafety(t *testing.T) {
 	if _, err := ValidateEndpoint("http://example.com/mcp", false); err == nil {
 		t.Fatal("plain HTTP endpoint unexpectedly allowed")

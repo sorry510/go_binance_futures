@@ -10,10 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
 	_ "github.com/mattn/go-sqlite3"
+	"go_binance_futures/agent/permission"
 	"go_binance_futures/models"
 )
 
@@ -225,4 +227,17 @@ func TestInstallRevisionRollbackAndAllowedToolsRequireReview(t *testing.T) {
 	}
 	rDir, err := (Importer{Store: store}).ImportDirectory(context.Background(), dirName, false)
 	assertInstalled(rDir, err, dirName)
+
+	tradePermission := models.AgentSkillPermission{
+		SkillID: r1.Skill.ID, VersionID: r1.Version.ID, RequestedName: "place_order",
+		ResolvedName: "native.place_order", Risk: string(permission.RiskTrade), Status: "high_risk",
+		Granted: 0, CreatedAt: time.Now().UnixMilli(), UpdatedAt: time.Now().UnixMilli(),
+	}
+	tradePermission.ID, err = store.orm().Insert(&tradePermission)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.SetPermissionGrant(context.Background(), tradePermission.ID, 1); err == nil || !strings.Contains(err.Error(), "cannot be granted trade tools") {
+		t.Fatalf("portable Skill unexpectedly received RiskTrade permission: %v", err)
+	}
 }
