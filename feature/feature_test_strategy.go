@@ -13,6 +13,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -23,6 +24,7 @@ import (
 var coinNoticeLastTimeMap = make(map[string]int64) // limit 通知一次
 var FuturesTestNotice = 0
 var offsetId = 0
+var testStrategyOpenMu sync.Mutex
 
 func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 	if systemConfig.FutureTest == 1 {
@@ -37,7 +39,11 @@ func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 		}
 		return
 	}
-	exclude_symbols_map := getExcludeSymbols()
+	exclude_symbols_map, err := getExcludeSymbols()
+	if err != nil {
+		logs.Error("load open test strategy symbols failed; skip opening new test positions:", err)
+		return
+	}
 	if len(exclude_symbols_map) > systemConfig.FutureMaxCount {
 		logs.Info("test position order: %d, is over max %d, stop open new test order", len(exclude_symbols_map), systemConfig.FutureMaxCount)
 		return
@@ -51,8 +57,8 @@ func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 
 	logs.Info("offsetId: ", offsetId)
 	var coins []*models.Symbols
-	limit := 5                                // 不设置太大，如果开仓太多，加上这里会导致接口请求超过限制
-	coins, err := getSymbols(offsetId, limit) // 按照顺序 limit 个币
+	limit := 5                               // 不设置太大，如果开仓太多，加上这里会导致接口请求超过限制
+	coins, err = getSymbols(offsetId, limit) // 按照顺序 limit 个币
 	if err != nil {
 		logs.Error("NoticeAllSymbolByStrategy:", err.Error())
 		return
@@ -125,7 +131,15 @@ func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 						logs.Error("Error NowPrice Symbol: ", coin.Symbol)
 						continue
 					}
-					testOrder := createTestResult(coin, floatNowPrice, strings.ToUpper(strategy.Type), strategy.Name, strategy.Type, strategy.Code, systemConfig.FutureTestFeeRate)
+					testOrder, created, err := createTestResult(coin, floatNowPrice, strings.ToUpper(strategy.Type), strategy.Name, strategy.Type, strategy.Code, systemConfig.FutureTestFeeRate)
+					if err != nil {
+						logs.Error("create test strategy result failed; skip opening new test positions:", err)
+						return
+					}
+					if !created {
+						exclude_symbols_map[coin.Symbol] = true
+						break
+					}
 					quantity, _ := strconv.ParseFloat(testOrder.PositionAmt, 64)
 					pusher.SetModuleName("futures_test").FuturesCustomStrategyTest(notify.FuturesTestParams{
 						Title:        lang.Lang("futures.custom_strategy_test"),
@@ -141,6 +155,8 @@ func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 						Remarks:      strategy.Code,
 					})
 					coinNoticeLastTimeMap[coin.Symbol] = nowTime
+					exclude_symbols_map[coin.Symbol] = true
+					break // 同一币种同时只允许一条未平仓测试记录
 				}
 			}
 		}
@@ -352,16 +368,31 @@ func getSymbols(offsetId int, limit int) (coins []*models.Symbols, err error) {
 }
 
 // 生成测试的开仓数据
-func createTestResult(coin *models.Symbols, nowPrice float64, positionSide, openStrategyName, openStrategyType, openStrategyCode string, feeRate float64) (result *models.TestStrategyResults) {
-	usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64)           // 交易金额
-	buyPrice := utils.GetTradePrecision(nowPrice, coin.TickSize)   // 合理精度的价格
-	quantity := (usdt_float64 / buyPrice) * float64(coin.Leverage) // 购买数量
-	quantity = utils.GetTradePrecision(quantity, coin.StepSize)    // 合理精度的数量
-	if positionSide == "SHORT" {
-		quantity = -quantity // 空单
+func createTestResult(coin *models.Symbols, nowPrice float64, positionSide, openStrategyName, openStrategyType, openStrategyCode string, feeRate float64) (*models.TestStrategyResults, bool, error) {
+	testStrategyOpenMu.Lock()
+	defer testStrategyOpenMu.Unlock()
+
+	o := orm.NewOrm()
+	openCount, err := o.QueryTable("test_strategy_results").
+		Filter("symbol", coin.Symbol).
+		Filter("close_price", "0").
+		Count()
+	if err != nil {
+		return nil, false, err
+	}
+	if openCount > 0 {
+		return nil, false, nil
 	}
 
-	result = new(models.TestStrategyResults)
+	usdtFloat64, _ := strconv.ParseFloat(coin.Usdt, 64)
+	buyPrice := utils.GetTradePrecision(nowPrice, coin.TickSize)
+	quantity := (usdtFloat64 / buyPrice) * float64(coin.Leverage)
+	quantity = utils.GetTradePrecision(quantity, coin.StepSize)
+	if positionSide == "SHORT" {
+		quantity = -quantity
+	}
+
+	result := new(models.TestStrategyResults)
 	result.Symbol = coin.Symbol
 	result.Price = strconv.FormatFloat(buyPrice, 'f', -1, 64)
 	result.Leverage = coin.Leverage
@@ -376,8 +407,8 @@ func createTestResult(coin *models.Symbols, nowPrice float64, positionSide, open
 	result.Strategy = coin.Strategy
 	result.StrategyTemplateID = coin.StrategyTemplateID
 	result.StrategyTemplateName = coin.StrategyTemplateName
-	if templateIdentity, err := strategyservice.ResolveTemplateIdentity(orm.NewOrm(), result.StrategyTemplateID, result.StrategyTemplateName, result.Technology, result.Strategy); err != nil {
-		logs.Warning("resolve test strategy template identity failed, symbol:", coin.Symbol, "error:", err)
+	if templateIdentity, resolveErr := strategyservice.ResolveTemplateIdentity(o, result.StrategyTemplateID, result.StrategyTemplateName, result.Technology, result.Strategy); resolveErr != nil {
+		logs.Warning("resolve test strategy template identity failed, symbol:", coin.Symbol, "error:", resolveErr)
 	} else {
 		result.StrategyTemplateID = templateIdentity.ID
 		result.StrategyTemplateName = templateIdentity.Name
@@ -392,26 +423,28 @@ func createTestResult(coin *models.Symbols, nowPrice float64, positionSide, open
 	result.OpenFeeRate = feeRate
 	result.CloseFeeRate = feeRate
 	result.CreateTime = time.Now().Unix() * 1000
-	result.UpdateTime = time.Now().Unix() * 1000
+	result.UpdateTime = result.CreateTime
 
-	o := orm.NewOrm()
-	o.Insert(result)
-	return result
+	if _, err := o.Insert(result); err != nil {
+		return nil, false, err
+	}
+	return result, true, nil
 }
 
-func getExcludeSymbols() (symbols map[string]bool) {
-	var testPositions []*models.TestStrategyResults
-	_, err := orm.NewOrm().QueryTable("test_strategy_results").Filter("close_price", "0").All(&testPositions)
+func getExcludeSymbols() (map[string]bool, error) {
+	var testPositions []models.TestStrategyResults
+	_, err := orm.NewOrm().QueryTable("test_strategy_results").
+		Filter("close_price", "0").
+		All(&testPositions, "Symbol")
 	if err != nil {
-		logs.Error("get test_strategy_results error:", err.Error())
-		return
+		return nil, err
 	}
 
-	symbols = make(map[string]bool)
-	for _, testPositions := range testPositions {
-		symbols[testPositions.Symbol] = true
+	symbols := make(map[string]bool, len(testPositions))
+	for _, position := range testPositions {
+		symbols[position.Symbol] = true
 	}
-	return symbols
+	return symbols, nil
 }
 
 func getTransformPositions() (usePositions []types.FuturesPosition, err error) {
