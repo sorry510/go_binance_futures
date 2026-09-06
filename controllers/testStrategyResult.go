@@ -27,20 +27,39 @@ type TestStrategyResultController struct {
 type TestStrategyResultsTableList = strategyservice.TestResult
 
 type testStrategyResultSearchParams struct {
-	Symbol       string
-	PositionSide string
-	StartTime    string
-	EndTime      string
-	Type         string
+	Symbol               string
+	PositionSide         string
+	StartTime            string
+	EndTime              string
+	Type                 string
+	StrategyTemplateID   int64
+	StrategyTemplateName string
+	StrategySnapshotHash string
+	OpenStrategyName     string
+	OpenStrategyType     string
+	OpenStrategyHash     string
+	CloseStrategyName    string
+	CloseStrategyType    string
+	CloseStrategyHash    string
 }
 
 func (ctrl *TestStrategyResultController) getSearchParams() testStrategyResultSearchParams {
+	templateID, _ := strconv.ParseInt(strings.TrimSpace(ctrl.GetString("strategy_template_id")), 10, 64)
 	return testStrategyResultSearchParams{
-		Symbol:       strings.TrimSpace(ctrl.GetString("symbol")),
-		PositionSide: strings.ToUpper(strings.TrimSpace(ctrl.GetString("position_side"))),
-		StartTime:    strings.TrimSpace(ctrl.GetString("start_time")),
-		EndTime:      strings.TrimSpace(ctrl.GetString("end_time")),
-		Type:         strings.ToLower(strings.TrimSpace(ctrl.GetString("type"))),
+		Symbol:               strings.TrimSpace(ctrl.GetString("symbol")),
+		PositionSide:         strings.ToUpper(strings.TrimSpace(ctrl.GetString("position_side"))),
+		StartTime:            strings.TrimSpace(ctrl.GetString("start_time")),
+		EndTime:              strings.TrimSpace(ctrl.GetString("end_time")),
+		Type:                 strings.ToLower(strings.TrimSpace(ctrl.GetString("type"))),
+		StrategyTemplateID:   templateID,
+		StrategyTemplateName: strings.TrimSpace(ctrl.GetString("strategy_template_name")),
+		StrategySnapshotHash: strings.TrimSpace(ctrl.GetString("strategy_snapshot_hash")),
+		OpenStrategyName:     strings.TrimSpace(ctrl.GetString("open_strategy_name")),
+		OpenStrategyType:     strings.TrimSpace(ctrl.GetString("open_strategy_type")),
+		OpenStrategyHash:     strings.TrimSpace(ctrl.GetString("open_strategy_hash")),
+		CloseStrategyName:    strings.TrimSpace(ctrl.GetString("close_strategy_name")),
+		CloseStrategyType:    strings.TrimSpace(ctrl.GetString("close_strategy_type")),
+		CloseStrategyHash:    strings.TrimSpace(ctrl.GetString("close_strategy_hash")),
 	}
 }
 
@@ -50,8 +69,8 @@ func (params testStrategyResultSearchParams) whereClause(tableAlias string) (str
 		prefix = tableAlias + "."
 	}
 
-	conditions := make([]string, 0, 5)
-	args := make([]interface{}, 0, 4)
+	conditions := make([]string, 0, 14)
+	args := make([]interface{}, 0, 14)
 	if params.Symbol != "" {
 		if strings.ContainsAny(params.Symbol, "%_") {
 			return "", nil, false, fmt.Errorf("invalid symbol")
@@ -62,6 +81,39 @@ func (params testStrategyResultSearchParams) whereClause(tableAlias string) (str
 	if params.PositionSide != "" && params.PositionSide != "ALL" {
 		conditions = append(conditions, prefix+"position_side = ?")
 		args = append(args, params.PositionSide)
+	}
+
+	if params.StrategyTemplateID > 0 {
+		conditions = append(conditions, prefix+"strategy_template_id = ?")
+		args = append(args, params.StrategyTemplateID)
+	}
+	for _, filter := range []struct {
+		column string
+		value  string
+		exact  bool
+	}{
+		{"strategy_template_name", params.StrategyTemplateName, false},
+		{"strategy_snapshot_hash", params.StrategySnapshotHash, true},
+		{"open_strategy_name", params.OpenStrategyName, false},
+		{"open_strategy_type", params.OpenStrategyType, true},
+		{"open_strategy_hash", params.OpenStrategyHash, true},
+		{"close_strategy_name", params.CloseStrategyName, false},
+		{"close_strategy_type", params.CloseStrategyType, true},
+		{"close_strategy_hash", params.CloseStrategyHash, true},
+	} {
+		if filter.value == "" {
+			continue
+		}
+		if strings.ContainsAny(filter.value, "%_") {
+			return "", nil, false, fmt.Errorf("invalid %s", filter.column)
+		}
+		if filter.exact {
+			conditions = append(conditions, prefix+filter.column+" = ?")
+			args = append(args, filter.value)
+		} else {
+			conditions = append(conditions, prefix+filter.column+" LIKE ?")
+			args = append(args, "%"+filter.value+"%")
+		}
 	}
 
 	var startTime int64
@@ -103,9 +155,12 @@ func (params testStrategyResultSearchParams) whereClause(tableAlias string) (str
 func (ctrl *TestStrategyResultController) Get() {
 	page, _ := strconv.Atoi(ctrl.GetString("page", "1"))
 	limit, _ := strconv.Atoi(ctrl.GetString("limit", "20"))
+	params := ctrl.getSearchParams()
 	result, err := (strategyservice.Service{}).ListTestResults(ctrl.Ctx.Request.Context(), strategyservice.TestResultsOptions{
-		Symbol: ctrl.GetString("symbol"), PositionSide: ctrl.GetString("position_side"),
-		StartTime: ctrl.GetString("start_time"), EndTime: ctrl.GetString("end_time"), Type: ctrl.GetString("type"),
+		Symbol: params.Symbol, PositionSide: params.PositionSide, StartTime: params.StartTime, EndTime: params.EndTime, Type: params.Type,
+		StrategyTemplateID: params.StrategyTemplateID, StrategyTemplateName: params.StrategyTemplateName, StrategySnapshotHash: params.StrategySnapshotHash,
+		OpenStrategyName: params.OpenStrategyName, OpenStrategyType: params.OpenStrategyType, OpenStrategyHash: params.OpenStrategyHash,
+		CloseStrategyName: params.CloseStrategyName, CloseStrategyType: params.CloseStrategyType, CloseStrategyHash: params.CloseStrategyHash,
 		Page: page, Limit: limit, DefaultLimit: 20,
 	})
 	if err != nil {
@@ -113,7 +168,7 @@ func (ctrl *TestStrategyResultController) Get() {
 		return
 	}
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": map[string]interface{}{
-		"total": result.Total, "list": result.List, "current_profit": result.CurrentProfit,
+		"total": result.Total, "list": result.List, "current_profit": result.CurrentProfit, "stats": result.Stats,
 	}, "msg": "success"})
 }
 

@@ -60,6 +60,52 @@ func loadTemplate(ctx context.Context, id int64, name string) (models.StrategyTe
 func templateSnapshot(t models.StrategyTemplates) workflowSkill.TemplateSnapshot {
 	return workflowSkill.TemplateSnapshot{ID: t.ID, Name: t.Name, Technology: t.Technology, Strategy: t.Strategy, UpdatedAt: t.UpdateTime}
 }
+func loadStrategyReviewRows(t models.StrategyTemplates, start, end int64, limit int) ([]models.TestStrategyResults, error) {
+	if limit <= 0 {
+		limit = 2000
+	}
+	o := orm.NewOrm()
+	rows := make([]models.TestStrategyResults, 0)
+	seen := map[int64]bool{}
+	appendRows := func(items []models.TestStrategyResults) {
+		for _, row := range items {
+			if seen[row.ID] {
+				continue
+			}
+			seen[row.ID] = true
+			rows = append(rows, row)
+		}
+	}
+	if t.ID > 0 {
+		var lineage []models.TestStrategyResults
+		_, err := o.QueryTable(new(models.TestStrategyResults)).
+			Filter("createTime__gte", start).Filter("createTime__lte", end).
+			Filter("strategy_template_id", t.ID).OrderBy("-createTime").Limit(limit).All(&lineage)
+		if err != nil {
+			return nil, err
+		}
+		appendRows(lineage)
+	}
+	if strings.TrimSpace(t.Strategy) != "" {
+		legacyQuery := o.QueryTable(new(models.TestStrategyResults)).
+			Filter("createTime__gte", start).Filter("createTime__lte", end).
+			Filter("strategy_template_id", 0).Filter("strategy", t.Strategy)
+		if strings.TrimSpace(t.Technology) != "" {
+			legacyQuery = legacyQuery.Filter("technology", t.Technology)
+		}
+		var legacy []models.TestStrategyResults
+		if _, err := legacyQuery.OrderBy("-createTime").Limit(limit).All(&legacy); err != nil {
+			return nil, err
+		}
+		appendRows(legacy)
+	}
+	sort.Slice(rows, func(i, j int) bool { return rows[i].CreateTime > rows[j].CreateTime })
+	if len(rows) > limit {
+		rows = rows[:limit]
+	}
+	return rows, nil
+}
+
 func buildStrategyStats(ctx context.Context, t models.StrategyTemplates, days int) (workflowSkill.StrategyStats, error) {
 	if days <= 0 {
 		days = 30
@@ -69,15 +115,7 @@ func buildStrategyStats(ctx context.Context, t models.StrategyTemplates, days in
 	}
 	end := time.Now().UTC().UnixMilli()
 	start := end - int64(time.Duration(days)*24*time.Hour/time.Millisecond)
-	q := orm.NewOrm().QueryTable(new(models.TestStrategyResults)).Filter("createTime__gte", start).Filter("createTime__lte", end)
-	if strings.TrimSpace(t.Strategy) != "" {
-		q = q.Filter("strategy", t.Strategy)
-	}
-	if strings.TrimSpace(t.Technology) != "" {
-		q = q.Filter("technology", t.Technology)
-	}
-	var rows []models.TestStrategyResults
-	_, err := q.OrderBy("-createTime").Limit(2000).All(&rows)
+	rows, err := loadStrategyReviewRows(t, start, end, 2000)
 	if err != nil {
 		return workflowSkill.StrategyStats{}, err
 	}
