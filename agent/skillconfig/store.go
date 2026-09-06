@@ -19,6 +19,7 @@ type CreateInput struct {
 	Name        string `json:"name"`
 	DisplayName string `json:"display_name"`
 	Description string `json:"description"`
+	Type        string `json:"type,omitempty"`
 	Enabled     int    `json:"enabled"`
 	ChatEnabled int    `json:"chat_enabled"`
 }
@@ -125,6 +126,10 @@ func (store Store) Create(ctx context.Context, input CreateInput) (*models.Agent
 	}
 	input.Name = strings.TrimSpace(input.Name)
 	input.DisplayName = strings.TrimSpace(input.DisplayName)
+	input.Type = strings.ToLower(strings.TrimSpace(input.Type))
+	if input.Type == "" {
+		input.Type = "native"
+	}
 	if input.Name == "" {
 		return nil, fmt.Errorf("skill name is required")
 	}
@@ -145,7 +150,7 @@ func (store Store) Create(ctx context.Context, input CreateInput) (*models.Agent
 	}
 	item := &models.AgentSkill{
 		Name: input.Name, DisplayName: input.DisplayName, Description: strings.TrimSpace(input.Description),
-		Type: "native", Enabled: input.Enabled, ChatEnabled: input.ChatEnabled, CreatedAt: now, UpdatedAt: now,
+		Type: input.Type, Enabled: input.Enabled, ChatEnabled: input.ChatEnabled, CreatedAt: now, UpdatedAt: now,
 	}
 	id, err := o.Insert(item)
 	if err != nil {
@@ -197,15 +202,19 @@ func (store Store) EnsureDefaults(ctx context.Context, defaults []CreateInput) e
 	}
 	o := store.ormer()
 	for _, input := range defaults {
+		desiredType := strings.ToLower(strings.TrimSpace(input.Type))
+		if desiredType == "" {
+			desiredType = "native"
+		}
 		var existing models.AgentSkill
 		err := o.QueryTable(new(models.AgentSkill)).Filter("Name", strings.TrimSpace(input.Name)).One(&existing)
 		if err == nil {
-			if existing.Type != "" && existing.Type != "native" {
-				return fmt.Errorf("default native skill %s conflicts with %s skill", input.Name, existing.Type)
+			if existing.Type != "" && existing.Type != desiredType {
+				return fmt.Errorf("default %s skill %s conflicts with %s skill", desiredType, input.Name, existing.Type)
 			}
 			fields := make([]string, 0, 2)
 			if existing.Type == "" {
-				existing.Type = "native"
+				existing.Type = desiredType
 				fields = append(fields, "Type")
 			}
 			if existing.ChatEnabled != 0 && existing.ChatEnabled != 1 {

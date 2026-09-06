@@ -174,11 +174,16 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 			_ = to.Rollback()
 			return fmt.Errorf("prepare database version %d compatibility failed: %w", version, err)
 		}
-		// 逐个执行数据库更新脚本
+		// 数据库版本可以只有 ORM Schema 变更；仅在版本 SQL 文件实际存在时执行数据迁移。
 		filepath := fmt.Sprintf("./command/sql/version/%d.sql", version)
-		if err := readAndExecuteSQLFile(to, filepath); err != nil {
+		if _, statErr := os.Stat(filepath); statErr == nil {
+			if err := readAndExecuteSQLFile(to, filepath); err != nil {
+				_ = to.Rollback()
+				return fmt.Errorf("update database version %d failed: %w", version, err)
+			}
+		} else if !os.IsNotExist(statErr) {
 			_ = to.Rollback()
-			return fmt.Errorf("update database version %d failed: %w", version, err)
+			return fmt.Errorf("check database version %d migration file failed: %w", version, statErr)
 		}
 	}
 

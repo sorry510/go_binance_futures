@@ -111,6 +111,12 @@ func (store *ORMStore) List(ctx context.Context, options ListOptions) (ListResul
 	if conversationID := strings.TrimSpace(options.ConversationID); conversationID != "" {
 		query = query.Filter("conversation_id", conversationID)
 	}
+	if teamRunID := strings.TrimSpace(options.TeamRunID); teamRunID != "" {
+		query = query.Filter("team_run_id", teamRunID)
+	}
+	if parentTaskID := strings.TrimSpace(options.ParentTaskID); parentTaskID != "" {
+		query = query.Filter("parent_task_id", parentTaskID)
+	}
 	total, err := query.Count()
 	if err != nil {
 		return ListResult{}, fmt.Errorf("count agent tasks: %w", err)
@@ -235,7 +241,8 @@ func stringValue(value *string) string {
 
 func toModel(item *Task) models.AgentTask {
 	row := models.AgentTask{
-		ID: item.ID, Skill: item.Skill, ConversationID: item.ConversationID, Status: string(item.Status), Stage: item.Stage, Progress: item.Progress,
+		ID: item.ID, Skill: item.Skill, ConversationID: item.ConversationID, ParentTaskID: item.ParentTaskID, TeamRunID: item.TeamRunID, TeamName: item.TeamName, TeamRole: item.TeamRole,
+		Status: string(item.Status), Stage: item.Stage, Progress: item.Progress,
 		InputJSON: sanitizePayload(item.Input), ResultJSON: sanitizePayload(string(item.Result)), Error: sanitizeText(item.Error),
 		Round: item.Round, MaxRounds: item.MaxRounds, Provider: item.Provider, Model: item.Model,
 		ExecutionMode: item.ExecutionMode, PlanJSON: stringPointer(sanitizePayload(string(item.Plan))), StepsJSON: stringPointer(sanitizePayload(string(item.Steps))), CheckpointJSON: stringPointer(sanitizePayload(item.CheckpointJSON)), ResumeCount: item.ResumeCount,
@@ -259,7 +266,8 @@ func toModel(item *Task) models.AgentTask {
 
 func fromModel(row models.AgentTask) *Task {
 	item := &Task{
-		ID: row.ID, Skill: row.Skill, ConversationID: row.ConversationID, Status: Status(row.Status), Stage: row.Stage, Progress: row.Progress,
+		ID: row.ID, Skill: row.Skill, ConversationID: row.ConversationID, ParentTaskID: row.ParentTaskID, TeamRunID: row.TeamRunID, TeamName: row.TeamName, TeamRole: row.TeamRole,
+		Status: Status(row.Status), Stage: row.Stage, Progress: row.Progress,
 		Input: row.InputJSON, Result: json.RawMessage(row.ResultJSON), Error: row.Error,
 		Round: row.Round, MaxRounds: row.MaxRounds, Provider: row.Provider, Model: row.Model,
 		ExecutionMode: row.ExecutionMode, Plan: json.RawMessage(stringValue(row.PlanJSON)), Steps: json.RawMessage(stringValue(row.StepsJSON)), CheckpointJSON: stringValue(row.CheckpointJSON), ResumeCount: row.ResumeCount,
