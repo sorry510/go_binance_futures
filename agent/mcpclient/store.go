@@ -207,6 +207,9 @@ func (s Store) UpdateTool(ctx context.Context, id int64, input ToolUpdateInput) 
 	if input.Risk != permission.RiskRead && input.Risk != permission.RiskWrite && input.Risk != permission.RiskTrade {
 		return models.AgentMCPTool{}, fmt.Errorf("invalid MCP tool risk %q", input.Risk)
 	}
+	if input.Risk == permission.RiskTrade && input.Enabled == 1 {
+		return models.AgentMCPTool{}, fmt.Errorf("external MCP trade tools must remain disabled; use the controlled Execution Service")
+	}
 	if input.Enabled != 0 && input.Enabled != 1 {
 		return models.AgentMCPTool{}, fmt.Errorf("MCP tool enabled must be 0 or 1")
 	}
@@ -265,6 +268,15 @@ func (s Store) SavePermission(ctx context.Context, input PermissionInput) (model
 	}
 	if err := s.validateCapability(ctx, input.ServerID, input.CapabilityType, input.CapabilityID); err != nil {
 		return models.AgentMCPPermission{}, err
+	}
+	if input.CapabilityType == CapabilityTool && input.Enabled == 1 {
+		tool, err := s.ToolByID(ctx, input.CapabilityID)
+		if err != nil {
+			return models.AgentMCPPermission{}, err
+		}
+		if strings.EqualFold(strings.TrimSpace(tool.Risk), string(permission.RiskTrade)) {
+			return models.AgentMCPPermission{}, fmt.Errorf("external MCP trade tools cannot be granted to Skills; use the controlled Execution Service")
+		}
 	}
 	if input.CapabilityType == CapabilityPrompt && input.AutoLoad == 1 {
 		prompt, err := s.PromptByID(ctx, input.CapabilityID)
