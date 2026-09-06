@@ -36,6 +36,9 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.Symbols),
 		new(models.SpotSymbols),
 		new(models.AgentSkill),
+		new(models.AgentTradeProposal),
+		new(models.AgentTradeExecution),
+		new(models.AgentTradeAudit),
 	)
 
 	if err := SyncDatabase(1); err != nil {
@@ -75,7 +78,26 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		}
 	}
 
-	if err := SyncDatabase(2); err != nil {
-		t.Fatalf("second version-2 sync should be idempotent: %v", err)
+	if err := SyncDatabase(3); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 3 {
+		t.Fatalf("expected database version 3 after controlled-trade migration, config=%+v err=%v", config, err)
+	}
+	if config.AgentTradeExecutionEnable != 0 || config.AgentTradeAllowedSymbols != "" {
+		t.Fatalf("V2-12 must stay disabled with an empty allowlist after upgrade: %+v", config)
+	}
+	if config.AgentTradeMaxRiskUSDT != 5 || config.AgentTradeMaxNotionalUSDT != 50 || config.AgentTradeMaxTotalExposureUSDT != 200 || config.AgentTradeMaxLeverage != 3 {
+		t.Fatalf("unexpected V2-12 risk defaults: %+v", config)
+	}
+	for _, table := range []string{"agent_trade_proposals", "agent_trade_executions", "agent_trade_audits"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected %s after version 3 sync, count=%d err=%v", table, count, err)
+		}
+	}
+	if err := SyncDatabase(3); err != nil {
+		t.Fatalf("second version-3 sync should be idempotent: %v", err)
 	}
 }

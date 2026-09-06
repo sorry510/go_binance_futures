@@ -12,10 +12,11 @@ import (
 )
 
 type GovernanceStatus struct {
-	Skills        map[string]bool     `json:"skills"`
-	Admission     governance.Status   `json:"admission"`
-	DefaultBudget agentruntime.Budget `json:"default_budget"`
-	TradeEnabled  bool                `json:"trade_enabled"`
+	Skills                     map[string]bool     `json:"skills"`
+	Admission                  governance.Status   `json:"admission"`
+	DefaultBudget              agentruntime.Budget `json:"default_budget"`
+	TradeEnabled               bool                `json:"trade_enabled"`
+	ControlledExecutionEnabled bool                `json:"controlled_execution_enabled"`
 }
 
 var defaultSkillStore = skillconfig.Store{}
@@ -62,8 +63,13 @@ func DefaultGovernanceStatus() GovernanceStatus {
 			skills[item.Name] = item.Enabled == 1
 		}
 	}
+	controlledExecutionEnabled := false
+	if cfg, err := utils.GetSystemConfig(); err == nil {
+		controlledExecutionEnabled = cfg.AgentTradeExecutionEnable == 1
+	}
 	return GovernanceStatus{
 		Skills: skills, Admission: defaultLimiter.Status(),
 		DefaultBudget: RuntimeBudget(""), TradeEnabled: false,
+		ControlledExecutionEnabled: controlledExecutionEnabled,
 	}
 }

@@ -63,7 +63,7 @@ V2 从现在开始严格按照 Phase 编号顺序开发，不再使用“编号�
 | [V2-9](./09-phase-v2-9-memory.md) | P1 ✅ | 长期 Memory、TTL、Scope 与管理 |
 | [V2-10](./10-phase-v2-10-observability.md) | P1 ✅ | Trace、长期指标、运营与管理页面 |
 | [V2-11](./11-phase-v2-11-workflows.md) | P1 ✅ | market_scan、strategy_review、strategy_experiment、alert_triage、daily_market_brief |
-| [V2-12](./12-phase-v2-12-risk-execution.md) | P2 | Proposal、Risk Engine、Approval、受控执行 |
+| [V2-12](./12-phase-v2-12-risk-execution.md) | P2 ✅ | Proposal、Risk Engine、Approval、受控执行 |
 
 ## 4. 严格开发顺序
 

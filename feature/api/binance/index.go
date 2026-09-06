@@ -318,6 +318,24 @@ func SellMarket(symbol string, quantity float64, positionSide futures.PositionSi
 	return order, err
 }
 
+// CreateAgentMarketOrder is reserved for the V2-12 controlled execution service.
+// The caller supplies a deterministic client order id so retries can reconcile
+// an ambiguous network result without submitting a second order.
+func CreateAgentMarketOrder(ctx context.Context, symbol string, quantity float64, side futures.SideType, positionSide futures.PositionSideType, clientOrderID string) (*futures.CreateOrderResponse, error) {
+	return futuresClient.NewCreateOrderService().
+		Symbol(symbol).
+		Side(side).
+		PositionSide(positionSide).
+		Type(futures.OrderTypeMarket).
+		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
+		NewClientOrderID(clientOrderID).
+		Do(ctx)
+}
+
+func GetOrderByClientOrderID(ctx context.Context, symbol, clientOrderID string) (*futures.Order, error) {
+	return futuresClient.NewGetOrderService().Symbol(symbol).OrigClientOrderID(clientOrderID).Do(ctx)
+}
+
 // 撤销订单
 // @see https://binance-docs.github.io/apidocs/futures/cn/#trade-6
 func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse, err error){
