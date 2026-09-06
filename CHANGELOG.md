@@ -1,5 +1,8 @@
 ### Change Log
 
+## v1.0.4
+- 增加测试策略的各项统计(破坏性修改，需要删除了test_strategy_results 表数据)
+
 ## v1.0.3
 - ai agent 升级
 - 增加各项监控和配置
