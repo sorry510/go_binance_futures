@@ -125,7 +125,7 @@ func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 						logs.Error("Error NowPrice Symbol: ", coin.Symbol)
 						continue
 					}
-					testOrder := createTestResult(coin, floatNowPrice, strings.ToUpper(strategy.Type), strategy.Code, systemConfig.FutureTestFeeRate)
+					testOrder := createTestResult(coin, floatNowPrice, strings.ToUpper(strategy.Type), strategy.Name, strategy.Type, strategy.Code, systemConfig.FutureTestFeeRate)
 					quantity, _ := strconv.ParseFloat(testOrder.PositionAmt, 64)
 					pusher.SetModuleName("futures_test").FuturesCustomStrategyTest(notify.FuturesTestParams{
 						Title:        lang.Lang("futures.custom_strategy_test"),
@@ -281,6 +281,9 @@ func CheckTestResults(systemConfig *models.Config) {
 					result.ClosePrice = position.MarkPrice
 					result.CloseProfit = strconv.FormatFloat(tradeProfit.NetProfit, 'f', 3, 64)
 					result.CloseStrategy = strategy.Code
+					result.CloseStrategyName = strings.TrimSpace(strategy.Name)
+					result.CloseStrategyType = strings.TrimSpace(strategy.Type)
+					result.CloseStrategyHash = strategyservice.RuleHash(strategy.Code)
 					result.UpdateTime = time.Now().Unix() * 1000
 					orm.NewOrm().Update(result)
 					// 平仓通知
@@ -309,6 +312,10 @@ func CheckTestResults(systemConfig *models.Config) {
 			// 没有定义平仓策略，使用超过 10 % 就平仓
 			result.ClosePrice = position.MarkPrice
 			result.CloseProfit = strconv.FormatFloat(tradeProfit.NetProfit, 'f', 3, 64)
+			result.CloseStrategy = strategyservice.SystemCloseStrategyCode
+			result.CloseStrategyName = strategyservice.SystemCloseStrategyName
+			result.CloseStrategyType = strategyservice.SystemCloseStrategyType
+			result.CloseStrategyHash = strategyservice.RuleHash(strategyservice.SystemCloseStrategyCode)
 			result.UpdateTime = time.Now().Unix() * 1000
 			orm.NewOrm().Update(result)
 			// 平仓通知
@@ -345,7 +352,7 @@ func getSymbols(offsetId int, limit int) (coins []*models.Symbols, err error) {
 }
 
 // 生成测试的开仓数据
-func createTestResult(coin *models.Symbols, nowPrice float64, positionSide string, openStrategyCode string, feeRate float64) (result *models.TestStrategyResults) {
+func createTestResult(coin *models.Symbols, nowPrice float64, positionSide, openStrategyName, openStrategyType, openStrategyCode string, feeRate float64) (result *models.TestStrategyResults) {
 	usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64)           // 交易金额
 	buyPrice := utils.GetTradePrecision(nowPrice, coin.TickSize)   // 合理精度的价格
 	quantity := (usdt_float64 / buyPrice) * float64(coin.Leverage) // 购买数量
@@ -367,7 +374,19 @@ func createTestResult(coin *models.Symbols, nowPrice float64, positionSide strin
 	result.PositionSide = positionSide
 	result.Technology = coin.Technology
 	result.Strategy = coin.Strategy
+	result.StrategyTemplateID = coin.StrategyTemplateID
+	result.StrategyTemplateName = coin.StrategyTemplateName
+	if templateIdentity, err := strategyservice.ResolveTemplateIdentity(orm.NewOrm(), result.StrategyTemplateID, result.StrategyTemplateName, result.Technology, result.Strategy); err != nil {
+		logs.Warning("resolve test strategy template identity failed, symbol:", coin.Symbol, "error:", err)
+	} else {
+		result.StrategyTemplateID = templateIdentity.ID
+		result.StrategyTemplateName = templateIdentity.Name
+	}
+	result.StrategySnapshotHash = strategyservice.StrategySnapshotHash(result.Technology, result.Strategy)
 	result.OpenStrategy = openStrategyCode
+	result.OpenStrategyName = strings.TrimSpace(openStrategyName)
+	result.OpenStrategyType = strings.TrimSpace(openStrategyType)
+	result.OpenStrategyHash = strategyservice.RuleHash(openStrategyCode)
 	result.ClosePrice = "0"
 	result.CloseProfit = "0"
 	result.OpenFeeRate = feeRate

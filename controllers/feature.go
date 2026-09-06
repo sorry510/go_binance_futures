@@ -207,11 +207,18 @@ func (ctrl *FeatureController) BatchEdit() {
 	}
 	if params.StrategyTemplateId != 0 {
 		var template models.StrategyTemplates
-		orm.NewOrm().QueryTable("strategy_templates").Filter("Id", params.StrategyTemplateId).One(&template)
+		if err := orm.NewOrm().QueryTable("strategy_templates").Filter("Id", params.StrategyTemplateId).One(&template); err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, "strategy template not found"))
+			return
+		}
 		query += " technology = ?,"
 		bindData = append(bindData, template.Technology)
 		query += " strategy = ?,"
 		bindData = append(bindData, template.Strategy)
+		query += " strategy_template_id = ?,"
+		bindData = append(bindData, template.ID)
+		query += " strategy_template_name = ?,"
+		bindData = append(bindData, template.Name)
 	}
 
 	if strings.HasSuffix(query, ",") {
