@@ -97,7 +97,7 @@ func (Service) ListTestResults(ctx context.Context, opts TestResultsOptions) (Te
 	metadataColumns := `t.strategy_template_id, t.strategy_template_name, t.strategy_snapshot_hash, t.open_strategy, t.open_strategy_name, t.open_strategy_type, t.open_strategy_hash, t.close_strategy, t.close_strategy_name, t.close_strategy_type, t.close_strategy_hash`
 	listSQL := `SELECT t.id, t.symbol, t.price, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.open_fee_rate, t.close_fee_rate, t.createTime, t.updateTime, ` + metadataColumns + `, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where +
 		" ORDER BY t.createTime DESC LIMIT " + strconv.Itoa(limit) + " OFFSET " + strconv.Itoa(offset)
-	countSQL := `SELECT COUNT(*) FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where
+	countSQL := `SELECT COUNT(*) FROM test_strategy_results t where 1 = 1` + where
 	profitSQL := `SELECT t.id, t.symbol, t.price, t.leverage, t.position_amt, t.position_side, t.close_price, t.open_fee_rate, t.close_fee_rate, ` + metadataColumns + `, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where
 	o := orm.NewOrm()
 	var list []TestResult
