@@ -163,7 +163,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentConversation), new(AgentConversationMessage), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace), new(AgentMemory), new(LLMConfig), new(LLMRouterSetting))
+	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentConversation), new(AgentConversationMessage), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace), new(AgentMemory), new(AgentWorkflowRun), new(AgentObservation), new(AgentChangeEvent), new(AgentTradeProposal), new(AgentTradeExecution), new(AgentTradeAudit), new(LLMConfig), new(LLMRouterSetting))
 	if err := orm.RunSyncdb("default", false, false); err != nil {
 		t.Fatalf("RunSyncdb must upgrade an existing database with rows: %v", err)
 	}
@@ -177,7 +177,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	requireAgentColumns(t, db, "agent_task_events", []string{
 		"step_id", "step_type", "error_type", "checkpoint",
 	})
-	for _, table := range []string{"agent_skill_versions", "agent_skill_permissions", "agent_mcp_servers", "agent_mcp_tools", "agent_mcp_resources", "agent_mcp_prompts", "agent_mcp_permissions", "agent_mcp_secrets", "agent_mcp_oauth_states", "agent_alert_pipeline_traces", "agent_memories", "llm_configs", "llm_router_settings"} {
+	for _, table := range []string{"agent_skill_versions", "agent_skill_permissions", "agent_mcp_servers", "agent_mcp_tools", "agent_mcp_resources", "agent_mcp_prompts", "agent_mcp_permissions", "agent_mcp_secrets", "agent_mcp_oauth_states", "agent_alert_pipeline_traces", "agent_memories", "agent_workflow_runs", "agent_observations", "agent_change_events", "agent_trade_proposals", "agent_trade_executions", "agent_trade_audits", "llm_configs", "llm_router_settings"} {
 		var count int
 		if err := db.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?`, table).Scan(&count); err != nil {
 			t.Fatal(err)
@@ -188,6 +188,22 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	}
 
 	requireAgentColumns(t, db, "agent_conversations", []string{"title"})
+	requireAgentColumns(t, db, "agent_observations", []string{
+		"task_id", "type", "step_id", "step_type", "skill", "provider", "model", "tool", "tool_source", "provider_ref",
+		"protocol_version", "catalog_hash", "schema_hash", "status", "error_type", "duration_ms", "cache_hit", "partial",
+		"context_tokens", "context_blocks", "trimmed_blocks", "memory_selected", "memory_trimmed", "evidence_count", "eval_case", "eval_score", "created_at",
+	})
+	requireAgentColumns(t, db, "agent_change_events", []string{
+		"category", "entity_type", "entity_id", "entity_name", "change_type", "from_version", "to_version", "before_hash", "after_hash", "status", "detail_json", "created_at",
+	})
+	requireAgentColumns(t, db, "agent_trade_proposals", []string{
+		"proposal_id", "source_task_id", "content_hash", "symbol", "side", "entry_zones_json", "stop_loss", "evidence_json", "market_condition", "status", "risk_status", "risk_json", "quantity", "reference_price", "leverage", "notional_usdt", "risk_usdt", "approved_by", "expires_at", "executed_at",
+	})
+	requireAgentColumns(t, db, "agent_trade_executions", []string{
+		"proposal_id", "idempotency_key", "client_order_id", "exchange_order_id", "status", "symbol", "side", "order_type", "quantity", "reference_price", "average_price", "leverage", "error", "submitted_at", "completed_at",
+	})
+	requireAgentColumns(t, db, "agent_trade_audits", []string{"proposal_id", "event", "status", "actor", "detail_json", "created_at"})
+
 	requireAgentColumns(t, db, "agent_conversation_messages", []string{"skill"})
 	var legacyConversationSkill, legacyConversationTitle string
 	if err := db.QueryRow(`SELECT skill, COALESCE(title, '') FROM agent_conversations WHERE id='legacy-conv'`).Scan(&legacyConversationSkill, &legacyConversationTitle); err != nil {
@@ -197,7 +213,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatalf("legacy conversation changed unexpectedly: skill=%q title=%q", legacyConversationSkill, legacyConversationTitle)
 	}
 
-	requireAgentColumns(t, db, "agent_skills", []string{"type", "active_version_id"})
+	requireAgentColumns(t, db, "agent_skills", []string{"type", "active_version_id", "chat_enabled"})
 	requireAgentColumns(t, db, "agent_skill_versions", []string{"skill_id", "package_hash", "version", "metadata_json", "requested_tools_json", "validation_status", "source", "package_path"})
 	requireAgentColumns(t, db, "agent_skill_permissions", []string{"skill_id", "version_id", "requested_name", "resolved_name", "risk", "status", "granted"})
 	requireAgentColumns(t, db, "agent_mcp_tools", []string{
@@ -209,11 +225,12 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 	})
 	var legacySkillType string
 	var legacyActiveVersion int64
-	if err := db.QueryRow(`SELECT type, active_version_id FROM agent_skills WHERE name='symbol_analysis'`).Scan(&legacySkillType, &legacyActiveVersion); err != nil {
+	var legacyChatEnabled int
+	if err := db.QueryRow(`SELECT type, active_version_id, chat_enabled FROM agent_skills WHERE name='symbol_analysis'`).Scan(&legacySkillType, &legacyActiveVersion, &legacyChatEnabled); err != nil {
 		t.Fatalf("legacy AgentSkill row became unreadable after V2-6 upgrade: %v", err)
 	}
-	if legacySkillType != "native" || legacyActiveVersion != 0 {
-		t.Fatalf("legacy AgentSkill defaults changed unexpectedly: type=%q active=%d", legacySkillType, legacyActiveVersion)
+	if legacySkillType != "native" || legacyActiveVersion != 0 || legacyChatEnabled != -1 {
+		t.Fatalf("legacy AgentSkill defaults changed unexpectedly: type=%q active=%d chat=%d", legacySkillType, legacyActiveVersion, legacyChatEnabled)
 	}
 
 	var legacyMCPName string

@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "name": "daily-market-brief-success",
+  "skill": "daily_market_brief",
+  "model_config_id": 201,
+  "input": "{\"version\":\"daily_market_brief_input_v1\",\"as_of\":\"2026-09-05T12:00:00Z\",\"market_condition\":3,\"candidates\":[],\"signals\":{\"total\":2,\"by_type\":{\"fast_move\":2},\"by_severity\":{\"high\":2},\"symbols\":[\"AAAUSDT\"]},\"data_missing\":[]}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\":\"final\",\"summary\":\"ok\",\"result\":{\"version\":\"daily_market_brief_v1\",\"as_of\":\"2026-09-05T12:00:00Z\",\"market_condition\":3,\"headline\":\"range market with isolated volatility\",\"regime_summary\":\"market condition 3\",\"opportunities\":[],\"incidents\":[\"AAAUSDT fast move cluster\"],\"watchlist\":[\"AAAUSDT\"],\"risks\":[\"event volatility\"],\"data_missing\":[]}}"
+    }
+  ]
+}

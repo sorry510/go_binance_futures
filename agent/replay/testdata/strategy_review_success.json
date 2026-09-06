@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "name": "strategy-review-success",
+  "skill": "strategy_review",
+  "model_config_id": 201,
+  "input": "{\"version\":\"strategy_review_input_v1\",\"template\":{\"id\":7,\"name\":\"demo\",\"technology\":\"{}\",\"strategy\":\"[]\",\"updated_at\":1780000000000},\"stats\":{\"total\":10,\"closed\":10,\"wins\":6,\"losses\":4,\"win_rate\":0.6,\"gross_profit\":10,\"net_profit\":8,\"fees\":2,\"average_net\":0.8,\"long_trades\":5,\"short_trades\":5,\"window_start\":1770000000000,\"window_end\":1780000000000},\"market_condition\":3,\"data_missing\":[]}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\":\"final\",\"summary\":\"ok\",\"result\":{\"version\":\"strategy_review_v1\",\"template_id\":7,\"market_condition\":3,\"verdict\":\"revise\",\"confidence\":0.75,\"summary\":\"positive but regime sensitive\",\"suitable_environments\":[3,4],\"failure_modes\":[\"trend reversal\"],\"proposals\":[\"tighten filter\"],\"evidence\":[\"60% win rate after fees\"]}}"
+    }
+  ]
+}

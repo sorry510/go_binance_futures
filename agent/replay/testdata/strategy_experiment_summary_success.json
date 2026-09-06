@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "name": "strategy-experiment-summary-success",
+  "skill": "strategy_experiment_summary",
+  "model_config_id": 201,
+  "input": "{\"version\":\"strategy_experiment_summary_input_v1\",\"proposal\":{\"version\":\"strategy_experiment_proposal_v1\",\"base_template_id\":7,\"candidate_name\":\"demo-exp\",\"technology_json\":\"{}\",\"strategy_json\":\"[]\",\"rationale\":[\"x\"],\"risks\":[\"y\"]},\"test\":{\"version\":\"strategy_experiment_test_v1\",\"valid\":true,\"rule_count\":1,\"enabled_rule_count\":1,\"compiled_rules\":1,\"scenario_runs\":3,\"scenario_passes\":3,\"errors\":[]}}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\":\"final\",\"summary\":\"ok\",\"result\":{\"version\":\"strategy_experiment_result_v1\",\"base_template_id\":7,\"candidate_name\":\"demo-exp\",\"verdict\":\"promising\",\"summary\":\"candidate passed deterministic checks\",\"test\":{\"version\":\"strategy_experiment_test_v1\",\"valid\":true,\"rule_count\":1,\"enabled_rule_count\":1,\"compiled_rules\":1,\"scenario_runs\":3,\"scenario_passes\":3,\"errors\":[]},\"proposed_changes\":[\"keep as experiment\"],\"risks\":[\"not production validated\"],\"technology_json\":\"{}\",\"strategy_json\":\"[]\"}}"
+    }
+  ]
+}

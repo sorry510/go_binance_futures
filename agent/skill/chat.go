@@ -16,6 +16,19 @@ type ChatContextAdapter interface {
 	BuildChatInputWithContext(context.Context, string, []string) (string, error)
 }
 
+// ChatInputOptions contains explicit user selections supplied by the Chat UI.
+// These values are deterministic context and must take precedence over guesses
+// extracted from free-form message text.
+type ChatInputOptions struct {
+	Symbol string
+}
+
+// ChatOptionsAdapter lets a Chat-capable Skill consume explicit UI selections
+// while preserving its existing Runtime input contract.
+type ChatOptionsAdapter interface {
+	BuildChatInputWithOptions(context.Context, string, []string, ChatInputOptions) (string, error)
+}
+
 // PlainTextFinalAdapter allows a Skill adapter to accept a plain-text LLM reply
 // as its final result when no package resource or external Tool is required.
 // Structured Native Skills should not implement this interface.

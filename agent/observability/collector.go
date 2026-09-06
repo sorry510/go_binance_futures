@@ -1,6 +1,7 @@
 package observability
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -47,16 +48,17 @@ type metricState struct {
 }
 
 type Collector struct {
-	mu     sync.Mutex
-	global metricState
-	skills map[string]*metricState
+	mu      sync.Mutex
+	global  metricState
+	skills  map[string]*metricState
+	persist bool
 }
 
 func New() *Collector {
 	return &Collector{skills: map[string]*metricState{}}
 }
 
-var defaultCollector = New()
+var defaultCollector = &Collector{skills: map[string]*metricState{}, persist: true}
 
 func Default() *Collector { return defaultCollector }
 
@@ -65,7 +67,6 @@ func (collector *Collector) Observe(value agentruntime.Observation) {
 		return
 	}
 	collector.mu.Lock()
-	defer collector.mu.Unlock()
 	collector.apply(&collector.global, value)
 	skill := strings.TrimSpace(value.Skill)
 	if skill != "" {
@@ -76,7 +77,11 @@ func (collector *Collector) Observe(value agentruntime.Observation) {
 		}
 		collector.apply(state, value)
 	}
+	collector.mu.Unlock()
 	collector.log(value)
+	if collector.persist {
+		persistObservation(context.Background(), value)
+	}
 }
 func (collector *Collector) apply(state *metricState, value agentruntime.Observation) {
 	switch value.Type {

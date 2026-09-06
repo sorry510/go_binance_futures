@@ -21,10 +21,27 @@ type agentSkillCreateRequest struct {
 	DisplayName string `json:"display_name"`
 	Description string `json:"description"`
 	Enabled     *int   `json:"enabled"`
+	ChatEnabled *int   `json:"chat_enabled"`
 }
 
 func (ctrl *AgentSkillController) Get() {
-	items, err := (skillconfig.Store{}).List(ctrl.Ctx.Request.Context())
+	kind := strings.TrimSpace(ctrl.GetString("type"))
+	keyword := strings.TrimSpace(ctrl.GetString("keyword"))
+	pageRaw := strings.TrimSpace(ctrl.GetString("page"))
+	limitRaw := strings.TrimSpace(ctrl.GetString("limit"))
+	store := skillconfig.Store{}
+	if kind != "" || keyword != "" || pageRaw != "" || limitRaw != "" {
+		page, _ := strconv.Atoi(pageRaw)
+		limit, _ := strconv.Atoi(limitRaw)
+		result, err := store.ListPage(ctrl.Ctx.Request.Context(), skillconfig.ListOptions{Type: kind, Keyword: keyword, Page: page, Limit: limit})
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(500, nil, err.Error()))
+			return
+		}
+		ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": result, "msg": "success"})
+		return
+	}
+	items, err := store.List(ctrl.Ctx.Request.Context())
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(500, nil, err.Error()))
 		return
@@ -54,6 +71,10 @@ func (ctrl *AgentSkillController) Post() {
 	if request.Enabled != nil {
 		enabled = *request.Enabled
 	}
+	chatEnabled := implementation.ChatDefault
+	if request.ChatEnabled != nil {
+		chatEnabled = *request.ChatEnabled
+	}
 	if strings.TrimSpace(request.DisplayName) == "" {
 		request.DisplayName = implementation.DisplayName
 	}
@@ -62,7 +83,7 @@ func (ctrl *AgentSkillController) Post() {
 	}
 	item, err := (skillconfig.Store{}).Create(ctrl.Ctx.Request.Context(), skillconfig.CreateInput{
 		Name: request.Name, DisplayName: request.DisplayName, Description: request.Description,
-		Enabled: enabled,
+		Enabled: enabled, ChatEnabled: chatEnabled,
 	})
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))

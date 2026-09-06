@@ -13,6 +13,7 @@ import (
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"go_binance_futures/agent/observability"
 	"go_binance_futures/agent/security"
 	"go_binance_futures/models"
 )
@@ -113,8 +114,14 @@ func (g *Gateway) RefreshCatalog(ctx context.Context, serverID int64) (RefreshRe
 	catalogHash := discoveryHash(discovery)
 	if err := g.syncCatalog(ctx, server, discovery, catalogHash); err != nil {
 		g.markServerError(serverID, err)
+		observability.RecordChange(ctx, observability.ChangeEvent{Category: "mcp", EntityType: "mcp_server", EntityID: server.ID, EntityName: server.Name, ChangeType: "catalog_refresh", BeforeHash: server.CatalogHash, Status: "error", Detail: map[string]any{"error": err.Error()}})
 		return RefreshResult{}, err
 	}
+	changeType := "catalog_refresh"
+	if server.CatalogHash != catalogHash {
+		changeType = "catalog_changed"
+	}
+	observability.RecordChange(ctx, observability.ChangeEvent{Category: "mcp", EntityType: "mcp_server", EntityID: server.ID, EntityName: server.Name, ChangeType: changeType, FromVersion: server.ProtocolVersion, ToVersion: discovery.ProtocolVersion, BeforeHash: server.CatalogHash, AfterHash: catalogHash, Status: "success", Detail: map[string]any{"tools": len(discovery.Tools), "resources": len(discovery.Resources), "prompts": len(discovery.Prompts)}})
 	return RefreshResult{
 		ProtocolVersion: discovery.ProtocolVersion,
 		ServerName:      discovery.ServerName, ServerVersion: discovery.ServerVersion,
@@ -183,7 +190,7 @@ func (g *Gateway) syncCatalog(ctx context.Context, server models.AgentMCPServer,
 		return err
 	}
 	o := g.Store.orm()
-	if err := syncTools(o, server, discovery.Tools, catalogHash); err != nil {
+	if err := syncTools(ctx, o, server, discovery.Tools, catalogHash); err != nil {
 		return err
 	}
 	if err := syncResources(o, server, discovery.Resources, catalogHash); err != nil {
@@ -207,7 +214,7 @@ func (g *Gateway) syncCatalog(ctx context.Context, server models.AgentMCPServer,
 	return err
 }
 
-func syncTools(o orm.Ormer, server models.AgentMCPServer, discovered []*mcp.Tool, catalogHash string) error {
+func syncTools(ctx context.Context, o orm.Ormer, server models.AgentMCPServer, discovered []*mcp.Tool, catalogHash string) error {
 	var existing []models.AgentMCPTool
 	if _, err := o.QueryTable(new(models.AgentMCPTool)).Filter("server_id", server.ID).All(&existing); err != nil {
 		return err
@@ -228,12 +235,21 @@ func syncTools(o orm.Ormer, server models.AgentMCPServer, discovered []*mcp.Tool
 		}
 		inputSchema, outputSchema, schemaHash := schemaIdentity(remote.InputSchema, remote.OutputSchema)
 		row, exists := byName[remote.Name]
+		previousSchemaHash := row.SchemaHash
 		schemaChanged := false
+		tradeRestricted := externalMCPTradeCapability(remote.Name, remote.Description)
 		if !exists {
-			row = models.AgentMCPTool{ServerID: server.ID, RemoteName: remote.Name, CanonicalName: canonical, Status: ToolUnclassified, Risk: "read", Enabled: 0, TimeoutMs: defaultToolTimeoutMs, MaxResultBytes: 128 << 10, CreatedAt: now}
+			risk := "read"
+			if tradeRestricted {
+				risk = "trade"
+			}
+			row = models.AgentMCPTool{ServerID: server.ID, RemoteName: remote.Name, CanonicalName: canonical, Status: ToolUnclassified, Risk: risk, Enabled: 0, TimeoutMs: defaultToolTimeoutMs, MaxResultBytes: 128 << 10, CreatedAt: now}
 		} else if row.SchemaHash != "" && row.SchemaHash != schemaHash {
 			row.Status, row.Enabled = ToolNeedsReview, 0
 			schemaChanged = true
+		}
+		if tradeRestricted {
+			row.Risk, row.Enabled, row.Status = "trade", 0, ToolNeedsReview
 		}
 		row.CanonicalName, row.Description = canonical, remote.Description
 		row.InputSchema, row.OutputSchema, row.SchemaHash, row.CatalogHash = inputSchema, outputSchema, schemaHash, catalogHash
@@ -250,10 +266,16 @@ func syncTools(o orm.Ormer, server models.AgentMCPServer, discovered []*mcp.Tool
 		} else if _, err := o.Update(&row); err != nil {
 			return err
 		}
-		if schemaChanged {
+		if schemaChanged || tradeRestricted {
 			if _, err := o.QueryTable(new(models.AgentMCPPermission)).Filter("server_id", server.ID).Filter("capability_type", CapabilityTool).Filter("capability_id", row.ID).Update(orm.Params{"enabled": 0, "updated_at": now}); err != nil {
 				return err
 			}
+		}
+		if schemaChanged {
+			observability.RecordChange(ctx, observability.ChangeEvent{Category: "mcp", EntityType: "mcp_tool", EntityID: row.ID, EntityName: row.CanonicalName, ChangeType: "schema_changed", BeforeHash: previousSchemaHash, AfterHash: schemaHash, Status: "review_required", Detail: map[string]any{"server_id": server.ID, "server_name": server.Name}})
+		}
+		if tradeRestricted {
+			observability.RecordChange(ctx, observability.ChangeEvent{Category: "mcp", EntityType: "mcp_tool", EntityID: row.ID, EntityName: row.CanonicalName, ChangeType: "trade_restricted", AfterHash: schemaHash, Status: "disabled", Detail: map[string]any{"server_id": server.ID, "server_name": server.Name}})
 		}
 		seen[remote.Name] = true
 	}
@@ -353,4 +375,28 @@ func syncPrompts(o orm.Ormer, server models.AgentMCPServer, discovered []*mcp.Pr
 		_, _ = o.QueryTable(new(models.AgentMCPPrompt)).Filter("id", row.ID).Delete()
 	}
 	return nil
+}
+
+func externalMCPTradeCapability(name, description string) bool {
+	normalize := func(value string) string {
+		value = strings.ToLower(strings.TrimSpace(value))
+		replacer := strings.NewReplacer("_", " ", "-", " ", ".", " ", "/", " ")
+		return strings.Join(strings.Fields(replacer.Replace(value)), " ")
+	}
+	nameText := normalize(name)
+	detail := nameText + " " + normalize(description)
+	for _, phrase := range []string{
+		"place order", "create order", "submit order", "execute order",
+		"open position", "close position", "execute trade",
+	} {
+		if strings.Contains(detail, phrase) {
+			return true
+		}
+	}
+	for _, exact := range []string{"buy", "sell", "trade", "order"} {
+		if nameText == exact {
+			return true
+		}
+	}
+	return false
 }

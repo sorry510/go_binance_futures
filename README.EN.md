@@ -77,18 +77,25 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 
 | Menu | Pages and purpose |
 | --- | --- |
-| Configuration Center (`配置中心`) | Global switches and runtime settings for futures trading, WebSocket, new-coin rush, price alerts, market monitoring, funding-rate monitoring, notifications, debug push, and external links |
-| AI → Symbol Analysis (`AI → 单币分析`) | Select or enter a USDT perpetual contract, add an optional focus, start an AI analysis, and review historical direction, confidence, market regime, price movement, and summaries |
-| AI → Task Center (`AI → 任务中心`) | View Agent governance and runtime metrics, per-Skill metrics, Scheduler status, and Agent Task history |
-| AI → Skill Management (`AI → Skill 管理`) | Manage database-backed Skill registrations, display names, descriptions, and enabled states; implementations remain in backend code |
-| AI → LLM Configuration (`AI → LLM 配置`) | Add, edit, test, and switch database-backed LLM configurations; new tasks use the current model without a service restart |
+| Configuration Center (`配置中心`) | Non-AI global settings for futures trading, WebSocket, new-coin rush, price alerts, market monitoring, funding-rate monitoring, notifications, debug push, and external links |
+| AI → Chat (`AI → 对话`) | Unified Agent chat entry; choose chat-enabled Native/Portable Skills and optionally select a real futures Symbol from the contract list so natural-language aliases cannot select the wrong market |
+| AI → Symbol Analysis (`AI → 单币分析`) | Select a real USDT perpetual contract, start structured AI analysis, and review historical TradingPlans, direction, confidence, market regime, and subsequent price movement |
+| AI → Model Configuration (`AI → 模型配置`) | Add, edit, test, and switch database-backed LLM configurations; new tasks use the current model without a restart |
+| AI → Skill Management (`AI → Skill 管理`) | Manage Native and Portable Skills in separate tabs with search, pagination, enable/disable, and an independent chat-availability switch |
+| AI → MCP Management (`AI → MCP 管理`) | Connect and govern third-party HTTP MCP Servers, including Tools, Resources, Prompts, authentication/OAuth, and per-Skill permissions |
+| AI → Memory Management (`AI → Memory 管理`) | Inspect and maintain long-term Agent Memory, Scope, TTL, and status |
+| AI → Workflows (`AI → 业务 Workflow`) | Run market scan, strategy review, strategy experiments, alert triage, and daily market brief workflows and inspect parent/child tasks |
+| AI → Controlled Trading (`AI → 受控交易`) | Convert a successful symbol analysis into a Trade Proposal, run deterministic risk checks, require human approval, re-check risk before execution, submit through the controlled Binance path, and retain audit history |
+| AI → Task Center (`AI → 任务中心`) | View Agent governance, Scheduler state, runtime metrics, and Agent Task history |
+| AI → Observability (`AI → 可观测性`) | Inspect long-term traces, model/Tool/Skill metrics, latency, token use, errors, and change history |
+| AI → Alert Pipeline History (`AI → 报警链路历史`) | Trace FastMove/liquidation Signals from event processing through AI analysis/triage to notification or fallback |
+| AI → AI Configuration (`AI → AI 配置`) | Central configuration for AI alerts, AI Schedulers, global Agent budgets/governance, and controlled-trading Risk Policy |
 | Futures Trade → Futures Trade (`合约交易 → 合约交易`) | Browse `Favorites`, `USDT`, and `USDC` symbols; add, search, batch-edit, enable all, or disable all symbol configurations |
 | Futures Trade → Futures Orders (`合约交易 → 合约订单`) | Search real futures order history by symbol and time range |
 | Futures Trade → Futures Account (`合约交易 → 合约账户`) | View Binance futures assets, positions, and open orders |
 | Futures Trade → Local Futures Account (`合约交易 → 本地合约账户`) | View assets, positions, and orders recorded locally by the application |
 | Futures Trade → Strategy Templates (`合约交易 → 策略模板`) | Create and maintain indicator and strategy-method templates |
 | Futures Trade → Test Results (`合约交易 → 测试结果`) | Search simulated-trading results by symbol and time range |
-| Futures Trade → Market Volatility Logs (`合约交易 → 市场波动日志`) | Search and group fast-market-movement records |
 | Coin Alerts → Spot/Futures Alerts (`币种提醒 → 现货提醒 / 合约提醒`) | Configure target-price alerts and optional automatic trades |
 | Market Monitoring → Spot/Futures Monitoring (`市场监听 → 现货监听 / 合约监听`) | Configure K-line, threshold, indicator, and custom-strategy monitoring |
 | Funding Rate Monitoring (`资金费率监听`) | View funding rates and configure automatic trading |
@@ -112,8 +119,8 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 #### AI - Skill Management
 ![New UI - AI Skill Management](./img/ui/ai-skill-management.png)
 
-#### AI - LLM Configuration
-![New UI - AI LLM Configuration](./img/ui/ai-llm-config.png)
+#### AI - Model Configuration
+![New UI - AI Model Configuration](./img/ui/ai-llm-config.png)
 
 #### Futures Trade
 ![New UI - Futures Trade](./img/ui/futures-symbols.png)
@@ -132,9 +139,6 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 
 #### Test Results
 ![New UI - Test Results](./img/ui/test-results.jpg)
-
-#### Market Volatility Logs
-![New UI - Market Volatility Logs](./img/ui/market-volatility-logs.jpg)
 
 #### Spot Alerts
 ![New UI - Spot Alerts](./img/ui/spot-alerts.jpg)
@@ -165,26 +169,71 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 
 ## AI features
 
+### Chat
+
+**AI → Chat** is the unified human entry point for the Agent platform. Select any Skill that is allowed in chat. For symbol analysis, the composer includes a searchable selector backed by the application's real futures contract list; the selected Symbol is sent explicitly and takes precedence over text parsing, so Chinese names, aliases, or free-form wording cannot accidentally select another market. Without a Symbol, the Skill can still handle ordinary conversation, and only explicit follow-up wording reuses the previous Symbol.
+
 ### Symbol Analysis
 
-Select or enter a USDT perpetual contract and optionally tell the AI what to focus on. The page starts the `symbol_analysis` Skill, loads the contract's latest successful analysis, compares it with the current market, and returns a structured TradingPlan. History shows status, direction, confidence, market regime, analysis-time price, current price, subsequent change, and summary.
+Select a real USDT perpetual Symbol and optionally add an analysis focus. The application runs the `symbol_analysis` Skill with market data, current market regime, and the latest successful comparison context, then returns a structured `TradingPlan`. History shows status, direction, confidence, market regime, analysis-time price, current price, later movement, and summary.
 
-### Task Center
+### Model Configuration
 
-- **Agent governance and runtime metrics:** per-minute and per-hour launch limits, accepted and rejected tasks, task success rate, LLM/Tool error rates, token usage, latency, average rounds, and Signal-to-notification conversion.
-- **Per-Skill metrics:** task count, success rate, error rates, token usage, and P95 latency for each Skill.
-- **Agent Scheduler:** enabled state, interval, running state, execution/skip counts, next run, and previous status for scheduled jobs.
-- **Agent Task history:** filter by Skill and status, then inspect stage, progress, provider, model, tokens, Conversation ID, and task details.
+LLM configurations are database-backed. The page supports provider templates and custom providers, configuration name, API endpoint, API key, model, request timeout, Temperature, connection testing, and switching the active model. New Agent tasks use the active configuration without restarting the service. API keys are never returned in plaintext.
 
 ### Skill Management
 
-Skill registration and governance settings are stored in the database. The page can create, edit, enable, disable, and delete Skills and maintain their display names and descriptions. Skill implementations remain in backend code; deleting the database registration prevents that Skill from starting.
+Skill registration and governance settings are stored in the database. Native and Portable Skills are shown in separate tabs with search and pagination. The page supports create/edit, enable/disable, deletion, and a separate **Chat Enabled** switch. `enabled` controls whether a Skill can run; `chat_enabled` only controls whether it is exposed to chat. Portable `allowed-tools` entries are permission requests and cannot self-grant high-risk or trading access.
 
-Built-in Skills include alert analysis (`alert_analysis`), market-regime analysis (`market_regime`), strategy generation (`strategy_builder`), and symbol analysis (`symbol_analysis`).
+### MCP Management
 
-### LLM Configuration
+The application can act as an MCP Client for third-party standard HTTP MCP Servers and bring remote Tools, Resources, and Prompts into the same Runtime, Permission, Trace, and Context system. The UI supports connection tests, Catalog refresh, authentication/OAuth, and per-Skill grants. External capabilities identified as real trading actions are forced into the high-risk trade class and kept disabled so they cannot bypass controlled execution.
 
-LLM configurations are stored in the database. The page can select a provider template; maintain the configuration name, API endpoint, API key, model name, request timeout, and Temperature; test connectivity; and mark a model as current. New Agent tasks read the current configuration without restarting the service. API keys are never returned in plaintext, while token and tool-call limits remain controlled by global Agent governance settings.
+### Memory Management
+
+Long-term Memory is persisted separately from Conversations and Tasks. The page exposes content, source, Scope, TTL, status, and update time. Memory contributes context only; it does not gain Tool or trading privileges.
+
+### Business Workflows
+
+Business Workflows reuse the existing Agent Runtime instead of creating a second Agent stack:
+
+- `market_scan`: a deterministic Scanner narrows the market first, then the Agent analyzes a small candidate set and returns opportunities.
+- `strategy_review`: reviews a strategy template using existing test results, post-fee performance, and the current market regime; it proposes changes but never edits the formal template directly.
+- `strategy_experiment`: the Agent proposes a candidate, deterministic expression validation and fixed-scenario tests run, and the Agent summarizes the result; experiments never overwrite a formal strategy.
+- `alert_triage`: when AI is enabled, related same-symbol Signals arriving close together can be grouped into an Incident to reduce duplicate notifications; AI-off/failure paths keep deterministic fallback behavior.
+- `daily_market_brief`: aggregates market regime, Scanner results, and important Signals into a fixed-schema brief; its Scheduler is disabled by default.
+
+### Controlled Trading
+
+Controlled trading does **not** expose a direct trading Tool to the LLM. Real execution follows this fixed path:
+
+`successful symbol_analysis → Trade Proposal → deterministic Risk Engine → human approval → risk re-check → Execution Service → Binance → Audit`.
+
+- Real AI execution is disabled by default and the allowed-symbol list starts empty.
+- A Proposal can only originate from a successful structured symbol analysis; the LLM does not choose the final quantity.
+- The Risk Engine checks the allowlist, direction, current market regime and regime drift, price freshness, Entry Zone, Stop Loss, estimated slippage, existing positions/open orders, duplicates, cooldown, leverage, per-trade risk, notional size, total exposure, and the Kill Switch.
+- Final quantity is computed deterministically from maximum risk, stop distance, maximum notional, and the exchange StepSize.
+- Risk is run again before real execution, and the Kill Switch is read again immediately before broker submission.
+- A unique `client_order_id` makes submission idempotent. Ambiguous network results are never automatically resubmitted; they can only be reconciled by that ID.
+- Proposal, Risk, approval/rejection, execution, and reconciliation actions are audited.
+- Current controlled execution submits an opening `MARKET` order. TradingPlan take-profit/stop-loss values are used by Risk and approval but do not yet automatically create Binance protective TP/SL orders.
+
+### AI Configuration
+
+All AI runtime configuration is centralized under **AI → AI Configuration**, including:
+
+- Alert Pipeline / AI analysis switches, minimum severity, cooldown, concurrency, and per-minute limits.
+- Market-regime update and daily-market-brief Schedulers.
+- Global Agent admission limits plus Token and Tool-call budgets.
+- Controlled-trading Kill Switch, Symbol allowlist, max per-trade risk/notional, total exposure, leverage, price freshness, slippage, cooldown, and Proposal TTL.
+
+These settings have been moved out of **Configuration Center**, which now contains only non-AI trading, market-monitoring, alert, and system runtime settings.
+
+### Task Center, Observability, and Alert History
+
+- **Task Center:** governance state, direct Runtime trade permission vs controlled execution state, Scheduler jobs, Task history, model identity, tokens, and task details.
+- **Observability:** long-term traces and per-Skill/model/Tool metrics including errors, latency, tokens, and change history.
+- **Alert Pipeline History:** the end-to-end Signal path from Event Bus and Signal Engine through AI analysis/triage to Notification or deterministic fallback.
 
 ## futures-trade
 
@@ -198,7 +247,7 @@ The **Futures Trade → Futures Trade** page supports per-symbol settings for st
 
 ### Global settings
 
-- **Fast-movement alerts:** configure the movement threshold, recovery threshold, cooldown, and monitoring windows. Review triggered events under **Market Volatility Logs**.
+- **Fast-movement alerts:** configure the movement threshold, recovery threshold, cooldown, and monitoring windows. Review Signal analysis, triage, notifications, and fallback under **AI → Alert Pipeline History**.
 - **Position profit sign-change notification:** sends a notification when a position changes between profit and loss. Enabling it for many positions or symbols increases API traffic.
 - **Allow Long / Allow Short:** direction-level master switches; disabled directions will not open even when a strategy matches.
 - **Trading Strategy / Coin Selection Strategy:** used when a symbol's strategy type is `global`; custom symbols use their own configuration.
@@ -269,7 +318,8 @@ Enable the master switch under **Configuration Center → Funding Rate Monitorin
 
 ## system-config
 
-- **Configuration Center:** changes database-backed runtime switches and parameters.
+- **Configuration Center:** changes non-AI database-backed trading, monitoring, and alert runtime settings.
+- **AI → AI Configuration:** centralizes AI alerts, Schedulers, global Agent budgets, and controlled-trading Risk Policy.
 - **System Configuration:** edits `conf/app.conf` online. After `Save`, startup-time settings still require `Restart Service` or a manual application restart.
 - **Logs:** displays output from the command configured in `web.commend_log`.
 
@@ -296,7 +346,9 @@ The System Configuration page contains sensitive values such as API keys, databa
 5. **Why can the account not open a position?** Check direction switches, maximum-position limits, maximum losing positions, excluded symbols, symbol enabled status, and available USDT. Binance may also restrict some IP regions.
 6. **Why is the UI slow?** For larger datasets, use MySQL; SQLite is better suited to smaller deployments.
 7. **What should I do after an API rate-limit error?** Reduce enabled symbols, monitoring rules, and high-frequency notifications, then wait for Binance's restriction to clear.
-8. **Where can I view service logs?** Open **Logs**. It runs the command configured in `web.commend_log`.
+8. **Where are AI alert, Scheduler, and budget settings?** Open **AI → AI Configuration**; these settings are no longer in Configuration Center.
+9. **Can the AI place a real order directly?** No. Controlled execution is disabled by default and requires a Proposal, deterministic Risk checks, human approval, and a final Risk re-check.
+10. **Where can I view service logs?** Open **Logs**. It runs the command configured in `web.commend_log`.
 
 ### edit config
 
