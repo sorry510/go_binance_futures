@@ -14,6 +14,7 @@ type Settings struct {
 	Cooldown      time.Duration          `json:"-"`
 	MaxConcurrent int                    `json:"max_concurrent"`
 	MaxPerMinute  int                    `json:"max_per_minute"`
+	TriageWindow  time.Duration          `json:"-"`
 	Signal        signalservice.Settings `json:"-"`
 }
 
@@ -41,6 +42,7 @@ func DefaultSettings() Settings {
 		Cooldown:      15 * time.Minute,
 		MaxConcurrent: 2,
 		MaxPerMinute:  6,
+		TriageWindow:  3 * time.Second,
 		Signal:        signalservice.DefaultSettings(),
 	}
 }
@@ -97,6 +99,10 @@ type Stats struct {
 	AIFallbacks        uint64  `json:"ai_fallbacks"`
 	Notifications      uint64  `json:"notifications"`
 	ActiveAI           int     `json:"active_ai"`
+	TriageBatches      uint64  `json:"triage_batches"`
+	TriageSignals      uint64  `json:"triage_signals"`
+	TriageTasksStarted uint64  `json:"triage_tasks_started"`
+	TriageSuppressed   uint64  `json:"triage_suppressed"`
 	SignalNotifyRate   float64 `json:"signal_notify_rate"`
 	AIFallbackRate     float64 `json:"ai_fallback_rate"`
 }

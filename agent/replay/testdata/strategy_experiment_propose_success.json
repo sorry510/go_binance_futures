@@ -1,0 +1,13 @@
+{
+  "version": "agent_replay_v1",
+  "name": "strategy-experiment-propose-success",
+  "skill": "strategy_experiment_propose",
+  "model_config_id": 201,
+  "input": "{\"version\":\"strategy_experiment_proposal_input_v1\",\"template\":{\"id\":7,\"name\":\"demo\",\"technology\":\"{}\",\"strategy\":\"[]\",\"updated_at\":1780000000000},\"goal\":\"reduce false entries\",\"market_condition\":3}",
+  "llm": [
+    {
+      "model": "fixture-model",
+      "content": "{\"action\":\"final\",\"summary\":\"ok\",\"result\":{\"version\":\"strategy_experiment_proposal_v1\",\"base_template_id\":7,\"candidate_name\":\"demo-exp\",\"technology_json\":\"{}\",\"strategy_json\":\"[{\\\"name\\\":\\\"r\\\",\\\"enable\\\":true,\\\"code\\\":\\\"NowPrice > 100\\\",\\\"type\\\":\\\"long\\\"}]\",\"rationale\":[\"add price gate\"],\"risks\":[\"synthetic validation only\"]}}"
+    }
+  ]
+}

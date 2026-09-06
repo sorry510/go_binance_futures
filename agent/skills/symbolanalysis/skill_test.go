@@ -168,6 +168,32 @@ func TestRunValidatorRejectsUnusedEvidenceSource(t *testing.T) {
 	}
 }
 
+func TestBuildChatInputWithOptionsPrefersSelectedSymbolOverMessageText(t *testing.T) {
+	raw, err := New().BuildChatInputWithOptions(
+		context.Background(),
+		"分析牛来USDT，重点看是否适合做多",
+		[]string{`{"symbol":"BTCUSDT","prompt":"之前分析 BTCUSDT","chat":true}`},
+		skill.ChatInputOptions{Symbol: "NILUSDT"},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var input Input
+	if err := json.Unmarshal([]byte(raw), &input); err != nil {
+		t.Fatal(err)
+	}
+	if input.Symbol != "NILUSDT" || input.Prompt != "分析牛来USDT，重点看是否适合做多" || !input.Chat {
+		t.Fatalf("explicit UI symbol must win: %+v", input)
+	}
+}
+
+func TestBuildChatInputWithOptionsRejectsNonUSDTSelection(t *testing.T) {
+	_, err := New().BuildChatInputWithOptions(context.Background(), "分析一下", nil, skill.ChatInputOptions{Symbol: "BTCUSDC"})
+	if err == nil || !strings.Contains(err.Error(), "USDT") {
+		t.Fatalf("expected invalid selection error, got %v", err)
+	}
+}
+
 func TestSymbolAnalysisMaxRounds(t *testing.T) {
 	if got := New().MaxRounds(); got != 15 {
 		t.Fatalf("MaxRounds() = %d, want 15", got)
@@ -183,7 +209,7 @@ func TestBuildChatInputConvertsNaturalLanguageToExistingContract(t *testing.T) {
 	if err := json.Unmarshal([]byte(raw), &input); err != nil {
 		t.Fatal(err)
 	}
-	if input.Symbol != "ONGUSDT" || input.Prompt != "请重新分析 ongusdt 最近的走势" {
+	if input.Symbol != "ONGUSDT" || input.Prompt != "请重新分析 ongusdt 最近的走势" || !input.Chat {
 		t.Fatalf("unexpected chat input: %+v", input)
 	}
 	if err := definition.ValidateInput(skill.Request{Input: raw}); err != nil {
@@ -191,10 +217,43 @@ func TestBuildChatInputConvertsNaturalLanguageToExistingContract(t *testing.T) {
 	}
 }
 
-func TestBuildChatInputRequiresExplicitUSDTContract(t *testing.T) {
-	_, err := New().BuildChatInput(context.Background(), "帮我分析一下比特币")
-	if err == nil || !strings.Contains(err.Error(), "BTCUSDT") {
-		t.Fatalf("expected explicit symbol guidance, got %v", err)
+func TestBuildChatInputAllowsFreeFormTextWithoutSymbol(t *testing.T) {
+	definition := New()
+	for _, content := range []string{"你好，今天怎么样？", "牛来USDT", "帮我解释一下资金费率是什么"} {
+		raw, err := definition.BuildChatInput(context.Background(), content)
+		if err != nil {
+			t.Fatalf("free-form chat %q should not fail: %v", content, err)
+		}
+		var input Input
+		if err := json.Unmarshal([]byte(raw), &input); err != nil {
+			t.Fatal(err)
+		}
+		if !input.Chat || input.Symbol != "" || input.Prompt != content {
+			t.Fatalf("unexpected free-form chat input for %q: %+v", content, input)
+		}
+		if err := definition.ValidateInput(skill.Request{Input: raw}); err != nil {
+			t.Fatalf("chat input should be valid: %v", err)
+		}
+		if required := definition.RequiredTools(skill.Request{Input: raw}); len(required) != 0 {
+			t.Fatalf("free-form chat must not require symbol tools: %v", required)
+		}
+		messages, err := definition.BuildInput(context.Background(), skill.Request{Input: raw})
+		if err != nil || len(messages) != 1 || !strings.Contains(messages[0].Content, content) || !strings.Contains(messages[0].Content, "CHAT_MODE_NO_SYMBOL") {
+			t.Fatalf("unexpected free-form messages: %+v err=%v", messages, err)
+		}
+		value, err := definition.ValidatorForRunWithEvidence(skill.Request{Input: raw}, nil, nil).Validate(context.Background(), json.RawMessage(`"可以正常聊天，不编造币种。"`))
+		if err != nil || value != "可以正常聊天，不编造币种。" {
+			t.Fatalf("free-form chat result should be accepted: value=%#v err=%v", value, err)
+		}
+	}
+}
+
+func TestDirectSymbolAnalysisStillRequiresUSDTContract(t *testing.T) {
+	definition := New()
+	for _, raw := range []string{`{"prompt":"随便聊聊"}`, `{"symbol":"BTCUSDC"}`} {
+		if err := definition.ValidateInput(skill.Request{Input: raw}); err == nil {
+			t.Fatalf("direct symbol-analysis input must remain strict: %s", raw)
+		}
 	}
 }
 
@@ -207,7 +266,7 @@ func TestBuildChatInputWithContextReusesPreviousSuccessfulSymbol(t *testing.T) {
 	if err := json.Unmarshal([]byte(raw), &input); err != nil {
 		t.Fatal(err)
 	}
-	if input.Symbol != "BTCUSDT" || input.Prompt != "刚才最需要注意的风险是什么？" {
+	if input.Symbol != "BTCUSDT" || input.Prompt != "刚才最需要注意的风险是什么？" || !input.Chat {
 		t.Fatalf("unexpected contextual chat input: %+v", input)
 	}
 }

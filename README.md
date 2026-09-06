@@ -74,18 +74,25 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 
 | 菜单 | 页面与用途 |
 | --- | --- |
-| 配置中心 | 管理合约交易、WebSocket、抢新、币种提醒、市场监听、资金费率监听、通知通道、调试推送和外部链接等全局开关与参数 |
-| AI → 单币分析 | 选择或输入 USDT 永续合约，可补充关注方向并启动 AI 分析；查看方向、置信度、市场环境、价格变化和分析总结等历史结果 |
-| AI → 任务中心 | 查看 Agent 治理与运行指标、各 Skill 指标、Scheduler 状态和 Agent Task 历史 |
-| AI → Skill 管理 | 管理数据库中的 Skill 注册信息、显示名称、描述和启用状态；执行实现仍由后端代码提供 |
-| AI → LLM 配置 | 新增、编辑、测试和切换数据库中的 LLM 模型配置；新任务无需重启即可使用当前模型 |
+| 配置中心 | 管理合约交易、WebSocket、抢新、币种提醒、市场监听、资金费率监听、通知通道、调试推送和外部链接等非 AI 全局配置 |
+| AI → 对话 | 统一 Agent 对话入口；选择允许在对话使用的 Native/Portable Skill，可从合约下拉框显式选择 Symbol，避免自然语言币名识别错误 |
+| AI → 单币分析 | 从真实合约列表选择 USDT 永续合约，启动结构化 AI 分析并查看历史 TradingPlan、方向、置信度、市场环境和后续价格变化 |
+| AI → 模型配置 | 新增、编辑、测试和切换数据库中的 LLM 模型配置；新任务无需重启即可使用当前模型 |
+| AI → Skill 管理 | Native / Portable 分 Tab 管理 Skill；支持搜索、分页、启停以及独立的“对话可用”开关 |
+| AI → MCP 管理 | 接入和治理第三方 HTTP MCP Server，管理 Tool、Resource、Prompt、OAuth/认证和 Skill 权限 |
+| AI → Memory 管理 | 查看和维护 Agent 长期 Memory、Scope、TTL 与状态 |
+| AI → 业务 Workflow | 运行市场扫描、策略复盘、策略实验、报警归并和每日市场摘要等业务 Workflow，并查看父任务与子 Agent Task |
+| AI → 受控交易 | 将成功的单币分析转换为 Trade Proposal，经确定性 Risk Engine、人工审批和执行前复检后受控提交 Binance，并保留完整审计 |
+| AI → 任务中心 | 查看 Agent 治理、Scheduler、运行指标和 Agent Task 历史 |
+| AI → 可观测性 | 查看长期 Trace、模型/Tool/Skill 运行指标、延迟、Token、错误率和变更记录 |
+| AI → 报警链路历史 | 查看 FastMove、爆仓等 Signal 从事件、AI 分析/归并到通知或 fallback 的完整链路 |
+| AI → AI 配置 | 集中管理 AI 报警、AI Scheduler、Agent 全局预算/治理参数和受控交易 Risk Policy |
 | 合约交易 → 合约交易 | 按 `自选`、`USDT`、`USDC` 查看币种；新增、查询、批量编辑、全部开启或全部关闭币种配置 |
 | 合约交易 → 合约订单 | 查询真实合约订单，可按币种和时间筛选 |
 | 合约交易 → 合约账户 | 查看币安合约资产、持仓和当前挂单 |
 | 合约交易 → 本地合约账户 | 查看程序记录的本地资产、持仓和挂单 |
 | 合约交易 → 策略模板 | 新增和维护技术指标、策略方法模板 |
 | 合约交易 → 测试结果 | 查询模拟交易结果，可按币种和时间筛选 |
-| 合约交易 → 市场波动日志 | 查询和分组查看快速波动记录 |
 | 币种提醒 → 现货提醒 / 合约提醒 | 配置到价提醒和可选的自动交易 |
 | 市场监听 → 现货监听 / 合约监听 | 配置 K 线、阈值、技术指标和自定义策略监听 |
 | 资金费率监听 | 查看资金费率并配置自动交易 |
@@ -109,8 +116,8 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 #### AI - Skill 管理
 ![UI - AI Skill 管理](./img/ui/ai-skill-management.png)
 
-#### AI - LLM 配置
-![UI - AI LLM 配置](./img/ui/ai-llm-config.png)
+#### AI - 模型配置
+![UI - AI 模型配置](./img/ui/ai-llm-config.png)
 
 #### 合约交易
 ![UI - 合约交易](./img/ui/futures-symbols.png)
@@ -129,9 +136,6 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 
 #### 测试结果
 ![UI - 测试结果](./img/ui/test-results.jpg)
-
-#### 市场波动日志
-![UI - 市场波动日志](./img/ui/market-volatility-logs.jpg)
 
 #### 现货提醒
 ![UI - 现货提醒](./img/ui/spot-alerts.jpg)
@@ -162,26 +166,71 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 
 ## AI 功能
 
+### 对话
+
+`AI → 对话` 是统一的人机交互入口。可显式选择允许在对话使用的 Skill；当使用单币分析时，输入框旁可直接从系统真实合约列表选择 Symbol，发送请求时后端优先使用该 Symbol，因此中文币名、别名或其它自然语言不会再导致币种识别错误。未选择 Symbol 时仍可进行普通对话，只有明确的续问语义才会复用上一轮币种。
+
 ### 单币分析
 
-选择或输入一个 USDT 永续合约，并可补充希望 AI 重点判断的方向。系统会启动 `symbol_analysis` Skill，读取该合约最近一次成功分析并与当前行情比较，输出结构化 TradingPlan。历史列表展示分析状态、方向、置信度、市场环境、当时价格、当前价格、后续涨跌和总结。
+从真实 USDT 永续合约列表选择一个 Symbol，并可补充希望 AI 重点判断的方向。系统启动 `symbol_analysis` Skill，读取行情、市场环境和最近一次成功分析，输出结构化 `TradingPlan`。历史列表展示分析状态、方向、置信度、市场环境、当时价格、当前价格、后续涨跌和总结。
 
-### 任务中心
+### 模型配置
 
-- **Agent 治理与运行指标**：查看每分钟/每小时启动额度、接受与拒绝次数、任务成功率、LLM/Tool 错误率、Token、延迟、平均轮次和 Signal 到通知的转化情况。
-- **各 Skill 运行指标**：按 Skill 查看任务量、成功率、错误率、Token 和 P95 延迟。
-- **Agent Scheduler**：查看调度任务的启用状态、周期、运行状态、执行/跳过次数、下次执行时间和上次状态。
-- **Agent Task 历史**：按 Skill 和状态筛选任务，查看阶段、进度、Provider、模型、Token、Conversation ID 和任务详情。
+LLM 配置保存在数据库中。页面支持 Provider 模板、自定义 Provider、配置名称、API 地址、API Key、模型名称、请求超时和 Temperature，支持连接测试和切换当前模型。Agent 新任务直接读取当前配置，无需重启服务；API Key 不会由接口回传明文。
 
 ### Skill 管理
 
-Skill 的注册与治理配置保存在数据库中。页面支持新增、编辑、启用、停用和删除 Skill，并维护显示名称与描述；Skill implementation 由后端代码提供，数据库记录被删除后对应 Skill 将无法启动。
+Skill 注册与治理配置保存在数据库中。Native 与 Portable Skill 分为两个 Tab，支持搜索、分页、新增、编辑、启停、删除，并提供独立的 **对话可用** 开关。`enabled` 控制 Skill 能否运行，`chat_enabled` 只控制是否出现在对话入口，两者互不替代。Portable Skill 的 `allowed-tools` 只是权限申请，不能自行获得高风险或交易权限。
 
-内置 Skill 包括事件报警分析（`alert_analysis`）、市场趋势分析（`market_regime`）、策略生成（`strategy_builder`）和单币分析（`symbol_analysis`）。
+### MCP 管理
 
-### LLM 配置
+系统可以作为 MCP Client 连接第三方标准 HTTP MCP Server，并将远端 Tool、Resource、Prompt 纳入统一 Runtime、Permission、Trace 与 Context。支持连接测试、Catalog 刷新、认证/OAuth 和按 Skill 授权。外部 MCP 中识别出的真实交易能力会被强制归类为高风险交易能力并保持禁用，不能绕过本项目的受控执行链路。
 
-LLM 配置保存在数据库中。页面支持选择 Provider 模板，维护配置名称、API 地址、API Key、模型名称、请求超时和 Temperature，测试连接，并把模型设为当前模型。Agent 新任务会直接读取当前配置，切换后无需重启服务；API Key 不会由接口回传明文，Token 与 Tool 上限仍由全局 Agent 治理配置控制。
+### Memory 管理
+
+长期 Memory 与 Conversation/Task 分离持久化。页面可查看内容、来源、Scope、TTL、状态和更新时间，用于长期上下文维护；Memory 不会获得额外 Tool 或交易权限。
+
+### 业务 Workflow
+
+业务 Workflow 复用现有 Agent Runtime，不创建第二套 Agent。当前包括：
+
+- `market_scan`：确定性 Scanner 先筛选候选，再由 Agent 分析少量币种并输出机会集合。
+- `strategy_review`：结合策略模板、已有测试结果、手续费后收益和当前市场环境进行复盘，只提出建议，不直接修改正式模板。
+- `strategy_experiment`：Agent 提议候选策略，系统做确定性表达式校验和固定场景测试，再由 Agent 总结；实验结果不会覆盖正式策略。
+- `alert_triage`：AI 开启时可把同一币种短时间内的多个相关 Signal 归并为 Incident，降低重复通知；AI 关闭或失败时保持确定性 fallback。
+- `daily_market_brief`：聚合市场环境、Scanner 和重要 Signal，生成固定结构的市场摘要；Scheduler 默认关闭。
+
+### 受控交易
+
+受控交易不是“让 LLM 直接下单”。真实执行固定经过：
+
+`成功的 symbol_analysis → Trade Proposal → 确定性 Risk Engine → 人工批准 → 执行前再次 Risk → Execution Service → Binance → Audit`。
+
+- 默认真实 AI 执行关闭，允许交易的 Symbol 白名单默认为空。
+- Proposal 只能从成功的结构化单币分析创建；LLM 不决定最终 quantity。
+- Risk Engine 检查白名单、方向、当前 MarketCondition 及漂移、价格 freshness、Entry Zone、Stop Loss、滑点、已有仓位/挂单、重复订单、cooldown、杠杆、单笔风险、名义金额、总 Exposure 和 Kill Switch。
+- 最终 quantity 根据最大风险、止损距离、最大名义金额和交易对 StepSize 计算。
+- 即使已经人工批准，真实执行前仍会重新运行 Risk；Broker 提交前还会再次检查 Kill Switch。
+- 使用唯一 `client_order_id` 保证幂等。网络结果不确定时不会自动重复下单，只允许按 `client_order_id` 对账。
+- 所有 Proposal、Risk、批准/拒绝、执行和对账动作都会写入审计。
+- 当前受控执行提交的是开仓 `MARKET` 订单；TradingPlan 中的止盈/止损用于 Risk 与审批依据，暂不会自动创建 Binance 保护性止盈/止损单。
+
+### AI 配置
+
+所有 AI 相关运行配置集中在 `AI → AI 配置`，包括：
+
+- AI 报警 Pipeline、AI 分析开关、最小严重级别、cooldown、并发与每分钟上限。
+- 市场环境自动更新和每日市场摘要 Scheduler。
+- Agent 每分钟/每小时启动额度、全局 Token 与 Tool 调用预算。
+- 受控交易 Kill Switch、Symbol 白名单、最大单笔风险、最大名义金额、总 Exposure、最大杠杆、价格 freshness、滑点、cooldown 和 Proposal TTL。
+
+这些 AI 配置已从“配置中心”迁出；`配置中心` 只保留非 AI 的交易、行情监听、提醒和系统运行配置。
+
+### 任务中心与可观测性
+
+- **任务中心**：查看 Agent 治理状态、Runtime 直接交易权限与受控执行开关、Scheduler、Task 历史、模型和 Token 等运行信息。
+- **可观测性**：查看长期 Trace、各 Skill/模型/Tool 指标、错误率、延迟、Token 和变更记录。
+- **报警链路历史**：查看 Signal 从 Event Bus、Signal Engine、AI 分析/归并到 Notification 或 fallback 的完整处理历史。
 
 ## 合约交易
 
@@ -202,7 +251,7 @@ LLM 配置保存在数据库中。页面支持选择 Provider 模板，维护配
 
 #### 快速波动通知
 
-快速波动通知可配置阈值、恢复阈值、冷却时间和监控窗口。记录可在 `合约交易 → 市场波动日志` 查询。
+快速波动通知可配置阈值、恢复阈值、冷却时间和监控窗口。Signal 的 AI 分析、归并、通知和 fallback 记录可在 `AI → 报警链路历史` 查询。
 
 #### 仓位收益正负转换通知
 
@@ -300,7 +349,8 @@ LLM 配置保存在数据库中。页面支持选择 Provider 模板，维护配
 
 ## 系统设置
 
-- `配置中心`：调整保存在数据库中的运行参数和功能开关。
+- `配置中心`：调整保存在数据库中的非 AI 交易、监听、提醒等运行参数和功能开关。
+- `AI → AI 配置`：集中调整 AI 报警、Scheduler、Agent 全局预算和受控交易 Risk Policy。
 - `系统配置`：在线编辑 `conf/app.conf`。点击 `保存` 后，启动期配置仍需点击 `重启服务` 或手动重启程序才能生效。
 - `日志`：查看 `web.commend_log` 配置的命令输出。
 
@@ -327,7 +377,9 @@ LLM 配置保存在数据库中。页面支持选择 Provider 模板，维护配
 5. **账户为什么无法开仓？** 先检查做多/做空开关、最大持仓数、最大亏损仓位数、排除币种、币种启用状态和账户 USDT；部分地区 IP 也可能被币安限制。
 6. **页面访问很慢怎么办？** 数据量较大时建议使用 MySQL；SQLite 更适合数据量较小的环境。
 7. **API 频率限制报错怎么办？** 减少启用币种、监听项和高频通知配置，等待币安限制解除后再恢复。
-8. **在哪里查看服务日志？** 打开左侧 `日志`；该页面执行 `web.commend_log`，请先在 `conf/app.conf` 中正确配置命令。
+8. **AI 的报警、Scheduler 和预算在哪里配置？** 统一进入 `AI → AI 配置`；这些设置已经不在配置中心。
+9. **AI 会不会直接下真实订单？** 不会。受控交易默认关闭，并且必须经过 Proposal、确定性 Risk、人工批准和执行前复检。
+10. **在哪里查看服务日志？** 打开左侧 `日志`；该页面执行 `web.commend_log`，请先在 `conf/app.conf` 中正确配置命令。
 
 ### 修改配置文件
 > 配置说明请参考 `app.conf.example` 中每一项的说明，复制修改文件名为 `app.conf`
@@ -502,6 +554,13 @@ bee pack -be GOOS=windows
 - [X] 将配置从 `conf` 缩减，改为可视化配置实时生效
 - [X] 数据库更新方式，使用 `go_binance_futures sync db` 独立完成首次建库、Schema 同步和版本迁移，正常启动不自动修改数据库
 - [X] 现货和合约添加 tab，添加 usdt 之外的交易对
+- [X] 完成统一 Agent 对话、可选 Skill 和合约 Symbol 下拉选择
+- [X] 完成 Native / Portable Skill 管理、搜索、分页和对话可用开关
+- [X] 完成第三方 HTTP MCP Client、OAuth、Catalog 与权限治理
+- [X] 完成长 Memory、业务 Workflow、任务中心和可观测性
+- [X] 完成 AI 报警归并与报警链路历史
+- [X] 完成 Trade Proposal、确定性 Risk Engine、人工审批和受控真实执行
+- [X] 将 AI 运行配置集中迁移到 `AI → AI 配置`
 - [X] 抢购添加手动设定价格挂单的功能，不设定才采用市价抢单
 - [X] 自动伸缩功能，当连续亏损时，是否需要自动缩减 最大持仓数量，反之亦然，类似于 tcp 窗口缩放
 - [ ] api 重构，添加一层适配器用来统一支持其它交易所的接口
