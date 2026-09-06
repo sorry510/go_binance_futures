@@ -25,3 +25,7 @@
 - 不修改真实交易行为。
 - 不新增自动交易模式。
 - 不重构现有 Runtime API，只补测试和基线。
+
+## 完成状态
+
+已完成。验收与 Benchmark 结果见 [v3-0-baseline-report.md](./v3-0-baseline-report.md)，机器可比较快照见 [v3-0-benchmark.json](./v3-0-benchmark.json)。
