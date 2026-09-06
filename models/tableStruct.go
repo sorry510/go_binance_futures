@@ -105,20 +105,22 @@ type Symbols struct {
 	CloseQty       float64 `orm:"column(closeQty)" json:"closeQty"`             // 最新成交价格上的成交量
 	TradeCount     float64 `orm:"column(tradeCount)" json:"tradeCount"`         // 24小时交易数
 
-	Leverage      int64  `orm:"column(leverage)" json:"leverage"`                // 合约倍数
-	MarginType    string `orm:"column(marginType)" json:"marginType"`            // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
-	TickSize      string `orm:"column(tickSize)" json:"tickSize"`                // 交易金额精度
-	StepSize      string `orm:"column(stepSize)" json:"stepSize"`                // 交易数量精度
-	Usdt          string `orm:"column(usdt)" json:"usdt"`                        // 交易金额
-	Profit        string `orm:"column(profit)" json:"profit"`                    // 盈利率
-	Loss          string `orm:"column(loss)" json:"loss"`                        // 损失率
-	KlineInterval string `orm:"column(kline_interval)" json:"kline_interval"`    // 选定的k线周期 (废弃)
-	Technology    string `orm:"column(technology);type(text)" json:"technology"` // 技术指标配置 json
-	Strategy      string `orm:"column(strategy);type(text)" json:"strategy"`     // 策略 json
-	StrategyType  string `orm:"column(strategy_type)" json:"strategy_type"`      // 策略类型 // global, line_x, custom
-	Pin           int64  `orm:"column(pin)" json:"pin"`                          // 置顶
-	Sort          int64  `orm:"column(sort)" json:"sort"`                        // 排序
-	Type          string `orm:"column(type)" json:"type"`                        // USDT, USDC
+	Leverage             int64  `orm:"column(leverage)" json:"leverage"`                                            // 合约倍数
+	MarginType           string `orm:"column(marginType)" json:"marginType"`                                        // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
+	TickSize             string `orm:"column(tickSize)" json:"tickSize"`                                            // 交易金额精度
+	StepSize             string `orm:"column(stepSize)" json:"stepSize"`                                            // 交易数量精度
+	Usdt                 string `orm:"column(usdt)" json:"usdt"`                                                    // 交易金额
+	Profit               string `orm:"column(profit)" json:"profit"`                                                // 盈利率
+	Loss                 string `orm:"column(loss)" json:"loss"`                                                    // 损失率
+	KlineInterval        string `orm:"column(kline_interval)" json:"kline_interval"`                                // 选定的k线周期 (废弃)
+	Technology           string `orm:"column(technology);type(text)" json:"technology"`                             // 技术指标配置 json
+	Strategy             string `orm:"column(strategy);type(text)" json:"strategy"`                                 // 策略 json
+	StrategyType         string `orm:"column(strategy_type)" json:"strategy_type"`                                  // 策略类型 // global, line_x, custom
+	StrategyTemplateID   int64  `orm:"column(strategy_template_id);index;default(0)" json:"strategy_template_id"`   // 策略模板来源 ID，0 表示自定义/未知
+	StrategyTemplateName string `orm:"column(strategy_template_name);size(128);null" json:"strategy_template_name"` // 策略模板名称快照
+	Pin                  int64  `orm:"column(pin)" json:"pin"`                                                      // 置顶
+	Sort                 int64  `orm:"column(sort)" json:"sort"`                                                    // 排序
+	Type                 string `orm:"column(type)" json:"type"`                                                    // USDT, USDC
 }
 
 type NewSymbols struct {
@@ -238,27 +240,36 @@ type StrategyTemplates struct {
 }
 
 type TestStrategyResults struct {
-	ID            int64   `orm:"column(id)" json:"id"`
-	Symbol        string  `orm:"column(symbol)" json:"symbol"`
-	Price         string  `orm:"column(price)" json:"price"`                                                     // 触发开仓策略时通知价格
-	Leverage      int64   `orm:"column(leverage)" json:"leverage"`                                               // 合约倍数
-	TickSize      string  `orm:"column(tickSize)" json:"tickSize"`                                               // 交易金额精度
-	StepSize      string  `orm:"column(stepSize)" json:"stepSize"`                                               // 交易数量精度
-	Usdt          string  `orm:"column(usdt)" json:"usdt"`                                                       // 交易金额
-	Profit        string  `orm:"column(profit)" json:"profit"`                                                   // 盈利率
-	Loss          string  `orm:"column(loss)" json:"loss"`                                                       // 损失率
-	PositionAmt   string  `orm:"column(position_amt)" json:"position_amt"`                                       // 买入的数量, 做多为正, 做空为负
-	PositionSide  string  `orm:"column(position_side)" json:"position_side"`                                     // LONG, SHORT
-	Technology    string  `orm:"column(technology);type(text)" json:"technology"`                                // 技术指标配置 json
-	Strategy      string  `orm:"column(strategy);type(text)" json:"strategy"`                                    // 策略 json
-	OpenStrategy  string  `orm:"column(open_strategy);type(text)" json:"open_strategy"`                          // 开仓策略
-	CloseStrategy string  `orm:"column(close_strategy);type(text)" json:"close_strategy"`                        // 平仓策略
-	ClosePrice    string  `orm:"column(close_price)" json:"close_price"`                                         // 触发平仓策略时通知价格
-	CloseProfit   string  `orm:"column(close_profit)" json:"close_profit"`                                       // 触发平仓策略时收益 usdt
-	OpenFeeRate   float64 `orm:"column(open_fee_rate);digits(12);decimals(8);default(0)" json:"open_fee_rate"`   // 开仓手续费率快照
-	CloseFeeRate  float64 `orm:"column(close_fee_rate);digits(12);decimals(8);default(0)" json:"close_fee_rate"` // 平仓手续费率快照
-	CreateTime    int64   `orm:"column(createTime)" json:"createTime"`
-	UpdateTime    int64   `orm:"column(updateTime)" json:"updateTime"`
+	ID                   int64   `orm:"column(id)" json:"id"`
+	Symbol               string  `orm:"column(symbol)" json:"symbol"`
+	Price                string  `orm:"column(price)" json:"price"`                                                       // 触发开仓策略时通知价格
+	Leverage             int64   `orm:"column(leverage)" json:"leverage"`                                                 // 合约倍数
+	TickSize             string  `orm:"column(tickSize)" json:"tickSize"`                                                 // 交易金额精度
+	StepSize             string  `orm:"column(stepSize)" json:"stepSize"`                                                 // 交易数量精度
+	Usdt                 string  `orm:"column(usdt)" json:"usdt"`                                                         // 交易金额
+	Profit               string  `orm:"column(profit)" json:"profit"`                                                     // 盈利率
+	Loss                 string  `orm:"column(loss)" json:"loss"`                                                         // 损失率
+	PositionAmt          string  `orm:"column(position_amt)" json:"position_amt"`                                         // 买入的数量, 做多为正, 做空为负
+	PositionSide         string  `orm:"column(position_side)" json:"position_side"`                                       // LONG, SHORT
+	Technology           string  `orm:"column(technology);type(text)" json:"technology"`                                  // 技术指标配置 json 快照
+	Strategy             string  `orm:"column(strategy);type(text)" json:"strategy"`                                      // 完整策略 json 快照
+	StrategyTemplateID   int64   `orm:"column(strategy_template_id);index;default(0)" json:"strategy_template_id"`        // 策略模板来源 ID
+	StrategyTemplateName string  `orm:"column(strategy_template_name);size(128);null" json:"strategy_template_name"`      // 策略模板名称快照
+	StrategySnapshotHash string  `orm:"column(strategy_snapshot_hash);size(64);index;null" json:"strategy_snapshot_hash"` // technology + strategy 的版本指纹
+	OpenStrategy         string  `orm:"column(open_strategy);type(text)" json:"open_strategy"`                            // 开仓策略表达式
+	OpenStrategyName     string  `orm:"column(open_strategy_name);size(128);null" json:"open_strategy_name"`              // 开仓策略名称
+	OpenStrategyType     string  `orm:"column(open_strategy_type);size(32);null" json:"open_strategy_type"`               // long / short
+	OpenStrategyHash     string  `orm:"column(open_strategy_hash);size(64);index;null" json:"open_strategy_hash"`         // 开仓规则版本指纹
+	CloseStrategy        string  `orm:"column(close_strategy);type(text)" json:"close_strategy"`                          // 平仓策略表达式
+	CloseStrategyName    string  `orm:"column(close_strategy_name);size(128);null" json:"close_strategy_name"`            // 平仓策略名称
+	CloseStrategyType    string  `orm:"column(close_strategy_type);size(32);null" json:"close_strategy_type"`             // close_long / close_short / system
+	CloseStrategyHash    string  `orm:"column(close_strategy_hash);size(64);index;null" json:"close_strategy_hash"`       // 平仓规则版本指纹
+	ClosePrice           string  `orm:"column(close_price)" json:"close_price"`                                           // 触发平仓策略时通知价格
+	CloseProfit          string  `orm:"column(close_profit)" json:"close_profit"`                                         // 触发平仓策略时收益 usdt
+	OpenFeeRate          float64 `orm:"column(open_fee_rate);digits(12);decimals(8);default(0)" json:"open_fee_rate"`     // 开仓手续费率快照
+	CloseFeeRate         float64 `orm:"column(close_fee_rate);digits(12);decimals(8);default(0)" json:"close_fee_rate"`   // 平仓手续费率快照
+	CreateTime           int64   `orm:"column(createTime)" json:"createTime"`
+	UpdateTime           int64   `orm:"column(updateTime)" json:"updateTime"`
 }
 
 func (u *Config) TableName() string {

@@ -36,23 +36,33 @@ type TestTradeProfit struct {
 }
 
 type TestResultsOptions struct {
-	Symbol       string
-	PositionSide string
-	StartTime    string
-	EndTime      string
-	Type         string
-	Page         int
-	Limit        int
-	DefaultLimit int
-	MaxLimit     int
+	Symbol               string
+	PositionSide         string
+	StartTime            string
+	EndTime              string
+	Type                 string
+	StrategyTemplateID   int64
+	StrategyTemplateName string
+	StrategySnapshotHash string
+	OpenStrategyName     string
+	OpenStrategyType     string
+	OpenStrategyHash     string
+	CloseStrategyName    string
+	CloseStrategyType    string
+	CloseStrategyHash    string
+	Page                 int
+	Limit                int
+	DefaultLimit         int
+	MaxLimit             int
 }
 
 type TestResultsResult struct {
-	Page          int          `json:"page"`
-	Limit         int          `json:"limit"`
-	Total         int64        `json:"total"`
-	CurrentProfit string       `json:"current_profit"`
-	List          []TestResult `json:"list"`
+	Page          int                   `json:"page"`
+	Limit         int                   `json:"limit"`
+	Total         int64                 `json:"total"`
+	CurrentProfit string                `json:"current_profit"`
+	Stats         TestResultReviewStats `json:"stats"`
+	List          []TestResult          `json:"list"`
 }
 
 type TemplateListOptions struct {
@@ -84,10 +94,11 @@ func (Service) ListTestResults(ctx context.Context, opts TestResultsOptions) (Te
 	if err != nil {
 		return TestResultsResult{}, err
 	}
-	listSQL := `SELECT t.id, t.symbol, t.price, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.open_fee_rate, t.close_fee_rate, t.createTime, t.updateTime, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where +
+	metadataColumns := `t.strategy_template_id, t.strategy_template_name, t.strategy_snapshot_hash, t.open_strategy, t.open_strategy_name, t.open_strategy_type, t.open_strategy_hash, t.close_strategy, t.close_strategy_name, t.close_strategy_type, t.close_strategy_hash`
+	listSQL := `SELECT t.id, t.symbol, t.price, t.leverage, t.usdt, t.profit, t.loss, t.position_amt, t.position_side, t.close_price, t.close_profit, t.open_fee_rate, t.close_fee_rate, t.createTime, t.updateTime, ` + metadataColumns + `, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where +
 		" ORDER BY t.createTime DESC LIMIT " + strconv.Itoa(limit) + " OFFSET " + strconv.Itoa(offset)
 	countSQL := `SELECT COUNT(*) FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where
-	profitSQL := `SELECT t.price, t.leverage, t.position_amt, t.close_price, t.open_fee_rate, t.close_fee_rate, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where
+	profitSQL := `SELECT t.id, t.symbol, t.price, t.leverage, t.position_amt, t.position_side, t.close_price, t.open_fee_rate, t.close_fee_rate, ` + metadataColumns + `, s.close as now_price FROM test_strategy_results t LEFT JOIN symbols s ON t.symbol = s.symbol where 1 = 1` + where
 	o := orm.NewOrm()
 	var list []TestResult
 	var profitResults []TestResult
@@ -107,7 +118,10 @@ func (Service) ListTestResults(ctx context.Context, opts TestResultsOptions) (Te
 	if err := ctx.Err(); err != nil {
 		return TestResultsResult{}, err
 	}
-	return TestResultsResult{Page: page, Limit: limit, Total: total, CurrentProfit: CalculateCurrentProfit(profitResults), List: list}, nil
+	return TestResultsResult{
+		Page: page, Limit: limit, Total: total, CurrentProfit: CalculateCurrentProfit(profitResults),
+		Stats: CalculateTestResultReviewStats(profitResults), List: list,
+	}, nil
 }
 
 func (Service) ListTemplates(ctx context.Context, opts TemplateListOptions) (TemplateListResult, error) {
@@ -240,8 +254,8 @@ func buildTestResultsWhere(opts TestResultsOptions, alias string) (string, []int
 	if alias != "" {
 		prefix = alias + "."
 	}
-	conditions := make([]string, 0, 5)
-	args := make([]interface{}, 0, 4)
+	conditions := make([]string, 0, 14)
+	args := make([]interface{}, 0, 14)
 	symbol := strings.TrimSpace(opts.Symbol)
 	if symbol != "" {
 		if strings.ContainsAny(symbol, "%_") {
@@ -254,6 +268,39 @@ func buildTestResultsWhere(opts TestResultsOptions, alias string) (string, []int
 	if positionSide != "" && positionSide != "ALL" {
 		conditions = append(conditions, prefix+"position_side = ?")
 		args = append(args, positionSide)
+	}
+	if opts.StrategyTemplateID > 0 {
+		conditions = append(conditions, prefix+"strategy_template_id = ?")
+		args = append(args, opts.StrategyTemplateID)
+	}
+	for _, filter := range []struct {
+		column string
+		value  string
+		exact  bool
+	}{
+		{"strategy_template_name", opts.StrategyTemplateName, false},
+		{"strategy_snapshot_hash", opts.StrategySnapshotHash, true},
+		{"open_strategy_name", opts.OpenStrategyName, false},
+		{"open_strategy_type", opts.OpenStrategyType, true},
+		{"open_strategy_hash", opts.OpenStrategyHash, true},
+		{"close_strategy_name", opts.CloseStrategyName, false},
+		{"close_strategy_type", opts.CloseStrategyType, true},
+		{"close_strategy_hash", opts.CloseStrategyHash, true},
+	} {
+		value := strings.TrimSpace(filter.value)
+		if value == "" {
+			continue
+		}
+		if strings.ContainsAny(value, "%_") {
+			return "", nil, fmt.Errorf("invalid %s", filter.column)
+		}
+		if filter.exact {
+			conditions = append(conditions, prefix+filter.column+" = ?")
+			args = append(args, value)
+		} else {
+			conditions = append(conditions, prefix+filter.column+" LIKE ?")
+			args = append(args, "%"+value+"%")
+		}
 	}
 	var startTime, endTime int64
 	if value := strings.TrimSpace(opts.StartTime); value != "" {
