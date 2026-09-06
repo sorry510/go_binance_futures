@@ -42,6 +42,15 @@ type Usage struct {
 	TotalTokens  int `json:"total_tokens,omitempty"`
 }
 
+type Linkage struct {
+	ParentTaskID   string
+	TeamRunID      string
+	TeamName       string
+	TeamRole       string
+	MaxToolCalls   int
+	MaxTotalTokens int
+}
+
 type VersionMetadata struct {
 	RuntimeVersion        string `json:"runtime_version"`
 	SkillVersion          string `json:"skill_version"`
@@ -60,6 +69,10 @@ type Task struct {
 	ID                    string          `json:"id"`
 	Skill                 string          `json:"skill"`
 	ConversationID        string          `json:"conversation_id,omitempty"`
+	ParentTaskID          string          `json:"parent_task_id,omitempty"`
+	TeamRunID             string          `json:"team_run_id,omitempty"`
+	TeamName              string          `json:"team_name,omitempty"`
+	TeamRole              string          `json:"team_role,omitempty"`
 	Status                Status          `json:"status"`
 	Stage                 string          `json:"stage"`
 	Progress              int             `json:"progress"`
@@ -96,6 +109,7 @@ type Task struct {
 	UpdatedAt             time.Time       `json:"updated_at"`
 	CompletedAt           *time.Time      `json:"completed_at,omitempty"`
 	Events                []Event         `json:"events,omitempty"`
+	TeamChildren          []*Task         `json:"team_children,omitempty"`
 }
 
 func (item *Task) ApplyVersionMetadata(value VersionMetadata) {

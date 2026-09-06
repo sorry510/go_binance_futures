@@ -120,3 +120,23 @@ func TestEnsureDefaultsInitializesOnlyUnsetChatEnabled(t *testing.T) {
 		t.Fatalf("explicit chat setting must not be overwritten: %+v", got)
 	}
 }
+
+func TestStoreSupportsTeamTypeDefaults(t *testing.T) {
+	store := setupSkillStoreTest(t)
+	ctx := context.Background()
+	name := "symbol_analysis_team_test"
+	if err := store.EnsureDefaults(ctx, []CreateInput{{Name: name, DisplayName: "Team", Type: "team", Enabled: 1, ChatEnabled: 1}}); err != nil {
+		t.Fatal(err)
+	}
+	item, err := store.GetByName(ctx, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Type != "team" || item.ChatEnabled != 1 {
+		t.Fatalf("unexpected team config: %+v", item)
+	}
+	result, err := store.ListPage(ctx, ListOptions{Type: "team", Keyword: name, Page: 1, Limit: 10})
+	if err != nil || result.Total != 1 || len(result.List) != 1 {
+		t.Fatalf("team type filter failed: %+v err=%v", result, err)
+	}
+}

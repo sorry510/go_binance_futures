@@ -140,6 +140,29 @@ func TestORMStoreMarksRunningTasksInterrupted(t *testing.T) {
 	}
 }
 
+func TestORMStoreMarksRunningTeamParentInterruptedAfterRestart(t *testing.T) {
+	store := setupORMStoreTest(t)
+	now := time.Now().UTC()
+	item := &Task{
+		ID: "team-parent-interrupted", Skill: "symbol_analysis_team", TeamRunID: "team-parent-interrupted",
+		TeamName: "symbol_analysis_team", TeamRole: "team", ExecutionMode: "team",
+		Status: StatusRunning, Stage: "team_children", Progress: 40, CreatedAt: now, UpdatedAt: now,
+	}
+	if err := store.Save(context.Background(), item); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.MarkInterrupted(context.Background(), now.Add(time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	got, err := store.Get(context.Background(), item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Status != StatusInterrupted || got.CompletedAt == nil {
+		t.Fatalf("team parent must be interrupted after restart: %+v", got)
+	}
+}
+
 func TestORMStoreListsPersistedTasks(t *testing.T) {
 	store := setupORMStoreTest(t)
 	result, err := store.List(context.Background(), ListOptions{Skill: "symbol_analysis", Page: 1, Limit: 10})
@@ -159,5 +182,32 @@ func TestToModelKeepsEmptyRuntimeTextExplicitForStrictSQLSchemas(t *testing.T) {
 	}
 	if *row.PlanJSON != "" || *row.StepsJSON != "" || *row.CheckpointJSON != "" {
 		t.Fatalf("empty runtime state must persist as empty strings: plan=%q steps=%q checkpoint=%q", *row.PlanJSON, *row.StepsJSON, *row.CheckpointJSON)
+	}
+}
+
+func TestORMStorePersistsTeamLinkageAndFiltersChildren(t *testing.T) {
+	store := setupORMStoreTest(t)
+	now := time.Now().UTC()
+	item := &Task{
+		ID: "team-child", Skill: "symbol_team_technical", ParentTaskID: "team-parent",
+		TeamRunID: "team-parent", TeamName: "symbol_analysis_team", TeamRole: "technical_analyst",
+		Status: StatusSucceeded, Stage: "completed", CreatedAt: now, UpdatedAt: now,
+	}
+	if err := store.Save(context.Background(), item); err != nil {
+		t.Fatal(err)
+	}
+	got, err := store.Get(context.Background(), item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.ParentTaskID != item.ParentTaskID || got.TeamRunID != item.TeamRunID || got.TeamName != item.TeamName || got.TeamRole != item.TeamRole {
+		t.Fatalf("team linkage was not persisted: %+v", got)
+	}
+	result, err := store.List(context.Background(), ListOptions{ParentTaskID: "team-parent", Page: 1, Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Total != 1 || result.List[0].ID != item.ID {
+		t.Fatalf("team child filter failed: %+v", result)
 	}
 }

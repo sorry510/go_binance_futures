@@ -238,3 +238,41 @@ func TestManagerCancelAndResumeUsesFrozenModelConfig(t *testing.T) {
 	}
 	t.Fatal("resumed task did not complete")
 }
+
+func TestStartLinkedPersistsTeamLineageAndBudget(t *testing.T) {
+	skills := skill.NewRegistry()
+	if err := skills.Register(skill.Definition{
+		SkillName: "team-child", Prompt: "test", Rounds: 1,
+		Version: skill.VersionInfo{SkillVersion: "1", PromptVersion: "1", InputContractVersion: "in", OutputContractVersion: "out", Source: skill.DefaultSource},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	store := task.NewMemoryStore()
+	manager, err := New(Config{
+		Skills: skills, Store: store,
+		NewClient: func() (llm.Client, error) {
+			return &fakeClient{response: `{"action":"final","result":{"ok":true}}`}, nil
+		},
+		RuntimeConfig: agentruntime.Config{Timeout: time.Second, Retry: agentruntime.RetryPolicy{MaxAttempts: 1}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	started, err := manager.StartLinked(
+		agentruntime.Request{Skill: "team-child", Input: `{"x":1}`},
+		task.Linkage{ParentTaskID: "parent-1", TeamRunID: "team-1", TeamName: "symbol_analysis_team", TeamRole: "technical_analyst", MaxToolCalls: 1, MaxTotalTokens: 100},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if started.ParentTaskID != "parent-1" || started.TeamRunID != "team-1" || started.TeamName != "symbol_analysis_team" || started.TeamRole != "technical_analyst" {
+		t.Fatalf("team lineage not frozen at start: %+v", started)
+	}
+	stored, err := store.Get(context.Background(), started.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.ParentTaskID != started.ParentTaskID || stored.TeamRole != started.TeamRole {
+		t.Fatalf("team lineage not persisted: %+v", stored)
+	}
+}

@@ -15,6 +15,7 @@ import (
 	"go_binance_futures/agent/skillconfig"
 	"go_binance_futures/agent/skills/symbolanalysis"
 	"go_binance_futures/agent/task"
+	agentteam "go_binance_futures/agent/team"
 	"go_binance_futures/llm"
 )
 
@@ -60,6 +61,9 @@ func ChatSkills(ctx context.Context) ([]ChatSkill, error) {
 		version := skill.ResolveVersionInfo(runtimeSkill, runtimeSkill.SystemPrompt())
 		result = append(result, ChatSkill{Name: runtimeSkill.Name(), DisplayName: cfg.display, Description: cfg.description, Type: cfg.kind, Version: version.SkillVersion})
 	}
+	if cfg, exists := configByName[agentteam.SymbolAnalysisTeam]; exists && cfg.enabled && cfg.chatEnabled {
+		result = append(result, ChatSkill{Name: agentteam.SymbolAnalysisTeam, DisplayName: cfg.display, Description: cfg.description, Type: cfg.kind, Version: "1.0.0"})
+	}
 	sort.Slice(result, func(i, j int) bool { return result[i].Name < result[j].Name })
 	return result, nil
 }
@@ -92,20 +96,6 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content, s
 			return nil, fmt.Errorf("conversation already has a running task %s", item.ID)
 		}
 	}
-	var selected skill.Skill
-	for _, candidate := range manager.Skills() {
-		if candidate.Name() == skillName {
-			selected = candidate
-			break
-		}
-	}
-	if selected == nil {
-		return nil, fmt.Errorf("skill %q is not registered in runtime", skillName)
-	}
-	adapter, ok := selected.(skill.ChatAdapter)
-	if !ok || !adapter.ChatEnabled() {
-		return nil, fmt.Errorf("skill %q does not support chat", skillName)
-	}
 	config, err := (skillconfig.Store{}).GetByName(ctx, skillName)
 	if err != nil {
 		return nil, fmt.Errorf("load skill %q chat configuration: %w", skillName, err)
@@ -124,6 +114,43 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content, s
 				break
 			}
 		}
+	}
+	if skillName == agentteam.SymbolAnalysisTeam {
+		input, err := agentteam.BuildChatInput(content, previousInputs, symbol)
+		if err != nil {
+			return nil, err
+		}
+		runner, err := DefaultTeamRunner()
+		if err != nil {
+			return nil, err
+		}
+		item, err := runner.StartWithOptions(input, agentteam.StartOptions{ConversationID: conversationID})
+		if err != nil {
+			return nil, err
+		}
+		if err := defaultConversationStore.AppendOnce(ctx, conversationID, item.ID, skillName, llmMessageUser(content)); err != nil {
+			_ = runner.Cancel(context.Background(), item.ID)
+			return nil, fmt.Errorf("persist chat user message: %w", err)
+		}
+		if err := defaultConversationStore.SetTitleFromFirstMessage(ctx, conversationID, content); err != nil {
+			return nil, err
+		}
+		return item, nil
+	}
+
+	var selected skill.Skill
+	for _, candidate := range manager.Skills() {
+		if candidate.Name() == skillName {
+			selected = candidate
+			break
+		}
+	}
+	if selected == nil {
+		return nil, fmt.Errorf("skill %q is not registered in runtime", skillName)
+	}
+	adapter, ok := selected.(skill.ChatAdapter)
+	if !ok || !adapter.ChatEnabled() {
+		return nil, fmt.Errorf("skill %q does not support chat", skillName)
 	}
 	var input string
 	if optionsAdapter, supportsOptions := selected.(skill.ChatOptionsAdapter); supportsOptions {
@@ -172,6 +199,12 @@ func chatAssistantText(result *agentruntime.Result, item *task.Task) string {
 		var plan symbolanalysis.TradingPlanV1
 		if json.Unmarshal(raw, &plan) == nil && strings.TrimSpace(plan.Symbol) != "" {
 			return symbolanalysis.FormatMarkdown(plan)
+		}
+	}
+	if item != nil && item.Skill == agentteam.SymbolAnalysisTeam {
+		var result agentteam.ResultV1
+		if json.Unmarshal(raw, &result) == nil && strings.TrimSpace(result.Symbol) != "" {
+			return agentteam.FormatMarkdown(result)
 		}
 	}
 	var text string

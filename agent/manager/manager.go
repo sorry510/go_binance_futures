@@ -52,6 +52,14 @@ func New(cfg Config) (*Manager, error) {
 	return &Manager{cfg: cfg, cancels: make(map[string]context.CancelFunc)}, nil
 }
 func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
+	return manager.start(req, task.Linkage{})
+}
+
+func (manager *Manager) StartLinked(req agentruntime.Request, linkage task.Linkage) (*task.Task, error) {
+	return manager.start(req, linkage)
+}
+
+func (manager *Manager) start(req agentruntime.Request, linkage task.Linkage) (*task.Task, error) {
 	req.Skill = strings.TrimSpace(req.Skill)
 	selectedSkill, ok := manager.cfg.Skills.Get(req.Skill)
 	if !ok {
@@ -84,6 +92,12 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 		return nil, fmt.Errorf("initialize LLM client: %w", err)
 	}
 	runtimeConfig := manager.cfg.RuntimeConfig
+	if linkage.MaxToolCalls > 0 {
+		runtimeConfig.MaxToolCalls = linkage.MaxToolCalls
+	}
+	if linkage.MaxTotalTokens > 0 {
+		runtimeConfig.MaxTotalTokens = linkage.MaxTotalTokens
+	}
 	runtimeConfig.Client = client
 	runtimeConfig.Skills = manager.cfg.Skills
 	runtimeConfig.Tools = manager.cfg.Tools
@@ -104,7 +118,13 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 	if maxRounds <= 0 {
 		maxRounds = agentruntime.DefaultConfig().DefaultMaxRounds
 	}
-	item := &task.Task{ID: taskID, Skill: selectedSkill.Name(), ConversationID: strings.TrimSpace(req.ConversationID), Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds, Provider: string(client.Provider()), CreatedAt: now, UpdatedAt: now}
+	item := &task.Task{
+		ID: taskID, Skill: selectedSkill.Name(), ConversationID: strings.TrimSpace(req.ConversationID),
+		ParentTaskID: strings.TrimSpace(linkage.ParentTaskID), TeamRunID: strings.TrimSpace(linkage.TeamRunID),
+		TeamName: strings.TrimSpace(linkage.TeamName), TeamRole: strings.TrimSpace(linkage.TeamRole),
+		Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds,
+		Provider: string(client.Provider()), CreatedAt: now, UpdatedAt: now,
+	}
 	item.ApplyVersionMetadata(executionSnapshot.Version)
 	if len(routeDecision.Candidates) > 0 {
 		if raw, marshalErr := json.Marshal(routeDecision.Candidates); marshalErr == nil {
