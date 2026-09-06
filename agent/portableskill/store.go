@@ -12,6 +12,7 @@ import (
 
 	"github.com/beego/beego/v2/client/orm"
 	"go_binance_futures/agent/observability"
+	"go_binance_futures/agent/permission"
 	"go_binance_futures/models"
 )
 
@@ -238,6 +239,9 @@ func (s Store) SetPermissionGrant(ctx context.Context, id int64, granted int) (*
 	}
 	if granted == 1 && strings.TrimSpace(row.ResolvedName) == "" {
 		return nil, fmt.Errorf("requested tool %q is unresolved", row.RequestedName)
+	}
+	if granted == 1 && strings.EqualFold(strings.TrimSpace(row.Risk), string(permission.RiskTrade)) {
+		return nil, fmt.Errorf("portable skills cannot be granted trade tools; use the controlled Execution Service")
 	}
 	row.Granted = granted
 	if granted == 1 {

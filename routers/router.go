@@ -20,6 +20,13 @@ func init() {
 	web.Router("/agents/tasks", &controllers.AgentController{}, "get:ListTasks;post:StartTask")                                          // 创建/查询统一 Agent 任务
 	web.Router("/agents/workflows", &controllers.AgentWorkflowController{}, "get:List;post:Start")                                       // V2-11 业务 Workflow
 	web.Router("/agents/workflows/:id", &controllers.AgentWorkflowController{}, "get:Get")                                               // Workflow 详情
+	web.Router("/agents/trade/proposals", &controllers.AgentTradeController{}, "get:List;post:Create")                                   // V2-12 受控交易 Proposal
+	web.Router("/agents/trade/proposals/:proposalId", &controllers.AgentTradeController{}, "get:Get")                                    // V2-12 Proposal 详情/审计
+	web.Router("/agents/trade/proposals/:proposalId/risk", &controllers.AgentTradeController{}, "post:Risk")                             // V2-12 重新执行确定性 Risk
+	web.Router("/agents/trade/proposals/:proposalId/approve", &controllers.AgentTradeController{}, "post:Approve")                       // V2-12 人工批准
+	web.Router("/agents/trade/proposals/:proposalId/reject", &controllers.AgentTradeController{}, "post:Reject")                         // V2-12 人工拒绝
+	web.Router("/agents/trade/proposals/:proposalId/execute", &controllers.AgentTradeController{}, "post:Execute")                       // V2-12 受控执行
+	web.Router("/agents/trade/proposals/:proposalId/reconcile", &controllers.AgentTradeController{}, "post:Reconcile")                   // V2-12 不确定订单对账
 	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask")                                                   // 查询统一 Agent 任务
 	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                                        // 取消运行中的 Agent 任务
 	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                                        // 从安全 Checkpoint 恢复 Agent 任务

@@ -1,6 +1,18 @@
 ### Change Log
 
 ## v1.0.2
+- 升级优化 ai agent, 增加各项监控和配置, 暂时还不能自动交易(没有测试 AI 受控交易部分，开启造成损失后果自负)
+- 修复发现的 bug
+
+## v1.0.2
+- 升级优化 ai agent, 接入标准 mcp 和 标准 skill
+- 增加对话聊天模式，可以使用导入的 skill
+- 修改项目启动逻辑，不再每次自动更新数据库，改为有需要时执行 `./go_binance_futures sync db`
+- 升级项目依赖
+- 修复发现的 bug
+- 修复 mysql5.6 的兼容性问题
+
+## v1.0.2
 - 升级优化 ai agent, 接入标准 mcp 和 标准 skill
 - 增加对话聊天模式，可以使用导入的 skill
 - 修改项目启动逻辑，不再每次自动更新数据库，改为有需要时执行 `./go_binance_futures sync db`

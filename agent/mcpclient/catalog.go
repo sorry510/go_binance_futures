@@ -237,11 +237,19 @@ func syncTools(ctx context.Context, o orm.Ormer, server models.AgentMCPServer, d
 		row, exists := byName[remote.Name]
 		previousSchemaHash := row.SchemaHash
 		schemaChanged := false
+		tradeRestricted := externalMCPTradeCapability(remote.Name, remote.Description)
 		if !exists {
-			row = models.AgentMCPTool{ServerID: server.ID, RemoteName: remote.Name, CanonicalName: canonical, Status: ToolUnclassified, Risk: "read", Enabled: 0, TimeoutMs: defaultToolTimeoutMs, MaxResultBytes: 128 << 10, CreatedAt: now}
+			risk := "read"
+			if tradeRestricted {
+				risk = "trade"
+			}
+			row = models.AgentMCPTool{ServerID: server.ID, RemoteName: remote.Name, CanonicalName: canonical, Status: ToolUnclassified, Risk: risk, Enabled: 0, TimeoutMs: defaultToolTimeoutMs, MaxResultBytes: 128 << 10, CreatedAt: now}
 		} else if row.SchemaHash != "" && row.SchemaHash != schemaHash {
 			row.Status, row.Enabled = ToolNeedsReview, 0
 			schemaChanged = true
+		}
+		if tradeRestricted {
+			row.Risk, row.Enabled, row.Status = "trade", 0, ToolNeedsReview
 		}
 		row.CanonicalName, row.Description = canonical, remote.Description
 		row.InputSchema, row.OutputSchema, row.SchemaHash, row.CatalogHash = inputSchema, outputSchema, schemaHash, catalogHash
@@ -258,11 +266,16 @@ func syncTools(ctx context.Context, o orm.Ormer, server models.AgentMCPServer, d
 		} else if _, err := o.Update(&row); err != nil {
 			return err
 		}
-		if schemaChanged {
+		if schemaChanged || tradeRestricted {
 			if _, err := o.QueryTable(new(models.AgentMCPPermission)).Filter("server_id", server.ID).Filter("capability_type", CapabilityTool).Filter("capability_id", row.ID).Update(orm.Params{"enabled": 0, "updated_at": now}); err != nil {
 				return err
 			}
+		}
+		if schemaChanged {
 			observability.RecordChange(ctx, observability.ChangeEvent{Category: "mcp", EntityType: "mcp_tool", EntityID: row.ID, EntityName: row.CanonicalName, ChangeType: "schema_changed", BeforeHash: previousSchemaHash, AfterHash: schemaHash, Status: "review_required", Detail: map[string]any{"server_id": server.ID, "server_name": server.Name}})
+		}
+		if tradeRestricted {
+			observability.RecordChange(ctx, observability.ChangeEvent{Category: "mcp", EntityType: "mcp_tool", EntityID: row.ID, EntityName: row.CanonicalName, ChangeType: "trade_restricted", AfterHash: schemaHash, Status: "disabled", Detail: map[string]any{"server_id": server.ID, "server_name": server.Name}})
 		}
 		seen[remote.Name] = true
 	}
@@ -362,4 +375,28 @@ func syncPrompts(o orm.Ormer, server models.AgentMCPServer, discovered []*mcp.Pr
 		_, _ = o.QueryTable(new(models.AgentMCPPrompt)).Filter("id", row.ID).Delete()
 	}
 	return nil
+}
+
+func externalMCPTradeCapability(name, description string) bool {
+	normalize := func(value string) string {
+		value = strings.ToLower(strings.TrimSpace(value))
+		replacer := strings.NewReplacer("_", " ", "-", " ", ".", " ", "/", " ")
+		return strings.Join(strings.Fields(replacer.Replace(value)), " ")
+	}
+	nameText := normalize(name)
+	detail := nameText + " " + normalize(description)
+	for _, phrase := range []string{
+		"place order", "create order", "submit order", "execute order",
+		"open position", "close position", "execute trade",
+	} {
+		if strings.Contains(detail, phrase) {
+			return true
+		}
+	}
+	for _, exact := range []string{"buy", "sell", "trade", "order"} {
+		if nameText == exact {
+			return true
+		}
+	}
+	return false
 }
