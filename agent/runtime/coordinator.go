@@ -102,6 +102,19 @@ func (coordinator *coordinator) prepareNew(ctx context.Context, req Request) (*r
 		Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds,
 		Provider: string(coordinator.runner.cfg.Client.Provider()), ExecutionMode: string(mode), CreatedAt: now, UpdatedAt: now,
 	}
+	// Manager.StartLinked pre-creates the task with immutable Team lineage. Runtime
+	// owns execution state, but must not erase that lineage on its first Save().
+	if strings.TrimSpace(req.TaskID) != "" {
+		if existing, existingErr := coordinator.runner.cfg.Tasks.Get(ctx, taskID); existingErr == nil && existing != nil {
+			currentTask.ParentTaskID = existing.ParentTaskID
+			currentTask.TeamRunID = existing.TeamRunID
+			currentTask.TeamName = existing.TeamName
+			currentTask.TeamRole = existing.TeamRole
+			if !existing.CreatedAt.IsZero() {
+				currentTask.CreatedAt = existing.CreatedAt
+			}
+		}
+	}
 	currentTask.ApplyVersionMetadata(snapshot.Version)
 	if routeDecision, ok := llm.ClientRouteDecision(coordinator.runner.cfg.Client); ok {
 		if raw, marshalErr := json.Marshal(routeDecision.Candidates); marshalErr == nil {

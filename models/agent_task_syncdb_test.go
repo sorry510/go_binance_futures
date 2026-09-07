@@ -173,6 +173,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		"model_config_id", "final_model_config_id", "route_candidates_json", "route_reason", "route_fallback_json", "input_contract_version", "output_contract_version",
 		"skill_source", "skill_source_version", "execution_mode", "plan_json",
 		"steps_json", "checkpoint_json", "resume_count", "tool_catalog_hash", "skill_package_hash",
+		"parent_task_id", "team_run_id", "team_name", "team_role",
 	})
 	requireAgentColumns(t, db, "agent_task_events", []string{
 		"step_id", "step_type", "error_type", "checkpoint",

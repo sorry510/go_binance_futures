@@ -1,0 +1,33 @@
+{
+  "version": "v3-0",
+  "captured_at": "2026-09-06T17:45:00+08:00",
+  "machine": {
+    "os": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M1 Pro"
+  },
+  "core_replay": {
+    "cases": 4,
+    "success_rate": 1.0,
+    "p95_duration_us_single_pass": 449,
+    "total_tokens": 0,
+    "tool_calls": 6,
+    "total_rounds": 6,
+    "average_rounds": 1.5,
+    "benchmark_ns_per_4_cases_median": 636093,
+    "bytes_per_op": 703641,
+    "allocs_per_op": 2743
+  },
+  "signal_to_notification": {
+    "mode": "ai_disabled_deterministic_fallback",
+    "benchmark_ns_per_op_median": 71019,
+    "bytes_per_op": 21268,
+    "allocs_per_op": 48
+  },
+  "proposal_to_execution": {
+    "broker": "fake",
+    "benchmark_ns_per_op_median": 1445684,
+    "bytes_per_op": 1077150,
+    "allocs_per_op": 5804
+  }
+}
