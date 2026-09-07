@@ -55,7 +55,7 @@ func (a *Adapter) Tools() []string {
 func (a *Adapter) ModelRequirements() llm.ModelRequirements {
 	return llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 55}
 }
-func (a *Adapter) MaxRounds() int { return 8 }
+func (a *Adapter) MaxRounds() int { return 0 }
 func (a *Adapter) BuildInput(_ context.Context, req skill.Request) ([]llm.Message, error) {
 	return []llm.Message{{Role: llm.RoleUser, Content: req.Input}}, nil
 }

@@ -14,6 +14,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	// Loads the global config before the package-level reads below run.
@@ -29,6 +30,7 @@ var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var pusher = notify.GetNotifyChannel()
 
 var flagFutures = 0
+var updateSymbolsTradePrecisionMu sync.Mutex
 
 func StartTrade(systemConfig *models.Config) {
 	if systemConfig.FutureEnable == 1 {
@@ -716,6 +718,9 @@ func BackfillEmptyFuturesSymbolTypes() error {
 
 // 更新币种的交易精度和插入新币
 func UpdateSymbolsTradePrecision() {
+	updateSymbolsTradePrecisionMu.Lock()
+	defer updateSymbolsTradePrecisionMu.Unlock()
+
 	if err := BackfillEmptyFuturesSymbolTypes(); err != nil {
 		logs.Error("backfill empty futures symbol types error:", err)
 	}
@@ -727,7 +732,10 @@ func UpdateSymbolsTradePrecision() {
 		logs.Info("auto add or update futures symbols trade precision")
 
 		var currentSymbols []models.Symbols
-		_, _ = o.QueryTable("symbols").All(&currentSymbols, "Symbol")
+		if _, err := o.Raw("SELECT DISTINCT symbol FROM symbols").QueryRows(&currentSymbols); err != nil {
+			logs.Error("load existing futures symbols error:", err)
+			return
+		}
 		existingSymbolMap := make(map[string]struct{}, len(currentSymbols))
 		for _, item := range currentSymbols {
 			existingSymbolMap[item.Symbol] = struct{}{}
@@ -799,19 +807,22 @@ func UpdateSymbolsTradePrecision() {
 			}
 		}
 
-		for start := 0; start < len(newSymbols); start += 1000 {
-			end := start + 1000
-			if end > len(newSymbols) {
-				end = len(newSymbols)
-			}
+		allowInsert := canInsertNewFuturesSymbols(o)
+		if allowInsert {
+			for start := 0; start < len(newSymbols); start += 1000 {
+				end := start + 1000
+				if end > len(newSymbols) {
+					end = len(newSymbols)
+				}
 
-			query, args := buildBatchInsertFuturesSymbolsSQL(newSymbols[start:end])
-			if query == "" {
-				continue
-			}
-			if _, err := o.Raw(query, args...).Exec(); err != nil {
-				logs.Error("insert futures symbols error:", err)
-				return
+				query, args := buildBatchInsertFuturesSymbolsSQL(newSymbols[start:end])
+				if query == "" {
+					continue
+				}
+				if _, err := o.Raw(query, args...).Exec(); err != nil {
+					logs.Error("insert futures symbols error:", err)
+					return
+				}
 			}
 		}
 
@@ -831,6 +842,30 @@ func UpdateSymbolsTradePrecision() {
 			}
 		}
 	}
+}
+
+func canInsertNewFuturesSymbols(o orm.Ormer) bool {
+	driver, _ := config.String("database::driver")
+	if driver != "mysql" {
+		return true
+	}
+
+	var uniqueIndexCount int
+	err := o.Raw(`SELECT COUNT(*)
+		FROM information_schema.STATISTICS
+		WHERE TABLE_SCHEMA = DATABASE()
+		  AND TABLE_NAME = 'symbols'
+		  AND COLUMN_NAME = 'symbol'
+		  AND NON_UNIQUE = 0`).QueryRow(&uniqueIndexCount)
+	if err != nil {
+		logs.Error("check symbols unique index error:", err)
+		return false
+	}
+	if uniqueIndexCount == 0 {
+		logs.Error("symbols.symbol unique index is missing; skip inserting new futures symbols to prevent duplicates")
+		return false
+	}
+	return true
 }
 
 type futuresSymbolPrecisionUpdate struct {

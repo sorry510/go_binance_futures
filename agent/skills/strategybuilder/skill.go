@@ -14,7 +14,6 @@ import (
 const (
 	Name               = "strategy_builder"
 	HistoryMetadataKey = "strategy_builder_history"
-	maxRounds          = 10
 )
 
 type Input struct {
@@ -44,7 +43,7 @@ func (*Builder) VersionInfo() skill.VersionInfo {
 func (*Builder) Tools() []string {
 	return []string{"get_features", "get_test_strategy_results", "get_market_condition"}
 }
-func (*Builder) MaxRounds() int { return maxRounds }
+func (*Builder) MaxRounds() int { return 0 }
 
 func (builder *Builder) BuildInput(_ context.Context, req skill.Request) ([]llm.Message, error) {
 	var input Input

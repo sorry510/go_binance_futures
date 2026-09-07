@@ -73,7 +73,7 @@ func (*Definition) Tools() []string {
 func (*Definition) ModelRequirements() llm.ModelRequirements {
 	return llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 70}
 }
-func (*Definition) MaxRounds() int { return 15 }
+func (*Definition) MaxRounds() int { return 0 }
 
 func (*Definition) ChatEnabled() bool           { return true }
 func (*Definition) PlainTextFinalAllowed() bool { return true }

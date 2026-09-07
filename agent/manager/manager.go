@@ -91,13 +91,7 @@ func (manager *Manager) start(req agentruntime.Request, linkage task.Linkage) (*
 	if err != nil {
 		return nil, fmt.Errorf("initialize LLM client: %w", err)
 	}
-	runtimeConfig := manager.cfg.RuntimeConfig
-	if linkage.MaxToolCalls > 0 {
-		runtimeConfig.MaxToolCalls = linkage.MaxToolCalls
-	}
-	if linkage.MaxTotalTokens > 0 {
-		runtimeConfig.MaxTotalTokens = linkage.MaxTotalTokens
-	}
+	runtimeConfig := applyLinkageBudgetCaps(manager.cfg.RuntimeConfig, selectedSkill.Name(), selectedSkill.MaxRounds(), linkage)
 	runtimeConfig.Client = client
 	runtimeConfig.Skills = manager.cfg.Skills
 	runtimeConfig.Tools = manager.cfg.Tools
@@ -114,10 +108,8 @@ func (manager *Manager) start(req agentruntime.Request, linkage task.Linkage) (*
 
 	now := time.Now().UTC()
 	taskID := task.NewID()
-	maxRounds := selectedSkill.MaxRounds()
-	if maxRounds <= 0 {
-		maxRounds = agentruntime.DefaultConfig().DefaultMaxRounds
-	}
+	budget := agentruntime.ResolveBudget(runtimeConfig, selectedSkill.Name(), selectedSkill.MaxRounds())
+	maxRounds := budget.MaxRounds
 	item := &task.Task{
 		ID: taskID, Skill: selectedSkill.Name(), ConversationID: strings.TrimSpace(req.ConversationID),
 		ParentTaskID: strings.TrimSpace(linkage.ParentTaskID), TeamRunID: strings.TrimSpace(linkage.TeamRunID),
@@ -153,6 +145,27 @@ func (manager *Manager) start(req agentruntime.Request, linkage task.Linkage) (*
 		manager.runCompletionHook(req, taskID, result, runErr)
 	}()
 	return &started, nil
+}
+
+func applyLinkageBudgetCaps(cfg agentruntime.Config, skillName string, skillMaxRounds int, linkage task.Linkage) agentruntime.Config {
+	if linkage.MaxToolCalls <= 0 && linkage.MaxTotalTokens <= 0 {
+		return cfg
+	}
+	budget := agentruntime.ResolveBudget(cfg, skillName, skillMaxRounds)
+	if linkage.MaxToolCalls > 0 && linkage.MaxToolCalls < budget.MaxToolCalls {
+		budget.MaxToolCalls = linkage.MaxToolCalls
+	}
+	if linkage.MaxTotalTokens > 0 && linkage.MaxTotalTokens < budget.MaxTotalTokens {
+		budget.MaxTotalTokens = linkage.MaxTotalTokens
+	}
+
+	// Linked Team budgets are hard caps. Freeze the already-resolved global
+	// budget for this child so a BudgetProvider cannot widen the Team cap.
+	cfg.DefaultMaxRounds = budget.MaxRounds
+	cfg.MaxToolCalls = budget.MaxToolCalls
+	cfg.MaxTotalTokens = budget.MaxTotalTokens
+	cfg.BudgetProvider = func(string) agentruntime.Budget { return budget }
+	return cfg
 }
 
 func (manager *Manager) Get(ctx context.Context, taskID string) (*task.Task, error) {

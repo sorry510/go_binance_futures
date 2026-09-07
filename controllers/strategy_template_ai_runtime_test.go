@@ -79,7 +79,7 @@ func TestStrategyTemplateAITaskUsesRuntimeAndPreservesConversation(t *testing.T)
 	strategyBuilderMemoryWriter = nil
 	admitStrategyBuilderSkill = func(string) error { return nil }
 	strategyBuilderBudgetProvider = func(string) agentruntime.Budget {
-		return agentruntime.Budget{MaxToolCalls: maxStrategyTemplateAIRounds, MaxTotalTokens: 120000}
+		return agentruntime.Budget{MaxToolCalls: 10, MaxTotalTokens: 120000}
 	}
 	defer func() {
 		newStrategyBuilderLLMClient = original
