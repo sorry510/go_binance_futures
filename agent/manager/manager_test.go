@@ -268,12 +268,23 @@ func TestStartLinkedPersistsTeamLineageAndBudget(t *testing.T) {
 	if started.ParentTaskID != "parent-1" || started.TeamRunID != "team-1" || started.TeamName != "symbol_analysis_team" || started.TeamRole != "technical_analyst" {
 		t.Fatalf("team lineage not frozen at start: %+v", started)
 	}
-	stored, err := store.Get(context.Background(), started.ID)
-	if err != nil {
-		t.Fatal(err)
+	deadline := time.Now().Add(time.Second)
+	var stored *task.Task
+	for time.Now().Before(deadline) {
+		stored, err = store.Get(context.Background(), started.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if task.IsTerminalStatus(stored.Status) {
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
 	}
-	if stored.ParentTaskID != started.ParentTaskID || stored.TeamRole != started.TeamRole {
-		t.Fatalf("team lineage not persisted: %+v", stored)
+	if stored == nil || !task.IsTerminalStatus(stored.Status) {
+		t.Fatal("linked child did not finish")
+	}
+	if stored.ParentTaskID != started.ParentTaskID || stored.TeamRunID != started.TeamRunID || stored.TeamName != started.TeamName || stored.TeamRole != started.TeamRole {
+		t.Fatalf("team lineage was erased by runtime persistence: %+v", stored)
 	}
 }
 
@@ -288,7 +299,7 @@ func TestApplyLinkageBudgetCapsCannotBeWidenedByGlobalProvider(t *testing.T) {
 	}
 	capped := applyLinkageBudgetCaps(cfg, "team-child", 3, task.Linkage{MaxToolCalls: 1, MaxTotalTokens: 100})
 	budget := agentruntime.ResolveBudget(capped, "team-child", 3)
-	if budget.MaxRounds != 15 || budget.MaxToolCalls != 1 || budget.MaxTotalTokens != 100 {
+	if budget.MaxRounds != 3 || budget.MaxToolCalls != 1 || budget.MaxTotalTokens != 100 {
 		t.Fatalf("linked budget was widened: %+v", budget)
 	}
 }
@@ -296,12 +307,12 @@ func TestApplyLinkageBudgetCapsCannotBeWidenedByGlobalProvider(t *testing.T) {
 func TestApplyLinkageBudgetCapsKeepsStricterGlobalLimits(t *testing.T) {
 	cfg := agentruntime.Config{
 		BudgetProvider: func(string) agentruntime.Budget {
-			return agentruntime.Budget{MaxRounds: 10, MaxToolCalls: 1, MaxTotalTokens: 80}
+			return agentruntime.Budget{MaxRounds: 2, MaxToolCalls: 1, MaxTotalTokens: 80}
 		},
 	}
 	capped := applyLinkageBudgetCaps(cfg, "team-child", 3, task.Linkage{MaxToolCalls: 2, MaxTotalTokens: 100})
 	budget := agentruntime.ResolveBudget(capped, "team-child", 3)
-	if budget.MaxRounds != 10 || budget.MaxToolCalls != 1 || budget.MaxTotalTokens != 80 {
+	if budget.MaxRounds != 2 || budget.MaxToolCalls != 1 || budget.MaxTotalTokens != 80 {
 		t.Fatalf("stricter global budget should be preserved: %+v", budget)
 	}
 }

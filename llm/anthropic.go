@@ -52,6 +52,10 @@ func (client *anthropicClient) Provider() Provider {
 
 func (client *anthropicClient) ConfigID() int64 { return client.cfg.ID }
 
+func (client *anthropicClient) ProxyDiagnostics() ProxyDiagnostics {
+	return client.transport.ProxyDiagnostics()
+}
+
 func (client *anthropicClient) Generate(ctx context.Context, request Request) (*Response, error) {
 	messages := make([]anthropicMessage, 0, len(request.Messages))
 	systemParts := make([]string, 0, 2)

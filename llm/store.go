@@ -22,6 +22,8 @@ type ConfigInput struct {
 	Provider          string  `json:"provider"`
 	APIURL            string  `json:"api_url"`
 	APIKey            string  `json:"api_key"`
+	ProxyURL          string  `json:"proxy_url"`
+	ClearProxyURL     bool    `json:"clear_proxy_url,omitempty"`
 	Model             string  `json:"model"`
 	APIVersion        string  `json:"api_version"`
 	TimeoutSeconds    int     `json:"timeout_seconds"`
@@ -42,6 +44,8 @@ type PublicConfig struct {
 	Name              string  `json:"name"`
 	Provider          string  `json:"provider"`
 	APIURL            string  `json:"api_url"`
+	ProxyURLMasked    string  `json:"proxy_url_masked,omitempty"`
+	HasProxyURL       bool    `json:"has_proxy_url"`
 	Model             string  `json:"model"`
 	APIVersion        string  `json:"api_version,omitempty"`
 	TimeoutSeconds    int     `json:"timeout_seconds"`
@@ -174,6 +178,11 @@ func (store Store) Update(ctx context.Context, id int64, input ConfigInput) (*Pu
 	if apiKey == "" {
 		apiKey = row.APIKey
 	}
+	if input.ClearProxyURL {
+		input.ProxyURL = ""
+	} else if strings.TrimSpace(input.ProxyURL) == "" {
+		input.ProxyURL = row.ProxyURL
+	}
 	normalized, err := normalizeConfigInput(input, apiKey, row)
 	if err != nil {
 		return nil, err
@@ -208,6 +217,7 @@ func normalizeConfigInput(input ConfigInput, preservedAPIKey string, existing *m
 	input.Provider = strings.TrimSpace(input.Provider)
 	input.APIURL = strings.TrimSpace(input.APIURL)
 	input.APIKey = strings.TrimSpace(input.APIKey)
+	input.ProxyURL = strings.TrimSpace(input.ProxyURL)
 	input.Model = normalizeModelIdentifier(input.Model)
 	input.APIVersion = strings.TrimSpace(input.APIVersion)
 	if input.APIKey == "" {
@@ -337,7 +347,7 @@ func configFromInput(input ConfigInput) (Config, error) {
 	}
 	temperature := input.Temperature
 	cfg := Config{
-		Provider: provider, Model: input.Model, APIURL: input.APIURL, APIKey: input.APIKey,
+		Provider: provider, Model: input.Model, APIURL: input.APIURL, APIKey: input.APIKey, ProxyURL: input.ProxyURL,
 		APIVersion: input.APIVersion, Timeout: time.Duration(input.TimeoutSeconds) * time.Second,
 		Temperature: &temperature, Command: defaultCommand(provider), Args: defaultArgs(provider), WorkingDir: ".",
 		Environment: map[string]string{},
@@ -350,7 +360,7 @@ func configFromInput(input ConfigInput) (Config, error) {
 
 func configFromModel(row models.LLMConfig) (Config, error) {
 	cfg, err := configFromInput(ConfigInput{
-		Name: row.Name, Provider: row.Provider, APIURL: row.APIURL, APIKey: row.APIKey, Model: row.Model,
+		Name: row.Name, Provider: row.Provider, APIURL: row.APIURL, APIKey: row.APIKey, ProxyURL: row.ProxyURL, Model: row.Model,
 		APIVersion: row.APIVersion, TimeoutSeconds: row.TimeoutSeconds, Temperature: row.Temperature, Enabled: row.Enabled,
 	})
 	if err != nil {
@@ -361,7 +371,7 @@ func configFromModel(row models.LLMConfig) (Config, error) {
 }
 func modelFromInput(input ConfigInput) models.LLMConfig {
 	return models.LLMConfig{
-		Name: input.Name, Provider: input.Provider, APIURL: input.APIURL, APIKey: input.APIKey,
+		Name: input.Name, Provider: input.Provider, APIURL: input.APIURL, APIKey: input.APIKey, ProxyURL: input.ProxyURL,
 		Model: input.Model, APIVersion: input.APIVersion, TimeoutSeconds: input.TimeoutSeconds, Temperature: input.Temperature, Enabled: input.Enabled,
 		RouterCandidate: intValueOr(input.RouterCandidate, 0), StructuredOutput: intValueOr(input.StructuredOutput, 1), NativeToolCalling: intValueOr(input.NativeToolCalling, 0),
 		Reasoning: intValueOr(input.Reasoning, 0), LongContext: intValueOr(input.LongContext, 0), JSONReliability: intValueOr(input.JSONReliability, 80),
@@ -371,7 +381,8 @@ func modelFromInput(input ConfigInput) models.LLMConfig {
 
 func toPublicConfig(row models.LLMConfig) PublicConfig {
 	return PublicConfig{
-		ID: row.ID, Name: row.Name, Provider: row.Provider, APIURL: row.APIURL, Model: row.Model,
+		ID: row.ID, Name: row.Name, Provider: row.Provider, APIURL: row.APIURL,
+		ProxyURLMasked: maskProxyURL(row.ProxyURL), HasProxyURL: strings.TrimSpace(row.ProxyURL) != "", Model: row.Model,
 		APIVersion: row.APIVersion, TimeoutSeconds: row.TimeoutSeconds, Temperature: row.Temperature,
 		Enabled: row.Enabled, RouterCandidate: row.RouterCandidate, StructuredOutput: row.StructuredOutput, NativeToolCalling: row.NativeToolCalling,
 		Reasoning: row.Reasoning, LongContext: row.LongContext, JSONReliability: row.JSONReliability, MaxContextTokens: row.MaxContextTokens,
@@ -484,7 +495,12 @@ func joinLegacyAPIURL(baseURL, endpoint string) string {
 	}
 	return baseURL + "/" + endpoint
 }
-func BuildConfig(input ConfigInput, preservedAPIKey string) (Config, error) {
+func BuildConfig(input ConfigInput, preservedAPIKey, preservedProxyURL string) (Config, error) {
+	if input.ClearProxyURL {
+		input.ProxyURL = ""
+	} else if strings.TrimSpace(input.ProxyURL) == "" {
+		input.ProxyURL = strings.TrimSpace(preservedProxyURL)
+	}
 	normalized, err := normalizeConfigInput(input, preservedAPIKey, nil)
 	if err != nil {
 		return Config{}, err

@@ -145,7 +145,7 @@ func TestSupportedHTTPProviderConfigs(t *testing.T) {
 			if provider == "openai_compatible" {
 				input.APIURL = "http://127.0.0.1:9999/v1/chat/completions"
 			}
-			cfg, err := BuildConfig(input, "")
+			cfg, err := BuildConfig(input, "", "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -214,5 +214,71 @@ func TestConfigFromModelNormalizesLegacyUnicodeDashesAtRuntime(t *testing.T) {
 	}
 	if cfg.Model != "gemini-3.5-flash" {
 		t.Fatalf("runtime model = %q, want ASCII hyphens", cfg.Model)
+	}
+}
+
+func TestStorePersistsAndMasksSOCKS5HProxy(t *testing.T) {
+	store := setupLLMStoreTest(t)
+	ctx := context.Background()
+	item, err := store.Create(ctx, ConfigInput{
+		Name: "proxy-gemini", Provider: "gemini", APIKey: "test-key", Model: "gemini-test",
+		ProxyURL: "socks5h://proxy-user:proxy-secret@127.0.0.1:1080", TimeoutSeconds: 30, Temperature: 0.2,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !item.HasProxyURL || item.ProxyURLMasked == "" || strings.Contains(item.ProxyURLMasked, "proxy-secret") {
+		t.Fatalf("proxy credential leaked in public config: %+v", item)
+	}
+	row, err := store.Get(ctx, item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if row.ProxyURL != "socks5h://proxy-user:proxy-secret@127.0.0.1:1080" {
+		t.Fatalf("proxy url not persisted: %q", row.ProxyURL)
+	}
+	updated, err := store.Update(ctx, item.ID, ConfigInput{
+		Name: "proxy-gemini", Provider: "gemini", APIKey: "", ProxyURL: "", Model: "gemini-test-2",
+		TimeoutSeconds: 30, Temperature: 0.2,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !updated.HasProxyURL {
+		t.Fatalf("blank proxy update removed existing proxy: %+v", updated)
+	}
+	row, _ = store.Get(ctx, item.ID)
+	if !strings.Contains(row.ProxyURL, "proxy-secret") {
+		t.Fatalf("stored proxy was not preserved: %q", row.ProxyURL)
+	}
+	_, err = store.Update(ctx, item.ID, ConfigInput{
+		Name: "proxy-gemini", Provider: "gemini", APIKey: "", ProxyURL: "", ClearProxyURL: true, Model: "gemini-test-3",
+		TimeoutSeconds: 30, Temperature: 0.2,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	row, _ = store.Get(ctx, item.ID)
+	if row.ProxyURL != "" {
+		t.Fatalf("clear_proxy_url did not remove proxy: %q", row.ProxyURL)
+	}
+}
+
+func TestProxyURLValidationRequiresSOCKS5H(t *testing.T) {
+	base := ConfigInput{Name: "proxy-validation", Provider: "gemini", APIKey: "test-key", Model: "gemini-test", TimeoutSeconds: 30, Temperature: 0.2}
+	for _, invalid := range []string{"http://127.0.0.1:8080", "socks5://127.0.0.1:1080", "socks5h://127.0.0.1"} {
+		input := base
+		input.ProxyURL = invalid
+		if _, err := BuildConfig(input, "", ""); err == nil {
+			t.Fatalf("expected invalid proxy %q to fail", invalid)
+		}
+	}
+	base.ProxyURL = "socks5h://user:pass@127.0.0.1:1080"
+	cfg, err := BuildConfig(base, "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.ProxyURL != base.ProxyURL {
+		t.Fatalf("proxy url=%q want=%q", cfg.ProxyURL, base.ProxyURL)
 	}
 }

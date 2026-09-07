@@ -54,3 +54,13 @@ func ConfigID(client Client) int64 {
 	}
 	return 0
 }
+
+func ClientProxyDiagnostics(client Client) ProxyDiagnostics {
+	type proxyDiagnosable interface {
+		ProxyDiagnostics() ProxyDiagnostics
+	}
+	if value, ok := client.(proxyDiagnosable); ok {
+		return value.ProxyDiagnostics()
+	}
+	return ProxyDiagnostics{}
+}
