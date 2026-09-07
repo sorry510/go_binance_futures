@@ -32,7 +32,6 @@ const (
 	strategyTemplateAITaskRetention  = 30 * time.Minute
 	maxStrategyTemplateAIPromptSize  = 12 * 1024
 	maxStrategyTemplateAIContextSize = 256 * 1024
-	maxStrategyTemplateAIRounds      = 10
 )
 
 type strategyTemplateAIGenerationRequest struct {
@@ -82,6 +81,15 @@ var admitStrategyBuilderSkill = agentapp.AdmitSkill
 var strategyBuilderBudgetProvider = agentapp.RuntimeBudget
 var strategyBuilderMemoryContextProvider = agentapp.MemoryContext
 var strategyBuilderMemoryWriter = agentapp.MemoryWrite
+
+func strategyTemplateAIMaxRounds() int {
+	budget := strategyBuilderBudgetProvider(strategybuilder.Name)
+	if budget.MaxRounds > 0 {
+		return budget.MaxRounds
+	}
+	return agentruntime.DefaultConfig().DefaultMaxRounds
+}
+
 var strategyTemplateConversationStore conversationstore.Store = conversationstore.NewORMStore()
 var strategyTemplatePersistentTaskStore task.Store = task.NewORMStore()
 
@@ -179,7 +187,7 @@ func startStrategyTemplateAITask(request strategyTemplateAIGenerationRequest) (s
 	taskID := newStrategyTemplateAITaskID()
 	item := &strategyTemplateAIGenerationTask{
 		TaskID: taskID, ConversationID: conversationID, Status: "queued", Stage: "queued",
-		MaxRounds: maxStrategyTemplateAIRounds, CreatedAt: now, UpdatedAt: now,
+		MaxRounds: strategyTemplateAIMaxRounds(), CreatedAt: now, UpdatedAt: now,
 	}
 	appendStrategyTemplateAIEventLocked(item, 0, "queued", "生成任务已创建")
 	strategyTemplateAITaskStore.Lock()
@@ -193,7 +201,7 @@ func startStrategyTemplateAITask(request strategyTemplateAIGenerationRequest) (s
 	persistent := &task.Task{
 		ID: taskID, Skill: strategybuilder.Name, ConversationID: conversationID,
 		Status: task.StatusQueued, Stage: "queued", Progress: 0, Input: string(inputJSON),
-		MaxRounds: maxStrategyTemplateAIRounds, CreatedAt: now, UpdatedAt: now,
+		MaxRounds: strategyTemplateAIMaxRounds(), CreatedAt: now, UpdatedAt: now,
 	}
 	if err := strategyTemplatePersistentTaskStore.Save(ctx, persistent); err != nil {
 		strategyTemplateAITaskStore.Lock()
@@ -263,7 +271,7 @@ func runStrategyTemplateAITask(taskID string, request strategyTemplateAIGenerati
 		Client: client, Skills: skills, Tools: toolRegistry, Tasks: strategyTemplatePersistentTaskStore,
 		Policy: permission.AllowWritesFor(nil), BudgetProvider: strategyBuilderBudgetProvider, Observer: observability.Default(),
 		MemoryContextProvider: strategyBuilderMemoryContextProvider, MemoryWriter: strategyBuilderMemoryWriter,
-		Timeout: 15 * time.Minute, DefaultMaxRounds: maxStrategyTemplateAIRounds,
+		Timeout: 15 * time.Minute, DefaultMaxRounds: strategyTemplateAIMaxRounds(),
 		MaxContextBytes: maxStrategyTemplateAIContextSize, MaxToolResultBytes: 256 * 1024,
 		Retry:     agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 		EventHook: func(event task.Event) { handleStrategyTemplateAIRuntimeEvent(taskID, event) },
@@ -301,7 +309,7 @@ func handleStrategyTemplateAIRuntimeEvent(taskID string, event task.Event) {
 	case "building_input":
 		updateStrategyTemplateAITask(taskID, 8, "building_prompt", "正在整理策略需求和框架约束")
 	case "waiting_llm":
-		updateStrategyTemplateAIRound(taskID, event.Round, progress, fmt.Sprintf("Agent 第 %d/%d 轮：正在等待 AI 响应", event.Round, maxStrategyTemplateAIRounds))
+		updateStrategyTemplateAIRound(taskID, event.Round, progress, fmt.Sprintf("Agent 第 %d/%d 轮：正在等待 AI 响应", event.Round, strategyTemplateAIMaxRounds()))
 	case "retrying_llm":
 		updateStrategyTemplateAITask(taskID, minStrategyTemplateAIProgress(progress+1, 94), "retrying_llm", "LLM 连接中断，正在自动重试")
 	case "waiting_tool":
@@ -569,10 +577,11 @@ func strategyTemplateAIRoundProgress(round int) int {
 	if round < 1 {
 		return 8
 	}
-	if round > maxStrategyTemplateAIRounds {
-		round = maxStrategyTemplateAIRounds
+	maxRounds := strategyTemplateAIMaxRounds()
+	if round > maxRounds {
+		round = maxRounds
 	}
-	return 8 + round*82/maxStrategyTemplateAIRounds
+	return 8 + round*82/maxRounds
 }
 
 func truncateStrategyTemplateAIEventMessage(message string) string {

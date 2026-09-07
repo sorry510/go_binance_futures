@@ -230,7 +230,7 @@ func DailyMarketBrief() *Definition          { return &Definition{kind: DailyMar
 
 func (d *Definition) Name() string    { return d.kind }
 func (d *Definition) Tools() []string { return nil }
-func (d *Definition) MaxRounds() int  { return 5 }
+func (d *Definition) MaxRounds() int  { return 0 }
 func (d *Definition) ModelRequirements() llm.ModelRequirements {
 	req := llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 70}
 	if d.kind == StrategyReviewName || strings.HasPrefix(d.kind, "strategy_experiment") || d.kind == AlertTriageName {

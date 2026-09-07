@@ -38,6 +38,7 @@ type RetryPolicy struct {
 }
 
 type Budget struct {
+	MaxRounds      int `json:"max_rounds"`
 	MaxToolCalls   int `json:"max_tool_calls"`
 	MaxTotalTokens int `json:"max_total_tokens"`
 }
@@ -126,7 +127,7 @@ type Runner interface {
 func DefaultConfig() Config {
 	return Config{
 		Timeout:              2 * time.Minute,
-		DefaultMaxRounds:     8,
+		DefaultMaxRounds:     15,
 		MaxContextBytes:      256 * 1024,
 		MaxContextTokens:     64 * 1024,
 		MaxToolResultBytes:   128 * 1024,

@@ -13,7 +13,6 @@ type Settings struct {
 	MinSeverity   signalservice.Severity `json:"min_severity"`
 	Cooldown      time.Duration          `json:"-"`
 	MaxConcurrent int                    `json:"max_concurrent"`
-	MaxPerMinute  int                    `json:"max_per_minute"`
 	TriageWindow  time.Duration          `json:"-"`
 	Signal        signalservice.Settings `json:"-"`
 }
@@ -41,7 +40,6 @@ func DefaultSettings() Settings {
 		MinSeverity:   signalservice.SeverityMedium,
 		Cooldown:      15 * time.Minute,
 		MaxConcurrent: 2,
-		MaxPerMinute:  6,
 		TriageWindow:  3 * time.Second,
 		Signal:        signalservice.DefaultSettings(),
 	}
@@ -59,9 +57,6 @@ func SettingsFromConfig(config models.Config) Settings {
 	}
 	if config.AgentAlertMaxConcurrent > 0 {
 		settings.MaxConcurrent = config.AgentAlertMaxConcurrent
-	}
-	if config.AgentAlertMaxPerMinute > 0 {
-		settings.MaxPerMinute = config.AgentAlertMaxPerMinute
 	}
 
 	settings.Signal.FastMoveEnabled = config.WsFuturesFastMoveEnable == 1
