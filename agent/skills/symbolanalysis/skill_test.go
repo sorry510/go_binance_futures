@@ -195,8 +195,8 @@ func TestBuildChatInputWithOptionsRejectsNonUSDTSelection(t *testing.T) {
 }
 
 func TestSymbolAnalysisMaxRounds(t *testing.T) {
-	if got := New().MaxRounds(); got != 15 {
-		t.Fatalf("MaxRounds() = %d, want 15", got)
+	if got := New().MaxRounds(); got != 0 {
+		t.Fatalf("MaxRounds() = %d, want global runtime budget (0)", got)
 	}
 }
 func TestBuildChatInputConvertsNaturalLanguageToExistingContract(t *testing.T) {

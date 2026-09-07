@@ -70,7 +70,7 @@ func (*Definition) Tools() []string {
 func (*Definition) ModelRequirements() llm.ModelRequirements {
 	return llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 70, PreferLowLatency: true}
 }
-func (*Definition) MaxRounds() int { return 6 }
+func (*Definition) MaxRounds() int { return 0 }
 
 func (*Definition) RequiredTools(skill.Request) []string {
 	return []string{"get_symbol_analysis_context"}

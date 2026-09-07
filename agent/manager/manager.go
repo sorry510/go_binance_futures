@@ -100,10 +100,8 @@ func (manager *Manager) Start(req agentruntime.Request) (*task.Task, error) {
 
 	now := time.Now().UTC()
 	taskID := task.NewID()
-	maxRounds := selectedSkill.MaxRounds()
-	if maxRounds <= 0 {
-		maxRounds = agentruntime.DefaultConfig().DefaultMaxRounds
-	}
+	budget := agentruntime.ResolveBudget(runtimeConfig, selectedSkill.Name(), selectedSkill.MaxRounds())
+	maxRounds := budget.MaxRounds
 	item := &task.Task{ID: taskID, Skill: selectedSkill.Name(), ConversationID: strings.TrimSpace(req.ConversationID), Status: task.StatusQueued, Stage: "queued", Input: req.Input, MaxRounds: maxRounds, Provider: string(client.Provider()), CreatedAt: now, UpdatedAt: now}
 	item.ApplyVersionMetadata(executionSnapshot.Version)
 	if len(routeDecision.Candidates) > 0 {
