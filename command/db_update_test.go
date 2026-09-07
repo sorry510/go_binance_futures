@@ -40,6 +40,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.AgentTradeProposal),
 		new(models.AgentTradeExecution),
 		new(models.AgentTradeAudit),
+		new(models.LLMConfig),
 	)
 
 	if err := SyncDatabase(1); err != nil {
@@ -113,5 +114,19 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	}
 	if err := SyncDatabase(4); err != nil {
 		t.Fatalf("second version-4 sync should be idempotent: %v", err)
+	}
+	if err := SyncDatabase(5); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 5 {
+		t.Fatalf("expected database version 5 after LLM proxy schema sync, config=%+v err=%v", config, err)
+	}
+	var proxyColumnCount int
+	if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('llm_configs') WHERE name='proxy_url'").QueryRow(&proxyColumnCount); err != nil || proxyColumnCount != 1 {
+		t.Fatalf("expected llm_configs.proxy_url after version 5 sync, count=%d err=%v", proxyColumnCount, err)
+	}
+	if err := SyncDatabase(5); err != nil {
+		t.Fatalf("second version-5 sync should be idempotent: %v", err)
 	}
 }

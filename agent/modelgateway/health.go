@@ -54,7 +54,20 @@ func (registry *HealthRegistry) Available(configID int64) bool {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	item := registry.entry(configID)
-	return item.state != "open" || !time.Now().Before(item.openUntil)
+	switch item.state {
+	case "half_open":
+		return !item.halfOpenInFlight
+	case "open":
+		return !time.Now().Before(item.openUntil) && !item.halfOpenInFlight
+	default:
+		return true
+	}
+}
+
+func (registry *HealthRegistry) Reset(configID int64) {
+	registry.mu.Lock()
+	defer registry.mu.Unlock()
+	delete(registry.entries, configID)
 }
 
 func (registry *HealthRegistry) Allow(configID int64, cooldown time.Duration) bool {
