@@ -42,6 +42,13 @@ type ExecutionModeProvider interface {
 	ExecutionMode() string
 }
 
+// DirectJSONFinalAdapter lets strictly validated, final-only skills accept a raw
+// JSON result when a model omits the Agent Runtime {action, result} envelope.
+// The normal final validator still runs, so this does not bypass output contracts.
+type DirectJSONFinalAdapter interface {
+	DirectJSONFinalAllowed() bool
+}
+
 type ContextResourceProvider interface {
 	ContextResources(req Request) []contextengine.Resource
 }
