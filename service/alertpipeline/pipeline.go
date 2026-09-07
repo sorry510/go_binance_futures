@@ -55,7 +55,6 @@ type Pipeline struct {
 	mu              sync.Mutex
 	lastRun         map[string]int64
 	incidentPending map[string]*incidentBucket
-	aiCalls         []int64
 	traces          []Trace
 
 	signalsReceived    atomic.Uint64
@@ -229,10 +228,6 @@ func (pipeline *Pipeline) processIncident(ctx context.Context, batch []signalser
 	pipeline.triageBatches.Add(1)
 	pipeline.triageSignals.Add(uint64(len(batch)))
 	settings := pipeline.cfg.Settings()
-	if !pipeline.reserveAIBudget(settings.MaxPerMinute) {
-		pipeline.fallbackIncidentBatch(batch, "AI minute budget exceeded", "")
-		return
-	}
 	if !pipeline.acquireAISlot(settings.MaxConcurrent) {
 		pipeline.fallbackIncidentBatch(batch, "AI concurrency limit reached", "")
 		return
@@ -589,27 +584,6 @@ func (pipeline *Pipeline) markCooldown(value signalservice.Signal) {
 	pipeline.mu.Unlock()
 }
 
-func (pipeline *Pipeline) reserveAIBudget(limit int) bool {
-	if limit <= 0 {
-		limit = DefaultSettings().MaxPerMinute
-	}
-	now := time.Now().UnixMilli()
-	cutoff := now - time.Minute.Milliseconds()
-	pipeline.mu.Lock()
-	defer pipeline.mu.Unlock()
-	kept := pipeline.aiCalls[:0]
-	for _, value := range pipeline.aiCalls {
-		if value > cutoff {
-			kept = append(kept, value)
-		}
-	}
-	pipeline.aiCalls = kept
-	if len(pipeline.aiCalls) >= limit {
-		return false
-	}
-	pipeline.aiCalls = append(pipeline.aiCalls, now)
-	return true
-}
 func newTrace(value signalservice.Signal, status string) Trace {
 	now := time.Now().UnixMilli()
 	return Trace{

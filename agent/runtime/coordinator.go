@@ -88,11 +88,10 @@ func (coordinator *coordinator) prepareNew(ctx context.Context, req Request) (*r
 		}
 		snapshot = &copy
 	}
-	maxRounds := selectedSkill.MaxRounds()
-	if maxRounds <= 0 {
-		maxRounds = coordinator.runner.cfg.DefaultMaxRounds
-	}
-	maxToolCalls, maxTotalTokens := coordinator.runner.budgetFor(selectedSkill.Name())
+	budget := ResolveBudget(coordinator.runner.cfg, selectedSkill.Name(), selectedSkill.MaxRounds())
+	maxRounds := budget.MaxRounds
+	maxToolCalls := budget.MaxToolCalls
+	maxTotalTokens := budget.MaxTotalTokens
 	now := time.Now().UTC()
 	taskID := strings.TrimSpace(req.TaskID)
 	if taskID == "" {
@@ -351,18 +350,36 @@ func (coordinator *coordinator) execute(ctx context.Context, session *runSession
 	}
 }
 
-func (runner *DefaultRunner) budgetFor(skillName string) (int, int) {
-	maxToolCalls, maxTotalTokens := runner.cfg.MaxToolCalls, runner.cfg.MaxTotalTokens
-	if runner.cfg.BudgetProvider != nil {
-		budget := runner.cfg.BudgetProvider(skillName)
-		if budget.MaxToolCalls > 0 {
-			maxToolCalls = budget.MaxToolCalls
+func ResolveBudget(cfg Config, skillName string, skillMaxRounds int) Budget {
+	defaults := DefaultConfig()
+	budget := Budget{
+		MaxRounds: skillMaxRounds, MaxToolCalls: cfg.MaxToolCalls, MaxTotalTokens: cfg.MaxTotalTokens,
+	}
+	if budget.MaxRounds <= 0 {
+		budget.MaxRounds = cfg.DefaultMaxRounds
+	}
+	if budget.MaxRounds <= 0 {
+		budget.MaxRounds = defaults.DefaultMaxRounds
+	}
+	if budget.MaxToolCalls <= 0 {
+		budget.MaxToolCalls = defaults.MaxToolCalls
+	}
+	if budget.MaxTotalTokens <= 0 {
+		budget.MaxTotalTokens = defaults.MaxTotalTokens
+	}
+	if cfg.BudgetProvider != nil {
+		override := cfg.BudgetProvider(skillName)
+		if override.MaxRounds > 0 {
+			budget.MaxRounds = override.MaxRounds
 		}
-		if budget.MaxTotalTokens > 0 {
-			maxTotalTokens = budget.MaxTotalTokens
+		if override.MaxToolCalls > 0 {
+			budget.MaxToolCalls = override.MaxToolCalls
+		}
+		if override.MaxTotalTokens > 0 {
+			budget.MaxTotalTokens = override.MaxTotalTokens
 		}
 	}
-	return maxToolCalls, maxTotalTokens
+	return budget
 }
 
 func resolveExecutionMode(selectedSkill skill.Skill) (ExecutionMode, error) {
