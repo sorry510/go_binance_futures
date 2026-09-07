@@ -212,6 +212,38 @@ func (store *ORMStore) MessagesDetailed(ctx context.Context, id string) ([]Messa
 	return result, nil
 }
 
+func (store *ORMStore) History(ctx context.Context, conversationID, currentTaskID string) ([]contextengine.ContextBlock, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	conversationID = strings.TrimSpace(conversationID)
+	if conversationID == "" {
+		return []contextengine.ContextBlock{}, nil
+	}
+	query := store.orm().QueryTable(new(models.AgentConversationMessage)).Filter("conversation_id", conversationID)
+	if currentTaskID = strings.TrimSpace(currentTaskID); currentTaskID != "" {
+		query = query.Exclude("task_id", currentTaskID)
+	}
+	var messages []models.AgentConversationMessage
+	if _, err := query.OrderBy("sequence").All(&messages); err != nil {
+		return nil, err
+	}
+	blocks := make([]contextengine.ContextBlock, 0, len(messages))
+	for _, row := range messages {
+		role := strings.TrimSpace(row.Role)
+		if role != llm.RoleUser && role != llm.RoleAssistant && role != llm.RoleSystem {
+			continue
+		}
+		blocks = append(blocks, contextengine.ContextBlock{
+			ID: fmt.Sprintf("conversation-%s-%06d", conversationID, row.Sequence), Type: contextengine.BlockHistory,
+			Source: "conversation:" + conversationID, Role: role,
+			Priority: contextengine.DefaultPriority(contextengine.BlockHistory), Freshness: contextengine.FreshnessUnknown,
+			Content: row.Content,
+		})
+	}
+	return blocks, nil
+}
+
 func (store *ORMStore) SuccessfulHistory(ctx context.Context, conversationID, currentTaskID string, limit int) ([]contextengine.ContextBlock, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err

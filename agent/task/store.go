@@ -13,6 +13,8 @@ type ListOptions struct {
 	Skill          string
 	Status         string
 	ConversationID string
+	TeamRunID      string
+	ParentTaskID   string
 	Page           int
 	Limit          int
 }
@@ -151,6 +153,12 @@ func (store *MemoryStore) List(ctx context.Context, options ListOptions) (ListRe
 		if options.ConversationID != "" && item.ConversationID != strings.TrimSpace(options.ConversationID) {
 			continue
 		}
+		if options.TeamRunID != "" && item.TeamRunID != strings.TrimSpace(options.TeamRunID) {
+			continue
+		}
+		if options.ParentTaskID != "" && item.ParentTaskID != strings.TrimSpace(options.ParentTaskID) {
+			continue
+		}
 		items = append(items, clone(item))
 	}
 	store.mu.RUnlock()
@@ -217,5 +225,6 @@ func clone(item *Task) *Task {
 	copyItem.Plan = append([]byte(nil), item.Plan...)
 	copyItem.Steps = append([]byte(nil), item.Steps...)
 	copyItem.Events = append([]Event(nil), item.Events...)
+	copyItem.TeamChildren = append([]*Task(nil), item.TeamChildren...)
 	return &copyItem
 }

@@ -116,8 +116,23 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 			continue
 		}
 
-		decision, err := parseDecision(response.Content)
-		if err != nil {
+		var decision decision
+		var decisionErr error
+		if adapter, ok := session.selectedSkill.(skill.DirectTextFinalAdapter); ok && adapter.DirectTextFinalAllowed() {
+			plain := strings.TrimSpace(response.Content)
+			if plain == "" {
+				decisionErr = fmt.Errorf("LLM returned an empty direct-text response")
+			} else if raw, marshalErr := json.Marshal(plain); marshalErr != nil {
+				decisionErr = marshalErr
+			} else {
+				decision.Action = "final"
+				decision.Summary = plain
+				decision.Result = raw
+			}
+		} else {
+			decision, decisionErr = parseDecision(response.Content)
+		}
+		if decisionErr != nil {
 			if adapter, ok := session.selectedSkill.(skill.PlainTextFinalAdapter); ok && adapter.PlainTextFinalAllowed() && extractJSONObject(response.Content) == "" {
 				plain := strings.TrimSpace(response.Content)
 				if plain != "" {
@@ -126,17 +141,17 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 						decision.Action = "final"
 						decision.Summary = plain
 						decision.Result = raw
-						err = nil
+						decisionErr = nil
 					}
 				}
 			}
 		}
-		if err != nil {
+		if decisionErr != nil {
 			executor.runner.observeRepair(item, "decision_protocol")
-			feedback := repairFeedback("decision_protocol", err.Error())
+			feedback := repairFeedback("decision_protocol", decisionErr.Error())
 			executor.runner.appendRuntimeMessage(item.ID, state, &messages, feedback)
 			state.Messages = messages
-			executor.runner.recordStep(item, state, llmStep, task.StatusRunning, "repairing_decision", progress+1, err.Error(), "decision_protocol", false)
+			executor.runner.recordStep(item, state, llmStep, task.StatusRunning, "repairing_decision", progress+1, decisionErr.Error(), "decision_protocol", false)
 			if checkpointErr := executor.runner.saveCheckpoint(ctx, item, state, llmStep, round+1); checkpointErr != nil {
 				return nil, executor.runner.fail(item, "checkpoint_failed", checkpointErr)
 			}

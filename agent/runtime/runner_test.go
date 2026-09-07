@@ -14,6 +14,7 @@ import (
 	"go_binance_futures/agent/contextengine"
 	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/skill"
+	"go_binance_futures/agent/skills/generalchat"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/tools"
 	"go_binance_futures/agent/validator"
@@ -1176,5 +1177,24 @@ func TestRunnerDegradesWhenLongTermMemoryIsUnavailable(t *testing.T) {
 	}
 	if !found {
 		t.Fatalf("memory read failure was not audited: %+v", stored.Events)
+	}
+}
+
+func TestRunnerGeneralChatTreatsJSONAsDirectTextFinal(t *testing.T) {
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{Content: `{"answer":"json is still chat content"}`}}}}
+	runner, _ := newTestRunner(t, client, generalchat.New())
+	result, err := runner.Run(context.Background(), Request{TaskID: "general-chat-json", Skill: generalchat.Name, Input: "return json"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var text string
+	if err := json.Unmarshal(result.Raw, &text); err != nil {
+		t.Fatalf("general chat result must be stored as text: %s err=%v", result.Raw, err)
+	}
+	if text != `{"answer":"json is still chat content"}` || result.Summary != text {
+		t.Fatalf("unexpected direct chat result: summary=%q raw=%s", result.Summary, result.Raw)
+	}
+	if len(client.requests) != 1 {
+		t.Fatalf("general chat should complete in one LLM call, got %d", len(client.requests))
 	}
 }

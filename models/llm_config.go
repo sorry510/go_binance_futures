@@ -6,6 +6,7 @@ type LLMConfig struct {
 	Provider          string  `orm:"column(provider);size(32)" json:"provider"`
 	APIURL            string  `orm:"column(api_url);type(text)" json:"api_url"`
 	APIKey            string  `orm:"column(api_key);type(text)" json:"-"`
+	ProxyURL          string  `orm:"column(proxy_url);type(text);null" json:"-"`
 	Model             string  `orm:"column(model);size(256)" json:"model"`
 	APIVersion        string  `orm:"column(api_version);size(64)" json:"api_version,omitempty"`
 	TimeoutSeconds    int     `orm:"column(timeout_seconds);default(60)" json:"timeout_seconds"`
