@@ -6,6 +6,7 @@ import (
 
 	"go_binance_futures/agent/skillconfig"
 	alertanalysis "go_binance_futures/agent/skills/alertanalysis"
+	generalchat "go_binance_futures/agent/skills/generalchat"
 	marketregime "go_binance_futures/agent/skills/marketregime"
 	strategybuilder "go_binance_futures/agent/skills/strategybuilder"
 	symbolanalysis "go_binance_futures/agent/skills/symbolanalysis"
@@ -22,6 +23,7 @@ type SkillImplementation struct {
 }
 
 var skillCatalog = map[string]SkillImplementation{
+	generalchat.Name:                             {Name: generalchat.Name, DisplayName: "通用对话", Description: "未选择业务 Skill 时使用的内部连续对话能力；无 Tool，使用当前 Conversation 历史上下文。", Type: "native", ChatDefault: 1},
 	symbolanalysis.Name:                          {Name: symbolanalysis.Name, DisplayName: "单币分析", Description: "分析指定 USDT 永续合约并输出结构化 TradingPlan。", Type: "native", ChatDefault: 1},
 	"symbol_analysis_team":                       {Name: "symbol_analysis_team", DisplayName: "多智能体单币分析", Description: "Technical + Flow 并行分析共享行情上下文，再由 Supervisor 汇总 Typed Result。", Type: "team", ChatDefault: 1},
 	symbolteam.TechnicalSkillName:                {Name: symbolteam.TechnicalSkillName, DisplayName: "技术分析 Agent", Description: "Multi-Agent Team 内部角色：基于共享上下文分析趋势、结构、波动与关键价位。", Type: "native", ChatDefault: 0},
