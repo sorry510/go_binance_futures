@@ -276,3 +276,32 @@ func TestStartLinkedPersistsTeamLineageAndBudget(t *testing.T) {
 		t.Fatalf("team lineage not persisted: %+v", stored)
 	}
 }
+
+func TestApplyLinkageBudgetCapsCannotBeWidenedByGlobalProvider(t *testing.T) {
+	cfg := agentruntime.Config{
+		DefaultMaxRounds: 8,
+		MaxToolCalls:     12,
+		MaxTotalTokens:   240000,
+		BudgetProvider: func(string) agentruntime.Budget {
+			return agentruntime.Budget{MaxRounds: 15, MaxToolCalls: 20, MaxTotalTokens: 300000}
+		},
+	}
+	capped := applyLinkageBudgetCaps(cfg, "team-child", 3, task.Linkage{MaxToolCalls: 1, MaxTotalTokens: 100})
+	budget := agentruntime.ResolveBudget(capped, "team-child", 3)
+	if budget.MaxRounds != 15 || budget.MaxToolCalls != 1 || budget.MaxTotalTokens != 100 {
+		t.Fatalf("linked budget was widened: %+v", budget)
+	}
+}
+
+func TestApplyLinkageBudgetCapsKeepsStricterGlobalLimits(t *testing.T) {
+	cfg := agentruntime.Config{
+		BudgetProvider: func(string) agentruntime.Budget {
+			return agentruntime.Budget{MaxRounds: 10, MaxToolCalls: 1, MaxTotalTokens: 80}
+		},
+	}
+	capped := applyLinkageBudgetCaps(cfg, "team-child", 3, task.Linkage{MaxToolCalls: 2, MaxTotalTokens: 100})
+	budget := agentruntime.ResolveBudget(capped, "team-child", 3)
+	if budget.MaxRounds != 10 || budget.MaxToolCalls != 1 || budget.MaxTotalTokens != 80 {
+		t.Fatalf("stricter global budget should be preserved: %+v", budget)
+	}
+}
