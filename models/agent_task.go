@@ -4,6 +4,10 @@ type AgentTask struct {
 	ID             string `orm:"column(id);pk;size(64)" json:"id"`
 	Skill          string `orm:"column(skill);size(64);index" json:"skill"`
 	ConversationID string `orm:"column(conversation_id);size(64);index" json:"conversation_id"`
+	ParentTaskID   string `orm:"column(parent_task_id);size(64);index" json:"parent_task_id"`
+	TeamRunID      string `orm:"column(team_run_id);size(64);index" json:"team_run_id"`
+	TeamName       string `orm:"column(team_name);size(64);index" json:"team_name"`
+	TeamRole       string `orm:"column(team_role);size(64);index" json:"team_role"`
 	Status         string `orm:"column(status);size(32);index" json:"status"`
 	Stage          string `orm:"column(stage);size(64)" json:"stage"`
 	Progress       int    `orm:"column(progress)" json:"progress"`

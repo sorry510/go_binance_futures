@@ -2,6 +2,7 @@ package llm
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -29,6 +30,7 @@ type Config struct {
 	Model       string
 	APIURL      string
 	APIKey      string
+	ProxyURL    string
 	APIVersion  string
 	Timeout     time.Duration
 	Temperature *float64
@@ -45,6 +47,12 @@ func LoadConfig() (Config, error) {
 func (cfg Config) Validate() error {
 	if cfg.Timeout <= 0 {
 		return fmt.Errorf("llm timeout must be greater than zero")
+	}
+	if err := validateProxyURL(cfg.ProxyURL); err != nil {
+		return err
+	}
+	if strings.TrimSpace(cfg.ProxyURL) != "" && (cfg.Provider == ProviderClaudeSDK || cfg.Provider == ProviderCodexSDK) {
+		return fmt.Errorf("llm proxy_url is only supported for HTTP API providers")
 	}
 
 	switch cfg.Provider {
@@ -73,6 +81,46 @@ func (cfg Config) Validate() error {
 	}
 	return nil
 }
+
+func validateProxyURL(value string) error {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil
+	}
+	parsed, err := url.Parse(value)
+	if err != nil {
+		return fmt.Errorf("llm proxy_url is invalid")
+	}
+	if strings.ToLower(parsed.Scheme) != "socks5h" {
+		return fmt.Errorf("llm proxy_url must use socks5h://")
+	}
+	if strings.TrimSpace(parsed.Hostname()) == "" || strings.TrimSpace(parsed.Port()) == "" {
+		return fmt.Errorf("llm proxy_url must include host and port")
+	}
+	if parsed.Path != "" || parsed.RawQuery != "" || parsed.Fragment != "" {
+		return fmt.Errorf("llm proxy_url must not contain path, query or fragment")
+	}
+	return nil
+}
+
+func maskProxyURL(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return ""
+	}
+	parsed, err := url.Parse(value)
+	if err != nil {
+		return "configured"
+	}
+	if parsed.User != nil {
+		username := parsed.User.Username()
+		if _, hasPassword := parsed.User.Password(); hasPassword {
+			parsed.User = url.UserPassword(username, "********")
+		}
+	}
+	return parsed.String()
+}
+
 func normalizeProvider(value string) (Provider, error) {
 	switch strings.ToLower(strings.TrimSpace(value)) {
 	case "openai", "chatgpt", "chatgpt_api":

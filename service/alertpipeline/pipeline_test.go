@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"testing"
@@ -261,5 +262,32 @@ func TestPipelineAIDisabledKeepsDeterministicPerSignalFallback(t *testing.T) {
 	}
 	if stats.TriageBatches != 0 || stats.TriageTasksStarted != 0 {
 		t.Fatalf("AI-disabled signals unexpectedly entered triage: %+v", stats)
+	}
+}
+
+func BenchmarkV3BaselineSignalToNotification(b *testing.B) {
+	h := newPipelineTestHarness()
+	h.settings.Cooldown = time.Nanosecond
+	pipeline, err := New(Config{
+		Settings: func() Settings { return h.settings }, StartTask: h.startTask, GetTask: h.getTask, Notify: h.notify,
+		QueueSize: 8, Workers: 1, PollInterval: time.Millisecond, TaskTimeout: time.Second,
+	})
+	if err != nil {
+		b.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	pipeline.Start(ctx)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		want := uint64(i + 1)
+		pipeline.Emit(testSignal(fmt.Sprintf("bench-%d", i)))
+		deadline := time.Now().Add(time.Second)
+		for pipeline.Stats().Notifications < want {
+			if time.Now().After(deadline) {
+				b.Fatal("signal-to-notification benchmark timed out")
+			}
+			time.Sleep(50 * time.Microsecond)
+		}
 	}
 }

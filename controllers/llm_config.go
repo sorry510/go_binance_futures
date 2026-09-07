@@ -3,9 +3,11 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 
+	"go_binance_futures/agent/modelgateway"
 	"go_binance_futures/llm"
 	"go_binance_futures/utils"
 
@@ -44,6 +46,7 @@ func (ctrl *LLMConfigController) Post() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
+	modelgateway.DefaultHealth().Reset(item.ID)
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
 }
 
@@ -66,6 +69,7 @@ func (ctrl *LLMConfigController) Put() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
+	modelgateway.DefaultHealth().Reset(id)
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
 }
 
@@ -97,6 +101,7 @@ func (ctrl *LLMConfigController) Delete() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
+	modelgateway.DefaultHealth().Reset(id)
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "msg": "success"})
 }
 func (ctrl *LLMConfigController) Test() {
@@ -105,16 +110,21 @@ func (ctrl *LLMConfigController) Test() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "请求格式错误: "+err.Error()))
 		return
 	}
-	preservedAPIKey := ""
-	if request.ID > 0 && strings.TrimSpace(request.APIKey) == "" {
+	preservedAPIKey, preservedProxyURL := "", ""
+	if request.ID > 0 && (strings.TrimSpace(request.APIKey) == "" || (!request.ClearProxyURL && strings.TrimSpace(request.ProxyURL) == "")) {
 		row, err := (llm.Store{}).Get(ctrl.Ctx.Request.Context(), request.ID)
 		if err != nil {
 			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 			return
 		}
-		preservedAPIKey = row.APIKey
+		if strings.TrimSpace(request.APIKey) == "" {
+			preservedAPIKey = row.APIKey
+		}
+		if !request.ClearProxyURL && strings.TrimSpace(request.ProxyURL) == "" {
+			preservedProxyURL = row.ProxyURL
+		}
 	}
-	cfg, err := llm.BuildConfig(request.ConfigInput, preservedAPIKey)
+	cfg, err := llm.BuildConfig(request.ConfigInput, preservedAPIKey, preservedProxyURL)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
@@ -130,8 +140,13 @@ func (ctrl *LLMConfigController) Test() {
 		Messages:  []llm.Message{{Role: llm.RoleUser, Content: "Reply with OK only."}},
 		MaxTokens: 16,
 	})
+	proxyDiagnostics := llm.ClientProxyDiagnostics(client)
 	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		message := err.Error()
+		if proxyDiagnostics.Enabled {
+			message = fmt.Sprintf("%s [SOCKS5H proxy=%s dialed=%t]", message, proxyDiagnostics.URLMasked, proxyDiagnostics.Dialed)
+		}
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, message))
 		return
 	}
 	content := strings.TrimSpace(response.Content)
@@ -142,6 +157,7 @@ func (ctrl *LLMConfigController) Test() {
 		"code": 200,
 		"data": map[string]interface{}{
 			"provider": client.Provider(), "model": response.Model, "content": content,
+			"proxy_enabled": proxyDiagnostics.Enabled, "proxy_dialed": proxyDiagnostics.Dialed, "proxy_url_masked": proxyDiagnostics.URLMasked,
 		},
 		"msg": "connection success",
 	})

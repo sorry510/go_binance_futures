@@ -13,8 +13,10 @@ import (
 	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/skillconfig"
+	generalchat "go_binance_futures/agent/skills/generalchat"
 	"go_binance_futures/agent/skills/symbolanalysis"
 	"go_binance_futures/agent/task"
+	agentteam "go_binance_futures/agent/team"
 	"go_binance_futures/llm"
 )
 
@@ -29,7 +31,7 @@ type ChatSkill struct {
 }
 
 func ConversationHistory(ctx context.Context, conversationID, currentTaskID string) ([]contextengine.ContextBlock, error) {
-	return defaultConversationStore.SuccessfulHistory(ctx, conversationID, currentTaskID, 30)
+	return defaultConversationStore.History(ctx, conversationID, currentTaskID)
 }
 func ChatSkills(ctx context.Context) ([]ChatSkill, error) {
 	manager, err := DefaultManager()
@@ -60,17 +62,24 @@ func ChatSkills(ctx context.Context) ([]ChatSkill, error) {
 		version := skill.ResolveVersionInfo(runtimeSkill, runtimeSkill.SystemPrompt())
 		result = append(result, ChatSkill{Name: runtimeSkill.Name(), DisplayName: cfg.display, Description: cfg.description, Type: cfg.kind, Version: version.SkillVersion})
 	}
+	if cfg, exists := configByName[agentteam.SymbolAnalysisTeam]; exists && cfg.enabled && cfg.chatEnabled {
+		result = append(result, ChatSkill{Name: agentteam.SymbolAnalysisTeam, DisplayName: cfg.display, Description: cfg.description, Type: cfg.kind, Version: "1.0.0"})
+	}
 	sort.Slice(result, func(i, j int) bool { return result[i].Name < result[j].Name })
 	return result, nil
 }
 
 func StartChatMessage(ctx context.Context, conversationID, skillName, content, symbol string) (*task.Task, error) {
 	conversationID = strings.TrimSpace(conversationID)
-	skillName = strings.TrimSpace(skillName)
+	requestedSkill := strings.TrimSpace(skillName)
+	effectiveSkill := requestedSkill
+	if effectiveSkill == "" {
+		effectiveSkill = generalchat.Name
+	}
 	content = strings.TrimSpace(content)
 	symbol = strings.ToUpper(strings.TrimSpace(symbol))
-	if conversationID == "" || skillName == "" || content == "" {
-		return nil, fmt.Errorf("conversation_id, skill and content are required")
+	if conversationID == "" || content == "" {
+		return nil, fmt.Errorf("conversation_id and content are required")
 	}
 	conv, err := defaultConversationStore.Get(ctx, conversationID)
 	if err != nil {
@@ -92,55 +101,82 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content, s
 			return nil, fmt.Errorf("conversation already has a running task %s", item.ID)
 		}
 	}
-	var selected skill.Skill
-	for _, candidate := range manager.Skills() {
-		if candidate.Name() == skillName {
-			selected = candidate
-			break
-		}
-	}
-	if selected == nil {
-		return nil, fmt.Errorf("skill %q is not registered in runtime", skillName)
-	}
-	adapter, ok := selected.(skill.ChatAdapter)
-	if !ok || !adapter.ChatEnabled() {
-		return nil, fmt.Errorf("skill %q does not support chat", skillName)
-	}
-	config, err := (skillconfig.Store{}).GetByName(ctx, skillName)
+	config, err := (skillconfig.Store{}).GetByName(ctx, effectiveSkill)
 	if err != nil {
-		return nil, fmt.Errorf("load skill %q chat configuration: %w", skillName, err)
+		return nil, fmt.Errorf("load skill %q chat configuration: %w", effectiveSkill, err)
 	}
 	if config.Enabled != 1 {
-		return nil, fmt.Errorf("skill %q is disabled", skillName)
+		return nil, fmt.Errorf("skill %q is disabled", effectiveSkill)
 	}
-	if config.ChatEnabled != 1 {
-		return nil, fmt.Errorf("skill %q is disabled for chat", skillName)
+	if effectiveSkill != generalchat.Name && config.ChatEnabled != 1 {
+		return nil, fmt.Errorf("skill %q is disabled for chat", effectiveSkill)
 	}
 	previousInputs := make([]string, 0, 8)
 	for _, previousTask := range tasks.List {
-		if previousTask.Skill == skillName && previousTask.Status == task.StatusSucceeded && strings.TrimSpace(previousTask.Input) != "" {
+		if previousTask.Skill == effectiveSkill && previousTask.Status == task.StatusSucceeded && strings.TrimSpace(previousTask.Input) != "" {
 			previousInputs = append(previousInputs, previousTask.Input)
 			if len(previousInputs) >= 8 {
 				break
 			}
 		}
 	}
+	if effectiveSkill == agentteam.SymbolAnalysisTeam {
+		input, err := agentteam.BuildChatInput(content, previousInputs, symbol)
+		if err != nil {
+			return nil, err
+		}
+		runner, err := DefaultTeamRunner()
+		if err != nil {
+			return nil, err
+		}
+		item, err := runner.StartWithOptions(input, agentteam.StartOptions{ConversationID: conversationID})
+		if err != nil {
+			return nil, err
+		}
+		if err := defaultConversationStore.AppendOnce(ctx, conversationID, item.ID, requestedSkill, llmMessageUser(content)); err != nil {
+			_ = runner.Cancel(context.Background(), item.ID)
+			return nil, fmt.Errorf("persist chat user message: %w", err)
+		}
+		if err := defaultConversationStore.SetTitleFromFirstMessage(ctx, conversationID, content); err != nil {
+			return nil, err
+		}
+		return item, nil
+	}
+
+	var selected skill.Skill
+	for _, candidate := range manager.Skills() {
+		if candidate.Name() == effectiveSkill {
+			selected = candidate
+			break
+		}
+	}
+	if selected == nil {
+		return nil, fmt.Errorf("skill %q is not registered in runtime", effectiveSkill)
+	}
 	var input string
-	if optionsAdapter, supportsOptions := selected.(skill.ChatOptionsAdapter); supportsOptions {
-		input, err = optionsAdapter.BuildChatInputWithOptions(ctx, content, previousInputs, skill.ChatInputOptions{Symbol: symbol})
-	} else if contextual, supportsContext := selected.(skill.ChatContextAdapter); supportsContext {
-		input, err = contextual.BuildChatInputWithContext(ctx, content, previousInputs)
+	if effectiveSkill == generalchat.Name {
+		input = content
 	} else {
-		input, err = adapter.BuildChatInput(ctx, content)
+		adapter, ok := selected.(skill.ChatAdapter)
+		if !ok || !adapter.ChatEnabled() {
+			return nil, fmt.Errorf("skill %q does not support chat", effectiveSkill)
+		}
+		if optionsAdapter, supportsOptions := selected.(skill.ChatOptionsAdapter); supportsOptions {
+			input, err = optionsAdapter.BuildChatInputWithOptions(ctx, content, previousInputs, skill.ChatInputOptions{Symbol: symbol})
+		} else if contextual, supportsContext := selected.(skill.ChatContextAdapter); supportsContext {
+			input, err = contextual.BuildChatInputWithContext(ctx, content, previousInputs)
+		} else {
+			input, err = adapter.BuildChatInput(ctx, content)
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
+	item, err := manager.Start(agentruntime.Request{Skill: effectiveSkill, Input: input, ConversationID: conversationID, Metadata: map[string]any{"chat_symbol": symbol}})
 	if err != nil {
 		return nil, err
 	}
-	item, err := manager.Start(agentruntime.Request{Skill: skillName, Input: input, ConversationID: conversationID, Metadata: map[string]any{"chat_symbol": symbol}})
-	if err != nil {
-		return nil, err
-	}
-	if err := defaultConversationStore.AppendOnce(ctx, conversationID, item.ID, skillName, llmMessageUser(content)); err != nil {
+	if err := defaultConversationStore.AppendOnce(ctx, conversationID, item.ID, requestedSkill, llmMessageUser(content)); err != nil {
 		_ = manager.Cancel(context.Background(), item.ID)
 		return nil, fmt.Errorf("persist chat user message: %w", err)
 	}
@@ -172,6 +208,12 @@ func chatAssistantText(result *agentruntime.Result, item *task.Task) string {
 		var plan symbolanalysis.TradingPlanV1
 		if json.Unmarshal(raw, &plan) == nil && strings.TrimSpace(plan.Symbol) != "" {
 			return symbolanalysis.FormatMarkdown(plan)
+		}
+	}
+	if item != nil && item.Skill == agentteam.SymbolAnalysisTeam {
+		var result agentteam.ResultV1
+		if json.Unmarshal(raw, &result) == nil && strings.TrimSpace(result.Symbol) != "" {
+			return agentteam.FormatMarkdown(result)
 		}
 	}
 	var text string
@@ -213,5 +255,9 @@ func persistChatCompletion(item *task.Task, result *agentruntime.Result) error {
 	if content == "" {
 		content = "任务已完成。"
 	}
-	return defaultConversationStore.AppendOnce(context.Background(), item.ConversationID, item.ID, item.Skill, llm.Message{Role: llm.RoleAssistant, Content: content})
+	messageSkill := item.Skill
+	if messageSkill == generalchat.Name {
+		messageSkill = ""
+	}
+	return defaultConversationStore.AppendOnce(context.Background(), item.ConversationID, item.ID, messageSkill, llm.Message{Role: llm.RoleAssistant, Content: content})
 }

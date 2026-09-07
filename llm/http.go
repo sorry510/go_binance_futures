@@ -6,14 +6,36 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
+	"sync/atomic"
+	"time"
+
+	xproxy "golang.org/x/net/proxy"
 )
 
 const maxErrorBodyBytes = 8 * 1024
 
 type httpTransport struct {
-	client *http.Client
+	client         *http.Client
+	proxyEnabled   bool
+	proxyURLMasked string
+	proxyDialed    atomic.Bool
+}
+
+type ProxyDiagnostics struct {
+	Enabled   bool   `json:"enabled"`
+	Dialed    bool   `json:"dialed"`
+	URLMasked string `json:"url_masked,omitempty"`
+}
+
+func (transport *httpTransport) ProxyDiagnostics() ProxyDiagnostics {
+	if transport == nil {
+		return ProxyDiagnostics{}
+	}
+	return ProxyDiagnostics{Enabled: transport.proxyEnabled, Dialed: transport.proxyDialed.Load(), URLMasked: transport.proxyURLMasked}
 }
 
 type HTTPError struct {
@@ -26,7 +48,41 @@ func (err *HTTPError) Error() string {
 }
 
 func newHTTPTransport(cfg Config) (*httpTransport, error) {
-	return &httpTransport{client: &http.Client{Timeout: cfg.Timeout}}, nil
+	base, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return nil, fmt.Errorf("default HTTP transport has unexpected type")
+	}
+	transport := base.Clone()
+	proxyURL := strings.TrimSpace(cfg.ProxyURL)
+	result := &httpTransport{proxyEnabled: proxyURL != "", proxyURLMasked: maskProxyURL(proxyURL)}
+
+	if proxyURL != "" {
+		transport.Proxy = nil
+		if err := validateProxyURL(proxyURL); err != nil {
+			return nil, err
+		}
+		parsed, _ := url.Parse(proxyURL)
+		var auth *xproxy.Auth
+		if parsed.User != nil {
+			password, _ := parsed.User.Password()
+			auth = &xproxy.Auth{User: parsed.User.Username(), Password: password}
+		}
+		baseDialer := &net.Dialer{Timeout: cfg.Timeout, KeepAlive: 30 * time.Second}
+		dialer, err := xproxy.SOCKS5("tcp", parsed.Host, auth, baseDialer)
+		if err != nil {
+			return nil, fmt.Errorf("initialize LLM SOCKS5 proxy: %w", err)
+		}
+		transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+			result.proxyDialed.Store(true)
+			if contextDialer, ok := dialer.(xproxy.ContextDialer); ok {
+				return contextDialer.DialContext(ctx, network, address)
+			}
+			return dialer.Dial(network, address)
+		}
+	}
+
+	result.client = &http.Client{Timeout: cfg.Timeout, Transport: transport}
+	return result, nil
 }
 
 func (transport *httpTransport) postJSON(ctx context.Context, endpoint string, payload interface{}, destination interface{}, headers map[string]string) error {

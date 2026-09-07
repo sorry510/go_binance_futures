@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -12,10 +13,14 @@ import (
 	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/skill"
 	alertanalysis "go_binance_futures/agent/skills/alertanalysis"
+	generalchat "go_binance_futures/agent/skills/generalchat"
 	marketregime "go_binance_futures/agent/skills/marketregime"
 	symbolanalysis "go_binance_futures/agent/skills/symbolanalysis"
+	symbolteam "go_binance_futures/agent/skills/symbolteam"
 	workflowSkills "go_binance_futures/agent/skills/workflows"
 	"go_binance_futures/agent/task"
+	"go_binance_futures/agent/team"
+	"go_binance_futures/agent/toolruntime"
 	agenttools "go_binance_futures/agent/tools"
 	domaintools "go_binance_futures/agent/tools/domain"
 
@@ -25,11 +30,12 @@ import (
 var defaultManagerOnce sync.Once
 var defaultManager *agentmanager.Manager
 var defaultManagerErr error
+var defaultTeamRunner *team.Runner
 
 func DefaultManager() (*agentmanager.Manager, error) {
 	defaultManagerOnce.Do(func() {
 		skills := skill.NewRegistry()
-		for _, definition := range []skill.Skill{symbolanalysis.New(), alertanalysis.New(), marketregime.New(), newWorkflowChatSkill(workflowSkills.MarketScan()), newWorkflowChatSkill(workflowSkills.StrategyReview()), workflowSkills.StrategyExperimentPropose(), workflowSkills.StrategyExperimentSummary(), workflowSkills.AlertTriage(), newWorkflowChatSkill(workflowSkills.DailyMarketBrief())} {
+		for _, definition := range []skill.Skill{generalchat.New(), symbolanalysis.New(), alertanalysis.New(), marketregime.New(), symbolteam.Technical(), symbolteam.Flow(), symbolteam.Supervisor(), newWorkflowChatSkill(workflowSkills.MarketScan()), newWorkflowChatSkill(workflowSkills.StrategyReview()), workflowSkills.StrategyExperimentPropose(), workflowSkills.StrategyExperimentSummary(), workflowSkills.AlertTriage(), newWorkflowChatSkill(workflowSkills.DailyMarketBrief())} {
 			if err := skills.Register(definition); err != nil {
 				defaultManagerErr = err
 				return
@@ -78,6 +84,39 @@ func DefaultManager() (*agentmanager.Manager, error) {
 				Retry:                       agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},
 			},
 		})
+		if defaultManagerErr != nil {
+			return
+		}
+		sharedToolRuntime, err := toolruntime.New(toolruntime.Config{
+			Registry: tools, Policy: permission.AllowWritesFor(nil), DefaultMaxResultBytes: 256 * 1024,
+		})
+		if err != nil {
+			defaultManagerErr = err
+			return
+		}
+		defaultTeamRunner, defaultManagerErr = team.New(team.Config{
+			Manager: defaultManager, Store: store,
+			SharedContext: team.ToolSharedContextExecutor{Runtime: sharedToolRuntime, Observer: observability.Default()},
+			// MaxToolCalls currently budgets the single shared-context aggregation call.
+			// Child analyst/supervisor skills intentionally have no direct tools in V3-1.
+			Observer: observability.Default(),
+			CompletionHook: func(item *task.Task) {
+				if err := persistChatCompletion(item, nil); err != nil {
+					logs.Error("persist team chat completion:", err)
+				}
+			},
+			MaxConcurrency: 2, MaxTotalTokens: 120000, MaxToolCalls: 1,
+		})
 	})
 	return defaultManager, defaultManagerErr
+}
+
+func DefaultTeamRunner() (*team.Runner, error) {
+	if _, err := DefaultManager(); err != nil {
+		return nil, err
+	}
+	if defaultTeamRunner == nil {
+		return nil, fmt.Errorf("default team runner is unavailable")
+	}
+	return defaultTeamRunner, nil
 }

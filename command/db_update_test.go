@@ -36,9 +36,11 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.Symbols),
 		new(models.SpotSymbols),
 		new(models.AgentSkill),
+		new(models.AgentTask),
 		new(models.AgentTradeProposal),
 		new(models.AgentTradeExecution),
 		new(models.AgentTradeAudit),
+		new(models.LLMConfig),
 	)
 
 	if err := SyncDatabase(1); err != nil {
@@ -97,7 +99,34 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 			t.Fatalf("expected %s after version 3 sync, count=%d err=%v", table, count, err)
 		}
 	}
-	if err := SyncDatabase(3); err != nil {
-		t.Fatalf("second version-3 sync should be idempotent: %v", err)
+	if err := SyncDatabase(4); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 4 {
+		t.Fatalf("expected database version 4 after V3-1 migration, config=%+v err=%v", config, err)
+	}
+	for _, column := range []string{"parent_task_id", "team_run_id", "team_name", "team_role"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('agent_tasks') WHERE name=?", column).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected agent_tasks.%s after version 4 sync, count=%d err=%v", column, count, err)
+		}
+	}
+	if err := SyncDatabase(4); err != nil {
+		t.Fatalf("second version-4 sync should be idempotent: %v", err)
+	}
+	if err := SyncDatabase(5); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 5 {
+		t.Fatalf("expected database version 5 after LLM proxy schema sync, config=%+v err=%v", config, err)
+	}
+	var proxyColumnCount int
+	if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('llm_configs') WHERE name='proxy_url'").QueryRow(&proxyColumnCount); err != nil || proxyColumnCount != 1 {
+		t.Fatalf("expected llm_configs.proxy_url after version 5 sync, count=%d err=%v", proxyColumnCount, err)
+	}
+	if err := SyncDatabase(5); err != nil {
+		t.Fatalf("second version-5 sync should be idempotent: %v", err)
 	}
 }

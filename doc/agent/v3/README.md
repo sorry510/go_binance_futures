@@ -42,8 +42,8 @@ V3 的重点不是“让 AI 更自由”，而是让每个判断都更容易验�
 
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
-| [V3-0](./00-phase-v3-0-baseline.md) | P0 | 冻结 V2 行为、Benchmark、Replay/Eval 基线 |
-| [V3-1](./01-phase-v3-1-multi-agent.md) | P0 | Multi-Agent Team：多个专业 Agent 以 Typed Output 协作 |
+| [V3-0](./00-phase-v3-0-baseline.md) | P0 ✅ | 冻结 V2 行为、Benchmark、Replay/Eval 基线 |
+| [V3-1](./01-phase-v3-1-multi-agent.md) | P0 ✅ | Multi-Agent Team：多个专业 Agent 以 Typed Output 协作 |
 | [V3-2](./02-phase-v3-2-market-intelligence.md) | P0 | Market Intelligence：统一 Fact/Event，接入新闻、公告、Alpha 与资金面 |
 | [V3-3](./03-phase-v3-3-backtest.md) | P0 | Historical Backtest Engine：正式、可复现的历史回测 |
 | [V3-4](./04-phase-v3-4-strategy-lab.md) | P1 | Strategy Lab：候选、回测、模拟、Promote、回滚和退役 |
