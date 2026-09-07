@@ -52,6 +52,7 @@ type MarketScanInput struct {
 	Version         string                       `json:"version"`
 	Prompt          string                       `json:"prompt,omitempty"`
 	GeneratedAt     int64                        `json:"generated_at"`
+	AsOf            string                       `json:"as_of,omitempty"`
 	MarketCondition *int                         `json:"market_condition"`
 	Candidates      []scanner.PrefilterCandidate `json:"candidates"`
 	DataMissing     []string                     `json:"data_missing"`
@@ -228,9 +229,10 @@ func StrategyExperimentSummary() *Definition { return &Definition{kind: Strategy
 func AlertTriage() *Definition               { return &Definition{kind: AlertTriageName} }
 func DailyMarketBrief() *Definition          { return &Definition{kind: DailyMarketBriefName} }
 
-func (d *Definition) Name() string    { return d.kind }
-func (d *Definition) Tools() []string { return nil }
-func (d *Definition) MaxRounds() int  { return 0 }
+func (d *Definition) Name() string                 { return d.kind }
+func (d *Definition) Tools() []string              { return nil }
+func (d *Definition) MaxRounds() int               { return 0 }
+func (d *Definition) DirectJSONFinalAllowed() bool { return true }
 func (d *Definition) ModelRequirements() llm.ModelRequirements {
 	req := llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 70}
 	if d.kind == StrategyReviewName || strings.HasPrefix(d.kind, "strategy_experiment") || d.kind == AlertTriageName {
@@ -240,24 +242,28 @@ func (d *Definition) ModelRequirements() llm.ModelRequirements {
 	return req
 }
 func (d *Definition) VersionInfo() skill.VersionInfo {
-	return skill.VersionInfo{SkillVersion: "1.0.0", PromptVersion: "1.0.0", InputContractVersion: inputVersion(d.kind), OutputContractVersion: outputVersion(d.kind), Source: skill.DefaultSource, SourceVersion: "v2-11"}
+	return skill.VersionInfo{SkillVersion: "1.0.0", PromptVersion: "1.0.1", InputContractVersion: inputVersion(d.kind), OutputContractVersion: outputVersion(d.kind), Source: skill.DefaultSource, SourceVersion: "v2-11"}
 }
 func (d *Definition) SystemPrompt() string {
+	finalEnvelope := ` Return exactly one Agent Runtime final decision JSON object with this top-level shape: {"action":"final","summary":"concise summary","result":{...}}. Put the complete workflow output inside result. Never return the workflow output object at the top level. Do not return tool or parallel_tools actions.`
 	switch d.kind {
 	case MarketScanName:
-		return "You rank only the deterministic market candidates provided by the system. Never claim to scan the full market yourself. Return strict opportunity_set_v1 JSON. Do not invent missing data or trading execution."
+		return `You rank only the deterministic market candidates provided by the system. Never claim to scan the full market yourself. Do not invent missing data or trading execution.
+The result field must be strict opportunity_set_v1 with exactly these fields:
+{"version":"opportunity_set_v1","as_of":"copy input.as_of exactly","market_condition":null,"opportunities":[{"rank":1,"symbol":"SOLUSDT","score":100,"direction":"long","confidence":0.8,"thesis":"concise thesis","risks":["at least one concrete risk or missing-data uncertainty"],"evidence":["facts from the supplied candidate only"]}],"data_missing":["preserve every input.data_missing item"]}
+Copy input.market_condition exactly, including null. Use only candidate symbols from the input, at most once each. direction must be long, short, watch, or avoid; confidence must be 0..1. Do not copy candidate-only fields such as grade, price, percent_change_24h, quote_volume_24h, trade_count_24h, high_24h, low_24h, open_24h, reasons, missing, or last_update_time into an opportunity object.` + finalEnvelope
 	case StrategyReviewName:
-		return "Review the supplied strategy snapshot, deterministic fee-adjusted test statistics, and market condition. Return strict strategy_review_v1 JSON. Proposals are advisory only; never modify a template."
+		return "Review the supplied strategy snapshot, deterministic fee-adjusted test statistics, and market condition. The result must be strict strategy_review_v1 JSON. Proposals are advisory only; never modify a template." + finalEnvelope
 	case StrategyExperimentProposeName:
-		return "Propose one candidate strategy revision from the supplied template and goal. Return strict strategy_experiment_proposal_v1 JSON. The candidate will be validated and tested deterministically; do not claim it has passed tests."
+		return "Propose one candidate strategy revision from the supplied template and goal. The result must be strict strategy_experiment_proposal_v1 JSON. The candidate will be validated and tested deterministically; do not claim it has passed tests." + finalEnvelope
 	case StrategyExperimentSummaryName:
-		return "Summarize the supplied strategy experiment proposal and deterministic test report. Return strict strategy_experiment_result_v1 JSON. Never overwrite or activate a production strategy."
+		return "Summarize the supplied strategy experiment proposal and deterministic test report. The result must be strict strategy_experiment_result_v1 JSON. Never overwrite or activate a production strategy." + finalEnvelope
 	case AlertTriageName:
-		return "Triage only the pre-grouped signal candidates provided by the deterministic incident builder. Decide which signals represent the same market event and whether to notify, suppress, or monitor. Return strict incident_set_v1 JSON."
+		return "Triage only the pre-grouped signal candidates provided by the deterministic incident builder. Decide which signals represent the same market event and whether to notify, suppress, or monitor. The result must be strict incident_set_v1 JSON." + finalEnvelope
 	case DailyMarketBriefName:
-		return "Create a concise fixed-schema daily market brief from the supplied market condition, deterministic scanner candidates, and recent signal summary. Return strict daily_market_brief_v1 JSON. Do not invent live facts."
+		return "Create a concise fixed-schema daily market brief from the supplied market condition, deterministic scanner candidates, and recent signal summary. The result must be strict daily_market_brief_v1 JSON. Do not invent live facts." + finalEnvelope
 	default:
-		return "Return strict JSON."
+		return "Return strict JSON inside an Agent Runtime final decision."
 	}
 }
 func (d *Definition) ValidateInput(req skill.Request) error {
@@ -425,6 +431,9 @@ func validateOpportunitySet(out OpportunitySetV1, input string) (any, error) {
 	}
 	var in MarketScanInput
 	_ = strictDecodeString(input, &in)
+	if in.AsOf != "" && out.AsOf != in.AsOf {
+		return nil, fmt.Errorf("as_of mismatch")
+	}
 	if !sameOptionalInt(out.MarketCondition, in.MarketCondition) {
 		return nil, fmt.Errorf("market_condition mismatch")
 	}
@@ -449,6 +458,15 @@ func validateOpportunitySet(out OpportunitySetV1, input string) (any, error) {
 	}
 	if out.Opportunities == nil || out.DataMissing == nil {
 		return nil, fmt.Errorf("opportunities and data_missing must be arrays")
+	}
+	missing := make(map[string]bool, len(out.DataMissing))
+	for _, item := range out.DataMissing {
+		missing[strings.TrimSpace(item)] = true
+	}
+	for _, required := range in.DataMissing {
+		if !missing[strings.TrimSpace(required)] {
+			return nil, fmt.Errorf("data_missing must preserve input item %q", required)
+		}
 	}
 	return out, nil
 }
