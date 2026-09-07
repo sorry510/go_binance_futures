@@ -72,7 +72,7 @@ func DefaultManager() (*agentmanager.Manager, error) {
 				MemoryWriter:                MemoryWrite,
 				ConversationHistoryProvider: ConversationHistory,
 				Observer:                    observability.Default(),
-				DefaultMaxRounds:            8,
+				DefaultMaxRounds:            15,
 				MaxContextBytes:             256 * 1024,
 				MaxToolResultBytes:          256 * 1024,
 				Retry:                       agentruntime.RetryPolicy{MaxAttempts: 2, Delay: time.Second},

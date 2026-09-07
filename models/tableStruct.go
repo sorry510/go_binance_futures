@@ -38,13 +38,14 @@ type Config struct {
 	AgentAlertMinSeverity                      string  `orm:"column(agent_alert_min_severity);size(16);default(medium)" json:"agent_alert_min_severity"`
 	AgentAlertCooldownSec                      int     `orm:"column(agent_alert_cooldown_sec);default(900)" json:"agent_alert_cooldown_sec"`
 	AgentAlertMaxConcurrent                    int     `orm:"column(agent_alert_max_concurrent);default(2)" json:"agent_alert_max_concurrent"`
-	AgentAlertMaxPerMinute                     int     `orm:"column(agent_alert_max_per_minute);default(6)" json:"agent_alert_max_per_minute"`
+	AgentAlertMaxPerMinute                     int     `orm:"column(agent_alert_max_per_minute);default(6)" json:"-"` // Deprecated: retained only to avoid destructive schema changes.
 	AgentMarketRegimeScheduleEnable            int     `orm:"column(agent_market_regime_schedule_enable);default(1)" json:"agent_market_regime_schedule_enable"`
 	AgentMarketRegimeIntervalMin               int     `orm:"column(agent_market_regime_interval_min);default(60)" json:"agent_market_regime_interval_min"`
 	AgentDailyMarketBriefScheduleEnable        int     `orm:"column(agent_daily_market_brief_schedule_enable);default(0)" json:"agent_daily_market_brief_schedule_enable"`
 	AgentDailyMarketBriefIntervalMin           int     `orm:"column(agent_daily_market_brief_interval_min);default(1440)" json:"agent_daily_market_brief_interval_min"`
 	AgentMaxStartsPerMinute                    int     `orm:"column(agent_max_starts_per_minute);default(30)" json:"agent_max_starts_per_minute"`
 	AgentMaxStartsPerHour                      int     `orm:"column(agent_max_starts_per_hour);default(300)" json:"agent_max_starts_per_hour"`
+	AgentMaxRoundsPerTask                      int     `orm:"column(agent_max_rounds_per_task);default(15)" json:"agent_max_rounds_per_task"`
 	AgentMaxTokensPerTask                      int     `orm:"column(agent_max_tokens_per_task);default(240000)" json:"agent_max_tokens_per_task"`
 	AgentMaxToolCallsPerTask                   int     `orm:"column(agent_max_tool_calls_per_task);default(12)" json:"agent_max_tool_calls_per_task"`
 	AgentTradeExecutionEnable                  int     `orm:"column(agent_trade_execution_enable);default(0)" json:"agent_trade_execution_enable"`

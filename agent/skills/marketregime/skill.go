@@ -39,7 +39,7 @@ func New() skill.Skill {
 	return skill.Definition{
 		SkillName:              Name,
 		Prompt:                 systemPrompt,
-		Rounds:                 2,
+		Rounds:                 0,
 		Version:                versionInfo,
 		ModelRequirementsValue: llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 65},
 		BuildInputFunc:         buildInput,
