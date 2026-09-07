@@ -15,6 +15,7 @@ import (
 	"go_binance_futures/agent/permission"
 	"go_binance_futures/agent/skill"
 	"go_binance_futures/agent/skills/generalchat"
+	workflowSkills "go_binance_futures/agent/skills/workflows"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/agent/tools"
 	"go_binance_futures/agent/validator"
@@ -1196,5 +1197,64 @@ func TestRunnerGeneralChatTreatsJSONAsDirectTextFinal(t *testing.T) {
 	}
 	if len(client.requests) != 1 {
 		t.Fatalf("general chat should complete in one LLM call, got %d", len(client.requests))
+	}
+}
+
+func TestMarketScanStructuredWorkflowAcceptsDirectJSONFinal(t *testing.T) {
+	const asOf = "2026-09-07T12:55:57Z"
+	input := `{"version":"market_scan_input_v1","generated_at":1788785757000,"as_of":"` + asOf + `","market_condition":10,"candidates":[{"symbol":"SOLUSDT"}],"data_missing":["盘口点差"]}`
+	directResult := `{"version":"opportunity_set_v1","as_of":"` + asOf + `","market_condition":10,"opportunities":[{"rank":1,"symbol":"SOLUSDT","score":95,"direction":"watch","confidence":0.8,"thesis":"流动性充足但缺少盘口确认","risks":["盘口点差缺失"],"evidence":["候选由确定性扫描器筛出"]}],"data_missing":["盘口点差"]}`
+	client := &fakeLLMClient{items: []fakeLLMItem{{response: &llm.Response{Model: "fake", Content: directResult}}}}
+	runner, _ := newTestRunner(t, client, workflowSkills.MarketScan())
+
+	result, err := runner.Run(context.Background(), Request{Skill: workflowSkills.MarketScanName, Input: input})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(client.requests) != 1 {
+		t.Fatalf("LLM calls = %d, want 1", len(client.requests))
+	}
+	if !strings.Contains(client.request(0).System, `"action":"final"`) {
+		t.Fatalf("market_scan system prompt does not declare Agent Runtime final envelope: %s", client.request(0).System)
+	}
+	out, ok := result.Value.(workflowSkills.OpportunitySetV1)
+	if !ok || out.AsOf != asOf || len(out.Opportunities) != 1 || out.Opportunities[0].Symbol != "SOLUSDT" {
+		t.Fatalf("unexpected market_scan result: %#v", result.Value)
+	}
+}
+
+func TestMarketScanDirectLegacyShapeRepairsAtValidationNotDecisionProtocol(t *testing.T) {
+	const asOf = "2026-09-07T12:55:57Z"
+	input := `{"version":"market_scan_input_v1","generated_at":1788785757000,"as_of":"` + asOf + `","market_condition":10,"candidates":[{"symbol":"SOLUSDT"}],"data_missing":["盘口点差"]}`
+	legacyShape := `{"version":"opportunity_set_v1","generated_at":1788785757000,"market_condition":10,"opportunities":[{"rank":1,"symbol":"SOLUSDT","score":100,"grade":"A+"}],"data_missing":["盘口点差"]}`
+	fixedShape := `{"version":"opportunity_set_v1","as_of":"` + asOf + `","market_condition":10,"opportunities":[{"rank":1,"symbol":"SOLUSDT","score":95,"direction":"watch","confidence":0.8,"thesis":"等待盘口确认","risks":["盘口点差缺失"],"evidence":["确定性扫描候选"]}],"data_missing":["盘口点差"]}`
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Model: "fake", Content: legacyShape}},
+		{response: &llm.Response{Model: "fake", Content: fixedShape}},
+	}}
+	runner, store := newTestRunner(t, client, workflowSkills.MarketScan())
+
+	result, err := runner.Run(context.Background(), Request{Skill: workflowSkills.MarketScanName, Input: input})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(client.requests) != 2 {
+		t.Fatalf("LLM calls = %d, want 2", len(client.requests))
+	}
+	stored, err := store.Get(context.Background(), result.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	foundValidationRepair := false
+	for _, event := range stored.Events {
+		if event.ErrorType == "decision_protocol" || event.Stage == "repairing_decision" {
+			t.Fatalf("direct workflow JSON must not enter decision protocol repair: %+v", event)
+		}
+		if event.Stage == "repairing_final" && event.ErrorType == "validation_error" {
+			foundValidationRepair = true
+		}
+	}
+	if !foundValidationRepair {
+		t.Fatalf("expected strict final validation repair, events=%+v", stored.Events)
 	}
 }

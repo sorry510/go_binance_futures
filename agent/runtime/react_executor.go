@@ -133,6 +133,16 @@ func (executor *reactExecutor) execute(ctx context.Context, session *runSession)
 			decision, decisionErr = parseDecision(response.Content)
 		}
 		if decisionErr != nil {
+			if adapter, ok := session.selectedSkill.(skill.DirectJSONFinalAdapter); ok && adapter.DirectJSONFinalAllowed() {
+				payload := extractJSONObject(response.Content)
+				if payload != "" {
+					decision.Action = "final"
+					decision.Result = json.RawMessage(payload)
+					decisionErr = nil
+				}
+			}
+		}
+		if decisionErr != nil {
 			if adapter, ok := session.selectedSkill.(skill.PlainTextFinalAdapter); ok && adapter.PlainTextFinalAllowed() && extractJSONObject(response.Content) == "" {
 				plain := strings.TrimSpace(response.Content)
 				if plain != "" {

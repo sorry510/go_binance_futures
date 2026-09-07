@@ -52,7 +52,8 @@ func buildMarketScanInput(ctx context.Context, analyze int) (workflowSkill.Marke
 	if len(candidates) > analyze {
 		candidates = candidates[:analyze]
 	}
-	return workflowSkill.MarketScanInput{Version: "market_scan_input_v1", GeneratedAt: scan.GeneratedAt, MarketCondition: c, Candidates: candidates, DataMissing: missing}, nil
+	asOf := time.UnixMilli(scan.GeneratedAt).UTC().Format(time.RFC3339)
+	return workflowSkill.MarketScanInput{Version: "market_scan_input_v1", GeneratedAt: scan.GeneratedAt, AsOf: asOf, MarketCondition: c, Candidates: candidates, DataMissing: missing}, nil
 }
 func loadTemplate(ctx context.Context, id int64, name string) (models.StrategyTemplates, error) {
 	return (strategyservice.Service{}).GetTemplate(ctx, strategyservice.TemplateQuery{ID: id, Name: name})
