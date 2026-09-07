@@ -1,5 +1,8 @@
 ### Change Log
 
+## v1.0.8
+- 修复 ai workflow 展示信息
+
 ## v1.0.7
 - 修复 ai 问题
 
