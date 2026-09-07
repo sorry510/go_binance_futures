@@ -35,3 +35,10 @@ type ChatOptionsAdapter interface {
 type PlainTextFinalAdapter interface {
 	PlainTextFinalAllowed() bool
 }
+
+// DirectTextFinalAdapter marks a no-tool conversational Skill whose entire LLM
+// response is the final user-visible answer, even when that response itself is JSON.
+// Structured/business Skills must not implement this interface.
+type DirectTextFinalAdapter interface {
+	DirectTextFinalAllowed() bool
+}

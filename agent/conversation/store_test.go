@@ -127,7 +127,14 @@ func TestChatAppendOnceAndSuccessfulHistory(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(history) != 2 || history[0].Content != "first" || history[1].Content != "answer" {
-		t.Fatalf("unexpected history: %+v", history)
+		t.Fatalf("unexpected successful history: %+v", history)
+	}
+	conversationHistory, err := store.History(ctx, conv.ID, "chat-current")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(conversationHistory) != 3 || conversationHistory[0].Content != "first" || conversationHistory[1].Content != "answer" || conversationHistory[2].Content != "failed input" {
+		t.Fatalf("conversation history must include the full prior message stream and exclude current task: %+v", conversationHistory)
 	}
 	messages, err := store.MessagesDetailed(ctx, conv.ID)
 	if err != nil {

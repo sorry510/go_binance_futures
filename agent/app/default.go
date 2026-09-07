@@ -13,6 +13,7 @@ import (
 	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/agent/skill"
 	alertanalysis "go_binance_futures/agent/skills/alertanalysis"
+	generalchat "go_binance_futures/agent/skills/generalchat"
 	marketregime "go_binance_futures/agent/skills/marketregime"
 	symbolanalysis "go_binance_futures/agent/skills/symbolanalysis"
 	symbolteam "go_binance_futures/agent/skills/symbolteam"
@@ -34,7 +35,7 @@ var defaultTeamRunner *team.Runner
 func DefaultManager() (*agentmanager.Manager, error) {
 	defaultManagerOnce.Do(func() {
 		skills := skill.NewRegistry()
-		for _, definition := range []skill.Skill{symbolanalysis.New(), alertanalysis.New(), marketregime.New(), symbolteam.Technical(), symbolteam.Flow(), symbolteam.Supervisor(), newWorkflowChatSkill(workflowSkills.MarketScan()), newWorkflowChatSkill(workflowSkills.StrategyReview()), workflowSkills.StrategyExperimentPropose(), workflowSkills.StrategyExperimentSummary(), workflowSkills.AlertTriage(), newWorkflowChatSkill(workflowSkills.DailyMarketBrief())} {
+		for _, definition := range []skill.Skill{generalchat.New(), symbolanalysis.New(), alertanalysis.New(), marketregime.New(), symbolteam.Technical(), symbolteam.Flow(), symbolteam.Supervisor(), newWorkflowChatSkill(workflowSkills.MarketScan()), newWorkflowChatSkill(workflowSkills.StrategyReview()), workflowSkills.StrategyExperimentPropose(), workflowSkills.StrategyExperimentSummary(), workflowSkills.AlertTriage(), newWorkflowChatSkill(workflowSkills.DailyMarketBrief())} {
 			if err := skills.Register(definition); err != nil {
 				defaultManagerErr = err
 				return
