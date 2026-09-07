@@ -200,8 +200,14 @@ func (runner *Runner) run(ctx context.Context, taskID string, input Input) {
 	if supervisorTask == nil || supervisorTask.Status != task.StatusSucceeded {
 		if supervisorTask != nil {
 			children = append(children, childTaskFromTask(symbolteam.RoleSupervisor, supervisorTask, []string{"supervisor_failed"}))
+			if detail := strings.TrimSpace(supervisorTask.Error); detail != "" {
+				runner.failParent(taskID, "team_supervisor_failed", fmt.Errorf("supervisor task failed: %s", detail))
+				return
+			}
+			runner.failParent(taskID, "team_supervisor_failed", fmt.Errorf("supervisor task ended with status=%s stage=%s", supervisorTask.Status, supervisorTask.Stage))
+			return
 		}
-		runner.failParent(taskID, "team_supervisor_failed", fmt.Errorf("supervisor task did not succeed"))
+		runner.failParent(taskID, "team_supervisor_failed", fmt.Errorf("supervisor task result is unavailable"))
 		return
 	}
 	addUsage(&usage, supervisorTask.Usage)

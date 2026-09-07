@@ -3,6 +3,7 @@ package symbolteam
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"go_binance_futures/agent/skill"
@@ -38,5 +39,18 @@ func TestSupervisorHasNoToolsAndRequiresTypedDirection(t *testing.T) {
 	raw := json.RawMessage(`{"version":"symbol_team_supervisor_v1","symbol":"BTCUSDT","as_of":"2026-09-06T10:00:00Z","direction":"buy-now","confidence":0.8,"summary":"x","consensus":[],"disagreements":[],"data_missing":[],"evidence":[]}`)
 	if _, err := Supervisor().Validator().Validate(context.Background(), raw); err == nil {
 		t.Fatal("supervisor validator accepted invalid direction")
+	}
+}
+
+func TestTeamRolePromptsRequireRuntimeFinalEnvelope(t *testing.T) {
+	for _, definition := range []*Definition{Technical(), Flow(), Supervisor()} {
+		prompt := definition.SystemPrompt()
+		if !strings.Contains(prompt, `action="final"`) || !strings.Contains(prompt, `"action":"final"`) {
+			t.Fatalf("skill %s prompt must require Runtime final envelope: %s", definition.Name(), prompt)
+		}
+		version := definition.VersionInfo()
+		if version.PromptVersion != "1.0.1" {
+			t.Fatalf("skill %s prompt version=%s", definition.Name(), version.PromptVersion)
+		}
 	}
 }

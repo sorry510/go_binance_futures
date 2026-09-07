@@ -152,6 +152,11 @@ func applyLinkageBudgetCaps(cfg agentruntime.Config, skillName string, skillMaxR
 		return cfg
 	}
 	budget := agentruntime.ResolveBudget(cfg, skillName, skillMaxRounds)
+	// A linked Team child is intentionally bounded by its Skill contract.
+	// The global per-task setting may tighten that contract, but must not widen it.
+	if skillMaxRounds > 0 && skillMaxRounds < budget.MaxRounds {
+		budget.MaxRounds = skillMaxRounds
+	}
 	if linkage.MaxToolCalls > 0 && linkage.MaxToolCalls < budget.MaxToolCalls {
 		budget.MaxToolCalls = linkage.MaxToolCalls
 	}

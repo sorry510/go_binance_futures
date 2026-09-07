@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -318,5 +319,20 @@ func TestTeamStartWithOptionsPersistsConversationAndCallsCompletionHook(t *testi
 		}
 	case <-time.After(time.Second):
 		t.Fatal("team completion hook was not called")
+	}
+}
+
+func TestSupervisorFailurePropagatesConcreteChildErrorToParent(t *testing.T) {
+	runner, store, _, _ := newFixtureRunner(t, symbolteam.RoleSupervisor)
+	started, err := runner.Start(Input{Symbol: "BTCUSDT"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	finished := waitTeam(t, store, started.ID)
+	if finished.Status != task.StatusFailed || finished.Stage != "team_supervisor_failed" {
+		t.Fatalf("unexpected supervisor failure state: %+v", finished)
+	}
+	if !strings.Contains(finished.Error, "supervisor task failed: fixture failure") {
+		t.Fatalf("parent did not preserve supervisor error: %q", finished.Error)
 	}
 }

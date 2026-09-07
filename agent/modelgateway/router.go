@@ -224,11 +224,14 @@ func (client *gatewayClient) Generate(ctx context.Context, request llm.Request) 
 	}
 	cooldown := time.Duration(client.settings.CooldownSeconds) * time.Second
 	var lastErr error
+	blocked := make([]string, 0, len(client.candidates))
 	for index, candidate := range client.candidates {
 		if index > 0 && client.settings.FallbackEnabled != 1 {
 			break
 		}
 		if !client.health.Allow(candidate.route.ConfigID, cooldown) {
+			snapshot := client.health.Snapshot(candidate.route.ConfigID)
+			blocked = append(blocked, fmt.Sprintf("config_id=%d state=%s open_until=%d", candidate.route.ConfigID, snapshot.State, snapshot.OpenUntil))
 			client.appendAttempt(llm.RouteAttempt{ConfigID: candidate.route.ConfigID, Provider: candidate.route.Provider, Model: candidate.route.Model, Status: "circuit_open", ErrorType: "circuit_open"})
 			continue
 		}
@@ -259,7 +262,11 @@ func (client *gatewayClient) Generate(ctx context.Context, request llm.Request) 
 		}
 	}
 	if lastErr == nil {
-		lastErr = fmt.Errorf("all model gateway candidates are unavailable")
+		if len(blocked) > 0 {
+			lastErr = fmt.Errorf("all model gateway candidates are unavailable: %s", strings.Join(blocked, "; "))
+		} else {
+			lastErr = fmt.Errorf("all model gateway candidates are unavailable")
+		}
 	}
 	return nil, fmt.Errorf("model gateway exhausted candidates: %w", lastErr)
 }
@@ -297,9 +304,22 @@ func classifyRouteError(err error) (string, bool) {
 			return "429", true
 		case httpError.StatusCode >= 500:
 			return "5xx", true
+		case isProviderLocationUnsupported(httpError):
+			// This is candidate/provider-specific rather than a malformed request.
+			// Allow the gateway to try another configured provider/model.
+			return "unsupported_location", true
 		default:
 			return fmt.Sprintf("http_%d", httpError.StatusCode), false
 		}
 	}
 	return "request", false
+}
+
+func isProviderLocationUnsupported(err *llm.HTTPError) bool {
+	if err == nil || err.StatusCode != 400 {
+		return false
+	}
+	body := strings.ToLower(strings.TrimSpace(err.Body))
+	return strings.Contains(body, "user location is not supported") ||
+		(strings.Contains(body, "failed_precondition") && strings.Contains(body, "location"))
 }

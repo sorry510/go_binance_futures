@@ -162,3 +162,121 @@ func TestRouterReportsCircuitOpenSeparatelyFromCapabilityMismatch(t *testing.T) 
 		t.Fatalf("expected circuit-open diagnostic, got %v", err)
 	}
 }
+
+func TestGatewayFallbackOnProviderLocationUnsupported(t *testing.T) {
+	primary := routingConfig(1, true, llm.ProviderGemini, "gemini-primary", llm.ModelProfile{StructuredOutput: true, JSONReliability: 90})
+	secondary := routingConfig(2, false, llm.ProviderOpenAICompatible, "agnes-fallback", llm.ModelProfile{StructuredOutput: true, JSONReliability: 80})
+	settings := llm.DefaultRouterSettings()
+	settings.Enabled = 1
+	settings.FallbackEnabled = 1
+	clients := map[int64]*fakeClient{
+		1: {provider: llm.ProviderGemini, err: &llm.HTTPError{StatusCode: 400, Body: `{"error":{"code":400,"message":"User location is not supported for the API use.","status":"FAILED_PRECONDITION"}}`}},
+		2: {provider: llm.ProviderOpenAICompatible, response: &llm.Response{Model: "agnes-fallback", Content: "ok"}},
+	}
+	router := newTestRouter(fakeStore{settings: settings, configs: []llm.RoutingConfig{primary, secondary}}, clients)
+	client, _, err := router.Route(context.Background(), llm.RouteRequest{Skill: "symbol_team_technical", Requirements: llm.ModelRequirements{StructuredOutput: true, MinJSONReliability: 75}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	response, err := client.Generate(context.Background(), llm.Request{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.ConfigID != 2 || response.Provider != llm.ProviderOpenAICompatible {
+		t.Fatalf("unexpected fallback response: %+v", response)
+	}
+	if clients[1].calls != 1 || clients[2].calls != 1 {
+		t.Fatalf("unexpected calls primary=%d fallback=%d", clients[1].calls, clients[2].calls)
+	}
+	if response.RouteTrace == nil || len(response.RouteTrace.Attempts) != 2 || response.RouteTrace.Attempts[0].ErrorType != "unsupported_location" {
+		t.Fatalf("unexpected route trace: %+v", response.RouteTrace)
+	}
+}
+
+func TestGatewayGenericHTTP400DoesNotFallback(t *testing.T) {
+	primary := routingConfig(1, true, llm.ProviderGemini, "gemini-primary", llm.ModelProfile{StructuredOutput: true, JSONReliability: 90})
+	secondary := routingConfig(2, false, llm.ProviderOpenAICompatible, "fallback", llm.ModelProfile{StructuredOutput: true, JSONReliability: 80})
+	settings := llm.DefaultRouterSettings()
+	settings.Enabled = 1
+	settings.FallbackEnabled = 1
+	clients := map[int64]*fakeClient{
+		1: {provider: llm.ProviderGemini, err: &llm.HTTPError{StatusCode: 400, Body: `{"error":{"message":"invalid request payload"}}`}},
+		2: {provider: llm.ProviderOpenAICompatible, response: &llm.Response{Content: "must not run"}},
+	}
+	router := newTestRouter(fakeStore{settings: settings, configs: []llm.RoutingConfig{primary, secondary}}, clients)
+	client, _, err := router.Route(context.Background(), llm.RouteRequest{Skill: "test", Requirements: llm.ModelRequirements{StructuredOutput: true}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := client.Generate(context.Background(), llm.Request{}); err == nil || !strings.Contains(err.Error(), "non-fallback error") {
+		t.Fatalf("expected generic 400 to remain non-fallback, got %v", err)
+	}
+	if clients[2].calls != 0 {
+		t.Fatalf("generic 400 unexpectedly called fallback %d times", clients[2].calls)
+	}
+}
+
+func TestHealthAvailableRejectsHalfOpenProbeInFlight(t *testing.T) {
+	health := NewHealthRegistry()
+	cooldown := 10 * time.Millisecond
+	health.Record(11, false, "5xx", time.Millisecond, 20, 1, cooldown)
+	time.Sleep(15 * time.Millisecond)
+	if !health.Allow(11, cooldown) {
+		t.Fatal("expired circuit should admit one half-open probe")
+	}
+	if health.Available(11) {
+		t.Fatal("half-open model with an in-flight probe must not be advertised as available")
+	}
+	health.Record(11, true, "", time.Millisecond, 20, 1, cooldown)
+	if !health.Available(11) {
+		t.Fatal("successful probe should make model available again")
+	}
+}
+
+func TestHealthResetClearsStaleCircuitAfterConfigChange(t *testing.T) {
+	health := NewHealthRegistry()
+	health.Record(12, false, "timeout", time.Millisecond, 20, 1, time.Minute)
+	if health.Available(12) {
+		t.Fatal("circuit should be open before reset")
+	}
+	health.Reset(12)
+	snapshot := health.Snapshot(12)
+	if snapshot.State != "closed" || snapshot.ConsecutiveFailures != 0 || snapshot.Samples != 0 {
+		t.Fatalf("reset did not clear stale health state: %+v", snapshot)
+	}
+	if !health.Available(12) {
+		t.Fatal("reset config should be immediately available")
+	}
+}
+
+func TestGatewayReportsBlockedCandidateHealthWhenStateChangesAfterRoute(t *testing.T) {
+	primary := routingConfig(21, true, llm.ProviderOpenAI, "primary", llm.ModelProfile{StructuredOutput: true, JSONReliability: 90})
+	secondary := routingConfig(22, false, llm.ProviderDeepSeek, "secondary", llm.ModelProfile{StructuredOutput: true, JSONReliability: 80})
+	settings := llm.DefaultRouterSettings()
+	settings.Enabled = 1
+	settings.FallbackEnabled = 1
+	clients := map[int64]*fakeClient{
+		21: {provider: llm.ProviderOpenAI, response: &llm.Response{Content: "unused"}},
+		22: {provider: llm.ProviderDeepSeek, response: &llm.Response{Content: "unused"}},
+	}
+	router := newTestRouter(fakeStore{settings: settings, configs: []llm.RoutingConfig{primary, secondary}}, clients)
+	client, _, err := router.Route(context.Background(), llm.RouteRequest{Skill: "alert_analysis", Requirements: llm.ModelRequirements{StructuredOutput: true}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	router.Health.Record(21, false, "timeout", time.Millisecond, 20, 1, time.Minute)
+	router.Health.Record(22, false, "5xx", time.Millisecond, 20, 1, time.Minute)
+	_, err = client.Generate(context.Background(), llm.Request{})
+	if err == nil {
+		t.Fatal("expected all candidates to be blocked")
+	}
+	message := err.Error()
+	for _, want := range []string{"all model gateway candidates are unavailable", "config_id=21 state=open", "config_id=22 state=open", "open_until="} {
+		if !strings.Contains(message, want) {
+			t.Fatalf("missing %q in error: %v", want, err)
+		}
+	}
+	if clients[21].calls != 0 || clients[22].calls != 0 {
+		t.Fatalf("blocked candidates should not be called: primary=%d secondary=%d", clients[21].calls, clients[22].calls)
+	}
+}
