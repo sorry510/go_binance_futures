@@ -83,6 +83,8 @@ func fixtureResult(skillName, input string) json.RawMessage {
 		return json.RawMessage(`{"version":"technical_analysis_v1","symbol":"BTCUSDT","as_of":"2026-09-06T10:00:00Z","trend":"bullish","structure":"higher lows","volatility":"normal","key_levels":[{"kind":"support","price":100}],"confidence":0.8,"data_missing":[],"evidence":[{"source":"get_symbol_analysis_context","finding":"1h structure bullish"}]}`)
 	case symbolteam.FlowSkillName:
 		return json.RawMessage(`{"version":"flow_analysis_v1","symbol":"BTCUSDT","as_of":"2026-09-06T10:00:00Z","bias":"bullish","funding":"neutral","open_interest":"rising","taker":"buyers lead","depth":"balanced","liquidation":"short liquidations","confidence":0.7,"data_missing":[],"evidence":[{"source":"get_symbol_analysis_context","finding":"OI and taker support"}]}`)
+	case symbolteam.NewsSkillName:
+		return json.RawMessage(`{"version":"news_analysis_v1","symbol":"BTCUSDT","as_of":"2026-09-06T10:00:00Z","bias":"neutral","impact":"low","summary":"no material fresh catalyst","confidence":0.8,"data_missing":[],"evidence":[{"source":"market_intelligence","finding":"fresh local signal only; no external catalyst"}]}`)
 	default:
 		var supervisor symbolteam.SupervisorInput
 		_ = json.Unmarshal([]byte(input), &supervisor)
@@ -92,6 +94,11 @@ func fixtureResult(skillName, input string) json.RawMessage {
 			evidence += `,{"role":"flow_analyst","source":"get_symbol_analysis_context","finding":"flow child bullish"}`
 		} else {
 			missing = append(missing, "flow_analyst_failed")
+		}
+		if supervisor.News.Status == string(task.StatusSucceeded) {
+			evidence += `,{"role":"news_analyst","source":"market_intelligence","finding":"news child neutral"}`
+		} else {
+			missing = append(missing, "news_analyst_failed")
 		}
 		evidence += `]`
 		raw, _ := json.Marshal(map[string]any{"version": "symbol_team_supervisor_v1", "symbol": "BTCUSDT", "as_of": "2026-09-06T10:00:00Z", "direction": "long", "confidence": 0.76, "summary": "typed team consensus", "consensus": []string{"technical and flow align"}, "disagreements": []string{}, "data_missing": missing})
@@ -164,20 +171,20 @@ func TestSymbolAnalysisTeamRunsSharedContextOnceAndLinksChildren(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if children.Total != 3 {
-		t.Fatalf("child tasks=%d want=3", children.Total)
+	if children.Total != 4 {
+		t.Fatalf("child tasks=%d want=4", children.Total)
 	}
 	manager.mu.Lock()
 	links := append([]task.Linkage(nil), manager.started...)
 	manager.mu.Unlock()
-	if len(links) != 3 || links[0].TeamRunID != started.ID {
+	if len(links) != 4 || links[0].TeamRunID != started.ID {
 		t.Fatalf("unexpected team linkages: %+v", links)
 	}
 	var result ResultV1
 	if err := json.Unmarshal(finished.Result, &result); err != nil {
 		t.Fatal(err)
 	}
-	if result.Status != "succeeded" || len(result.Evidence) != 2 {
+	if result.Status != "succeeded" || len(result.Evidence) != 3 {
 		t.Fatalf("unexpected result: %+v", result)
 	}
 }
@@ -255,7 +262,7 @@ func TestTeamTokenBudgetStopsBeforeSupervisor(t *testing.T) {
 	manager.mu.Lock()
 	links := append([]task.Linkage(nil), manager.started...)
 	manager.mu.Unlock()
-	if len(links) != 2 {
+	if len(links) != 3 {
 		t.Fatalf("supervisor started after team budget was exhausted: %+v", links)
 	}
 }

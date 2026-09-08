@@ -8,6 +8,7 @@ import (
 	"go_binance_futures/models"
 	liquidationservice "go_binance_futures/service/liquidation"
 	marketservice "go_binance_futures/service/market"
+	marketintelligence "go_binance_futures/service/marketintelligence"
 	symbolservice "go_binance_futures/service/symbol"
 	"math"
 	"sort"
@@ -28,6 +29,7 @@ type Dependencies struct {
 	GetDepth                  func(context.Context, string, int) (*futures.DepthResponse, error)
 	ListLiquidations          func(context.Context, liquidationservice.ListOptions) (liquidationservice.ListResult, error)
 	ListHistory               func(context.Context, HistoryListOptions) (HistoryListResult, error)
+	BuildMarketIntelligence   func(context.Context, Context) (marketintelligence.Snapshot, error)
 	Now                       func() time.Time
 }
 type Snapshot struct {
@@ -94,18 +96,19 @@ type PreviousAnalysis struct {
 	Plan            json.RawMessage `json:"plan,omitempty"`
 }
 type Context struct {
-	Symbol           string                   `json:"symbol"`
-	AsOf             string                   `json:"as_of"`
-	Snapshot         Snapshot                 `json:"snapshot"`
-	MarketCondition  *marketservice.Condition `json:"market_condition,omitempty"`
-	Klines           []KlineFeature           `json:"klines"`
-	Funding          *FundingFeature          `json:"funding,omitempty"`
-	OpenInterest     *OpenInterestFeature     `json:"open_interest,omitempty"`
-	Taker            *TakerFeature            `json:"taker,omitempty"`
-	Depth            *DepthFeature            `json:"depth,omitempty"`
-	Liquidations     *LiquidationFeature      `json:"liquidations,omitempty"`
-	PreviousAnalyses []PreviousAnalysis       `json:"previous_analyses"`
-	DataMissing      []string                 `json:"data_missing"`
+	Symbol             string                       `json:"symbol"`
+	AsOf               string                       `json:"as_of"`
+	Snapshot           Snapshot                     `json:"snapshot"`
+	MarketCondition    *marketservice.Condition     `json:"market_condition,omitempty"`
+	Klines             []KlineFeature               `json:"klines"`
+	Funding            *FundingFeature              `json:"funding,omitempty"`
+	OpenInterest       *OpenInterestFeature         `json:"open_interest,omitempty"`
+	Taker              *TakerFeature                `json:"taker,omitempty"`
+	Depth              *DepthFeature                `json:"depth,omitempty"`
+	Liquidations       *LiquidationFeature          `json:"liquidations,omitempty"`
+	PreviousAnalyses   []PreviousAnalysis           `json:"previous_analyses"`
+	MarketIntelligence *marketintelligence.Snapshot `json:"market_intelligence,omitempty"`
+	DataMissing        []string                     `json:"data_missing"`
 }
 
 func DefaultDependencies() Dependencies {
@@ -113,7 +116,10 @@ func DefaultDependencies() Dependencies {
 	m := marketservice.Service{}
 	l := liquidationservice.Service{}
 	h := HistoryService{}
-	return Dependencies{GetSymbol: s.Snapshot, GetMarketCondition: m.MarketCondition, GetKlines: m.Klines, GetFundingRate: m.FundingRate, GetOpenInterest: m.OpenInterest, GetOpenInterestStatistics: m.OpenInterestStatistics, GetTakerLongShortRatio: m.TakerLongShortRatio, GetDepth: m.Depth, ListLiquidations: l.List, ListHistory: h.List, Now: time.Now}
+	mi := marketintelligence.DefaultService()
+	return Dependencies{GetSymbol: s.Snapshot, GetMarketCondition: m.MarketCondition, GetKlines: m.Klines, GetFundingRate: m.FundingRate, GetOpenInterest: m.OpenInterest, GetOpenInterestStatistics: m.OpenInterestStatistics, GetTakerLongShortRatio: m.TakerLongShortRatio, GetDepth: m.Depth, ListLiquidations: l.List, ListHistory: h.List, BuildMarketIntelligence: func(ctx context.Context, value Context) (marketintelligence.Snapshot, error) {
+		return persistMarketIntelligence(ctx, mi, value)
+	}, Now: time.Now}
 }
 func Build(ctx context.Context, symbol string, d Dependencies) (Context, error) {
 	symbol = strings.ToUpper(strings.TrimSpace(symbol))
@@ -232,6 +238,13 @@ func Build(ctx context.Context, symbol string, d Dependencies) (Context, error) 
 		out.Liquidations = summarizeLiquidations(liq)
 	} else {
 		out.DataMissing = append(out.DataMissing, "liquidations")
+	}
+	if d.BuildMarketIntelligence != nil {
+		if intelligence, intelligenceErr := d.BuildMarketIntelligence(ctx, out); intelligenceErr == nil {
+			out.MarketIntelligence = &intelligence
+		} else {
+			out.DataMissing = append(out.DataMissing, "market_intelligence")
+		}
 	}
 	return out, nil
 }

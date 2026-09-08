@@ -13,6 +13,7 @@ import (
 	spotbinance "github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/delivery"
 	"github.com/adshao/go-binance/v2/futures"
+	"github.com/gorilla/websocket"
 	xproxy "golang.org/x/net/proxy"
 )
 
@@ -98,6 +99,34 @@ func (p *Pool) HTTPClient() *http.Client {
 func (t *roundRobinTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	index := t.next.Add(1) - 1
 	return t.transports[index%uint64(len(t.transports))].RoundTrip(req)
+}
+
+// WebSocketDialer returns a gorilla WebSocket dialer using the same rotating
+// Binance proxy pool as the REST clients. SOCKS targets keep the hostname for
+// proxy-side DNS resolution.
+func (p *Pool) WebSocketDialer() (*websocket.Dialer, error) {
+	dialer := *websocket.DefaultDialer
+	if !p.Enabled() {
+		return &dialer, nil
+	}
+	proxyURL := p.nextProxy()
+	switch strings.ToLower(proxyURL.Scheme) {
+	case "http", "https":
+		dialer.Proxy = http.ProxyURL(proxyURL)
+	case "socks5", "socks5h":
+		dialer.Proxy = nil
+		forward := &net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}
+		socksDialer, err := xproxy.FromURL(proxyURL, forward)
+		if err != nil {
+			return nil, err
+		}
+		contextDialer, ok := socksDialer.(xproxy.ContextDialer)
+		if !ok {
+			return nil, fmt.Errorf("SOCKS5 dialer does not support context")
+		}
+		dialer.NetDialContext = contextDialer.DialContext
+	}
+	return &dialer, nil
 }
 
 func (p *Pool) WithFuturesWS(connect func() (chan struct{}, chan struct{}, error)) (chan struct{}, chan struct{}, error) {

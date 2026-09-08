@@ -13,22 +13,25 @@ import (
 	"go_binance_futures/scanner"
 	liquidationservice "go_binance_futures/service/liquidation"
 	marketservice "go_binance_futures/service/market"
+	marketintelligence "go_binance_futures/service/marketintelligence"
 	strategyservice "go_binance_futures/service/strategy"
 	symbolservice "go_binance_futures/service/symbol"
 	symbolanalysisservice "go_binance_futures/service/symbolanalysis"
 )
 
 type Dependencies struct {
-	GetSymbol                  func(context.Context, string) (any, error)
-	ListSymbols                func(context.Context, symbolservice.ListOptions) (symbolservice.ListResult, error)
-	GetKlines                  func(context.Context, string, string, int) (any, error)
-	GetFundingRate             func(context.Context, string) (any, error)
-	GetMarketCondition         func(context.Context) (any, error)
-	ListLiquidations           func(context.Context, liquidationservice.ListOptions) (liquidationservice.ListResult, error)
-	ScanSymbols                func(context.Context, scanner.PrefilterOptions) (*scanner.PrefilterResult, error)
-	ListTestResults            func(context.Context, strategyservice.TestResultsOptions) (strategyservice.TestResultsResult, error)
-	GetStrategyTemplate        func(context.Context, strategyservice.TemplateQuery) (any, error)
-	BuildSymbolAnalysisContext func(context.Context, string) (symbolanalysisservice.Context, error)
+	GetSymbol                     func(context.Context, string) (any, error)
+	ListSymbols                   func(context.Context, symbolservice.ListOptions) (symbolservice.ListResult, error)
+	GetKlines                     func(context.Context, string, string, int) (any, error)
+	GetFundingRate                func(context.Context, string) (any, error)
+	GetMarketCondition            func(context.Context) (any, error)
+	ListLiquidations              func(context.Context, liquidationservice.ListOptions) (liquidationservice.ListResult, error)
+	ScanSymbols                   func(context.Context, scanner.PrefilterOptions) (*scanner.PrefilterResult, error)
+	ListTestResults               func(context.Context, strategyservice.TestResultsOptions) (strategyservice.TestResultsResult, error)
+	GetStrategyTemplate           func(context.Context, strategyservice.TemplateQuery) (any, error)
+	BuildSymbolAnalysisContext    func(context.Context, string) (symbolanalysisservice.Context, error)
+	GetMarketIntelligence         func(context.Context, string, time.Duration, int) (marketintelligence.Snapshot, error)
+	GetMarketIntelligenceTimeline func(context.Context, string, int64, int64, int) (marketintelligence.Snapshot, error)
 }
 
 func DefaultDependencies() Dependencies {
@@ -53,6 +56,8 @@ func DefaultDependencies() Dependencies {
 		BuildSymbolAnalysisContext: func(ctx context.Context, symbol string) (symbolanalysisservice.Context, error) {
 			return symbolanalysisservice.Build(ctx, symbol, symbolanalysisservice.DefaultDependencies())
 		},
+		GetMarketIntelligence:         marketintelligence.DefaultService().Snapshot,
+		GetMarketIntelligenceTimeline: marketintelligence.DefaultService().Timeline,
 	}
 }
 
@@ -62,7 +67,7 @@ func RegisterReadOnly(registry *agenttools.Registry, deps Dependencies) error {
 	}
 	definitions := []agenttools.Tool{
 		newFeaturesTool(deps), newSymbolSnapshotTool(deps), newKlinesTool(deps), newFundingRateTool(deps), newLiquidationsTool(deps),
-		newMarketConditionTool(deps), newSymbolAnalysisContextTool(deps), newScanSymbolsTool(deps), newTestResultsTool(deps), newStrategyTemplateTool(deps),
+		newMarketConditionTool(deps), newMarketIntelligenceTool(deps), newSymbolAnalysisContextTool(deps), newScanSymbolsTool(deps), newTestResultsTool(deps), newStrategyTemplateTool(deps),
 	}
 	for _, tool := range definitions {
 		if err := registry.Register(tool); err != nil {
@@ -169,6 +174,38 @@ func newMarketConditionTool(deps Dependencies) agenttools.Tool {
 				return nil, fmt.Errorf("market service is unavailable")
 			}
 			return deps.GetMarketCondition(ctx)
+		}}
+}
+
+func newMarketIntelligenceTool(deps Dependencies) agenttools.Tool {
+	type input struct {
+		Symbol        string `json:"symbol"`
+		WindowMinutes int    `json:"window_minutes"`
+		StartTime     int64  `json:"start_time"`
+		EndTime       int64  `json:"end_time"`
+		Limit         int    `json:"limit"`
+	}
+	return agenttools.Func{ToolName: "get_market_intelligence", ToolDescription: "查询统一 Market Intelligence：公告、新闻、Alpha、本地 Signal 与 Funding/OI/Taker/Depth/Liquidation Fact，保留 event_time/observed_at/freshness", ToolRisk: permission.RiskRead,
+		ToolMetadata: metadata(`{"type":"object","required":["symbol"],"additionalProperties":false,"properties":{"symbol":{"type":"string"},"window_minutes":{"type":"integer","minimum":1,"maximum":10080},"start_time":{"type":"integer"},"end_time":{"type":"integer"},"limit":{"type":"integer","minimum":1,"maximum":200}}}`, 5*time.Second, 192<<10),
+		ExecuteFunc: func(ctx context.Context, raw json.RawMessage) (any, error) {
+			var in input
+			if err := strictDecode(raw, &in); err != nil {
+				return nil, err
+			}
+			if in.StartTime > 0 || in.EndTime > 0 {
+				if deps.GetMarketIntelligenceTimeline == nil {
+					return nil, fmt.Errorf("market intelligence timeline service is unavailable")
+				}
+				return deps.GetMarketIntelligenceTimeline(ctx, strings.ToUpper(strings.TrimSpace(in.Symbol)), in.StartTime, in.EndTime, in.Limit)
+			}
+			if deps.GetMarketIntelligence == nil {
+				return nil, fmt.Errorf("market intelligence service is unavailable")
+			}
+			window := time.Duration(in.WindowMinutes) * time.Minute
+			if in.WindowMinutes <= 0 {
+				window = 24 * time.Hour
+			}
+			return deps.GetMarketIntelligence(ctx, strings.ToUpper(strings.TrimSpace(in.Symbol)), window, in.Limit)
 		}}
 }
 
