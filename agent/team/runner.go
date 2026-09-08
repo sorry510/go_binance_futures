@@ -47,7 +47,7 @@ func New(cfg Config) (*Runner, error) {
 		cfg.ChildTimeout = 3 * time.Minute
 	}
 	if cfg.MaxConcurrency <= 0 {
-		cfg.MaxConcurrency = 2
+		cfg.MaxConcurrency = 3
 	}
 	if cfg.MaxTotalTokens <= 0 {
 		cfg.MaxTotalTokens = 120000
@@ -77,9 +77,9 @@ func (runner *Runner) StartWithOptions(input Input, options StartOptions) (*task
 	item := &task.Task{
 		ID: id, Skill: SymbolAnalysisTeam, ConversationID: strings.TrimSpace(options.ConversationID), TeamRunID: id, TeamName: SymbolAnalysisTeam, TeamRole: "team",
 		Status: task.StatusQueued, Stage: "team_queued", Progress: 0, Input: string(rawInput), ExecutionMode: "team",
-		RuntimeVersion: agentruntime.CurrentVersion, SkillVersion: "1.0.0", PromptVersion: "1.0.0",
+		RuntimeVersion: agentruntime.CurrentVersion, SkillVersion: "1.1.0", PromptVersion: "1.0.0",
 		InputContractVersion: "symbol_analysis_team_input_v1", OutputContractVersion: "symbol_analysis_team_v1",
-		SkillSource: skill.DefaultSource, SkillSourceVersion: "v3-1", CreatedAt: now, UpdatedAt: now,
+		SkillSource: skill.DefaultSource, SkillSourceVersion: "v3-2", CreatedAt: now, UpdatedAt: now,
 	}
 	item.Events = append(item.Events, teamEvent(item, "team_queued", 0, "team run queued", "queued"))
 	if creator, ok := runner.cfg.Store.(task.CreateStore); ok {
@@ -156,7 +156,7 @@ func (runner *Runner) run(ctx context.Context, taskID string, input Input) {
 
 	sharedInput := symbolteam.SharedInput{Symbol: input.Symbol, Prompt: input.Prompt, SharedContext: shared.Raw, SharedContextHash: shared.ContentHash}
 	childRaw, _ := json.Marshal(sharedInput)
-	specs := []childSpec{{role: symbolteam.RoleTechnical, skill: symbolteam.TechnicalSkillName}, {role: symbolteam.RoleFlow, skill: symbolteam.FlowSkillName}}
+	specs := []childSpec{{role: symbolteam.RoleTechnical, skill: symbolteam.TechnicalSkillName}, {role: symbolteam.RoleFlow, skill: symbolteam.FlowSkillName}, {role: symbolteam.RoleNews, skill: symbolteam.NewsSkillName}}
 	outcomes := runner.runChildren(ctx, taskID, string(childRaw), specs)
 	if err := ctx.Err(); err != nil {
 		runner.cancelParent(taskID)
@@ -177,7 +177,7 @@ func (runner *Runner) run(ctx context.Context, taskID string, input Input) {
 		return
 	}
 
-	supervisorInput := symbolteam.SupervisorInput{Symbol: input.Symbol, Prompt: input.Prompt, Technical: members[symbolteam.RoleTechnical], Flow: members[symbolteam.RoleFlow]}
+	supervisorInput := symbolteam.SupervisorInput{Symbol: input.Symbol, Prompt: input.Prompt, Technical: members[symbolteam.RoleTechnical], Flow: members[symbolteam.RoleFlow], News: members[symbolteam.RoleNews]}
 	supervisorRaw, _ := json.Marshal(supervisorInput)
 	remaining := runner.cfg.MaxTotalTokens - usage.TotalTokens
 	if remaining < 1 {

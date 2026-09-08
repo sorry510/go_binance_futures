@@ -35,7 +35,7 @@ var defaultTeamRunner *team.Runner
 func DefaultManager() (*agentmanager.Manager, error) {
 	defaultManagerOnce.Do(func() {
 		skills := skill.NewRegistry()
-		for _, definition := range []skill.Skill{generalchat.New(), symbolanalysis.New(), alertanalysis.New(), marketregime.New(), symbolteam.Technical(), symbolteam.Flow(), symbolteam.Supervisor(), newWorkflowChatSkill(workflowSkills.MarketScan()), newWorkflowChatSkill(workflowSkills.StrategyReview()), workflowSkills.StrategyExperimentPropose(), workflowSkills.StrategyExperimentSummary(), workflowSkills.AlertTriage(), newWorkflowChatSkill(workflowSkills.DailyMarketBrief())} {
+		for _, definition := range []skill.Skill{generalchat.New(), symbolanalysis.New(), alertanalysis.New(), marketregime.New(), symbolteam.Technical(), symbolteam.Flow(), symbolteam.News(), symbolteam.Supervisor(), newWorkflowChatSkill(workflowSkills.MarketScan()), newWorkflowChatSkill(workflowSkills.StrategyReview()), workflowSkills.StrategyExperimentPropose(), workflowSkills.StrategyExperimentSummary(), workflowSkills.AlertTriage(), newWorkflowChatSkill(workflowSkills.DailyMarketBrief())} {
 			if err := skills.Register(definition); err != nil {
 				defaultManagerErr = err
 				return
@@ -105,7 +105,7 @@ func DefaultManager() (*agentmanager.Manager, error) {
 					logs.Error("persist team chat completion:", err)
 				}
 			},
-			MaxConcurrency: 2, MaxTotalTokens: 120000, MaxToolCalls: 1,
+			MaxConcurrency: 3, MaxTotalTokens: 120000, MaxToolCalls: 1,
 		})
 	})
 	return defaultManager, defaultManagerErr

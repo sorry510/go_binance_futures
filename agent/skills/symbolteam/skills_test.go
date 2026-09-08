@@ -11,7 +11,7 @@ import (
 
 func TestAnalystSkillsUseSharedContextWithoutTools(t *testing.T) {
 	input := `{"symbol":"BTCUSDT","shared_context":{"symbol":"BTCUSDT","as_of":"2026-09-06T10:00:00Z"},"shared_context_hash":"abc"}`
-	for _, definition := range []*Definition{Technical(), Flow()} {
+	for _, definition := range []*Definition{Technical(), Flow(), News()} {
 		if tools := definition.Tools(); len(tools) != 0 {
 			t.Fatalf("%s unexpectedly has tools: %v", definition.Name(), tools)
 		}
@@ -43,14 +43,29 @@ func TestSupervisorHasNoToolsAndRequiresTypedDirection(t *testing.T) {
 }
 
 func TestTeamRolePromptsRequireRuntimeFinalEnvelope(t *testing.T) {
-	for _, definition := range []*Definition{Technical(), Flow(), Supervisor()} {
+	for _, definition := range []*Definition{Technical(), Flow(), News(), Supervisor()} {
 		prompt := definition.SystemPrompt()
 		if !strings.Contains(prompt, `action="final"`) || !strings.Contains(prompt, `"action":"final"`) {
 			t.Fatalf("skill %s prompt must require Runtime final envelope: %s", definition.Name(), prompt)
 		}
 		version := definition.VersionInfo()
-		if version.PromptVersion != "1.0.1" {
+		if version.PromptVersion != "1.1.0" {
 			t.Fatalf("skill %s prompt version=%s", definition.Name(), version.PromptVersion)
 		}
+	}
+}
+
+func TestNewsValidatorUsesMarketIntelligenceEvidenceAndAllowsNoFreshCatalyst(t *testing.T) {
+	valid := json.RawMessage(`{"version":"news_analysis_v1","symbol":"BTCUSDT","as_of":"2026-09-08T05:00:00Z","bias":"bullish","impact":"medium","summary":"fresh official listing catalyst","confidence":0.7,"data_missing":[],"evidence":[{"source":"market_intelligence","finding":"fresh announcement event_time precedes observed_at by 2s"}]}`)
+	if _, err := News().Validator().Validate(context.Background(), valid); err != nil {
+		t.Fatalf("news validator rejected market intelligence evidence: %v", err)
+	}
+	neutral := json.RawMessage(`{"version":"news_analysis_v1","symbol":"BTCUSDT","as_of":"2026-09-08T05:00:00Z","bias":"neutral","impact":"none","summary":"no fresh catalyst","confidence":0.8,"data_missing":[],"evidence":[]}`)
+	if _, err := News().Validator().Validate(context.Background(), neutral); err != nil {
+		t.Fatalf("news validator rejected no-catalyst result: %v", err)
+	}
+	invented := json.RawMessage(`{"version":"news_analysis_v1","symbol":"BTCUSDT","as_of":"2026-09-08T05:00:00Z","bias":"bullish","impact":"high","summary":"invented","confidence":0.9,"data_missing":[],"evidence":[{"source":"twitter_guess","finding":"rumor"}]}`)
+	if _, err := News().Validator().Validate(context.Background(), invented); err == nil {
+		t.Fatal("news validator accepted non-Market-Intelligence evidence")
 	}
 }
