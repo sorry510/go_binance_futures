@@ -242,28 +242,26 @@ func (d *Definition) ModelRequirements() llm.ModelRequirements {
 	return req
 }
 func (d *Definition) VersionInfo() skill.VersionInfo {
-	return skill.VersionInfo{SkillVersion: "1.0.0", PromptVersion: "1.0.1", InputContractVersion: inputVersion(d.kind), OutputContractVersion: outputVersion(d.kind), Source: skill.DefaultSource, SourceVersion: "v2-11"}
+	return skill.VersionInfo{SkillVersion: "1.0.0", PromptVersion: "1.0.2", InputContractVersion: inputVersion(d.kind), OutputContractVersion: outputVersion(d.kind), Source: skill.DefaultSource, SourceVersion: "v2-11"}
 }
 func (d *Definition) SystemPrompt() string {
 	finalEnvelope := ` Return exactly one Agent Runtime final decision JSON object with this top-level shape: {"action":"final","summary":"concise summary","result":{...}}. Put the complete workflow output inside result. Never return the workflow output object at the top level. Do not return tool or parallel_tools actions.`
+	contract := " The result field must match this exact schema and must not contain any other fields: " + outputContract(d.kind)
 	switch d.kind {
 	case MarketScanName:
-		return `You rank only the deterministic market candidates provided by the system. Never claim to scan the full market yourself. Do not invent missing data or trading execution.
-The result field must be strict opportunity_set_v1 with exactly these fields:
-{"version":"opportunity_set_v1","as_of":"copy input.as_of exactly","market_condition":null,"opportunities":[{"rank":1,"symbol":"SOLUSDT","score":100,"direction":"long","confidence":0.8,"thesis":"concise thesis","risks":["at least one concrete risk or missing-data uncertainty"],"evidence":["facts from the supplied candidate only"]}],"data_missing":["preserve every input.data_missing item"]}
-Copy input.market_condition exactly, including null. Use only candidate symbols from the input, at most once each. direction must be long, short, watch, or avoid; confidence must be 0..1. Do not copy candidate-only fields such as grade, price, percent_change_24h, quote_volume_24h, trade_count_24h, high_24h, low_24h, open_24h, reasons, missing, or last_update_time into an opportunity object.` + finalEnvelope
+		return "You rank only the deterministic market candidates provided by the system. Never claim to scan the full market yourself. Do not invent missing data or trading execution. Copy input.as_of and input.market_condition exactly, including null. Preserve every input.data_missing item. Use only candidate symbols from the input, at most once each. direction must be long, short, watch, or avoid; confidence must be 0..1. Do not copy scanner-only fields such as grade, price, percent_change_24h, quote_volume_24h, trade_count_24h, high_24h, low_24h, open_24h, reasons, missing, or last_update_time into an opportunity object." + contract + finalEnvelope
 	case StrategyReviewName:
-		return "Review the supplied strategy snapshot, deterministic fee-adjusted test statistics, and market condition. The result must be strict strategy_review_v1 JSON. Proposals are advisory only; never modify a template." + finalEnvelope
+		return "Review the supplied strategy snapshot, deterministic fee-adjusted test statistics, and market condition. Copy input.template.id and input.market_condition exactly. Proposals are advisory only; never modify a template." + contract + finalEnvelope
 	case StrategyExperimentProposeName:
-		return "Propose one candidate strategy revision from the supplied template and goal. The result must be strict strategy_experiment_proposal_v1 JSON. The candidate will be validated and tested deterministically; do not claim it has passed tests." + finalEnvelope
+		return "Propose one candidate strategy revision from the supplied template and goal. Copy input.template.id into base_template_id. technology_json and strategy_json must each be JSON encoded as a string. The candidate will be validated and tested deterministically; do not claim it has passed tests." + contract + finalEnvelope
 	case StrategyExperimentSummaryName:
-		return "Summarize the supplied strategy experiment proposal and deterministic test report. The result must be strict strategy_experiment_result_v1 JSON. Never overwrite or activate a production strategy." + finalEnvelope
+		return "Summarize the supplied strategy experiment proposal and deterministic test report. Copy proposal identity, technology_json, strategy_json, and the complete input.test object exactly. Never overwrite or activate a production strategy." + contract + finalEnvelope
 	case AlertTriageName:
-		return "Triage only the pre-grouped signal candidates provided by the deterministic incident builder. Decide which signals represent the same market event and whether to notify, suppress, or monitor. The result must be strict incident_set_v1 JSON." + finalEnvelope
+		return "Triage only the pre-grouped signal candidates provided by the deterministic incident builder. Every input signal_id must appear in exactly one incident. Decide whether to notify, suppress, or monitor; severity must be low, medium, high, or critical." + contract + finalEnvelope
 	case DailyMarketBriefName:
-		return "Create a concise fixed-schema daily market brief from the supplied market condition, deterministic scanner candidates, and recent signal summary. The result must be strict daily_market_brief_v1 JSON. Do not invent live facts." + finalEnvelope
+		return "Create a concise daily market brief only from the supplied market condition, deterministic scanner candidates, and recent signal summary. Copy input.as_of and input.market_condition exactly, including null. Preserve every input.data_missing item. opportunities and watchlist may only reference symbols present in input.candidates or input.signals.symbols. Do not copy scanner fields into the result and do not invent live facts, prices, indicators, news, or fields that are not in the schema." + contract + finalEnvelope
 	default:
-		return "Return strict JSON inside an Agent Runtime final decision."
+		return "Return strict JSON inside an Agent Runtime final decision." + contract + finalEnvelope
 	}
 }
 func (d *Definition) ValidateInput(req skill.Request) error {
@@ -311,39 +309,45 @@ func (d *Definition) validatorFor(input string) validator.FinalValidator {
 		case MarketScanName:
 			var out OpportunitySetV1
 			if err := strictDecode(raw, &out); err != nil {
-				return nil, err
+				return nil, outputContractError(d.kind, input, err)
 			}
-			return validateOpportunitySet(out, input)
+			value, err := validateOpportunitySet(out, input)
+			return outputContractResult(d.kind, input, value, err)
 		case StrategyReviewName:
 			var out StrategyReviewV1
 			if err := strictDecode(raw, &out); err != nil {
-				return nil, err
+				return nil, outputContractError(d.kind, input, err)
 			}
-			return validateStrategyReview(out, input)
+			value, err := validateStrategyReview(out, input)
+			return outputContractResult(d.kind, input, value, err)
 		case StrategyExperimentProposeName:
 			var out StrategyExperimentProposalV1
 			if err := strictDecode(raw, &out); err != nil {
-				return nil, err
+				return nil, outputContractError(d.kind, input, err)
 			}
-			return validateExperimentProposal(out, input)
+			value, err := validateExperimentProposal(out, input)
+			return outputContractResult(d.kind, input, value, err)
 		case StrategyExperimentSummaryName:
 			var out StrategyExperimentResultV1
 			if err := strictDecode(raw, &out); err != nil {
-				return nil, err
+				return nil, outputContractError(d.kind, input, err)
 			}
-			return validateExperimentResult(out, input)
+			value, err := validateExperimentResult(out, input)
+			return outputContractResult(d.kind, input, value, err)
 		case AlertTriageName:
 			var out IncidentSetV1
 			if err := strictDecode(raw, &out); err != nil {
-				return nil, err
+				return nil, outputContractError(d.kind, input, err)
 			}
-			return validateIncidentSet(out, input)
+			value, err := validateIncidentSet(out, input)
+			return outputContractResult(d.kind, input, value, err)
 		case DailyMarketBriefName:
 			var out DailyMarketBriefV1
 			if err := strictDecode(raw, &out); err != nil {
-				return nil, err
+				return nil, outputContractError(d.kind, input, err)
 			}
-			return validateDailyBrief(out, input)
+			value, err := validateDailyBrief(out, input)
+			return outputContractResult(d.kind, input, value, err)
 		}
 		return nil, fmt.Errorf("unsupported workflow skill %q", d.kind)
 	})
@@ -386,6 +390,84 @@ func outputVersion(kind string) string {
 	}
 }
 
+func outputContract(kind string) string {
+	switch kind {
+	case MarketScanName:
+		return `{"version":"opportunity_set_v1","as_of":"<copy input.as_of exactly>","market_condition":3,"opportunities":[{"rank":1,"symbol":"SOLUSDT","score":100,"direction":"long","confidence":0.8,"thesis":"concise thesis","risks":["concrete risk"],"evidence":["fact from supplied candidate"]}],"data_missing":["preserve input items"]}`
+	case StrategyReviewName:
+		return `{"version":"strategy_review_v1","template_id":1,"market_condition":3,"verdict":"revise","confidence":0.8,"summary":"concise review","suitable_environments":[1,2],"failure_modes":["..."],"proposals":["..."],"evidence":["..."]}`
+	case StrategyExperimentProposeName:
+		return `{"version":"strategy_experiment_proposal_v1","base_template_id":1,"candidate_name":"...","technology_json":"{\"ma\":[]}","strategy_json":"[]","rationale":["..."],"risks":["..."]}`
+	case StrategyExperimentSummaryName:
+		return `{"version":"strategy_experiment_result_v1","base_template_id":1,"candidate_name":"...","technology_json":"<copy proposal exactly>","strategy_json":"<copy proposal exactly>","verdict":"promising","summary":"...","test":{"version":"strategy_experiment_test_v1","valid":true,"rule_count":1,"enabled_rule_count":1,"compiled_rules":1,"scenario_runs":3,"scenario_passes":3,"errors":[]},"proposed_changes":["..."],"risks":["..."]}`
+	case AlertTriageName:
+		return `{"version":"incident_set_v1","as_of":"<RFC3339>","incidents":[{"incident_id":"...","signal_ids":["..."],"symbols":["BTCUSDT"],"severity":"high","action":"notify","summary":"...","rationale":"..."}]}`
+	case DailyMarketBriefName:
+		return `{"version":"daily_market_brief_v1","as_of":"<copy input.as_of exactly>","market_condition":3,"headline":"concise headline","regime_summary":"concise market-regime summary","opportunities":[{"symbol":"SOLUSDT","why":"why this supplied candidate matters"}],"incidents":["concise incident summary derived from input.signals"],"watchlist":["SOLUSDT"],"risks":["market or data-quality risk"],"data_missing":["preserve input items"]}`
+	default:
+		return `{}`
+	}
+}
+func outputContractForInput(kind, input string) string {
+	contract := outputContract(kind)
+	if strings.TrimSpace(input) == "" {
+		return contract
+	}
+	replaceValue := func(key, example string, value any) {
+		raw, err := json.Marshal(value)
+		if err == nil {
+			contract = strings.Replace(contract, fmt.Sprintf(`%q:%s`, key, example), fmt.Sprintf(`%q:%s`, key, raw), 1)
+		}
+	}
+	switch kind {
+	case MarketScanName:
+		var in MarketScanInput
+		if strictDecodeString(input, &in) == nil {
+			contract = strings.Replace(contract, `"as_of":"<copy input.as_of exactly>"`, `"as_of":`+string(mustJSON(in.AsOf)), 1)
+			replaceValue("market_condition", "3", in.MarketCondition)
+		}
+	case StrategyReviewName:
+		var in StrategyReviewInput
+		if strictDecodeString(input, &in) == nil {
+			replaceValue("template_id", "1", in.Template.ID)
+			replaceValue("market_condition", "3", in.MarketCondition)
+		}
+	case StrategyExperimentProposeName:
+		var in StrategyExperimentProposalInput
+		if strictDecodeString(input, &in) == nil {
+			replaceValue("base_template_id", "1", in.Template.ID)
+		}
+	case StrategyExperimentSummaryName:
+		var in StrategyExperimentSummaryInput
+		if strictDecodeString(input, &in) == nil {
+			replaceValue("base_template_id", "1", in.Proposal.BaseTemplateID)
+			replaceValue("candidate_name", `"..."`, in.Proposal.CandidateName)
+		}
+	case DailyMarketBriefName:
+		var in DailyMarketBriefInput
+		if strictDecodeString(input, &in) == nil {
+			contract = strings.Replace(contract, `"as_of":"<copy input.as_of exactly>"`, `"as_of":`+string(mustJSON(in.AsOf)), 1)
+			replaceValue("market_condition", "3", in.MarketCondition)
+		}
+	}
+	return contract
+}
+
+func mustJSON(value any) json.RawMessage {
+	raw, _ := json.Marshal(value)
+	return raw
+}
+
+func outputContractError(kind, input string, err error) error {
+	return fmt.Errorf("output does not match %s: %v. Expected exact result schema: %s", outputVersion(kind), err, outputContractForInput(kind, input))
+}
+
+func outputContractResult(kind, input string, value any, err error) (any, error) {
+	if err != nil {
+		return nil, outputContractError(kind, input, err)
+	}
+	return value, nil
+}
 func strictDecodeString(raw string, target any) error {
 	return strictDecode(json.RawMessage(raw), target)
 }
@@ -573,14 +655,52 @@ func validateDailyBrief(out DailyMarketBriefV1, input string) (any, error) {
 	if err := strictDecodeString(input, &in); err != nil {
 		return nil, err
 	}
+	if out.Version != "daily_market_brief_v1" || !validAsOf(out.AsOf) || strings.TrimSpace(out.Headline) == "" || strings.TrimSpace(out.RegimeSummary) == "" {
+		return nil, fmt.Errorf("invalid daily_market_brief_v1 version/as_of/headline/regime_summary")
+	}
+	if out.AsOf != in.AsOf {
+		return nil, fmt.Errorf("as_of mismatch")
+	}
 	if !sameOptionalInt(out.MarketCondition, in.MarketCondition) {
 		return nil, fmt.Errorf("market_condition mismatch")
 	}
-	if out.Version != "daily_market_brief_v1" || !validAsOf(out.AsOf) || strings.TrimSpace(out.Headline) == "" || strings.TrimSpace(out.RegimeSummary) == "" {
-		return nil, fmt.Errorf("invalid daily_market_brief_v1")
-	}
 	if out.Opportunities == nil || out.Incidents == nil || out.Watchlist == nil || out.Risks == nil || out.DataMissing == nil {
-		return nil, fmt.Errorf("daily brief arrays required")
+		return nil, fmt.Errorf("daily brief arrays are required")
+	}
+	if in.Signals.Total == 0 && len(out.Incidents) > 0 {
+		return nil, fmt.Errorf("incidents must be empty when input signal total is zero")
+	}
+	allowed := make(map[string]bool, len(in.Candidates)+len(in.Signals.Symbols))
+	for _, candidate := range in.Candidates {
+		allowed[strings.ToUpper(strings.TrimSpace(candidate.Symbol))] = true
+	}
+	for _, symbol := range in.Signals.Symbols {
+		allowed[strings.ToUpper(strings.TrimSpace(symbol))] = true
+	}
+	seenOpportunities := map[string]bool{}
+	for i := range out.Opportunities {
+		symbol := strings.ToUpper(strings.TrimSpace(out.Opportunities[i].Symbol))
+		out.Opportunities[i].Symbol = symbol
+		if symbol == "" || !allowed[symbol] || seenOpportunities[symbol] || strings.TrimSpace(out.Opportunities[i].Why) == "" {
+			return nil, fmt.Errorf("invalid or duplicate opportunity symbol %q", symbol)
+		}
+		seenOpportunities[symbol] = true
+	}
+	for i := range out.Watchlist {
+		symbol := strings.ToUpper(strings.TrimSpace(out.Watchlist[i]))
+		out.Watchlist[i] = symbol
+		if symbol == "" || !allowed[symbol] {
+			return nil, fmt.Errorf("watchlist symbol %q is not present in supplied input", symbol)
+		}
+	}
+	missing := make(map[string]bool, len(out.DataMissing))
+	for _, item := range out.DataMissing {
+		missing[strings.TrimSpace(item)] = true
+	}
+	for _, required := range in.DataMissing {
+		if !missing[strings.TrimSpace(required)] {
+			return nil, fmt.Errorf("data_missing must preserve input item %q", required)
+		}
 	}
 	return out, nil
 }
