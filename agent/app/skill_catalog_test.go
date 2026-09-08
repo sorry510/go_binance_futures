@@ -11,7 +11,7 @@ func TestNativeSkillChatDefaults(t *testing.T) {
 	disabled := map[string]bool{
 		"alert_analysis": true, "market_regime": true, "strategy_builder": true,
 		"alert_triage": true, "strategy_experiment_propose": true, "strategy_experiment_summary": true,
-		"symbol_team_technical": true, "symbol_team_flow": true, "symbol_team_supervisor": true,
+		"symbol_team_technical": true, "symbol_team_flow": true, "symbol_team_news": true, "symbol_team_supervisor": true,
 	}
 	for _, item := range AvailableSkillImplementations() {
 		want := 1

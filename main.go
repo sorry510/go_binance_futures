@@ -13,6 +13,7 @@ import (
 	"go_binance_futures/models"
 	_ "go_binance_futures/routers"
 	alertpipeline "go_binance_futures/service/alertpipeline"
+	marketintelligence "go_binance_futures/service/marketintelligence"
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
@@ -33,7 +34,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 5 // 每次变动数据库版本号 +1
+var dbVersion int64 = 6 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -47,6 +48,8 @@ var dbname, _ = config.String("database::dbname")
 var dbCollation, _ = config.String("database::collation")
 var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var tradeKey, _ = config.String("binance::api_key")
+var tradeSecret, _ = config.String("binance::api_secret")
+var tradeProxyURL, _ = config.String("binance::proxy_url")
 var mcpServerEnable, _ = config.Bool("mcp::mcp_server_enable")
 var SystemConfig models.Config
 
@@ -94,6 +97,10 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentTask))
 	orm.RegisterModel(new(models.AgentTaskEvent))
 	orm.RegisterModel(new(models.AgentAlertPipelineTrace))
+	orm.RegisterModel(new(models.AgentMarketEvent))
+	orm.RegisterModel(new(models.AgentMarketEventSource))
+	orm.RegisterModel(new(models.AgentMarketFact))
+	orm.RegisterModel(new(models.AgentMarketSourceStatus))
 	orm.RegisterModel(new(models.AgentConversation))
 	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.AgentMemory))
@@ -241,6 +248,8 @@ func main() {
 		return
 	}
 	initializeRuntimeDatabase()
+
+	go marketintelligence.RunBinanceAnnouncementStream(context.Background(), marketintelligence.BinanceAnnouncementConfig{APIKey: tradeKey, Secret: tradeSecret, ProxyURL: tradeProxyURL})
 
 	if err := alertpipeline.StartDefault(context.Background(), func() models.Config { return SystemConfig }); err != nil {
 		logs.Error("start alert pipeline:", err)
