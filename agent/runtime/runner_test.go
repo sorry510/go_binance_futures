@@ -1258,3 +1258,49 @@ func TestMarketScanDirectLegacyShapeRepairsAtValidationNotDecisionProtocol(t *te
 		t.Fatalf("expected strict final validation repair, events=%+v", stored.Events)
 	}
 }
+
+func TestDailyMarketBriefRepairsWithFullOutputContract(t *testing.T) {
+	const asOf = "2026-09-07T15:25:20Z"
+	input := `{"version":"daily_market_brief_input_v1","as_of":"` + asOf + `","market_condition":3,"candidates":[{"symbol":"SOLUSDT"}],"signals":{"total":0,"by_type":{},"by_severity":{},"symbols":[]},"data_missing":["盘口点差"]}`
+	legacyShape := `{"version":"daily_market_brief_v1","brief_date":"2026-09-07","market_condition":3,"headline":"市场摘要"}`
+	fixedShape := `{"version":"daily_market_brief_v1","as_of":"` + asOf + `","market_condition":3,"headline":"震荡市场，等待确认","regime_summary":"当前为震荡环境，候选仅用于观察。","opportunities":[{"symbol":"SOLUSDT","why":"候选由确定性扫描器筛出，但仍缺少盘口确认。"}],"incidents":[],"watchlist":["SOLUSDT"],"risks":["盘口点差缺失"],"data_missing":["盘口点差"]}`
+	client := &fakeLLMClient{items: []fakeLLMItem{
+		{response: &llm.Response{Model: "fake", Content: legacyShape}},
+		{response: &llm.Response{Model: "fake", Content: fixedShape}},
+	}}
+	runner, store := newTestRunner(t, client, workflowSkills.DailyMarketBrief())
+
+	result, err := runner.Run(context.Background(), Request{Skill: workflowSkills.DailyMarketBriefName, Input: input})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(client.requests) != 2 {
+		t.Fatalf("LLM calls = %d, want 2", len(client.requests))
+	}
+	if !strings.Contains(client.request(0).System, `"headline"`) || !strings.Contains(client.request(0).System, `"regime_summary"`) {
+		t.Fatalf("daily_market_brief system prompt is missing the concrete output contract: %s", client.request(0).System)
+	}
+	feedbackHasContract := false
+	for _, message := range client.request(1).Messages {
+		if strings.Contains(message.Content, "Expected exact result schema") && strings.Contains(message.Content, "headline") {
+			feedbackHasContract = true
+			break
+		}
+	}
+	if !feedbackHasContract {
+		t.Fatalf("validation repair did not include the exact output contract: %+v", client.request(1).Messages)
+	}
+	stored, err := store.Get(context.Background(), result.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, event := range stored.Events {
+		if event.ErrorType == "decision_protocol" || event.Stage == "repairing_decision" {
+			t.Fatalf("daily_market_brief must repair at final validation, not decision protocol: %+v", event)
+		}
+	}
+	out, ok := result.Value.(workflowSkills.DailyMarketBriefV1)
+	if !ok || out.AsOf != asOf || len(out.Opportunities) != 1 || out.Opportunities[0].Symbol != "SOLUSDT" {
+		t.Fatalf("unexpected daily market brief result: %#v", result.Value)
+	}
+}

@@ -1,5 +1,8 @@
 ### Change Log
 
+## v1.0.9
+- 修复 ai agent
+
 ## v1.0.8
 - 修复 ai workflow 展示信息
 
