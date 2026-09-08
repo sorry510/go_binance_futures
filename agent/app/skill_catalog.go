@@ -28,6 +28,7 @@ var skillCatalog = map[string]SkillImplementation{
 	"symbol_analysis_team":                       {Name: "symbol_analysis_team", DisplayName: "多智能体单币分析", Description: "Technical + Flow 并行分析共享行情上下文，再由 Supervisor 汇总 Typed Result。", Type: "team", ChatDefault: 1},
 	symbolteam.TechnicalSkillName:                {Name: symbolteam.TechnicalSkillName, DisplayName: "技术分析 Agent", Description: "Multi-Agent Team 内部角色：基于共享上下文分析趋势、结构、波动与关键价位。", Type: "native", ChatDefault: 0},
 	symbolteam.FlowSkillName:                     {Name: symbolteam.FlowSkillName, DisplayName: "资金流分析 Agent", Description: "Multi-Agent Team 内部角色：基于共享上下文分析 Funding、OI、Taker、Depth 与强平。", Type: "native", ChatDefault: 0},
+	symbolteam.NewsSkillName:                     {Name: symbolteam.NewsSkillName, DisplayName: "新闻事件分析 Agent", Description: "Multi-Agent Team 内部角色：仅消费统一 Market Intelligence，分析公告、Alpha、新闻与本地 Signal 的时效和影响。", Type: "native", ChatDefault: 0},
 	symbolteam.SupervisorSkillName:               {Name: symbolteam.SupervisorSkillName, DisplayName: "Team Supervisor", Description: "Multi-Agent Team 内部角色：仅汇总 Typed Child Result，不增加 Tool 权限。", Type: "native", ChatDefault: 0},
 	alertanalysis.Name:                           {Name: alertanalysis.Name, DisplayName: "事件报警分析", Description: "对 Signal Engine 预筛选异常进行 AI 二次确认。", Type: "native", ChatDefault: 0},
 	marketregime.Name:                            {Name: marketregime.Name, DisplayName: "市场趋势分析", Description: "根据确定性市场快照识别 Market Regime。", Type: "native", ChatDefault: 0},

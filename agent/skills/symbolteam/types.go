@@ -5,6 +5,7 @@ import "encoding/json"
 const (
 	TechnicalSkillName  = "symbol_team_technical"
 	FlowSkillName       = "symbol_team_flow"
+	NewsSkillName       = "symbol_team_news"
 	SupervisorSkillName = "symbol_team_supervisor"
 )
 
@@ -61,6 +62,18 @@ type FlowAnalysisV1 struct {
 	Evidence     []Evidence `json:"evidence"`
 }
 
+type NewsAnalysisV1 struct {
+	Version     string     `json:"version"`
+	Symbol      string     `json:"symbol"`
+	AsOf        string     `json:"as_of"`
+	Bias        string     `json:"bias"`
+	Impact      string     `json:"impact"`
+	Summary     string     `json:"summary"`
+	Confidence  float64    `json:"confidence"`
+	DataMissing []string   `json:"data_missing"`
+	Evidence    []Evidence `json:"evidence"`
+}
+
 type MemberInput struct {
 	Role        string          `json:"role"`
 	TaskID      string          `json:"task_id,omitempty"`
@@ -74,6 +87,7 @@ type SupervisorInput struct {
 	Prompt    string      `json:"prompt,omitempty"`
 	Technical MemberInput `json:"technical"`
 	Flow      MemberInput `json:"flow"`
+	News      MemberInput `json:"news"`
 }
 
 type SupervisorEvidence struct {
