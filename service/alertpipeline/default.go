@@ -4,12 +4,16 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	agentapp "go_binance_futures/agent/app"
 	agentevent "go_binance_futures/agent/event"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	marketintelligence "go_binance_futures/service/marketintelligence"
 	signalservice "go_binance_futures/service/signal"
+
+	"github.com/beego/beego/v2/core/logs"
 )
 
 type ConfigProvider func() models.Config
@@ -55,7 +59,10 @@ func StartDefault(ctx context.Context, provider ConfigProvider) error {
 			return
 		}
 		defaultEngine, err = signalservice.NewEngine(bus,
-			func() signalservice.Settings { return settings().Signal }, defaultPipeline.Emit)
+			func() signalservice.Settings { return settings().Signal }, func(value signalservice.Signal) bool {
+				go persistMarketIntelligenceSignal(value)
+				return defaultPipeline.Emit(value)
+			})
 		if err != nil {
 			defaultErr = err
 			return
@@ -85,4 +92,12 @@ func DefaultStatus(traceLimit int) RuntimeStatus {
 
 func DefaultPipeline() *Pipeline {
 	return defaultPipeline
+}
+
+func persistMarketIntelligenceSignal(value signalservice.Signal) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if _, _, err := marketintelligence.DefaultService().IngestSignal(ctx, value); err != nil {
+		logs.Warning("persist market intelligence signal:", err)
+	}
 }
