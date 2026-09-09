@@ -45,7 +45,7 @@ V3 的重点不是“让 AI 更自由”，而是让每个判断都更容易验�
 | [V3-0](./00-phase-v3-0-baseline.md) | P0 ✅ | 冻结 V2 行为、Benchmark、Replay/Eval 基线 |
 | [V3-1](./01-phase-v3-1-multi-agent.md) | P0 ✅ | Multi-Agent Team：多个专业 Agent 以 Typed Output 协作 |
 | [V3-2](./02-phase-v3-2-market-intelligence.md) | P0 ✅ | Market Intelligence：统一 Fact/Event，接入新闻、公告、Alpha 与资金面 |
-| [V3-3](./03-phase-v3-3-backtest.md) | P0 | Historical Backtest Engine：正式、可复现的历史回测 |
+| [V3-3](./03-phase-v3-3-backtest.md) | P0 ✅ | Historical Backtest Engine：正式确定性历史回测 + 全局历史行情仓库 |
 | [V3-4](./04-phase-v3-4-strategy-lab.md) | P1 | Strategy Lab：候选、回测、模拟、Promote、回滚和退役 |
 | [V3-5](./05-phase-v3-5-portfolio-risk.md) | P1 | Portfolio Risk：账户级风险预算、组合暴露和并发 Reservation |
 | [V3-6](./06-phase-v3-6-execution-lifecycle.md) | P1 | Execution Lifecycle：保护单、部分成交、加减仓、平仓和恢复 |
@@ -92,7 +92,7 @@ V3-9 Agent Studio
 
 - 一个交易机会可以由多个专业 Agent 协作完成，并能追踪每个子判断。
 - 新闻、公告、Alpha、资金面和本地 Signal 使用统一 MarketFact/MarketEvent 表达。
-- 策略可以基于固定历史数据做可复现回测，并计算手续费、Funding、滑点和风险指标。
+- 策略可以基于统一 Historical Market Repository 做确定性历史回测，并计算手续费、Funding、滑点和风险指标；每次 Run 记录实际 data_hash。
 - 策略具备 Candidate → Backtest → Paper → Active → Retired 生命周期和版本回滚。
 - 多个同时出现的 Proposal 受账户级 Portfolio Risk 统一约束。
 - 真实交易具备 Entry、保护性 Stop、Take Profit、部分成交、平仓和重启恢复能力。
