@@ -85,4 +85,4 @@ ECharts 改为按模块引入后，Backtest production chunk 从约 1.05 MB 降�
 
 ## 8. V3-3 边界
 
-没有实现 V3-4 Candidate / Paper / Active / Retired 生命周期，没有参数大规模寻优，没有 LLM 逐 K 线交易决策，也没有改变真实交易链路。
+没有实现策略 Candidate / Paper / Active / Retired 生命周期，没有参数大规模寻优，没有 LLM 逐 K 线交易决策，也没有改变真实交易链路。后续规划复审已取消 Strategy Lab：新策略直接新建 Strategy Template，历史 Backtest / Paper 依靠已保存的完整策略快照复现。

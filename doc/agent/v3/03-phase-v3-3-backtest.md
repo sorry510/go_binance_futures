@@ -71,5 +71,5 @@ Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、Execut
 
 - 不做遗传算法/大规模参数优化。
 - 不让 LLM 在回测循环里逐 K 线做决策。
-- 不做 Candidate/Active/Promote 生命周期；留给 V3-4。
+- 不做 Candidate/Active/Promote 生命周期；个人项目采用“新策略新建 Strategy Template”，历史 Run 依靠完整 Snapshot 保持可复现。
 - 不做历史 Kline Revision/Watermark；历史数据采用 latest canonical value。
