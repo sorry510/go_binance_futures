@@ -240,6 +240,52 @@ func GetKlineData(symbol string, interval string, limit int) (klines []*futures.
 	return klines, err
 }
 
+// GetHistoricalKlines returns closed futures K-lines ordered from oldest to newest.
+// It paginates the exchange API and never returns a bar whose CloseTime is after endTime.
+func GetHistoricalKlines(ctx context.Context, symbol, interval string, startTime, endTime int64) ([]*futures.Kline, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	interval = strings.TrimSpace(interval)
+	if symbol == "" || interval == "" || startTime <= 0 || endTime <= 0 || startTime > endTime {
+		return nil, fmt.Errorf("historical K-line requires symbol, interval and valid time range")
+	}
+	cursor := startTime
+	seen := map[int64]bool{}
+	result := make([]*futures.Kline, 0)
+	for cursor <= endTime {
+		page, err := futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).StartTime(cursor).EndTime(endTime).Limit(1000).Do(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("get historical K-lines %s %s: %w", symbol, interval, err)
+		}
+		if len(page) == 0 {
+			break
+		}
+		lastOpen := cursor
+		for _, item := range page {
+			if item == nil || item.OpenTime < startTime || item.CloseTime > endTime || seen[item.OpenTime] {
+				continue
+			}
+			seen[item.OpenTime] = true
+			result = append(result, item)
+			if item.OpenTime > lastOpen {
+				lastOpen = item.OpenTime
+			}
+		}
+		if lastOpen < cursor || len(page) < 1000 {
+			break
+		}
+		next := lastOpen + 1
+		if next <= cursor {
+			break
+		}
+		cursor = next
+	}
+	sort.Slice(result, func(i, j int) bool { return result[i].OpenTime < result[j].OpenTime })
+	return result, nil
+}
+
 // 限价买入
 // @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
 // @returns /doc/order.js
@@ -540,6 +586,50 @@ func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate
 	}
 	res, err = service.Do(context.Background())
 	return res, err
+}
+
+// GetHistoricalFundingRates returns funding records ordered from oldest to newest.
+func GetHistoricalFundingRates(ctx context.Context, symbol string, startTime, endTime int64) ([]*futures.FundingRate, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	if symbol == "" || startTime <= 0 || endTime <= 0 || startTime > endTime {
+		return nil, fmt.Errorf("historical funding requires symbol and valid time range")
+	}
+	cursor := startTime
+	seen := map[int64]bool{}
+	result := make([]*futures.FundingRate, 0)
+	for cursor <= endTime {
+		page, err := futuresClient.NewFundingRateService().Symbol(symbol).StartTime(cursor).EndTime(endTime).Limit(1000).Do(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("get historical funding %s: %w", symbol, err)
+		}
+		if len(page) == 0 {
+			break
+		}
+		lastTime := cursor
+		for _, item := range page {
+			if item == nil || item.FundingTime < startTime || item.FundingTime > endTime || seen[item.FundingTime] {
+				continue
+			}
+			seen[item.FundingTime] = true
+			result = append(result, item)
+			if item.FundingTime > lastTime {
+				lastTime = item.FundingTime
+			}
+		}
+		if lastTime < cursor || len(page) < 1000 {
+			break
+		}
+		next := lastTime + 1
+		if next <= cursor {
+			break
+		}
+		cursor = next
+	}
+	sort.Slice(result, func(i, j int) bool { return result[i].FundingTime < result[j].FundingTime })
+	return result, nil
 }
 
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)

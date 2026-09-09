@@ -1,0 +1,395 @@
+package backtest
+
+import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"sync"
+	"time"
+
+	"go_binance_futures/models"
+	"go_binance_futures/service/historicalmarket"
+	strategyservice "go_binance_futures/service/strategy"
+
+	"github.com/beego/beego/v2/client/orm"
+)
+
+type Manager struct {
+	builder DatasetBuilder
+	engine  Engine
+	mu      sync.Mutex
+	cancel  map[string]context.CancelFunc
+}
+
+var defaultManagerOnce sync.Once
+var defaultManager *Manager
+
+func DefaultManager() *Manager {
+	defaultManagerOnce.Do(func() {
+		defaultManager = NewManager(DatasetBuilder{Repository: historicalmarket.DefaultRepository()})
+		_ = defaultManager.markInterrupted()
+	})
+	return defaultManager
+}
+func NewManager(builder DatasetBuilder) *Manager {
+	return &Manager{builder: builder, engine: Engine{}, cancel: map[string]context.CancelFunc{}}
+}
+
+func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
+	request.Symbol = strings.ToUpper(strings.TrimSpace(request.Symbol))
+	request.ExecutionInterval = strings.TrimSpace(request.ExecutionInterval)
+	request.Config = NormalizeRunConfig(request.Config)
+	if request.StrategyTemplateID <= 0 {
+		return RunSummary{}, fmt.Errorf("strategy_template_id is required")
+	}
+	if request.Symbol == "" || !strings.HasSuffix(request.Symbol, "USDT") {
+		return RunSummary{}, fmt.Errorf("symbol must be a USDT futures contract")
+	}
+	if request.StartTime <= 0 || request.EndTime <= request.StartTime {
+		return RunSummary{}, fmt.Errorf("valid start_time and end_time are required")
+	}
+	if _, err := intervalDuration(request.ExecutionInterval, time.UnixMilli(request.StartTime)); err != nil {
+		return RunSummary{}, err
+	}
+	o := orm.NewOrm()
+	template := models.StrategyTemplates{ID: request.StrategyTemplateID}
+	if err := o.Read(&template); err != nil {
+		return RunSummary{}, fmt.Errorf("load strategy template: %w", err)
+	}
+	strategyVersion := strategyservice.StrategySnapshotHash(template.Technology, template.Strategy)
+	now := time.Now().UnixMilli()
+	runID := newRunID()
+	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: EngineVersion, MarketConditionModel: MarketConditionModel, Symbol: request.Symbol, ExecutionInterval: request.ExecutionInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
+	if _, err := o.Insert(&row); err != nil {
+		return RunSummary{}, fmt.Errorf("create backtest run: %w", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	manager.mu.Lock()
+	manager.cancel[runID] = cancel
+	manager.mu.Unlock()
+	go manager.run(ctx, row, request)
+	return summaryFromRow(row), nil
+}
+func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, request StartRequest) {
+	defer manager.finishActive(row.RunID)
+	manager.updateState(row.RunID, "running", "building_dataset", 5, "", false)
+	lastProgress := 5
+	reportProgress := func(stage string, base, span, completed, total int) {
+		if total <= 0 {
+			return
+		}
+		value := base + completed*span/total
+		if value > base+span {
+			value = base + span
+		}
+		if value <= lastProgress {
+			return
+		}
+		lastProgress = value
+		manager.updateProgress(row.RunID, stage, value)
+	}
+	dataset, err := manager.builder.BuildWithProgress(ctx, DatasetRequest{Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, TechnologyJSON: row.TechnologyJSON}, func(completed, total int) {
+		reportProgress("building_dataset", 5, 25, completed, total)
+	})
+	if err != nil {
+		manager.finishError(row.RunID, ctx, err)
+		return
+	}
+	manifest, err := saveDataset(ctx, dataset)
+	if err != nil {
+		manager.finishError(row.RunID, ctx, err)
+		return
+	}
+	dataset.DatasetID = manifest.DatasetID
+	dataset.DatasetSpecHash = manifest.DatasetSpecHash
+	lastProgress = 35
+	if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", row.RunID).Update(orm.Params{"dataset_id": dataset.DatasetID, "dataset_spec_hash": dataset.DatasetSpecHash, "data_hash": dataset.DataHash, "stage": "running_backtest", "progress": 35, "updated_at": time.Now().UnixMilli()}); err != nil {
+		manager.finishError(row.RunID, ctx, err)
+		return
+	}
+	result, err := manager.engine.RunWithProgress(ctx, dataset, StrategySnapshot{TemplateID: row.StrategyTemplateID, TemplateName: row.StrategyTemplateName, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON, Version: row.StrategyVersion}, request.Config, func(completed, total int) {
+		reportProgress("running_backtest", 35, 55, completed, total)
+	})
+	if err != nil {
+		manager.finishError(row.RunID, ctx, err)
+		return
+	}
+	lastProgress = 90
+	manager.updateProgress(row.RunID, "saving_results", 90)
+	if err := saveResultWithProgress(ctx, row.RunID, result, func(completed, total int) {
+		reportProgress("saving_results", 90, 9, completed, total)
+	}); err != nil {
+		manager.finishError(row.RunID, ctx, err)
+		return
+	}
+	if err := ctx.Err(); err != nil {
+		manager.finishError(row.RunID, ctx, err)
+		return
+	}
+	metrics, _ := json.Marshal(result.Metrics)
+	now := time.Now().UnixMilli()
+	_, err = orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", row.RunID).Update(orm.Params{"status": "succeeded", "stage": "completed", "progress": 100, "metrics_json": string(metrics), "updated_at": now, "completed_at": now})
+	if err != nil {
+		manager.finishError(row.RunID, ctx, err)
+	}
+}
+func (manager *Manager) finishActive(runID string) {
+	manager.mu.Lock()
+	if cancel := manager.cancel[runID]; cancel != nil {
+		cancel()
+	}
+	delete(manager.cancel, runID)
+	manager.mu.Unlock()
+}
+func (manager *Manager) updateState(runID, status, stage string, progress int, errorText string, completed bool) {
+	params := orm.Params{"status": status, "stage": stage, "progress": progress, "updated_at": time.Now().UnixMilli(), "error": errorText}
+	if status == "running" && stage == "building_dataset" {
+		params["started_at"] = time.Now().UnixMilli()
+	}
+	if completed {
+		params["completed_at"] = time.Now().UnixMilli()
+	}
+	_, _ = orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).Update(params)
+}
+func (manager *Manager) updateProgress(runID, stage string, progress int) {
+	_, _ = orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).Update(orm.Params{"stage": stage, "progress": progress, "updated_at": time.Now().UnixMilli()})
+}
+
+func (manager *Manager) finishError(runID string, ctx context.Context, cause error) {
+	if ctx.Err() != nil {
+		manager.updateState(runID, "cancelled", "cancelled", 100, "backtest cancelled", true)
+		return
+	}
+	manager.updateState(runID, "failed", "failed", 100, cause.Error(), true)
+}
+func (manager *Manager) Cancel(runID string) error {
+	var row models.AgentBacktestRun
+	if err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).One(&row); err != nil {
+		return err
+	}
+	if row.Status != "queued" && row.Status != "running" {
+		return fmt.Errorf("backtest run is already %s", row.Status)
+	}
+	manager.mu.Lock()
+	cancel := manager.cancel[runID]
+	manager.mu.Unlock()
+	if cancel == nil {
+		return fmt.Errorf("backtest run is not active in this process")
+	}
+	cancel()
+	manager.updateState(runID, "cancelled", "cancelled", 100, "backtest cancelled", true)
+	return nil
+}
+func (manager *Manager) markInterrupted() error {
+	now := time.Now().UnixMilli()
+	_, err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("status__in", "queued", "running").Update(orm.Params{"status": "interrupted", "stage": "interrupted", "progress": 100, "error": "process restarted before backtest completed", "updated_at": now, "completed_at": now})
+	return err
+}
+
+func (manager *Manager) List(page, limit int) ([]RunSummary, int64, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	q := orm.NewOrm().QueryTable(new(models.AgentBacktestRun))
+	total, err := q.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+	var rows []models.AgentBacktestRun
+	if _, err = q.OrderBy("-created_at").Limit(limit, (page-1)*limit).All(&rows); err != nil {
+		return nil, 0, err
+	}
+	out := make([]RunSummary, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, summaryFromRow(row))
+	}
+	return out, total, nil
+}
+func (manager *Manager) Get(runID string) (RunDetail, error) {
+	var row models.AgentBacktestRun
+	if err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).One(&row); err != nil {
+		return RunDetail{}, err
+	}
+	detail := RunDetail{RunSummary: summaryFromRow(row), Trades: []Trade{}, Events: []AuditEvent{}, Equity: []EquityPoint{}}
+	if row.DatasetID != "" {
+		m, err := loadDatasetManifest(row.DatasetID)
+		if err == nil {
+			detail.Dataset = &m
+		}
+	}
+	return detail, nil
+}
+func (manager *Manager) Trades(runID string, limit int) ([]Trade, error) {
+	if limit <= 0 || limit > 5000 {
+		limit = 5000
+	}
+	var rows []models.AgentBacktestTrade
+	if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestTrade)).Filter("run_id", runID).OrderBy("sequence").Limit(limit).All(&rows); err != nil {
+		return nil, err
+	}
+	out := make([]Trade, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, Trade{Sequence: r.Sequence, Symbol: r.Symbol, Side: r.Side, EntryTime: r.EntryTime, ExitTime: r.ExitTime, EntryPrice: r.EntryPrice, ExitPrice: r.ExitPrice, Quantity: r.Quantity, GrossPnL: r.GrossPnL, Fees: r.Fees, FundingPnL: r.FundingPnL, NetPnL: r.NetPnL, HoldingMs: r.HoldingMs, ExitReason: r.ExitReason, OpenStrategyName: r.OpenStrategyName, OpenStrategyType: r.OpenStrategyType, OpenStrategyHash: r.OpenStrategyHash, CloseStrategyName: r.CloseStrategyName, CloseStrategyType: r.CloseStrategyType, CloseStrategyHash: r.CloseStrategyHash, MarketCondition: r.MarketCondition})
+	}
+	return out, nil
+}
+func (manager *Manager) Events(runID string, limit int) ([]AuditEvent, error) {
+	if limit <= 0 || limit > 10000 {
+		limit = 10000
+	}
+	var rows []models.AgentBacktestEvent
+	if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestEvent)).Filter("run_id", runID).OrderBy("sequence").Limit(limit).All(&rows); err != nil {
+		return nil, err
+	}
+	out := make([]AuditEvent, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, AuditEvent{Sequence: r.Sequence, EventTime: r.EventTime, Type: r.Type, Action: r.Action, Side: r.Side, Price: r.Price, Quantity: r.Quantity, Data: json.RawMessage(r.DataJSON)})
+	}
+	return out, nil
+}
+func (manager *Manager) Equity(runID string, limit int) ([]EquityPoint, error) {
+	if limit <= 0 || limit > 20000 {
+		limit = 20000
+	}
+	var rows []models.AgentBacktestEquityPoint
+	if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).OrderBy("sequence").Limit(limit).All(&rows); err != nil {
+		return nil, err
+	}
+	out := make([]EquityPoint, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, EquityPoint{Sequence: r.Sequence, BarTime: r.BarTime, Equity: r.Equity, Cash: r.Cash, UnrealizedPnL: r.UnrealizedPnL, DrawdownPct: r.DrawdownPct, PositionSide: r.PositionSide})
+	}
+	return out, nil
+}
+
+func saveDataset(ctx context.Context, d Dataset) (DatasetManifest, error) {
+	if err := ctx.Err(); err != nil {
+		return DatasetManifest{}, err
+	}
+	o := orm.NewOrm()
+	var existing models.AgentBacktestDataset
+	if err := o.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_spec_hash", d.DatasetSpecHash).One(&existing); err == nil {
+		return manifestFromRow(existing), nil
+	} else if err != orm.ErrNoRows {
+		return DatasetManifest{}, err
+	}
+	intervals, _ := json.Marshal(d.Intervals)
+	benchmarks, _ := json.Marshal(d.BenchmarkSymbols)
+	now := time.Now().UnixMilli()
+	row := models.AgentBacktestDataset{DatasetID: d.DatasetID, DatasetSpecHash: d.DatasetSpecHash, Symbol: d.Symbol, ExecutionInterval: d.ExecutionInterval, IntervalsJSON: string(intervals), BenchmarkSymbolsJSON: string(benchmarks), StartTime: d.StartTime, EndTime: d.EndTime, WarmupStartTime: d.WarmupStartTime, Market: d.Market, CreatedAt: now, UpdatedAt: now}
+	if _, err := o.Insert(&row); err != nil {
+		if reread := o.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_spec_hash", d.DatasetSpecHash).One(&existing); reread == nil {
+			return manifestFromRow(existing), nil
+		}
+		return DatasetManifest{}, err
+	}
+	return manifestFromRow(row), nil
+}
+func loadDatasetManifest(id string) (DatasetManifest, error) {
+	var row models.AgentBacktestDataset
+	if err := orm.NewOrm().QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_id", id).One(&row); err != nil {
+		return DatasetManifest{}, err
+	}
+	return manifestFromRow(row), nil
+}
+func manifestFromRow(row models.AgentBacktestDataset) DatasetManifest {
+	var intervals, bench []string
+	_ = json.Unmarshal([]byte(row.IntervalsJSON), &intervals)
+	_ = json.Unmarshal([]byte(row.BenchmarkSymbolsJSON), &bench)
+	return DatasetManifest{DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, Market: row.Market, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, Intervals: intervals, BenchmarkSymbols: bench, StartTime: row.StartTime, EndTime: row.EndTime, WarmupStartTime: row.WarmupStartTime, CreatedAt: row.CreatedAt}
+}
+func saveResult(ctx context.Context, runID string, result Result) error {
+	return saveResultWithProgress(ctx, runID, result, nil)
+}
+
+func saveResultWithProgress(ctx context.Context, runID string, result Result, progress ProgressCallback) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	o := orm.NewOrm()
+	totalRows := len(result.Trades) + len(result.Events) + len(result.Equity)
+	completedRows := 0
+	report := func() {
+		if progress != nil {
+			if totalRows == 0 {
+				progress(1, 1)
+				return
+			}
+			progress(completedRows, totalRows)
+		}
+	}
+	report()
+	tradeRows := make([]models.AgentBacktestTrade, 0, len(result.Trades))
+	for _, t := range result.Trades {
+		tradeRows = append(tradeRows, models.AgentBacktestTrade{RunID: runID, Sequence: t.Sequence, Symbol: t.Symbol, Side: t.Side, EntryTime: t.EntryTime, ExitTime: t.ExitTime, EntryPrice: t.EntryPrice, ExitPrice: t.ExitPrice, Quantity: t.Quantity, GrossPnL: t.GrossPnL, Fees: t.Fees, FundingPnL: t.FundingPnL, NetPnL: t.NetPnL, HoldingMs: t.HoldingMs, ExitReason: t.ExitReason, OpenStrategyName: t.OpenStrategyName, OpenStrategyType: t.OpenStrategyType, OpenStrategyHash: t.OpenStrategyHash, CloseStrategyName: t.CloseStrategyName, CloseStrategyType: t.CloseStrategyType, CloseStrategyHash: t.CloseStrategyHash, MarketCondition: t.MarketCondition})
+	}
+	if len(tradeRows) > 0 {
+		if _, err := o.InsertMulti(500, &tradeRows); err != nil {
+			return err
+		}
+		completedRows += len(tradeRows)
+		report()
+	}
+	eventRows := make([]models.AgentBacktestEvent, 0, len(result.Events))
+	for _, e := range result.Events {
+		eventRows = append(eventRows, models.AgentBacktestEvent{RunID: runID, Sequence: e.Sequence, EventTime: e.EventTime, Type: e.Type, Action: e.Action, Side: e.Side, Price: e.Price, Quantity: e.Quantity, DataJSON: string(e.Data)})
+	}
+	for start := 0; start < len(eventRows); start += 500 {
+		end := start + 500
+		if end > len(eventRows) {
+			end = len(eventRows)
+		}
+		chunk := eventRows[start:end]
+		if _, err := o.InsertMulti(500, &chunk); err != nil {
+			return err
+		}
+		completedRows += len(chunk)
+		report()
+	}
+	eqRows := make([]models.AgentBacktestEquityPoint, 0, len(result.Equity))
+	for _, e := range result.Equity {
+		eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
+	}
+	for start := 0; start < len(eqRows); start += 500 {
+		end := start + 500
+		if end > len(eqRows) {
+			end = len(eqRows)
+		}
+		chunk := eqRows[start:end]
+		if _, err := o.InsertMulti(500, &chunk); err != nil {
+			return err
+		}
+		completedRows += len(chunk)
+		report()
+	}
+	if totalRows == 0 {
+		report()
+	}
+	return nil
+}
+func summaryFromRow(row models.AgentBacktestRun) RunSummary {
+	var metrics *Metrics
+	if strings.TrimSpace(row.MetricsJSON) != "" {
+		var m Metrics
+		if json.Unmarshal([]byte(row.MetricsJSON), &m) == nil {
+			metrics = &m
+		}
+	}
+	return RunSummary{RunID: row.RunID, DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, DataHash: row.DataHash, StrategyTemplateID: row.StrategyTemplateID, StrategyTemplateName: row.StrategyTemplateName, StrategyVersion: row.StrategyVersion, EngineVersion: row.EngineVersion, MarketConditionModel: row.MarketConditionModel, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, Config: RunConfig{InitialEquity: row.InitialEquity, PositionSizePct: row.PositionSizePct, Leverage: row.Leverage, FeeRate: row.FeeRate, SlippageBps: row.SlippageBps, StopLossPct: row.StopLossPct, TakeProfitPct: row.TakeProfitPct}, Status: row.Status, Stage: row.Stage, Progress: row.Progress, Metrics: metrics, Error: row.Error, CreatedAt: row.CreatedAt, StartedAt: row.StartedAt, UpdatedAt: row.UpdatedAt, CompletedAt: row.CompletedAt}
+}
+func newRunID() string {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err == nil {
+		return "bt_" + hex.EncodeToString(b)
+	}
+	return fmt.Sprintf("bt_%d", time.Now().UnixNano())
+}

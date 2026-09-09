@@ -1,5 +1,9 @@
 ### Change Log
 
+## v1.1.0
+- 升级 ai agent
+- 增加初版的 历史回测 功能
+
 ## v1.0.9
 - 修复 ai agent
 
