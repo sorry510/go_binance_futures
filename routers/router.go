@@ -37,10 +37,17 @@ func init() {
 	web.Router("/agents/memories/:id/approve", &controllers.AgentMemoryController{}, "post:Approve")                                     // 审批 candidate Memory
 	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory")                        // 查询单币分析历史
 	web.Router("/agents/market-intelligence", &controllers.AgentMarketIntelligenceController{}, "get:Get")                               // V3-2 unified Market Intelligence query/replay
-	web.Router("/agents/market-intelligence/events", &controllers.AgentMarketIntelligenceController{}, "post:IngestEvents")              // V3-2 canonical external event ingest
-	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus")                                    // 查询事件报警链路状态与最近追踪
-	web.Router("/agents/alerts/traces", &controllers.AgentController{}, "get:ListAlertPipelineTraces")                                   // 分页查询完整事件→信号→任务→通知链路
-	web.Router("/agents/scheduler/status", &controllers.AgentController{}, "get:GetSchedulerStatus")                                     // 查询 Agent Scheduler 状态
+	web.Router("/agents/market-intelligence/events", &controllers.AgentMarketIntelligenceController{}, "post:IngestEvents")
+	web.Router("/agents/historical-market/import", &controllers.AgentHistoricalMarketController{}, "post:Import")
+	web.Router("/agents/backtests", &controllers.AgentBacktestController{}, "get:List;post:Start")
+	web.Router("/agents/backtests/:id", &controllers.AgentBacktestController{}, "get:Get")
+	web.Router("/agents/backtests/:id/cancel", &controllers.AgentBacktestController{}, "post:Cancel")
+	web.Router("/agents/backtests/:id/trades", &controllers.AgentBacktestController{}, "get:Trades")
+	web.Router("/agents/backtests/:id/events", &controllers.AgentBacktestController{}, "get:Events")
+	web.Router("/agents/backtests/:id/equity", &controllers.AgentBacktestController{}, "get:Equity")   // V3-2 canonical external event ingest
+	web.Router("/agents/alerts/status", &controllers.AgentController{}, "get:GetAlertPipelineStatus")  // 查询事件报警链路状态与最近追踪
+	web.Router("/agents/alerts/traces", &controllers.AgentController{}, "get:ListAlertPipelineTraces") // 分页查询完整事件→信号→任务→通知链路
+	web.Router("/agents/scheduler/status", &controllers.AgentController{}, "get:GetSchedulerStatus")   // 查询 Agent Scheduler 状态
 	web.Router("/agents/governance/status", &controllers.AgentController{}, "get:GetGovernanceStatus")
 	web.Router("/agents/observability/summary", &controllers.AgentObservabilityController{}, "get:Summary")                   // V2-10 长期运营指标
 	web.Router("/agents/observability/traces", &controllers.AgentObservabilityController{}, "get:Traces")                     // V2-10 持久化节点 Trace
