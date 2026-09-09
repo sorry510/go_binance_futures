@@ -41,6 +41,9 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.AgentTradeExecution),
 		new(models.AgentTradeAudit),
 		new(models.LLMConfig),
+		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus),
+		new(models.MarketDataImportBatch), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate),
+		new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint),
 	)
 
 	if err := SyncDatabase(1); err != nil {
@@ -128,5 +131,34 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	}
 	if err := SyncDatabase(5); err != nil {
 		t.Fatalf("second version-5 sync should be idempotent: %v", err)
+	}
+	if err := SyncDatabase(6); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 6 {
+		t.Fatalf("expected database version 6, config=%+v err=%v", config, err)
+	}
+	for _, table := range []string{"agent_market_events", "agent_market_event_sources", "agent_market_facts", "agent_market_source_status"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected %s after version 6 sync, count=%d err=%v", table, count, err)
+		}
+	}
+	if err := SyncDatabase(7); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 7 {
+		t.Fatalf("expected database version 7, config=%+v err=%v", config, err)
+	}
+	for _, table := range []string{"market_data_import_batches", "market_klines_1m", "market_klines_3m", "market_klines_5m", "market_klines_15m", "market_klines_30m", "market_klines_1h", "market_klines_2h", "market_klines_4h", "market_klines_6h", "market_klines_8h", "market_klines_12h", "market_klines_1d", "market_klines_3d", "market_klines_1w", "market_klines_1mo", "market_funding_rates", "agent_backtest_datasets", "agent_backtest_runs", "agent_backtest_trades", "agent_backtest_events", "agent_backtest_equity_points"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected %s after version 7 sync, count=%d err=%v", table, count, err)
+		}
+	}
+	if err := SyncDatabase(7); err != nil {
+		t.Fatalf("second version-7 sync should be idempotent: %v", err)
 	}
 }
