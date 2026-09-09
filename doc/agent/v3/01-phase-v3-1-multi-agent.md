@@ -31,7 +31,7 @@
 - 在 Task/Observability 中展示 Team Run、子 Task、角色、耗时、Token 和最终汇总。
 - Skill 管理展示 `symbol_analysis_team` 为 Team 类型；Technical / Flow / Supervisor 保持内部角色。
 - 对话页 `/` 菜单提供“多智能体单币分析”，发送后仍由 Team Runner 编排，并把父 Team Task 绑定到当前 Conversation。
-- 首版 Team 配置由后端定义，Web 只查看；可编辑 Team 放到 V3-9。
+- Team 配置继续由后端定义，Web 以查看和运行结果为主；个人项目不再规划独立 Agent Studio。
 
 ## 验收 Gate
 
