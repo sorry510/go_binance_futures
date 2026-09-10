@@ -13,12 +13,14 @@ import (
 	"go_binance_futures/models"
 	_ "go_binance_futures/routers"
 	alertpipeline "go_binance_futures/service/alertpipeline"
+	futuresownership "go_binance_futures/service/futuresownership"
 	marketintelligence "go_binance_futures/service/marketintelligence"
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"go_binance_futures/webnotification"
 	"os"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -34,7 +36,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 9 // 每次变动数据库版本号 +1
+var dbVersion int64 = 10 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -91,6 +93,8 @@ func registerModels() {
 	orm.RegisterModel(new(models.DeliverySymbols))
 	orm.RegisterModel(new(models.FuturesPosition))
 	orm.RegisterModel(new(models.FuturesOrder))
+	orm.RegisterModel(new(models.FuturesManagedPosition))
+	orm.RegisterModel(new(models.FuturesManagedOrder))
 	orm.RegisterModel(new(models.NotifyConfig))
 	orm.RegisterModel(new(models.FuturesLiquidationOrder))
 	orm.RegisterModel(new(models.SymbolAnalysisHistory))
@@ -224,6 +228,13 @@ func initializeRuntimeDatabase() {
 	}
 	if err := feature.BackfillEmptyFuturesSymbolTypes(); err != nil {
 		logs.Error("backfill empty futures symbol types error:", err)
+	}
+	if strings.TrimSpace(tradeKey) != "" {
+		if summaries, err := futuresownership.DefaultReconciler().ReconcileAll(context.Background()); err != nil {
+			logs.Error("reconcile futures ownership on startup:", err)
+		} else {
+			logs.Info("futures ownership startup reconcile complete:", len(summaries), "owners checked")
+		}
 	}
 }
 
