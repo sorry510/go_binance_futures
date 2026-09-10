@@ -2,6 +2,8 @@ package utils
 
 import "math"
 
+const DisabledFuturesROIThreshold = 1_000_000.0
+
 // FuturesLeveragedROI matches the gross ROI formula used by the live futures loop.
 // Fees and funding are intentionally excluded because Binance UnrealizedProfit does
 // not include them in the live close-trigger calculation.

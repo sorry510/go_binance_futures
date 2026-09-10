@@ -18,10 +18,13 @@ import (
 )
 
 type Manager struct {
-	builder DatasetBuilder
-	engine  Engine
-	mu      sync.Mutex
-	cancel  map[string]context.CancelFunc
+	builder        DatasetBuilder
+	engine         Engine
+	mu             sync.Mutex
+	cancel         map[string]context.CancelFunc
+	prefetchMu     sync.Mutex
+	prefetchJobs   map[string]PrefetchSummary
+	prefetchActive string
 }
 
 var defaultManagerOnce sync.Once
@@ -35,12 +38,11 @@ func DefaultManager() *Manager {
 	return defaultManager
 }
 func NewManager(builder DatasetBuilder) *Manager {
-	return &Manager{builder: builder, engine: Engine{}, cancel: map[string]context.CancelFunc{}}
+	return &Manager{builder: builder, engine: Engine{}, cancel: map[string]context.CancelFunc{}, prefetchJobs: map[string]PrefetchSummary{}}
 }
 
 func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	request.Symbol = strings.ToUpper(strings.TrimSpace(request.Symbol))
-	request.ExecutionInterval = strings.TrimSpace(request.ExecutionInterval)
 	request.Config = NormalizeRunConfig(request.Config)
 	if request.StrategyTemplateID <= 0 {
 		return RunSummary{}, fmt.Errorf("strategy_template_id is required")
@@ -51,9 +53,6 @@ func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	if request.StartTime <= 0 || request.EndTime <= request.StartTime {
 		return RunSummary{}, fmt.Errorf("valid start_time and end_time are required")
 	}
-	if _, err := intervalDuration(request.ExecutionInterval, time.UnixMilli(request.StartTime)); err != nil {
-		return RunSummary{}, err
-	}
 	o := orm.NewOrm()
 	template := models.StrategyTemplates{ID: request.StrategyTemplateID}
 	if err := o.Read(&template); err != nil {
@@ -62,7 +61,7 @@ func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	strategyVersion := strategyservice.StrategySnapshotHash(template.Technology, template.Strategy)
 	now := time.Now().UnixMilli()
 	runID := newRunID()
-	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: EngineVersion, MarketConditionModel: MarketConditionModel, Symbol: request.Symbol, ExecutionInterval: request.ExecutionInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
+	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: EngineVersion, MarketConditionModel: MarketConditionModel, Symbol: request.Symbol, ExecutionInterval: ReplayInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
 	if _, err := o.Insert(&row); err != nil {
 		return RunSummary{}, fmt.Errorf("create backtest run: %w", err)
 	}
@@ -214,18 +213,30 @@ func (manager *Manager) Delete(runID string) error {
 		_ = tx.Rollback()
 		return cause
 	}
-	for name, model := range map[string]interface{}{
-		"equity points": new(models.AgentBacktestEquityPoint),
-		"events":        new(models.AgentBacktestEvent),
-		"trades":        new(models.AgentBacktestTrade),
+	// Use direct predicate deletes instead of QuerySeter.Delete. Beego may expand
+	// large result sets into primary-key IN (?, ?, ...) lists; a 1m backtest can
+	// contain hundreds of thousands of equity points and exceed the database
+	// prepared-statement placeholder limit. Each statement below always uses one
+	// placeholder regardless of the number of child rows.
+	for _, item := range []struct {
+		name  string
+		table string
+	}{
+		{name: "equity points", table: "agent_backtest_equity_points"},
+		{name: "events", table: "agent_backtest_events"},
+		{name: "trades", table: "agent_backtest_trades"},
 	} {
-		if _, err := tx.QueryTable(model).Filter("run_id", runID).Delete(); err != nil {
-			return rollback(fmt.Errorf("delete backtest %s: %w", name, err))
+		if _, err := tx.Raw("DELETE FROM "+item.table+" WHERE run_id = ?", runID).Exec(); err != nil {
+			return rollback(fmt.Errorf("delete backtest %s: %w", item.name, err))
 		}
 	}
-	deleted, err := tx.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).Delete()
+	result, err := tx.Raw("DELETE FROM agent_backtest_runs WHERE run_id = ?", runID).Exec()
 	if err != nil {
 		return rollback(fmt.Errorf("delete backtest run: %w", err))
+	}
+	deleted, err := result.RowsAffected()
+	if err != nil {
+		return rollback(fmt.Errorf("read deleted backtest run count: %w", err))
 	}
 	if deleted == 0 {
 		return rollback(fmt.Errorf("backtest run %q not found", runID))

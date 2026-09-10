@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	EngineVersion        = "backtest_engine_v3"
+	EngineVersion        = "backtest_engine_v4"
 	MarketConditionModel = "backtest_major_regime_v1"
 	DefaultWarmupBars    = 200
+	ReplayInterval       = "1m"
 )
 
 var BenchmarkSymbols = []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"}
@@ -91,7 +92,6 @@ type RunConfig struct {
 type StartRequest struct {
 	StrategyTemplateID int64     `json:"strategy_template_id"`
 	Symbol             string    `json:"symbol"`
-	ExecutionInterval  string    `json:"execution_interval"`
 	StartTime          int64     `json:"start_time"`
 	EndTime            int64     `json:"end_time"`
 	Config             RunConfig `json:"config"`

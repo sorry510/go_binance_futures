@@ -10,6 +10,7 @@ import (
 	"time"
 
 	strategyservice "go_binance_futures/service/strategy"
+	"go_binance_futures/utils"
 
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/vm"
@@ -243,11 +244,11 @@ func evaluateRules(rules []Rule, side string, env map[string]interface{}, cache 
 func closeGateReason(roi float64, config RunConfig) string {
 	loss := config.StopLossPct
 	if loss <= 0 {
-		loss = 1000000
+		loss = utils.DisabledFuturesROIThreshold
 	}
 	profit := config.TakeProfitPct
 	if profit <= 0 {
-		profit = 10000000
+		profit = utils.DisabledFuturesROIThreshold
 	}
 	if roi <= -loss {
 		return "stop_loss"
