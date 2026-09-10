@@ -43,8 +43,9 @@ Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、Execut
 - 当前 Engine 采用**单仓位模式**：同一时刻最多只有一个 `Position`，已有仓位时只评估对应的 `close_long` / `close_short`，不会继续评估新的 `long` / `short` 开仓规则。
 - 因此必须先平仓后才能再次开仓；V3-3 不支持加仓、金字塔、多笔并行持仓、LONG/SHORT 同时持有或持仓中直接反手。
 - 策略平仓信号在 Bar close 产生、下一根 Bar open 平仓；该下一根 Bar 收盘时已为空仓，因此可以产生新的开仓 signal，并最早在再下一根 Bar open 成交。
-- 已有仓位的 TP/SL 可由当前 Bar high/low 触发；同 Bar TP/SL 同时命中时使用保守的 stop-loss first。
-- TP/SL 保护性平仓后的同一 Bar 不重新开仓，最早从后续 Bar 再判断开仓。
+- `StopLossPct` / `TakeProfitPct` 表示**杠杆后的持仓 ROI 触发门槛**，与真实交易/模拟盘的 `nowProfit` 语义一致，不是标的价格直接涨跌百分比。三者统一使用 `ROI = unrealizedPnL / (abs(quantity) * markPrice) * leverage * 100`；手续费和 Funding 不参与这个毛 ROI 触发判断。
+- 对自定义 Strategy Template，ROI 门槛不是独立的‘触线强平单’：ROI 仍处于 `(-StopLossPct, +TakeProfitPct)` 区间时不评估 `close_long` / `close_short`；越过门槛后才评估对应平仓规则，规则为 true 才产生平仓 signal。`0` 与真实交易一致表示门槛基本关闭（内部等价 10000%）。
+- Backtest 在 execution Bar close 计算 ROI 并评估平仓规则，满足后最早下一根 Bar open 成交；不会用当前 Bar High/Low 模拟线上 2 秒级轮询中的瞬时触发，因此高低点只在 Bar 内短暂越线但收盘恢复时可能与实时执行不同，这是历史回放粒度差异，不是未来函数。
 - 最后一根 Bar 仍有仓位时以 `end_of_data` 确定性平仓。
 - `backtest_major_regime_v1` 仅用于回测历史分组，不冒充线上全市场 Market Regime。
 
@@ -52,6 +53,7 @@ Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、Execut
 
 - `GET/POST /agents/backtests`
 - `GET /agents/backtests/:id`
+- `DELETE /agents/backtests/:id`：删除 Run 及其 Trade/Event/Equity；无其它 Run 引用时同时删除轻量 Dataset Manifest，不删除全局历史行情缓存。
 - `POST /agents/backtests/:id/cancel`
 - `GET /agents/backtests/:id/trades|events|equity`
 - `POST /agents/historical-market/import`：外部 Kline/Funding canonical 导入。
@@ -59,7 +61,7 @@ Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、Execut
 
 ## 验收 Gate
 
-- LONG、SHORT、止盈、止损、无交易固定 Fixture。
+- LONG、SHORT、止盈/止损 ROI Gate、无交易固定 Fixture；必须验证‘越过 ROI 门槛才评估平仓规则、规则 false 不强平、0 表示门槛关闭’。
 - 手续费、Funding、滑点均有单元测试。
 - 明确验证未来 Bar 不可见。
 - 同一输入内存 Dataset/Strategy/Engine 重放必须确定性。

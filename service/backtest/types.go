@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	EngineVersion        = "backtest_engine_v1"
+	EngineVersion        = "backtest_engine_v3"
 	MarketConditionModel = "backtest_major_regime_v1"
 	DefaultWarmupBars    = 200
 )
@@ -116,6 +116,7 @@ type PendingAction struct {
 	StrategyName    string
 	StrategyType    string
 	StrategyHash    string
+	ExitReason      string
 	SignalTime      int64
 	MarketCondition int
 }

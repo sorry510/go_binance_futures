@@ -61,8 +61,8 @@ Position Size: 1
 Leverage: 1
 Fee Rate: 0.0005
 Slippage: 5 bps
-Stop Loss: 0
-Take Profit: 0
+Stop Loss ROI: 0
+Take Profit ROI: 0
 ```
 
 提交后状态应依次进入：
@@ -224,7 +224,9 @@ Equity: 资金曲线与 Drawdown 曲线非空
 
 重点人工验证防未来函数：如果某根 5m Bar 收盘后产生 `signal`，普通策略开/平仓的 `order/fill` 必须出现在下一根 5m Bar 的 `open_time`，不能按当前 Bar 的 open 成交。
 
-已有仓位的 Stop Loss / Take Profit 属于保护规则，可使用当前 Bar 的 High/Low；同一 Bar 同时命中时必须是 Stop Loss 优先。
+止盈/止损输入值是杠杆后的毛 ROI Gate，不是触线强平。例如 `Leverage=10`、`Take Profit ROI=10%`，LONG Entry=100 时价格约到 101.01 已达到 10% ROI 门槛；此时系统才开始评估 `close_long`，只有该规则为 true 才产生平仓 signal，并在下一根 execution Bar open 成交。止损同理。
+
+人工测试至少验证三点：ROI 未过门槛时即使 `close_long/close_short` 表达式为 true 也不平；ROI 越过门槛但平仓表达式为 false 时继续持有；`Stop Loss/Take Profit = 0` 时与真实交易一样视为门槛关闭。Backtest 只在 execution Bar close 采样 ROI，不使用 Bar High/Low 猜测线上 2 秒轮询是否曾瞬时触发。
 ## 11. 核心自动测试
 
 Repository 数据层：
@@ -262,7 +264,7 @@ go test -count=1 \
 go test -count=1 ./service/backtest
 ```
 
-覆盖 LONG、SHORT、TP、SL、同 Bar TP+SL、No Trade、Fees、Slippage、Funding 和确定性 Engine replay。
+覆盖 LONG、SHORT、ROI Gate、门槛未过不评估平仓、规则 false 不强平、0 门槛关闭、No Trade、Fees、Slippage、Funding 和确定性 Engine replay。
 ## 12. 完整发布级 Gate
 
 需要重新做完整回归时：

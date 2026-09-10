@@ -99,20 +99,14 @@ func StartTrade(systemConfig *models.Config) {
 		}
 		exclude_symbols_map[position.Symbol] = true // 后续的开仓中避过已经有持仓的币
 
-		coin_profit_float64 := 10000.0           // 全局定义
-		coin_loss_float64 := 10000.0             // 全局定义
+		coin_profit_float64, coin_loss_float64 := resolveTradeROIThresholds("0", "0")
 		coin_line_strategy := globalLineStrategy // 默认为全局
 		var findCoin *models.Symbols
 		for _, coin := range allCoins {
 			if coin.Symbol == position.Symbol {
 				findCoin = coin
 				// 自定义可以覆盖全局
-				if coin.Profit != "0" {
-					coin_profit_float64, _ = strconv.ParseFloat(coin.Profit, 64)
-				}
-				if coin.Loss != "0" {
-					coin_loss_float64, _ = strconv.ParseFloat(coin.Loss, 64)
-				}
+				coin_profit_float64, coin_loss_float64 = resolveTradeROIThresholds(coin.Profit, coin.Loss)
 				if coin.StrategyType != "global" {
 					// 独立的策略
 					coin_line_strategy = GetLineStrategy(coin.StrategyType)
@@ -124,7 +118,7 @@ func StartTrade(systemConfig *models.Config) {
 		unRealizedProfit, _ := strconv.ParseFloat(position.UnrealizedProfit, 64)
 		leverage_float64 := float64(position.Leverage)
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
-		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * markPrice_float64)) * leverage_float64 * 100 // 当前收益率(正为盈利，负为亏损)
+		nowProfit := utils.FuturesLeveragedROI(unRealizedProfit, positionAmtFloatAbs, markPrice_float64, position.Leverage) // 当前收益率(正为盈利，负为亏损)
 
 		if nowProfit < -0.1 {
 			lossCount += 1

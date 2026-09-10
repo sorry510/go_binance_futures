@@ -333,9 +333,5 @@ func grossROI(p *Position, price float64, leverage int) float64 {
 	if p == nil || price <= 0 {
 		return 0
 	}
-	movement := (price - p.EntryPrice) / price
-	if p.Side == "SHORT" {
-		movement = -movement
-	}
-	return movement * float64(leverage) * 100
+	return utils.FuturesLeveragedROI(unrealizedPnL(p, price), math.Abs(p.Quantity), price, int64(leverage))
 }

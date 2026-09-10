@@ -40,7 +40,7 @@ func init() {
 	web.Router("/agents/market-intelligence/events", &controllers.AgentMarketIntelligenceController{}, "post:IngestEvents")
 	web.Router("/agents/historical-market/import", &controllers.AgentHistoricalMarketController{}, "post:Import")
 	web.Router("/agents/backtests", &controllers.AgentBacktestController{}, "get:List;post:Start")
-	web.Router("/agents/backtests/:id", &controllers.AgentBacktestController{}, "get:Get")
+	web.Router("/agents/backtests/:id", &controllers.AgentBacktestController{}, "get:Get;delete:Delete")
 	web.Router("/agents/backtests/:id/cancel", &controllers.AgentBacktestController{}, "post:Cancel")
 	web.Router("/agents/backtests/:id/trades", &controllers.AgentBacktestController{}, "get:Trades")
 	web.Router("/agents/backtests/:id/events", &controllers.AgentBacktestController{}, "get:Events")
