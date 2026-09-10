@@ -34,6 +34,7 @@ var pusher = notify.GetNotifyChannel()
 
 const (
 	futuresWsFlushInterval      = time.Second
+	historicalRESTMinInterval   = 300 * time.Millisecond
 	futuresWsBatchSize          = 500
 	wsNoDataAlertThreshold      = 3 * time.Minute
 	wsNoDataAlertInterval       = 10 * time.Minute
@@ -48,6 +49,28 @@ var futuresWsFlushOnce sync.Once
 
 var futuresClient *futures.Client
 var deliveryClient *delivery.Client
+
+var historicalRESTMu sync.Mutex
+var historicalRESTLast time.Time
+
+func waitHistoricalREST(ctx context.Context) error {
+	historicalRESTMu.Lock()
+	defer historicalRESTMu.Unlock()
+	if !historicalRESTLast.IsZero() {
+		wait := historicalRESTMinInterval - time.Since(historicalRESTLast)
+		if wait > 0 {
+			timer := time.NewTimer(wait)
+			defer timer.Stop()
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-timer.C:
+			}
+		}
+	}
+	historicalRESTLast = time.Now()
+	return nil
+}
 
 func init() {
 	var err error
@@ -255,6 +278,9 @@ func GetHistoricalKlines(ctx context.Context, symbol, interval string, startTime
 	seen := map[int64]bool{}
 	result := make([]*futures.Kline, 0)
 	for cursor <= endTime {
+		if err := waitHistoricalREST(ctx); err != nil {
+			return nil, err
+		}
 		page, err := futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).StartTime(cursor).EndTime(endTime).Limit(1000).Do(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("get historical K-lines %s %s: %w", symbol, interval, err)
@@ -601,6 +627,9 @@ func GetHistoricalFundingRates(ctx context.Context, symbol string, startTime, en
 	seen := map[int64]bool{}
 	result := make([]*futures.FundingRate, 0)
 	for cursor <= endTime {
+		if err := waitHistoricalREST(ctx); err != nil {
+			return nil, err
+		}
 		page, err := futuresClient.NewFundingRateService().Symbol(symbol).StartTime(cursor).EndTime(endTime).Limit(1000).Do(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("get historical funding %s: %w", symbol, err)

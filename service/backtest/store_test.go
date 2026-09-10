@@ -77,7 +77,7 @@ func TestManagerPersistsDeterministicBacktestWithoutLegacyPaperTables(t *testing
 	}
 	start := time.Date(2026, 1, 2, 0, 0, 0, 0, time.UTC)
 	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{}), WarmupBars: 20})
-	run, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", ExecutionInterval: "1m", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()})
+	run, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +85,10 @@ func TestManagerPersistsDeterministicBacktestWithoutLegacyPaperTables(t *testing
 	for time.Now().Before(deadline) {
 		detail, err := manager.Get(run.RunID)
 		if err == nil && detail.Status == "succeeded" {
-			if detail.Dataset == nil || detail.Dataset.DatasetSpecHash == "" || detail.DataHash == "" {
+			if detail.ExecutionInterval != ReplayInterval || detail.Dataset == nil || detail.Dataset.ExecutionInterval != ReplayInterval {
+				t.Fatalf("new backtests must always use %s replay: %+v", ReplayInterval, detail)
+			}
+			if detail.Dataset.DatasetSpecHash == "" || detail.DataHash == "" {
 				t.Fatalf("dataset not persisted: %+v", detail)
 			}
 			trades, err := manager.Trades(run.RunID, 100)
@@ -141,7 +144,7 @@ func TestSameDatasetSpecUsesLatestCanonicalMarketData(t *testing.T) {
 	start := time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)
 	repo := historicalmarket.NewRepository(fixtureHistorySource{})
 	manager := NewManager(DatasetBuilder{Repository: repo, WarmupBars: 20})
-	request := StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", ExecutionInterval: "1m", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()}
+	request := StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()}
 	first, err := manager.Start(request)
 	if err != nil {
 		t.Fatal(err)
@@ -239,5 +242,36 @@ func TestManagerDeleteKeepsSharedDatasetAndRejectsActiveRun(t *testing.T) {
 	}
 	if !o.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", active.RunID).Exist() {
 		t.Fatal("active run was deleted despite rejection")
+	}
+}
+
+func TestManagerDeleteHandlesVeryLargeEquityHistoryWithoutPlaceholderExpansion(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	run := models.AgentBacktestRun{RunID: "bt_large_delete_fixture", Status: "succeeded", Stage: "completed"}
+	if _, err := o.Insert(&run); err != nil {
+		t.Fatal(err)
+	}
+	_, err := o.Raw(`WITH RECURSIVE seq(x) AS (
+		SELECT 1
+		UNION ALL
+		SELECT x + 1 FROM seq WHERE x < 70000
+	)
+	INSERT INTO agent_backtest_equity_points
+		(run_id, sequence, bar_time, equity, cash, unrealized_pnl, drawdown_pct, position_side)
+	SELECT ?, x, x, 1000, 1000, 0, 0, '' FROM seq`, run.RunID).Exec()
+	if err != nil {
+		t.Fatal(err)
+	}
+	count, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", run.RunID).Count()
+	if err != nil || count != 70000 {
+		t.Fatalf("large fixture count=%d err=%v", count, err)
+	}
+	if err := NewManager(DatasetBuilder{}).Delete(run.RunID); err != nil {
+		t.Fatal(err)
+	}
+	count, err = o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", run.RunID).Count()
+	if err != nil || count != 0 {
+		t.Fatalf("large equity history remains after delete: count=%d err=%v", count, err)
 	}
 }

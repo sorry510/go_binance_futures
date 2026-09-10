@@ -39,6 +39,8 @@ func init() {
 	web.Router("/agents/market-intelligence", &controllers.AgentMarketIntelligenceController{}, "get:Get")                               // V3-2 unified Market Intelligence query/replay
 	web.Router("/agents/market-intelligence/events", &controllers.AgentMarketIntelligenceController{}, "post:IngestEvents")
 	web.Router("/agents/historical-market/import", &controllers.AgentHistoricalMarketController{}, "post:Import")
+	web.Router("/agents/backtests/prefetch", &controllers.AgentBacktestController{}, "post:Prefetch")
+	web.Router("/agents/backtests/prefetch/:jobId", &controllers.AgentBacktestController{}, "get:PrefetchStatus")
 	web.Router("/agents/backtests", &controllers.AgentBacktestController{}, "get:List;post:Start")
 	web.Router("/agents/backtests/:id", &controllers.AgentBacktestController{}, "get:Get;delete:Delete")
 	web.Router("/agents/backtests/:id/cancel", &controllers.AgentBacktestController{}, "post:Cancel")

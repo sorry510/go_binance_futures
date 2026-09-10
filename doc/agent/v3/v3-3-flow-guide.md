@@ -62,22 +62,22 @@ market + symbol + open_time
 
 ```text
 Symbol: ONGUSDT
-Execution Interval: 5m
-Technology 使用: 1m / 5m / 15m / 1h
+Replay Interval: 1m（固定，不再由用户选择）
+Technology 使用: 5m / 15m / 1h
 ```
 
 则需要：
 
 ```text
 ONGUSDT: 1m, 5m, 15m, 1h
-BTCUSDT: 5m
-ETHUSDT: 5m
-SOLUSDT: 5m
-BNBUSDT: 5m
+BTCUSDT: 1m
+ETHUSDT: 1m
+SOLUSDT: 1m
+BNBUSDT: 1m
 ONGUSDT Funding
 ```
 
-其中 BTC/ETH/SOL/BNB 是固定 benchmark，使用 Execution Interval。
+其中 1m 是固定回放主时间轴；5m/15m/1h 来自 Technology。BTC/ETH/SOL/BNB 是固定 benchmark，也统一使用 1m。
 
 Repository 对每个需求先查询本地表，并计算应有的 Bar 时间点；本地完整则直接复用，不调用 Binance。
 ## 4. 本地缺口如何补齐
@@ -103,6 +103,8 @@ Repository 只生成缺口：
 Binance 单页最多读取 1000 根，系统持续翻页直到目标 `end_time`；只接受 `CloseTime <= end_time` 的已闭合 Bar。
 
 返回数据统一转换为 Historical Market Kline，再走 `Repository.Import()` 写入全局表。
+
+Web 的“获取历史数据”按钮会在正式回测前主动执行同一套 local-first 补缺：包含目标 Symbol 的 1m、Technology 中启用指标依赖的所有周期、benchmark 1m、Funding，以及默认 200 Bar warmup。历史 Kline/Funding 的实际 Binance REST 分页请求共享全局节流器，相邻请求起始时间至少间隔 300ms；同一时刻只允许一个预取任务运行。
 ## 5. 外部历史数据导入
 
 统一入口：
@@ -167,7 +169,7 @@ Dataset 现在是“历史数据查询规格”，不是 Kline 副本。
 `dataset_spec_hash` 由以下规格生成：
 
 ```text
-market / symbol / execution_interval
+market / symbol / execution_interval（新 Run 固定为 1m）
 需要的 indicator intervals
 benchmark symbols
 start_time / end_time / warmup_start_time
@@ -201,7 +203,7 @@ Bar close
   ↓
 signal
   ↓
-下一根 Execution Bar open 成交
+下一根 1m Replay Bar open 成交
 ```
 
 因此不能用某根 Bar 的收盘信息按同一根 Bar 的开盘价成交。
@@ -217,12 +219,12 @@ ROI 仍在 (-Loss, +Profit)
 ROI <= -Loss 或 ROI >= +Profit
   → 评估对应 close_long / close_short
   → 规则 true 才产生 close signal
-  → 下一根 Execution Bar open 成交
+  → 下一根 1m Replay Bar open 成交
 ```
 
-`Profit/Loss = 0` 时，与真实交易保持一致，按 10000% 的内部门槛处理，等价于日常行情下关闭该 ROI Gate。例：Entry=100、Leverage=10、Profit=10%，LONG 在价格约 101.01 时毛 ROI 已接近/达到 10%；但这只代表允许评估 `close_long`，并不代表一定立即平仓。
+`Profit/Loss = 0` 时，与真实交易保持一致，按 `1,000,000%` 的共享内部门槛处理，等价于日常行情下关闭该 ROI Gate。例：Entry=100、Leverage=10、Profit=10%，LONG 在价格约 101.01 时毛 ROI 已接近/达到 10%；但这只代表允许评估 `close_long`，并不代表一定立即平仓。
 
-线上真实交易约每 2 秒按实时 Mark Price 检查门槛，模拟盘按当前行情检查；Backtest 只能在 execution Bar close 检查。因此某根历史 Bar 的 High/Low 曾短暂越过门槛、但 Close 又回到门槛内时，Backtest 不会假设线上一定成交。这是历史数据粒度造成的执行模型差异。
+线上真实交易约每 2 秒按实时 Mark Price 检查门槛，模拟盘按当前行情检查；Backtest 只能在 1m Replay Bar close 检查。因此某根历史 Bar 的 High/Low 曾短暂越过门槛、但 Close 又回到门槛内时，Backtest 不会假设线上一定成交。这是历史数据粒度造成的执行模型差异。
 
 ### 9.1 单仓位模式
 
