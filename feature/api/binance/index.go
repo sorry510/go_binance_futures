@@ -289,6 +289,12 @@ func GetEarliestHistoricalKline(ctx context.Context, symbol, interval string) (*
 // GetHistoricalKlines returns closed futures K-lines ordered from oldest to newest.
 // It paginates the exchange API and never returns a bar whose CloseTime is after endTime.
 func GetHistoricalKlines(ctx context.Context, symbol, interval string, startTime, endTime int64) ([]*futures.Kline, error) {
+	return GetHistoricalKlinesWithProgress(ctx, symbol, interval, startTime, endTime, nil)
+}
+
+// GetHistoricalKlinesWithProgress uses the same Binance requests as GetHistoricalKlines
+// and only reports progress after each already-required page. It adds no REST calls.
+func GetHistoricalKlinesWithProgress(ctx context.Context, symbol, interval string, startTime, endTime int64, progress func(completed int)) ([]*futures.Kline, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -321,6 +327,9 @@ func GetHistoricalKlines(ctx context.Context, symbol, interval string, startTime
 			if item.OpenTime > lastOpen {
 				lastOpen = item.OpenTime
 			}
+		}
+		if progress != nil {
+			progress(len(result))
 		}
 		if lastOpen < cursor || len(page) < 1000 {
 			break
