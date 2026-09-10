@@ -6,7 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"go_binance_futures/models"
 	"go_binance_futures/service/agenttrade"
+	futuresownership "go_binance_futures/service/futuresownership"
 	"go_binance_futures/utils"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -73,6 +75,24 @@ func (ctrl *AgentTradeController) Get() {
 		return
 	}
 	data := map[string]any{"proposal": proposal, "audits": audits}
+	ownership := futuresownership.DefaultService()
+	if positions, positionErr := ownership.ListPositions(ctrl.Ctx.Request.Context(), futuresownership.OwnerAgentTrade, false); positionErr == nil {
+		for _, position := range positions {
+			if position.SourceRef == proposal.ProposalID {
+				data["managed_position"] = position
+				break
+			}
+		}
+	}
+	if orders, orderErr := ownership.ListOrders(ctrl.Ctx.Request.Context(), futuresownership.OwnerAgentTrade, 500); orderErr == nil {
+		managedOrders := make([]models.FuturesManagedOrder, 0)
+		for _, order := range orders {
+			if order.SourceRef == proposal.ProposalID {
+				managedOrders = append(managedOrders, order)
+			}
+		}
+		data["managed_orders"] = managedOrders
+	}
 	if execErr == nil {
 		data["execution"] = execution
 	} else if execErr != orm.ErrNoRows {
@@ -127,4 +147,59 @@ func (ctrl *AgentTradeController) Reconcile() {
 		return
 	}
 	ctrl.Ctx.Resp(map[string]any{"code": 200, "data": map[string]any{"proposal": proposal, "execution": execution}, "msg": "success"})
+}
+
+func (ctrl *AgentTradeController) Close() {
+	proposal, result, err := tradeService().Close(ctrl.Ctx.Request.Context(), ctrl.proposalID(), "web_admin")
+	if err != nil {
+		ctrl.Ctx.Resp(map[string]any{"code": 400, "data": map[string]any{"proposal": proposal, "close": result}, "msg": err.Error()})
+		return
+	}
+	ctrl.Ctx.Resp(map[string]any{"code": 200, "data": map[string]any{"proposal": proposal, "close": result}, "msg": "success"})
+}
+
+func (ctrl *AgentTradeController) Ownership() {
+	ctx := ctrl.Ctx.Request.Context()
+	owner := strings.TrimSpace(ctrl.GetString("owner"))
+	ownership := futuresownership.DefaultService()
+	positions, err := ownership.ListPositions(ctx, owner, false)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	orders, err := ownership.ListOrders(ctx, owner, 200)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, err.Error()))
+		return
+	}
+	data := map[string]any{"positions": positions, "orders": orders}
+	overview, overviewErr := futuresownership.DefaultReconciler().PositionOverview(ctx)
+	if overviewErr == nil {
+		data["account_positions"] = overview
+	} else {
+		data["account_positions"] = []any{}
+		data["account_error"] = overviewErr.Error()
+	}
+	ctrl.Ctx.Resp(map[string]any{"code": 200, "data": data, "msg": "success"})
+}
+
+func (ctrl *AgentTradeController) ReconcileOwnership() {
+	ctx := ctrl.Ctx.Request.Context()
+	owner := strings.TrimSpace(ctrl.GetString("owner"))
+	reconciler := futuresownership.DefaultReconciler()
+	if owner != "" {
+		summary, err := reconciler.ReconcileOwner(ctx, owner)
+		if err != nil {
+			ctrl.Ctx.Resp(map[string]any{"code": 400, "data": summary, "msg": err.Error()})
+			return
+		}
+		ctrl.Ctx.Resp(map[string]any{"code": 200, "data": []futuresownership.ReconcileSummary{summary}, "msg": "success"})
+		return
+	}
+	summaries, err := reconciler.ReconcileAll(ctx)
+	if err != nil {
+		ctrl.Ctx.Resp(map[string]any{"code": 500, "data": summaries, "msg": err.Error()})
+		return
+	}
+	ctrl.Ctx.Resp(map[string]any{"code": 200, "data": summaries, "msg": "success"})
 }

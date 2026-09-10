@@ -26,12 +26,14 @@ func prepareTradeTestDB(t testing.TB) {
 		if err := orm.RegisterDataBase("default", "sqlite3", "file:agenttrade_tests?mode=memory&cache=shared"); err != nil {
 			panic(err)
 		}
-		orm.RegisterModel(new(models.AgentTradeProposal), new(models.AgentTradeExecution), new(models.AgentTradeAudit))
+		orm.RegisterModel(new(models.AgentTradeProposal), new(models.AgentTradeExecution), new(models.AgentTradeAudit), new(models.FuturesManagedPosition), new(models.FuturesManagedOrder))
 		if err := orm.RunSyncdb("default", false, false); err != nil {
 			panic(err)
 		}
 	})
 	o := orm.NewOrm()
+	_, _ = o.Raw("DELETE FROM futures_managed_orders").Exec()
+	_, _ = o.Raw("DELETE FROM futures_managed_positions").Exec()
 	_, _ = o.Raw("DELETE FROM agent_trade_audits").Exec()
 	_, _ = o.Raw("DELETE FROM agent_trade_executions").Exec()
 	_, _ = o.Raw("DELETE FROM agent_trade_proposals").Exec()
@@ -80,6 +82,25 @@ func (f *fakeBroker) SubmitMarket(context.Context, BrokerOrderRequest) (BrokerOr
 func (f *fakeBroker) LookupByClientOrderID(context.Context, string, string) (BrokerOrderResult, error) {
 	f.lookupCalls++
 	return f.lookup, f.lookupErr
+}
+
+type fakeLifecycle struct {
+	protectCalls int
+	closeCalls   int
+	protection   ProtectionResult
+	protectErr   error
+	closeResult  CloseResult
+	closeErr     error
+}
+
+func (f *fakeLifecycle) EnsureProtection(context.Context, models.AgentTradeProposal) (ProtectionResult, error) {
+	f.protectCalls++
+	return f.protection, f.protectErr
+}
+
+func (f *fakeLifecycle) Close(context.Context, models.AgentTradeProposal) (CloseResult, error) {
+	f.closeCalls++
+	return f.closeResult, f.closeErr
 }
 
 func passingRiskData(now time.Time) *fakeRiskData {
@@ -381,5 +402,120 @@ func TestFinalKillSwitchCheckBlocksBrokerSubmission(t *testing.T) {
 	}
 	if updatedProposal.Status != StatusRiskRejected || updatedExecution.Status != StatusExecutionFailed {
 		t.Fatalf("unexpected blocked states: proposal=%s execution=%s", updatedProposal.Status, updatedExecution.Status)
+	}
+}
+
+func TestExecutedEntryRequiresConfirmedProtection(t *testing.T) {
+	prepareTradeTestDB(t)
+	now := time.UnixMilli(1_800_000_000_000).UTC()
+	data := passingRiskData(now)
+	broker := &fakeBroker{submit: BrokerOrderResult{ExchangeOrderID: "entry-1", ClientOrderID: "entry-client", AveragePrice: 100.1}}
+	lifecycle := &fakeLifecycle{protection: ProtectionResult{StopClientOrderID: "stop-1", StopExchangeOrderID: "stop-ex-1"}}
+	service := testService(now, data, broker)
+	service.Lifecycle = lifecycle
+	proposal, err := service.CreateFromTask(context.Background(), "task-plan")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, err = service.Approve(context.Background(), proposal.ProposalID, "tester")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, execution, err := service.Execute(context.Background(), proposal.ProposalID, "tester")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if proposal.Status != StatusExecuted || execution.Status != StatusExecuted || lifecycle.protectCalls != 1 {
+		t.Fatalf("entry must finish with confirmed protection: proposal=%s execution=%s protectCalls=%d", proposal.Status, execution.Status, lifecycle.protectCalls)
+	}
+	if broker.submitCalls != 1 {
+		t.Fatalf("entry submit calls=%d, want 1", broker.submitCalls)
+	}
+}
+
+func TestStopFailureBecomesProtectionFailedWithoutResubmittingEntry(t *testing.T) {
+	prepareTradeTestDB(t)
+	now := time.UnixMilli(1_800_000_000_000).UTC()
+	data := passingRiskData(now)
+	broker := &fakeBroker{submit: BrokerOrderResult{ExchangeOrderID: "entry-2", ClientOrderID: "entry-client-2", AveragePrice: 100.1}}
+	lifecycle := &fakeLifecycle{protectErr: errors.New("stop not confirmed")}
+	service := testService(now, data, broker)
+	service.Lifecycle = lifecycle
+	proposal, err := service.CreateFromTask(context.Background(), "task-plan")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, err = service.Approve(context.Background(), proposal.ProposalID, "tester")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, execution, err := service.Execute(context.Background(), proposal.ProposalID, "tester")
+	if err == nil || proposal.Status != StatusProtectionFailed || execution.Status != StatusExecuted {
+		t.Fatalf("stop failure must expose protection_failed while preserving entry execution: proposal=%s execution=%s err=%v", proposal.Status, execution.Status, err)
+	}
+	if broker.submitCalls != 1 {
+		t.Fatalf("entry submit calls=%d, want 1", broker.submitCalls)
+	}
+	_, _, _ = service.Execute(context.Background(), proposal.ProposalID, "tester")
+	if broker.submitCalls != 1 {
+		t.Fatalf("protection retry must not resubmit entry, calls=%d", broker.submitCalls)
+	}
+	lifecycle.protectErr = nil
+	lifecycle.protection = ProtectionResult{StopClientOrderID: "stop-2", StopExchangeOrderID: "stop-ex-2"}
+	proposal, _, err = service.Reconcile(context.Background(), proposal.ProposalID, "tester")
+	if err != nil || proposal.Status != StatusExecuted {
+		t.Fatalf("protection reconcile must recover proposal: status=%s err=%v", proposal.Status, err)
+	}
+}
+
+func TestOptionalTakeProfitFailureDoesNotMarkProtectionFailed(t *testing.T) {
+	prepareTradeTestDB(t)
+	now := time.UnixMilli(1_800_000_000_000).UTC()
+	data := passingRiskData(now)
+	broker := &fakeBroker{submit: BrokerOrderResult{ExchangeOrderID: "entry-3", ClientOrderID: "entry-client-3", AveragePrice: 100.1}}
+	lifecycle := &fakeLifecycle{protection: ProtectionResult{StopExchangeOrderID: "stop-ok", TakeProfitError: "tp rejected"}}
+	service := testService(now, data, broker)
+	service.Lifecycle = lifecycle
+	proposal, err := service.CreateFromTask(context.Background(), "task-plan")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, err = service.Approve(context.Background(), proposal.ProposalID, "tester")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, _, err = service.Execute(context.Background(), proposal.ProposalID, "tester")
+	if err != nil || proposal.Status != StatusExecuted {
+		t.Fatalf("optional TP failure must not remove stop-protected status: status=%s err=%v", proposal.Status, err)
+	}
+}
+
+func TestManagedCloseIsIdempotent(t *testing.T) {
+	prepareTradeTestDB(t)
+	now := time.UnixMilli(1_800_000_000_000).UTC()
+	data := passingRiskData(now)
+	broker := &fakeBroker{submit: BrokerOrderResult{ExchangeOrderID: "entry-4", ClientOrderID: "entry-client-4", AveragePrice: 100.1}}
+	lifecycle := &fakeLifecycle{protection: ProtectionResult{StopExchangeOrderID: "stop-ok"}, closeResult: CloseResult{ClientOrderID: "close-1", ExchangeOrderID: "close-ex-1", FilledQty: 0.5}}
+	service := testService(now, data, broker)
+	service.Lifecycle = lifecycle
+	proposal, err := service.CreateFromTask(context.Background(), "task-plan")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, err = service.Approve(context.Background(), proposal.ProposalID, "tester")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, _, err = service.Execute(context.Background(), proposal.ProposalID, "tester")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal, result, err := service.Close(context.Background(), proposal.ProposalID, "tester")
+	if err != nil || proposal.Status != StatusClosed || result.ExchangeOrderID != "close-ex-1" || lifecycle.closeCalls != 1 {
+		t.Fatalf("managed close failed: proposal=%s result=%+v calls=%d err=%v", proposal.Status, result, lifecycle.closeCalls, err)
+	}
+	_, result, err = service.Close(context.Background(), proposal.ProposalID, "tester")
+	if err != nil || !result.AlreadyClosed || lifecycle.closeCalls != 1 {
+		t.Fatalf("repeated close must be idempotent: result=%+v calls=%d err=%v", result, lifecycle.closeCalls, err)
 	}
 }
