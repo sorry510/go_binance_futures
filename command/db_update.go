@@ -3,6 +3,7 @@ package command
 import (
 	"bufio"
 	"fmt"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/utils"
 	"os"
 	"strings"
@@ -161,6 +162,29 @@ func prepareVersionCompatibility(executor rawExecutor, version int64) error {
 	return nil
 }
 
+func migrateDeprecatedStrategyMarketEnv(executor rawExecutor) error {
+	var rows []struct {
+		ID       int64  `orm:"column(id)"`
+		Strategy string `orm:"column(strategy)"`
+	}
+	if _, err := executor.Raw("SELECT id, strategy FROM strategy_templates").QueryRows(&rows); err != nil {
+		return err
+	}
+	for _, row := range rows {
+		updated, changed, err := strategyservice.RemoveDeprecatedMarketEnvFromStrategyJSON(row.Strategy)
+		if err != nil {
+			return fmt.Errorf("strategy template %d: %w", row.ID, err)
+		}
+		if !changed {
+			continue
+		}
+		if _, err := executor.Raw("UPDATE strategy_templates SET strategy = ? WHERE id = ?", updated, row.ID).Exec(); err != nil {
+			return fmt.Errorf("update strategy template %d: %w", row.ID, err)
+		}
+	}
+	return nil
+}
+
 func UpdateDatabase(oldVersion int64, newVersion int64) error {
 	o := orm.NewOrm()
 	to, err := o.Begin()
@@ -170,6 +194,12 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 	}
 	version := oldVersion + 1
 	for ; version <= newVersion; version++ {
+		if version == 8 {
+			if err := migrateDeprecatedStrategyMarketEnv(to); err != nil {
+				_ = to.Rollback()
+				return fmt.Errorf("migrate database version %d strategy templates failed: %w", version, err)
+			}
+		}
 		if err := prepareVersionCompatibility(to, version); err != nil {
 			_ = to.Rollback()
 			return fmt.Errorf("prepare database version %d compatibility failed: %w", version, err)

@@ -61,8 +61,8 @@ Position Size: 1
 Leverage: 1
 Fee Rate: 0.0005
 Slippage: 5 bps
-Stop Loss: 0
-Take Profit: 0
+Stop Loss ROI: 0
+Take Profit ROI: 0
 ```
 
 提交后状态应依次进入：
@@ -145,27 +145,25 @@ ORDER BY id;
 如果本地 Kline/Funding 已完整，不应再次产生同一范围的 Binance Kline 下载记录。
 
 如果仅扩大了回测时间范围，则只应补新增的缺失区间，而不是重新下载已有数据。
-## 7. 验证 Benchmark 数据
+## 7. 验证不再获取 Benchmark 数据
 
-即使目标是 `BTCUSDT`，Dataset Builder 仍可能读取：
+Dataset Builder 只应读取目标 Symbol 的固定 1m、Technology 实际依赖周期和 Funding，不再因为回测额外拉取 BTC/ETH/SOL/BNB。
+
+例如目标 `ONGUSDT` 且 Technology 使用 5m/15m/1h 时，只应准备：
 
 ```text
-BTCUSDT / ETHUSDT / SOLUSDT / BNBUSDT
+ONGUSDT: 1m, 5m, 15m, 1h
+ONGUSDT Funding
 ```
 
-它们用于历史 `BasicTrend` 和 `MarketCondition`。
+选择包含 `MarketCondition` 的 Strategy Template 时：若目标范围没有足够的 `market_condition_histories` 覆盖，应提示先点击“补充 MarketCondition 历史”；补充完成且覆盖连续后，应允许“获取历史数据”和正式回测。回放时必须使用当前 Bar 时刻之前最近一条历史 MarketCondition，不能读取未来小时。
 
-可以检查：
+## 7.1 验证 MarketCondition 历史补充
 
-```sql
-SELECT symbol, COUNT(*) AS cnt
-FROM market_klines_5m
-WHERE market = 'futures_usdt'
-GROUP BY symbol
-ORDER BY symbol;
-```
+点击“补充 MarketCondition 历史”后应看到后台阶段从查询上线时间 → BTC 1h → ETH 1h → 推断 → 保存。首次执行会补齐缺失 Kline；再次执行应主要复用本地数据。
 
-因此第一次回测后看到多个 benchmark Symbol 的 Kline 是正常现象。
+检查 `market_condition_histories` 时，同一小时若原来已有真实记录，值和记录必须保持不变；推断任务只能插入空缺小时。BTC/ETH 只有在两者 1h Kline 均存在时才生成推断值。
+
 ## 8. 验证外部数据覆盖
 
 可通过接口导入一根测试 Kline：
@@ -224,7 +222,9 @@ Equity: 资金曲线与 Drawdown 曲线非空
 
 重点人工验证防未来函数：如果某根 5m Bar 收盘后产生 `signal`，普通策略开/平仓的 `order/fill` 必须出现在下一根 5m Bar 的 `open_time`，不能按当前 Bar 的 open 成交。
 
-已有仓位的 Stop Loss / Take Profit 属于保护规则，可使用当前 Bar 的 High/Low；同一 Bar 同时命中时必须是 Stop Loss 优先。
+止盈/止损输入值是杠杆后的毛 ROI Gate，不是触线强平。例如 `Leverage=10`、`Take Profit ROI=10%`，LONG Entry=100 时价格约到 101.01 已达到 10% ROI 门槛；此时系统才开始评估 `close_long`，只有该规则为 true 才产生平仓 signal，并在下一根 execution Bar open 成交。止损同理。
+
+人工测试至少验证三点：ROI 未过门槛时即使 `close_long/close_short` 表达式为 true 也不平；ROI 越过门槛但平仓表达式为 false 时继续持有；`Stop Loss/Take Profit = 0` 时与真实交易一样视为门槛关闭。Backtest 只在 execution Bar close 采样 ROI，不使用 Bar High/Low 猜测线上 2 秒轮询是否曾瞬时触发。
 ## 11. 核心自动测试
 
 Repository 数据层：
@@ -262,7 +262,7 @@ go test -count=1 \
 go test -count=1 ./service/backtest
 ```
 
-覆盖 LONG、SHORT、TP、SL、同 Bar TP+SL、No Trade、Fees、Slippage、Funding 和确定性 Engine replay。
+覆盖 LONG、SHORT、ROI Gate、门槛未过不评估平仓、规则 false 不强平、0 门槛关闭、No Trade、Fees、Slippage、Funding 和确定性 Engine replay。
 ## 12. 完整发布级 Gate
 
 需要重新做完整回归时：

@@ -3,6 +3,7 @@ package command
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"go_binance_futures/models"
@@ -41,7 +42,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.AgentTradeExecution),
 		new(models.AgentTradeAudit),
 		new(models.LLMConfig),
-		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus),
+		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus), new(models.MarketConditionHistory),
 		new(models.MarketDataImportBatch), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate),
 		new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint),
 	)
@@ -160,5 +161,43 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	}
 	if err := SyncDatabase(7); err != nil {
 		t.Fatalf("second version-7 sync should be idempotent: %v", err)
+	}
+	legacy := models.StrategyTemplates{
+		Name: "legacy-market-env", Technology: "{}",
+		Strategy: `[{"name":"open","type":"long","code":"MarketCondition == \"2\" && BasicTrend > 0","fullScreen":true,"enable":true}]`,
+	}
+	if _, err := o.Insert(&legacy); err != nil {
+		t.Fatal(err)
+	}
+	if err := SyncDatabase(8); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 8 {
+		t.Fatalf("expected database version 8, config=%+v err=%v", config, err)
+	}
+	var historyTableCount int
+	if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='market_condition_histories'").QueryRow(&historyTableCount); err != nil || historyTableCount != 1 {
+		t.Fatalf("expected market_condition_histories after version 8 sync, count=%d err=%v", historyTableCount, err)
+	}
+	var migrated string
+	if err := o.Raw("SELECT strategy FROM strategy_templates WHERE id = ?", legacy.ID).QueryRow(&migrated); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(migrated, "BasicTrend") || strings.Contains(migrated, "BTCUSDT.") || !strings.Contains(migrated, "MarketCondition") || !strings.Contains(migrated, `"fullScreen":true`) {
+		t.Fatalf("version 8 strategy migration is invalid: %s", migrated)
+	}
+	if err := SyncDatabase(8); err != nil {
+		t.Fatalf("second version-8 sync should be idempotent: %v", err)
+	}
+	if err := SyncDatabase(9); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 9 {
+		t.Fatalf("expected database version 9, config=%+v err=%v", config, err)
+	}
+	if err := SyncDatabase(9); err != nil {
+		t.Fatalf("second version-9 sync should be idempotent: %v", err)
 	}
 }

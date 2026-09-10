@@ -79,12 +79,12 @@ func UpdateMarketConditionWithProgress(systemConfig *models.Config, progressCall
 	}
 
 	reportMarketConditionProgress(progressCallback, 92, "saving")
-	if result.MarketCondition != systemConfig.MarketCondition {
-		if err := marketservice.SaveMarketCondition(context.Background(), systemConfig.ID, result.MarketCondition); err != nil {
-			return result, err
-		}
-		systemConfig.MarketCondition = result.MarketCondition
+	// Persist every completed automatic evaluation, even when the resulting
+	// condition is unchanged, so the history represents each real update.
+	if err := marketservice.SaveMarketCondition(context.Background(), systemConfig.ID, result.MarketCondition); err != nil {
+		return result, err
 	}
+	systemConfig.MarketCondition = result.MarketCondition
 
 	logs.Info("market condition updated: condition=%d name=%s source=%s confidence=%.2f reason=%s",
 		result.MarketCondition,

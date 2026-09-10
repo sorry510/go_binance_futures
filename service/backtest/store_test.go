@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -26,7 +27,7 @@ func setupBacktestStoreTest(t *testing.T) {
 		if backtestStoreTestErr != nil {
 			return
 		}
-		orm.RegisterModel(new(models.StrategyTemplates), new(models.MarketKline1m), new(models.MarketFundingRate), new(models.MarketDataImportBatch), new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint))
+		orm.RegisterModel(new(models.Config), new(models.MarketConditionHistory), new(models.StrategyTemplates), new(models.MarketKline1m), new(models.MarketKline1h), new(models.MarketFundingRate), new(models.MarketDataImportBatch), new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint))
 		dir, err := os.MkdirTemp("", "backtest-store-test-*")
 		if err != nil {
 			backtestStoreTestErr = err
@@ -42,10 +43,13 @@ func setupBacktestStoreTest(t *testing.T) {
 		t.Fatal(backtestStoreTestErr)
 	}
 	o := orm.NewOrm()
-	for _, table := range []string{"agent_backtest_equity_points", "agent_backtest_events", "agent_backtest_trades", "agent_backtest_runs", "agent_backtest_datasets", "market_data_import_batches", "market_funding_rates", "market_klines_1m", "strategy_templates"} {
+	for _, table := range []string{"agent_backtest_equity_points", "agent_backtest_events", "agent_backtest_trades", "agent_backtest_runs", "agent_backtest_datasets", "market_data_import_batches", "market_funding_rates", "market_klines_1m", "market_klines_1h", "strategy_templates", "market_condition_histories", "config"} {
 		if _, err := o.Raw("DELETE FROM " + table).Exec(); err != nil {
 			t.Fatal(err)
 		}
+	}
+	if _, err := o.Insert(&models.Config{Version: 8, MarketCondition: 3}); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -77,7 +81,7 @@ func TestManagerPersistsDeterministicBacktestWithoutLegacyPaperTables(t *testing
 	}
 	start := time.Date(2026, 1, 2, 0, 0, 0, 0, time.UTC)
 	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{}), WarmupBars: 20})
-	run, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", ExecutionInterval: "1m", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()})
+	run, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +89,10 @@ func TestManagerPersistsDeterministicBacktestWithoutLegacyPaperTables(t *testing
 	for time.Now().Before(deadline) {
 		detail, err := manager.Get(run.RunID)
 		if err == nil && detail.Status == "succeeded" {
-			if detail.Dataset == nil || detail.Dataset.DatasetSpecHash == "" || detail.DataHash == "" {
+			if detail.ExecutionInterval != ReplayInterval || detail.Dataset == nil || detail.Dataset.ExecutionInterval != ReplayInterval {
+				t.Fatalf("new backtests must always use %s replay: %+v", ReplayInterval, detail)
+			}
+			if detail.Dataset.DatasetSpecHash == "" || detail.DataHash == "" {
 				t.Fatalf("dataset not persisted: %+v", detail)
 			}
 			trades, err := manager.Trades(run.RunID, 100)
@@ -141,7 +148,7 @@ func TestSameDatasetSpecUsesLatestCanonicalMarketData(t *testing.T) {
 	start := time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)
 	repo := historicalmarket.NewRepository(fixtureHistorySource{})
 	manager := NewManager(DatasetBuilder{Repository: repo, WarmupBars: 20})
-	request := StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", ExecutionInterval: "1m", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()}
+	request := StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()}
 	first, err := manager.Start(request)
 	if err != nil {
 		t.Fatal(err)
@@ -165,4 +172,190 @@ func TestSameDatasetSpecUsesLatestCanonicalMarketData(t *testing.T) {
 	if secondDetail.DataHash == firstDetail.DataHash {
 		t.Fatalf("data hash must change after canonical OHLCV overwrite: %s", firstDetail.DataHash)
 	}
+}
+
+func TestManagerDeleteRemovesRunChildrenAndUnusedDataset(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	dataset := models.AgentBacktestDataset{
+		DatasetID: "ds_delete_fixture", DatasetSpecHash: "spec_delete_fixture", Symbol: "BTCUSDT",
+		ExecutionInterval: "1m", IntervalsJSON: `["1m"]`, BenchmarkSymbolsJSON: `[]`, Market: "futures_usdt",
+	}
+	if _, err := o.Insert(&dataset); err != nil {
+		t.Fatal(err)
+	}
+	run := models.AgentBacktestRun{RunID: "bt_delete_fixture", DatasetID: dataset.DatasetID, Status: "succeeded", Stage: "completed"}
+	if _, err := o.Insert(&run); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Insert(&models.AgentBacktestTrade{RunID: run.RunID, Sequence: 1, Symbol: "BTCUSDT", Side: "LONG"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Insert(&models.AgentBacktestEvent{RunID: run.RunID, Sequence: 1, Type: "position", Action: "closed"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Insert(&models.AgentBacktestEquityPoint{RunID: run.RunID, Sequence: 1}); err != nil {
+		t.Fatal(err)
+	}
+
+	manager := NewManager(DatasetBuilder{})
+	if err := manager.Delete(run.RunID); err != nil {
+		t.Fatal(err)
+	}
+	for name, model := range map[string]interface{}{
+		"run": new(models.AgentBacktestRun), "trade": new(models.AgentBacktestTrade),
+		"event": new(models.AgentBacktestEvent), "equity": new(models.AgentBacktestEquityPoint),
+	} {
+		count, err := o.QueryTable(model).Filter("run_id", run.RunID).Count()
+		if err != nil || count != 0 {
+			t.Fatalf("%s rows remain after delete: count=%d err=%v", name, count, err)
+		}
+	}
+	if exists := o.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_id", dataset.DatasetID).Exist(); exists {
+		t.Fatal("unused dataset manifest should be deleted with its last run")
+	}
+}
+
+func TestManagerDeleteKeepsSharedDatasetAndRejectsActiveRun(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	dataset := models.AgentBacktestDataset{
+		DatasetID: "ds_shared_fixture", DatasetSpecHash: "spec_shared_fixture", Symbol: "BTCUSDT",
+		ExecutionInterval: "1m", IntervalsJSON: `["1m"]`, BenchmarkSymbolsJSON: `[]`, Market: "futures_usdt",
+	}
+	if _, err := o.Insert(&dataset); err != nil {
+		t.Fatal(err)
+	}
+	first := models.AgentBacktestRun{RunID: "bt_shared_first", DatasetID: dataset.DatasetID, Status: "succeeded", Stage: "completed"}
+	second := models.AgentBacktestRun{RunID: "bt_shared_second", DatasetID: dataset.DatasetID, Status: "succeeded", Stage: "completed"}
+	active := models.AgentBacktestRun{RunID: "bt_active_fixture", Status: "running", Stage: "running_backtest"}
+	for _, row := range []*models.AgentBacktestRun{&first, &second, &active} {
+		if _, err := o.Insert(row); err != nil {
+			t.Fatal(err)
+		}
+	}
+	manager := NewManager(DatasetBuilder{})
+	if err := manager.Delete(first.RunID); err != nil {
+		t.Fatal(err)
+	}
+	if !o.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_id", dataset.DatasetID).Exist() {
+		t.Fatal("shared dataset manifest must remain while another run references it")
+	}
+	if err := manager.Delete(active.RunID); err == nil {
+		t.Fatal("active backtest run must not be deletable")
+	}
+	if !o.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", active.RunID).Exist() {
+		t.Fatal("active run was deleted despite rejection")
+	}
+}
+
+func TestManagerDeleteHandlesVeryLargeEquityHistoryWithoutPlaceholderExpansion(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	run := models.AgentBacktestRun{RunID: "bt_large_delete_fixture", Status: "succeeded", Stage: "completed"}
+	if _, err := o.Insert(&run); err != nil {
+		t.Fatal(err)
+	}
+	_, err := o.Raw(`WITH RECURSIVE seq(x) AS (
+		SELECT 1
+		UNION ALL
+		SELECT x + 1 FROM seq WHERE x < 70000
+	)
+	INSERT INTO agent_backtest_equity_points
+		(run_id, sequence, bar_time, equity, cash, unrealized_pnl, drawdown_pct, position_side)
+	SELECT ?, x, x, 1000, 1000, 0, 0, '' FROM seq`, run.RunID).Exec()
+	if err != nil {
+		t.Fatal(err)
+	}
+	count, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", run.RunID).Count()
+	if err != nil || count != 70000 {
+		t.Fatalf("large fixture count=%d err=%v", count, err)
+	}
+	if err := NewManager(DatasetBuilder{}).Delete(run.RunID); err != nil {
+		t.Fatal(err)
+	}
+	count, err = o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", run.RunID).Count()
+	if err != nil || count != 0 {
+		t.Fatalf("large equity history remains after delete: count=%d err=%v", count, err)
+	}
+}
+
+func TestBacktestRejectsStrategyUsingMarketCondition(t *testing.T) {
+	setupBacktestStoreTest(t)
+	template := models.StrategyTemplates{
+		Name: "market-condition-backtest-blocked", Technology: "{}",
+		Strategy:   `[{"name":"open","enable":true,"code":"MarketCondition == \"2\" && NowPrice > 0","type":"long"}]`,
+		CreateTime: time.Now().UnixMilli(), UpdateTime: time.Now().UnixMilli(),
+	}
+	if _, err := orm.NewOrm().Insert(&template); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{})})
+	_, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(time.Hour).UnixMilli(), Config: zeroCosts()})
+	if err == nil || !strings.Contains(err.Error(), "MarketCondition") || !strings.Contains(err.Error(), "补充") {
+		t.Fatalf("expected missing MarketCondition history rejection, got %v", err)
+	}
+	count, countErr := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Count()
+	if countErr != nil || count != 0 {
+		t.Fatalf("rejected backtest must not create a run: count=%d err=%v", count, countErr)
+	}
+}
+
+func TestBacktestPrefetchRejectsStrategyUsingMarketCondition(t *testing.T) {
+	setupBacktestStoreTest(t)
+	template := models.StrategyTemplates{
+		Name: "market-condition-prefetch-blocked", Technology: "{}",
+		Strategy:   `[{"name":"open","enable":true,"code":"MarketCondition == \"3\"","type":"long"}]`,
+		CreateTime: time.Now().UnixMilli(), UpdateTime: time.Now().UnixMilli(),
+	}
+	if _, err := orm.NewOrm().Insert(&template); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{})})
+	_, err := manager.StartPrefetch(PrefetchRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(time.Hour).UnixMilli()})
+	if err == nil || !strings.Contains(err.Error(), "MarketCondition") || !strings.Contains(err.Error(), "补充") {
+		t.Fatalf("expected missing MarketCondition history prefetch rejection, got %v", err)
+	}
+}
+
+func TestBacktestUsingMarketConditionRunsWhenHistoryIsAvailable(t *testing.T) {
+	setupBacktestStoreTest(t)
+	template := models.StrategyTemplates{
+		Name: "market-condition-backtest-supported", Technology: "{}",
+		Strategy:   `[{"name":"open","enable":true,"code":"MarketCondition == \"2\" && NowPrice > 0","type":"long"}]`,
+		CreateTime: time.Now().UnixMilli(), UpdateTime: time.Now().UnixMilli(),
+	}
+	if _, err := orm.NewOrm().Insert(&template); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	config, err := loadBacktestSystemConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := orm.NewOrm().Insert(&models.MarketConditionHistory{ConfigID: config.ID, MarketCondition: 2, CreatedAt: start.Add(-time.Minute).UnixMilli()}); err != nil {
+		t.Fatal(err)
+	}
+	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{}), WarmupBars: 2})
+	run, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()})
+	if err != nil {
+		t.Fatalf("historical MarketCondition should allow backtest: %v", err)
+	}
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		detail, getErr := manager.Get(run.RunID)
+		if getErr != nil {
+			t.Fatal(getErr)
+		}
+		if detail.Status == "succeeded" {
+			return
+		}
+		if detail.Status == "failed" || detail.Status == "cancelled" || detail.Status == "interrupted" {
+			t.Fatalf("backtest with MarketCondition history failed: %+v", detail)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatal("backtest with MarketCondition history did not finish")
 }

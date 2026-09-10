@@ -10,6 +10,7 @@ import (
 	"time"
 
 	strategyservice "go_binance_futures/service/strategy"
+	"go_binance_futures/utils"
 
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/vm"
@@ -71,7 +72,6 @@ func (Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy Str
 		result.Events = append(result.Events, AuditEvent{Sequence: eventSeq, EventTime: at, Type: typ, Action: action, Side: side, Price: price, Quantity: qty, Data: raw})
 	}
 	for index, bar := range bars {
-		closedProtectiveThisBar := false
 		if err := ctx.Err(); err != nil {
 			return Result{}, err
 		}
@@ -91,28 +91,17 @@ func (Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy Str
 					addEvent(bar.OpenTime, "position", "opened", action.Side, fill, qty, nil)
 				}
 			} else if action.Action == "close" && position != nil {
+				reason := action.ExitReason
+				if reason == "" {
+					reason = "strategy"
+				}
 				var trade Trade
-				trade, cash = closePosition(*position, dataset.Symbol, bar.OpenTime, bar.Open, "strategy", action, config, cash, len(result.Trades)+1)
+				trade, cash = closePosition(*position, dataset.Symbol, bar.OpenTime, bar.Open, reason, action, config, cash, len(result.Trades)+1)
 				result.Trades = append(result.Trades, trade)
 				addEvent(bar.OpenTime, "order", "close", trade.Side, trade.ExitPrice, trade.Quantity, action)
 				addEvent(bar.OpenTime, "fill", "close", trade.Side, trade.ExitPrice, trade.Quantity, nil)
 				addEvent(bar.OpenTime, "position", "closed", trade.Side, trade.ExitPrice, trade.Quantity, map[string]any{"net_pnl": trade.NetPnL})
 				position = nil
-			}
-		}
-		if position != nil {
-			exitPrice, reason := protectiveExit(*position, bar, config)
-			if reason != "" {
-				action := PendingAction{Action: "close", Side: position.Side, StrategyName: reason, StrategyType: reason, StrategyHash: strategyservice.RuleHash(reason)}
-				trade, newCash := closePositionAtFill(*position, dataset.Symbol, bar.CloseTime, exitPrice, reason, action, config, cash, len(result.Trades)+1)
-				cash = newCash
-				result.Trades = append(result.Trades, trade)
-				addEvent(bar.CloseTime, "signal", reason, trade.Side, exitPrice, trade.Quantity, nil)
-				addEvent(bar.CloseTime, "order", "close", trade.Side, exitPrice, trade.Quantity, map[string]any{"reason": reason})
-				addEvent(bar.CloseTime, "fill", "close", trade.Side, exitPrice, trade.Quantity, nil)
-				addEvent(bar.CloseTime, "position", "closed", trade.Side, exitPrice, trade.Quantity, map[string]any{"net_pnl": trade.NetPnL})
-				position = nil
-				closedProtectiveThisBar = true
 			}
 		}
 		for fundingIndex < len(dataset.Funding) && dataset.Funding[fundingIndex].FundingTime <= bar.CloseTime {
@@ -137,16 +126,20 @@ func (Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy Str
 		env, condition, envErr := environment.Build(bar.CloseTime, position, cash, config)
 		if envErr == nil {
 			if position != nil {
-				rule, ok, evalErr := evaluateRules(rules, position.Side, env, compiled, true)
-				if evalErr != nil {
-					return Result{}, evalErr
-				}
-				if ok {
-					pending = &PendingAction{Action: "close", Side: position.Side, StrategyName: rule.Name, StrategyType: rule.Type, StrategyHash: strategyservice.RuleHash(rule.Code), SignalTime: bar.CloseTime, MarketCondition: condition}
-					addEvent(bar.CloseTime, "signal", rule.Type, position.Side, bar.Close, position.Quantity, map[string]any{"strategy_name": rule.Name})
+				roi, _ := env["ROI"].(float64)
+				gateReason := closeGateReason(roi, config)
+				if gateReason != "" {
+					rule, ok, evalErr := evaluateRules(rules, position.Side, env, compiled, true)
+					if evalErr != nil {
+						return Result{}, evalErr
+					}
+					if ok {
+						pending = &PendingAction{Action: "close", Side: position.Side, StrategyName: rule.Name, StrategyType: rule.Type, StrategyHash: strategyservice.RuleHash(rule.Code), ExitReason: gateReason, SignalTime: bar.CloseTime, MarketCondition: condition}
+						addEvent(bar.CloseTime, "signal", rule.Type, position.Side, bar.Close, position.Quantity, map[string]any{"strategy_name": rule.Name, "roi": roi, "gate_reason": gateReason})
+					}
 				}
 			}
-			if position == nil && pending == nil && !closedProtectiveThisBar {
+			if position == nil && pending == nil {
 				rule, ok, evalErr := evaluateRules(rules, "", env, compiled, false)
 				if evalErr != nil {
 					return Result{}, evalErr
@@ -248,31 +241,24 @@ func evaluateRules(rules []Rule, side string, env map[string]interface{}, cache 
 	}
 	return Rule{}, false, nil
 }
-func protectiveExit(position Position, bar Bar, config RunConfig) (float64, string) {
-	if config.StopLossPct > 0 {
-		threshold := position.EntryPrice * (1 - config.StopLossPct/100)
-		if position.Side == "SHORT" {
-			threshold = position.EntryPrice * (1 + config.StopLossPct/100)
-			if bar.High >= threshold {
-				return applySlippage(threshold, position.Side, false, config.SlippageBps), "stop_loss"
-			}
-		} else if bar.Low <= threshold {
-			return applySlippage(threshold, position.Side, false, config.SlippageBps), "stop_loss"
-		}
+func closeGateReason(roi float64, config RunConfig) string {
+	loss := config.StopLossPct
+	if loss <= 0 {
+		loss = utils.DisabledFuturesROIThreshold
 	}
-	if config.TakeProfitPct > 0 {
-		threshold := position.EntryPrice * (1 + config.TakeProfitPct/100)
-		if position.Side == "SHORT" {
-			threshold = position.EntryPrice * (1 - config.TakeProfitPct/100)
-			if bar.Low <= threshold {
-				return applySlippage(threshold, position.Side, false, config.SlippageBps), "take_profit"
-			}
-		} else if bar.High >= threshold {
-			return applySlippage(threshold, position.Side, false, config.SlippageBps), "take_profit"
-		}
+	profit := config.TakeProfitPct
+	if profit <= 0 {
+		profit = utils.DisabledFuturesROIThreshold
 	}
-	return 0, ""
+	if roi <= -loss {
+		return "stop_loss"
+	}
+	if roi >= profit {
+		return "take_profit"
+	}
+	return ""
 }
+
 func applySlippage(price float64, side string, entering bool, bps float64) float64 {
 	rate := bps / 10000
 	if (side == "LONG" && entering) || (side == "SHORT" && !entering) {
