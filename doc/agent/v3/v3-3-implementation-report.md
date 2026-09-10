@@ -49,16 +49,16 @@ Repository 行为：
 
 - Strategy 在 Bar close 产生 signal，最早下一根 execution Bar open 成交。
 - 每个历史环境只能访问当前 close_time 以前的数据。
-- 支持 LONG / SHORT、策略平仓、TP、SL、end-of-data close。
-- 同 Bar 同时命中 TP/SL 时 stop-loss first。
-- TP/SL 平仓后的同 Bar 不重新开仓。
+- 支持 LONG / SHORT、策略平仓、止盈/止损 ROI Gate、end-of-data close。
+- `backtest_engine_v3` 把自定义策略平仓语义与真实交易/模拟盘对齐：三者共享相同毛 ROI 公式；ROI 未越过 `Loss/Profit` 门槛时不评估 `close_long/close_short`，越过门槛后规则为 true 才平仓；0 门槛按 10000% 处理。旧 `backtest_engine_v1/v2` Run 保留原结果，不回写历史记录。
+- Backtest 的 ROI Gate 在 execution Bar close 采样，平仓 signal 仍按防未来函数规则在下一根 Bar open 成交；不使用 Bar High/Low 推断线上 2 秒级瞬时触发。
 - 计入双边手续费、方向滑点和 Funding。
 - 生成 Trade、signal/order/fill/position Audit Event 和 Equity Curve。
 - 输出收益、回撤、胜率、Profit Factor、Sharpe、Sortino、Fees、Funding、持仓时长及 Side/MarketCondition 分组。
 
 ## 5. API / UI
 
-Backtest API：创建、列表、详情、取消、Trades、Events、Equity。外部历史数据通过 canonical import API 写入 Historical Market Repository。
+Backtest API：创建、列表、详情、取消、删除、Trades、Events、Equity。删除 Run 时事务清理其 Trade/Event/Equity，并仅在无引用时删除 Dataset Manifest；Historical Market Repository 行情缓存不受影响。外部历史数据通过 canonical import API 写入 Historical Market Repository。
 
 Web 新增 AI → 历史回测，包含参数表单、异步进度、结果指标、Equity Curve、Trades、Audit Events、Side/MarketCondition 分组和两次成功 Run 对比。
 
@@ -73,7 +73,7 @@ ECharts 改为按模块引入后，Backtest production chunk 从约 1.05 MB 降�
 - `go test -count=1 ./...`：通过。
 - `go test -race ./service/historicalmarket ./service/backtest ./controllers ./command ./models ./feature/api/binance`：通过，无 data race；仅有既知 macOS linker warning。
 - Historical Repository：last-write-wins、完整本地零 Source 调用、内部缺口仅补缺失区间、非法 interval 白名单拒绝均通过。
-- Backtest Fixture：LONG、SHORT、TP、SL、无交易、手续费、滑点、Funding、未来 Bar 不可见、确定性 replay 均通过。
+- Backtest Fixture：LONG、SHORT、杠杆 ROI Gate、门槛前不评估 close、规则 false 不强平、0 门槛关闭、无交易、手续费、滑点、Funding、未来 Bar 不可见、确定性 replay 均通过。
 - 最新数据语义 Gate：相同 Dataset Spec 覆盖历史 Kline 后 Dataset ID / Spec Hash 不变，Run `data_hash` 改变。
 - `pnpm typecheck`：通过。
 - `pnpm build`：通过。

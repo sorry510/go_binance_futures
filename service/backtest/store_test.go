@@ -166,3 +166,78 @@ func TestSameDatasetSpecUsesLatestCanonicalMarketData(t *testing.T) {
 		t.Fatalf("data hash must change after canonical OHLCV overwrite: %s", firstDetail.DataHash)
 	}
 }
+
+func TestManagerDeleteRemovesRunChildrenAndUnusedDataset(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	dataset := models.AgentBacktestDataset{
+		DatasetID: "ds_delete_fixture", DatasetSpecHash: "spec_delete_fixture", Symbol: "BTCUSDT",
+		ExecutionInterval: "1m", IntervalsJSON: `["1m"]`, BenchmarkSymbolsJSON: `[]`, Market: "futures_usdt",
+	}
+	if _, err := o.Insert(&dataset); err != nil {
+		t.Fatal(err)
+	}
+	run := models.AgentBacktestRun{RunID: "bt_delete_fixture", DatasetID: dataset.DatasetID, Status: "succeeded", Stage: "completed"}
+	if _, err := o.Insert(&run); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Insert(&models.AgentBacktestTrade{RunID: run.RunID, Sequence: 1, Symbol: "BTCUSDT", Side: "LONG"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Insert(&models.AgentBacktestEvent{RunID: run.RunID, Sequence: 1, Type: "position", Action: "closed"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Insert(&models.AgentBacktestEquityPoint{RunID: run.RunID, Sequence: 1}); err != nil {
+		t.Fatal(err)
+	}
+
+	manager := NewManager(DatasetBuilder{})
+	if err := manager.Delete(run.RunID); err != nil {
+		t.Fatal(err)
+	}
+	for name, model := range map[string]interface{}{
+		"run": new(models.AgentBacktestRun), "trade": new(models.AgentBacktestTrade),
+		"event": new(models.AgentBacktestEvent), "equity": new(models.AgentBacktestEquityPoint),
+	} {
+		count, err := o.QueryTable(model).Filter("run_id", run.RunID).Count()
+		if err != nil || count != 0 {
+			t.Fatalf("%s rows remain after delete: count=%d err=%v", name, count, err)
+		}
+	}
+	if exists := o.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_id", dataset.DatasetID).Exist(); exists {
+		t.Fatal("unused dataset manifest should be deleted with its last run")
+	}
+}
+
+func TestManagerDeleteKeepsSharedDatasetAndRejectsActiveRun(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	dataset := models.AgentBacktestDataset{
+		DatasetID: "ds_shared_fixture", DatasetSpecHash: "spec_shared_fixture", Symbol: "BTCUSDT",
+		ExecutionInterval: "1m", IntervalsJSON: `["1m"]`, BenchmarkSymbolsJSON: `[]`, Market: "futures_usdt",
+	}
+	if _, err := o.Insert(&dataset); err != nil {
+		t.Fatal(err)
+	}
+	first := models.AgentBacktestRun{RunID: "bt_shared_first", DatasetID: dataset.DatasetID, Status: "succeeded", Stage: "completed"}
+	second := models.AgentBacktestRun{RunID: "bt_shared_second", DatasetID: dataset.DatasetID, Status: "succeeded", Stage: "completed"}
+	active := models.AgentBacktestRun{RunID: "bt_active_fixture", Status: "running", Stage: "running_backtest"}
+	for _, row := range []*models.AgentBacktestRun{&first, &second, &active} {
+		if _, err := o.Insert(row); err != nil {
+			t.Fatal(err)
+		}
+	}
+	manager := NewManager(DatasetBuilder{})
+	if err := manager.Delete(first.RunID); err != nil {
+		t.Fatal(err)
+	}
+	if !o.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_id", dataset.DatasetID).Exist() {
+		t.Fatal("shared dataset manifest must remain while another run references it")
+	}
+	if err := manager.Delete(active.RunID); err == nil {
+		t.Fatal("active backtest run must not be deletable")
+	}
+	if !o.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", active.RunID).Exist() {
+		t.Fatal("active run was deleted despite rejection")
+	}
+}

@@ -183,6 +183,69 @@ func (manager *Manager) Cancel(runID string) error {
 	manager.updateState(runID, "cancelled", "cancelled", 100, "backtest cancelled", true)
 	return nil
 }
+
+func (manager *Manager) Delete(runID string) error {
+	runID = strings.TrimSpace(runID)
+	if runID == "" {
+		return fmt.Errorf("run_id is required")
+	}
+	o := orm.NewOrm()
+	var row models.AgentBacktestRun
+	if err := o.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).One(&row); err != nil {
+		if err == orm.ErrNoRows {
+			return fmt.Errorf("backtest run %q not found", runID)
+		}
+		return err
+	}
+	if row.Status == "queued" || row.Status == "running" {
+		return fmt.Errorf("active backtest run cannot be deleted; cancel it first")
+	}
+	manager.mu.Lock()
+	_, active := manager.cancel[runID]
+	manager.mu.Unlock()
+	if active {
+		return fmt.Errorf("backtest run is still active; wait for cancellation to finish before deleting")
+	}
+	tx, err := o.Begin()
+	if err != nil {
+		return fmt.Errorf("begin delete backtest transaction: %w", err)
+	}
+	rollback := func(cause error) error {
+		_ = tx.Rollback()
+		return cause
+	}
+	for name, model := range map[string]interface{}{
+		"equity points": new(models.AgentBacktestEquityPoint),
+		"events":        new(models.AgentBacktestEvent),
+		"trades":        new(models.AgentBacktestTrade),
+	} {
+		if _, err := tx.QueryTable(model).Filter("run_id", runID).Delete(); err != nil {
+			return rollback(fmt.Errorf("delete backtest %s: %w", name, err))
+		}
+	}
+	deleted, err := tx.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).Delete()
+	if err != nil {
+		return rollback(fmt.Errorf("delete backtest run: %w", err))
+	}
+	if deleted == 0 {
+		return rollback(fmt.Errorf("backtest run %q not found", runID))
+	}
+	if strings.TrimSpace(row.DatasetID) != "" {
+		refs, err := tx.QueryTable(new(models.AgentBacktestRun)).Filter("dataset_id", row.DatasetID).Count()
+		if err != nil {
+			return rollback(fmt.Errorf("count backtest dataset references: %w", err))
+		}
+		if refs == 0 {
+			if _, err := tx.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_id", row.DatasetID).Delete(); err != nil {
+				return rollback(fmt.Errorf("delete unused backtest dataset manifest: %w", err))
+			}
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit delete backtest transaction: %w", err)
+	}
+	return nil
+}
 func (manager *Manager) markInterrupted() error {
 	now := time.Now().UnixMilli()
 	_, err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("status__in", "queued", "running").Update(orm.Params{"status": "interrupted", "stage": "interrupted", "progress": 100, "error": "process restarted before backtest completed", "updated_at": now, "completed_at": now})

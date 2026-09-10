@@ -45,7 +45,7 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
-| [V3-5](./05-phase-v3-5-trade-safety.md) | P0 | 真实交易安全与仓位生命周期：只管理系统自己的仓位，补齐保护单、平仓和重启恢复 |
+| [V3-5](./05-phase-v3-5-trade-safety.md) | P0 | 真实交易安全：先统一仓位/订单 Ownership，确保“谁创建、谁管理”，再补 Agent Stop、整仓平仓与重启恢复 |
 | [V3-6](./06-phase-v3-6-opportunity-watch.md) | P1 | Opportunity Watch：自动发现和分析机会，但真实执行继续由用户确认 |
 | [V3-7](./07-phase-v3-7-outcome-review.md) | P1 | 交易复盘与策略比较：统一查看 Backtest、模拟盘和真实交易表现 |
 | [V3-8](./08-phase-v3-8-personal-operations.md) | P2 | 个人运维与 V3 收尾：健康检查、数据增长控制、备份说明和最终清理 |
@@ -69,7 +69,7 @@ V2 Controlled Trade Proposal
           ↓
 用户确认
           ↓
-V3-5 Safe Execution + Managed Position
+V3-5 Ownership-Safe Execution + Managed Position
           ↓
 Binance
           ↓
@@ -83,7 +83,7 @@ V3-7 Outcome Review
 ```text
 V3-3 Historical Backtest ✅
         ↓
-V3-5 Trade Safety & Position Lifecycle
+V3-5 Trade Ownership & Safety
         ↓
 V3-6 Opportunity Watch
         ↓
