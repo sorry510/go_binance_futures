@@ -57,8 +57,7 @@ func hasCloseMarketConfirmation(code string, indicatorNames []string) bool {
 		}
 	}
 	for _, name := range []string{
-		"MarketCondition", "BasicTrend", "NowSymbolPercentChange", "NowSymbolClose", "NowSymbolOpen", "NowSymbolLow", "NowSymbolHigh",
-		"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT",
+		"MarketCondition", "NowSymbolPercentChange", "NowSymbolClose", "NowSymbolOpen", "NowSymbolLow", "NowSymbolHigh",
 	} {
 		if containsExprIdentifier(code, name) {
 			return true

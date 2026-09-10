@@ -1,101 +1,114 @@
-# AI Agent V3 开发计划
+# AI Agent V3 开发计划（个人版）
 
-## 1. 定位
+## 1. 项目定位
 
-V2 已经完成 Runtime、Task/Conversation、Context、Tool Runtime、MCP Client、Portable Skill、Chat、Model Gateway、Memory、Observability、业务 Workflow，以及受控真实交易链路。
+V3 面向 **单用户、个人自用的 Binance 合约辅助交易系统**。目标不是建设大型量化平台，而是让已有 Agent、行情、回测和受控交易能力变得更可靠、更容易验证、更适合长期自己使用。
 
-V3 不再继续堆 Agent 基础设施，而是把现有能力用于建立一个 **可验证、可回测、可组合风控、可逐步自动化的交易决策闭环**。
+V2 已经完成 Runtime、Task/Conversation、Tool Runtime、MCP、Portable Skill、Model Gateway、Memory、Observability、Workflow 和受控交易；V3-1～V3-3 又完成 Multi-Agent、Market Intelligence 和正式 Historical Backtest。因此后续阶段只补真正缺失的交易闭环，不再重复建设平台能力。
 
-本项目是单用户自用，因此 V3 明确简化：
+### 明确不做
 
-- 不建设企业级 RBAC、审批人、多人工作流。
-- Strategy Lab 只保留显式 Promote、版本和回滚，不做复杂审批流。
-- Portfolio Risk 只做确定性风险控制，不做“谁有权 override”的权限系统。
-- 真实自动执行只由 deterministic Policy 决定，LLM 不能自己批准交易。
-- 所有高风险操作仍保留清晰的开关、状态和审计，防止程序错误和误操作。
-## 2. V3 总体闭环
+- 不做企业级 RBAC、审批流、组织/租户、多用户协作。
+- 不做 Strategy Version / Candidate / Promote / Retired 生命周期。
+- 不做机构级 Portfolio Optimizer、VaR、相关性矩阵或复杂 Risk Reservation。
+- 不做 Agent Studio / Developer Portal；继续使用现有 Skill、MCP、Workflow 管理页面。
+- 不让 LLM 自动修改正式策略、自动突破 Risk、自动批准真实订单。
+
+## 2. 策略使用约定
+
+本项目采用非常简单的策略管理原则：**已有策略不原地修改，新想法直接创建新的 Strategy Template。**
 
 ```text
-Market Data / News / Announcement / Alpha
-                    ↓
-            Market Intelligence
-                    ↓
-            Multi-Agent Team
-                    ↓
-               Opportunity
-                    ↓
-        Strategy / Trade Proposal
-                    ↓
-     Backtest / Paper / Portfolio Risk
-                    ↓
-          Execution / Position Manager
-                    ↓
-                 Binance
-                    ↓
-          Outcome Attribution
-                    ↓
-             Continuous Eval
+策略 A（保留不变）
+   ↓ 新想法
+新建策略 B
+   ↓
+Backtest / 模拟盘
+   ↓
+用户决定哪个策略绑定到 Symbol
 ```
 
-V3 的重点不是“让 AI 更自由”，而是让每个判断都更容易验证、复现和追踪。
-## 3. Phase 索引
+V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策略指纹；模拟盘结果也保存完整 Technology / Strategy Snapshot，因此历史结果本身已经可复现，不再额外维护策略版本系统。
+
+## 3. 已完成基线
+
+| Phase | 状态 | 已有能力 |
+| --- | --- | --- |
+| [V3-0](./00-phase-v3-0-baseline.md) | ✅ | 冻结 V2 行为、Benchmark、Replay/Eval 基线 |
+| [V3-1](./01-phase-v3-1-multi-agent.md) | ✅ | Multi-Agent Team：Technical / Flow / News / Supervisor 协作 |
+| [V3-2](./02-phase-v3-2-market-intelligence.md) | ✅ | Market Intelligence：统一 Event/Fact、公告/新闻/资金面来源 |
+| [V3-3](./03-phase-v3-3-backtest.md) | ✅ | Historical Market Repository + 确定性历史回测 |
+
+> 原 V3-4 Strategy Lab 在规划复审后取消：个人使用方式是“新策略新建模板”，而 Backtest / Paper 已保存完整策略快照，额外版本生命周期属于重复抽象，因此删除该 Phase 文档并保留编号空缺。
+
+## 4. 后续 Phase
 
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
-| [V3-0](./00-phase-v3-0-baseline.md) | P0 ✅ | 冻结 V2 行为、Benchmark、Replay/Eval 基线 |
-| [V3-1](./01-phase-v3-1-multi-agent.md) | P0 ✅ | Multi-Agent Team：多个专业 Agent 以 Typed Output 协作 |
-| [V3-2](./02-phase-v3-2-market-intelligence.md) | P0 ✅ | Market Intelligence：统一 Fact/Event，接入新闻、公告、Alpha 与资金面 |
-| [V3-3](./03-phase-v3-3-backtest.md) | P0 ✅ | Historical Backtest Engine：正式确定性历史回测 + 全局历史行情仓库 |
-| [V3-4](./04-phase-v3-4-strategy-lab.md) | P1 | Strategy Lab：候选、回测、模拟、Promote、回滚和退役 |
-| [V3-5](./05-phase-v3-5-portfolio-risk.md) | P1 | Portfolio Risk：账户级风险预算、组合暴露和并发 Reservation |
-| [V3-6](./06-phase-v3-6-execution-lifecycle.md) | P1 | Execution Lifecycle：保护单、部分成交、加减仓、平仓和恢复 |
-| [V3-7](./07-phase-v3-7-opportunity-automation.md) | P1 | Opportunity Pipeline：自动发现机会、Shadow/Assisted/Auto 分级执行 |
-| [V3-8](./08-phase-v3-8-outcome-eval.md) | P2 | Outcome Attribution：交易结果归因、漂移检测和持续评测 |
-| [V3-9](./09-phase-v3-9-agent-studio.md) | P2 | Agent Studio：Web Skill 编辑、Team 编排、测试、版本和发布 |
-## 4. 严格开发顺序
+| [V3-5](./05-phase-v3-5-trade-safety.md) | P0 | 真实交易安全：先统一仓位/订单 Ownership，确保“谁创建、谁管理”，再补 Agent Stop、整仓平仓与重启恢复 |
+| [V3-6](./06-phase-v3-6-opportunity-watch.md) | P1 | Opportunity Watch：自动发现和分析机会，但真实执行继续由用户确认 |
+| [V3-7](./07-phase-v3-7-outcome-review.md) | P1 | 交易复盘与策略比较：统一查看 Backtest、模拟盘和真实交易表现 |
+| [V3-8](./08-phase-v3-8-personal-operations.md) | P2 | 个人运维与 V3 收尾：健康检查、数据增长控制、备份说明和最终清理 |
+
+V3 到 V3-8 结束，不再规划 Agent Studio。
+
+## 5. 新的交易闭环
 
 ```text
-V3-0 Baseline
-  ↓
-V3-1 Multi-Agent
-  ↓
-V3-2 Market Intelligence
-  ↓
-V3-3 Historical Backtest
-  ↓
-V3-4 Strategy Lab
-  ↓
-V3-5 Portfolio Risk
-  ↓
-V3-6 Execution Lifecycle
-  ↓
-V3-7 Opportunity Automation
-  ↓
-V3-8 Outcome Eval
-  ↓
-V3-9 Agent Studio
+Market Data / Event / News
+          ↓
+Market Intelligence / Scanner
+          ↓
+Single Agent / Multi-Agent / Workflow
+          ↓
+Opportunity / Trading Plan
+          ↓
+V2 Controlled Trade Proposal
+          ↓
+现有 Deterministic Risk
+          ↓
+用户确认
+          ↓
+V3-5 Ownership-Safe Execution + Managed Position
+          ↓
+Binance
+          ↓
+V3-7 Outcome Review
 ```
 
-约束：前一 Phase 未通过 Gate，不进入下一 Phase。V3-3 未完成前不允许策略自动晋级；V3-5/6 未完成前不扩大真实自动执行范围。
-## 5. 统一原则
+自动化重点放在“发现、分析、通知和准备 Proposal”，而不是自动替用户批准真实交易。
 
-- 继续复用 V2 Runtime、Task、Context、Tool、Permission、MCP、Memory、Observability，不新建第二套 Agent 平台。
-- LLM 负责分析、解释、提出候选；行情计算、回测、风控、仓位和执行由 Go Service 确定性完成。
-- Multi-Agent 通过 Typed Input/Output 和子 Task 协作，不允许无限自由对话。
-- 新闻和外部信息必须保存来源、事件时间、观测时间和 freshness，避免把旧消息当实时信息。
-- 策略修改永远先产生新版本；AI 不能直接覆盖 Active Strategy。
-- Portfolio Risk 没有普通“强制绕过”按钮；失败时返回明确原因。
-- 自动执行必须建立在明确的 Symbol/Strategy/Risk 白名单和 deterministic Policy 上。
-- 真实订单测试使用 Fake Broker/Testnet/Replay，不在自动测试中调用生产 Binance 下单。
+## 6. 开发顺序
 
-## 6. V3 Definition of Done
+```text
+V3-3 Historical Backtest ✅
+        ↓
+V3-5 Trade Ownership & Safety
+        ↓
+V3-6 Opportunity Watch
+        ↓
+V3-7 Outcome Review
+        ↓
+V3-8 Personal Operations / Finalization
+```
 
-- 一个交易机会可以由多个专业 Agent 协作完成，并能追踪每个子判断。
-- 新闻、公告、Alpha、资金面和本地 Signal 使用统一 MarketFact/MarketEvent 表达。
-- 策略可以基于统一 Historical Market Repository 做确定性历史回测，并计算手续费、Funding、滑点和风险指标；每次 Run 记录实际 data_hash。
-- 策略具备 Candidate → Backtest → Paper → Active → Retired 生命周期和版本回滚。
-- 多个同时出现的 Proposal 受账户级 Portfolio Risk 统一约束。
-- 真实交易具备 Entry、保护性 Stop、Take Profit、部分成交、平仓和重启恢复能力。
-- 系统可以在 Shadow/Assisted/Auto 三种模式下自动发现机会，默认不直接扩大真实自动交易。
-- 每笔交易结果能归因到 Signal、Evidence、Agent/Model/Skill、Strategy、Risk 和 Execution。
-- Web 可以编辑标准 Skill 和 Team 配置，但仍受现有 Tool/Permission 安全边界约束。
+前一 Phase 未通过 Gate，不进入下一 Phase。V3-5 未完成前，不扩大真实交易自动化范围。
+
+## 7. 统一设计原则
+
+- 优先复用现有代码和表；能扩展现有 Service 就不新增第二套系统。
+- LLM 做分析、解释和候选建议；风险、下单、仓位、保护和平仓由确定性 Go 逻辑完成。
+- 系统只管理自己创建的真实仓位；用户手工仓位、其他机器人仓位一律视为外部资产，不主动修改。
+- 新策略永远创建新的 Strategy Template，不原地覆盖旧模板。
+- Risk 配置保持少而明确，失败时返回具体数值和原因。
+- 自动测试只使用 Fake Broker / Replay / Testnet，不调用生产账户下单。
+- 不为了“架构完整”增加用户实际不会使用的状态、表、审批或页面。
+
+## 8. V3 Definition of Done
+
+- Multi-Agent 和 Market Intelligence 可以稳定给出可追踪的分析结果。
+- Historical Backtest 可以使用统一历史行情仓库复现策略表现。
+- 真实交易只管理本系统自己的订单/仓位，并具备 Stop、可选 TP、确定性平仓和重启恢复能力。
+- 自动发现机会后可以通知用户并快速进入现有受控交易流程，但不会绕过用户确认。
+- Backtest、模拟盘和真实交易可以按策略/Symbol/行情环境做实用复盘。
+- 系统长期运行时可以快速检查数据源、Agent、Scheduler、DB 和交易链路健康状态，并控制大表增长。
