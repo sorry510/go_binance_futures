@@ -178,7 +178,7 @@ func TestBuilderRejectsProfitOnlyCloseRule(t *testing.T) {
 
 func TestBuilderAcceptsConfirmedCloseRule(t *testing.T) {
 	builder := New(Options{Validate: func([]byte) error { return nil }})
-	raw := json.RawMessage(`{"name":"close","technology":{},"strategy":[{"name":"confirmed_exit","type":"close_long","code":"ROI >= 3 && (MarketCondition == \"4\" || BasicTrend < 0)","fullScreen":false,"enable":true}]}`)
+	raw := json.RawMessage(`{"name":"close","technology":{},"strategy":[{"name":"confirmed_exit","type":"close_long","code":"ROI >= 3 && (MarketCondition == \"4\" || NowSymbolPercentChange < 0)","fullScreen":false,"enable":true}]}`)
 	if _, err := builder.Validator().Validate(context.Background(), raw); err != nil {
 		t.Fatalf("confirmed close rule should pass: %v", err)
 	}
@@ -204,7 +204,7 @@ func TestBuilderRejectsPnlOnlyOrBranch(t *testing.T) {
 
 func TestBuilderRejectsComplexOneLineCode(t *testing.T) {
 	builder := New(Options{Validate: func([]byte) error { return nil }})
-	code := `MarketCondition == "1" && BasicTrend > 0 && NowPrice > NowSymbolOpen && BTCUSDT.PercentChange > 0 && ETHUSDT.PercentChange > 0 && SOLUSDT.PercentChange > 0 && BNBUSDT.PercentChange > 0`
+	code := `MarketCondition == "1" && NowPrice > NowSymbolOpen && NowSymbolPercentChange > 0 && NowSymbolHigh > NowSymbolLow && NowTime > SystemStartTime && NowSymbolClose > 0 && NowSymbolLow > 0`
 	payload, _ := json.Marshal(map[string]any{"name": "one-line", "technology": map[string]any{}, "strategy": []map[string]any{{"name": "long", "type": "long", "code": code, "fullScreen": false, "enable": true}}})
 	_, err := builder.Validator().Validate(context.Background(), payload)
 	if err == nil || !strings.Contains(err.Error(), "不能全部写在一行") {
@@ -214,7 +214,7 @@ func TestBuilderRejectsComplexOneLineCode(t *testing.T) {
 
 func TestBuilderAcceptsReadableLetCode(t *testing.T) {
 	builder := New(Options{Validate: func([]byte) error { return nil }})
-	code := "let regime_ok = MarketCondition == \"1\" && BasicTrend > 0;\nlet benchmark_ok = BTCUSDT.PercentChange > 0 && ETHUSDT.PercentChange > 0;\nlet price_ok = NowPrice > NowSymbolOpen && SOLUSDT.PercentChange > 0 && BNBUSDT.PercentChange > 0;\nregime_ok && benchmark_ok && price_ok"
+	code := "let regime_ok = MarketCondition == \"1\";\nlet momentum_ok = NowSymbolPercentChange > 0;\nlet price_ok = NowPrice > NowSymbolOpen && NowSymbolHigh > NowSymbolLow;\nregime_ok && momentum_ok && price_ok"
 	payload, _ := json.Marshal(map[string]any{"name": "readable", "technology": map[string]any{}, "strategy": []map[string]any{{"name": "long", "type": "long", "code": code, "fullScreen": false, "enable": true}}})
 	if _, err := builder.Validator().Validate(context.Background(), payload); err != nil {
 		t.Fatalf("readable let code should pass: %v", err)

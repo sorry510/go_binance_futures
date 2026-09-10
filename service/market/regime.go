@@ -158,15 +158,42 @@ func SaveMarketCondition(ctx context.Context, configID int64, condition int) err
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if !markettypes.IsValidMarketCondition(condition) {
-		return fmt.Errorf("invalid market condition %d", condition)
-	}
-	_, err := orm.NewOrm().QueryTable("config").Filter("id", configID).Update(orm.Params{"market_condition": condition})
+	o := orm.NewOrm()
+	tx, err := o.Begin()
 	if err != nil {
-		return fmt.Errorf("update market condition: %w", err)
+		return fmt.Errorf("begin market condition update: %w", err)
+	}
+	if err := saveMarketConditionWithOrmer(ctx, tx, configID, condition); err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit market condition update: %w", err)
 	}
 	return nil
 }
+
+func saveMarketConditionWithOrmer(ctx context.Context, o orm.QueryExecutor, configID int64, condition int) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if !markettypes.IsValidMarketCondition(condition) {
+		return fmt.Errorf("invalid market condition %d", condition)
+	}
+	updated, err := o.QueryTable("config").Filter("id", configID).Update(orm.Params{"market_condition": condition})
+	if err != nil {
+		return fmt.Errorf("update market condition: %w", err)
+	}
+	if updated == 0 {
+		return fmt.Errorf("config %d not found", configID)
+	}
+	history := models.MarketConditionHistory{ConfigID: configID, MarketCondition: condition, CreatedAt: time.Now().UnixMilli()}
+	if _, err := o.Insert(&history); err != nil {
+		return fmt.Errorf("save market condition history: %w", err)
+	}
+	return nil
+}
+
 func SanitizeReason(reason string) string {
 	reason = strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(reason, "\r", " "), "\n", " "))
 	runes := []rune(reason)

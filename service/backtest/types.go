@@ -6,13 +6,11 @@ import (
 )
 
 const (
-	EngineVersion        = "backtest_engine_v4"
-	MarketConditionModel = "backtest_major_regime_v1"
+	EngineVersion        = "backtest_engine_v6"
+	MarketConditionModel = "historical_market_condition_v1"
 	DefaultWarmupBars    = 200
 	ReplayInterval       = "1m"
 )
-
-var BenchmarkSymbols = []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"}
 
 type Bar struct {
 	Symbol              string  `json:"symbol"`
@@ -36,20 +34,26 @@ type Funding struct {
 	MarkPrice   float64 `json:"mark_price"`
 }
 
+type MarketConditionPoint struct {
+	Time  int64 `json:"time"`
+	Value int   `json:"value"`
+}
+
 type Dataset struct {
-	DatasetID         string           `json:"dataset_id"`
-	DatasetSpecHash   string           `json:"dataset_spec_hash"`
-	DataHash          string           `json:"data_hash"`
-	Market            string           `json:"market"`
-	Symbol            string           `json:"symbol"`
-	ExecutionInterval string           `json:"execution_interval"`
-	Intervals         []string         `json:"intervals"`
-	BenchmarkSymbols  []string         `json:"benchmark_symbols"`
-	StartTime         int64            `json:"start_time"`
-	EndTime           int64            `json:"end_time"`
-	WarmupStartTime   int64            `json:"warmup_start_time"`
-	Bars              map[string][]Bar `json:"bars"`
-	Funding           []Funding        `json:"funding"`
+	DatasetID               string                 `json:"dataset_id"`
+	DatasetSpecHash         string                 `json:"dataset_spec_hash"`
+	DataHash                string                 `json:"data_hash"`
+	Market                  string                 `json:"market"`
+	Symbol                  string                 `json:"symbol"`
+	ExecutionInterval       string                 `json:"execution_interval"`
+	Intervals               []string               `json:"intervals"`
+	StartTime               int64                  `json:"start_time"`
+	EndTime                 int64                  `json:"end_time"`
+	WarmupStartTime         int64                  `json:"warmup_start_time"`
+	Bars                    map[string][]Bar       `json:"bars"`
+	Funding                 []Funding              `json:"funding"`
+	MarketConditions        []MarketConditionPoint `json:"market_conditions,omitempty"`
+	MarketConditionRequired bool                   `json:"market_condition_required,omitempty"`
 }
 
 func BarSeriesKey(symbol, interval string) string { return symbol + "|" + interval }
@@ -62,6 +66,7 @@ type DatasetRequest struct {
 	StartTime         int64  `json:"start_time"`
 	EndTime           int64  `json:"end_time"`
 	TechnologyJSON    string `json:"technology_json"`
+	StrategyJSON      string `json:"strategy_json"`
 }
 
 type Rule struct {
@@ -178,19 +183,18 @@ type GroupMetrics struct {
 }
 
 type Metrics struct {
-	NetPnL            float64        `json:"net_pnl"`
-	ReturnPct         float64        `json:"return_pct"`
-	MaxDrawdownPct    float64        `json:"max_drawdown_pct"`
-	WinRate           float64        `json:"win_rate"`
-	ProfitFactor      float64        `json:"profit_factor"`
-	Sharpe            float64        `json:"sharpe"`
-	Sortino           float64        `json:"sortino"`
-	TradeCount        int            `json:"trade_count"`
-	Fees              float64        `json:"fees"`
-	Funding           float64        `json:"funding"`
-	AverageHoldingMs  int64          `json:"average_holding_ms"`
-	BySide            []GroupMetrics `json:"by_side"`
-	ByMarketCondition []GroupMetrics `json:"by_market_condition"`
+	NetPnL           float64        `json:"net_pnl"`
+	ReturnPct        float64        `json:"return_pct"`
+	MaxDrawdownPct   float64        `json:"max_drawdown_pct"`
+	WinRate          float64        `json:"win_rate"`
+	ProfitFactor     float64        `json:"profit_factor"`
+	Sharpe           float64        `json:"sharpe"`
+	Sortino          float64        `json:"sortino"`
+	TradeCount       int            `json:"trade_count"`
+	Fees             float64        `json:"fees"`
+	Funding          float64        `json:"funding"`
+	AverageHoldingMs int64          `json:"average_holding_ms"`
+	BySide           []GroupMetrics `json:"by_side"`
 }
 
 type Result struct {
@@ -247,7 +251,6 @@ type DatasetManifest struct {
 	Symbol            string   `json:"symbol"`
 	ExecutionInterval string   `json:"execution_interval"`
 	Intervals         []string `json:"intervals"`
-	BenchmarkSymbols  []string `json:"benchmark_symbols"`
 	StartTime         int64    `json:"start_time"`
 	EndTime           int64    `json:"end_time"`
 	WarmupStartTime   int64    `json:"warmup_start_time"`

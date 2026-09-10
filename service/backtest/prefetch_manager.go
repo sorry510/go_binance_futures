@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go_binance_futures/models"
+	strategyservice "go_binance_futures/service/strategy"
 
 	"github.com/beego/beego/v2/client/orm"
 )
@@ -21,7 +22,6 @@ type PrefetchSummary struct {
 	Symbol               string   `json:"symbol"`
 	ReplayInterval       string   `json:"replay_interval"`
 	Intervals            []string `json:"intervals"`
-	BenchmarkSymbols     []string `json:"benchmark_symbols"`
 	StartTime            int64    `json:"start_time"`
 	EndTime              int64    `json:"end_time"`
 	WarmupStartTime      int64    `json:"warmup_start_time"`
@@ -48,9 +48,14 @@ func (manager *Manager) StartPrefetch(request PrefetchRequest) (PrefetchSummary,
 	if err := orm.NewOrm().QueryTable(new(models.StrategyTemplates)).Filter("id", request.StrategyTemplateID).One(&template); err != nil {
 		return PrefetchSummary{}, fmt.Errorf("load strategy template: %w", err)
 	}
+	if strategyservice.StrategyUsesMarketCondition(template.Strategy) {
+		if err := ValidateMarketConditionCoverage(context.Background(), request.StartTime, request.EndTime); err != nil {
+			return PrefetchSummary{}, err
+		}
+	}
 	plan, err := manager.builder.PrefetchPlan(DatasetRequest{
 		Symbol: request.Symbol, ExecutionInterval: ReplayInterval,
-		StartTime: request.StartTime, EndTime: request.EndTime, TechnologyJSON: template.Technology,
+		StartTime: request.StartTime, EndTime: request.EndTime, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy,
 	})
 	if err != nil {
 		return PrefetchSummary{}, err
@@ -60,7 +65,7 @@ func (manager *Manager) StartPrefetch(request PrefetchRequest) (PrefetchSummary,
 		JobID: "prefetch_" + newRunID()[4:], Status: "queued", Stage: "queued", Progress: 0,
 		StrategyTemplateID: template.ID, StrategyTemplateName: template.Name,
 		Symbol: plan.Symbol, ReplayInterval: plan.ReplayInterval,
-		Intervals: append([]string(nil), plan.Intervals...), BenchmarkSymbols: append([]string(nil), plan.BenchmarkSymbols...),
+		Intervals: append([]string(nil), plan.Intervals...),
 		StartTime: plan.StartTime, EndTime: plan.EndTime, WarmupStartTime: plan.WarmupStartTime,
 		CreatedAt: now, UpdatedAt: now,
 	}
@@ -80,7 +85,7 @@ func (manager *Manager) StartPrefetch(request PrefetchRequest) (PrefetchSummary,
 	manager.prefetchJobs[job.JobID] = job
 	manager.prefetchActive = job.JobID
 	manager.prefetchMu.Unlock()
-	go manager.runPrefetch(job.JobID, template.Technology)
+	go manager.runPrefetch(job.JobID, template.Technology, template.Strategy)
 	return clonePrefetchSummary(job), nil
 }
 
@@ -93,7 +98,7 @@ func (manager *Manager) GetPrefetch(jobID string) (PrefetchSummary, error) {
 	}
 	return clonePrefetchSummary(job), nil
 }
-func (manager *Manager) runPrefetch(jobID, technologyJSON string) {
+func (manager *Manager) runPrefetch(jobID, technologyJSON, strategyJSON string) {
 	manager.updatePrefetch(jobID, func(job *PrefetchSummary) {
 		job.Status = "running"
 		job.Stage = "fetching"
@@ -105,7 +110,7 @@ func (manager *Manager) runPrefetch(jobID, technologyJSON string) {
 	}
 	result, err := manager.builder.Prefetch(context.Background(), DatasetRequest{
 		Symbol: job.Symbol, ExecutionInterval: ReplayInterval,
-		StartTime: job.StartTime, EndTime: job.EndTime, TechnologyJSON: technologyJSON,
+		StartTime: job.StartTime, EndTime: job.EndTime, TechnologyJSON: technologyJSON, StrategyJSON: strategyJSON,
 	}, func(completed, total int) {
 		progress := 1
 		if total > 0 {
@@ -155,6 +160,5 @@ func (manager *Manager) updatePrefetch(jobID string, update func(*PrefetchSummar
 
 func clonePrefetchSummary(job PrefetchSummary) PrefetchSummary {
 	job.Intervals = append([]string(nil), job.Intervals...)
-	job.BenchmarkSymbols = append([]string(nil), job.BenchmarkSymbols...)
 	return job
 }

@@ -11,8 +11,12 @@ import (
 	"time"
 
 	"go_binance_futures/feature/strategy/line"
+	"go_binance_futures/models"
 	"go_binance_futures/service/historicalmarket"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
+
+	"github.com/beego/beego/v2/client/orm"
 )
 
 type DatasetBuilder struct {
@@ -60,15 +64,12 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 			warmupStart = candidate
 		}
 	}
-	dataset := Dataset{Market: historicalmarket.MarketFuturesUSDT, Symbol: request.Symbol, ExecutionInterval: request.ExecutionInterval, Intervals: intervals, BenchmarkSymbols: append([]string(nil), BenchmarkSymbols...), StartTime: request.StartTime, EndTime: request.EndTime, WarmupStartTime: warmupStart, Bars: map[string][]Bar{}, Funding: []Funding{}}
-	benchmarkUnits := len(BenchmarkSymbols)
-	for _, symbol := range BenchmarkSymbols {
-		if symbol == request.Symbol {
-			benchmarkUnits--
-			break
-		}
+	requiresMarketCondition := strategyservice.StrategyUsesMarketCondition(request.StrategyJSON)
+	dataset := Dataset{Market: historicalmarket.MarketFuturesUSDT, Symbol: request.Symbol, ExecutionInterval: request.ExecutionInterval, Intervals: intervals, StartTime: request.StartTime, EndTime: request.EndTime, WarmupStartTime: warmupStart, Bars: map[string][]Bar{}, Funding: []Funding{}, MarketConditionRequired: requiresMarketCondition}
+	totalUnits := len(intervals) + 1 // target series + funding
+	if requiresMarketCondition {
+		totalUnits++
 	}
-	totalUnits := len(intervals) + benchmarkUnits + 1 // target series + benchmark series + funding
 	completedUnits := 0
 	report := func() {
 		if progress != nil {
@@ -90,20 +91,6 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 		completedUnits++
 		report()
 	}
-	benchmarkStart, _ := subtractBars(request.StartTime, request.ExecutionInterval, builder.WarmupBars)
-	for _, symbol := range BenchmarkSymbols {
-		key := BarSeriesKey(symbol, request.ExecutionInterval)
-		if _, exists := dataset.Bars[key]; exists {
-			continue
-		}
-		rows, err := repo.LoadKlines(ctx, dataset.Market, symbol, request.ExecutionInterval, benchmarkStart, request.EndTime)
-		if err != nil {
-			return Dataset{}, fmt.Errorf("load benchmark %s: %w", symbol, err)
-		}
-		dataset.Bars[key] = convertHistoricalKlines(rows)
-		completedUnits++
-		report()
-	}
 	fundingRows, err := repo.LoadFunding(ctx, dataset.Market, request.Symbol, request.StartTime, request.EndTime)
 	if err != nil {
 		return Dataset{}, fmt.Errorf("load historical funding %s: %w", request.Symbol, err)
@@ -114,6 +101,15 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 	completedUnits++
 	report()
 	sort.Slice(dataset.Funding, func(i, j int) bool { return dataset.Funding[i].FundingTime < dataset.Funding[j].FundingTime })
+	if requiresMarketCondition {
+		points, err := loadMarketConditionHistory(ctx, request.StartTime, request.EndTime)
+		if err != nil {
+			return Dataset{}, err
+		}
+		dataset.MarketConditions = points
+		completedUnits++
+		report()
+	}
 	dataset.DatasetSpecHash = DatasetSpecHash(dataset)
 	dataset.DatasetID = "ds_" + dataset.DatasetSpecHash[:24]
 	dataset.DataHash = DatasetDataHash(dataset)
@@ -229,9 +225,10 @@ func DatasetSpecHash(dataset Dataset) string {
 	enc.SetEscapeHTML(false)
 	_ = enc.Encode(struct {
 		Market, Symbol, ExecutionInterval string
-		Intervals, Benchmarks             []string
+		Intervals                         []string
 		Start, End, Warmup                int64
-	}{dataset.Market, dataset.Symbol, dataset.ExecutionInterval, dataset.Intervals, dataset.BenchmarkSymbols, dataset.StartTime, dataset.EndTime, dataset.WarmupStartTime})
+		MarketConditionRequired           bool
+	}{dataset.Market, dataset.Symbol, dataset.ExecutionInterval, dataset.Intervals, dataset.StartTime, dataset.EndTime, dataset.WarmupStartTime, dataset.MarketConditionRequired})
 	return hex.EncodeToString(h.Sum(nil))
 }
 func DatasetDataHash(dataset Dataset) string {
@@ -257,5 +254,73 @@ func DatasetDataHash(dataset Dataset) string {
 	for _, funding := range dataset.Funding {
 		_ = enc.Encode(funding)
 	}
+	for _, point := range dataset.MarketConditions {
+		_ = enc.Encode(point)
+	}
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func loadMarketConditionHistory(ctx context.Context, startTime, endTime int64) ([]MarketConditionPoint, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	config, err := loadBacktestSystemConfig()
+	if err != nil {
+		return nil, fmt.Errorf("load system config for MarketCondition history: %w", err)
+	}
+	o := orm.NewOrm()
+	var before models.MarketConditionHistory
+	beforeErr := o.QueryTable(new(models.MarketConditionHistory)).Filter("config_id", config.ID).Filter("created_at__lte", startTime).OrderBy("-created_at").One(&before)
+	if beforeErr != nil && beforeErr != orm.ErrNoRows {
+		return nil, fmt.Errorf("load MarketCondition history before range: %w", beforeErr)
+	}
+	var rows []models.MarketConditionHistory
+	if _, err := o.QueryTable(new(models.MarketConditionHistory)).Filter("config_id", config.ID).Filter("created_at__gt", startTime).Filter("created_at__lte", endTime).OrderBy("created_at").All(&rows); err != nil {
+		return nil, fmt.Errorf("load MarketCondition history range: %w", err)
+	}
+	all := make([]models.MarketConditionHistory, 0, len(rows)+1)
+	if beforeErr == nil {
+		all = append(all, before)
+	}
+	all = append(all, rows...)
+	if err := validateMarketConditionCoverage(all, startTime, endTime); err != nil {
+		return nil, err
+	}
+	points := make([]MarketConditionPoint, 0, len(all))
+	for _, row := range all {
+		points = append(points, MarketConditionPoint{Time: row.CreatedAt, Value: row.MarketCondition})
+	}
+	return points, nil
+}
+
+func ValidateMarketConditionCoverage(ctx context.Context, startTime, endTime int64) error {
+	_, err := loadMarketConditionHistory(ctx, startTime, endTime)
+	return err
+}
+
+var loadBacktestSystemConfig = func() (models.Config, error) {
+	var config models.Config
+	err := orm.NewOrm().QueryTable(new(models.Config)).OrderBy("id").One(&config)
+	return config, err
+}
+
+func validateMarketConditionCoverage(rows []models.MarketConditionHistory, startTime, endTime int64) error {
+	if len(rows) == 0 || rows[0].CreatedAt > startTime {
+		return fmt.Errorf("MarketCondition 历史数据不足，请先点击“补充 MarketCondition 历史”")
+	}
+	const maxGap = 2 * time.Hour
+	if time.Duration(startTime-rows[0].CreatedAt)*time.Millisecond > maxGap {
+		return fmt.Errorf("MarketCondition 历史数据在回测开始时间前存在缺口，请先补充历史数据")
+	}
+	previous := rows[0].CreatedAt
+	for _, row := range rows[1:] {
+		if time.Duration(row.CreatedAt-previous)*time.Millisecond > maxGap {
+			return fmt.Errorf("MarketCondition 历史数据存在超过 2 小时的缺口，请先补充历史数据")
+		}
+		previous = row.CreatedAt
+	}
+	if time.Duration(endTime-previous)*time.Millisecond > maxGap {
+		return fmt.Errorf("MarketCondition 历史数据未覆盖回测结束时间，请先补充历史数据")
+	}
+	return nil
 }
