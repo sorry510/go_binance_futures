@@ -51,12 +51,27 @@ func (source *prefetchCountingSource) stats() (int, int) {
 	return source.calls, source.rows
 }
 func (source *prefetchCountingSource) Klines(ctx context.Context, market, symbol, interval string, start, end int64) ([]historicalmarket.Kline, error) {
+	return source.KlinesWithProgress(ctx, market, symbol, interval, start, end, nil)
+}
+
+func (source *prefetchCountingSource) KlinesWithProgress(ctx context.Context, market, symbol, interval string, start, end int64, progress historicalmarket.KlineProgressCallback) ([]historicalmarket.Kline, error) {
 	if source.inner == nil {
 		return nil, fmt.Errorf("historical K-line source is unavailable")
 	}
-	rows, err := source.inner.Klines(ctx, market, symbol, interval, start, end)
+	var rows []historicalmarket.Kline
+	var err error
+	progressive := false
+	if inner, ok := source.inner.(historicalmarket.KlineProgressSource); ok {
+		progressive = true
+		rows, err = inner.KlinesWithProgress(ctx, market, symbol, interval, start, end, progress)
+	} else {
+		rows, err = source.inner.Klines(ctx, market, symbol, interval, start, end)
+	}
 	if err == nil {
 		source.add(len(rows))
+		if progress != nil && !progressive {
+			progress(len(rows), len(rows))
+		}
 	}
 	return rows, err
 }
@@ -121,30 +136,44 @@ func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetReque
 	if warmupBars <= 0 {
 		warmupBars = DefaultWarmupBars
 	}
-	total := len(plan.Intervals) + 1
+	const (
+		intervalProgressUnits = 1000
+		fundingProgressUnits  = 100
+	)
+	total := len(plan.Intervals)*intervalProgressUnits + fundingProgressUnits
 	completed := 0
-	report := func() {
+	report := func(value int) {
 		if progress != nil {
-			progress(completed, total)
+			progress(value, total)
 		}
 	}
-	report()
+	report(0)
 	for _, interval := range plan.Intervals {
 		start, err := subtractBars(plan.StartTime, interval, warmupBars)
 		if err != nil {
 			return PrefetchResult{}, err
 		}
-		if _, err := fetchRepo.LoadKlines(ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, interval, start, plan.EndTime); err != nil {
+		base := completed
+		if _, err := fetchRepo.LoadKlinesWithProgress(ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, interval, start, plan.EndTime, func(done, intervalTotal int) {
+			if intervalTotal <= 0 {
+				return
+			}
+			units := done * intervalProgressUnits / intervalTotal
+			if units >= intervalProgressUnits {
+				units = intervalProgressUnits - 1
+			}
+			report(base + units)
+		}); err != nil {
 			return PrefetchResult{}, fmt.Errorf("prefetch %s %s: %w", plan.Symbol, interval, err)
 		}
-		completed++
-		report()
+		completed += intervalProgressUnits
+		report(completed)
 	}
 	if _, err := fetchRepo.LoadFunding(ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, plan.StartTime, plan.EndTime); err != nil {
 		return PrefetchResult{}, fmt.Errorf("prefetch funding %s: %w", plan.Symbol, err)
 	}
-	completed++
-	report()
+	completed += fundingProgressUnits
+	report(completed)
 	calls, rows := counter.stats()
 	return PrefetchResult{Plan: plan, RemoteCalls: calls, RemoteRows: rows}, nil
 }

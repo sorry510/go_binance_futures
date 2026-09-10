@@ -82,3 +82,57 @@ func TestPrefetchFillsDataSoImmediateBuildUsesLocalCache(t *testing.T) {
 		t.Fatalf("build refetched Binance data after successful prefetch: before=%d/%d after=%d/%d", klineCalls, fundingCalls, afterKlines, afterFunding)
 	}
 }
+
+type progressiveHistorySource struct{}
+
+func (source progressiveHistorySource) Klines(ctx context.Context, market, symbol, interval string, start, end int64) ([]historicalmarket.Kline, error) {
+	return source.KlinesWithProgress(ctx, market, symbol, interval, start, end, nil)
+}
+
+func (progressiveHistorySource) KlinesWithProgress(ctx context.Context, market, symbol, interval string, start, end int64, progress historicalmarket.KlineProgressCallback) ([]historicalmarket.Kline, error) {
+	rows, err := fixtureHistorySource{}.Klines(ctx, market, symbol, interval, start, end)
+	if err != nil {
+		return nil, err
+	}
+	if progress != nil && len(rows) > 0 {
+		for completed := 1; completed <= len(rows); completed++ {
+			progress(completed, len(rows))
+		}
+	}
+	return rows, nil
+}
+
+func (progressiveHistorySource) Funding(context.Context, string, string, int64, int64) ([]historicalmarket.FundingRate, error) {
+	return []historicalmarket.FundingRate{}, nil
+}
+
+func TestPrefetchReportsKlineProgressBeforeRemoteRangeCompletes(t *testing.T) {
+	setupBacktestStoreTest(t)
+	start := time.Date(2026, 3, 3, 0, 0, 0, 0, time.UTC)
+	builder := DatasetBuilder{Repository: historicalmarket.NewRepository(progressiveHistorySource{}), WarmupBars: 2}
+	values := []int{}
+	totals := []int{}
+	_, err := builder.Prefetch(context.Background(), DatasetRequest{
+		Symbol: "DOGEUSDT", ExecutionInterval: ReplayInterval,
+		StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), TechnologyJSON: "{}",
+	}, func(completed, total int) {
+		values = append(values, completed)
+		totals = append(totals, total)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(values) < 5 {
+		t.Fatalf("expected granular prefetch progress callbacks, got %v", values)
+	}
+	foundIntermediate := false
+	for i, value := range values {
+		if totals[i] > 0 && value > 0 && value < totals[i]/2 {
+			foundIntermediate = true
+			break
+		}
+	}
+	if !foundIntermediate {
+		t.Fatalf("expected progress while K-line range was still downloading, values=%v totals=%v", values, totals)
+	}
+}

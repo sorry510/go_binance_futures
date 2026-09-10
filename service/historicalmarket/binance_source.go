@@ -13,11 +13,20 @@ import (
 
 type BinanceSource struct{}
 
-func (BinanceSource) Klines(ctx context.Context, market, symbol, interval string, start, end int64) ([]Kline, error) {
+func (source BinanceSource) Klines(ctx context.Context, market, symbol, interval string, start, end int64) ([]Kline, error) {
+	return source.KlinesWithProgress(ctx, market, symbol, interval, start, end, nil)
+}
+
+func (BinanceSource) KlinesWithProgress(ctx context.Context, market, symbol, interval string, start, end int64, progress KlineProgressCallback) ([]Kline, error) {
 	if market != MarketFuturesUSDT {
 		return nil, fmt.Errorf("binance historical source does not support market %q", market)
 	}
-	rows, err := binanceapi.GetHistoricalKlines(ctx, symbol, interval, start, end)
+	estimated, _ := expectedKlineCount(interval, start, end)
+	rows, err := binanceapi.GetHistoricalKlinesWithProgress(ctx, symbol, interval, start, end, func(completed int) {
+		if progress != nil {
+			progress(completed, estimated)
+		}
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -31,6 +40,9 @@ func (BinanceSource) Klines(ctx context.Context, market, symbol, interval string
 			return nil, err
 		}
 		result = append(result, item)
+	}
+	if progress != nil {
+		progress(len(result), estimated)
 	}
 	return result, nil
 }
