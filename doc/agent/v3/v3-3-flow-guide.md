@@ -206,7 +206,23 @@ signal
 
 因此不能用某根 Bar 的收盘信息按同一根 Bar 的开盘价成交。
 
-已有仓位的 Stop Loss / Take Profit 使用当前 Bar 的 High/Low 判断；同一 Bar 同时命中时 Stop Loss 优先。保护性平仓发生后，该 Bar 不允许立即重新开仓。
+自定义策略的止盈/止损参数采用与真实交易和模拟盘一致的**杠杆毛 ROI Gate**语义，而不是价格涨跌幅，也不是独立的强制保护单：
+
+```text
+ROI = unrealizedPnL / (abs(quantity) * markPrice) * leverage * 100
+
+ROI 仍在 (-Loss, +Profit)
+  → 不评估 close_long / close_short
+
+ROI <= -Loss 或 ROI >= +Profit
+  → 评估对应 close_long / close_short
+  → 规则 true 才产生 close signal
+  → 下一根 Execution Bar open 成交
+```
+
+`Profit/Loss = 0` 时，与真实交易保持一致，按 10000% 的内部门槛处理，等价于日常行情下关闭该 ROI Gate。例：Entry=100、Leverage=10、Profit=10%，LONG 在价格约 101.01 时毛 ROI 已接近/达到 10%；但这只代表允许评估 `close_long`，并不代表一定立即平仓。
+
+线上真实交易约每 2 秒按实时 Mark Price 检查门槛，模拟盘按当前行情检查；Backtest 只能在 execution Bar close 检查。因此某根历史 Bar 的 High/Low 曾短暂越过门槛、但 Close 又回到门槛内时，Backtest 不会假设线上一定成交。这是历史数据粒度造成的执行模型差异。
 
 ### 9.1 单仓位模式
 
@@ -261,6 +277,8 @@ signal / order / fill / position / funding
 ```
 
 Metrics 包括 Net PnL、Return、Max Drawdown、Win Rate、Profit Factor、Sharpe、Sortino、Trade Count、Fees、Funding、Average Holding Time，并按 LONG/SHORT 与 MarketCondition 分组。
+
+历史 Run 可通过 `DELETE /agents/backtests/:id` 删除。删除会在事务中清理对应 Trade / Event / Equity；如果 Dataset Manifest 已没有其它 Run 引用则一并删除 Manifest，但 `market_klines_*`、`market_funding_rates` 等全局 Historical Market Repository 数据不会删除。
 
 ## 11. 一句话流程
 

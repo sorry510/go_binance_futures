@@ -44,6 +44,13 @@ func (ctrl *AgentBacktestController) Get() {
 	}
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
 }
+func (ctrl *AgentBacktestController) Delete() {
+	if err := backtestservice.DefaultManager().Delete(strings.TrimSpace(ctrl.Ctx.Input.Param(":id"))); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": true, "msg": "success"})
+}
 func (ctrl *AgentBacktestController) Cancel() {
 	if err := backtestservice.DefaultManager().Cancel(strings.TrimSpace(ctrl.Ctx.Input.Param(":id"))); err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
