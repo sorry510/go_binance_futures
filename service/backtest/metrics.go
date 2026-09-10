@@ -3,12 +3,11 @@ package backtest
 import (
 	"math"
 	"sort"
-	"strconv"
 	"time"
 )
 
 func calculateMetrics(trades []Trade, equity []EquityPoint, initialEquity float64, interval time.Duration) Metrics {
-	metrics := Metrics{BySide: []GroupMetrics{}, ByMarketCondition: []GroupMetrics{}}
+	metrics := Metrics{BySide: []GroupMetrics{}}
 	if len(equity) > 0 {
 		metrics.NetPnL = equity[len(equity)-1].Equity - initialEquity
 		if initialEquity > 0 {
@@ -23,7 +22,6 @@ func calculateMetrics(trades []Trade, equity []EquityPoint, initialEquity float6
 	metrics.TradeCount = len(trades)
 	wins, lossesAbs, winsPnL, holding := 0, 0.0, 0.0, int64(0)
 	bySide := map[string][]Trade{}
-	byCondition := map[string][]Trade{}
 	for _, trade := range trades {
 		metrics.Fees += trade.Fees
 		metrics.Funding += trade.FundingPnL
@@ -35,8 +33,6 @@ func calculateMetrics(trades []Trade, equity []EquityPoint, initialEquity float6
 			lossesAbs += -trade.NetPnL
 		}
 		bySide[trade.Side] = append(bySide[trade.Side], trade)
-		key := strconv.Itoa(trade.MarketCondition)
-		byCondition[key] = append(byCondition[key], trade)
 	}
 	if len(trades) > 0 {
 		metrics.WinRate = float64(wins) / float64(len(trades))
@@ -51,11 +47,7 @@ func calculateMetrics(trades []Trade, equity []EquityPoint, initialEquity float6
 	for key, items := range bySide {
 		metrics.BySide = append(metrics.BySide, groupMetrics(key, items))
 	}
-	for key, items := range byCondition {
-		metrics.ByMarketCondition = append(metrics.ByMarketCondition, groupMetrics(key, items))
-	}
 	sort.Slice(metrics.BySide, func(i, j int) bool { return metrics.BySide[i].Key < metrics.BySide[j].Key })
-	sort.Slice(metrics.ByMarketCondition, func(i, j int) bool { return metrics.ByMarketCondition[i].Key < metrics.ByMarketCondition[j].Key })
 	return metrics
 }
 func groupMetrics(key string, trades []Trade) GroupMetrics {

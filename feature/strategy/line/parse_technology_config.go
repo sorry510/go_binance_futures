@@ -579,9 +579,8 @@ var supportedKlineIntervals = map[string]struct{}{
 var reservedIndicatorNames = map[string]struct{}{
 	"SystemStartTime": {}, "MarketCondition": {}, "NowTime": {}, "NowPrice": {},
 	"NowSymbolPercentChange": {}, "NowSymbolClose": {}, "NowSymbolOpen": {},
-	"NowSymbolLow": {}, "NowSymbolHigh": {}, "BasicTrend": {},
+	"NowSymbolLow": {}, "NowSymbolHigh": {},
 	"KdjSimple": {}, "IsAsc": {}, "IsDesc": {}, "ROI": {}, "Position": {}, "Positions": {},
-	"BTCUSDT": {}, "ETHUSDT": {}, "SOLUSDT": {}, "BNBUSDT": {},
 }
 
 // ValidateTechnologyConfig validates enabled indicator settings without loading market data.
@@ -691,76 +690,42 @@ func InitParseEnv(symbol string, strTechnology string) map[string]interface{} {
 	o := orm.NewOrm()
 	var symbols []models.Symbols
 
-	sql := "SELECT * FROM symbols WHERE symbol = ? OR symbol = ? OR symbol = ? OR symbol = ? OR symbol = ?"
-	_, err := o.Raw(sql, "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", symbol).QueryRows(&symbols)
+	_, err := o.QueryTable("symbols").Filter("symbol", symbol).All(&symbols)
 	if err != nil {
 		logs.Error("error", err.Error())
 	}
 
-	// resPrice, _ := binance.GetTickerPrice(symbol)
-	// nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64)
 	marketConditionStr, _ := config.String("MarketCondition")
-	system_start_time_str, _ := config.String("system_start_time")
-	system_start_time_int, _ := strconv.ParseInt(system_start_time_str, 10, 64)
+	systemStartTimeText, _ := config.String("system_start_time")
+	systemStartTime, _ := strconv.ParseInt(systemStartTimeText, 10, 64)
 	tConfig, klineMap := ParseTechnologyConfig(symbol, strTechnology)
 	env := map[string]interface{}{
-		// build-in
-		// "NowPrice": nowPrice, // 当前价格
-		"SystemStartTime": system_start_time_int,    // 系统启动时间, 毫秒时间戳
-		"MarketCondition": marketConditionStr,       // 当前市场行情趋势
-		"NowTime":         time.Now().Unix() * 1000, // 毫秒时间戳
-
-		// function
-		"KdjSimple":  KdjSimple,    // 计算是否是金叉,
-		"IsAsc":      utils.IsAsc,  // 是否是升序数组
-		"IsDesc":     utils.IsDesc, // 是否是降序数组,
-		"BasicTrend": 0.0,          // 基础趋势涨跌幅 (btc * 0.6 + eth * 0.3 + sol * 0.05 + bnb * 0.05)
+		"SystemStartTime": systemStartTime,
+		"MarketCondition": marketConditionStr,
+		"NowTime":         time.Now().Unix() * 1000,
+		"KdjSimple":       KdjSimple,
+		"IsAsc":           utils.IsAsc,
+		"IsDesc":          utils.IsDesc,
 	}
-	basicTrend := 0.0
 
 	for _, v := range symbols {
-		if v.Symbol == "BTCUSDT" {
-			basicTrend += v.PercentChange * 0.6
-		} else if v.Symbol == "ETHUSDT" {
-			basicTrend += v.PercentChange * 0.3
-		} else if v.Symbol == "SOLUSDT" {
-			basicTrend += v.PercentChange * 0.05
-		} else if v.Symbol == "BNBUSDT" {
-			basicTrend += v.PercentChange * 0.05
-		}
-		close, _ := strconv.ParseFloat(v.Close, 64)
-		open, _ := strconv.ParseFloat(v.Open, 64)
-		low, _ := strconv.ParseFloat(v.Low, 64)
-		high, _ := strconv.ParseFloat(v.High, 64)
-		item := map[string]interface{}{
-			"PercentChange": v.PercentChange,
-			"Close":         close,
-			"Open":          open,
-			"Low":           low,
-			"High":          high,
-		}
-		env[v.Symbol] = item
-		if v.Symbol == symbol {
-			env["NowPrice"] = close                         // 当前价格
-			env["NowSymbolPercentChange"] = v.PercentChange // 当前涨跌幅
-			env["NowSymbolClose"] = close
-			env["NowSymbolOpen"] = open
-			env["NowSymbolLow"] = low
-			env["NowSymbolHigh"] = high
-		}
+		closePrice, _ := strconv.ParseFloat(v.Close, 64)
+		openPrice, _ := strconv.ParseFloat(v.Open, 64)
+		lowPrice, _ := strconv.ParseFloat(v.Low, 64)
+		highPrice, _ := strconv.ParseFloat(v.High, 64)
+		env["NowPrice"] = closePrice
+		env["NowSymbolPercentChange"] = v.PercentChange
+		env["NowSymbolClose"] = closePrice
+		env["NowSymbolOpen"] = openPrice
+		env["NowSymbolLow"] = lowPrice
+		env["NowSymbolHigh"] = highPrice
 	}
-	env["BasicTrend"] = basicTrend
 
-	// technology
 	for k, v := range tConfig {
 		env[k] = v
 	}
-
-	// kline data
 	for k, v := range klineMap {
 		env["kline_"+k] = v
 	}
-
-	// logs.Info(utils.ToJson(klineMap))
 	return env
 }

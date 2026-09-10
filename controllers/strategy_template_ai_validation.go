@@ -14,14 +14,6 @@ import (
 	"github.com/expr-lang/expr"
 )
 
-type strategyTemplateSyntheticMarket struct {
-	PercentChange float64
-	Close         float64
-	Open          float64
-	Low           float64
-	High          float64
-}
-
 func formatStrategyTemplateJSON(value string) string {
 	var buffer bytes.Buffer
 	if err := json.Indent(&buffer, []byte(value), "", "  "); err != nil {
@@ -84,7 +76,6 @@ func validateGeneratedTechnologyKeys(data []byte) error {
 
 func buildSyntheticStrategyTemplateEnv(config technology.TechnologyConfig, ruleType string) map[string]interface{} {
 	series := syntheticStrategyTemplateSeries()
-	market := strategyTemplateSyntheticMarket{PercentChange: 1.0, Close: 101.0, Open: 100.0, Low: 99.0, High: 102.0}
 	env := map[string]interface{}{
 		"SystemStartTime":        int64(1_700_000_000_000),
 		"MarketCondition":        "3",
@@ -95,14 +86,9 @@ func buildSyntheticStrategyTemplateEnv(config technology.TechnologyConfig, ruleT
 		"NowSymbolOpen":          100.0,
 		"NowSymbolLow":           99.0,
 		"NowSymbolHigh":          102.0,
-		"BasicTrend":             0.5,
 		"KdjSimple":              line.KdjSimple,
 		"IsAsc":                  utils.IsAsc,
 		"IsDesc":                 utils.IsDesc,
-		"BTCUSDT":                market,
-		"ETHUSDT":                market,
-		"SOLUSDT":                market,
-		"BNBUSDT":                market,
 	}
 	if ruleType == "long" || ruleType == "short" {
 		env["Positions"] = []types.FuturesPosition{}

@@ -18,13 +18,12 @@ type PrefetchRequest struct {
 }
 
 type PrefetchPlan struct {
-	Symbol           string   `json:"symbol"`
-	ReplayInterval   string   `json:"replay_interval"`
-	Intervals        []string `json:"intervals"`
-	BenchmarkSymbols []string `json:"benchmark_symbols"`
-	StartTime        int64    `json:"start_time"`
-	EndTime          int64    `json:"end_time"`
-	WarmupStartTime  int64    `json:"warmup_start_time"`
+	Symbol          string   `json:"symbol"`
+	ReplayInterval  string   `json:"replay_interval"`
+	Intervals       []string `json:"intervals"`
+	StartTime       int64    `json:"start_time"`
+	EndTime         int64    `json:"end_time"`
+	WarmupStartTime int64    `json:"warmup_start_time"`
 }
 type PrefetchResult struct {
 	Plan        PrefetchPlan `json:"plan"`
@@ -103,8 +102,7 @@ func (builder DatasetBuilder) PrefetchPlan(request DatasetRequest) (PrefetchPlan
 	}
 	return PrefetchPlan{
 		Symbol: request.Symbol, ReplayInterval: ReplayInterval, Intervals: intervals,
-		BenchmarkSymbols: append([]string(nil), BenchmarkSymbols...),
-		StartTime:        request.StartTime, EndTime: request.EndTime, WarmupStartTime: warmupStart,
+		StartTime: request.StartTime, EndTime: request.EndTime, WarmupStartTime: warmupStart,
 	}, nil
 }
 func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetRequest, progress ProgressCallback) (PrefetchResult, error) {
@@ -123,14 +121,7 @@ func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetReque
 	if warmupBars <= 0 {
 		warmupBars = DefaultWarmupBars
 	}
-	benchmarkUnits := len(BenchmarkSymbols)
-	for _, symbol := range BenchmarkSymbols {
-		if symbol == plan.Symbol {
-			benchmarkUnits--
-			break
-		}
-	}
-	total := len(plan.Intervals) + benchmarkUnits + 1
+	total := len(plan.Intervals) + 1
 	completed := 0
 	report := func() {
 		if progress != nil {
@@ -145,20 +136,6 @@ func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetReque
 		}
 		if _, err := fetchRepo.LoadKlines(ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, interval, start, plan.EndTime); err != nil {
 			return PrefetchResult{}, fmt.Errorf("prefetch %s %s: %w", plan.Symbol, interval, err)
-		}
-		completed++
-		report()
-	}
-	benchmarkStart, err := subtractBars(plan.StartTime, ReplayInterval, warmupBars)
-	if err != nil {
-		return PrefetchResult{}, err
-	}
-	for _, symbol := range BenchmarkSymbols {
-		if symbol == plan.Symbol {
-			continue
-		}
-		if _, err := fetchRepo.LoadKlines(ctx, historicalmarket.MarketFuturesUSDT, symbol, ReplayInterval, benchmarkStart, plan.EndTime); err != nil {
-			return PrefetchResult{}, fmt.Errorf("prefetch benchmark %s: %w", symbol, err)
 		}
 		completed++
 		report()

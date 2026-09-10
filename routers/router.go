@@ -41,6 +41,8 @@ func init() {
 	web.Router("/agents/historical-market/import", &controllers.AgentHistoricalMarketController{}, "post:Import")
 	web.Router("/agents/backtests/prefetch", &controllers.AgentBacktestController{}, "post:Prefetch")
 	web.Router("/agents/backtests/prefetch/:jobId", &controllers.AgentBacktestController{}, "get:PrefetchStatus")
+	web.Router("/agents/backtests/market-condition/backfill", &controllers.AgentBacktestController{}, "post:MarketConditionBackfill")
+	web.Router("/agents/backtests/market-condition/backfill/:jobId", &controllers.AgentBacktestController{}, "get:MarketConditionBackfillStatus")
 	web.Router("/agents/backtests", &controllers.AgentBacktestController{}, "get:List;post:Start")
 	web.Router("/agents/backtests/:id", &controllers.AgentBacktestController{}, "get:Get;delete:Delete")
 	web.Router("/agents/backtests/:id/cancel", &controllers.AgentBacktestController{}, "post:Cancel")
