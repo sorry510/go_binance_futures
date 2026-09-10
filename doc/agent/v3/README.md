@@ -38,6 +38,7 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 | [V3-1](./01-phase-v3-1-multi-agent.md) | ✅ | Multi-Agent Team：Technical / Flow / News / Supervisor 协作 |
 | [V3-2](./02-phase-v3-2-market-intelligence.md) | ✅ | Market Intelligence：统一 Event/Fact、公告/新闻/资金面来源 |
 | [V3-3](./03-phase-v3-3-backtest.md) | ✅ | Historical Market Repository + 确定性历史回测 |
+| [V3-5](./05-phase-v3-5-trade-safety.md) | ✅ | Trade Ownership & Safety：Owner 隔离、Managed Position、Stop/TP、Close、Restart/Reconcile |
 
 > 原 V3-4 Strategy Lab 在规划复审后取消：个人使用方式是“新策略新建模板”，而 Backtest / Paper 已保存完整策略快照，额外版本生命周期属于重复抽象，因此删除该 Phase 文档并保留编号空缺。
 
@@ -45,7 +46,6 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
-| [V3-5](./05-phase-v3-5-trade-safety.md) | P0 | 真实交易安全：先统一仓位/订单 Ownership，确保“谁创建、谁管理”，再补 Agent Stop、整仓平仓与重启恢复 |
 | [V3-6](./06-phase-v3-6-opportunity-watch.md) | P1 | Opportunity Watch：自动发现和分析机会，但真实执行继续由用户确认 |
 | [V3-7](./07-phase-v3-7-outcome-review.md) | P1 | 交易复盘与策略比较：统一查看 Backtest、模拟盘和真实交易表现 |
 | [V3-8](./08-phase-v3-8-personal-operations.md) | P2 | 个人运维与 V3 收尾：健康检查、数据增长控制、备份说明和最终清理 |
@@ -83,7 +83,7 @@ V3-7 Outcome Review
 ```text
 V3-3 Historical Backtest ✅
         ↓
-V3-5 Trade Ownership & Safety
+V3-5 Trade Ownership & Safety ✅
         ↓
 V3-6 Opportunity Watch
         ↓
@@ -92,7 +92,7 @@ V3-7 Outcome Review
 V3-8 Personal Operations / Finalization
 ```
 
-前一 Phase 未通过 Gate，不进入下一 Phase。V3-5 未完成前，不扩大真实交易自动化范围。
+前一 Phase 未通过 Gate，不进入下一 Phase。V3-5 已完成，后续真实交易能力必须继续复用 Ownership-safe Execution。
 
 ## 7. 统一设计原则
 

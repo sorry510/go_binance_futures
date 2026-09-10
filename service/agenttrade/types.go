@@ -2,6 +2,7 @@ package agenttrade
 
 import (
 	"context"
+	"errors"
 
 	"go_binance_futures/models"
 )
@@ -15,8 +16,12 @@ const (
 	StatusExecuted           = "executed"
 	StatusExecutionFailed    = "execution_failed"
 	StatusExecutionUncertain = "execution_uncertain"
+	StatusProtectionFailed   = "protection_failed"
+	StatusClosed             = "closed"
 	StatusExpired            = "expired"
 )
+
+var ErrManagedPositionClosed = errors.New("agent managed position is already closed")
 
 const (
 	RiskPass = "pass"
@@ -41,6 +46,26 @@ type RiskResult struct {
 	RiskUSDT            float64     `json:"risk_usdt"`
 	CurrentExposureUSDT float64     `json:"current_exposure_usdt"`
 	CheckedAt           int64       `json:"checked_at"`
+}
+
+type ProtectionResult struct {
+	StopClientOrderID         string `json:"stop_client_order_id,omitempty"`
+	StopExchangeOrderID       string `json:"stop_exchange_order_id,omitempty"`
+	TakeProfitClientOrderID   string `json:"take_profit_client_order_id,omitempty"`
+	TakeProfitExchangeOrderID string `json:"take_profit_exchange_order_id,omitempty"`
+	TakeProfitError           string `json:"take_profit_error,omitempty"`
+}
+
+type CloseResult struct {
+	ClientOrderID   string  `json:"client_order_id,omitempty"`
+	ExchangeOrderID string  `json:"exchange_order_id,omitempty"`
+	FilledQty       float64 `json:"filled_qty,omitempty"`
+	AlreadyClosed   bool    `json:"already_closed,omitempty"`
+}
+
+type PositionLifecycle interface {
+	EnsureProtection(context.Context, models.AgentTradeProposal) (ProtectionResult, error)
+	Close(context.Context, models.AgentTradeProposal) (CloseResult, error)
 }
 
 type ListOptions struct {

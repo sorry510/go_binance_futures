@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -22,17 +23,19 @@ type TaskReader interface {
 }
 
 type Service struct {
-	Store  Store
-	Tasks  TaskReader
-	Risk   RiskEngine
-	Broker Broker
-	Now    func() time.Time
+	Store     Store
+	Tasks     TaskReader
+	Risk      RiskEngine
+	Broker    Broker
+	Lifecycle PositionLifecycle
+	Notifier  TradeNotifier
+	Now       func() time.Time
 }
 
 func DefaultService() Service {
 	store := Store{}
 	risk := RiskEngine{Store: store, Data: DefaultRiskDataSource{}}
-	return Service{Store: store, Tasks: task.NewORMStore(), Risk: risk, Broker: BinanceBroker{}}
+	return Service{Store: store, Tasks: task.NewORMStore(), Risk: risk, Broker: BinanceBroker{}, Lifecycle: DefaultOwnershipLifecycle(), Notifier: WebTradeNotifier{}}
 }
 
 func (s Service) now() time.Time {
@@ -159,7 +162,7 @@ func (s Service) Approve(ctx context.Context, proposalID, actor string) (models.
 	if proposal.Status == StatusApproved {
 		return proposal, nil
 	}
-	if proposal.Status == StatusExecuted || proposal.Status == StatusExecuting || proposal.Status == StatusExecutionUncertain {
+	if proposal.Status == StatusExecuted || proposal.Status == StatusExecuting || proposal.Status == StatusExecutionUncertain || proposal.Status == StatusProtectionFailed || proposal.Status == StatusClosed {
 		return proposal, fmt.Errorf("proposal status %q cannot be approved", proposal.Status)
 	}
 	proposal, err = s.EvaluateRisk(ctx, proposalID)
@@ -191,7 +194,7 @@ func (s Service) Reject(ctx context.Context, proposalID, actor, reason string) (
 	if proposal.Status == StatusRejected {
 		return proposal, nil
 	}
-	if proposal.Status == StatusExecuting || proposal.Status == StatusExecuted || proposal.Status == StatusExecutionUncertain {
+	if proposal.Status == StatusExecuting || proposal.Status == StatusExecuted || proposal.Status == StatusExecutionUncertain || proposal.Status == StatusProtectionFailed || proposal.Status == StatusClosed {
 		return proposal, fmt.Errorf("proposal status %q cannot be rejected", proposal.Status)
 	}
 	actor = strings.TrimSpace(actor)
@@ -217,9 +220,22 @@ func (s Service) Execute(ctx context.Context, proposalID, actor string) (models.
 	if err != nil {
 		return proposal, models.AgentTradeExecution{}, err
 	}
-	if proposal.Status == StatusExecuted {
+	if proposal.Status == StatusExecuted || proposal.Status == StatusProtectionFailed {
 		execution, execErr := s.Store.GetExecution(ctx, proposalID)
-		return proposal, execution, execErr
+		if execErr != nil {
+			return proposal, execution, execErr
+		}
+		if s.Lifecycle == nil {
+			return proposal, execution, nil
+		}
+		return s.reconcileExecutedLifecycle(ctx, proposal, execution, actor)
+	}
+	if proposal.Status == StatusClosed {
+		execution, execErr := s.Store.GetExecution(ctx, proposalID)
+		if execErr != nil {
+			return proposal, execution, execErr
+		}
+		return proposal, execution, fmt.Errorf("proposal position is already closed")
 	}
 	if proposal.Status == StatusExecutionUncertain || proposal.Status == StatusExecuting {
 		return s.Reconcile(ctx, proposalID, actor)
@@ -329,7 +345,10 @@ func (s Service) markExecuted(ctx context.Context, proposal models.AgentTradePro
 		return proposal, execution, err
 	}
 	_ = s.Store.Audit(ctx, proposal.ProposalID, "executed", "success", actor, map[string]any{"exchange_order_id": execution.ExchangeOrderID, "client_order_id": execution.ClientOrderID, "average_price": execution.AveragePrice})
-	return proposal, execution, nil
+	if s.Lifecycle == nil {
+		return proposal, execution, nil
+	}
+	return s.reconcileExecutedLifecycle(ctx, proposal, execution, actor)
 }
 
 func (s Service) Reconcile(ctx context.Context, proposalID, actor string) (models.AgentTradeProposal, models.AgentTradeExecution, error) {
@@ -351,7 +370,13 @@ func (s Service) Reconcile(ctx context.Context, proposalID, actor string) (model
 	} else if err != nil {
 		return proposal, execution, err
 	}
-	if execution.Status == StatusExecuted || proposal.Status == StatusExecuted {
+	if execution.Status == StatusExecuted || proposal.Status == StatusExecuted || proposal.Status == StatusProtectionFailed {
+		if s.Lifecycle == nil {
+			return proposal, execution, nil
+		}
+		return s.reconcileExecutedLifecycle(ctx, proposal, execution, actor)
+	}
+	if proposal.Status == StatusClosed {
 		return proposal, execution, nil
 	}
 	if s.Broker == nil {
@@ -373,6 +398,80 @@ func (s Service) Reconcile(ctx context.Context, proposalID, actor string) (model
 	}
 	_ = s.Store.Audit(ctx, proposal.ProposalID, "reconcile", "found", actor, map[string]any{"exchange_order_id": result.ExchangeOrderID})
 	return s.markExecuted(ctx, proposal, execution, result, actor)
+}
+
+func (s Service) reconcileExecutedLifecycle(ctx context.Context, proposal models.AgentTradeProposal, execution models.AgentTradeExecution, actor string) (models.AgentTradeProposal, models.AgentTradeExecution, error) {
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		actor = "web_admin"
+	}
+	protection, err := s.Lifecycle.EnsureProtection(ctx, proposal)
+	now := s.now().UnixMilli()
+	if errors.Is(err, ErrManagedPositionClosed) {
+		if _, cleanupErr := s.Lifecycle.Close(ctx, proposal); cleanupErr != nil {
+			_ = s.Store.Audit(ctx, proposal.ProposalID, "protection_cleanup", "error", actor, map[string]any{"error": cleanupErr.Error()})
+			return proposal, execution, cleanupErr
+		}
+		proposal.Status, proposal.UpdatedAt = StatusClosed, now
+		if saveErr := s.Store.SaveProposal(ctx, &proposal); saveErr != nil {
+			return proposal, execution, saveErr
+		}
+		_ = s.Store.Audit(ctx, proposal.ProposalID, "protection_reconcile", "position_closed", actor, nil)
+		return proposal, execution, nil
+	}
+	if err != nil {
+		proposal.Status, proposal.UpdatedAt = StatusProtectionFailed, now
+		if saveErr := s.Store.SaveProposal(ctx, &proposal); saveErr != nil {
+			return proposal, execution, saveErr
+		}
+		_ = s.Store.Audit(ctx, proposal.ProposalID, "protection", StatusProtectionFailed, actor, map[string]any{"error": err.Error(), "result": protection})
+		if s.Notifier != nil {
+			_ = s.Notifier.ProtectionFailed(ctx, proposal, err)
+		}
+		return proposal, execution, fmt.Errorf("entry is executed but protective stop is not confirmed: %w", err)
+	}
+	proposal.Status, proposal.UpdatedAt = StatusExecuted, now
+	if err := s.Store.SaveProposal(ctx, &proposal); err != nil {
+		return proposal, execution, err
+	}
+	status := "success"
+	if protection.TakeProfitError != "" {
+		status = "warning"
+	}
+	_ = s.Store.Audit(ctx, proposal.ProposalID, "protection", status, actor, protection)
+	return proposal, execution, nil
+}
+
+func (s Service) Close(ctx context.Context, proposalID, actor string) (models.AgentTradeProposal, CloseResult, error) {
+	proposal, err := s.Store.GetProposal(ctx, proposalID)
+	if err != nil {
+		return proposal, CloseResult{}, err
+	}
+	if proposal.Status == StatusClosed {
+		return proposal, CloseResult{AlreadyClosed: true}, nil
+	}
+	if proposal.Status != StatusExecuted && proposal.Status != StatusProtectionFailed {
+		return proposal, CloseResult{}, fmt.Errorf("proposal status %q has no agent managed position to close", proposal.Status)
+	}
+	if s.Lifecycle == nil {
+		return proposal, CloseResult{}, fmt.Errorf("position lifecycle is required")
+	}
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		actor = "web_admin"
+	}
+	result, closeErr := s.Lifecycle.Close(ctx, proposal)
+	if closeErr != nil {
+		_ = s.Store.Audit(ctx, proposal.ProposalID, "managed_close", "error", actor, map[string]any{"error": closeErr.Error(), "result": result})
+		return proposal, result, closeErr
+	}
+	now := s.now().UnixMilli()
+	proposal.Status, proposal.UpdatedAt = StatusClosed, now
+	if err := s.Store.SaveProposal(ctx, &proposal); err != nil {
+		return proposal, result, err
+	}
+	_ = s.Store.Audit(ctx, proposal.ProposalID, "managed_close", "success", actor, result)
+	return proposal, result, nil
 }
 
 func newProposalID() (string, error) {
