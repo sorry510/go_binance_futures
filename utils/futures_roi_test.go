@@ -13,3 +13,9 @@ func TestFuturesLeveragedROIMatchesLiveFormula(t *testing.T) {
 		t.Fatalf("zero quantity ROI=%v", got)
 	}
 }
+
+func TestDisabledFuturesROIThreshold(t *testing.T) {
+	if DisabledFuturesROIThreshold != 1_000_000 {
+		t.Fatalf("DisabledFuturesROIThreshold=%v", DisabledFuturesROIThreshold)
+	}
+}
