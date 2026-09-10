@@ -70,14 +70,10 @@ Technology 使用: 5m / 15m / 1h
 
 ```text
 ONGUSDT: 1m, 5m, 15m, 1h
-BTCUSDT: 1m
-ETHUSDT: 1m
-SOLUSDT: 1m
-BNBUSDT: 1m
 ONGUSDT Funding
 ```
 
-其中 1m 是固定回放主时间轴；5m/15m/1h 来自 Technology。BTC/ETH/SOL/BNB 是固定 benchmark，也统一使用 1m。
+其中 1m 是固定回放主时间轴；5m/15m/1h 来自 Technology。回测不再为了 `BasicTrend` 或历史 `MarketCondition` 额外获取 BTC/ETH/SOL/BNB benchmark。
 
 Repository 对每个需求先查询本地表，并计算应有的 Bar 时间点；本地完整则直接复用，不调用 Binance。
 ## 4. 本地缺口如何补齐
@@ -104,7 +100,7 @@ Binance 单页最多读取 1000 根，系统持续翻页直到目标 `end_time`�
 
 返回数据统一转换为 Historical Market Kline，再走 `Repository.Import()` 写入全局表。
 
-Web 的“获取历史数据”按钮会在正式回测前主动执行同一套 local-first 补缺：包含目标 Symbol 的 1m、Technology 中启用指标依赖的所有周期、benchmark 1m、Funding，以及默认 200 Bar warmup。历史 Kline/Funding 的实际 Binance REST 分页请求共享全局节流器，相邻请求起始时间至少间隔 300ms；同一时刻只允许一个预取任务运行。
+Web 的“获取历史数据”按钮会在正式回测前主动执行同一套 local-first 补缺：只包含目标 Symbol 的 1m、Technology 中启用指标依赖的所有周期、Funding，以及默认 200 Bar warmup。历史 Kline/Funding 的实际 Binance REST 分页请求共享全局节流器，相邻请求起始时间至少间隔 300ms；同一时刻只允许一个预取任务运行。
 ## 5. 外部历史数据导入
 
 统一入口：
@@ -171,7 +167,6 @@ Dataset 现在是“历史数据查询规格”，不是 Kline 副本。
 ```text
 market / symbol / execution_interval（新 Run 固定为 1m）
 需要的 indicator intervals
-benchmark symbols
 start_time / end_time / warmup_start_time
 ```
 
@@ -188,9 +183,18 @@ Run B: DatasetSpecHash = AAA, DataHash = 222
 ```
 
 这用于审计“结果变化是否来自历史数据变化”。
+
+### 8.1 Historical MarketCondition 补充
+
+回测页面提供“补充 MarketCondition 历史”后台任务。任务先通过 Binance Futures API 查询 BTCUSDT 与 ETHUSDT 各自最早可用的 1h Kline，再通过 Historical Market Repository 以 local-first 方式补齐到最近一个已闭合小时；已有 Kline 不重新拉取。
+
+两者都有数据的小时才会推断 MarketCondition。推断使用过去最多 24 小时 BTC/ETH 涨跌幅、方向一致/分化关系和平均 1h 振幅，映射到现有 1~11 MarketCondition。它是历史近似值，不声称复原当时 LLM/全市场判断。
+
+推断结果写入 `market_condition_histories`。若某小时已经存在任意 MarketCondition 记录（例如系统真实运行时保存的值），该小时直接跳过，绝不覆盖。由于推断只使用已闭合 1h Kline，历史值以该小时 close_time 生效，避免把尚未完成小时的数据泄漏到更早的 1m Replay Bar。
+
 ## 9. Backtest Engine 执行时序
 
-Engine 进入运行阶段后不再访问 Binance、WebSocket、当前 `symbols` 或当前 MarketCondition。
+Engine 进入运行阶段后不再访问 Binance、WebSocket、当前 `symbols` 或当前实时 MarketCondition。若 Strategy Template 引用 `MarketCondition`，Dataset Builder 会在运行前一次性读取 `market_condition_histories`，Engine 每根 1m Replay Bar 使用 `<= 当前 Bar close_time` 的最近历史值；覆盖不足时在启动前拒绝并提示补充历史数据。
 
 核心时序：
 
@@ -278,7 +282,7 @@ agent_backtest_equity_points
 signal / order / fill / position / funding
 ```
 
-Metrics 包括 Net PnL、Return、Max Drawdown、Win Rate、Profit Factor、Sharpe、Sortino、Trade Count、Fees、Funding、Average Holding Time，并按 LONG/SHORT 与 MarketCondition 分组。
+Metrics 包括 Net PnL、Return、Max Drawdown、Win Rate、Profit Factor、Sharpe、Sortino、Trade Count、Fees、Funding、Average Holding Time，并按 LONG/SHORT 分组。
 
 历史 Run 可通过 `DELETE /agents/backtests/:id` 删除。删除会在事务中清理对应 Trade / Event / Equity；如果 Dataset Manifest 已没有其它 Run 引用则一并删除 Manifest，但 `market_klines_*`、`market_funding_rates` 等全局 Historical Market Repository 数据不会删除。
 

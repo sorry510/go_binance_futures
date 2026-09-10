@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -26,7 +27,7 @@ func setupBacktestStoreTest(t *testing.T) {
 		if backtestStoreTestErr != nil {
 			return
 		}
-		orm.RegisterModel(new(models.StrategyTemplates), new(models.MarketKline1m), new(models.MarketFundingRate), new(models.MarketDataImportBatch), new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint))
+		orm.RegisterModel(new(models.Config), new(models.MarketConditionHistory), new(models.StrategyTemplates), new(models.MarketKline1m), new(models.MarketKline1h), new(models.MarketFundingRate), new(models.MarketDataImportBatch), new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint))
 		dir, err := os.MkdirTemp("", "backtest-store-test-*")
 		if err != nil {
 			backtestStoreTestErr = err
@@ -42,10 +43,13 @@ func setupBacktestStoreTest(t *testing.T) {
 		t.Fatal(backtestStoreTestErr)
 	}
 	o := orm.NewOrm()
-	for _, table := range []string{"agent_backtest_equity_points", "agent_backtest_events", "agent_backtest_trades", "agent_backtest_runs", "agent_backtest_datasets", "market_data_import_batches", "market_funding_rates", "market_klines_1m", "strategy_templates"} {
+	for _, table := range []string{"agent_backtest_equity_points", "agent_backtest_events", "agent_backtest_trades", "agent_backtest_runs", "agent_backtest_datasets", "market_data_import_batches", "market_funding_rates", "market_klines_1m", "market_klines_1h", "strategy_templates", "market_condition_histories", "config"} {
 		if _, err := o.Raw("DELETE FROM " + table).Exec(); err != nil {
 			t.Fatal(err)
 		}
+	}
+	if _, err := o.Insert(&models.Config{Version: 8, MarketCondition: 3}); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -274,4 +278,84 @@ func TestManagerDeleteHandlesVeryLargeEquityHistoryWithoutPlaceholderExpansion(t
 	if err != nil || count != 0 {
 		t.Fatalf("large equity history remains after delete: count=%d err=%v", count, err)
 	}
+}
+
+func TestBacktestRejectsStrategyUsingMarketCondition(t *testing.T) {
+	setupBacktestStoreTest(t)
+	template := models.StrategyTemplates{
+		Name: "market-condition-backtest-blocked", Technology: "{}",
+		Strategy:   `[{"name":"open","enable":true,"code":"MarketCondition == \"2\" && NowPrice > 0","type":"long"}]`,
+		CreateTime: time.Now().UnixMilli(), UpdateTime: time.Now().UnixMilli(),
+	}
+	if _, err := orm.NewOrm().Insert(&template); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{})})
+	_, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(time.Hour).UnixMilli(), Config: zeroCosts()})
+	if err == nil || !strings.Contains(err.Error(), "MarketCondition") || !strings.Contains(err.Error(), "补充") {
+		t.Fatalf("expected missing MarketCondition history rejection, got %v", err)
+	}
+	count, countErr := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Count()
+	if countErr != nil || count != 0 {
+		t.Fatalf("rejected backtest must not create a run: count=%d err=%v", count, countErr)
+	}
+}
+
+func TestBacktestPrefetchRejectsStrategyUsingMarketCondition(t *testing.T) {
+	setupBacktestStoreTest(t)
+	template := models.StrategyTemplates{
+		Name: "market-condition-prefetch-blocked", Technology: "{}",
+		Strategy:   `[{"name":"open","enable":true,"code":"MarketCondition == \"3\"","type":"long"}]`,
+		CreateTime: time.Now().UnixMilli(), UpdateTime: time.Now().UnixMilli(),
+	}
+	if _, err := orm.NewOrm().Insert(&template); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{})})
+	_, err := manager.StartPrefetch(PrefetchRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(time.Hour).UnixMilli()})
+	if err == nil || !strings.Contains(err.Error(), "MarketCondition") || !strings.Contains(err.Error(), "补充") {
+		t.Fatalf("expected missing MarketCondition history prefetch rejection, got %v", err)
+	}
+}
+
+func TestBacktestUsingMarketConditionRunsWhenHistoryIsAvailable(t *testing.T) {
+	setupBacktestStoreTest(t)
+	template := models.StrategyTemplates{
+		Name: "market-condition-backtest-supported", Technology: "{}",
+		Strategy:   `[{"name":"open","enable":true,"code":"MarketCondition == \"2\" && NowPrice > 0","type":"long"}]`,
+		CreateTime: time.Now().UnixMilli(), UpdateTime: time.Now().UnixMilli(),
+	}
+	if _, err := orm.NewOrm().Insert(&template); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	config, err := loadBacktestSystemConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := orm.NewOrm().Insert(&models.MarketConditionHistory{ConfigID: config.ID, MarketCondition: 2, CreatedAt: start.Add(-time.Minute).UnixMilli()}); err != nil {
+		t.Fatal(err)
+	}
+	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{}), WarmupBars: 2})
+	run, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()})
+	if err != nil {
+		t.Fatalf("historical MarketCondition should allow backtest: %v", err)
+	}
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		detail, getErr := manager.Get(run.RunID)
+		if getErr != nil {
+			t.Fatal(getErr)
+		}
+		if detail.Status == "succeeded" {
+			return
+		}
+		if detail.Status == "failed" || detail.Status == "cancelled" || detail.Status == "interrupted" {
+			t.Fatalf("backtest with MarketCondition history failed: %+v", detail)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatal("backtest with MarketCondition history did not finish")
 }

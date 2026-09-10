@@ -23,15 +23,8 @@ func fixtureDataset(closes []float64) Dataset {
 		low := math.Min(open, close) - 0.2
 		bars = append(bars, Bar{Symbol: "BTCUSDT", Interval: "1m", OpenTime: at.UnixMilli(), CloseTime: at.Add(time.Minute - time.Millisecond).UnixMilli(), Open: open, High: high, Low: low, Close: close, QuoteVolume: 1000})
 	}
-	d := Dataset{Symbol: "BTCUSDT", ExecutionInterval: "1m", Intervals: []string{"1m"}, BenchmarkSymbols: append([]string(nil), BenchmarkSymbols...), StartTime: bars[0].CloseTime, EndTime: bars[len(bars)-1].CloseTime, WarmupStartTime: bars[0].OpenTime, Bars: map[string][]Bar{}, Funding: []Funding{}}
-	for _, symbol := range BenchmarkSymbols {
-		copyBars := make([]Bar, len(bars))
-		for i, b := range bars {
-			b.Symbol = symbol
-			copyBars[i] = b
-		}
-		d.Bars[BarSeriesKey(symbol, "1m")] = copyBars
-	}
+	d := Dataset{Symbol: "BTCUSDT", ExecutionInterval: "1m", Intervals: []string{"1m"}, StartTime: bars[0].CloseTime, EndTime: bars[len(bars)-1].CloseTime, WarmupStartTime: bars[0].OpenTime, Bars: map[string][]Bar{}, Funding: []Funding{}}
+	d.Bars[BarSeriesKey("BTCUSDT", "1m")] = bars
 	d.Market = "futures_usdt"
 	d.DatasetSpecHash = DatasetSpecHash(d)
 	d.DatasetID = "ds_" + d.DatasetSpecHash[:24]
@@ -241,5 +234,33 @@ func TestBacktestProgressTracksProcessedBars(t *testing.T) {
 		if completed[i] < completed[i-1] || totals[i] != totals[0] {
 			t.Fatalf("progress must be monotonic with stable total: completed=%v totals=%v", completed, totals)
 		}
+	}
+}
+
+func TestHistoricalEnvironmentUsesLatestVisibleMarketCondition(t *testing.T) {
+	d := fixtureDataset([]float64{100, 101, 102})
+	bars := d.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	d.MarketConditionRequired = true
+	d.MarketConditions = []MarketConditionPoint{
+		{Time: bars[0].CloseTime - 1, Value: 2},
+		{Time: bars[1].CloseTime, Value: 4},
+	}
+	environment, err := newHistoricalEnvironment(d, "{}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstEnv, firstCondition, err := environment.Build(bars[0].CloseTime, nil, 1000, zeroCosts())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if firstCondition != 2 || firstEnv["MarketCondition"] != "2" {
+		t.Fatalf("unexpected first MarketCondition: condition=%d env=%v", firstCondition, firstEnv["MarketCondition"])
+	}
+	secondEnv, secondCondition, err := environment.Build(bars[1].CloseTime, nil, 1000, zeroCosts())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if secondCondition != 4 || secondEnv["MarketCondition"] != "4" {
+		t.Fatalf("unexpected second MarketCondition: condition=%d env=%v", secondCondition, secondEnv["MarketCondition"])
 	}
 }

@@ -18,13 +18,17 @@ import (
 )
 
 type Manager struct {
-	builder        DatasetBuilder
-	engine         Engine
-	mu             sync.Mutex
-	cancel         map[string]context.CancelFunc
-	prefetchMu     sync.Mutex
-	prefetchJobs   map[string]PrefetchSummary
-	prefetchActive string
+	builder                 DatasetBuilder
+	engine                  Engine
+	mu                      sync.Mutex
+	cancel                  map[string]context.CancelFunc
+	prefetchMu              sync.Mutex
+	prefetchJobs            map[string]PrefetchSummary
+	prefetchActive          string
+	marketConditionMu       sync.Mutex
+	marketConditionJobs     map[string]MarketConditionBackfillSummary
+	marketConditionActive   string
+	marketConditionEarliest earliestKlineSource
 }
 
 var defaultManagerOnce sync.Once
@@ -38,7 +42,11 @@ func DefaultManager() *Manager {
 	return defaultManager
 }
 func NewManager(builder DatasetBuilder) *Manager {
-	return &Manager{builder: builder, engine: Engine{}, cancel: map[string]context.CancelFunc{}, prefetchJobs: map[string]PrefetchSummary{}}
+	return &Manager{
+		builder: builder, engine: Engine{}, cancel: map[string]context.CancelFunc{},
+		prefetchJobs: map[string]PrefetchSummary{}, marketConditionJobs: map[string]MarketConditionBackfillSummary{},
+		marketConditionEarliest: historicalmarket.BinanceSource{},
+	}
 }
 
 func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
@@ -57,6 +65,11 @@ func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	template := models.StrategyTemplates{ID: request.StrategyTemplateID}
 	if err := o.Read(&template); err != nil {
 		return RunSummary{}, fmt.Errorf("load strategy template: %w", err)
+	}
+	if strategyservice.StrategyUsesMarketCondition(template.Strategy) {
+		if err := ValidateMarketConditionCoverage(context.Background(), request.StartTime, request.EndTime); err != nil {
+			return RunSummary{}, err
+		}
 	}
 	strategyVersion := strategyservice.StrategySnapshotHash(template.Technology, template.Strategy)
 	now := time.Now().UnixMilli()
@@ -90,7 +103,7 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		lastProgress = value
 		manager.updateProgress(row.RunID, stage, value)
 	}
-	dataset, err := manager.builder.BuildWithProgress(ctx, DatasetRequest{Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, TechnologyJSON: row.TechnologyJSON}, func(completed, total int) {
+	dataset, err := manager.builder.BuildWithProgress(ctx, DatasetRequest{Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON}, func(completed, total int) {
 		reportProgress("building_dataset", 5, 25, completed, total)
 	})
 	if err != nil {
@@ -357,9 +370,8 @@ func saveDataset(ctx context.Context, d Dataset) (DatasetManifest, error) {
 		return DatasetManifest{}, err
 	}
 	intervals, _ := json.Marshal(d.Intervals)
-	benchmarks, _ := json.Marshal(d.BenchmarkSymbols)
 	now := time.Now().UnixMilli()
-	row := models.AgentBacktestDataset{DatasetID: d.DatasetID, DatasetSpecHash: d.DatasetSpecHash, Symbol: d.Symbol, ExecutionInterval: d.ExecutionInterval, IntervalsJSON: string(intervals), BenchmarkSymbolsJSON: string(benchmarks), StartTime: d.StartTime, EndTime: d.EndTime, WarmupStartTime: d.WarmupStartTime, Market: d.Market, CreatedAt: now, UpdatedAt: now}
+	row := models.AgentBacktestDataset{DatasetID: d.DatasetID, DatasetSpecHash: d.DatasetSpecHash, Symbol: d.Symbol, ExecutionInterval: d.ExecutionInterval, IntervalsJSON: string(intervals), BenchmarkSymbolsJSON: "[]", StartTime: d.StartTime, EndTime: d.EndTime, WarmupStartTime: d.WarmupStartTime, Market: d.Market, CreatedAt: now, UpdatedAt: now}
 	if _, err := o.Insert(&row); err != nil {
 		if reread := o.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_spec_hash", d.DatasetSpecHash).One(&existing); reread == nil {
 			return manifestFromRow(existing), nil
@@ -376,10 +388,9 @@ func loadDatasetManifest(id string) (DatasetManifest, error) {
 	return manifestFromRow(row), nil
 }
 func manifestFromRow(row models.AgentBacktestDataset) DatasetManifest {
-	var intervals, bench []string
+	var intervals []string
 	_ = json.Unmarshal([]byte(row.IntervalsJSON), &intervals)
-	_ = json.Unmarshal([]byte(row.BenchmarkSymbolsJSON), &bench)
-	return DatasetManifest{DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, Market: row.Market, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, Intervals: intervals, BenchmarkSymbols: bench, StartTime: row.StartTime, EndTime: row.EndTime, WarmupStartTime: row.WarmupStartTime, CreatedAt: row.CreatedAt}
+	return DatasetManifest{DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, Market: row.Market, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, Intervals: intervals, StartTime: row.StartTime, EndTime: row.EndTime, WarmupStartTime: row.WarmupStartTime, CreatedAt: row.CreatedAt}
 }
 func saveResult(ctx context.Context, runID string, result Result) error {
 	return saveResultWithProgress(ctx, runID, result, nil)

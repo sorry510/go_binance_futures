@@ -42,26 +42,19 @@ func (builder *historicalEnvironment) Build(asOf int64, position *Position, cash
 		return nil, 0, fmt.Errorf("%w: no execution bars visible at %d", ErrInsufficientHistoricalBars, asOf)
 	}
 	current := currentBars[0]
-	benchmarks := map[string]map[string]interface{}{}
-	changes := map[string]float64{}
-	for _, symbol := range BenchmarkSymbols {
-		stats := builder.tickerStats(symbol, asOf)
-		benchmarks[symbol] = stats
-		changes[symbol], _ = stats["PercentChange"].(float64)
-	}
-	basicTrend := changes["BTCUSDT"]*0.6 + changes["ETHUSDT"]*0.3 + changes["SOLUSDT"]*0.05 + changes["BNBUSDT"]*0.05
-	condition := classifyHistoricalRegime(changes, currentBars)
 	targetStats := builder.tickerStats(builder.dataset.Symbol, asOf)
 	env := map[string]interface{}{
-		"SystemStartTime": builder.dataset.StartTime, "MarketCondition": strconv.Itoa(condition), "NowTime": asOf, "NowPrice": current.Close,
+		"SystemStartTime": builder.dataset.StartTime, "NowTime": asOf, "NowPrice": current.Close,
 		"NowSymbolPercentChange": targetStats["PercentChange"], "NowSymbolClose": targetStats["Close"], "NowSymbolOpen": targetStats["Open"], "NowSymbolLow": targetStats["Low"], "NowSymbolHigh": targetStats["High"],
-		"BasicTrend": basicTrend, "KdjSimple": line.KdjSimple, "IsAsc": utils.IsAsc, "IsDesc": utils.IsDesc,
+		"KdjSimple": line.KdjSimple, "IsAsc": utils.IsAsc, "IsDesc": utils.IsDesc,
 	}
-	for symbol, value := range benchmarks {
-		env[symbol] = value
-	}
-	if _, exists := env[builder.dataset.Symbol]; !exists {
-		env[builder.dataset.Symbol] = targetStats
+	condition := 0
+	if builder.dataset.MarketConditionRequired {
+		condition = builder.marketConditionAt(asOf)
+		if condition == 0 {
+			return nil, 0, fmt.Errorf("%w: no MarketCondition visible at %d", ErrInsufficientHistoricalBars, asOf)
+		}
+		env["MarketCondition"] = strconv.Itoa(condition)
 	}
 	if err := builder.addIndicators(env, asOf); err != nil {
 		return nil, condition, err
@@ -83,6 +76,15 @@ func (builder *historicalEnvironment) Build(asOf int64, position *Position, cash
 	env["ROI"], env["NetROI"], env["Fee"], env["NetProfit"], env["Position"] = roi, netROI, position.OpenFee+projectedCloseFee, net, p
 	env["Positions"] = []markettypes.FuturesPosition{{Symbol: builder.dataset.Symbol, Side: position.Side, Amount: strconv.FormatFloat(position.Quantity, 'f', -1, 64), Leverage: int64(config.Leverage), EntryPrice: strconv.FormatFloat(position.EntryPrice, 'f', -1, 64), MarkPrice: strconv.FormatFloat(current.Close, 'f', -1, 64), UnrealizedProfit: strconv.FormatFloat(gross, 'f', -1, 64), SourceType: "backtest", CreateTime: position.EntryTime}}
 	return env, condition, nil
+}
+
+func (builder *historicalEnvironment) marketConditionAt(asOf int64) int {
+	points := builder.dataset.MarketConditions
+	index := sort.Search(len(points), func(i int) bool { return points[i].Time > asOf })
+	if index == 0 {
+		return 0
+	}
+	return points[index-1].Value
 }
 
 func (builder *historicalEnvironment) series(symbol, interval string, asOf int64, limit int) []Bar {
@@ -240,86 +242,6 @@ func toKLinePrice(bars []Bar) line.KLinePrice {
 	return p
 }
 
-func classifyHistoricalRegime(changes map[string]float64, targetBars []Bar) int {
-	btc, eth, sol, bnb := changes["BTCUSDT"], changes["ETHUSDT"], changes["SOLUSDT"], changes["BNBUSDT"]
-	values := []float64{btc, eth, sol, bnb}
-	up, down := 0, 0
-	sum := 0.0
-	for _, v := range values {
-		sum += v
-		if v > 0 {
-			up++
-		} else if v < 0 {
-			down++
-		}
-	}
-	avg := sum / 4
-	if up == 4 && avg >= 0.5 {
-		return markettypes.MarketConditionBroadRise
-	}
-	if down == 4 && avg <= -0.5 {
-		return markettypes.MarketConditionBroadDecline
-	}
-	others := (eth + sol + bnb) / 3
-	if btc >= 0.5 && others <= -0.2 {
-		return markettypes.MarketConditionBullishDivergence
-	}
-	if btc <= -0.5 && others >= 0.2 {
-		return markettypes.MarketConditionBearishDivergence
-	}
-	weighted := btc*0.5 + eth*0.3 + sol*0.1 + bnb*0.1
-	vol := historicalVolatility(targetBars, 20)
-	if math.Abs(weighted) < 0.5 {
-		if vol >= 2 {
-			return markettypes.MarketConditionHighVolatility
-		}
-		if vol <= 0.35 {
-			return markettypes.MarketConditionLowVolatility
-		}
-		return markettypes.MarketConditionSideways
-	}
-	if weighted >= 5 {
-		return markettypes.MarketConditionStrongBull
-	}
-	if weighted >= 1 {
-		return markettypes.MarketConditionBull
-	}
-	if weighted <= -5 {
-		return markettypes.MarketConditionStrongBear
-	}
-	if weighted <= -1 {
-		return markettypes.MarketConditionBear
-	}
-	return markettypes.MarketConditionSideways
-}
-func historicalVolatility(bars []Bar, limit int) float64 {
-	if len(bars) < 2 {
-		return 0
-	}
-	if len(bars) > limit {
-		bars = bars[:limit]
-	}
-	returns := make([]float64, 0, len(bars)-1)
-	for i := 0; i+1 < len(bars); i++ {
-		if bars[i+1].Close > 0 {
-			returns = append(returns, (bars[i].Close-bars[i+1].Close)/bars[i+1].Close*100)
-		}
-	}
-	if len(returns) == 0 {
-		return 0
-	}
-	mean := 0.0
-	for _, v := range returns {
-		mean += v
-	}
-	mean /= float64(len(returns))
-	sum := 0.0
-	for _, v := range returns {
-		d := v - mean
-		sum += d * d
-	}
-	return math.Sqrt(sum / float64(len(returns)))
-}
 func unrealizedPnL(p *Position, price float64) float64 {
 	if p == nil {
 		return 0

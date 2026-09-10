@@ -45,6 +45,24 @@ func (ctrl *AgentBacktestController) PrefetchStatus() {
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
 }
 
+func (ctrl *AgentBacktestController) MarketConditionBackfill() {
+	item, err := backtestservice.DefaultManager().StartMarketConditionBackfill()
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
+}
+
+func (ctrl *AgentBacktestController) MarketConditionBackfillStatus() {
+	item, err := backtestservice.DefaultManager().GetMarketConditionBackfill(strings.TrimSpace(ctrl.Ctx.Input.Param(":jobId")))
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(404, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": item, "msg": "success"})
+}
+
 func (ctrl *AgentBacktestController) Start() {
 	var request backtestservice.StartRequest
 	if err := json.Unmarshal(ctrl.Ctx.Input.RequestBody, &request); err != nil {

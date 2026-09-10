@@ -71,7 +71,7 @@ func TestPrefetchFillsDataSoImmediateBuildUsesLocalCache(t *testing.T) {
 		t.Fatalf("unexpected prefetch result: %+v", result)
 	}
 	klineCalls, fundingCalls := source.counts()
-	if klineCalls != 5 || fundingCalls != 1 {
+	if klineCalls != 1 || fundingCalls != 1 {
 		t.Fatalf("unexpected remote calls after prefetch: klines=%d funding=%d", klineCalls, fundingCalls)
 	}
 	if _, err := builder.Build(context.Background(), request); err != nil {

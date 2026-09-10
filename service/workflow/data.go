@@ -205,7 +205,6 @@ func testProposal(p workflowSkill.StrategyExperimentProposalV1) workflowSkill.Ex
 		report.CompiledRules++
 		for _, scenario := range []float64{-8, 0, 8} {
 			env["NowSymbolPercentChange"] = scenario
-			env["BasicTrend"] = scenario / 2
 			report.ScenarioRuns++
 			if _, err := expr.Run(program, env); err == nil {
 				report.ScenarioPasses++
@@ -223,12 +222,10 @@ func syntheticEnv(tech technology.TechnologyConfig) map[string]any {
 	for i := range series {
 		series[i] = 100 + float64(150-i)/10
 	}
-	market := struct{ PercentChange, Close, Open, Low, High float64 }{1, 101, 100, 99, 102}
 	env := map[string]any{
 		"SystemStartTime": int64(1_700_000_000_000), "MarketCondition": "3", "NowTime": int64(1_700_000_060_000),
 		"NowPrice": 101.0, "NowSymbolPercentChange": 1.0, "NowSymbolClose": 101.0, "NowSymbolOpen": 100.0, "NowSymbolLow": 99.0, "NowSymbolHigh": 102.0,
-		"BasicTrend": 0.5, "ROI": 5.0, "KdjSimple": line.KdjSimple, "IsAsc": utils.IsAsc, "IsDesc": utils.IsDesc,
-		"BTCUSDT": market, "ETHUSDT": market, "SOLUSDT": market, "BNBUSDT": market,
+		"ROI": 5.0, "KdjSimple": line.KdjSimple, "IsAsc": utils.IsAsc, "IsDesc": utils.IsDesc,
 		"Positions": []markettypes.FuturesPosition{}, "Position": markettypes.FuturesPositionCode{Symbol: "BTCUSDT", Side: "LONG", Amount: 0.01, Leverage: 3, EntryPrice: 100, MarkPrice: 101, UnrealizedProfit: 1, CreateTime: 1_700_000_000_000, SourceType: "local"},
 	}
 	intervals := map[string]bool{}

@@ -163,7 +163,7 @@ func TestStrategyTemplateValidationAcceptsMarketConditionStringComparison(t *tes
 }
 
 func TestStrategyTemplateValidationAcceptsMultilineLetExpression(t *testing.T) {
-	code := "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet strong_bull = MarketCondition == \"1\" && BasicTrend >= 0.5;\nwarmup_ok && strong_bull"
+	code := "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet strong_bull = MarketCondition == \"1\" && NowPrice > NowSymbolOpen;\nwarmup_ok && strong_bull"
 	technology := map[string]any{"ma": []any{}, "ema": []any{}, "macd": []any{}, "adx": []any{}, "mfi": []any{}, "obv": []any{}, "cci": []any{}, "roc": []any{}, "kdj": []any{}, "rsi": []any{}, "kc": []any{}, "boll": []any{}, "donchian": []any{}, "atr": []any{}, "supertrend": []any{}}
 	candidate, err := json.Marshal(map[string]any{"name": "readable-let", "technology": technology, "strategy": []map[string]any{{"name": "long", "type": "long", "code": code, "fullScreen": false, "enable": true}}})
 	if err != nil {
