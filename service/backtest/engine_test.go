@@ -23,15 +23,8 @@ func fixtureDataset(closes []float64) Dataset {
 		low := math.Min(open, close) - 0.2
 		bars = append(bars, Bar{Symbol: "BTCUSDT", Interval: "1m", OpenTime: at.UnixMilli(), CloseTime: at.Add(time.Minute - time.Millisecond).UnixMilli(), Open: open, High: high, Low: low, Close: close, QuoteVolume: 1000})
 	}
-	d := Dataset{Symbol: "BTCUSDT", ExecutionInterval: "1m", Intervals: []string{"1m"}, BenchmarkSymbols: append([]string(nil), BenchmarkSymbols...), StartTime: bars[0].CloseTime, EndTime: bars[len(bars)-1].CloseTime, WarmupStartTime: bars[0].OpenTime, Bars: map[string][]Bar{}, Funding: []Funding{}}
-	for _, symbol := range BenchmarkSymbols {
-		copyBars := make([]Bar, len(bars))
-		for i, b := range bars {
-			b.Symbol = symbol
-			copyBars[i] = b
-		}
-		d.Bars[BarSeriesKey(symbol, "1m")] = copyBars
-	}
+	d := Dataset{Symbol: "BTCUSDT", ExecutionInterval: "1m", Intervals: []string{"1m"}, StartTime: bars[0].CloseTime, EndTime: bars[len(bars)-1].CloseTime, WarmupStartTime: bars[0].OpenTime, Bars: map[string][]Bar{}, Funding: []Funding{}}
+	d.Bars[BarSeriesKey("BTCUSDT", "1m")] = bars
 	d.Market = "futures_usdt"
 	d.DatasetSpecHash = DatasetSpecHash(d)
 	d.DatasetID = "ds_" + d.DatasetSpecHash[:24]
@@ -54,7 +47,9 @@ func closeEnough(a, b float64) bool { return math.Abs(a-b) < 1e-6 }
 
 func TestBacktestLongUsesNextBarOpen(t *testing.T) {
 	d := fixtureDataset([]float64{100, 101, 104, 105})
-	r := runFixture(t, d, []Rule{{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"}, {Name: "close", Enable: true, Type: "close_long", Code: "NowPrice >= 104"}}, zeroCosts())
+	c := zeroCosts()
+	c.TakeProfitPct = 3
+	r := runFixture(t, d, []Rule{{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"}, {Name: "close", Enable: true, Type: "close_long", Code: "NowPrice >= 104"}}, c)
 	if len(r.Trades) != 1 {
 		t.Fatalf("trades=%+v", r.Trades)
 	}
@@ -68,32 +63,73 @@ func TestBacktestLongUsesNextBarOpen(t *testing.T) {
 }
 func TestBacktestShort(t *testing.T) {
 	d := fixtureDataset([]float64{100, 99, 96, 95})
-	r := runFixture(t, d, []Rule{{Name: "open", Enable: true, Type: "short", Code: "NowPrice >= 100"}, {Name: "close", Enable: true, Type: "close_short", Code: "NowPrice <= 96"}}, zeroCosts())
+	c := zeroCosts()
+	c.TakeProfitPct = 3
+	r := runFixture(t, d, []Rule{{Name: "open", Enable: true, Type: "short", Code: "NowPrice >= 100"}, {Name: "close", Enable: true, Type: "close_short", Code: "NowPrice <= 96"}}, c)
 	if len(r.Trades) != 1 || r.Trades[0].Side != "SHORT" || r.Trades[0].NetPnL <= 0 {
 		t.Fatalf("short failed: %+v", r.Trades)
 	}
 }
-func TestBacktestTakeProfit(t *testing.T) {
-	d := fixtureDataset([]float64{100, 100, 100})
-	bars := d.Bars[BarSeriesKey("BTCUSDT", "1m")]
-	bars[1].High = 103
-	d.Bars[BarSeriesKey("BTCUSDT", "1m")] = bars
-	r := runFixture(t, d, []Rule{{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"}}, RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 1, TakeProfitPct: 2})
+func TestBacktestCloseRuleWaitsForROIGate(t *testing.T) {
+	d := fixtureDataset([]float64{100, 100, 100.5, 100.5})
+	r := runFixture(t, d, []Rule{
+		{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"},
+		{Name: "close", Enable: true, Type: "close_long", Code: "NowPrice > 0"},
+	}, RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 10, TakeProfitPct: 10})
+	if len(r.Trades) != 1 || r.Trades[0].ExitReason != "end_of_data" {
+		t.Fatalf("close rule ran before live-equivalent ROI gate: %+v", r.Trades)
+	}
+}
+
+func TestBacktestTakeProfitGateUsesLeveragedROI(t *testing.T) {
+	d := fixtureDataset([]float64{100, 100, 101.02, 101.02})
+	r := runFixture(t, d, []Rule{
+		{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"},
+		{Name: "close", Enable: true, Type: "close_long", Code: "NowPrice >= 101"},
+	}, RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 10, TakeProfitPct: 10})
 	if len(r.Trades) != 1 || r.Trades[0].ExitReason != "take_profit" {
-		t.Fatalf("take profit failed: %+v", r.Trades)
+		t.Fatalf("10x leverage with 10%% ROI should unlock close rule near +1%% price move: %+v", r.Trades)
+	}
+	if !closeEnough(r.Trades[0].ExitPrice, 101.02) {
+		t.Fatalf("ROI-gated strategy close must fill on next bar open: %+v", r.Trades[0])
 	}
 }
-func TestBacktestStopLossWinsWhenStopAndTargetBothTouched(t *testing.T) {
-	d := fixtureDataset([]float64{100, 100, 100})
-	bars := d.Bars[BarSeriesKey("BTCUSDT", "1m")]
-	bars[1].High = 103
-	bars[1].Low = 97
-	d.Bars[BarSeriesKey("BTCUSDT", "1m")] = bars
-	r := runFixture(t, d, []Rule{{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"}}, RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 1, StopLossPct: 2, TakeProfitPct: 2})
+
+func TestBacktestStopLossGateUsesLeveragedROI(t *testing.T) {
+	d := fixtureDataset([]float64{100, 100, 98.99, 98.99})
+	r := runFixture(t, d, []Rule{
+		{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"},
+		{Name: "close", Enable: true, Type: "close_long", Code: "NowPrice < 100"},
+	}, RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 10, StopLossPct: 10})
 	if len(r.Trades) != 1 || r.Trades[0].ExitReason != "stop_loss" {
-		t.Fatalf("protective precedence failed: %+v", r.Trades)
+		t.Fatalf("10x leverage with 10%% loss ROI should unlock close rule near -1%% price move: %+v", r.Trades)
+	}
+	if !closeEnough(r.Trades[0].ExitPrice, 98.99) {
+		t.Fatalf("ROI-gated strategy close must fill on next bar open: %+v", r.Trades[0])
 	}
 }
+
+func TestBacktestROIGateDoesNotForceCloseWhenRuleIsFalse(t *testing.T) {
+	d := fixtureDataset([]float64{100, 100, 101.02, 102})
+	r := runFixture(t, d, []Rule{
+		{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"},
+		{Name: "close", Enable: true, Type: "close_long", Code: "false"},
+	}, RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 10, TakeProfitPct: 10})
+	if len(r.Trades) != 1 || r.Trades[0].ExitReason != "end_of_data" {
+		t.Fatalf("ROI threshold must gate, not force, the close rule: %+v", r.Trades)
+	}
+}
+
+func TestCloseGateZeroThresholdsMatchLiveDisabledDefaults(t *testing.T) {
+	config := RunConfig{}
+	if got := closeGateReason(20, config); got != "" {
+		t.Fatalf("zero thresholds should be effectively disabled, got %q", got)
+	}
+	if got := closeGateReason(-20, config); got != "" {
+		t.Fatalf("zero thresholds should be effectively disabled, got %q", got)
+	}
+}
+
 func TestBacktestNoTrade(t *testing.T) {
 	d := fixtureDataset([]float64{100, 101, 102})
 	r := runFixture(t, d, []Rule{{Name: "never", Enable: true, Type: "long", Code: "NowPrice > 1000"}}, zeroCosts())
@@ -198,5 +234,33 @@ func TestBacktestProgressTracksProcessedBars(t *testing.T) {
 		if completed[i] < completed[i-1] || totals[i] != totals[0] {
 			t.Fatalf("progress must be monotonic with stable total: completed=%v totals=%v", completed, totals)
 		}
+	}
+}
+
+func TestHistoricalEnvironmentUsesLatestVisibleMarketCondition(t *testing.T) {
+	d := fixtureDataset([]float64{100, 101, 102})
+	bars := d.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	d.MarketConditionRequired = true
+	d.MarketConditions = []MarketConditionPoint{
+		{Time: bars[0].CloseTime - 1, Value: 2},
+		{Time: bars[1].CloseTime, Value: 4},
+	}
+	environment, err := newHistoricalEnvironment(d, "{}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstEnv, firstCondition, err := environment.Build(bars[0].CloseTime, nil, 1000, zeroCosts())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if firstCondition != 2 || firstEnv["MarketCondition"] != "2" {
+		t.Fatalf("unexpected first MarketCondition: condition=%d env=%v", firstCondition, firstEnv["MarketCondition"])
+	}
+	secondEnv, secondCondition, err := environment.Build(bars[1].CloseTime, nil, 1000, zeroCosts())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if secondCondition != 4 || secondEnv["MarketCondition"] != "4" {
+		t.Fatalf("unexpected second MarketCondition: condition=%d env=%v", secondCondition, secondEnv["MarketCondition"])
 	}
 }

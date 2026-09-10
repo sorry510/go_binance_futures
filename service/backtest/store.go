@@ -18,10 +18,17 @@ import (
 )
 
 type Manager struct {
-	builder DatasetBuilder
-	engine  Engine
-	mu      sync.Mutex
-	cancel  map[string]context.CancelFunc
+	builder                 DatasetBuilder
+	engine                  Engine
+	mu                      sync.Mutex
+	cancel                  map[string]context.CancelFunc
+	prefetchMu              sync.Mutex
+	prefetchJobs            map[string]PrefetchSummary
+	prefetchActive          string
+	marketConditionMu       sync.Mutex
+	marketConditionJobs     map[string]MarketConditionBackfillSummary
+	marketConditionActive   string
+	marketConditionEarliest earliestKlineSource
 }
 
 var defaultManagerOnce sync.Once
@@ -35,12 +42,15 @@ func DefaultManager() *Manager {
 	return defaultManager
 }
 func NewManager(builder DatasetBuilder) *Manager {
-	return &Manager{builder: builder, engine: Engine{}, cancel: map[string]context.CancelFunc{}}
+	return &Manager{
+		builder: builder, engine: Engine{}, cancel: map[string]context.CancelFunc{},
+		prefetchJobs: map[string]PrefetchSummary{}, marketConditionJobs: map[string]MarketConditionBackfillSummary{},
+		marketConditionEarliest: historicalmarket.BinanceSource{},
+	}
 }
 
 func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	request.Symbol = strings.ToUpper(strings.TrimSpace(request.Symbol))
-	request.ExecutionInterval = strings.TrimSpace(request.ExecutionInterval)
 	request.Config = NormalizeRunConfig(request.Config)
 	if request.StrategyTemplateID <= 0 {
 		return RunSummary{}, fmt.Errorf("strategy_template_id is required")
@@ -51,18 +61,20 @@ func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	if request.StartTime <= 0 || request.EndTime <= request.StartTime {
 		return RunSummary{}, fmt.Errorf("valid start_time and end_time are required")
 	}
-	if _, err := intervalDuration(request.ExecutionInterval, time.UnixMilli(request.StartTime)); err != nil {
-		return RunSummary{}, err
-	}
 	o := orm.NewOrm()
 	template := models.StrategyTemplates{ID: request.StrategyTemplateID}
 	if err := o.Read(&template); err != nil {
 		return RunSummary{}, fmt.Errorf("load strategy template: %w", err)
 	}
+	if strategyservice.StrategyUsesMarketCondition(template.Strategy) {
+		if err := ValidateMarketConditionCoverage(context.Background(), request.StartTime, request.EndTime); err != nil {
+			return RunSummary{}, err
+		}
+	}
 	strategyVersion := strategyservice.StrategySnapshotHash(template.Technology, template.Strategy)
 	now := time.Now().UnixMilli()
 	runID := newRunID()
-	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: EngineVersion, MarketConditionModel: MarketConditionModel, Symbol: request.Symbol, ExecutionInterval: request.ExecutionInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
+	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: EngineVersion, MarketConditionModel: MarketConditionModel, Symbol: request.Symbol, ExecutionInterval: ReplayInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
 	if _, err := o.Insert(&row); err != nil {
 		return RunSummary{}, fmt.Errorf("create backtest run: %w", err)
 	}
@@ -91,7 +103,7 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		lastProgress = value
 		manager.updateProgress(row.RunID, stage, value)
 	}
-	dataset, err := manager.builder.BuildWithProgress(ctx, DatasetRequest{Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, TechnologyJSON: row.TechnologyJSON}, func(completed, total int) {
+	dataset, err := manager.builder.BuildWithProgress(ctx, DatasetRequest{Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON}, func(completed, total int) {
 		reportProgress("building_dataset", 5, 25, completed, total)
 	})
 	if err != nil {
@@ -181,6 +193,81 @@ func (manager *Manager) Cancel(runID string) error {
 	}
 	cancel()
 	manager.updateState(runID, "cancelled", "cancelled", 100, "backtest cancelled", true)
+	return nil
+}
+
+func (manager *Manager) Delete(runID string) error {
+	runID = strings.TrimSpace(runID)
+	if runID == "" {
+		return fmt.Errorf("run_id is required")
+	}
+	o := orm.NewOrm()
+	var row models.AgentBacktestRun
+	if err := o.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).One(&row); err != nil {
+		if err == orm.ErrNoRows {
+			return fmt.Errorf("backtest run %q not found", runID)
+		}
+		return err
+	}
+	if row.Status == "queued" || row.Status == "running" {
+		return fmt.Errorf("active backtest run cannot be deleted; cancel it first")
+	}
+	manager.mu.Lock()
+	_, active := manager.cancel[runID]
+	manager.mu.Unlock()
+	if active {
+		return fmt.Errorf("backtest run is still active; wait for cancellation to finish before deleting")
+	}
+	tx, err := o.Begin()
+	if err != nil {
+		return fmt.Errorf("begin delete backtest transaction: %w", err)
+	}
+	rollback := func(cause error) error {
+		_ = tx.Rollback()
+		return cause
+	}
+	// Use direct predicate deletes instead of QuerySeter.Delete. Beego may expand
+	// large result sets into primary-key IN (?, ?, ...) lists; a 1m backtest can
+	// contain hundreds of thousands of equity points and exceed the database
+	// prepared-statement placeholder limit. Each statement below always uses one
+	// placeholder regardless of the number of child rows.
+	for _, item := range []struct {
+		name  string
+		table string
+	}{
+		{name: "equity points", table: "agent_backtest_equity_points"},
+		{name: "events", table: "agent_backtest_events"},
+		{name: "trades", table: "agent_backtest_trades"},
+	} {
+		if _, err := tx.Raw("DELETE FROM "+item.table+" WHERE run_id = ?", runID).Exec(); err != nil {
+			return rollback(fmt.Errorf("delete backtest %s: %w", item.name, err))
+		}
+	}
+	result, err := tx.Raw("DELETE FROM agent_backtest_runs WHERE run_id = ?", runID).Exec()
+	if err != nil {
+		return rollback(fmt.Errorf("delete backtest run: %w", err))
+	}
+	deleted, err := result.RowsAffected()
+	if err != nil {
+		return rollback(fmt.Errorf("read deleted backtest run count: %w", err))
+	}
+	if deleted == 0 {
+		return rollback(fmt.Errorf("backtest run %q not found", runID))
+	}
+	if strings.TrimSpace(row.DatasetID) != "" {
+		refs, err := tx.QueryTable(new(models.AgentBacktestRun)).Filter("dataset_id", row.DatasetID).Count()
+		if err != nil {
+			return rollback(fmt.Errorf("count backtest dataset references: %w", err))
+		}
+		if refs == 0 {
+			if _, err := tx.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_id", row.DatasetID).Delete(); err != nil {
+				return rollback(fmt.Errorf("delete unused backtest dataset manifest: %w", err))
+			}
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit delete backtest transaction: %w", err)
+	}
 	return nil
 }
 func (manager *Manager) markInterrupted() error {
@@ -283,9 +370,8 @@ func saveDataset(ctx context.Context, d Dataset) (DatasetManifest, error) {
 		return DatasetManifest{}, err
 	}
 	intervals, _ := json.Marshal(d.Intervals)
-	benchmarks, _ := json.Marshal(d.BenchmarkSymbols)
 	now := time.Now().UnixMilli()
-	row := models.AgentBacktestDataset{DatasetID: d.DatasetID, DatasetSpecHash: d.DatasetSpecHash, Symbol: d.Symbol, ExecutionInterval: d.ExecutionInterval, IntervalsJSON: string(intervals), BenchmarkSymbolsJSON: string(benchmarks), StartTime: d.StartTime, EndTime: d.EndTime, WarmupStartTime: d.WarmupStartTime, Market: d.Market, CreatedAt: now, UpdatedAt: now}
+	row := models.AgentBacktestDataset{DatasetID: d.DatasetID, DatasetSpecHash: d.DatasetSpecHash, Symbol: d.Symbol, ExecutionInterval: d.ExecutionInterval, IntervalsJSON: string(intervals), BenchmarkSymbolsJSON: "[]", StartTime: d.StartTime, EndTime: d.EndTime, WarmupStartTime: d.WarmupStartTime, Market: d.Market, CreatedAt: now, UpdatedAt: now}
 	if _, err := o.Insert(&row); err != nil {
 		if reread := o.QueryTable(new(models.AgentBacktestDataset)).Filter("dataset_spec_hash", d.DatasetSpecHash).One(&existing); reread == nil {
 			return manifestFromRow(existing), nil
@@ -302,10 +388,9 @@ func loadDatasetManifest(id string) (DatasetManifest, error) {
 	return manifestFromRow(row), nil
 }
 func manifestFromRow(row models.AgentBacktestDataset) DatasetManifest {
-	var intervals, bench []string
+	var intervals []string
 	_ = json.Unmarshal([]byte(row.IntervalsJSON), &intervals)
-	_ = json.Unmarshal([]byte(row.BenchmarkSymbolsJSON), &bench)
-	return DatasetManifest{DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, Market: row.Market, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, Intervals: intervals, BenchmarkSymbols: bench, StartTime: row.StartTime, EndTime: row.EndTime, WarmupStartTime: row.WarmupStartTime, CreatedAt: row.CreatedAt}
+	return DatasetManifest{DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, Market: row.Market, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, Intervals: intervals, StartTime: row.StartTime, EndTime: row.EndTime, WarmupStartTime: row.WarmupStartTime, CreatedAt: row.CreatedAt}
 }
 func saveResult(ctx context.Context, runID string, result Result) error {
 	return saveResultWithProgress(ctx, runID, result, nil)

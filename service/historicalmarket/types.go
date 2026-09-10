@@ -76,3 +76,11 @@ type Source interface {
 	Klines(context.Context, string, string, string, int64, int64) ([]Kline, error)
 	Funding(context.Context, string, string, int64, int64) ([]FundingRate, error)
 }
+
+// KlineProgressCallback reports completed/estimated rows while a remote K-line
+// source is paging data. It is optional and does not change the Source contract.
+type KlineProgressCallback func(completed, total int)
+
+type KlineProgressSource interface {
+	KlinesWithProgress(context.Context, string, string, string, int64, int64, KlineProgressCallback) ([]Kline, error)
+}

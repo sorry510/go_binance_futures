@@ -3,8 +3,8 @@ package binance
 import (
 	"context"
 	"fmt"
-	"go_binance_futures/binanceproxy"
 	agentevent "go_binance_futures/agent/event"
+	"go_binance_futures/binanceproxy"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/utils"
@@ -25,7 +25,6 @@ import (
 	"github.com/beego/beego/v2/core/config"
 )
 
-
 var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
 var proxy_url, _ = config.String("binance::proxy_url")
@@ -33,11 +32,12 @@ var proxyPool *binanceproxy.Pool
 var pusher = notify.GetNotifyChannel()
 
 const (
-	futuresWsFlushInterval      = time.Second
-	futuresWsBatchSize          = 500
-	wsNoDataAlertThreshold      = 3 * time.Minute
-	wsNoDataAlertInterval       = 10 * time.Minute
-	wsNoDataCheckInterval       = 30 * time.Second
+	futuresWsFlushInterval                             = time.Second
+	historicalRESTMinInterval                          = 300 * time.Millisecond
+	futuresWsBatchSize                                 = 500
+	wsNoDataAlertThreshold                             = 3 * time.Minute
+	wsNoDataAlertInterval                              = 10 * time.Minute
+	wsNoDataCheckInterval                              = 30 * time.Second
 	futuresOrderTypeTakeProfitMarket futures.OrderType = "TAKE_PROFIT_MARKET"
 	futuresOrderTypeStopMarket       futures.OrderType = "STOP_MARKET"
 )
@@ -48,6 +48,28 @@ var futuresWsFlushOnce sync.Once
 
 var futuresClient *futures.Client
 var deliveryClient *delivery.Client
+
+var historicalRESTMu sync.Mutex
+var historicalRESTLast time.Time
+
+func waitHistoricalREST(ctx context.Context) error {
+	historicalRESTMu.Lock()
+	defer historicalRESTMu.Unlock()
+	if !historicalRESTLast.IsZero() {
+		wait := historicalRESTMinInterval - time.Since(historicalRESTLast)
+		if wait > 0 {
+			timer := time.NewTimer(wait)
+			defer timer.Stop()
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-timer.C:
+			}
+		}
+	}
+	historicalRESTLast = time.Now()
+	return nil
+}
 
 func init() {
 	var err error
@@ -66,8 +88,8 @@ func init() {
 }
 
 type OrderParams struct {
-	Symbol    string
-	OrderID   int64
+	Symbol  string
+	OrderID int64
 }
 
 type ListOrderParams struct {
@@ -99,9 +121,9 @@ type PositionParams struct {
 }
 
 // @returns /doc/position.js
-func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, err error){
+func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, err error) {
 	query := futuresClient.NewGetPositionRiskService()
-	if (positionParams.Symbol != "") {
+	if positionParams.Symbol != "" {
 		query = query.Symbol(positionParams.Symbol)
 	}
 	res, err = query.Do(context.Background())
@@ -114,9 +136,9 @@ func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, er
 
 // @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3
 // 这个版本仅返回有持仓或挂单的交易对，但是缺少了 Leverage 字段
-func GetPositionV3(positionParams PositionParams) (res []*futures.PositionRiskV3, err error){
+func GetPositionV3(positionParams PositionParams) (res []*futures.PositionRiskV3, err error) {
 	query := futuresClient.NewGetPositionRiskV3Service()
-	if (positionParams.Symbol != "") {
+	if positionParams.Symbol != "" {
 		query = query.Symbol(positionParams.Symbol)
 	}
 	res, err = query.Do(context.Background())
@@ -136,21 +158,21 @@ type IncomeParams struct {
 }
 
 // @returns /doc/income.js
-func GetIncome(incomeParams IncomeParams) (res []*futures.IncomeHistory, err error){
+func GetIncome(incomeParams IncomeParams) (res []*futures.IncomeHistory, err error) {
 	query := futuresClient.NewGetIncomeHistoryService()
-	if (incomeParams.Symbol != "") {
+	if incomeParams.Symbol != "" {
 		query = query.Symbol(incomeParams.Symbol)
 	}
-	if (incomeParams.IncomeType != "") {
+	if incomeParams.IncomeType != "" {
 		query = query.IncomeType(incomeParams.IncomeType)
 	}
-	if (incomeParams.StartTime != 0) {
+	if incomeParams.StartTime != 0 {
 		query = query.StartTime(incomeParams.StartTime)
 	}
-	if (incomeParams.EndTime != 0) {
+	if incomeParams.EndTime != 0 {
 		query = query.EndTime(incomeParams.EndTime)
 	}
-	if (incomeParams.Limit != 0) {
+	if incomeParams.Limit != 0 {
 		query = query.Limit(incomeParams.Limit)
 	}
 	res, err = query.Do(context.Background())
@@ -164,9 +186,9 @@ func GetIncome(incomeParams IncomeParams) (res []*futures.IncomeHistory, err err
 
 func GetDepth(symbol string, limits ...int) (res *futures.DepthResponse, err error) {
 	limit := 100 // 默认值
-    if len(limits) != 0 {
-        limit = limits[0]
-    }
+	if len(limits) != 0 {
+		limit = limits[0]
+	}
 	res, err = futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(context.Background())
 	if err != nil {
 		logs.Error(err)
@@ -189,9 +211,9 @@ func GetTickerPrice(symbol string) (res []*futures.SymbolPrice, err error) {
 // @see https://binance-docs.github.io/apidocs/futures/cn/#38a975b802
 func GetDepthAvgPrice(symbol string, limits ...int) (buyPrice float64, sellPrice float64, err error) {
 	limit := 50 // 默认值
-    if len(limits) != 0 {
-        limit = limits[0]
-    }
+	if len(limits) != 0 {
+		limit = limits[0]
+	}
 	res, err := futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(context.Background())
 	if err != nil {
 		logs.Error(err)
@@ -240,9 +262,39 @@ func GetKlineData(symbol string, interval string, limit int) (klines []*futures.
 	return klines, err
 }
 
+// GetEarliestHistoricalKline returns the first available futures K-line for a symbol/interval.
+// It is used only to discover the exchange listing boundary before local-first gap filling.
+func GetEarliestHistoricalKline(ctx context.Context, symbol, interval string) (*futures.Kline, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	interval = strings.TrimSpace(interval)
+	if symbol == "" || interval == "" {
+		return nil, fmt.Errorf("earliest historical K-line requires symbol and interval")
+	}
+	if err := waitHistoricalREST(ctx); err != nil {
+		return nil, err
+	}
+	rows, err := futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).StartTime(1).Limit(1).Do(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get earliest historical K-line %s %s: %w", symbol, interval, err)
+	}
+	if len(rows) == 0 || rows[0] == nil {
+		return nil, fmt.Errorf("no historical K-line available for %s %s", symbol, interval)
+	}
+	return rows[0], nil
+}
+
 // GetHistoricalKlines returns closed futures K-lines ordered from oldest to newest.
 // It paginates the exchange API and never returns a bar whose CloseTime is after endTime.
 func GetHistoricalKlines(ctx context.Context, symbol, interval string, startTime, endTime int64) ([]*futures.Kline, error) {
+	return GetHistoricalKlinesWithProgress(ctx, symbol, interval, startTime, endTime, nil)
+}
+
+// GetHistoricalKlinesWithProgress uses the same Binance requests as GetHistoricalKlines
+// and only reports progress after each already-required page. It adds no REST calls.
+func GetHistoricalKlinesWithProgress(ctx context.Context, symbol, interval string, startTime, endTime int64, progress func(completed int)) ([]*futures.Kline, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -255,6 +307,9 @@ func GetHistoricalKlines(ctx context.Context, symbol, interval string, startTime
 	seen := map[int64]bool{}
 	result := make([]*futures.Kline, 0)
 	for cursor <= endTime {
+		if err := waitHistoricalREST(ctx); err != nil {
+			return nil, err
+		}
 		page, err := futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).StartTime(cursor).EndTime(endTime).Limit(1000).Do(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("get historical K-lines %s %s: %w", symbol, interval, err)
@@ -272,6 +327,9 @@ func GetHistoricalKlines(ctx context.Context, symbol, interval string, startTime
 			if item.OpenTime > lastOpen {
 				lastOpen = item.OpenTime
 			}
+		}
+		if progress != nil {
+			progress(len(result))
 		}
 		if lastOpen < cursor || len(page) < 1000 {
 			break
@@ -302,7 +360,7 @@ func BuyLimit(symbol string, quantity float64, price float64, positionSide futur
 	if err != nil {
 		return nil, err
 	}
-		
+
 	return order, err
 }
 
@@ -322,7 +380,7 @@ func SellLimit(symbol string, quantity float64, price float64, positionSide futu
 	if err != nil {
 		return nil, err
 	}
-		
+
 	return order, err
 }
 
@@ -341,7 +399,7 @@ func BuyMarket(symbol string, quantity float64, positionSide futures.PositionSid
 	if err != nil {
 		return nil, err
 	}
-		
+
 	return order, err
 }
 
@@ -360,7 +418,7 @@ func SellMarket(symbol string, quantity float64, positionSide futures.PositionSi
 	if err != nil {
 		return nil, err
 	}
-		
+
 	return order, err
 }
 
@@ -384,7 +442,7 @@ func GetOrderByClientOrderID(ctx context.Context, symbol, clientOrderID string) 
 
 // 撤销订单
 // @see https://binance-docs.github.io/apidocs/futures/cn/#trade-6
-func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse, err error){
+func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse, err error) {
 	res, err = futuresClient.NewCancelOrderService().Symbol(symbol).OrderID(orderId).Do(context.Background())
 	if err != nil {
 		return nil, err
@@ -484,7 +542,7 @@ func GetOpenOrder(symbols ...string) (res []*futures.Order, err error) {
 
 // 获取交易规则和交易对
 // @see https://binance-docs.github.io/apidocs/futures/cn/#0f3f2d5ee7
-func GetExchangeInfo()(res *futures.ExchangeInfo, err error) {
+func GetExchangeInfo() (res *futures.ExchangeInfo, err error) {
 	res, err = futuresClient.NewExchangeInfoService().Do(context.Background())
 	if err != nil {
 		return nil, err
@@ -501,16 +559,16 @@ func OrderTakeProfit(symbol string, stopPrice float64, side futures.SideType, po
 		Symbol(symbol).
 		Side(side).
 		PositionSide(positionSide).
-		Type(futuresOrderTypeTakeProfitMarket). // 止盈市价单
+		Type(futuresOrderTypeTakeProfitMarket).                 // 止盈市价单
 		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 触发价格
-		ClosePosition(true). // 是否市价全平(和quantity参数互斥)
+		ClosePosition(true).                                    // 是否市价全平(和quantity参数互斥)
 		// Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		// TimeInForce(binance.TimeInForceTypeGTC).
 		Do(context.Background())
 	if err != nil {
 		return nil, err
 	}
-		
+
 	return order, err
 }
 
@@ -522,16 +580,16 @@ func OrderStopLoss(symbol string, stopPrice float64, side futures.SideType, posi
 		Symbol(symbol).
 		Side(side).
 		PositionSide(positionSide).
-		Type(futuresOrderTypeStopMarket). // 止损限价单
+		Type(futuresOrderTypeStopMarket).                       // 止损限价单
 		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 触发价格
-		ClosePosition(true). // 是否市价全平(和quantity参数互斥)
+		ClosePosition(true).                                    // 是否市价全平(和quantity参数互斥)
 		// Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		// TimeInForce(binance.TimeInForceTypeGTC).
 		Do(context.Background())
 	if err != nil {
 		return nil, err
 	}
-		
+
 	return order, err
 }
 
@@ -601,6 +659,9 @@ func GetHistoricalFundingRates(ctx context.Context, symbol string, startTime, en
 	seen := map[int64]bool{}
 	result := make([]*futures.FundingRate, 0)
 	for cursor <= endTime {
+		if err := waitHistoricalREST(ctx); err != nil {
+			return nil, err
+		}
 		page, err := futuresClient.NewFundingRateService().Symbol(symbol).StartTime(cursor).EndTime(endTime).Limit(1000).Do(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("get historical funding %s: %w", symbol, err)
@@ -790,7 +851,7 @@ func batchUpdateSymbolsUpsertClause() string {
 
 func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 	logs.Info("futures websocket start: auto update symbols price")
-	
+
 	startFuturesWsFlushTask(systemConfig)
 
 	for {
@@ -803,7 +864,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		var lastRecvAt atomic.Int64
 		var lastAlertAt atomic.Int64
 		// futures.WebsocketKeepalive = true
-		
+
 		doneC, _, err := wsFuturesAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
 			lastRecvAt.Store(time.Now().UnixMilli())
 			lastAlertAt.Store(0)
@@ -971,7 +1032,7 @@ func WsUserData() {
 	logs.Info("futures_user_data ws start: auto update db futures position")
 	o := orm.NewOrm()
 	doneC, _, err := wsFuturesUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
-		if (event.Event == "ACCOUNT_UPDATE") {
+		if event.Event == "ACCOUNT_UPDATE" {
 			for _, v := range event.AccountUpdate.Positions {
 				floatAmount, _ := strconv.ParseFloat(v.Amount, 64)
 				var position models.FuturesPosition
@@ -997,7 +1058,7 @@ func WsUserData() {
 					o.Update(&position)
 				}
 			}
-		}  else if (event.Event == "ORDER_TRADE_UPDATE") {
+		} else if event.Event == "ORDER_TRADE_UPDATE" {
 			order := event.OrderTradeUpdate
 			var orderModel models.FuturesOrder
 			o.QueryTable("futures_orders").Filter("order_id", order.ID).One(&orderModel)
@@ -1016,7 +1077,7 @@ func WsUserData() {
 			orderModel.CommissionAsset = order.CommissionAsset
 			orderModel.Commission = order.Commission
 			orderModel.RealizedPnL = order.RealizedPnL
-			
+
 			orderModel.UpdateTime = event.Time
 			if orderModel.ID == 0 {
 				orderModel.CreateTime = event.Time
@@ -1024,7 +1085,7 @@ func WsUserData() {
 			} else {
 				o.Update(&orderModel)
 			}
-		} else if (event.Event == "ACCOUNT_CONFIG_UPDATE") {
+		} else if event.Event == "ACCOUNT_CONFIG_UPDATE" {
 			config := event.AccountConfigUpdate
 			if config.Leverage == 0 {
 				// 其它推送不处理
@@ -1036,7 +1097,7 @@ func WsUserData() {
 				positionModel.Leverage = config.Leverage
 				o.Update(&positionModel)
 			}
-		} else if (event.Event == "listenKeyExpired") {
+		} else if event.Event == "listenKeyExpired" {
 			// 如果 listenKey 过期，重新获取 listenKey
 			logs.Info("futures_user_data ws listenKeyExpired")
 			UpdateListenKey(listenKey)
@@ -1050,9 +1111,9 @@ func WsUserData() {
 		for {
 			time.Sleep(time.Minute * 20) // key 1小时过期， 20 分钟更新一次
 			UpdateListenKey(listenKey)
-		}	
+		}
 	}()
-	
+
 	if err != nil {
 		logs.Error("futures_user_data ws start error:", err)
 		time.Sleep(time.Second * 30) // 30 秒间隔

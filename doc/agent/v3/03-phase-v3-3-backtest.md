@@ -13,7 +13,7 @@
 - 支持 LONG / SHORT、策略平仓、止盈、止损。
 - 计入双边手续费、Funding 和可配置滑点。
 - 记录 signal / order / fill / position、Trade 和 Equity Curve。
-- 输出 Net PnL、Return、Max Drawdown、Win Rate、Profit Factor、Sharpe、Sortino、Trade Count、Fees、Funding、Average Holding Time，并按 LONG/SHORT 和 MarketCondition 分组。
+- 输出 Net PnL、Return、Max Drawdown、Win Rate、Profit Factor、Sharpe、Sortino、Trade Count、Fees、Funding、Average Holding Time，并按 LONG/SHORT 分组。
 
 ## Historical Market Repository
 
@@ -27,7 +27,7 @@
 
 ## Dataset 与可追踪性
 
-Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、Execution Interval、策略依赖 intervals、benchmark、起止时间和 warmup 范围。
+Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、固定 1m Replay Interval、策略依赖 intervals、起止时间和 warmup 范围。
 
 - `dataset_spec_hash`：查询规格指纹，相同规格复用同一个 Dataset ID。
 - `data_hash`：某次 Backtest Run 实际读取到的 Kline/Funding 内容指纹。
@@ -37,29 +37,36 @@ Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、Execut
 
 ## 执行与时间语义
 
+- 新建 Backtest 的回放主时间轴固定为 `1m`，API/UI 不再允许选择 Execution Interval；Technology 中各指标仍按自身 `kline_interval` 读取历史 Kline。
 - Engine 运行期间不访问 Binance、实时 WebSocket、当前 `symbols` 或当前系统 MarketCondition。
 - 每个执行 Bar 只允许访问 `close_time <= 当前 Bar close_time` 的历史数据。
 - Bar close 产生策略 signal，最早在下一根 execution Bar open 成交，防止同 Bar 未来函数。
 - 当前 Engine 采用**单仓位模式**：同一时刻最多只有一个 `Position`，已有仓位时只评估对应的 `close_long` / `close_short`，不会继续评估新的 `long` / `short` 开仓规则。
 - 因此必须先平仓后才能再次开仓；V3-3 不支持加仓、金字塔、多笔并行持仓、LONG/SHORT 同时持有或持仓中直接反手。
 - 策略平仓信号在 Bar close 产生、下一根 Bar open 平仓；该下一根 Bar 收盘时已为空仓，因此可以产生新的开仓 signal，并最早在再下一根 Bar open 成交。
-- 已有仓位的 TP/SL 可由当前 Bar high/low 触发；同 Bar TP/SL 同时命中时使用保守的 stop-loss first。
-- TP/SL 保护性平仓后的同一 Bar 不重新开仓，最早从后续 Bar 再判断开仓。
+- `StopLossPct` / `TakeProfitPct` 表示**杠杆后的持仓 ROI 触发门槛**，与真实交易/模拟盘的 `nowProfit` 语义一致，不是标的价格直接涨跌百分比。三者统一使用 `ROI = unrealizedPnL / (abs(quantity) * markPrice) * leverage * 100`；手续费和 Funding 不参与这个毛 ROI 触发判断。
+- 对自定义 Strategy Template，ROI 门槛不是独立的‘触线强平单’：ROI 仍处于 `(-StopLossPct, +TakeProfitPct)` 区间时不评估 `close_long` / `close_short`；越过门槛后才评估对应平仓规则，规则为 true 才产生平仓 signal。`0` 与真实交易一致表示门槛基本关闭（内部统一等价 `1,000,000%`）。
+- Backtest 在 execution Bar close 计算 ROI 并评估平仓规则，满足后最早下一根 Bar open 成交；不会用当前 Bar High/Low 模拟线上 2 秒级轮询中的瞬时触发，因此高低点只在 Bar 内短暂越线但收盘恢复时可能与实时执行不同，这是历史回放粒度差异，不是未来函数。
 - 最后一根 Bar 仍有仓位时以 `end_of_data` 确定性平仓。
-- `backtest_major_regime_v1` 仅用于回测历史分组，不冒充线上全市场 Market Regime。
+- Backtest 不使用当前实时 `MarketCondition`。含 `MarketCondition` 的 Strategy Template 会读取 `market_condition_histories` 中在当前 Replay Bar 时刻已经可见的最近一条历史值；历史覆盖不足时拒绝回测并提示先补充历史数据。
 
 ## API / UI
 
 - `GET/POST /agents/backtests`
 - `GET /agents/backtests/:id`
+- `DELETE /agents/backtests/:id`：删除 Run 及其 Trade/Event/Equity；无其它 Run 引用时同时删除轻量 Dataset Manifest，不删除全局历史行情缓存。
+- `POST /agents/backtests/prefetch`：按 Strategy Template + Symbol + 时间范围预取回测需要的目标 Symbol 1m、指标周期 Kline 与 Funding；包含 warmup，不再额外获取 BTC/ETH/SOL/BNB benchmark。
+- `GET /agents/backtests/prefetch/:jobId`：查询预取进度和补齐结果。
+- `POST /agents/backtests/market-condition/backfill`：后台补齐 BTCUSDT/ETHUSDT 从 Binance Futures 各自上线至今的 1h Kline，并按两者 24h 方向/强弱/分化与 1h 波动关系确定性推断逐小时 MarketCondition。
+- `GET /agents/backtests/market-condition/backfill/:jobId`：查询 MarketCondition 补充任务进度；同小时已有历史记录时直接跳过，不覆盖真实记录。
 - `POST /agents/backtests/:id/cancel`
 - `GET /agents/backtests/:id/trades|events|equity`
 - `POST /agents/historical-market/import`：外部 Kline/Funding canonical 导入。
-- Web 新增 AI → 历史回测：创建任务、进度、结果详情、Equity Curve、Trades、Audit Events、分组指标和两次结果简单对比。
+- Web 新增 AI → 历史回测：创建任务、手动“获取历史数据”、进度、结果详情、Equity Curve、Trades、Audit Events、按 Side 分组指标和两次结果简单对比。
 
 ## 验收 Gate
 
-- LONG、SHORT、止盈、止损、无交易固定 Fixture。
+- LONG、SHORT、止盈/止损 ROI Gate、无交易固定 Fixture；必须验证‘越过 ROI 门槛才评估平仓规则、规则 false 不强平、0 表示门槛关闭’。
 - 手续费、Funding、滑点均有单元测试。
 - 明确验证未来 Bar 不可见。
 - 同一输入内存 Dataset/Strategy/Engine 重放必须确定性。
@@ -71,5 +78,5 @@ Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、Execut
 
 - 不做遗传算法/大规模参数优化。
 - 不让 LLM 在回测循环里逐 K 线做决策。
-- 不做 Candidate/Active/Promote 生命周期；留给 V3-4。
+- 不做 Candidate/Active/Promote 生命周期；个人项目采用“新策略新建 Strategy Template”，历史 Run 依靠完整 Snapshot 保持可复现。
 - 不做历史 Kline Revision/Watermark；历史数据采用 latest canonical value。

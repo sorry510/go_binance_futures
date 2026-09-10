@@ -191,17 +191,11 @@ func CheckTestResults(systemConfig *models.Config) {
 	}
 
 	for _, result := range results {
-		coin_profit_float64 := 3.0 // 进入策略前的盈利率限制
-		coin_loss_float64 := 3.0   // 进入策略前的亏损率限制
+		coin_profit_float64, coin_loss_float64 := resolveTradeROIThresholds("0", "0")
 		floatNowPrice := 0.0
 		for _, coin := range allCoins {
 			if coin.Symbol == result.Symbol {
-				if coin.Profit != "0" {
-					coin_profit_float64, _ = strconv.ParseFloat(coin.Profit, 64)
-				}
-				if coin.Loss != "0" {
-					coin_loss_float64, _ = strconv.ParseFloat(coin.Loss, 64)
-				}
+				coin_profit_float64, coin_loss_float64 = resolveTradeROIThresholds(coin.Profit, coin.Loss)
 				floatNowPrice, _ = strconv.ParseFloat(coin.Close, 64)
 				break
 			}
@@ -214,7 +208,7 @@ func CheckTestResults(systemConfig *models.Config) {
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 		enterPrice_float64, _ := strconv.ParseFloat(result.Price, 64)
 		unRealizedProfit := (floatNowPrice - enterPrice_float64) * positionAmtFloat // 未实现盈亏
-		nowProfit := (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
+		nowProfit := utils.FuturesLeveragedROI(unRealizedProfit, positionAmtFloatAbs, floatNowPrice, result.Leverage)
 
 		if nowProfit > -coin_loss_float64 && nowProfit < coin_profit_float64 {
 			continue // 盈亏在约定范围内，就不用进行策略，也不平仓
@@ -238,7 +232,7 @@ func CheckTestResults(systemConfig *models.Config) {
 
 		// 使用策略环境中的最新价格重新计算盈亏。ROI 保留旧的毛收益语义，新增净收益变量向前兼容。
 		unRealizedProfit = (floatNowPrice - enterPrice_float64) * positionAmtFloat
-		nowProfit = (unRealizedProfit / (positionAmtFloatAbs * floatNowPrice)) * float64(result.Leverage) * 100
+		nowProfit = utils.FuturesLeveragedROI(unRealizedProfit, positionAmtFloatAbs, floatNowPrice, result.Leverage)
 		tradeProfit := strategyservice.CalculateTestTradeProfit(
 			enterPrice_float64, floatNowPrice, positionAmtFloat, result.Leverage,
 			result.OpenFeeRate, result.CloseFeeRate,

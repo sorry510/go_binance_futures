@@ -25,6 +25,10 @@ func NewRepository(source Source) *Repository { return &Repository{Source: sourc
 func DefaultRepository() *Repository          { return NewRepository(BinanceSource{}) }
 
 func (repo *Repository) LoadKlines(ctx context.Context, market, symbol, interval string, start, end int64) ([]Kline, error) {
+	return repo.LoadKlinesWithProgress(ctx, market, symbol, interval, start, end, nil)
+}
+
+func (repo *Repository) LoadKlinesWithProgress(ctx context.Context, market, symbol, interval string, start, end int64, progress KlineProgressCallback) ([]Kline, error) {
 	if err := validateRange(market, symbol, start, end); err != nil {
 		return nil, err
 	}
@@ -40,8 +44,33 @@ func (repo *Repository) LoadKlines(ctx context.Context, market, symbol, interval
 		return nil, err
 	}
 	if len(missing) > 0 && repo.Source != nil {
-		for _, gap := range missing {
-			remote, err := repo.Source.Klines(ctx, market, symbol, interval, gap[0], gap[1])
+		totalMissing := 0
+		gapSizes := make([]int, len(missing))
+		for i, gap := range missing {
+			gapSizes[i], _ = expectedKlineCount(interval, gap[0], gap[1])
+			totalMissing += gapSizes[i]
+		}
+		completedBefore := 0
+		if progress != nil {
+			progress(0, totalMissing)
+		}
+		for i, gap := range missing {
+			var remote []Kline
+			var err error
+			if source, ok := repo.Source.(KlineProgressSource); ok {
+				base := completedBefore
+				remote, err = source.KlinesWithProgress(ctx, market, symbol, interval, gap[0], gap[1], func(done, _ int) {
+					if progress == nil {
+						return
+					}
+					if done > gapSizes[i] {
+						done = gapSizes[i]
+					}
+					progress(base+done, totalMissing)
+				})
+			} else {
+				remote, err = repo.Source.Klines(ctx, market, symbol, interval, gap[0], gap[1])
+			}
 			if err != nil {
 				return nil, err
 			}
@@ -49,6 +78,10 @@ func (repo *Repository) LoadKlines(ctx context.Context, market, symbol, interval
 				if _, err := repo.Import(ctx, ImportRequest{Source: SourceBinanceREST, SourceRef: fmt.Sprintf("%s:%s:%d-%d", symbol, interval, gap[0], gap[1]), Klines: remote}); err != nil {
 					return nil, err
 				}
+			}
+			completedBefore += gapSizes[i]
+			if progress != nil {
+				progress(completedBefore, totalMissing)
 			}
 		}
 		rows, err = repo.queryKlines(market, symbol, interval, start, end)
@@ -62,6 +95,9 @@ func (repo *Repository) LoadKlines(ctx context.Context, market, symbol, interval
 	}
 	if len(missing) > 0 {
 		return nil, fmt.Errorf("historical K-line gaps remain for %s %s: %v", symbol, interval, missing)
+	}
+	if progress != nil {
+		progress(1, 1)
 	}
 	return rows, nil
 }
@@ -318,6 +354,30 @@ func missingKlineRanges(interval string, start, end int64, rows []Kline) ([][2]i
 		missing = append(missing, [2]int64{gapStart, close})
 	}
 	return missing, nil
+}
+
+func expectedKlineCount(interval string, start, end int64) (int, error) {
+	first, last, ok, err := expectedKlineBounds(interval, start, end)
+	if err != nil || !ok {
+		return 0, err
+	}
+	if interval != "1M" {
+		duration, err := fixedDuration(interval)
+		if err != nil {
+			return 0, err
+		}
+		return int((last-first)/duration.Milliseconds()) + 1, nil
+	}
+	count := 0
+	for cursor := first; cursor <= last; {
+		count++
+		next := time.UnixMilli(cursor).UTC().AddDate(0, 1, 0).UnixMilli()
+		if next <= cursor {
+			return 0, fmt.Errorf("invalid interval progression %s", interval)
+		}
+		cursor = next
+	}
+	return count, nil
 }
 
 func fundingMissingRanges(start, end int64, rows []FundingRate) [][2]int64 {
