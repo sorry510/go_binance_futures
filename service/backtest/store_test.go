@@ -174,6 +174,40 @@ func TestSameDatasetSpecUsesLatestCanonicalMarketData(t *testing.T) {
 	}
 }
 
+func TestBacktestTradeAndEventPagination(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	run := models.AgentBacktestRun{RunID: "bt_page_fixture", Status: "succeeded", Stage: "completed"}
+	if _, err := o.Insert(&run); err != nil {
+		t.Fatal(err)
+	}
+	for i := 1; i <= 45; i++ {
+		if _, err := o.Insert(&models.AgentBacktestTrade{RunID: run.RunID, Sequence: i, Symbol: "BTCUSDT", Side: "LONG", EntryResolution: "1m", ExitResolution: "1m"}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for i := 1; i <= 120; i++ {
+		if _, err := o.Insert(&models.AgentBacktestEvent{RunID: run.RunID, Sequence: i, Type: "fixture", Action: "event"}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	manager := NewManager(DatasetBuilder{})
+	trades, totalTrades, err := manager.TradesPage(run.RunID, 2, 20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if totalTrades != 45 || len(trades) != 20 || trades[0].Sequence != 21 || trades[19].Sequence != 40 {
+		t.Fatalf("unexpected trade page: total=%d rows=%+v", totalTrades, trades)
+	}
+	events, totalEvents, err := manager.EventsPage(run.RunID, 3, 50)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if totalEvents != 120 || len(events) != 20 || events[0].Sequence != 101 || events[19].Sequence != 120 {
+		t.Fatalf("unexpected event page: total=%d rows=%+v", totalEvents, events)
+	}
+}
+
 func TestManagerDeleteRemovesRunChildrenAndUnusedDataset(t *testing.T) {
 	setupBacktestStoreTest(t)
 	o := orm.NewOrm()
@@ -358,4 +392,54 @@ func TestBacktestUsingMarketConditionRunsWhenHistoryIsAvailable(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	t.Fatal("backtest with MarketCondition history did not finish")
+}
+
+func TestManagerPersistsAdaptiveResolutionMetadataWithoutChangingV6Execution(t *testing.T) {
+	setupBacktestStoreTest(t)
+	template := models.StrategyTemplates{Name: "adaptive-fixture", Technology: "{}", Strategy: `[{"name":"open","enable":true,"code":"NowPrice > 0","type":"long"}]`, CreateTime: time.Now().UnixMilli(), UpdateTime: time.Now().UnixMilli()}
+	if _, err := orm.NewOrm().Insert(&template); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Date(2026, 1, 3, 0, 0, 0, 0, time.UTC)
+	manager := NewManager(DatasetBuilder{Repository: historicalmarket.NewRepository(fixtureHistorySource{}), WarmupBars: 20})
+	run, err := manager.Start(StartRequest{StrategyTemplateID: template.ID, ResolutionMode: ResolutionModeAdaptive, Symbol: "BTCUSDT", StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), Config: zeroCosts()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		detail, err := manager.Get(run.RunID)
+		if err == nil && detail.Status == "succeeded" {
+			if detail.ResolutionMode != ResolutionModeAdaptive || detail.ResolutionModel != AdaptiveResolutionModel || detail.EngineVersion != AdaptiveEngineVersion {
+				t.Fatalf("adaptive metadata was not persisted: %+v", detail.RunSummary)
+			}
+			if detail.ResolutionStats != (ResolutionStats{}) {
+				t.Fatalf("no-ambiguity adaptive run unexpectedly drilled down: %+v", detail.ResolutionStats)
+			}
+			trades, err := manager.Trades(run.RunID, 100)
+			if err != nil || len(trades) == 0 {
+				t.Fatalf("adaptive trades missing: %+v err=%v", trades, err)
+			}
+			for _, trade := range trades {
+				if trade.EntryResolution != "1m" || trade.ExitResolution != "1m" {
+					t.Fatalf("V3-4A no-ambiguity trade must remain 1m: %+v", trade)
+				}
+			}
+			return
+		}
+		if err == nil && detail.Status == "failed" {
+			t.Fatalf("adaptive backtest failed: %+v", detail)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatal("adaptive backtest did not finish")
+}
+
+func TestManagerRejectsUnsupportedResolutionMode(t *testing.T) {
+	setupBacktestStoreTest(t)
+	manager := NewManager(DatasetBuilder{})
+	_, err := manager.Start(StartRequest{StrategyTemplateID: 1, ResolutionMode: "tick_everything", Symbol: "BTCUSDT", StartTime: 1, EndTime: 2})
+	if err == nil || !strings.Contains(err.Error(), "unsupported resolution_mode") {
+		t.Fatalf("unsupported resolution mode must fail closed, got %v", err)
+	}
 }

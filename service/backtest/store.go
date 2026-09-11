@@ -43,7 +43,7 @@ func DefaultManager() *Manager {
 }
 func NewManager(builder DatasetBuilder) *Manager {
 	return &Manager{
-		builder: builder, engine: Engine{}, cancel: map[string]context.CancelFunc{},
+		builder: builder, engine: Engine{ResolutionProviderFactory: historicalmarket.DefaultAdaptiveResolutionProvider}, cancel: map[string]context.CancelFunc{},
 		prefetchJobs: map[string]PrefetchSummary{}, marketConditionJobs: map[string]MarketConditionBackfillSummary{},
 		marketConditionEarliest: historicalmarket.BinanceSource{},
 	}
@@ -52,6 +52,12 @@ func NewManager(builder DatasetBuilder) *Manager {
 func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	request.Symbol = strings.ToUpper(strings.TrimSpace(request.Symbol))
 	request.Config = NormalizeRunConfig(request.Config)
+	resolutionMode, err := NormalizeResolutionMode(request.ResolutionMode)
+	if err != nil {
+		return RunSummary{}, err
+	}
+	request.ResolutionMode = resolutionMode
+	engineVersion, resolutionModel := ResolutionMetadata(resolutionMode)
 	if request.StrategyTemplateID <= 0 {
 		return RunSummary{}, fmt.Errorf("strategy_template_id is required")
 	}
@@ -74,7 +80,7 @@ func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	strategyVersion := strategyservice.StrategySnapshotHash(template.Technology, template.Strategy)
 	now := time.Now().UnixMilli()
 	runID := newRunID()
-	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: EngineVersion, MarketConditionModel: MarketConditionModel, Symbol: request.Symbol, ExecutionInterval: ReplayInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
+	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: engineVersion, MarketConditionModel: MarketConditionModel, ResolutionMode: resolutionMode, ResolutionModel: resolutionModel, Symbol: request.Symbol, ExecutionInterval: ReplayInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
 	if _, err := o.Insert(&row); err != nil {
 		return RunSummary{}, fmt.Errorf("create backtest run: %w", err)
 	}
@@ -122,7 +128,7 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		manager.finishError(row.RunID, ctx, err)
 		return
 	}
-	result, err := manager.engine.RunWithProgress(ctx, dataset, StrategySnapshot{TemplateID: row.StrategyTemplateID, TemplateName: row.StrategyTemplateName, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON, Version: row.StrategyVersion}, request.Config, func(completed, total int) {
+	result, err := manager.engine.RunWithResolution(ctx, dataset, StrategySnapshot{TemplateID: row.StrategyTemplateID, TemplateName: row.StrategyTemplateName, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON, Version: row.StrategyVersion}, request.Config, row.ResolutionMode, func(completed, total int) {
 		reportProgress("running_backtest", 35, 55, completed, total)
 	})
 	if err != nil {
@@ -142,8 +148,9 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		return
 	}
 	metrics, _ := json.Marshal(result.Metrics)
+	resolutionStats, _ := json.Marshal(result.ResolutionStats)
 	now := time.Now().UnixMilli()
-	_, err = orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", row.RunID).Update(orm.Params{"status": "succeeded", "stage": "completed", "progress": 100, "metrics_json": string(metrics), "updated_at": now, "completed_at": now})
+	_, err = orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", row.RunID).Update(orm.Params{"status": "succeeded", "stage": "completed", "progress": 100, "data_hash": result.DataHash, "engine_version": result.EngineVersion, "resolution_mode": result.ResolutionMode, "resolution_model": result.ResolutionModel, "resolution_stats_json": string(resolutionStats), "metrics_json": string(metrics), "updated_at": now, "completed_at": now})
 	if err != nil {
 		manager.finishError(row.RunID, ctx, err)
 	}
@@ -316,32 +323,62 @@ func (manager *Manager) Get(runID string) (RunDetail, error) {
 	return detail, nil
 }
 func (manager *Manager) Trades(runID string, limit int) ([]Trade, error) {
-	if limit <= 0 || limit > 5000 {
-		limit = 5000
+	items, _, err := manager.TradesPage(runID, 1, limit)
+	return items, err
+}
+
+func (manager *Manager) TradesPage(runID string, page, limit int) ([]Trade, int64, error) {
+	page, limit = normalizePage(page, limit, 20, 5000)
+	query := orm.NewOrm().QueryTable(new(models.AgentBacktestTrade)).Filter("run_id", runID)
+	total, err := query.Count()
+	if err != nil {
+		return nil, 0, err
 	}
 	var rows []models.AgentBacktestTrade
-	if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestTrade)).Filter("run_id", runID).OrderBy("sequence").Limit(limit).All(&rows); err != nil {
-		return nil, err
+	if _, err := query.OrderBy("sequence").Limit(limit, (page-1)*limit).All(&rows); err != nil {
+		return nil, 0, err
 	}
 	out := make([]Trade, 0, len(rows))
 	for _, r := range rows {
-		out = append(out, Trade{Sequence: r.Sequence, Symbol: r.Symbol, Side: r.Side, EntryTime: r.EntryTime, ExitTime: r.ExitTime, EntryPrice: r.EntryPrice, ExitPrice: r.ExitPrice, Quantity: r.Quantity, GrossPnL: r.GrossPnL, Fees: r.Fees, FundingPnL: r.FundingPnL, NetPnL: r.NetPnL, HoldingMs: r.HoldingMs, ExitReason: r.ExitReason, OpenStrategyName: r.OpenStrategyName, OpenStrategyType: r.OpenStrategyType, OpenStrategyHash: r.OpenStrategyHash, CloseStrategyName: r.CloseStrategyName, CloseStrategyType: r.CloseStrategyType, CloseStrategyHash: r.CloseStrategyHash, MarketCondition: r.MarketCondition})
+		out = append(out, Trade{Sequence: r.Sequence, Symbol: r.Symbol, Side: r.Side, EntryTime: r.EntryTime, ExitTime: r.ExitTime, EntryPrice: r.EntryPrice, ExitPrice: r.ExitPrice, Quantity: r.Quantity, GrossPnL: r.GrossPnL, Fees: r.Fees, FundingPnL: r.FundingPnL, NetPnL: r.NetPnL, HoldingMs: r.HoldingMs, ExitReason: r.ExitReason, OpenStrategyName: r.OpenStrategyName, OpenStrategyType: r.OpenStrategyType, OpenStrategyHash: r.OpenStrategyHash, CloseStrategyName: r.CloseStrategyName, CloseStrategyType: r.CloseStrategyType, CloseStrategyHash: r.CloseStrategyHash, MarketCondition: r.MarketCondition, EntryResolution: r.EntryResolution, ExitResolution: r.ExitResolution})
 	}
-	return out, nil
+	return out, total, nil
 }
+
 func (manager *Manager) Events(runID string, limit int) ([]AuditEvent, error) {
-	if limit <= 0 || limit > 10000 {
-		limit = 10000
+	items, _, err := manager.EventsPage(runID, 1, limit)
+	return items, err
+}
+
+func (manager *Manager) EventsPage(runID string, page, limit int) ([]AuditEvent, int64, error) {
+	page, limit = normalizePage(page, limit, 50, 10000)
+	query := orm.NewOrm().QueryTable(new(models.AgentBacktestEvent)).Filter("run_id", runID)
+	total, err := query.Count()
+	if err != nil {
+		return nil, 0, err
 	}
 	var rows []models.AgentBacktestEvent
-	if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestEvent)).Filter("run_id", runID).OrderBy("sequence").Limit(limit).All(&rows); err != nil {
-		return nil, err
+	if _, err := query.OrderBy("sequence").Limit(limit, (page-1)*limit).All(&rows); err != nil {
+		return nil, 0, err
 	}
 	out := make([]AuditEvent, 0, len(rows))
 	for _, r := range rows {
 		out = append(out, AuditEvent{Sequence: r.Sequence, EventTime: r.EventTime, Type: r.Type, Action: r.Action, Side: r.Side, Price: r.Price, Quantity: r.Quantity, Data: json.RawMessage(r.DataJSON)})
 	}
-	return out, nil
+	return out, total, nil
+}
+
+func normalizePage(page, limit, defaultLimit, maxLimit int) (int, int) {
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = defaultLimit
+	}
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+	return page, limit
 }
 func (manager *Manager) Equity(runID string, limit int) ([]EquityPoint, error) {
 	if limit <= 0 || limit > 20000 {
@@ -415,7 +452,7 @@ func saveResultWithProgress(ctx context.Context, runID string, result Result, pr
 	report()
 	tradeRows := make([]models.AgentBacktestTrade, 0, len(result.Trades))
 	for _, t := range result.Trades {
-		tradeRows = append(tradeRows, models.AgentBacktestTrade{RunID: runID, Sequence: t.Sequence, Symbol: t.Symbol, Side: t.Side, EntryTime: t.EntryTime, ExitTime: t.ExitTime, EntryPrice: t.EntryPrice, ExitPrice: t.ExitPrice, Quantity: t.Quantity, GrossPnL: t.GrossPnL, Fees: t.Fees, FundingPnL: t.FundingPnL, NetPnL: t.NetPnL, HoldingMs: t.HoldingMs, ExitReason: t.ExitReason, OpenStrategyName: t.OpenStrategyName, OpenStrategyType: t.OpenStrategyType, OpenStrategyHash: t.OpenStrategyHash, CloseStrategyName: t.CloseStrategyName, CloseStrategyType: t.CloseStrategyType, CloseStrategyHash: t.CloseStrategyHash, MarketCondition: t.MarketCondition})
+		tradeRows = append(tradeRows, models.AgentBacktestTrade{RunID: runID, Sequence: t.Sequence, Symbol: t.Symbol, Side: t.Side, EntryTime: t.EntryTime, ExitTime: t.ExitTime, EntryPrice: t.EntryPrice, ExitPrice: t.ExitPrice, Quantity: t.Quantity, GrossPnL: t.GrossPnL, Fees: t.Fees, FundingPnL: t.FundingPnL, NetPnL: t.NetPnL, HoldingMs: t.HoldingMs, ExitReason: t.ExitReason, OpenStrategyName: t.OpenStrategyName, OpenStrategyType: t.OpenStrategyType, OpenStrategyHash: t.OpenStrategyHash, CloseStrategyName: t.CloseStrategyName, CloseStrategyType: t.CloseStrategyType, CloseStrategyHash: t.CloseStrategyHash, MarketCondition: t.MarketCondition, EntryResolution: t.EntryResolution, ExitResolution: t.ExitResolution})
 	}
 	if len(tradeRows) > 0 {
 		if _, err := o.InsertMulti(500, &tradeRows); err != nil {
@@ -469,7 +506,19 @@ func summaryFromRow(row models.AgentBacktestRun) RunSummary {
 			metrics = &m
 		}
 	}
-	return RunSummary{RunID: row.RunID, DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, DataHash: row.DataHash, StrategyTemplateID: row.StrategyTemplateID, StrategyTemplateName: row.StrategyTemplateName, StrategyVersion: row.StrategyVersion, EngineVersion: row.EngineVersion, MarketConditionModel: row.MarketConditionModel, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, Config: RunConfig{InitialEquity: row.InitialEquity, PositionSizePct: row.PositionSizePct, Leverage: row.Leverage, FeeRate: row.FeeRate, SlippageBps: row.SlippageBps, StopLossPct: row.StopLossPct, TakeProfitPct: row.TakeProfitPct}, Status: row.Status, Stage: row.Stage, Progress: row.Progress, Metrics: metrics, Error: row.Error, CreatedAt: row.CreatedAt, StartedAt: row.StartedAt, UpdatedAt: row.UpdatedAt, CompletedAt: row.CompletedAt}
+	var resolutionStats ResolutionStats
+	if strings.TrimSpace(row.ResolutionStatsJSON) != "" {
+		_ = json.Unmarshal([]byte(row.ResolutionStatsJSON), &resolutionStats)
+	}
+	mode := row.ResolutionMode
+	if mode == "" {
+		mode = ResolutionModeStandard
+	}
+	model := row.ResolutionModel
+	if model == "" {
+		model = StandardResolutionModel
+	}
+	return RunSummary{RunID: row.RunID, DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, DataHash: row.DataHash, StrategyTemplateID: row.StrategyTemplateID, StrategyTemplateName: row.StrategyTemplateName, StrategyVersion: row.StrategyVersion, EngineVersion: row.EngineVersion, MarketConditionModel: row.MarketConditionModel, ResolutionMode: mode, ResolutionModel: model, ResolutionStats: resolutionStats, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, Config: RunConfig{InitialEquity: row.InitialEquity, PositionSizePct: row.PositionSizePct, Leverage: row.Leverage, FeeRate: row.FeeRate, SlippageBps: row.SlippageBps, StopLossPct: row.StopLossPct, TakeProfitPct: row.TakeProfitPct}, Status: row.Status, Stage: row.Stage, Progress: row.Progress, Metrics: metrics, Error: row.Error, CreatedAt: row.CreatedAt, StartedAt: row.StartedAt, UpdatedAt: row.UpdatedAt, CompletedAt: row.CompletedAt}
 }
 func newRunID() string {
 	b := make([]byte, 16)
