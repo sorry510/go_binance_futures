@@ -2,14 +2,22 @@ package backtest
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 )
 
 const (
-	EngineVersion        = "backtest_engine_v6"
-	MarketConditionModel = "historical_market_condition_v1"
-	DefaultWarmupBars    = 200
-	ReplayInterval       = "1m"
+	StandardEngineVersion   = "backtest_engine_v6"
+	AdaptiveEngineVersion   = "backtest_engine_v8"
+	EngineVersion           = StandardEngineVersion
+	MarketConditionModel    = "historical_market_condition_v1"
+	ResolutionModeStandard  = "standard_1m"
+	ResolutionModeAdaptive  = "adaptive"
+	StandardResolutionModel = "standard_1m_v1"
+	AdaptiveResolutionModel = "adaptive_intrabar_v2"
+	DefaultWarmupBars       = 200
+	ReplayInterval          = "1m"
 )
 
 type Bar struct {
@@ -96,6 +104,7 @@ type RunConfig struct {
 
 type StartRequest struct {
 	StrategyTemplateID int64     `json:"strategy_template_id"`
+	ResolutionMode     string    `json:"resolution_mode,omitempty"`
 	Symbol             string    `json:"symbol"`
 	StartTime          int64     `json:"start_time"`
 	EndTime            int64     `json:"end_time"`
@@ -148,6 +157,8 @@ type Trade struct {
 	CloseStrategyType string  `json:"close_strategy_type,omitempty"`
 	CloseStrategyHash string  `json:"close_strategy_hash,omitempty"`
 	MarketCondition   int     `json:"market_condition"`
+	EntryResolution   string  `json:"entry_resolution,omitempty"`
+	ExitResolution    string  `json:"exit_resolution,omitempty"`
 }
 
 type AuditEvent struct {
@@ -197,43 +208,60 @@ type Metrics struct {
 	BySide           []GroupMetrics `json:"by_side"`
 }
 
+type ResolutionStats struct {
+	SecondDrilldownMinutes int   `json:"second_drilldown_minutes"`
+	TradeDrilldownSeconds  int   `json:"trade_drilldown_seconds"`
+	SecondCacheHits        int   `json:"second_cache_hits"`
+	TradeCacheHits         int   `json:"trade_cache_hits"`
+	ArchiveCacheHits       int   `json:"archive_cache_hits"`
+	ArchiveDownloads       int   `json:"archive_downloads"`
+	DownloadBytes          int64 `json:"download_bytes"`
+	Unresolved             int   `json:"unresolved"`
+}
+
 type Result struct {
-	DatasetID            string        `json:"dataset_id"`
-	DatasetSpecHash      string        `json:"dataset_spec_hash"`
-	DataHash             string        `json:"data_hash"`
-	StrategyVersion      string        `json:"strategy_version"`
-	EngineVersion        string        `json:"engine_version"`
-	MarketConditionModel string        `json:"market_condition_model"`
-	Metrics              Metrics       `json:"metrics"`
-	Trades               []Trade       `json:"trades"`
-	Events               []AuditEvent  `json:"events"`
-	Equity               []EquityPoint `json:"equity"`
+	DatasetID            string          `json:"dataset_id"`
+	DatasetSpecHash      string          `json:"dataset_spec_hash"`
+	DataHash             string          `json:"data_hash"`
+	StrategyVersion      string          `json:"strategy_version"`
+	EngineVersion        string          `json:"engine_version"`
+	MarketConditionModel string          `json:"market_condition_model"`
+	ResolutionMode       string          `json:"resolution_mode"`
+	ResolutionModel      string          `json:"resolution_model"`
+	ResolutionStats      ResolutionStats `json:"resolution_stats"`
+	Metrics              Metrics         `json:"metrics"`
+	Trades               []Trade         `json:"trades"`
+	Events               []AuditEvent    `json:"events"`
+	Equity               []EquityPoint   `json:"equity"`
 }
 
 type RunSummary struct {
-	RunID                string    `json:"run_id"`
-	DatasetID            string    `json:"dataset_id"`
-	DatasetSpecHash      string    `json:"dataset_spec_hash"`
-	DataHash             string    `json:"data_hash"`
-	StrategyTemplateID   int64     `json:"strategy_template_id"`
-	StrategyTemplateName string    `json:"strategy_template_name"`
-	StrategyVersion      string    `json:"strategy_version"`
-	EngineVersion        string    `json:"engine_version"`
-	MarketConditionModel string    `json:"market_condition_model"`
-	Symbol               string    `json:"symbol"`
-	ExecutionInterval    string    `json:"execution_interval"`
-	StartTime            int64     `json:"start_time"`
-	EndTime              int64     `json:"end_time"`
-	Config               RunConfig `json:"config"`
-	Status               string    `json:"status"`
-	Stage                string    `json:"stage"`
-	Progress             int       `json:"progress"`
-	Metrics              *Metrics  `json:"metrics,omitempty"`
-	Error                string    `json:"error,omitempty"`
-	CreatedAt            int64     `json:"created_at"`
-	StartedAt            int64     `json:"started_at,omitempty"`
-	UpdatedAt            int64     `json:"updated_at"`
-	CompletedAt          int64     `json:"completed_at,omitempty"`
+	RunID                string          `json:"run_id"`
+	DatasetID            string          `json:"dataset_id"`
+	DatasetSpecHash      string          `json:"dataset_spec_hash"`
+	DataHash             string          `json:"data_hash"`
+	StrategyTemplateID   int64           `json:"strategy_template_id"`
+	StrategyTemplateName string          `json:"strategy_template_name"`
+	StrategyVersion      string          `json:"strategy_version"`
+	EngineVersion        string          `json:"engine_version"`
+	MarketConditionModel string          `json:"market_condition_model"`
+	ResolutionMode       string          `json:"resolution_mode"`
+	ResolutionModel      string          `json:"resolution_model"`
+	ResolutionStats      ResolutionStats `json:"resolution_stats"`
+	Symbol               string          `json:"symbol"`
+	ExecutionInterval    string          `json:"execution_interval"`
+	StartTime            int64           `json:"start_time"`
+	EndTime              int64           `json:"end_time"`
+	Config               RunConfig       `json:"config"`
+	Status               string          `json:"status"`
+	Stage                string          `json:"stage"`
+	Progress             int             `json:"progress"`
+	Metrics              *Metrics        `json:"metrics,omitempty"`
+	Error                string          `json:"error,omitempty"`
+	CreatedAt            int64           `json:"created_at"`
+	StartedAt            int64           `json:"started_at,omitempty"`
+	UpdatedAt            int64           `json:"updated_at"`
+	CompletedAt          int64           `json:"completed_at,omitempty"`
 }
 
 type RunDetail struct {
@@ -255,6 +283,26 @@ type DatasetManifest struct {
 	EndTime           int64    `json:"end_time"`
 	WarmupStartTime   int64    `json:"warmup_start_time"`
 	CreatedAt         int64    `json:"created_at"`
+}
+
+func NormalizeResolutionMode(value string) (string, error) {
+	value = strings.ToLower(strings.TrimSpace(value))
+	if value == "" {
+		return ResolutionModeStandard, nil
+	}
+	switch value {
+	case ResolutionModeStandard, ResolutionModeAdaptive:
+		return value, nil
+	default:
+		return "", fmt.Errorf("unsupported resolution_mode %q", value)
+	}
+}
+
+func ResolutionMetadata(mode string) (engineVersion, model string) {
+	if mode == ResolutionModeAdaptive {
+		return AdaptiveEngineVersion, AdaptiveResolutionModel
+	}
+	return StandardEngineVersion, StandardResolutionModel
 }
 
 func DefaultRunConfig() RunConfig {

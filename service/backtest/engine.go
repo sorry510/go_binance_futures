@@ -16,13 +16,24 @@ import (
 	"github.com/expr-lang/expr/vm"
 )
 
-type Engine struct{}
+type Engine struct {
+	ResolutionProviderFactory ResolutionProviderFactory
+}
 
 func (engine Engine) Run(ctx context.Context, dataset Dataset, strategy StrategySnapshot, config RunConfig) (Result, error) {
 	return engine.RunWithProgress(ctx, dataset, strategy, config, nil)
 }
 
-func (Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy StrategySnapshot, config RunConfig, progress ProgressCallback) (Result, error) {
+func (engine Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy StrategySnapshot, config RunConfig, progress ProgressCallback) (Result, error) {
+	return engine.RunWithResolution(ctx, dataset, strategy, config, ResolutionModeStandard, progress)
+}
+
+func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, strategy StrategySnapshot, config RunConfig, resolutionMode string, progress ProgressCallback) (Result, error) {
+	mode, err := NormalizeResolutionMode(resolutionMode)
+	if err != nil {
+		return Result{}, err
+	}
+	engineVersion, resolutionModel := ResolutionMetadata(mode)
 	if err := ctx.Err(); err != nil {
 		return Result{}, err
 	}
@@ -57,7 +68,9 @@ func (Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy Str
 	if progress != nil {
 		progress(0, len(bars))
 	}
-	result := Result{DatasetID: dataset.DatasetID, DatasetSpecHash: dataset.DatasetSpecHash, DataHash: dataset.DataHash, StrategyVersion: strategy.Version, EngineVersion: EngineVersion, MarketConditionModel: MarketConditionModel, Trades: []Trade{}, Events: []AuditEvent{}, Equity: []EquityPoint{}}
+	result := Result{DatasetID: dataset.DatasetID, DatasetSpecHash: dataset.DatasetSpecHash, DataHash: dataset.DataHash, StrategyVersion: strategy.Version, EngineVersion: engineVersion, MarketConditionModel: MarketConditionModel, ResolutionMode: mode, ResolutionModel: resolutionModel, Trades: []Trade{}, Events: []AuditEvent{}, Equity: []EquityPoint{}}
+	adaptiveState := adaptiveRunState{factory: engine.ResolutionProviderFactory}
+	defer adaptiveState.close()
 	cash := config.InitialEquity
 	peak := cash
 	var position *Position
@@ -70,6 +83,27 @@ func (Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy Str
 		eventSeq++
 		raw, _ := json.Marshal(data)
 		result.Events = append(result.Events, AuditEvent{Sequence: eventSeq, EventTime: at, Type: typ, Action: action, Side: side, Price: price, Quantity: qty, Data: raw})
+	}
+	advanceFunding := func(until int64, fallbackMark float64) {
+		for fundingIndex < len(dataset.Funding) && dataset.Funding[fundingIndex].FundingTime <= until {
+			fund := dataset.Funding[fundingIndex]
+			fundingIndex++
+			if position == nil || fund.FundingTime < position.EntryTime {
+				continue
+			}
+			mark := fund.MarkPrice
+			if mark <= 0 {
+				mark = fallbackMark
+			}
+			notional := math.Abs(position.Quantity) * mark
+			payment := -notional * fund.FundingRate
+			if position.Side == "SHORT" {
+				payment = -payment
+			}
+			position.FundingPnL += payment
+			cash += payment
+			addEvent(fund.FundingTime, "position", "funding", position.Side, mark, position.Quantity, map[string]any{"funding_rate": fund.FundingRate, "funding_pnl": payment})
+		}
 	}
 	for index, bar := range bars {
 		if err := ctx.Err(); err != nil {
@@ -104,25 +138,29 @@ func (Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy Str
 				position = nil
 			}
 		}
-		for fundingIndex < len(dataset.Funding) && dataset.Funding[fundingIndex].FundingTime <= bar.CloseTime {
-			fund := dataset.Funding[fundingIndex]
-			fundingIndex++
-			if position == nil || fund.FundingTime < position.EntryTime {
-				continue
+		if mode == ResolutionModeAdaptive && position != nil {
+			decision, adaptiveErr := adaptiveState.evaluateROIClose(ctx, dataset, environment, bar, position, cash, config, rules, compiled, advanceFunding)
+			if adaptiveErr != nil {
+				return Result{}, adaptiveErr
 			}
-			mark := fund.MarkPrice
-			if mark <= 0 {
-				mark = bar.Close
+			if decision.Resolved && position != nil {
+				action := adaptiveCloseAction(decision, position.Side)
+				addEvent(decision.SignalTime, "intrabar_resolution", "close_gate", position.Side, decision.Price, position.Quantity, map[string]any{
+					"resolution": decision.Resolution, "roi": decision.ROI, "gate_reason": decision.Reason,
+					"evidence": decision.Evidence,
+				})
+				addEvent(decision.SignalTime, "signal", decision.Rule.Type, position.Side, decision.Price, position.Quantity, map[string]any{"strategy_name": decision.Rule.Name, "roi": decision.ROI, "gate_reason": decision.Reason, "resolution": decision.Resolution})
+				trade, newCash := closePosition(*position, dataset.Symbol, decision.SignalTime, decision.Price, decision.Reason, action, config, cash, len(result.Trades)+1)
+				trade.ExitResolution = decision.Resolution
+				cash = newCash
+				result.Trades = append(result.Trades, trade)
+				addEvent(decision.SignalTime, "order", "close", trade.Side, trade.ExitPrice, trade.Quantity, action)
+				addEvent(decision.SignalTime, "fill", "close", trade.Side, trade.ExitPrice, trade.Quantity, map[string]any{"resolution": decision.Resolution})
+				addEvent(decision.SignalTime, "position", "closed", trade.Side, trade.ExitPrice, trade.Quantity, map[string]any{"net_pnl": trade.NetPnL, "resolution": decision.Resolution})
+				position = nil
 			}
-			notional := math.Abs(position.Quantity) * mark
-			payment := -notional * fund.FundingRate
-			if position.Side == "SHORT" {
-				payment = -payment
-			}
-			position.FundingPnL += payment
-			cash += payment
-			addEvent(fund.FundingTime, "position", "funding", position.Side, mark, position.Quantity, map[string]any{"funding_rate": fund.FundingRate, "funding_pnl": payment})
 		}
+		advanceFunding(bar.CloseTime, bar.Close)
 		env, condition, envErr := environment.Build(bar.CloseTime, position, cash, config)
 		if envErr == nil {
 			if position != nil {
@@ -198,6 +236,9 @@ func (Engine) RunWithProgress(ctx context.Context, dataset Dataset, strategy Str
 	}
 	interval, _ := intervalDuration(dataset.ExecutionInterval, timeForMillis(dataset.StartTime))
 	result.Metrics = calculateMetrics(result.Trades, result.Equity, config.InitialEquity, interval)
+	if mode == ResolutionModeAdaptive {
+		adaptiveState.finalize(&result)
+	}
 	return result, nil
 }
 
@@ -275,7 +316,7 @@ func closePositionAtFill(position Position, symbol string, at int64, fill float6
 	cash += gross - closeFee
 	fees := position.OpenFee + closeFee
 	net := gross - fees + position.FundingPnL
-	trade := Trade{Sequence: sequence, Symbol: symbol, Side: position.Side, EntryTime: position.EntryTime, ExitTime: at, EntryPrice: position.EntryPrice, ExitPrice: fill, Quantity: math.Abs(position.Quantity), GrossPnL: gross, Fees: fees, FundingPnL: position.FundingPnL, NetPnL: net, HoldingMs: at - position.EntryTime, ExitReason: reason, OpenStrategyName: position.OpenStrategyName, OpenStrategyType: position.OpenStrategyType, OpenStrategyHash: position.OpenStrategyHash, CloseStrategyName: action.StrategyName, CloseStrategyType: action.StrategyType, CloseStrategyHash: action.StrategyHash, MarketCondition: position.MarketCondition}
+	trade := Trade{Sequence: sequence, Symbol: symbol, Side: position.Side, EntryTime: position.EntryTime, ExitTime: at, EntryPrice: position.EntryPrice, ExitPrice: fill, Quantity: math.Abs(position.Quantity), GrossPnL: gross, Fees: fees, FundingPnL: position.FundingPnL, NetPnL: net, HoldingMs: at - position.EntryTime, ExitReason: reason, OpenStrategyName: position.OpenStrategyName, OpenStrategyType: position.OpenStrategyType, OpenStrategyHash: position.OpenStrategyHash, CloseStrategyName: action.StrategyName, CloseStrategyType: action.StrategyType, CloseStrategyHash: action.StrategyHash, MarketCondition: position.MarketCondition, EntryResolution: "1m", ExitResolution: "1m"}
 	return trade, cash
 }
 func timeForMillis(value int64) time.Time { return time.UnixMilli(value).UTC() }

@@ -46,7 +46,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.AgentTradeAudit),
 		new(models.LLMConfig),
 		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus), new(models.MarketConditionHistory),
-		new(models.MarketDataImportBatch), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate),
+		new(models.MarketDataImportBatch), new(models.MarketKline1s), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate), new(models.MarketTrade),
 		new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint),
 	)
 
@@ -225,6 +225,36 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	}
 	if err := SyncDatabase(10); err != nil {
 		t.Fatalf("second version-10 sync should be idempotent: %v", err)
+	}
+	if err := SyncDatabase(11); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 11 {
+		t.Fatalf("expected database version 11 after V3-4 sparse history schema sync, config=%+v err=%v", config, err)
+	}
+	for _, table := range []string{"market_klines_1s", "market_trades"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected %s after version 11 sync, count=%d err=%v", table, count, err)
+		}
+	}
+	if !sqliteHasIndexColumns(t, o, "market_trades", []string{"market", "symbol", "trade_time"}) {
+		t.Fatal("expected market_trades(market,symbol,trade_time) index after version 11 sync")
+	}
+	for table, columns := range map[string][]string{
+		"agent_backtest_runs":   {"resolution_mode", "resolution_model", "resolution_stats_json"},
+		"agent_backtest_trades": {"entry_resolution", "exit_resolution"},
+	} {
+		for _, column := range columns {
+			var count int
+			if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info(?) WHERE name=?", table, column).QueryRow(&count); err != nil || count != 1 {
+				t.Fatalf("expected %s.%s after version 11 sync, count=%d err=%v", table, column, count, err)
+			}
+		}
+	}
+	if err := SyncDatabase(11); err != nil {
+		t.Fatalf("second version-11 sync should be idempotent: %v", err)
 	}
 }
 

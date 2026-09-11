@@ -38,6 +38,7 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 | [V3-1](./01-phase-v3-1-multi-agent.md) | ✅ | Multi-Agent Team：Technical / Flow / News / Supervisor 协作 |
 | [V3-2](./02-phase-v3-2-market-intelligence.md) | ✅ | Market Intelligence：统一 Event/Fact、公告/新闻/资金面来源 |
 | [V3-3](./03-phase-v3-3-backtest.md) | ✅ | Historical Market Repository + 确定性历史回测 |
+| [V3-4](./04-phase-v3-4-adaptive-resolution-backtest.md) | ✅ | Adaptive Resolution Backtest：1m 主回放，ROI/价格路径候选时按需下钻 1s，必要时继续下钻 trades |
 
 > 原 V3-4 Strategy Lab 仍保持取消；编号 V3-4 现重新用于 Backtest 精度增强，不恢复 Strategy Lab。
 
@@ -45,7 +46,6 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
-| [V3-4](./04-phase-v3-4-adaptive-resolution-backtest.md) | P0 | Adaptive Resolution Backtest：1m 主回放，发生路径歧义时按需下钻 1s，极少数同秒冲突再下钻 trades |
 | [V3-5](./05-phase-v3-5-trade-safety.md) | P0 | 真实交易安全：先统一仓位/订单 Ownership，确保“谁创建、谁管理”，再补 Agent Stop、整仓平仓与重启恢复 |
 | [V3-6](./06-phase-v3-6-opportunity-watch.md) | P1 | Opportunity Watch：自动发现和分析机会，但真实执行继续由用户确认 |
 | [V3-7](./07-phase-v3-7-outcome-review.md) | P1 | 交易复盘与策略比较：统一查看 Backtest、模拟盘和真实交易表现 |
@@ -84,7 +84,7 @@ V3-7 Outcome Review
 ```text
 V3-3 Historical Backtest ✅
         ↓
-V3-4 Adaptive Resolution Backtest
+V3-4 Adaptive Resolution Backtest ✅
         ↓
 V3-5 Trade Ownership & Safety
         ↓

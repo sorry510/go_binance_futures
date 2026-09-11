@@ -26,6 +26,7 @@ type MarketKline1m struct {
 func (*MarketKline1m) TableName() string       { return "market_klines_1m" }
 func (*MarketKline1m) TableUnique() [][]string { return [][]string{{"Market", "Symbol", "OpenTime"}} }
 
+type MarketKline1s MarketKline1m
 type MarketKline3m MarketKline1m
 type MarketKline5m MarketKline1m
 type MarketKline15m MarketKline1m
@@ -41,6 +42,7 @@ type MarketKline3d MarketKline1m
 type MarketKline1w MarketKline1m
 type MarketKline1mo MarketKline1m
 
+func (*MarketKline1s) TableName() string  { return "market_klines_1s" }
 func (*MarketKline3m) TableName() string  { return "market_klines_3m" }
 func (*MarketKline5m) TableName() string  { return "market_klines_5m" }
 func (*MarketKline15m) TableName() string { return "market_klines_15m" }
@@ -56,6 +58,7 @@ func (*MarketKline3d) TableName() string  { return "market_klines_3d" }
 func (*MarketKline1w) TableName() string  { return "market_klines_1w" }
 func (*MarketKline1mo) TableName() string { return "market_klines_1mo" }
 
+func (*MarketKline1s) TableUnique() [][]string  { return marketKlineUnique() }
 func (*MarketKline3m) TableUnique() [][]string  { return marketKlineUnique() }
 func (*MarketKline5m) TableUnique() [][]string  { return marketKlineUnique() }
 func (*MarketKline15m) TableUnique() [][]string { return marketKlineUnique() }
@@ -71,6 +74,33 @@ func (*MarketKline3d) TableUnique() [][]string  { return marketKlineUnique() }
 func (*MarketKline1w) TableUnique() [][]string  { return marketKlineUnique() }
 func (*MarketKline1mo) TableUnique() [][]string { return marketKlineUnique() }
 func marketKlineUnique() [][]string             { return [][]string{{"Market", "Symbol", "OpenTime"}} }
+
+// MarketTrade stores only sparse trade slices that were actually required by
+// adaptive backtest drill-down. It is intentionally not a full trade archive.
+type MarketTrade struct {
+	ID            int64   `orm:"column(id);auto" json:"id"`
+	Market        string  `orm:"column(market);size(32)" json:"market"`
+	Symbol        string  `orm:"column(symbol);size(32);index" json:"symbol"`
+	TradeID       int64   `orm:"column(trade_id);index" json:"trade_id"`
+	TradeTime     int64   `orm:"column(trade_time);index" json:"trade_time"`
+	Price         float64 `orm:"column(price);digits(30);decimals(12)" json:"price"`
+	Quantity      float64 `orm:"column(quantity);digits(40);decimals(12)" json:"quantity"`
+	QuoteQuantity float64 `orm:"column(quote_quantity);digits(40);decimals(12)" json:"quote_quantity"`
+	IsBuyerMaker  bool    `orm:"column(is_buyer_maker)" json:"is_buyer_maker"`
+	Source        string  `orm:"column(source);size(64);index" json:"source"`
+	SourceRef     string  `orm:"column(source_ref);size(512);null" json:"source_ref,omitempty"`
+	ArchiveSHA256 string  `orm:"column(archive_sha256);size(64);index" json:"archive_sha256"`
+	CreatedAt     int64   `orm:"column(created_at);index" json:"created_at"`
+	UpdatedAt     int64   `orm:"column(updated_at);index" json:"updated_at"`
+}
+
+func (*MarketTrade) TableName() string { return "market_trades" }
+func (*MarketTrade) TableUnique() [][]string {
+	return [][]string{{"Market", "Symbol", "TradeID"}}
+}
+func (*MarketTrade) TableIndex() [][]string {
+	return [][]string{{"Market", "Symbol", "TradeTime"}}
+}
 
 // MarketFundingRate is globally shared because funding history is much smaller
 // than Kline history and has no Kline interval dimension.
