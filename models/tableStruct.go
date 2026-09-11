@@ -85,7 +85,7 @@ type Order struct {
 	Side           string `orm:"column(side)" json:"side"`                     // open, close
 	PositionSide   string `orm:"column(positionSide)" json:"positionSide"`     // LONG, SHORT
 	OrderId        int64  `orm:"column(order_id)" json:"order_id"`
-	UpdateTime     int64  `orm:"column(updateTime)" json:"updateTime"`
+	UpdateTime     int64  `orm:"column(updateTime);index" json:"updateTime"`
 	ClosedTime     int64  `orm:"column(closedTime)" json:"closedTime"` // 平仓时间(只针对 side = 'open' 的订单)
 }
 
@@ -269,7 +269,7 @@ type TestStrategyResults struct {
 	CloseProfit          string  `orm:"column(close_profit)" json:"close_profit"`                                         // 触发平仓策略时收益 usdt
 	OpenFeeRate          float64 `orm:"column(open_fee_rate);digits(12);decimals(8);default(0)" json:"open_fee_rate"`     // 开仓手续费率快照
 	CloseFeeRate         float64 `orm:"column(close_fee_rate);digits(12);decimals(8);default(0)" json:"close_fee_rate"`   // 平仓手续费率快照
-	CreateTime           int64   `orm:"column(createTime)" json:"createTime"`
+	CreateTime           int64   `orm:"column(createTime);index" json:"createTime"`
 	UpdateTime           int64   `orm:"column(updateTime)" json:"updateTime"`
 }
 
@@ -279,6 +279,10 @@ func (u *Config) TableName() string {
 
 func (u *Order) TableName() string {
 	return "order"
+}
+
+func (u *Order) TableIndex() [][]string {
+	return [][]string{{"Side", "UpdateTime"}}
 }
 
 func (u *Symbols) TableName() string {
@@ -311,4 +315,8 @@ func (u *StrategyTemplates) TableName() string {
 
 func (u *TestStrategyResults) TableName() string {
 	return "test_strategy_results"
+}
+
+func (u *TestStrategyResults) TableIndex() [][]string {
+	return [][]string{{"StrategyTemplateID", "CreateTime"}}
 }

@@ -19,7 +19,7 @@ type FuturesOrder struct {
 	RealizedPnL string `orm:"column(realized_pnl)" json:"realized_pnl"` // 已实现盈亏
 	
 	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
-	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
+	UpdateTime int64 `orm:"column(updateTime);index" json:"updateTime"`
 }
 
 func (u *FuturesOrder) TableName() string {

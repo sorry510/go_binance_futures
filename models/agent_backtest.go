@@ -86,6 +86,9 @@ type AgentBacktestTrade struct {
 }
 
 func (*AgentBacktestTrade) TableName() string { return "agent_backtest_trades" }
+func (*AgentBacktestTrade) TableIndex() [][]string {
+	return [][]string{{"RunID", "Sequence"}}
+}
 
 // AgentBacktestEvent is the deterministic audit stream: signal -> order -> fill -> position.
 type AgentBacktestEvent struct {
@@ -102,6 +105,9 @@ type AgentBacktestEvent struct {
 }
 
 func (*AgentBacktestEvent) TableName() string { return "agent_backtest_events" }
+func (*AgentBacktestEvent) TableIndex() [][]string {
+	return [][]string{{"RunID", "Sequence"}}
+}
 
 // AgentBacktestEquityPoint stores the replayable equity curve.
 type AgentBacktestEquityPoint struct {
@@ -117,3 +123,6 @@ type AgentBacktestEquityPoint struct {
 }
 
 func (*AgentBacktestEquityPoint) TableName() string { return "agent_backtest_equity_points" }
+func (*AgentBacktestEquityPoint) TableIndex() [][]string {
+	return [][]string{{"RunID", "Sequence"}}
+}
