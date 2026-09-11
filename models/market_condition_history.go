@@ -11,3 +11,6 @@ type MarketConditionHistory struct {
 }
 
 func (*MarketConditionHistory) TableName() string { return "market_condition_histories" }
+func (*MarketConditionHistory) TableIndex() [][]string {
+	return [][]string{{"ConfigID", "CreatedAt"}}
+}
