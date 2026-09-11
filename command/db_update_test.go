@@ -33,7 +33,10 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	}
 	orm.RegisterModel(
 		new(models.Config),
+		new(models.Order),
+		new(models.FuturesOrder),
 		new(models.StrategyTemplates),
+		new(models.TestStrategyResults),
 		new(models.Symbols),
 		new(models.SpotSymbols),
 		new(models.AgentSkill),
@@ -200,4 +203,61 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err := SyncDatabase(9); err != nil {
 		t.Fatalf("second version-9 sync should be idempotent: %v", err)
 	}
+	if err := SyncDatabase(10); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 10 {
+		t.Fatalf("expected database version 10, config=%+v err=%v", config, err)
+	}
+	for table, columns := range map[string][]string{
+		"agent_backtest_trades":        {"run_id", "sequence"},
+		"agent_backtest_events":        {"run_id", "sequence"},
+		"agent_backtest_equity_points": {"run_id", "sequence"},
+		"market_condition_histories":   {"config_id", "created_at"},
+		"order":                        {"side", "updateTime"},
+		"test_strategy_results":        {"strategy_template_id", "createTime"},
+		"futures_orders":               {"updateTime"},
+	} {
+		if !sqliteHasIndexColumns(t, o, table, columns) {
+			t.Fatalf("expected composite index on %s(%s) after version 10 sync", table, strings.Join(columns, ","))
+		}
+	}
+	if err := SyncDatabase(10); err != nil {
+		t.Fatalf("second version-10 sync should be idempotent: %v", err)
+	}
+}
+
+func sqliteHasIndexColumns(t *testing.T, o orm.Ormer, table string, want []string) bool {
+	t.Helper()
+	var indexes []struct {
+		Name string `orm:"column(name)"`
+	}
+	tableName := strings.ReplaceAll(table, "'", "''")
+	if _, err := o.Raw("PRAGMA index_list('" + tableName + "')").QueryRows(&indexes); err != nil {
+		t.Fatalf("list indexes for %s: %v", table, err)
+	}
+	for _, index := range indexes {
+		var columns []struct {
+			Name string `orm:"column(name)"`
+		}
+		indexName := strings.ReplaceAll(index.Name, "'", "''")
+		if _, err := o.Raw("PRAGMA index_info('" + indexName + "')").QueryRows(&columns); err != nil {
+			t.Fatalf("read index %s: %v", index.Name, err)
+		}
+		if len(columns) != len(want) {
+			continue
+		}
+		match := true
+		for i := range want {
+			if columns[i].Name != want[i] {
+				match = false
+				break
+			}
+		}
+		if match {
+			return true
+		}
+	}
+	return false
 }
