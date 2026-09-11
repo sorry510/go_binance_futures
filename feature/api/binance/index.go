@@ -286,6 +286,64 @@ func GetEarliestHistoricalKline(ctx context.Context, symbol, interval string) (*
 	return rows[0], nil
 }
 
+const (
+	historicalKlinePageLimit = 1000
+	// Keep every request safely below Binance's maximum startTime/endTime span.
+	// The per-page K-line limit is normally the tighter bound for short intervals.
+	historicalKlineMaxWindow = 199 * 24 * time.Hour
+)
+
+func historicalKlineIntervalDuration(interval string) (time.Duration, bool) {
+	switch interval {
+	case "1m":
+		return time.Minute, true
+	case "3m":
+		return 3 * time.Minute, true
+	case "5m":
+		return 5 * time.Minute, true
+	case "15m":
+		return 15 * time.Minute, true
+	case "30m":
+		return 30 * time.Minute, true
+	case "1h":
+		return time.Hour, true
+	case "2h":
+		return 2 * time.Hour, true
+	case "4h":
+		return 4 * time.Hour, true
+	case "6h":
+		return 6 * time.Hour, true
+	case "8h":
+		return 8 * time.Hour, true
+	case "12h":
+		return 12 * time.Hour, true
+	case "1d":
+		return 24 * time.Hour, true
+	case "3d":
+		return 72 * time.Hour, true
+	case "1w":
+		return 7 * 24 * time.Hour, true
+	default:
+		// 1M is calendar based; the 199-day exchange-window bound is enough.
+		return 0, false
+	}
+}
+
+func historicalKlinePageEnd(startTime, endTime int64, interval string) int64 {
+	pageEnd := endTime
+	maxWindowEnd := startTime + historicalKlineMaxWindow.Milliseconds() - 1
+	if maxWindowEnd < pageEnd {
+		pageEnd = maxWindowEnd
+	}
+	if duration, ok := historicalKlineIntervalDuration(interval); ok {
+		maxRowsEnd := startTime + int64(historicalKlinePageLimit)*duration.Milliseconds() - 1
+		if maxRowsEnd < pageEnd {
+			pageEnd = maxRowsEnd
+		}
+	}
+	return pageEnd
+}
+
 // GetHistoricalKlines returns closed futures K-lines ordered from oldest to newest.
 // It paginates the exchange API and never returns a bar whose CloseTime is after endTime.
 func GetHistoricalKlines(ctx context.Context, symbol, interval string, startTime, endTime int64) ([]*futures.Kline, error) {
@@ -310,14 +368,18 @@ func GetHistoricalKlinesWithProgress(ctx context.Context, symbol, interval strin
 		if err := waitHistoricalREST(ctx); err != nil {
 			return nil, err
 		}
-		page, err := futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).StartTime(cursor).EndTime(endTime).Limit(1000).Do(ctx)
+		pageEnd := historicalKlinePageEnd(cursor, endTime, interval)
+		if pageEnd < cursor {
+			return nil, fmt.Errorf("invalid historical K-line page range %d-%d", cursor, pageEnd)
+		}
+		page, err := futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).StartTime(cursor).EndTime(pageEnd).Limit(historicalKlinePageLimit).Do(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("get historical K-lines %s %s: %w", symbol, interval, err)
 		}
 		if len(page) == 0 {
 			break
 		}
-		lastOpen := cursor
+		lastOpen := int64(0)
 		for _, item := range page {
 			if item == nil || item.OpenTime < startTime || item.CloseTime > endTime || seen[item.OpenTime] {
 				continue
@@ -331,10 +393,10 @@ func GetHistoricalKlinesWithProgress(ctx context.Context, symbol, interval strin
 		if progress != nil {
 			progress(len(result))
 		}
-		if lastOpen < cursor || len(page) < 1000 {
+		if lastOpen < cursor || pageEnd >= endTime {
 			break
 		}
-		next := lastOpen + 1
+		next := pageEnd + 1
 		if next <= cursor {
 			break
 		}
