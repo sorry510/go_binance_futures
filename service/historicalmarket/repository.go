@@ -223,8 +223,15 @@ func (repo *Repository) queryKlines(market, symbol, interval string, start, end 
 	if !ok {
 		return []Kline{}, nil
 	}
+	from := " FROM " + table
+	if repo.mysql() {
+		// MySQL can otherwise prefer the single-column symbol index and filesort
+		// hundreds of thousands of 1m rows. Use the existing composite unique
+		// index (market,symbol,open_time) so the range is already time ordered.
+		from += " FORCE INDEX (market)"
+	}
 	var rows []models.MarketKline1m
-	query := "SELECT market,symbol,open_time,close_time,open_price,high_price,low_price,close_price,volume,quote_volume,trade_count,taker_buy_base_volume,taker_buy_quote_volume,source,source_ref,created_at,updated_at FROM " + table + " WHERE market=? AND symbol=? AND open_time>=? AND open_time<=? ORDER BY open_time"
+	query := "SELECT market,symbol,open_time,close_time,open_price,high_price,low_price,close_price,volume,quote_volume,trade_count,taker_buy_base_volume,taker_buy_quote_volume,source,source_ref,created_at,updated_at" + from + " WHERE market=? AND symbol=? AND open_time>=? AND open_time<=? ORDER BY open_time"
 	if _, err := orm.NewOrm().Raw(query, market, strings.ToUpper(symbol), first, last).QueryRows(&rows); err != nil {
 		return nil, err
 	}
@@ -236,9 +243,15 @@ func (repo *Repository) queryKlines(market, symbol, interval string, start, end 
 }
 
 func (repo *Repository) queryFunding(market, symbol string, start, end int64) ([]FundingRate, error) {
+	from := " FROM market_funding_rates"
+	if repo.mysql() {
+		// Keep MySQL on the composite (market,symbol,funding_time) unique index.
+		// SQLite/PostgreSQL use the portable query without an index hint.
+		from += " FORCE INDEX (market)"
+	}
+	query := "SELECT market,symbol,funding_time,funding_rate,mark_price,source,source_ref" + from + " WHERE market=? AND symbol=? AND funding_time>=? AND funding_time<=? ORDER BY funding_time"
 	var rows []models.MarketFundingRate
-	_, err := orm.NewOrm().QueryTable(new(models.MarketFundingRate)).Filter("market", market).Filter("symbol", strings.ToUpper(symbol)).Filter("funding_time__gte", start).Filter("funding_time__lte", end).OrderBy("funding_time").All(&rows)
-	if err != nil {
+	if _, err := orm.NewOrm().Raw(query, market, strings.ToUpper(symbol), start, end).QueryRows(&rows); err != nil {
 		return nil, err
 	}
 	out := make([]FundingRate, 0, len(rows))
