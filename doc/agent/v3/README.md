@@ -40,12 +40,13 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 | [V3-3](./03-phase-v3-3-backtest.md) | ✅ | Historical Market Repository + 确定性历史回测 |
 | [V3-5](./05-phase-v3-5-trade-safety.md) | ✅ | Trade Ownership & Safety：Owner 隔离、Managed Position、Stop/TP、Close、Restart/Reconcile |
 
-> 原 V3-4 Strategy Lab 在规划复审后取消：个人使用方式是“新策略新建模板”，而 Backtest / Paper 已保存完整策略快照，额外版本生命周期属于重复抽象，因此删除该 Phase 文档并保留编号空缺。
+> 原 V3-4 Strategy Lab 仍保持取消；编号 V3-4 现重新用于 Backtest 精度增强，不恢复 Strategy Lab。
 
 ## 4. 后续 Phase
 
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
+| [V3-4](./04-phase-v3-4-adaptive-resolution-backtest.md) | P0 | Adaptive Resolution Backtest：1m 主回放，发生路径歧义时按需下钻 1s，极少数同秒冲突再下钻 trades |
 | [V3-6](./06-phase-v3-6-opportunity-watch.md) | P1 | Opportunity Watch：自动发现和分析机会，但真实执行继续由用户确认 |
 | [V3-7](./07-phase-v3-7-outcome-review.md) | P1 | 交易复盘与策略比较：统一查看 Backtest、模拟盘和真实交易表现 |
 | [V3-8](./08-phase-v3-8-personal-operations.md) | P2 | 个人运维与 V3 收尾：健康检查、数据增长控制、备份说明和最终清理 |
@@ -83,6 +84,8 @@ V3-7 Outcome Review
 ```text
 V3-3 Historical Backtest ✅
         ↓
+V3-4 Adaptive Resolution Backtest
+        ↓
 V3-5 Trade Ownership & Safety ✅
         ↓
 V3-6 Opportunity Watch
@@ -92,7 +95,7 @@ V3-7 Outcome Review
 V3-8 Personal Operations / Finalization
 ```
 
-前一 Phase 未通过 Gate，不进入下一 Phase。V3-5 已完成，后续真实交易能力必须继续复用 Ownership-safe Execution。
+V3-5 已在独立 trade 分支并行完成，因此不受 V3-4 当前进度阻塞；后续 Phase 仍按各自 Gate 推进，所有真实交易能力必须继续复用 Ownership-safe Execution。
 
 ## 7. 统一设计原则
 
@@ -107,7 +110,7 @@ V3-8 Personal Operations / Finalization
 ## 8. V3 Definition of Done
 
 - Multi-Agent 和 Market Intelligence 可以稳定给出可追踪的分析结果。
-- Historical Backtest 可以使用统一历史行情仓库复现策略表现。
+- Historical Backtest 可以使用统一历史行情仓库复现策略表现；V3-4 在 1m 无法确定路径顺序时按需使用 1s/trades 提高执行精度。
 - 真实交易只管理本系统自己的订单/仓位，并具备 Stop、可选 TP、确定性平仓和重启恢复能力。
 - 自动发现机会后可以通知用户并快速进入现有受控交易流程，但不会绕过用户确认。
 - Backtest、模拟盘和真实交易可以按策略/Symbol/行情环境做实用复盘。
