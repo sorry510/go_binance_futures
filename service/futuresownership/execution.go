@@ -61,6 +61,12 @@ func validateOrderRequest(request OrderRequest) error {
 	if math.IsNaN(request.Quantity) || math.IsInf(request.Quantity, 0) || request.Quantity <= qtyEpsilon {
 		return fmt.Errorf("managed order quantity must be a finite positive value")
 	}
+	// Owned order decimals are serialized with at most 8 fractional digits to
+	// remove IEEE-754 noise. Reject values that would round to zero instead of
+	// sending a syntactically valid but semantically zero quantity to Binance.
+	if math.Round(request.Quantity*1e8) == 0 {
+		return fmt.Errorf("managed order quantity %.12g is below 8-decimal transport precision", request.Quantity)
+	}
 	positionSide, err := normalizePositionSide(request.PositionSide)
 	if err != nil {
 		return err

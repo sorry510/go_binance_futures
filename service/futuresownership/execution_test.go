@@ -30,6 +30,8 @@ func TestValidateOrderRequestDirectionAndPositiveQuantity(t *testing.T) {
 		{name: "reversed close short", req: OrderRequest{PositionSide: "SHORT", Intent: IntentClose, Side: "SELL", Quantity: 1}, wantErr: true},
 		{name: "negative quantity", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: -1}, wantErr: true},
 		{name: "zero quantity", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: 0}, wantErr: true},
+		{name: "below transport precision", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: 4e-9}, wantErr: true},
+		{name: "minimum transport precision", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: 1e-8}},
 		{name: "nan quantity", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: math.NaN()}, wantErr: true},
 	}
 	for _, tt := range tests {
@@ -221,6 +223,17 @@ func TestManagedOrderTypeRoutesConditionalOrdersToAlgoAPI(t *testing.T) {
 	for orderType, want := range tests {
 		if got := isAlgoManagedOrderType(orderType); got != want {
 			t.Fatalf("isAlgoManagedOrderType(%q)=%v want %v", orderType, got, want)
+		}
+	}
+}
+
+func TestDeterministicSubmitRejectionClassification(t *testing.T) {
+	if !deterministicSubmitRejection(&common.APIError{Code: -1008, Message: "Request throttled by system-level protection"}) {
+		t.Fatal("Binance -1008 is a throttled/rejected request, not an unknown execution result")
+	}
+	for _, code := range []int64{-1000, -1001, -1006, -1007} {
+		if deterministicSubmitRejection(&common.APIError{Code: code, Message: "unknown execution"}) {
+			t.Fatalf("Binance code %d must remain fail-closed as execution-uncertain", code)
 		}
 	}
 }

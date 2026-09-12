@@ -161,7 +161,7 @@ func accountTradeRiskCounts(positions []types.FuturesPosition) (positionCount, l
 	return positionCount, lossCount
 }
 
-func cancelTimeoutAutoStrategyOrders(excluded map[string]bool, timeoutSec int64) error {
+func cancelTimeoutAutoStrategyOrders(timeoutSec int64) error {
 	ctx := context.Background()
 	orders, err := sharedOwnership.ActiveOrders(ctx, futuresownership.OwnerAutoStrategy)
 	if err != nil {
@@ -169,7 +169,7 @@ func cancelTimeoutAutoStrategyOrders(excluded map[string]bool, timeoutSec int64)
 	}
 	now := time.Now().UnixMilli()
 	for _, order := range orders {
-		if order.Intent != futuresownership.IntentOpen || excluded[order.Symbol] || now < order.CreatedAt+timeoutSec*1000 {
+		if order.Intent != futuresownership.IntentOpen || now < order.CreatedAt+timeoutSec*1000 {
 			continue
 		}
 		if strings.TrimSpace(order.ExchangeOrderID) == "" {

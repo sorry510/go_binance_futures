@@ -30,7 +30,7 @@ V3-5 已完成真实 Binance Futures 的 Ownership 隔离与 Agent Managed Posit
 
 `StartTrade` 现在同时保留两类视图：全账户仓位/挂单只用于风险和冲突判断；`owner=auto_strategy` 的 managed 数据才允许平仓或 timeout cancel。
 
-平仓前再次读取 Binance 当前仓位，并强制 `close_qty = min(managed_qty, account_qty)`。`FutureExcludeSymbols` 继续优先于自动平仓和撤单。
+平仓前再次读取 Binance 当前仓位，并强制 `close_qty = min(managed_qty, account_qty)`。`FutureExcludeSymbols` 已移除，手工仓位、其它 owner 仓位和来源不明仓位依靠 Ownership 隔离，不会被 `auto_strategy` 自动认领、平仓或撤单。
 
 其它真实 Futures 入口已统一 Owner 化：
 

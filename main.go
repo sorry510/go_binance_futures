@@ -12,6 +12,7 @@ import (
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
 	_ "go_binance_futures/routers"
+	agenttrade "go_binance_futures/service/agenttrade"
 	alertpipeline "go_binance_futures/service/alertpipeline"
 	futuresownership "go_binance_futures/service/futuresownership"
 	marketintelligence "go_binance_futures/service/marketintelligence"
@@ -365,18 +366,28 @@ func main() {
 	// 自动合约交易
 	loopRun(func() {
 		feature.StartTrade(&SystemConfig)
-	}, time.Second*2) // 2秒间隔, 1min 中不能超过 2400 权重和
+	}, time.Second*2) // 2秒间隔；REST 权重随 managed orders/WS 状态变化，不使用固定预算假设
 
 	// Ownership 低频全量对账：补齐 notice/rush/funding/agent 等非 StartTrade owner
 	// 的交易所成交、外部减仓/平仓状态。auto_strategy 虽有 2 秒内循环对账，
 	// 在这里重复检查一次也仅作为低频兜底。
 	loopRun(func() {
+		if !futuresTradingConfigured() {
+			return
+		}
 		if summaries, err := futuresownership.DefaultReconciler().ReconcileAll(context.Background()); err != nil {
 			logs.Warning("periodic futures ownership reconcile:", err)
 		} else {
 			logs.Debug("periodic futures ownership reconcile complete:", len(summaries), "owners checked")
+			if updated, syncErr := agenttrade.DefaultService().SyncClosedManagedProposals(context.Background(), "ownership_reconcile"); syncErr != nil {
+				logs.Warning("sync closed agent trade proposals:", syncErr)
+			} else if updated > 0 {
+				logs.Info("agent trade proposal ownership reconcile:", updated, "proposals closed")
+			}
+			// Only rebuild notice protection after account/ownership reconciliation
+			// succeeds; otherwise stale managed quantity could over-protect a position.
+			feature.RepairNoticeAutoOrderProtections()
 		}
-		feature.RepairNoticeAutoOrderProtections()
 	}, time.Minute)
 
 	// 30 分钟检查一次所有未平仓的订单, 一次 200 条，此处是兜底行为，处理一些意外情况

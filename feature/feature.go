@@ -85,26 +85,16 @@ func StartTrade(systemConfig *models.Config) {
 	/************************************************获取账户信息 end******************************************************************* */
 
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 start************************************************************ */
-	configuredExcludeSymbols := GetExcludeSymbolsMap(systemConfig.FutureExcludeSymbols)
-	// Keep the user-configured exclusion set immutable while this cycle runs.
-	// A separate set blocks new opens for symbols that already have a managed
-	// position. Reusing one map here would skip the second leg when Hedge Mode
-	// holds both LONG and SHORT on the same symbol.
-	openBlockedSymbols := make(map[string]bool, len(configuredExcludeSymbols)+len(managedPositions))
-	for symbol := range configuredExcludeSymbols {
-		openBlockedSymbols[symbol] = true
-	}
-	cancelTimeoutOrder(configuredExcludeSymbols, int64(systemConfig.FutureBuyTimeout))
+	// Only managed positions block new opens. Manual/unknown account positions are
+	// never claimed by auto_strategy and therefore do not need an exclusion list.
+	openBlockedSymbols := make(map[string]bool, len(managedPositions))
+	cancelTimeoutOrder(int64(systemConfig.FutureBuyTimeout))
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 end************************************************************ */
 
-	/*************************************************平仓(止盈或止损)已经有持仓的币(排除手动交易白名单) start************************************************************ */
+	/*************************************************平仓(止盈或止损)只处理 Ownership 允许的 managed 持仓 start************************************************************ */
 	positionCount, lossCount := accountTradeRiskCounts(positions) // 风险统计继续观察全账户
 	for _, managedPosition := range managedPositions {
 		position := managedPosition.Position
-		// 在白名单内, 不参与自动平仓交易
-		if _, exist := configuredExcludeSymbols[position.Symbol]; exist {
-			continue
-		}
 		positionAmtFloat, _ := strconv.ParseFloat(position.Amount, 64)
 		positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
 		if positionAmtFloatAbs < 0.0000000001 {           // 没有持仓的
@@ -399,7 +389,7 @@ func StartTrade(systemConfig *models.Config) {
 	isOpen := false
 
 	for _, coin := range coins {
-		if _, exist := openBlockedSymbols[coin.Symbol]; exist { // 配置排除或已有 managed 持仓
+		if _, exist := openBlockedSymbols[coin.Symbol]; exist { // 已有 managed 持仓
 			continue
 		}
 		positionSideLong := "LONG"
@@ -603,16 +593,6 @@ func StartTrade(systemConfig *models.Config) {
 	/*************************************************开仓 end************************************************************ */
 }
 
-// 排除自动交易的币
-func GetExcludeSymbolsMap(exclude_symbols_str string) map[string]bool {
-	exclude_symbols_map := make(map[string]bool)
-	exclude_symbols := strings.Split(exclude_symbols_str, ",")
-	for _, symbol := range exclude_symbols {
-		exclude_symbols_map[symbol] = true
-	}
-	return exclude_symbols_map
-}
-
 // 获取所有交易的币
 func GetAllSymbols() (symbols []*models.Symbols, err error) {
 	o := orm.NewOrm()
@@ -621,8 +601,8 @@ func GetAllSymbols() (symbols []*models.Symbols, err error) {
 }
 
 // 挂单已经超过设置的超时时间，撤销挂单
-func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, buyTimeout int64) {
-	if err := cancelTimeoutAutoStrategyOrders(explodeSymbolsMap, buyTimeout); err != nil {
+func cancelTimeoutOrder(buyTimeout int64) {
+	if err := cancelTimeoutAutoStrategyOrders(buyTimeout); err != nil {
 		logs.Error("cancel auto_strategy managed timeout orders:", err)
 	}
 }

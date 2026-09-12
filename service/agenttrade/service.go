@@ -14,6 +14,7 @@ import (
 	"go_binance_futures/agent/skills/symbolanalysis"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/models"
+	futuresownership "go_binance_futures/service/futuresownership"
 
 	"github.com/beego/beego/v2/client/orm"
 )
@@ -495,4 +496,52 @@ func errorText(err error) string {
 		return ""
 	}
 	return err.Error()
+}
+
+// SyncClosedManagedProposals mirrors ownership closure into proposal state after
+// a successful exchange/ownership reconcile. It is deliberately source-ref
+// based: proposals with no ownership history are left untouched, and an active
+// position owned by another proposal on the same symbol/side cannot keep an old
+// proposal falsely "executed".
+func (s Service) SyncClosedManagedProposals(ctx context.Context, actor string) (int, error) {
+	positions, err := futuresownership.DefaultService().ListPositions(ctx, futuresownership.OwnerAgentTrade, false)
+	if err != nil {
+		return 0, err
+	}
+	known := make(map[string]bool)
+	active := make(map[string]bool)
+	for _, position := range positions {
+		ref := strings.TrimSpace(position.SourceRef)
+		if ref == "" {
+			continue
+		}
+		known[ref] = true
+		if position.Status != futuresownership.PositionClosed && position.ManagedQty > 0 {
+			active[ref] = true
+		}
+	}
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		actor = "ownership_reconcile"
+	}
+	var proposals []models.AgentTradeProposal
+	if _, err := s.Store.orm().QueryTable(new(models.AgentTradeProposal)).
+		Filter("status__in", StatusExecuted, StatusProtectionFailed).
+		OrderBy("id").All(&proposals); err != nil {
+		return 0, err
+	}
+	updated := 0
+	for _, proposal := range proposals {
+		if !known[proposal.ProposalID] || active[proposal.ProposalID] {
+			continue
+		}
+		now := s.now().UnixMilli()
+		proposal.Status, proposal.UpdatedAt = StatusClosed, now
+		if err := s.Store.SaveProposal(ctx, &proposal); err != nil {
+			return updated, err
+		}
+		_ = s.Store.Audit(ctx, proposal.ProposalID, "ownership_reconcile", StatusClosed, actor, map[string]any{"reason": "managed_position_closed"})
+		updated++
+	}
+	return updated, nil
 }
