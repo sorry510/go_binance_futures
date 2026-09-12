@@ -22,6 +22,62 @@ import (
 var sharedOwnership = futuresownership.DefaultService()
 var sharedOwnershipExecutor = futuresownership.DefaultExecutor()
 
+type ownedTradePosition struct {
+	Position  types.FuturesPosition
+	Owner     string
+	SourceRef string
+}
+
+func syncStrategyExitPositions(accountPositions []types.FuturesPosition) ([]ownedTradePosition, error) {
+	autoPositions, err := syncAutoStrategyOwnership(accountPositions)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]ownedTradePosition, 0, len(autoPositions))
+	for _, position := range autoPositions {
+		result = append(result, ownedTradePosition{Position: position, Owner: futuresownership.OwnerAutoStrategy, SourceRef: "auto_strategy:" + strings.ToUpper(position.Symbol)})
+	}
+
+	accountByKey := make(map[string]types.FuturesPosition, len(accountPositions))
+	for _, position := range accountPositions {
+		accountByKey[managedPositionKey(position.Symbol, position.Side)] = position
+	}
+	accountQty, err := ownershipAccountQuantities(accountPositions, false)
+	if err != nil {
+		return nil, err
+	}
+	for _, owner := range []string{futuresownership.OwnerNewCoinRush, futuresownership.OwnerFundingRate} {
+		managed, err := sharedOwnership.ActivePositions(context.Background(), owner)
+		if err != nil {
+			return nil, err
+		}
+		for _, position := range managed {
+			if owner == futuresownership.OwnerFundingRate && !strings.HasPrefix(position.SourceRef, "funding_rate:") {
+				continue
+			}
+			key := managedPositionKey(position.Symbol, position.PositionSide)
+			if _, err := sharedOwnership.ReconcilePosition(context.Background(), owner, position.Symbol, position.PositionSide, accountQty[key]); err != nil && err != orm.ErrNoRows {
+				return nil, err
+			}
+		}
+		managed, err = sharedOwnership.ActivePositions(context.Background(), owner)
+		if err != nil {
+			return nil, err
+		}
+		for _, position := range managed {
+			if owner == futuresownership.OwnerFundingRate && !strings.HasPrefix(position.SourceRef, "funding_rate:") {
+				continue
+			}
+			account, ok := accountByKey[managedPositionKey(position.Symbol, position.PositionSide)]
+			if !ok || position.ManagedQty <= 1e-12 {
+				continue
+			}
+			result = append(result, ownedTradePosition{Position: managedAccountPosition(account, position), Owner: owner, SourceRef: position.SourceRef})
+		}
+	}
+	return result, nil
+}
+
 func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]types.FuturesPosition, error) {
 	ctx := context.Background()
 	managedOrders, err := sharedOwnership.ActiveOrders(ctx, futuresownership.OwnerAutoStrategy)
@@ -181,6 +237,82 @@ func submitNoticeAutoOpen(sourceRef, symbol string, quantity float64, side futur
 	return submitOwnedFeatureOpen(futuresownership.OwnerNoticeAutoOrder, sourceRef, symbol, quantity, 0, side, positionSide, futures.OrderTypeMarket)
 }
 
+func RepairNoticeAutoOrderProtections() {
+	ctx := context.Background()
+	positions, err := sharedOwnership.ActivePositions(ctx, futuresownership.OwnerNoticeAutoOrder)
+	if err != nil {
+		logs.Error("repair notice protections load positions:", err)
+		return
+	}
+	if len(positions) == 0 {
+		return
+	}
+	orders, err := sharedOwnership.ActiveOrders(ctx, futuresownership.OwnerNoticeAutoOrder)
+	if err != nil {
+		logs.Error("repair notice protections load orders:", err)
+		return
+	}
+	for _, position := range positions {
+		const prefix = "notice_auto_order:"
+		if !strings.HasPrefix(position.SourceRef, prefix) {
+			continue
+		}
+		id, parseErr := strconv.ParseInt(strings.TrimPrefix(position.SourceRef, prefix), 10, 64)
+		if parseErr != nil {
+			logs.Error("repair notice protections invalid source ref:", position.SourceRef, parseErr)
+			continue
+		}
+		var notice models.NoticeSymbols
+		if err := orm.NewOrm().QueryTable(new(models.NoticeSymbols)).Filter("id", id).One(&notice); err != nil {
+			logs.Error("repair notice protections load source:", position.SourceRef, err)
+			continue
+		}
+		protectionSide := futures.SideTypeSell
+		positionSide := futures.PositionSideTypeLong
+		if strings.EqualFold(position.PositionSide, "SHORT") {
+			protectionSide = futures.SideTypeBuy
+			positionSide = futures.PositionSideTypeShort
+		}
+		for _, spec := range []struct {
+			intent string
+			price  string
+		}{
+			{intent: futuresownership.IntentTakeProfit, price: notice.ProfitPrice},
+			{intent: futuresownership.IntentStopLoss, price: notice.LossPrice},
+		} {
+			price, parseErr := strconv.ParseFloat(strings.TrimSpace(spec.price), 64)
+			if parseErr != nil || price <= 0 {
+				continue
+			}
+			price = utils.GetTradePrecision(price, notice.TickSize)
+			hasExact, unresolved := false, false
+			for _, order := range orders {
+				if order.SourceRef != position.SourceRef || order.Symbol != position.Symbol || !strings.EqualFold(order.PositionSide, position.PositionSide) || order.Intent != spec.intent {
+					continue
+				}
+				if math.Abs(order.RequestedQty-position.ManagedQty) <= 1e-12 && !hasExact {
+					hasExact = true
+					continue
+				}
+				if strings.TrimSpace(order.ExchangeOrderID) == "" {
+					unresolved = true
+					continue
+				}
+				if cancelErr := sharedOwnershipExecutor.Cancel(ctx, futuresownership.OwnerNoticeAutoOrder, order); cancelErr != nil {
+					logs.Error("repair notice protections cancel stale order:", order.ClientOrderID, cancelErr)
+					unresolved = true
+				}
+			}
+			if hasExact || unresolved {
+				continue
+			}
+			if _, err := submitNoticeProtection(position.SourceRef, position.Symbol, position.ManagedQty, price, protectionSide, positionSide, spec.intent); err != nil {
+				logs.Error("repair notice protection submit:", position.Symbol, spec.intent, err)
+			}
+		}
+	}
+}
+
 func noticeManagedQuantity(symbol string, positionSide futures.PositionSideType) (float64, error) {
 	position, err := sharedOwnership.GetPosition(context.Background(), futuresownership.OwnerNoticeAutoOrder, symbol, string(positionSide))
 	if err != nil {
@@ -211,24 +343,28 @@ func submitOwnedFeatureOpen(owner, sourceRef, symbol string, quantity, price flo
 	return submitOwnedFeatureOrder(owner, sourceRef, symbol, quantity, price, 0, side, positionSide, orderType, futuresownership.IntentOpen)
 }
 
-func submitAutoStrategyClose(symbol string, quantity float64, positionSide futures.PositionSideType) (*futures.CreateOrderResponse, error) {
+func submitManagedStrategyClose(owner, sourceRef, symbol string, quantity float64, positionSide futures.PositionSideType) (*futures.CreateOrderResponse, error) {
 	accountQty, err := currentAccountPositionQty(symbol, positionSide)
 	if err != nil {
 		return nil, err
 	}
-	closeQty, err := sharedOwnership.CloseQuantity(context.Background(), futuresownership.OwnerAutoStrategy, symbol, string(positionSide), accountQty)
+	closeQty, err := sharedOwnership.CloseQuantity(context.Background(), owner, symbol, string(positionSide), accountQty)
 	if err != nil {
 		return nil, err
 	}
 	closeQty = math.Min(closeQty, math.Abs(quantity))
 	if closeQty <= 1e-12 {
-		return nil, fmt.Errorf("no managed %s %s quantity is available to close", strings.ToUpper(symbol), positionSide)
+		return nil, fmt.Errorf("no managed %s %s quantity is available to close for owner %s", strings.ToUpper(symbol), positionSide, owner)
 	}
 	side := futures.SideTypeSell
 	if positionSide == futures.PositionSideTypeShort {
 		side = futures.SideTypeBuy
 	}
-	return submitAutoStrategyOrder(symbol, closeQty, 0, side, positionSide, futures.OrderTypeMarket, futuresownership.IntentClose)
+	return submitOwnedFeatureOrder(owner, sourceRef, symbol, closeQty, 0, 0, side, positionSide, futures.OrderTypeMarket, futuresownership.IntentClose)
+}
+
+func submitAutoStrategyClose(symbol string, quantity float64, positionSide futures.PositionSideType) (*futures.CreateOrderResponse, error) {
+	return submitManagedStrategyClose(futuresownership.OwnerAutoStrategy, "auto_strategy:"+strings.ToUpper(strings.TrimSpace(symbol)), symbol, quantity, positionSide)
 }
 
 func currentAccountPositionQty(symbol string, positionSide futures.PositionSideType) (float64, error) {

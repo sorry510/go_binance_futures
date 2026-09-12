@@ -49,7 +49,11 @@ func (l OwnershipLifecycle) EnsureProtection(ctx context.Context, proposal model
 		return ProtectionResult{}, fmt.Errorf("managed quantity and stop loss must be positive")
 	}
 	side := closeSide(proposal.Side)
-	result := ProtectionResult{StopClientOrderID: lifecycleClientOrderID("sl", proposal.ProposalID)}
+	stopClientID, err := l.nextProtectionClientOrderID(ctx, proposal, futuresownership.IntentStopLoss, "sl", position.ManagedQty)
+	if err != nil {
+		return ProtectionResult{}, err
+	}
+	result := ProtectionResult{StopClientOrderID: stopClientID}
 	stop, err := l.submitProtection(ctx, proposal, position.ManagedQty, proposal.StopLoss, futuresownership.IntentStopLoss, "STOP_MARKET", side, result.StopClientOrderID)
 	if err != nil {
 		return result, fmt.Errorf("create protective stop: %w", err)
@@ -58,7 +62,12 @@ func (l OwnershipLifecycle) EnsureProtection(ctx context.Context, proposal model
 
 	var targets []float64
 	if err := json.Unmarshal([]byte(proposal.TakeProfitsJSON), &targets); err == nil && len(targets) > 0 && targets[0] > 0 {
-		result.TakeProfitClientOrderID = lifecycleClientOrderID("tp", proposal.ProposalID)
+		tpClientID, idErr := l.nextProtectionClientOrderID(ctx, proposal, futuresownership.IntentTakeProfit, "tp", position.ManagedQty)
+		if idErr != nil {
+			result.TakeProfitError = idErr.Error()
+			return result, nil
+		}
+		result.TakeProfitClientOrderID = tpClientID
 		tp, tpErr := l.submitProtection(ctx, proposal, position.ManagedQty, targets[0], futuresownership.IntentTakeProfit, "TAKE_PROFIT_MARKET", side, result.TakeProfitClientOrderID)
 		if tpErr != nil {
 			result.TakeProfitError = tpErr.Error()
@@ -75,21 +84,36 @@ func (l OwnershipLifecycle) submitProtection(ctx context.Context, proposal model
 		Intent: intent, Side: side, OrderType: orderType, Quantity: qty, StopPrice: stopPrice,
 		SourceRef: proposal.ProposalID, ClientOrderID: clientID,
 	}
-	result, err := l.executor().Execute(ctx, request)
-	if err == nil {
-		return result, nil
+	return l.executor().Execute(ctx, request)
+}
+
+func (l OwnershipLifecycle) nextProtectionClientOrderID(ctx context.Context, proposal models.AgentTradeProposal, intent, kind string, quantity float64) (string, error) {
+	orders, err := l.ownership().ListOrders(ctx, futuresownership.OwnerAgentTrade, 500)
+	if err != nil {
+		return "", err
 	}
-	lastErr := err
-	for i := 0; i < 2; i++ {
-		reconciled, reconcileErr := l.executor().Reconcile(ctx, proposal.Symbol, clientID)
-		if reconcileErr == nil && strings.TrimSpace(reconciled.ExchangeOrderID) != "" {
-			return reconciled, nil
+	attempts := 0
+	for _, managed := range orders {
+		if managed.SourceRef != proposal.ProposalID || managed.Intent != intent {
+			continue
 		}
-		if reconcileErr != nil {
-			lastErr = reconcileErr
+		attempts++
+		if managed.Status == futuresownership.OrderFilled {
+			return managed.ClientOrderID, nil
+		}
+		if managed.Status == futuresownership.OrderPending || managed.Status == futuresownership.OrderSubmitted || managed.Status == futuresownership.OrderPartiallyFilled || managed.Status == futuresownership.OrderReconcile {
+			if math.Abs(managed.RequestedQty-quantity) <= 1e-12 {
+				return managed.ClientOrderID, nil
+			}
+			if strings.TrimSpace(managed.ExchangeOrderID) == "" {
+				return "", fmt.Errorf("cannot resize unresolved %s protection %s from %.12f to %.12f", intent, managed.ClientOrderID, managed.RequestedQty, quantity)
+			}
+			if err := l.executor().Cancel(ctx, futuresownership.OwnerAgentTrade, managed); err != nil {
+				return "", fmt.Errorf("cancel stale %s protection %s before resize: %w", intent, managed.ClientOrderID, err)
+			}
 		}
 	}
-	return futuresownership.ExchangeOrder{}, lastErr
+	return lifecycleAttemptClientOrderID(kind, proposal.ProposalID, attempts+1), nil
 }
 
 func (l OwnershipLifecycle) Close(ctx context.Context, proposal models.AgentTradeProposal) (CloseResult, error) {
@@ -114,13 +138,36 @@ func (l OwnershipLifecycle) Close(ctx context.Context, proposal models.AgentTrad
 	if err != nil {
 		return CloseResult{}, err
 	}
-	closeQty := math.Min(position.ManagedQty, accountQty)
+	closeQty := math.Min(position.ManagedQty, math.Abs(accountQty))
 	if closeQty <= 1e-12 {
 		_, _ = l.ownership().ReconcilePosition(ctx, futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side, 0)
 		_ = l.cancelProtection(ctx, proposal.ProposalID, "")
 		return CloseResult{AlreadyClosed: true}, nil
 	}
-	clientID := lifecycleClientOrderID("close", proposal.ProposalID)
+	clientID, err := l.nextCloseClientOrderID(ctx, proposal)
+	if err != nil {
+		return CloseResult{}, err
+	}
+	// Reconciliation above may have completed an earlier close attempt. Reload
+	// ownership before calculating the next mutation quantity.
+	position, err = l.ownership().GetPosition(ctx, futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side)
+	if err == orm.ErrNoRows {
+		_ = l.cancelProtection(ctx, proposal.ProposalID, "")
+		return CloseResult{AlreadyClosed: true}, nil
+	}
+	if err != nil {
+		return CloseResult{}, err
+	}
+	accountQty, err = accountQtyFn(ctx, proposal.Symbol, proposal.Side)
+	if err != nil {
+		return CloseResult{}, err
+	}
+	closeQty = math.Min(position.ManagedQty, math.Abs(accountQty))
+	if closeQty <= 1e-12 {
+		_, _ = l.ownership().ReconcilePosition(ctx, futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side, 0)
+		_ = l.cancelProtection(ctx, proposal.ProposalID, "")
+		return CloseResult{AlreadyClosed: true}, nil
+	}
 	order, err := l.executor().Execute(ctx, futuresownership.OrderRequest{
 		Owner: futuresownership.OwnerAgentTrade, Symbol: proposal.Symbol, PositionSide: proposal.Side,
 		Intent: futuresownership.IntentClose, Side: closeSide(proposal.Side), OrderType: string(futures.OrderTypeMarket),
@@ -140,6 +187,46 @@ func (l OwnershipLifecycle) Close(ctx context.Context, proposal models.AgentTrad
 		return CloseResult{ClientOrderID: clientID, ExchangeOrderID: order.ExchangeOrderID, FilledQty: order.FilledQty}, fmt.Errorf("position closed but protection cleanup failed: %w", err)
 	}
 	return CloseResult{ClientOrderID: clientID, ExchangeOrderID: order.ExchangeOrderID, FilledQty: order.FilledQty}, nil
+}
+
+func (l OwnershipLifecycle) nextCloseClientOrderID(ctx context.Context, proposal models.AgentTradeProposal) (string, error) {
+	orders, err := l.ownership().ListOrders(ctx, futuresownership.OwnerAgentTrade, 500)
+	if err != nil {
+		return "", err
+	}
+	attempts := 0
+	for _, managed := range orders {
+		if managed.SourceRef != proposal.ProposalID || managed.Intent != futuresownership.IntentClose {
+			continue
+		}
+		attempts++
+		switch managed.Status {
+		case futuresownership.OrderPending, futuresownership.OrderSubmitted, futuresownership.OrderPartiallyFilled, futuresownership.OrderReconcile:
+			reconciled, reconcileErr := l.executor().Reconcile(ctx, managed.Symbol, managed.ClientOrderID)
+			if reconcileErr != nil {
+				return "", fmt.Errorf("reconcile existing managed close %s before retry: %w", managed.ClientOrderID, reconcileErr)
+			}
+			switch strings.ToUpper(strings.TrimSpace(reconciled.Status)) {
+			case "FILLED", "CANCELED", "EXPIRED", "REJECTED":
+				// Terminal: a remaining managed quantity may use a new attempt ID.
+			default:
+				return "", fmt.Errorf("managed close %s is still active with exchange status %s", managed.ClientOrderID, reconciled.Status)
+			}
+		}
+	}
+	return lifecycleAttemptClientOrderID("close", proposal.ProposalID, attempts+1), nil
+}
+
+func lifecycleAttemptClientOrderID(kind, proposalID string, attempt int) string {
+	if attempt < 1 {
+		attempt = 1
+	}
+	suffix := fmt.Sprintf("_%d", attempt)
+	base := lifecycleClientOrderID(kind, proposalID)
+	if len(base)+len(suffix) > 36 {
+		base = base[:36-len(suffix)]
+	}
+	return base + suffix
 }
 
 func (l OwnershipLifecycle) cancelProtection(ctx context.Context, proposalID, onlyIntent string) error {

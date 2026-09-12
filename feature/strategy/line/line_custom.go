@@ -27,7 +27,7 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParam
 	if isNullCustomConfig(coin.Strategy) {
 		return openResult
 	}
-	
+
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
 	if err != nil {
@@ -67,13 +67,13 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParam
 
 // 达到止盈或止损率之后的判定是否可以平仓
 func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
-	coin := closeParams.Symbols // 交易对
+	coin := closeParams.Symbols      // 交易对
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
 	if isNullCustomConfig(coin.Strategy) {
 		return closeResult
 	}
-	
+
 	var strategyConfig technology.StrategyConfig
 	err := json.Unmarshal([]byte(coin.Strategy), &strategyConfig)
 	if err != nil {
@@ -86,7 +86,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 	env["ROI"] = closeParams.NowProfit // 当前收益率
 	env["Position"] = types.FuturesPositionCode{
 		Symbol: coin.Symbol,
-		Side: position.Side,
+		Side:   position.Side,
 		Amount: func() float64 {
 			amount, err := strconv.ParseFloat(position.Amount, 64)
 			if err != nil {
@@ -120,7 +120,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 			}
 			return unrealizedProfit
 		}(),
-		Mock: false,
+		Mock:       false,
 		CreateTime: position.CreateTime,
 		SourceType: position.SourceType,
 	} // 当前仓位信息
@@ -134,7 +134,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 				// 平空仓的策略，当前仓位不是空仓，跳过
 				continue
 			}
-			
+
 			program, err := expr.Compile(strategy.Code, expr.Env(env))
 			if err != nil {
 				logs.Error("Error Strategy Compile Symbol: ", coin.Symbol)
@@ -179,16 +179,16 @@ func normalizeCustomTechnology(value string) string {
 }
 
 func (TradeLine TradeLineCustom) simpleCloseStrategy(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
-	coin := closeParams.Symbols // 交易对
+	coin := closeParams.Symbols      // 交易对
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
-	
-	if closeParams.NowProfit < 3 || closeParams.NowProfit > -3 {
+
+	if autoStopNeutralROI(closeParams.NowProfit) {
 		// 收益率小于3%或者大于-3%, 不平仓
 		closeResult.Complete = false
 		return closeResult
 	}
-	
+
 	lines, err := binance.GetKlineData(coin.Symbol, "5m", 2)
 	if err != nil {
 		logs.Error("Error GetKlineData Symbol in line_custom: ", coin.Symbol)
@@ -229,19 +229,19 @@ func (TradeLine TradeLineCustom) getTransformPositions() (usePositions []types.F
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		unRealizedProfit := (markPrice_float64 - enterPrice_float64) * positionAmt // 未实现盈亏
 		position.UnrealizedProfit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
-		
+
 		usePositions = append(usePositions, types.FuturesPosition{
-			Symbol: position.Symbol,
-			Side: position.Side,
-			Amount: position.Amount,
-			MarginType: position.MarginType,
-			Leverage: position.Leverage,
-			IsolatedWallet: position.IsolatedWallet,
-			EntryPrice: position.EntryPrice,
-			MarkPrice: position.MarkPrice,
+			Symbol:           position.Symbol,
+			Side:             position.Side,
+			Amount:           position.Amount,
+			MarginType:       position.MarginType,
+			Leverage:         position.Leverage,
+			IsolatedWallet:   position.IsolatedWallet,
+			EntryPrice:       position.EntryPrice,
+			MarkPrice:        position.MarkPrice,
 			UnrealizedProfit: position.UnrealizedProfit,
-			SourceType: "local",
-			CreateTime: position.CreateTime,
+			SourceType:       "local",
+			CreateTime:       position.CreateTime,
 		})
 	}
 	return usePositions, err

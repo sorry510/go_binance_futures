@@ -20,9 +20,9 @@ func (TradeLine TradeLine7) GetCanLongOrShort(openParams strategy.OpenParams) (o
 	symbols := openParams.Symbols
 	openResult.CanLong = false
 	openResult.CanShort = false
-	
+
 	limit := 150
-	period := 50 
+	period := 50
 	multiplier1 := 2.75 // 窄通道
 	multiplier2 := 3.75 // 宽通道
 	kline_1, err := binance.GetKlineData(symbols.Symbol, "4h", limit)
@@ -37,11 +37,11 @@ func (TradeLine TradeLine7) GetCanLongOrShort(openParams strategy.OpenParams) (o
 	// if err != nil {
 	// 	return false, false
 	// }
-	
+
 	if len(kline_1) < limit || len(kline_2) < limit {
 		return openResult
 	}
-	
+
 	high1, low1, close1, _ := GetLineFloatPrices(kline_1)
 	upper1, _, lower1, err := CalculateKeltnerChannels(high1, low1, close1, period, multiplier1) // kc1
 	if err != nil {
@@ -51,33 +51,33 @@ func (TradeLine TradeLine7) GetCanLongOrShort(openParams strategy.OpenParams) (o
 	if err != nil {
 		return openResult
 	}
-	
+
 	close2 := GetLineClosePrices(kline_2)
 	limitPeriod := 12 // 最近n根k线
-	
+
 	// 之前的最低价格跌破了 kc2 的下轨，然后当前价格超越了 kc1 下轨，止损位置在 kc1 下轨附近位置，止盈50%位置在 kc1 中规附近位置，剩余 50% 止盈50%位置在 kc1 上轨附近位置
 	// 大级别看起来是上升通道
-	if (close1[0] > lower1[0] && close1[1] < lower1[1]) {
+	if close1[0] > lower1[0] && close1[1] < lower1[1] {
 		for i := 2; i < limitPeriod; i++ {
 			// 最近10根k线最低价格在kc2下轨之下
 			if low1[i] < lower2[i] {
 				// 大级别看起来是上升通道
-				if (utils.IsDesc(close2[0:2])) {
+				if utils.IsDesc(close2[0:2]) {
 					openResult.CanLong = true
 					return openResult
 				}
 			}
 		}
 	}
-	
+
 	// 之前的最高价格超越了 kc2 的上轨，然后当前价格跌破了 kc1 上轨，止损位置在 kc1 上轨附近位置，止盈50%位置在 kc1 中规附近位置，剩余 50% 止盈50%位置在 kc1 下轨附近位置
 	// 大级别看起来是下降通道
-	if (close1[0] < upper1[0] && close1[1] > upper1[1]) {
+	if close1[0] < upper1[0] && close1[1] > upper1[1] {
 		for i := 1; i < limitPeriod; i++ {
 			// 最近10根k线最高价格在kc2上轨之上
 			if high1[i] > upper2[i] {
 				// 大级别看起来是下降通道
-				if (utils.IsAsc(close2[0:3])) {
+				if utils.IsAsc(close2[0:3]) {
 					openResult.CanShort = true
 					return openResult
 				}
@@ -89,10 +89,10 @@ func (TradeLine TradeLine7) GetCanLongOrShort(openParams strategy.OpenParams) (o
 }
 
 func (TradeLine TradeLine7) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
-	symbols := closeParams.Symbols // 交易对
+	symbols := closeParams.Symbols   // 交易对
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
-	
+
 	lines, err := binance.GetKlineData(symbols.Symbol, "3m", 2)
 	if err != nil {
 		closeResult.Complete = true
@@ -115,8 +115,8 @@ func (TradeLine TradeLine7) CanOrderComplete(closeParams strategy.CloseParams) (
 func (TradeLine TradeLine7) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
-	
-	if closeParams.NowProfit < 3 || closeParams.NowProfit > -3 {
+
+	if autoStopNeutralROI(closeParams.NowProfit) {
 		closeResult.Complete = false
 		return closeResult
 	}
@@ -130,11 +130,11 @@ func (TradeLine TradeLine7) MarketReversal(symbol string, positionSide string) (
 	// 	return false
 	// }
 	// kline_1d_close := GetLineClosePrices(kline_1d)
-	
+
 	// ma1d_3, _ := CalculateSimpleMovingAverage(kline_1d_close, 3) // ma3
 	// ma1d_7, _ := CalculateSimpleMovingAverage(kline_1d_close, 7) // ma7
 	// ma1d_15, _ := CalculateSimpleMovingAverage(kline_1d_close, 15) // ma15
-	
+
 	// if positionSide== "LONG" {
 	// 	if KdjSimple(ma1d_7, ma1d_3, 4) && KdjSimple(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
 	// 		return true

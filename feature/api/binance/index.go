@@ -27,6 +27,10 @@ import (
 
 var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
+var testnet, _ = config.Bool("binance::testnet")
+var testnet_api_key, _ = config.String("binance::testnet_api_key")
+var testnet_api_secret, _ = config.String("binance::testnet_api_secret")
+var testnet_futures_base_url, _ = config.String("binance::testnet_binance_futures_base_url")
 var proxy_url, _ = config.String("binance::proxy_url")
 var proxyPool *binanceproxy.Pool
 var pusher = notify.GetNotifyChannel()
@@ -77,7 +81,18 @@ func init() {
 		proxyPool, _ = binanceproxy.New("")
 	}
 
-	futuresClient = futures.NewClient(api_key, api_secret)
+	futuresKey, futuresSecret := api_key, api_secret
+	if testnet {
+		futures.UseTestnet = true
+		futuresKey, futuresSecret = testnet_api_key, testnet_api_secret
+	}
+	futuresClient = futures.NewClient(futuresKey, futuresSecret)
+	if testnet && strings.TrimSpace(testnet_futures_base_url) != "" {
+		futuresClient.SetApiEndpoint(strings.TrimRight(strings.TrimSpace(testnet_futures_base_url), "/"))
+	}
+	if testnet {
+		logs.Warning("Binance USD-M Futures TESTNET mode enabled; REST endpoint:", futuresClient.BaseURL)
+	}
 	deliveryClient = delivery.NewClient(api_key, api_secret)
 	if proxyPool.Enabled() {
 		futuresClient.HTTPClient = proxyPool.HTTPClient()
@@ -404,96 +419,15 @@ func GetHistoricalKlinesWithProgress(ctx context.Context, symbol, interval strin
 	return result, nil
 }
 
-// 限价买入
-// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
-// @returns /doc/order.js
-func BuyLimit(symbol string, quantity float64, price float64, positionSide futures.PositionSideType) (order *futures.CreateOrderResponse, err error) {
-	order, err = futuresClient.NewCreateOrderService().
-		Symbol(symbol).
-		Side(futures.SideTypeBuy).
-		PositionSide(positionSide).
-		Type(futures.OrderTypeLimit).
-		TimeInForce(futures.TimeInForceTypeGTC).
-		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		Price(strconv.FormatFloat(price, 'f', -1, 64)).
-		Do(context.Background())
-	if err != nil {
-		return nil, err
+// Futures order mutations must go through service/futuresownership.Executor.
+// CreateOwnedOrder below is the only low-level primitive used by the ownership-aware broker.
+func formatOwnedOrderDecimal(value float64) string {
+	text := strconv.FormatFloat(value, 'f', 8, 64)
+	text = strings.TrimRight(strings.TrimRight(text, "0"), ".")
+	if text == "" || text == "-0" {
+		return "0"
 	}
-
-	return order, err
-}
-
-// 限价卖出
-// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
-// @returns /doc/order.js
-func SellLimit(symbol string, quantity float64, price float64, positionSide futures.PositionSideType) (order *futures.CreateOrderResponse, err error) {
-	order, err = futuresClient.NewCreateOrderService().
-		Symbol(symbol).
-		Side(futures.SideTypeSell).
-		PositionSide(positionSide).
-		Type(futures.OrderTypeLimit).
-		TimeInForce(futures.TimeInForceTypeGTC).
-		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		Price(strconv.FormatFloat(price, 'f', -1, 64)).
-		Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	return order, err
-}
-
-// 市价买入
-// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
-// @returns /doc/order.js
-func BuyMarket(symbol string, quantity float64, positionSide futures.PositionSideType) (order *futures.CreateOrderResponse, err error) {
-	order, err = futuresClient.NewCreateOrderService().
-		Symbol(symbol).
-		Side(futures.SideTypeBuy).
-		PositionSide(positionSide).
-		Type(futures.OrderTypeMarket).
-		// TimeInForce(futures.TimeInForceTypeGTC).
-		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	return order, err
-}
-
-// 市价卖出
-// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
-// @returns /doc/order.js
-func SellMarket(symbol string, quantity float64, positionSide futures.PositionSideType) (order *futures.CreateOrderResponse, err error) {
-	order, err = futuresClient.NewCreateOrderService().
-		Symbol(symbol).
-		Side(futures.SideTypeSell).
-		PositionSide(positionSide).
-		Type(futures.OrderTypeMarket).
-		// TimeInForce(futures.TimeInForceTypeGTC).
-		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	return order, err
-}
-
-// CreateAgentMarketOrder is reserved for the V2-12 controlled execution service.
-// The caller supplies a deterministic client order id so retries can reconcile
-// an ambiguous network result without submitting a second order.
-func CreateAgentMarketOrder(ctx context.Context, symbol string, quantity float64, side futures.SideType, positionSide futures.PositionSideType, clientOrderID string) (*futures.CreateOrderResponse, error) {
-	return futuresClient.NewCreateOrderService().
-		Symbol(symbol).
-		Side(side).
-		PositionSide(positionSide).
-		Type(futures.OrderTypeMarket).
-		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		NewClientOrderID(clientOrderID).
-		Do(ctx)
+	return text
 }
 
 type OwnedOrderParams struct {
@@ -515,20 +449,52 @@ func CreateOwnedOrder(ctx context.Context, params OwnedOrderParams) (*futures.Cr
 		Side(params.Side).
 		PositionSide(params.PositionSide).
 		Type(params.OrderType).
-		Quantity(strconv.FormatFloat(params.Quantity, 'f', -1, 64)).
+		Quantity(formatOwnedOrderDecimal(params.Quantity)).
 		NewClientOrderID(params.ClientOrderID)
 	if params.OrderType == futures.OrderTypeLimit {
 		service = service.TimeInForce(futures.TimeInForceTypeGTC).
-			Price(strconv.FormatFloat(params.Price, 'f', -1, 64))
+			Price(formatOwnedOrderDecimal(params.Price))
 	}
 	if params.StopPrice > 0 {
-		service = service.StopPrice(strconv.FormatFloat(params.StopPrice, 'f', -1, 64))
+		service = service.StopPrice(formatOwnedOrderDecimal(params.StopPrice))
 	}
 	return service.Do(ctx)
 }
 
 func GetOrderByClientOrderID(ctx context.Context, symbol, clientOrderID string) (*futures.Order, error) {
 	return futuresClient.NewGetOrderService().Symbol(symbol).OrigClientOrderID(clientOrderID).Do(ctx)
+}
+
+// CreateOwnedAlgoOrder submits Binance USD-M conditional orders through the
+// dedicated Algo Order API. Since 2026-08-17 STOP/TP families are rejected by
+// the normal /fapi/v1/order endpoint with -4120.
+func CreateOwnedAlgoOrder(ctx context.Context, params OwnedOrderParams) (*futures.CreateAlgoOrderResp, error) {
+	service := futuresClient.NewCreateAlgoOrderService().
+		Symbol(params.Symbol).
+		Side(params.Side).
+		PositionSide(params.PositionSide).
+		Type(futures.AlgoOrderType(strings.ToUpper(strings.TrimSpace(string(params.OrderType))))).
+		Quantity(formatOwnedOrderDecimal(params.Quantity)).
+		ClientAlgoId(params.ClientOrderID)
+	if params.StopPrice > 0 {
+		service = service.TriggerPrice(formatOwnedOrderDecimal(params.StopPrice))
+	}
+	if params.Price > 0 {
+		service = service.Price(formatOwnedOrderDecimal(params.Price))
+	}
+	return service.Do(ctx)
+}
+
+func GetAlgoOrderByClientOrderID(ctx context.Context, clientOrderID string) (*futures.GetAlgoOrderResp, error) {
+	return futuresClient.NewGetAlgoOrderService().ClientAlgoID(clientOrderID).Do(ctx)
+}
+
+func GetOrderByOrderID(ctx context.Context, symbol string, orderID int64) (*futures.Order, error) {
+	return futuresClient.NewGetOrderService().Symbol(symbol).OrderID(orderID).Do(ctx)
+}
+
+func CancelAlgoOrder(ctx context.Context, algoID int64) (*futures.CancelAlgoOrderResp, error) {
+	return futuresClient.NewCancelAlgoOrderService().AlgoID(algoID).Do(ctx)
 }
 
 // 撤销订单

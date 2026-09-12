@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"testing"
 	"time"
 
@@ -14,12 +15,14 @@ import (
 )
 
 type lifecycleBroker struct {
-	submitCalls map[string]int
-	lookupCalls map[string]int
-	cancelIDs   []int64
-	failIntent  string
-	nextOrderID int64
-	orders      map[string]futuresownership.ExchangeOrder
+	submitCalls    map[string]int
+	lookupCalls    map[string]int
+	cancelIDs      []int64
+	failIntent     string
+	closeStatus    string
+	closeFillRatio float64
+	nextOrderID    int64
+	orders         map[string]futuresownership.ExchangeOrder
 }
 
 func newLifecycleBroker() *lifecycleBroker {
@@ -34,6 +37,10 @@ func (b *lifecycleBroker) Submit(_ context.Context, request futuresownership.Ord
 	status, filled := "NEW", 0.0
 	if request.Intent == futuresownership.IntentClose {
 		status, filled = "FILLED", request.Quantity
+		if b.closeStatus != "" {
+			status = b.closeStatus
+			filled = request.Quantity * b.closeFillRatio
+		}
 	}
 	b.nextOrderID++
 	result := futuresownership.ExchangeOrder{ExchangeOrderID: fmt.Sprintf("%d", b.nextOrderID), ClientOrderID: clientID, Status: status, FilledQty: filled, AveragePrice: 101}
@@ -41,7 +48,7 @@ func (b *lifecycleBroker) Submit(_ context.Context, request futuresownership.Ord
 	return result, nil
 }
 
-func (b *lifecycleBroker) Lookup(_ context.Context, _ string, clientID string) (futuresownership.ExchangeOrder, error) {
+func (b *lifecycleBroker) Lookup(_ context.Context, _ string, clientID, _ string) (futuresownership.ExchangeOrder, error) {
 	b.lookupCalls[clientID]++
 	row, ok := b.orders[clientID]
 	if !ok {
@@ -50,7 +57,7 @@ func (b *lifecycleBroker) Lookup(_ context.Context, _ string, clientID string) (
 	return row, nil
 }
 
-func (b *lifecycleBroker) Cancel(_ context.Context, _ string, orderID int64) error {
+func (b *lifecycleBroker) Cancel(_ context.Context, _ string, orderID int64, _ string) error {
 	b.cancelIDs = append(b.cancelIDs, orderID)
 	return nil
 }
@@ -121,6 +128,68 @@ func TestOwnershipLifecycleStopFailureNeverResubmits(t *testing.T) {
 	}
 }
 
+func TestOwnershipLifecycleProtectionCanRetryAfterTerminalFailure(t *testing.T) {
+	prepareTradeTestDB(t)
+	proposal := baseProposal(time.UnixMilli(1_800_000_000_000).UTC())
+	broker := newLifecycleBroker()
+	broker.failIntent = futuresownership.IntentStopLoss
+	lifecycle := testOwnershipLifecycle(t, proposal, 0.5, broker)
+	first, err := lifecycle.EnsureProtection(context.Background(), proposal)
+	if err == nil {
+		t.Fatal("first stop submission must fail")
+	}
+	if first.StopClientOrderID == "" {
+		t.Fatal("failed protection must retain its client order id")
+	}
+	if err := lifecycle.Ownership.SetOrderStatus(context.Background(), first.StopClientOrderID, futuresownership.OrderFailed); err != nil {
+		t.Fatal(err)
+	}
+	broker.failIntent = ""
+	second, err := lifecycle.EnsureProtection(context.Background(), proposal)
+	if err != nil {
+		t.Fatalf("terminal failed protection must be replaceable: %v", err)
+	}
+	if second.StopClientOrderID == first.StopClientOrderID {
+		t.Fatalf("replacement protection must use a new attempt id: %s", second.StopClientOrderID)
+	}
+	if broker.submitCalls[futuresownership.IntentStopLoss] != 2 {
+		t.Fatalf("expected a second stop submission after terminal failure, calls=%d", broker.submitCalls[futuresownership.IntentStopLoss])
+	}
+}
+
+func TestOwnershipLifecycleResizesProtectionAfterManagedQuantityShrinks(t *testing.T) {
+	prepareTradeTestDB(t)
+	proposal := baseProposal(time.UnixMilli(1_800_000_000_000).UTC())
+	broker := newLifecycleBroker()
+	lifecycle := testOwnershipLifecycle(t, proposal, 0.5, broker)
+	first, err := lifecycle.EnsureProtection(context.Background(), proposal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := lifecycle.Ownership.ReconcilePosition(context.Background(), futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side, 0.3); err != nil {
+		t.Fatal(err)
+	}
+	second, err := lifecycle.EnsureProtection(context.Background(), proposal)
+	if err != nil {
+		t.Fatalf("protection resize after external partial close failed: %v", err)
+	}
+	if second.StopClientOrderID == first.StopClientOrderID || second.TakeProfitClientOrderID == first.TakeProfitClientOrderID {
+		t.Fatalf("resized protections must use new attempt IDs: first=%+v second=%+v", first, second)
+	}
+	if len(broker.cancelIDs) != 2 {
+		t.Fatalf("both stale protections must be canceled before resize, cancel count=%d", len(broker.cancelIDs))
+	}
+	orders, err := lifecycle.Ownership.ListOrders(context.Background(), futuresownership.OwnerAgentTrade, 50)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, order := range orders {
+		if (order.ClientOrderID == second.StopClientOrderID || order.ClientOrderID == second.TakeProfitClientOrderID) && math.Abs(order.RequestedQty-0.3) > 1e-12 {
+			t.Fatalf("replacement protection qty=%v, want 0.3: %+v", order.RequestedQty, order)
+		}
+	}
+}
+
 func TestOwnershipLifecycleCloseUsesManagedQtyAndCleansProtection(t *testing.T) {
 	prepareTradeTestDB(t)
 	proposal := baseProposal(time.UnixMilli(1_800_000_000_000).UTC())
@@ -142,6 +211,43 @@ func TestOwnershipLifecycleCloseUsesManagedQtyAndCleansProtection(t *testing.T) 
 	}
 	if _, err := lifecycle.Ownership.GetPosition(context.Background(), futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side); err != orm.ErrNoRows {
 		t.Fatalf("managed position should be closed, err=%v", err)
+	}
+}
+
+func TestOwnershipLifecycleCloseCanRetryRemainingQuantityAfterTerminalPartialFill(t *testing.T) {
+	prepareTradeTestDB(t)
+	proposal := baseProposal(time.UnixMilli(1_800_000_000_000).UTC())
+	broker := newLifecycleBroker()
+	broker.closeStatus = "CANCELED"
+	broker.closeFillRatio = 0.4
+	lifecycle := testOwnershipLifecycle(t, proposal, 0.5, broker)
+
+	first, err := lifecycle.Close(context.Background(), proposal)
+	if err == nil {
+		t.Fatal("partial terminal close must report remaining managed quantity")
+	}
+	if first.FilledQty != 0.2 {
+		t.Fatalf("first close filled qty=%v, want 0.2", first.FilledQty)
+	}
+	remaining, loadErr := lifecycle.Ownership.GetPosition(context.Background(), futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side)
+	if loadErr != nil || math.Abs(remaining.ManagedQty-0.3) > 1e-12 {
+		t.Fatalf("remaining managed qty=%+v err=%v", remaining, loadErr)
+	}
+
+	broker.closeStatus = ""
+	broker.closeFillRatio = 0
+	second, err := lifecycle.Close(context.Background(), proposal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if math.Abs(second.FilledQty-0.3) > 1e-12 || broker.submitCalls[futuresownership.IntentClose] != 2 {
+		t.Fatalf("retry must submit only remaining qty: result=%+v calls=%d", second, broker.submitCalls[futuresownership.IntentClose])
+	}
+	if first.ClientOrderID == second.ClientOrderID {
+		t.Fatalf("terminal partial close retry must use a new client order id: %s", first.ClientOrderID)
+	}
+	if _, err := lifecycle.Ownership.GetPosition(context.Background(), futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side); err != orm.ErrNoRows {
+		t.Fatalf("managed position should be fully closed after retry, err=%v", err)
 	}
 }
 
