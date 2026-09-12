@@ -70,6 +70,16 @@ type OBVConfigData struct {
 	Data          []float64 `json:"data"`           // On-balance volume
 }
 
+const (
+	// Keep the historical 150-bar baseline so existing EMA/Wilder-based strategy values
+	// do not change merely because their mathematical minimum is smaller. The value is
+	// now a floor, not a hard cap: indicators with longer warmup automatically request more.
+	defaultStrategyKlineLimit      = 150
+	strategyIndicatorOutputReserve = 32
+	// Binance Futures Kline REST supports at most 1500 rows per request.
+	maxStrategyKlineLimit = 1500
+)
+
 type KLinePrice struct {
 	High   []float64 `json:"high"`   // 最高价
 	Low    []float64 `json:"low"`    // 最低价
@@ -91,7 +101,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 		return config, klineMap
 	}
 
-	limit := 150
+	limit := technologyKlineLimit(technologyConfig)
 	usedIndicatorNames := make(map[string]struct{})
 	for _, item := range technologyConfig.MA {
 		if item.Enable {
@@ -583,10 +593,31 @@ var reservedIndicatorNames = map[string]struct{}{
 	"KdjSimple": {}, "IsAsc": {}, "IsDesc": {}, "ROI": {}, "Position": {}, "Positions": {},
 }
 
-// ValidateTechnologyConfig validates enabled indicator settings without loading market data.
-func ValidateTechnologyConfig(config technology.TechnologyConfig) error {
-	usedNames := make(map[string]struct{})
-	indicatorGroups := []struct {
+func indicatorRequiredKlines(indicatorType string, item technology.IndicatorConfig) int {
+	reserve := strategyIndicatorOutputReserve
+	switch indicatorType {
+	case "macd":
+		// MACD output length is N-slow-signal+2.
+		return item.SlowPeriod + item.SignalPeriod + reserve - 2
+	case "rsi", "roc", "mfi":
+		// These outputs have length N-period.
+		return item.Period + reserve
+	case "adx":
+		// ADX output length is N-2*period+1.
+		return 2*item.Period + reserve - 1
+	case "obv":
+		return reserve
+	default:
+		// MA/EMA/CCI/KDJ/KC/BOLL/Donchian/ATR/Supertrend outputs are N-period+1.
+		return item.Period + reserve - 1
+	}
+}
+
+func technologyIndicatorGroups(config technology.TechnologyConfig) []struct {
+	name  string
+	items []technology.IndicatorConfig
+} {
+	return []struct {
 		name  string
 		items []technology.IndicatorConfig
 	}{
@@ -606,13 +637,38 @@ func ValidateTechnologyConfig(config technology.TechnologyConfig) error {
 		{name: "atr", items: config.ATR},
 		{name: "supertrend", items: config.Supertrend},
 	}
+}
+
+func technologyKlineLimit(config technology.TechnologyConfig) int {
+	limit := defaultStrategyKlineLimit
+	for _, group := range technologyIndicatorGroups(config) {
+		for _, item := range group.items {
+			if !item.Enable {
+				continue
+			}
+			required := indicatorRequiredKlines(group.name, item)
+			if required > limit {
+				limit = required
+			}
+		}
+	}
+	if limit > maxStrategyKlineLimit {
+		return maxStrategyKlineLimit
+	}
+	return limit
+}
+
+// ValidateTechnologyConfig validates enabled indicator settings without loading market data.
+func ValidateTechnologyConfig(config technology.TechnologyConfig) error {
+	usedNames := make(map[string]struct{})
+	indicatorGroups := technologyIndicatorGroups(config)
 
 	for _, group := range indicatorGroups {
 		for _, item := range group.items {
 			if !item.Enable {
 				continue
 			}
-			if err := validateIndicatorConfig("", group.name, item, 150, usedNames); err != nil {
+			if err := validateIndicatorConfig("", group.name, item, maxStrategyKlineLimit, usedNames); err != nil {
 				return err
 			}
 		}
@@ -645,8 +701,9 @@ func validateIndicatorConfig(symbol, indicatorType string, item technology.Indic
 		if item.FastPeriod >= item.SlowPeriod {
 			return fmt.Errorf("MACD indicator %q fast period must be less than slow period", name)
 		}
-		if item.SlowPeriod+item.SignalPeriod-1 > maxPeriod {
-			return fmt.Errorf("MACD indicator %q requires more than %d K-lines", name, maxPeriod)
+		required := indicatorRequiredKlines(indicatorType, item)
+		if required > maxPeriod {
+			return fmt.Errorf("MACD indicator %q requires %d K-lines (including %d recent outputs), maximum is %d", name, required, strategyIndicatorOutputReserve, maxPeriod)
 		}
 		usedNames[name] = struct{}{}
 		return nil
@@ -681,6 +738,10 @@ func validateIndicatorConfig(symbol, indicatorType string, item technology.Indic
 	}
 	if indicatorType == "boll" && item.StdDevMultiplier < 0 {
 		return fmt.Errorf("BOLL indicator %q standard deviation multiplier must not be negative", name)
+	}
+	required := indicatorRequiredKlines(indicatorType, item)
+	if required > maxPeriod {
+		return fmt.Errorf("%s indicator %q requires %d K-lines (including %d recent outputs), maximum is %d", strings.ToUpper(indicatorType), name, required, strategyIndicatorOutputReserve, maxPeriod)
 	}
 	usedNames[name] = struct{}{}
 	return nil
