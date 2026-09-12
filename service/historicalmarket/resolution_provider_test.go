@@ -87,6 +87,9 @@ func TestResolutionProviderSecondBarsDownloadsVerifiedDailyKlines(t *testing.T) 
 	if len(again) != 2 || !secondEvidence.CacheHit || requests.Load() != firstRequests {
 		t.Fatalf("persisted sparse seconds not reused: evidence=%+v requests=%d/%d", secondEvidence, requests.Load(), firstRequests)
 	}
+	if secondEvidence.EvidenceHash != evidence.EvidenceHash || secondEvidence.Resolution != evidence.Resolution {
+		t.Fatalf("cold/hot native 1s evidence changed: cold=%+v hot=%+v", evidence, secondEvidence)
+	}
 	if provider.Stats().ArchiveDownloads != 1 || provider.Stats().SecondCacheHits != 1 {
 		t.Fatalf("unexpected resolution stats: %+v", provider.Stats())
 	}
@@ -146,6 +149,9 @@ func TestResolutionProviderSecondBarsFallsBackToTrades(t *testing.T) {
 	}
 	if len(again) != 2 || !againEvidence.CacheHit || klineRequests.Load() != firstKline || tradeRequests.Load() != firstTrade {
 		t.Fatalf("derived sparse cache not reused: evidence=%+v requests=%d/%d", againEvidence, klineRequests.Load(), tradeRequests.Load())
+	}
+	if againEvidence.EvidenceHash != evidence.EvidenceHash || againEvidence.Resolution != evidence.Resolution {
+		t.Fatalf("cold/hot derived 1s evidence changed: cold=%+v hot=%+v", evidence, againEvidence)
 	}
 }
 

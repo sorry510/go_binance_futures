@@ -153,3 +153,19 @@ if scanner == nil || scanner.archiveURL != archive.URL || (start > 0 && scanner.
 **未发现 P0/P1 缺陷。** 两项 P2 均为"边界条件下静默改变结果"的类型（F1 阈值提取、F2 scanner 等值边界），触发条件窄且在正常数据/常规策略写法下不出现，但一旦命中不会报错、只体现在回测结果差异上，建议在人工验收前处理或至少补测试固化预期。其余 P3 为健壮性、版本口径、可观测性与文档问题。
 
 **AUTOMATED PASS / 人工验收待定**（沿用本轮结论）。
+
+---
+
+## 9. 复评处理记录（2026-09-12）
+
+- **F1 / P2：已修复。** ROI 数字字面量支持科学计数法与 `_` 分隔符，并增加比较式邻接校验；`ROI >= 5 + 1`、`1 + 5 <= ROI` 等无法证明为纯字面量比较的表达式改为 ineligible，保守走完整 Adaptive 重放。新增测试覆盖 `1.5e3`、`1_600` 与算术表达式回退。
+- **F2 / P2：已修复。** scanner 重开条件由 `start < lastTime` 改为 `start <= lastTime`；新增 `start == lastTime` 回归测试，确认边界记录不会丢失。
+- **F3 / P3：已修复。** ROI-only 证明阶段的 `BuildIntrabar` 失败不再终止 Run，而是放弃优化、回退高精度完整重放；新增 malformed full-minute 回归测试。
+- **F4 / P3：已加 fail-closed。** trade replay 若发现成交价落在对应 1s `[Low, High]` 之外，直接报 evidence inconsistency，而不是在矛盾证据上继续剪枝/成交。当前生产 1s 数据全部由同一批 verified trades 聚合，因此正常路径不会触发。
+- **F5 / P3：已处理。** 数据库已有成功的 `backtest_engine_v8` Run，本轮 ROI 剪枝与证据获取路径已改变，因此当前 Adaptive EngineVersion 提升为 `backtest_engine_v9`；无 schema 变更，不提升 DB version。
+- **F6 / P3：不修改。** 高精度 activity 在实际 download/parse 阻塞期间会保持对应 stage；操作结束并继续 bar replay 后恢复 `running_backtest` 是期望行为。若 cache 命中很快，阶段短暂属于真实状态，不强行延长 UI 展示。
+- **F7 / P3：已清理。** Phase 文档移除 forward scanner 重复 bullet，并明确两组 benchmark 的区间口径。
+
+- **追加发现 F8 / P2（缓存可复现性）：已修复。** 首次由 trades 聚合 1s 时 EvidenceHash 使用 `second-from-trades`，而 sparse cache 命中曾使用 `second-local`，导致相同 1s rows 可能因 cache 状态得到不同 DataHash。现已按真实来源 canonicalize：derived trades 固定使用 `1s_from_trades` + `second-from-trades`，原生 1s 固定使用 `1s`；新增 cold/hot cache evidence hash 一致性测试。
+
+本轮针对性测试通过后，再执行全量 `go test ./...`、race、build 与 `git diff --check` 作为最终 Gate。

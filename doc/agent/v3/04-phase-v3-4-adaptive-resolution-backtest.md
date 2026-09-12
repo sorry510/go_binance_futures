@@ -217,7 +217,7 @@ Adaptive Run 必须记录：
 
 Audit Event 增加 `intrabar_resolution`，至少记录：候选事件、1m OHLC、使用精度、首次命中时间、最终事件、数据 source_ref/checksum。
 
-Engine 语义变化后提升 EngineVersion。最终实现将 A/B 合并到同一 Adaptive 路径，统一使用 `backtest_engine_v8`；标准模式继续保持 V6，旧 V6 Run 不回写。
+Engine 语义变化后提升 EngineVersion。最终实现将 A/B 合并到同一 Adaptive 路径，统一使用 `backtest_engine_v9`；标准模式继续保持 V6，旧 V6 Run 不回写。
 ## 6. V3-4B：Adaptive Strategy Evaluation
 
 V3-4B 才处理当前 ROI Gate / close strategy 在分钟内部可能成立又消失的问题。
@@ -291,7 +291,7 @@ V3-4B 不要求所有 long/short 开仓规则都变成秒级；“捕捉 1m Clos
 
 ### 6.5 Engine Version
 
-V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v8`，与 V7 的纯 Intrabar Execution 明确分离。
+V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v9`，与 V7 的纯 Intrabar Execution 明确分离。
 ## 7. UI / API
 
 回测页面增加精度模式：
@@ -467,7 +467,7 @@ V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v8`，�
 > V3-4 完成后，Backtest 仍以 1m 为主时间轴；绝大多数历史 Bar 保持 V3-3 的速度和存储成本。只有当 1m 无法确定执行顺序或当前 ROI Gate 在分钟内可能触发时，Engine 才按需取得 Binance 官方 1s/trades 数据进行更高精度重放，并把所有下钻证据、数据版本和最终决策完整记录，且不存在未来数据泄漏。
 ## 14. 实现结果（2026-09-11）
 
-- Engine：`standard_1m` 保持 `backtest_engine_v6`；Adaptive 使用 `backtest_engine_v8`。
+- Engine：`standard_1m` 保持 `backtest_engine_v6`；Adaptive 使用 `backtest_engine_v9`。
 - 数据源：Go 原生 Binance Public Data Client，支持 1s Kline / trades、CHECKSUM、proxy、retry、cancel、singleflight。
 - 存储：新增 sparse `market_klines_1s` / `market_trades`，只保存实际下钻使用的数据；写入使用事务避免取消时留下半截 canonical 数据。
 - 时序：Live `InitParseEnv` 使用当前动态 Kline；Adaptive 以截至当前秒/当前 trade 已知数据构造 partial Kline，不读取未来 1m/高周期数据。
@@ -479,18 +479,16 @@ V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v8`，�
 - 执行假设：当前回测模型没有独立的 Limit 挂单/部分成交对象，因此 `IntrabarResolver` 的 Limit 排队简化假设尚未进入生产执行路径；未来加入 Limit 模型时必须显式记录对应 Run metadata。
 - 数据库版本：V3-4 从现有 **v10** 顺序升级到 **v11**。若后续与另一个同样使用 v11 的分支合并，再由合并结果统一提升到下一个数据库版本，避免提前跳号。
 - Adaptive 性能修复：verified trades 的父 `range` coverage 可直接服务秒级子请求，避免同一 daily trades ZIP 被每秒重复解压扫描；intrabar environment 使用二分定位当前窗口并限制指标序列为 warmup 范围，避免长历史 O(n) 复制被每个 trade 放大。
-- 真实 BTCUSDT 复现验证：相同策略/配置截取到首次问题区间，Adaptive 完成 3 个 1s drill-down 分钟、104 个 trade drill-down 秒，全部命中 sparse cache，结果/DataHash 稳定。
+- 真实 BTCUSDT 首次问题区间复现验证：相同策略/配置下，Adaptive 完成 3 个 1s drill-down 分钟、104 个 trade drill-down 秒，全部命中 sparse cache，结果/DataHash 稳定。
 - 验证：`go test ./...`、`go test -race ./service/historicalmarket ./service/backtest`、`go build ./...`、前端 `pnpm build`、`git diff --check` 均通过。SQLite schema/idempotency 自动测试通过；本次未直接修改服务器 MySQL/PostgreSQL，部署时统一执行 `./go_binance_futures sync db`。
-
-
-- 同一 Run 内 Public Data daily ZIP 使用前向流式 CSV scanner，避免不同候选分钟重复解压。
-
 
 ## 复核与性能补充（2026-09-12）
 
-- Public Data daily ZIP 使用单 Run forward scanner，同一 archive 的后续时间范围不再从 ZIP 起点重复解压。
+- Public Data daily ZIP 使用单 Run forward scanner，同一 archive 的后续时间范围不再从 ZIP 起点重复解压；`start == lastTime` 边界会保守重开 scanner，避免漏掉已消费边界记录。
 - 404 archive 在单 Run 内 negative cache；父级 sparse trades range 可覆盖子级秒请求。
-- Adaptive 对可证明为 ROI-only 动态的平仓规则先做 ROI 范围可达性判断，无法成立的分钟不下钻 1s/trades。
+- Adaptive 对可证明为 ROI-only 动态的平仓规则先做 ROI 范围可达性判断，无法成立的分钟不下钻 1s/trades；阈值解析支持科学计数法/数字下划线，无法完整证明的表达式保守回退完整重放。
 - 高精度阶段区分为读取缓存、下载 ZIP、解析 ZIP，并暴露给前端实时展示。
 - 回测页面新增 Run 耗时展示；运行中持续更新，结束后使用 started_at/completed_at 固化。
-- BTCUSDT 2026-01-01 ~ 2026-01-15 真实只读 benchmark：Dataset ≈0.36s，Adaptive Engine ≈50.3s，SecondDrilldownMinutes=55，TradeDrilldownSeconds=2859。
+- BTCUSDT `2026-01-01 ~ 2026-01-15` 真实只读 benchmark：Dataset ≈0.36s，Adaptive Engine ≈50.3s，SecondDrilldownMinutes=55，TradeDrilldownSeconds=2859。
+- ROI 剪枝/证据获取行为已在已有 V8 Run 之后继续变化，因此当前 Adaptive EngineVersion 提升到 `backtest_engine_v9`；数据库 schema/version 不变。
+- 1s evidence 在首次生成与 sparse cache 命中时使用相同 canonical hash kind，保证 cache 状态不改变最终 DataHash。
