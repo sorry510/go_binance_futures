@@ -223,7 +223,7 @@ func CheckTestResults(systemConfig *models.Config) {
 			continue
 		}
 
-		hasCloseStrategy := false
+		hasCloseStrategy := line.HasEnabledCloseStrategy(strategyConfig, result.PositionSide)
 		env := line.InitParseEnv(result.Symbol, result.Technology)
 		floatNowPrice, ok := env["NowPrice"].(float64)
 		if !ok {
@@ -274,10 +274,6 @@ func CheckTestResults(systemConfig *models.Config) {
 					// 平空仓的策略，当前仓位不是空仓，跳过
 					continue
 				}
-
-				// 只要存在适用于当前持仓方向且已启用的平仓策略，就不能再走系统 ROI fallback。
-				// 编译/执行失败属于策略错误，不应被误判为“没有定义平仓策略”。
-				hasCloseStrategy = true
 
 				program, err := expr.Compile(strategy.Code, expr.Env(env))
 				if err != nil {
