@@ -157,6 +157,45 @@ func TestOwnershipLifecycleProtectionCanRetryAfterTerminalFailure(t *testing.T) 
 	}
 }
 
+func TestOwnershipLifecycleRecreatesProtectionAfterTerminalPartialFill(t *testing.T) {
+	prepareTradeTestDB(t)
+	proposal := baseProposal(time.UnixMilli(1_800_000_000_000).UTC())
+	broker := newLifecycleBroker()
+	lifecycle := testOwnershipLifecycle(t, proposal, 0.5, broker)
+	first, err := lifecycle.EnsureProtection(context.Background(), proposal)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Simulate an exchange-side terminal protective fill that only reduced part
+	// of the managed position. The remaining 0.3 must receive fresh protection.
+	stop := broker.orders[first.StopClientOrderID]
+	stop.Status, stop.FilledQty = "FILLED", 0.2
+	broker.orders[first.StopClientOrderID] = stop
+	if _, err := lifecycle.Executor.Reconcile(context.Background(), proposal.Symbol, first.StopClientOrderID); err != nil {
+		t.Fatal(err)
+	}
+	remaining, err := lifecycle.Ownership.GetPosition(context.Background(), futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side)
+	if err != nil || math.Abs(remaining.ManagedQty-0.3) > 1e-12 {
+		t.Fatalf("remaining managed position=%+v err=%v", remaining, err)
+	}
+
+	second, err := lifecycle.EnsureProtection(context.Background(), proposal)
+	if err != nil {
+		t.Fatalf("remaining managed position must be re-protected: %v", err)
+	}
+	if second.StopClientOrderID == first.StopClientOrderID {
+		t.Fatalf("terminal filled stop must not be reused: %s", first.StopClientOrderID)
+	}
+	if broker.submitCalls[futuresownership.IntentStopLoss] != 2 {
+		t.Fatalf("expected replacement stop submission, calls=%d", broker.submitCalls[futuresownership.IntentStopLoss])
+	}
+	row, err := findLifecycleOrder(second.StopClientOrderID)
+	if err != nil || math.Abs(row.RequestedQty-0.3) > 1e-12 {
+		t.Fatalf("replacement stop must protect remaining 0.3: %+v err=%v", row, err)
+	}
+}
+
 func TestOwnershipLifecycleResizesProtectionAfterManagedQuantityShrinks(t *testing.T) {
 	prepareTradeTestDB(t)
 	proposal := baseProposal(time.UnixMilli(1_800_000_000_000).UTC())

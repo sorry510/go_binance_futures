@@ -242,7 +242,7 @@ The **Futures Trade → Futures Trade** page supports per-symbol settings for st
 
 ### Enabling futures trading
 
-1. Under **Configuration Center → Futures Trade** (`配置中心 → 合约交易`), enable the futures master switch and `WebSocket`.
+1. Under **Configuration Center → Futures Trade** (`配置中心 → 合约交易`), enable the futures master switch and `WebSocket`. The futures master switch is saved immediately and no longer shows a second confirmation dialog.
 2. Enable `Allow Long` and/or `Allow Short`, then configure the global strategies, position limits, and order type.
 3. Open **Futures Trade → Futures Trade** and verify the target symbol's parameters and enabled status.
 
@@ -254,7 +254,7 @@ The **Futures Trade → Futures Trade** page supports per-symbol settings for st
 - **Trading Strategy / Coin Selection Strategy:** used when a symbol's strategy type is `global`; custom symbols use their own configuration.
 - **Maximum Positions / Maximum Losing Positions:** prevent new automatic positions after a limit is reached. Automatic scaling can adjust the losing-position limit after consecutive wins or losses.
 - **Market Trend:** select it manually or enable automatic market-trend updates for strategy evaluation.
-- **Excluded Symbols:** symbols selected in the UI are excluded from automatic trading. Add existing manual positions here if the bot must not manage them.
+- **Ownership isolation:** the Excluded Symbols setting has been removed. Automatic futures trading only manages positions and orders created and registered by the corresponding owner. Manual positions, positions owned by other modules, and unknown account positions are not automatically claimed, closed, or canceled by `auto_strategy`.
 - **Order Type:** `LIMIT` places a limit order; `MARKET` executes a market order.
 
 ## Historical Backtest
@@ -375,7 +375,7 @@ The System Configuration page contains sensitive values such as API keys, databa
 ## important
 - The network must be located outside the mainland (as the Binance interface cannot be accessed normally in mainland China). The proxy configuration for Binance API has been added (websocket has no proxy configuration due to component usage issues, and is only used to update the latest contract currency prices in the background). If there are available proxies, they can also be used normally
 -Apply for api_key address: [Binance API Management Page]（ https://www.binance.com/cn/usercenter/settings/api-management )
-- If the account already has futures positions, select symbols that the bot must not manage under **Configuration Center → Futures Trade → Excluded Symbols**. Otherwise, the bot may close them according to its strategy
+- Automatic futures trading uses Ownership isolation and only manages positions/orders created and registered by the corresponding owner. Existing manual or unknown positions are not automatically claimed by the bot
 - After modifying `conf/app.conf`, restart the application before expecting startup-time settings to take effect
 -Please ensure that your account has sufficient USDT, otherwise placing an order will result in an error
 - Do not exceed 20 notifications within 1 minute of DingTalk push, otherwise the IP address will be blocked for a period of time and the push will not be successful
@@ -390,7 +390,7 @@ The System Configuration page contains sensitive values such as API keys, databa
 2. **Where can I view simulated trades?** Enable `Test Strategy`, then use `View Test Results` or open **Futures Trade → Test Results**.
 3. **Why did a configuration change not take effect?** Configuration Center updates runtime settings. System Configuration edits `conf/app.conf`; after `Save`, startup-time settings still require an application restart.
 4. **Why are futures prices delayed?** Prices are updated through WebSocket. Check the `WebSocket` switch, network quality, and proxy stability.
-5. **Why can the account not open a position?** Check direction switches, maximum-position limits, maximum losing positions, excluded symbols, symbol enabled status, and available USDT. Binance may also restrict some IP regions.
+5. **Why can the account not open a position?** Check direction switches, maximum-position limits, maximum losing positions, symbol enabled status, available USDT, and whether the same Symbol/side already has a managed position or active controlled order. Binance may also restrict some IP regions.
 6. **Why is the UI slow?** For larger datasets, use MySQL; SQLite is better suited to smaller deployments.
 7. **What should I do after an API rate-limit error?** Reduce enabled symbols, monitoring rules, and high-frequency notifications, then wait for Binance's restriction to clear.
 8. **Where are AI alert, Scheduler, and budget settings?** Open **AI → AI Configuration**; these settings are no longer in Configuration Center.

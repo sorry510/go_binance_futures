@@ -12,6 +12,7 @@ import (
 	"go_binance_futures/agent/skills/symbolanalysis"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/models"
+	futuresownership "go_binance_futures/service/futuresownership"
 
 	"github.com/beego/beego/v2/client/orm"
 	_ "github.com/mattn/go-sqlite3"
@@ -517,5 +518,63 @@ func TestManagedCloseIsIdempotent(t *testing.T) {
 	_, result, err = service.Close(context.Background(), proposal.ProposalID, "tester")
 	if err != nil || !result.AlreadyClosed || lifecycle.closeCalls != 1 {
 		t.Fatalf("repeated close must be idempotent: result=%+v calls=%d err=%v", result, lifecycle.closeCalls, err)
+	}
+}
+
+func TestSyncClosedManagedProposalsUsesOwnershipSourceRef(t *testing.T) {
+	prepareTradeTestDB(t)
+	ctx := context.Background()
+	now := time.UnixMilli(1_800_000_000_000).UTC()
+	service := Service{Store: Store{}, Now: func() time.Time { return now }}
+	ownership := futuresownership.Service{Now: func() time.Time { return now }}
+
+	closed := baseProposal(now)
+	closed.ProposalID, closed.Status = "proposal_closed", StatusExecuted
+	if err := service.Store.SaveProposal(ctx, &closed); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ownership.ClaimOrder(ctx, futuresownership.ClaimOrderInput{Owner: futuresownership.OwnerAgentTrade, Symbol: closed.Symbol, PositionSide: closed.Side, Intent: futuresownership.IntentOpen, ClientOrderID: "agt_sync_closed", RequestedQty: 0.5, OrderType: "MARKET", SourceRef: closed.ProposalID}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ownership.ApplyFill(ctx, "agt_sync_closed", 0.5, 100); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ownership.ReconcilePosition(ctx, futuresownership.OwnerAgentTrade, closed.Symbol, closed.Side, 0); err != nil {
+		t.Fatal(err)
+	}
+
+	unknown := baseProposal(now)
+	unknown.ProposalID, unknown.Symbol, unknown.Status = "proposal_no_ownership", "ETHUSDT", StatusExecuted
+	if err := service.Store.SaveProposal(ctx, &unknown); err != nil {
+		t.Fatal(err)
+	}
+
+	active := baseProposal(now)
+	active.ProposalID, active.Symbol, active.Status = "proposal_active", "SOLUSDT", StatusProtectionFailed
+	if err := service.Store.SaveProposal(ctx, &active); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ownership.ClaimOrder(ctx, futuresownership.ClaimOrderInput{Owner: futuresownership.OwnerAgentTrade, Symbol: active.Symbol, PositionSide: active.Side, Intent: futuresownership.IntentOpen, ClientOrderID: "agt_sync_active", RequestedQty: 0.2, OrderType: "MARKET", SourceRef: active.ProposalID}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ownership.ApplyFill(ctx, "agt_sync_active", 0.2, 50); err != nil {
+		t.Fatal(err)
+	}
+
+	updated, err := service.SyncClosedManagedProposals(ctx, "test")
+	if err != nil || updated != 1 {
+		t.Fatalf("sync result updated=%d err=%v", updated, err)
+	}
+	gotClosed, _ := service.Store.GetProposal(ctx, closed.ProposalID)
+	gotUnknown, _ := service.Store.GetProposal(ctx, unknown.ProposalID)
+	gotActive, _ := service.Store.GetProposal(ctx, active.ProposalID)
+	if gotClosed.Status != StatusClosed {
+		t.Fatalf("closed ownership proposal status=%s", gotClosed.Status)
+	}
+	if gotUnknown.Status != StatusExecuted {
+		t.Fatalf("proposal without ownership history must remain executed, got %s", gotUnknown.Status)
+	}
+	if gotActive.Status != StatusProtectionFailed {
+		t.Fatalf("active owned proposal must retain status, got %s", gotActive.Status)
 	}
 }
