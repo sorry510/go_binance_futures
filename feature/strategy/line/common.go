@@ -174,7 +174,7 @@ func baseMarketBreadthPermissions(riseCount, fallCount, total int, btcPercentCha
 	return canLong, canShort
 }
 
-// 判断 btc 的涨跌是否大于 5%，判断 当前所有币种涨跌数量是否 80%，是否是一个单项行情
+// 判断 btc 的涨跌是否大于 5%，结合 75%/60% 市场宽度阈值判断是否为单边行情
 func BaseCheckCanLongOrShort() (canLong bool, canShort bool) {
 	coins, err := GetAllSymbols()
 	if err != nil {

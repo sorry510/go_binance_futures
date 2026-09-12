@@ -99,7 +99,10 @@ func (l OwnershipLifecycle) nextProtectionClientOrderID(ctx context.Context, pro
 		}
 		attempts++
 		if managed.Status == futuresownership.OrderFilled {
-			return managed.ClientOrderID, nil
+			// A terminal protective order must never be treated as active protection.
+			// If EnsureProtection is running, a managed position still exists, so a
+			// filled/terminal protection needs a fresh attempt for the remainder.
+			continue
 		}
 		if managed.Status == futuresownership.OrderPending || managed.Status == futuresownership.OrderSubmitted || managed.Status == futuresownership.OrderPartiallyFilled || managed.Status == futuresownership.OrderReconcile {
 			if math.Abs(managed.RequestedQty-quantity) <= 1e-12 {
