@@ -34,6 +34,9 @@ type AgentBacktestRun struct {
 	StrategyJSON         string  `orm:"column(strategy_json);type(text)" json:"-"`
 	EngineVersion        string  `orm:"column(engine_version);size(64);index" json:"engine_version"`
 	MarketConditionModel string  `orm:"column(market_condition_model);size(64)" json:"market_condition_model"`
+	ResolutionMode       string  `orm:"column(resolution_mode);size(32);default(standard_1m);index" json:"resolution_mode"`
+	ResolutionModel      string  `orm:"column(resolution_model);size(64);default(standard_1m_v1)" json:"resolution_model"`
+	ResolutionStatsJSON  string  `orm:"column(resolution_stats_json);type(text);null" json:"-"`
 	Symbol               string  `orm:"column(symbol);size(32);index" json:"symbol"`
 	ExecutionInterval    string  `orm:"column(execution_interval);size(16)" json:"execution_interval"`
 	StartTime            int64   `orm:"column(start_time);index" json:"start_time"`
@@ -83,6 +86,8 @@ type AgentBacktestTrade struct {
 	CloseStrategyType string  `orm:"column(close_strategy_type);size(32);null" json:"close_strategy_type,omitempty"`
 	CloseStrategyHash string  `orm:"column(close_strategy_hash);size(64);null" json:"close_strategy_hash,omitempty"`
 	MarketCondition   int     `orm:"column(market_condition);index" json:"market_condition"`
+	EntryResolution   string  `orm:"column(entry_resolution);size(16);default(1m)" json:"entry_resolution"`
+	ExitResolution    string  `orm:"column(exit_resolution);size(16);default(1m)" json:"exit_resolution"`
 }
 
 func (*AgentBacktestTrade) TableName() string { return "agent_backtest_trades" }

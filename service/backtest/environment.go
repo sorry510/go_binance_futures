@@ -21,6 +21,7 @@ var ErrInsufficientHistoricalBars = errors.New("insufficient historical bars")
 type historicalEnvironment struct {
 	dataset    Dataset
 	technology technology.TechnologyConfig
+	overlays   map[string]Bar
 }
 
 func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historicalEnvironment, error) {
@@ -37,6 +38,24 @@ func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historic
 }
 
 func (builder *historicalEnvironment) Build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
+	return builder.build(asOf, position, cash, config)
+}
+
+// BuildIntrabar mirrors the live environment's use of the current open K-line,
+// but only with price/volume information observed through the supplied partial
+// minute. Higher-interval current bars are reconstructed from completed 1m
+// bars plus this partial minute, so no future part of the current bar leaks in.
+func (builder *historicalEnvironment) BuildIntrabar(asOf int64, partialMinute Bar, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
+	overlays, err := buildIntrabarOverlays(builder.dataset, partialMinute, asOf)
+	if err != nil {
+		return nil, 0, err
+	}
+	clone := *builder
+	clone.overlays = overlays
+	return clone.build(asOf, position, cash, config)
+}
+
+func (builder *historicalEnvironment) build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
 	currentBars := builder.series(builder.dataset.Symbol, builder.dataset.ExecutionInterval, asOf, DefaultWarmupBars)
 	if len(currentBars) == 0 {
 		return nil, 0, fmt.Errorf("%w: no execution bars visible at %d", ErrInsufficientHistoricalBars, asOf)
@@ -88,33 +107,84 @@ func (builder *historicalEnvironment) marketConditionAt(asOf int64) int {
 }
 
 func (builder *historicalEnvironment) series(symbol, interval string, asOf int64, limit int) []Bar {
-	all := builder.dataset.Bars[BarSeriesKey(symbol, interval)]
+	key := BarSeriesKey(symbol, interval)
+	all := builder.dataset.Bars[key]
 	end := sort.Search(len(all), func(i int) bool { return all[i].CloseTime > asOf })
-	if end <= 0 {
-		return nil
+	overlay, hasOverlay := builder.overlays[key]
+	if hasOverlay && (overlay.OpenTime > asOf || overlay.CloseTime > asOf) {
+		hasOverlay = false
+	}
+	replacesLast := hasOverlay && end > 0 && all[end-1].OpenTime == overlay.OpenTime
+	canonicalLimit := limit
+	if limit > 0 && hasOverlay && !replacesLast {
+		canonicalLimit--
+		if canonicalLimit < 0 {
+			canonicalLimit = 0
+		}
 	}
 	start := 0
-	if limit > 0 && end > limit {
-		start = end - limit
+	if limit > 0 && end > canonicalLimit {
+		start = end - canonicalLimit
 	}
 	out := append([]Bar(nil), all[start:end]...)
+	if hasOverlay {
+		if len(out) > 0 && out[len(out)-1].OpenTime == overlay.OpenTime {
+			out[len(out)-1] = overlay
+		} else {
+			out = append(out, overlay)
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	if limit > 0 && len(out) > limit {
+		out = out[len(out)-limit:]
+	}
 	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
 		out[i], out[j] = out[j], out[i]
 	}
 	return out
 }
-func (builder *historicalEnvironment) tickerStats(symbol string, asOf int64) map[string]interface{} {
-	all := builder.dataset.Bars[BarSeriesKey(symbol, builder.dataset.ExecutionInterval)]
+
+func (builder *historicalEnvironment) visibleBars(symbol, interval string, asOf int64) []Bar {
+	all := builder.dataset.Bars[BarSeriesKey(symbol, interval)]
 	end := sort.Search(len(all), func(i int) bool { return all[i].CloseTime > asOf })
-	if end == 0 {
-		return map[string]interface{}{"PercentChange": 0.0, "Close": 0.0, "Open": 0.0, "Low": 0.0, "High": 0.0}
+	visible := all[:end]
+	overlay, ok := builder.overlays[BarSeriesKey(symbol, interval)]
+	if !ok || overlay.OpenTime > asOf || overlay.CloseTime > asOf {
+		// Standard 1m replay must stay zero-copy here. Copying all historical
+		// bars on every minute turns a long backtest into O(n²) memory work.
+		return visible
 	}
+	// Intrabar replay is rare and may replace/append the current partial bar.
+	// Copy only in that path so the canonical dataset is never mutated.
+	out := append([]Bar(nil), visible...)
+	if len(out) > 0 && out[len(out)-1].OpenTime == overlay.OpenTime {
+		out[len(out)-1] = overlay
+	} else {
+		out = append(out, overlay)
+	}
+	return out
+}
+
+func (builder *historicalEnvironment) tickerStats(symbol string, asOf int64) map[string]interface{} {
+	key := BarSeriesKey(symbol, builder.dataset.ExecutionInterval)
+	all := builder.dataset.Bars[key]
+	end := sort.Search(len(all), func(i int) bool { return all[i].CloseTime > asOf })
 	startTime := asOf - (24 * time.Hour).Milliseconds()
 	start := sort.Search(end, func(i int) bool { return all[i].CloseTime >= startTime })
-	if start >= end {
-		start = end - 1
+	window := append([]Bar(nil), all[start:end]...)
+	overlay, hasOverlay := builder.overlays[key]
+	if hasOverlay && overlay.OpenTime <= asOf && overlay.CloseTime <= asOf {
+		if len(window) > 0 && window[len(window)-1].OpenTime == overlay.OpenTime {
+			window[len(window)-1] = overlay
+		} else {
+			window = append(window, overlay)
+		}
 	}
-	window := all[start:end]
+	if len(window) == 0 {
+		return map[string]interface{}{"PercentChange": 0.0, "Close": 0.0, "Open": 0.0, "Low": 0.0, "High": 0.0}
+	}
 	open := window[0].Open
 	close := window[len(window)-1].Close
 	low, high := window[0].Low, window[0].High
@@ -131,6 +201,85 @@ func (builder *historicalEnvironment) tickerStats(symbol string, asOf int64) map
 		change = (close - open) / open * 100
 	}
 	return map[string]interface{}{"PercentChange": change, "Close": close, "Open": open, "Low": low, "High": high}
+}
+
+func buildIntrabarOverlays(dataset Dataset, partialMinute Bar, asOf int64) (map[string]Bar, error) {
+	if partialMinute.OpenTime <= 0 || partialMinute.CloseTime != asOf || partialMinute.Open <= 0 || partialMinute.Close <= 0 || partialMinute.High < partialMinute.Low {
+		return nil, fmt.Errorf("invalid intrabar partial minute at %d", asOf)
+	}
+	overlays := map[string]Bar{BarSeriesKey(dataset.Symbol, "1m"): partialMinute}
+	minuteBars := dataset.Bars[BarSeriesKey(dataset.Symbol, "1m")]
+	for _, interval := range dataset.Intervals {
+		if interval == "1m" {
+			continue
+		}
+		windowStart, err := intervalWindowStart(interval, asOf)
+		if err != nil {
+			return nil, err
+		}
+		startIndex := sort.Search(len(minuteBars), func(i int) bool { return minuteBars[i].OpenTime >= windowStart })
+		endIndex := sort.Search(len(minuteBars), func(i int) bool { return minuteBars[i].OpenTime >= partialMinute.OpenTime })
+		components := make([]Bar, 0, endIndex-startIndex+1)
+		for _, bar := range minuteBars[startIndex:endIndex] {
+			if bar.CloseTime > asOf {
+				break
+			}
+			components = append(components, bar)
+		}
+		components = append(components, partialMinute)
+		overlay := aggregatePartialBars(dataset.Symbol, interval, windowStart, asOf, components)
+		overlays[BarSeriesKey(dataset.Symbol, interval)] = overlay
+	}
+	return overlays, nil
+}
+
+func intervalWindowStart(interval string, asOf int64) (int64, error) {
+	t := time.UnixMilli(asOf).UTC()
+	switch interval {
+	case "1M":
+		return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC).UnixMilli(), nil
+	case "1w":
+		days := (int(t.Weekday()) + 6) % 7
+		return time.Date(t.Year(), t.Month(), t.Day()-days, 0, 0, 0, 0, time.UTC).UnixMilli(), nil
+	}
+	duration, err := intervalDuration(interval, t)
+	if err != nil {
+		return 0, err
+	}
+	ms := duration.Milliseconds()
+	return asOf - positiveMillisMod(asOf, ms), nil
+}
+
+func positiveMillisMod(value, mod int64) int64 {
+	result := value % mod
+	if result < 0 {
+		result += mod
+	}
+	return result
+}
+
+func aggregatePartialBars(symbol, interval string, openTime, closeTime int64, bars []Bar) Bar {
+	result := Bar{Symbol: symbol, Interval: interval, OpenTime: openTime, CloseTime: closeTime}
+	if len(bars) == 0 {
+		return result
+	}
+	result.Open = bars[0].Open
+	result.High = bars[0].High
+	result.Low = bars[0].Low
+	result.Close = bars[len(bars)-1].Close
+	for _, bar := range bars {
+		if bar.High > result.High {
+			result.High = bar.High
+		}
+		if bar.Low < result.Low {
+			result.Low = bar.Low
+		}
+		result.Volume += bar.Volume
+		result.QuoteVolume += bar.QuoteVolume
+		result.TradeCount += bar.TradeCount
+		result.TakerBuyQuoteVolume += bar.TakerBuyQuoteVolume
+	}
+	return result
 }
 
 func (builder *historicalEnvironment) addIndicators(env map[string]interface{}, asOf int64) error {
