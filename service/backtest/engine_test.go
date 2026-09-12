@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"math"
+	"strings"
 	"testing"
 	"time"
 
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/service/historicalmarket"
+
+	"github.com/expr-lang/expr/vm"
 )
 
 func fixtureDataset(closes []float64) Dataset {
@@ -640,16 +643,75 @@ func TestAdaptiveROIOnlyStableCloseSkipsHighResolutionWhenRuleCannotPass(t *test
 	}
 }
 
+func TestAdaptiveROIProofBuildFailureFallsBackToConservativeReplay(t *testing.T) {
+	d := fixtureDataset([]float64{100, 100.2, 100.2})
+	bars := d.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	bar := bars[1]
+	bar.Open = 0
+	bar.Close = 0
+	bar.High = 101.5
+	bar.Low = 99.5
+	provider := &intrabarFixtureProvider{seconds: []historicalmarket.Kline{{
+		Market: d.Market, Symbol: d.Symbol, Interval: "1s", OpenTime: bar.OpenTime, CloseTime: bar.OpenTime + 999,
+		Open: 100, High: 101.3, Low: 100, Close: 101.2,
+	}}}
+	environment, err := newHistoricalEnvironment(d, "{}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := adaptiveRunState{factory: func() (historicalmarket.ResolutionProvider, error) { return provider, nil }}
+	defer state.close()
+	position := &Position{Side: "LONG", EntryTime: bars[0].OpenTime, EntryPrice: 100, Quantity: 1}
+	config := zeroCosts()
+	config.Leverage = 10
+	config.TakeProfitPct = 10
+	rules := []Rule{{Name: "close", Enable: true, Type: "close_long", Code: "ROI >= 10"}}
+	decision, err := state.evaluateROIClose(context.Background(), d, environment, bar, position, 1000, config, rules, map[string]*vm.Program{}, nil)
+	if err != nil {
+		t.Fatalf("ROI proof build failure must fall back instead of aborting run: %v", err)
+	}
+	if provider.secondCalls != 1 || !decision.Resolved || decision.Resolution != "1s" {
+		t.Fatalf("conservative replay was not used after proof build failure: decision=%+v calls=%d", decision, provider.secondCalls)
+	}
+}
+
+func TestAdaptiveTradeOutsideSecondRangeFailsClosed(t *testing.T) {
+	d := fixtureDataset([]float64{100, 100.2, 100.2})
+	bars := d.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	bars[1].High = 101.5
+	bars[1].Low = 100
+	d.Bars[BarSeriesKey("BTCUSDT", "1m")] = bars
+	provider := &intrabarFixtureProvider{
+		seconds: []historicalmarket.Kline{{Market: d.Market, Symbol: d.Symbol, Interval: "1s", OpenTime: bars[1].OpenTime, CloseTime: bars[1].OpenTime + 999, Open: 100, High: 101.5, Low: 100, Close: 100.2}},
+		trades:  []historicalmarket.PublicDataTrade{{TradeID: 1, TradeTime: bars[1].OpenTime + 200, Price: 102, Quantity: 1, QuoteQuantity: 102}},
+	}
+	engine := Engine{ResolutionProviderFactory: func() (historicalmarket.ResolutionProvider, error) { return provider, nil }}
+	strategy := StrategySnapshot{TemplateID: 1, TemplateName: "inconsistent-evidence", TechnologyJSON: "{}", StrategyJSON: strategyJSON(
+		Rule{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"},
+		Rule{Name: "close", Enable: true, Type: "close_long", Code: "ROI >= 10"},
+	)}
+	_, err := engine.RunWithResolution(context.Background(), d, strategy, RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 10, TakeProfitPct: 10}, ResolutionModeAdaptive, nil)
+	if err == nil || !strings.Contains(err.Error(), "outside 1s range") {
+		t.Fatalf("inconsistent trade/1s evidence must fail closed, err=%v", err)
+	}
+}
+
 func TestCloseRuleROIProfileRejectsCurrentBarAndDynamicFields(t *testing.T) {
 	stable := analyzeCloseRuleROIProfile([]Rule{{Enable: true, Type: "close_long", Code: "ROI >= 5 && kline_1h.Close[1] > 0"}}, "LONG")
 	if !stable.Eligible || len(stable.Thresholds) != 1 || stable.Thresholds[0] != 5 {
 		t.Fatalf("completed-bar ROI rule should be eligible: %+v", stable)
+	}
+	scientific := analyzeCloseRuleROIProfile([]Rule{{Enable: true, Type: "close_long", Code: "ROI >= 1.5e3 && ROI <= 1_600"}}, "LONG")
+	if !scientific.Eligible || len(scientific.Thresholds) != 2 || scientific.Thresholds[0] != 1500 || scientific.Thresholds[1] != 1600 {
+		t.Fatalf("scientific/underscored ROI thresholds were parsed incorrectly: %+v", scientific)
 	}
 	for _, code := range []string{
 		"ROI >= 5 && kline_1h.Close[0] > 0",
 		"ROI >= 5 && NowPrice > 100",
 		"ROI >= 5 && IsAsc(kline_1h.Close, 3)",
 		"ROI * 2 >= 5",
+		"ROI >= 5 + 1",
+		"1 + 5 <= ROI",
 	} {
 		if got := analyzeCloseRuleROIProfile([]Rule{{Enable: true, Type: "close_long", Code: code}}, "LONG"); got.Eligible {
 			t.Fatalf("dynamic/non-comparison ROI rule must use conservative replay: code=%q profile=%+v", code, got)

@@ -703,7 +703,7 @@ func (client *PublicDataClient) readPublicDataCSVRange(ctx context.Context, arch
 		scannerSlot = &client.tradeScanner
 	}
 	scanner := *scannerSlot
-	if scanner == nil || scanner.archiveURL != archive.URL || (start > 0 && scanner.lastTime > 0 && start < scanner.lastTime) {
+	if scanner == nil || scanner.archiveURL != archive.URL || (start > 0 && scanner.lastTime > 0 && start <= scanner.lastTime) {
 		closePublicDataCSVScanner(scanner)
 		*scannerSlot = nil
 		var err error

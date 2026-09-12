@@ -44,7 +44,7 @@ type closeRuleROIProfile struct {
 
 var (
 	roiWordPattern      = regexp.MustCompile(`\bROI\b`)
-	roiComparePattern   = regexp.MustCompile(`(?:\bROI\s*(?:<=|>=|==|!=|<|>)\s*(-?\d+(?:\.\d+)?)|(-?\d+(?:\.\d+)?)\s*(?:<=|>=|==|!=|<|>)\s*\bROI\b)`)
+	roiComparePattern   = regexp.MustCompile(`(?:\bROI\s*(?:<=|>=|==|!=|<|>)\s*(-?\d(?:_?\d)*(?:\.\d(?:_?\d)*)?(?:[eE][+-]?\d(?:_?\d)*)?)|(-?\d(?:_?\d)*(?:\.\d(?:_?\d)*)?(?:[eE][+-]?\d(?:_?\d)*)?)\s*(?:<=|>=|==|!=|<|>)\s*\bROI\b)`)
 	bracketIndexPattern = regexp.MustCompile(`\[\s*([^\]]+)\s*\]`)
 )
 
@@ -80,16 +80,23 @@ func analyzeCloseRuleROIProfile(rules []Rule, side string) closeRuleROIProfile {
 			}
 		}
 		roiCount := len(roiWordPattern.FindAllStringIndex(code, -1))
-		matches := roiComparePattern.FindAllStringSubmatch(code, -1)
-		if roiCount != len(matches) {
+		matchIndexes := roiComparePattern.FindAllStringSubmatchIndex(code, -1)
+		if roiCount != len(matchIndexes) {
 			return closeRuleROIProfile{}
 		}
-		for _, match := range matches {
-			value := match[1]
-			if value == "" {
-				value = match[2]
+		for _, match := range matchIndexes {
+			if !roiComparisonIsStandalone(code, match[0], match[1]) {
+				return closeRuleROIProfile{}
 			}
-			threshold, err := strconv.ParseFloat(value, 64)
+			valueStart, valueEnd := match[2], match[3]
+			if valueStart < 0 {
+				valueStart, valueEnd = match[4], match[5]
+			}
+			if valueStart < 0 || valueEnd <= valueStart {
+				return closeRuleROIProfile{}
+			}
+			value := code[valueStart:valueEnd]
+			threshold, err := strconv.ParseFloat(strings.ReplaceAll(value, "_", ""), 64)
 			if err != nil {
 				return closeRuleROIProfile{}
 			}
@@ -101,6 +108,31 @@ func analyzeCloseRuleROIProfile(rules []Rule, side string) closeRuleROIProfile {
 	}
 	sort.Float64s(profile.Thresholds)
 	return profile
+}
+
+func roiComparisonIsStandalone(code string, start, end int) bool {
+	isUnsafeNeighbor := func(ch byte) bool {
+		return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_' || ch == '.' || strings.ContainsRune("+-*/%^", rune(ch))
+	}
+	for i := start - 1; i >= 0; i-- {
+		if code[i] == ' ' || code[i] == '\t' || code[i] == '\n' || code[i] == '\r' {
+			continue
+		}
+		if isUnsafeNeighbor(code[i]) {
+			return false
+		}
+		break
+	}
+	for i := end; i < len(code); i++ {
+		if code[i] == ' ' || code[i] == '\t' || code[i] == '\n' || code[i] == '\r' {
+			continue
+		}
+		if isUnsafeNeighbor(code[i]) {
+			return false
+		}
+		break
+	}
+	return true
 }
 
 func hasMarketConditionInRange(points []MarketConditionPoint, start, end int64) bool {
@@ -243,8 +275,12 @@ func (state *adaptiveRunState) evaluateROIClose(
 			if !possible {
 				return adaptiveCloseDecision{}, nil
 			}
-		} else if !errors.Is(err, ErrInsufficientHistoricalBars) {
-			return adaptiveCloseDecision{}, err
+		} else {
+			// The ROI-only proof is only a performance optimization. If the
+			// synthetic full-minute environment cannot be built (for example a
+			// malformed legacy bar), fall back to the conservative high-resolution
+			// replay path instead of turning an optimization into a new hard-fail.
+			stableEnv = nil
 		}
 	}
 
@@ -399,6 +435,12 @@ func (state *adaptiveRunState) evaluateTradeROIClose(
 		}
 		if trade.TradeTime < second.OpenTime || trade.TradeTime > second.CloseTime || trade.Price <= 0 {
 			continue
+		}
+		// A trade outside the 1s OHLC range means the two evidence sources
+		// disagree. Do not silently continue with pruning assumptions derived
+		// from that bar; strict Adaptive mode fails closed on inconsistent data.
+		if trade.Price < second.Low || trade.Price > second.High {
+			return adaptiveCloseDecision{}, fmt.Errorf("trade price %.12f outside 1s range [%.12f, %.12f] at %d", trade.Price, second.Low, second.High, trade.TradeTime)
 		}
 		partial = appendTradeToPartialMinute(partial, minute, trade)
 		if advanceFunding != nil {
