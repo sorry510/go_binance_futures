@@ -85,7 +85,7 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | AI → MCP Management (`AI → MCP 管理`) | Connect and govern third-party HTTP MCP Servers, including Tools, Resources, Prompts, authentication/OAuth, and per-Skill permissions |
 | AI → Memory Management (`AI → Memory 管理`) | Inspect and maintain long-term Agent Memory, Scope, TTL, and status |
 | AI → Workflows (`AI → 业务 Workflow`) | Run market scan, strategy review, strategy experiments, alert triage, and daily market brief workflows and inspect parent/child tasks |
-| AI → Controlled Trading (`AI → 受控交易`) | Convert a successful symbol analysis into a Trade Proposal, run deterministic risk checks, require human approval, re-check risk before execution, submit through the controlled Binance path, and retain audit history |
+| Futures Trade → Controlled Trading (`合约交易 → 受控交易`) | Convert a successful symbol analysis into a Trade Proposal, run deterministic risk checks, require human approval, re-check risk before execution, submit through the controlled Binance path, and retain audit history |
 | AI → Task Center (`AI → 任务中心`) | View Agent governance, Scheduler state, runtime metrics, and Agent Task history |
 | AI → Observability (`AI → 可观测性`) | Inspect long-term traces, model/Tool/Skill metrics, latency, token use, errors, and change history |
 | AI → Alert Pipeline History (`AI → 报警链路历史`) | Trace FastMove/liquidation Signals from event processing through AI analysis/triage to notification or fallback |
@@ -95,7 +95,8 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Futures Trade → Futures Account (`合约交易 → 合约账户`) | View Binance futures assets, positions, and open orders |
 | Futures Trade → Local Futures Account (`合约交易 → 本地合约账户`) | View assets, positions, and orders recorded locally by the application |
 | Futures Trade → Strategy Templates (`合约交易 → 策略模板`) | Create and maintain indicator and strategy-method templates |
-| Futures Trade → Test Results (`合约交易 → 测试结果`) | Search simulated-trading results by symbol and time range |
+| Futures Trade → Test Results (`合约交易 → 测试结果`) | Search real-time paper-trading results by symbol and time range |
+| Futures Trade → Historical Backtest (`合约交易 → 历史回测`) | Replay strategies on historical 1m market data with Funding and MarketCondition; supports Standard 1m and Adaptive Resolution modes with trades, equity, audit events, and drill-down statistics |
 | Coin Alerts → Spot/Futures Alerts (`币种提醒 → 现货提醒 / 合约提醒`) | Configure target-price alerts and optional automatic trades |
 | Market Monitoring → Spot/Futures Monitoring (`市场监听 → 现货监听 / 合约监听`) | Configure K-line, threshold, indicator, and custom-strategy monitoring |
 | Funding Rate Monitoring (`资金费率监听`) | View funding rates and configure automatic trading |
@@ -256,7 +257,53 @@ The **Futures Trade → Futures Trade** page supports per-symbol settings for st
 - **Excluded Symbols:** symbols selected in the UI are excluded from automatic trading. Add existing manual positions here if the bot must not manage them.
 - **Order Type:** `LIMIT` places a limit order; `MARKET` executes a market order.
 
-## simulated custom-strategy trading (no backtesting)
+## Historical Backtest
+
+**Futures Trade → Historical Backtest** replays a strategy on historical market data. It is separate from the real-time `Test Strategy` paper-trading feature. A backtest never submits a real Binance order and is intended for comparing strategy versions, cost/leverage parameters, and execution-resolution models.
+
+### Replay modes
+
+- **Standard 1m:** uses 1-minute bars as the execution timeline together with historical K-lines, Funding, MarketCondition, and the selected strategy template. It is the fastest mode and is the recommended baseline.
+- **Adaptive Resolution:** keeps 1m as the primary timeline. Only minutes whose intraminute order cannot be determined from the 1m bar, or whose ROI Gate may become valid intraminute, are drilled down to `1s`; if a second is still ambiguous, the engine replays individual `trades`. The system does not convert the entire historical range into second-level or tick-level data.
+- A 1m `High/Low` is only a candidate detector. It does not mean a take-profit/stop-loss was automatically filled. The close rule is re-evaluated at 1s/trade time, so Adaptive and Standard runs can legitimately produce different exit times, trade counts, and PnL.
+
+### Historical data and high-resolution cache
+
+Base replay data comes from locally stored historical K-lines, required indicator intervals, Funding, and MarketCondition. The **Fetch Historical Data** action prepares only this base dataset. High-resolution data remains lazy and is fetched only when an Adaptive run actually needs it.
+
+High-resolution requests first use the sparse database cache:
+
+- `market_klines_1s` stores only 1s bars for minutes that were actually drilled down.
+- `market_trades` stores only the trade ranges that were actually required.
+- When a Binance USD-M Futures 1s archive is unavailable for a date, the provider falls back to Binance Public Data daily trades ZIPs and aggregates the verified trades into 1s bars for the requested minute.
+- Sparse data is reusable across runs. A first Adaptive run may need to download and parse large daily trades ZIPs; later runs over the same ranges are usually much faster once the database cache is populated.
+- Every ZIP is checked against Binance's SHA256 `.CHECKSUM`. Trades are ordered by `trade_time + trade_id` to make same-millisecond replay deterministic.
+
+### Results, auditability, and reproducibility
+
+Each run stores the strategy version, time range, initial equity, position size, leverage, fee rate, slippage, take-profit/stop-loss parameters, and exposes metrics such as net PnL, return, maximum drawdown, win rate, Profit Factor, Sharpe, Sortino, fees, Funding, trade count, holding time, and side-level breakdowns.
+
+Adaptive runs additionally record:
+
+- 1s drill-down minutes and trade drill-down seconds.
+- 1s/trade cache hits, archive cache hits, ZIP download count, and download bytes.
+- Per-trade `entry_resolution` / `exit_resolution` such as `1m`, `1s`, or `trades`.
+- Intrabar Resolution audit events and the high-resolution evidence actually consumed by the run.
+- A `DataHash` extended with the consumed high-resolution evidence, plus the Engine/Resolution Model version used for the run.
+
+The UI shows live stages for dataset building, normal replay, high-resolution cache access, ZIP download, ZIP parsing, and result persistence, together with elapsed run time. Trades and Audit Events are paginated so long backtests do not load every detail into the browser at once.
+
+### Recommended workflow
+
+1. After upgrading the application, run `./go_binance_futures sync db` so all backtest and sparse high-resolution tables exist.
+2. Open **Futures Trade → Historical Backtest**, select the strategy template, Symbol, time range, and replay mode, then configure equity, position size, leverage, fees, slippage, take profit, and stop loss as needed.
+3. For a long first run, use **Fetch Historical Data** first. If historical MarketCondition data is missing, use the backfill action on the same page.
+4. When comparing Standard and Adaptive, keep `start_time`, `end_time`, strategy version, and all run parameters identical; otherwise a different time window can be mistaken for a resolution difference.
+5. The first Adaptive run can be dominated by Binance Public Data ZIP downloads. On a repeated run, `second_cache_hits` / `trade_cache_hits` close to their drill-down counts with `archive_downloads=0` indicates that the database high-resolution cache is working.
+
+> A backtest is a historical simulation, not a full exchange matching-engine replica. Order-book queue position, maker queueing, and full partial-fill depth are not modeled, and historical results do not guarantee future performance.
+
+## real-time custom-strategy paper trading (separate from historical backtesting)
 
 Enable `WebSocket` and `Test Strategy` under **Configuration Center → Futures Trade**. Simulation follows the same strategies and limits as real automatic trading but does not operate the real futures account. Open the result from the `View Test Results` button or **Futures Trade → Test Results**.
 
@@ -355,6 +402,17 @@ The System Configuration page contains sensitive values such as API keys, databa
 ```
 cp conf/app.conf.example conf/app.conf
 ```
+
+#### Historical-backtest temporary ZIP directory
+
+Adaptive backtests lazily download Binance Public Data ZIPs. Configure the temporary ZIP root under `[binance]`:
+
+```ini
+[binance]
+public_data_cache_dir = "./cache/tmp"
+```
+
+Each Adaptive run creates its own `binance-public-data-*` child directory under this root. The run directory is removed after a normal completion, failure, or normal cancellation, while the `cache/tmp` root remains. An absolute path on another disk can also be used.
 
 #### database config
 
