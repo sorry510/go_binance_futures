@@ -62,7 +62,7 @@ Repository 行为：
 
 Backtest API：创建、列表、详情、取消、删除、Trades、Events、Equity，并新增历史数据预取创建/状态接口。预取只准备目标 Symbol 的 1m + Technology 依赖周期、Funding 和指标 warmup，不再获取 BTC/ETH/SOL/BNB benchmark；Repository 已完整的数据不会再次请求 Binance。删除 Run 时事务清理其 Trade/Event/Equity；对子表采用 `DELETE ... WHERE run_id = ?` 直接条件删除，避免 1m 长周期回测产生大量记录时 Beego ORM 展开超大主键 placeholder 列表；仅在无引用时删除 Dataset Manifest，Historical Market Repository 行情缓存不受影响。外部历史数据通过 canonical import API 写入 Historical Market Repository。
 
-Web 新增 AI → 历史回测，包含参数表单、异步进度、结果指标、Equity Curve、Trades、Audit Events、Side 分组和两次成功 Run 对比。
+Web 新增 合约交易 → 历史回测，包含参数表单、异步进度、结果指标、Equity Curve、Trades、Audit Events、Side 分组和两次成功 Run 对比。
 
 ECharts 改为按模块引入后，Backtest production chunk 从约 1.05 MB 降至约 501 KB。
 

@@ -46,7 +46,7 @@ SHOW TABLES LIKE 'agent_backtest_%';
 打开：
 
 ```text
-AI → 历史回测
+合约交易 → 历史回测
 ```
 
 建议第一次使用：

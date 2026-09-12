@@ -1,5 +1,8 @@
 # Phase V3-5：真实交易安全与仓位/订单归属隔离
 
+> 状态：✅ 已完成（2026-09-10）。实施结果见 [`v3-5-implementation-report.md`](./v3-5-implementation-report.md)。
+> 人工验证：[`v3-5-agent-trade-ownership-testing-guide.md`](./v3-5-agent-trade-ownership-testing-guide.md)。
+
 > 定位：P0。先解决真实资金下“谁创建、谁管理”的 ownership 边界，再补齐 Agent 受控交易的保护单、整仓平仓和重启恢复。
 >
 > **详细 ownership 设计真相源：** `doc/trade/合约自动交易仓位归属隔离改造计划.md`。本文件只定义 V3-5 的实施顺序、阶段边界和验收 Gate；如两份文档存在 ownership 细节差异，以详细设计文档为准。
@@ -274,7 +277,7 @@ V2 Controlled Trade 已具备：
 
 - 配置中心继续保留合约交易开关和 `FutureExcludeSymbols`。
 - ownership 隔离完成后，开启合约交易的警告文案改成“只管理本系统创建并登记的仓位/订单”。
-- `AI → 受控交易` 展示 Agent Managed Position、Stop/TP、order id、clientOrderId 和最近 Reconcile 时间。
+- `合约交易 → 仓位与受控交易` 展示 Agent Managed Position、Stop/TP、order id、clientOrderId 和最近 Reconcile 时间。
 - 对 unmanaged / 其它 owner 仓位明确显示归属，但不提供越权操作按钮。
 
 ## 10. 本阶段明确不做

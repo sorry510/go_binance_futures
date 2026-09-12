@@ -48,6 +48,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus), new(models.MarketConditionHistory),
 		new(models.MarketDataImportBatch), new(models.MarketKline1s), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate), new(models.MarketTrade),
 		new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint),
+		new(models.FuturesManagedPosition), new(models.FuturesManagedOrder),
 	)
 
 	if err := SyncDatabase(1); err != nil {
@@ -210,6 +211,12 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err != nil || config.Version != 10 {
 		t.Fatalf("expected database version 10, config=%+v err=%v", config, err)
 	}
+	for _, table := range []string{"futures_managed_positions", "futures_managed_orders"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected %s after version 10 sync, count=%d err=%v", table, count, err)
+		}
+	}
 	for table, columns := range map[string][]string{
 		"agent_backtest_trades":        {"run_id", "sequence"},
 		"agent_backtest_events":        {"run_id", "sequence"},
@@ -255,6 +262,26 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	}
 	if err := SyncDatabase(11); err != nil {
 		t.Fatalf("second version-11 sync should be idempotent: %v", err)
+	}
+
+	// V3-4 and V3-5 were developed on separate schema-version lines. The
+	// merged branch advances to version 12 so a database that already reached
+	// either branch's version 11 is forced through RunSyncdb once more.
+	if err := SyncDatabase(12); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 12 {
+		t.Fatalf("expected database version 12 after merged V3-4/V3-5 schema sync, config=%+v err=%v", config, err)
+	}
+	for _, table := range []string{"market_klines_1s", "market_trades", "futures_managed_positions", "futures_managed_orders"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected merged schema table %s after version 12 sync, count=%d err=%v", table, count, err)
+		}
+	}
+	if err := SyncDatabase(12); err != nil {
+		t.Fatalf("second version-12 sync should be idempotent: %v", err)
 	}
 }
 
