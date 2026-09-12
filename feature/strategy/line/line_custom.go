@@ -81,7 +81,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 		logs.Error("Error unmarshalling JSON:", err.Error())
 		return closeResult
 	}
-	findStrategy := false
+	hasCloseStrategy := HasEnabledCloseStrategy(strategyConfig, position.Side)
 	env := InitParseEnv(coin.Symbol, normalizeCustomTechnology(coin.Technology))
 	env["ROI"] = closeParams.NowProfit // 当前收益率
 	env["Position"] = types.FuturesPositionCode{
@@ -147,14 +147,13 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 				logs.Error("Error Strategy Run:", err.Error())
 				continue
 			}
-			findStrategy = true // 发现有正常能执行的平仓策略
 			if result, ok := output.(bool); ok && result {
 				closeResult.Complete = true
 			}
 		}
 	}
-	if !findStrategy {
-		// 没有定义平仓策略，使用简单的策略平仓
+	if !hasCloseStrategy {
+		// 当前持仓方向没有定义启用的平仓策略，才使用简单策略平仓
 		return TradeLine.simpleCloseStrategy(closeParams)
 	}
 	return closeResult
@@ -169,6 +168,24 @@ func (TradeLine TradeLineCustom) AutoStopOrder(closeParams strategy.CloseParams)
 func isNullCustomConfig(value string) bool {
 	value = strings.TrimSpace(value)
 	return value == "" || value == "null"
+}
+
+// HasEnabledCloseStrategy reports whether the strategy snapshot contains an enabled
+// close rule applicable to the current position side. Its result is independent of
+// whether the rule can compile/run with the current transient market-data environment.
+func HasEnabledCloseStrategy(strategyConfig technology.StrategyConfig, positionSide string) bool {
+	for _, rule := range strategyConfig {
+		if !rule.Enable {
+			continue
+		}
+		if rule.Type == "close_long" && positionSide == "LONG" {
+			return true
+		}
+		if rule.Type == "close_short" && positionSide == "SHORT" {
+			return true
+		}
+	}
+	return false
 }
 
 func normalizeCustomTechnology(value string) string {

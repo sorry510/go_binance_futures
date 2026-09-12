@@ -133,7 +133,7 @@ Outer eligibility is checked against current symbol profit/loss settings (defaul
 
 ## Limits, verdict and optimization
 
-The current table still has no historical MarketCondition, rule-branch ID, indicator snapshot, MFE/MAE, scan timestamp, missed-signal count, or funding/exit-slippage records. Cannot infer performance in all 11 regimes from a program that references all 11. Do not reconstruct historical conditions from today's market state.
+The current table still has no rule-branch ID, indicator snapshot, MFE/MAE, scan timestamp, missed-signal count, or funding/exit-slippage records. Do not reconstruct historical indicator values from today's data.
 
 Give exactly one verdict per version:
 - `insufficient evidence`: fewer than 20 valid closes, concentration, substantial censoring, a narrow window, unknown costs or unresolved execution attribution.
