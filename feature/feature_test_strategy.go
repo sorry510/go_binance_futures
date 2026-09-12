@@ -10,6 +10,7 @@ import (
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
+	"go_binance_futures/webnotification"
 	"math"
 	"strconv"
 	"strings"
@@ -485,14 +486,8 @@ func autoTestToTrade(systemConfig *models.Config, isProfit bool) {
 		testProfitTradeCount = 0
 	}
 	if testProfitTradeCount >= systemConfig.FutureTestAutoTradeCountLimit {
-		logs.Info("test strategy consecutive profit %d times, auto enable futures trade bot", testProfitTradeCount)
-		systemConfig.FutureEnable = 1
-		systemConfig.FutureAllowLong = 1
-		systemConfig.FutureAllowShort = 1
-		systemConfig.FutureTest = 0
-		orm.NewOrm().Update(systemConfig)
-		// 删除剩余的测试策略数据
-		orm.NewOrm().QueryTable("test_strategy_results").Filter("close_price", "0").Delete()
+		logs.Info("test strategy consecutive profit %d times; real futures trading still requires manual enabling", testProfitTradeCount)
+		_, _ = webnotification.Publish("futures_test", "测试策略已达到连续盈利阈值。系统不会自动开启合约交易或修改做多/做空开关；如需真实交易，请在配置中心手动打开合约交易。")
 		testProfitTradeCount = 0
 	}
 }

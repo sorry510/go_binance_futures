@@ -8,7 +8,7 @@ type Config struct {
 	DeliveryEnable                             int     `orm:"column(delivery_enable)" json:"delivery_enable"`
 	FuturesPositionConvertEnable               int     `orm:"column(futures_position_convert_enable)" json:"futures_position_convert_enable"` // 合约持仓正负转换通知
 	FutureBuyTimeout                           int     `orm:"column(future_buy_timeout)" json:"future_buy_timeout"`
-	FutureExcludeSymbols                       string  `orm:"column(future_exclude_symbols);type(text)" json:"future_exclude_symbols"`
+	LegacyFutureExcludeSymbols                 string  `orm:"column(future_exclude_symbols);type(text)" json:"-"` // Deprecated DB column retained only for non-destructive schema compatibility.
 	FutureMaxCount                             int     `orm:"column(future_max_count)" json:"future_max_count"`
 	FutureOrderType                            string  `orm:"column(future_order_type)" json:"future_order_type"`
 	FutureAllowLong                            int     `orm:"column(future_allow_long)" json:"future_allow_long"`

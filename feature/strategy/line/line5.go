@@ -21,7 +21,7 @@ func (TradeLine5 TradeLine5) GetCanLongOrShort(openParams strategy.OpenParams) (
 	symbols := openParams.Symbols
 	openResult.CanLong = false
 	openResult.CanShort = false
-	
+
 	kline_1, err1 := binance.GetKlineData(symbols.Symbol, "1m", 30)
 	if err1 != nil {
 		return openResult
@@ -29,17 +29,17 @@ func (TradeLine5 TradeLine5) GetCanLongOrShort(openParams strategy.OpenParams) (
 	if TradeLine5.checkLine(kline_1) {
 		return openResult
 	}
-	
+
 	lastOpenPrice, _ := strconv.ParseFloat(kline_1[1].Open, 64) // 1min 前的价格
 	nowPrice, _ := strconv.ParseFloat(kline_1[0].Close, 64)
-	
+
 	percentLimit := 0.009 // 变化幅度
-	
-	if (nowPrice > lastOpenPrice) && (nowPrice - lastOpenPrice) / lastOpenPrice >= percentLimit {
+
+	if (nowPrice > lastOpenPrice) && (nowPrice-lastOpenPrice)/lastOpenPrice >= percentLimit {
 		openResult.CanLong = true
 		return openResult
 	}
-	if (nowPrice < lastOpenPrice) && (lastOpenPrice - nowPrice) / lastOpenPrice >= percentLimit {
+	if (nowPrice < lastOpenPrice) && (lastOpenPrice-nowPrice)/lastOpenPrice >= percentLimit {
 		openResult.CanShort = true
 		return openResult
 	}
@@ -49,10 +49,10 @@ func (TradeLine5 TradeLine5) GetCanLongOrShort(openParams strategy.OpenParams) (
 // 达到止盈或止损后判断是否可以平仓
 // 3min 最新价格是否跌破前一个3min的收盘价
 func (TradeLine5 TradeLine5) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
-	symbols := closeParams.Symbols // 交易对
+	symbols := closeParams.Symbols   // 交易对
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
-	
+
 	lines, err := binance.GetKlineData(symbols.Symbol, "5m", 2)
 	if err != nil {
 		closeResult.Complete = true
@@ -75,8 +75,8 @@ func (TradeLine5 TradeLine5) CanOrderComplete(closeParams strategy.CloseParams) 
 func (TradeLine5 TradeLine5) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
-	
-	if closeParams.NowProfit < 3 || closeParams.NowProfit > -3 {
+
+	if autoStopNeutralROI(closeParams.NowProfit) {
 		closeResult.Complete = false
 		return closeResult
 	}
@@ -90,12 +90,12 @@ func (TradeLine5 TradeLine5) MarketReversal(symbol string, positionSide string) 
 		return false
 	}
 	kline_1d_close := GetLineClosePrices(kline_1d)
-	
-	ma1d_3, _ := CalculateSimpleMovingAverage(kline_1d_close, 3) // ma3
-	ma1d_7, _ := CalculateSimpleMovingAverage(kline_1d_close, 7) // ma7
+
+	ma1d_3, _ := CalculateSimpleMovingAverage(kline_1d_close, 3)   // ma3
+	ma1d_7, _ := CalculateSimpleMovingAverage(kline_1d_close, 7)   // ma7
 	ma1d_15, _ := CalculateSimpleMovingAverage(kline_1d_close, 15) // ma15
-	
-	if positionSide== "LONG" {
+
+	if positionSide == "LONG" {
 		if KdjSimple(ma1d_7, ma1d_3, 4) && KdjSimple(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
 			return true
 		}
@@ -108,14 +108,13 @@ func (TradeLine5 TradeLine5) MarketReversal(symbol string, positionSide string) 
 	return false
 }
 
-
 func (TradeLine5 TradeLine5) checkLine(kLines []*futures.Kline) bool {
 	// 判定是否最近有个一次突变
 	for _, item := range kLines {
 		open, _ := strconv.ParseFloat(item.Open, 64)
 		high, _ := strconv.ParseFloat(item.High, 64)
 		low, _ := strconv.ParseFloat(item.Low, 64)
-		if (high - low) / open >= 0.015 {
+		if (high-low)/open >= 0.015 {
 			return true
 		}
 	}
