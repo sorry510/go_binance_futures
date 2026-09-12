@@ -62,7 +62,7 @@ Dataset 不再复制历史 Bar/Funding，只保存查询规格：Symbol、固定
 - `POST /agents/backtests/:id/cancel`
 - `GET /agents/backtests/:id/trades|events|equity`
 - `POST /agents/historical-market/import`：外部 Kline/Funding canonical 导入。
-- Web 新增 AI → 历史回测：创建任务、手动“获取历史数据”、进度、结果详情、Equity Curve、Trades、Audit Events、按 Side 分组指标和两次结果简单对比。
+- Web 新增 合约交易 → 历史回测：创建任务、手动“获取历史数据”、进度、结果详情、Equity Curve、Trades、Audit Events、按 Side 分组指标和两次结果简单对比。
 
 ## 验收 Gate
 

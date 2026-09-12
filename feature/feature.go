@@ -77,17 +77,21 @@ func StartTrade(systemConfig *models.Config) {
 		time.Sleep(30 * time.Second)
 		return
 	}
+	managedPositions, err := syncAutoStrategyOwnership(positions)
+	if err != nil {
+		logs.Error("sync auto_strategy ownership:", err)
+		return
+	}
 	/************************************************获取账户信息 end******************************************************************* */
 
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 start************************************************************ */
 	exclude_symbols_map := GetExcludeSymbolsMap(systemConfig.FutureExcludeSymbols)
-	cancelTimeoutOrder(exclude_symbols_map, allOpenOrders, int64(systemConfig.FutureBuyTimeout))
+	cancelTimeoutOrder(exclude_symbols_map, int64(systemConfig.FutureBuyTimeout))
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 end************************************************************ */
 
 	/*************************************************平仓(止盈或止损)已经有持仓的币(排除手动交易白名单) start************************************************************ */
-	positionCount := 0 // 当前仓位数量
-	lossCount := 0     // 亏损的仓位数量
-	for _, position := range positions {
+	positionCount, lossCount := accountTradeRiskCounts(positions) // 风险统计继续观察全账户
+	for _, position := range managedPositions {
 		// 在白名单内, 不参与自动平仓交易
 		if _, exist := exclude_symbols_map[position.Symbol]; exist {
 			continue
@@ -120,10 +124,6 @@ func StartTrade(systemConfig *models.Config) {
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		nowProfit := utils.FuturesLeveragedROI(unRealizedProfit, positionAmtFloatAbs, markPrice_float64, position.Leverage) // 当前收益率(正为盈利，负为亏损)
 
-		if nowProfit < -0.1 {
-			lossCount += 1
-		}
-
 		closeResult := coin_line_strategy.AutoStopOrder(strategy.CloseParams{
 			Symbols:   findCoin,
 			Position:  position,
@@ -132,7 +132,7 @@ func StartTrade(systemConfig *models.Config) {
 		if closeResult.Complete { // 触发策略,风向改变,强制平仓
 			logs.Info("%s:auto_stop_start", position.Symbol)
 			if position.Side == "LONG" {
-				order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+				order, err := submitAutoStrategyClose(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
 					// 数据库写入订单
 					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
@@ -166,7 +166,7 @@ func StartTrade(systemConfig *models.Config) {
 				}
 			}
 			if position.Side == "SHORT" {
-				order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				order, err := submitAutoStrategyClose(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 数据库写入订单
 					insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
@@ -211,7 +211,7 @@ func StartTrade(systemConfig *models.Config) {
 			})
 			if closeResult.Complete { //
 				if position.Side == "LONG" {
-					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+					order, err := submitAutoStrategyClose(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
@@ -245,7 +245,7 @@ func StartTrade(systemConfig *models.Config) {
 					}
 				}
 				if position.Side == "SHORT" {
-					order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+					order, err := submitAutoStrategyClose(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
@@ -289,7 +289,7 @@ func StartTrade(systemConfig *models.Config) {
 			})
 			if closeResult.Complete {
 				if position.Side == "LONG" {
-					order, err := binance.SellMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+					order, err := submitAutoStrategyClose(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
@@ -323,7 +323,7 @@ func StartTrade(systemConfig *models.Config) {
 					}
 				}
 				if position.Side == "SHORT" {
-					order, err := binance.BuyMarket(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+					order, err := submitAutoStrategyClose(position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 					if err == nil {
 						// 数据库写入订单
 						insertCloseOrder(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
@@ -359,8 +359,7 @@ func StartTrade(systemConfig *models.Config) {
 				continue
 			}
 		}
-		// 继续持有
-		positionCount += 1
+		// 继续持有；positionCount 已按全账户仓位统计。
 	}
 	/*************************************************平仓 end************************************************************ */
 
@@ -451,7 +450,7 @@ func StartTrade(systemConfig *models.Config) {
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 
 				if systemConfig.FutureOrderType == "MARKET" {
-					order, err := binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
+					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket)
 					if err == nil {
 						// 数据库写入订单
 						buyPrice := utils.GetTradePrecision(buyPrice*1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
@@ -480,7 +479,7 @@ func StartTrade(systemConfig *models.Config) {
 						})
 					}
 				} else {
-					order, err := binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
+					order, err := submitAutoStrategyOpen(symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
@@ -522,7 +521,7 @@ func StartTrade(systemConfig *models.Config) {
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 
 				if systemConfig.FutureOrderType == "MARKET" {
-					order, err := binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
+					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket)
 					if err == nil {
 						// 数据库写入订单
 						sellPrice := utils.GetTradePrecision(sellPrice*0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
@@ -551,7 +550,7 @@ func StartTrade(systemConfig *models.Config) {
 						})
 					}
 				} else {
-					order, err := binance.SellLimit(symbol, quantity, sellPrice, futures.PositionSideTypeShort)
+					order, err := submitAutoStrategyOpen(symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
@@ -607,26 +606,9 @@ func GetAllSymbols() (symbols []*models.Symbols, err error) {
 }
 
 // 挂单已经超过设置的超时时间，撤销挂单
-func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, allOpenOrders []types.FuturesOrder, buy_timeout int64) {
-	nowTime := time.Now().Unix() * 1000 // 毫秒时间戳
-	for _, buyOrder := range allOpenOrders {
-		if _, exist := explodeSymbolsMap[buyOrder.Symbol]; exist {
-			// 在白名单内
-			continue
-		}
-		if buyOrder.Status != "NEW" {
-			// 只处理open order订单
-			continue
-		}
-		if nowTime < (buyOrder.UpdateTime + buy_timeout*1000) {
-			// 没有超过设置的超时
-			continue
-		}
-		res, _ := binance.CancelOrder(buyOrder.Symbol, buyOrder.OrderId)
-		logs.Info("cancel order response:", res)
-		// 删除对应订单
-		// 有时候会出现 order 表中有订单，但是实际上 app 中没有订单的情况，调用 CancelOrder 接口会报错, 所以这里直接删除订单
-		orm.NewOrm().Raw("DELETE FROM `order` where order_id = '" + strconv.FormatInt(buyOrder.OrderId, 10) + "'").Exec()
+func cancelTimeoutOrder(explodeSymbolsMap map[string]bool, buyTimeout int64) {
+	if err := cancelTimeoutAutoStrategyOrders(explodeSymbolsMap, buyTimeout); err != nil {
+		logs.Error("cancel auto_strategy managed timeout orders:", err)
 	}
 }
 
