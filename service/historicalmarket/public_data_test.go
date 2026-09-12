@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -139,6 +140,170 @@ func TestPublicDataParseTradesOrdersByTimeThenID(t *testing.T) {
 	}
 	if rows[1].QuoteQuantity != 202 || !rows[1].IsBuyerMaker {
 		t.Fatalf("trade fields lost: %+v", rows[1])
+	}
+}
+
+func TestPublicDataTradeScannerStreamsForwardAcrossRanges(t *testing.T) {
+	date := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	filename := "BTCUSDT-trades-2026-09-11.zip"
+	csv := "id,price,qty,quoteQty,time,isBuyerMaker\n" +
+		"1,100,1,100,1789084800100,false\n" +
+		"2,101,1,101,1789084800200,false\n" +
+		"3,102,1,102,1789084860100,false\n" +
+		"4,103,1,103,1789084920100,false\n"
+	zipped := publicDataTestZIP(t, strings.TrimSuffix(filename, ".zip")+".csv", csv)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".CHECKSUM") {
+			fmt.Fprint(w, publicDataChecksum(zipped, filename))
+			return
+		}
+		w.Write(zipped)
+	}))
+	defer server.Close()
+	client, err := NewPublicDataClient(PublicDataClientConfig{BaseURL: server.URL, CacheDir: t.TempDir(), HTTPClient: server.Client()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	archive, err := client.FetchArchive(context.Background(), PublicDataArchiveSpec{Kind: ArchiveKindTrades, Period: ArchivePeriodDaily, Symbol: "BTCUSDT", Date: date})
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := client.ParseTrades(context.Background(), archive, 1789084800000, 1789084859999)
+	if err != nil || len(first) != 2 {
+		t.Fatalf("first range rows=%d err=%v", len(first), err)
+	}
+	scanner := client.tradeScanner
+	if scanner == nil {
+		t.Fatal("trade scanner was not created")
+	}
+	rowAfterFirst := scanner.rowNumber
+	second, err := client.ParseTrades(context.Background(), archive, 1789084860000, 1789084919999)
+	if err != nil || len(second) != 1 || second[0].TradeID != 3 {
+		t.Fatalf("second range rows=%+v err=%v", second, err)
+	}
+	if client.tradeScanner != scanner || client.tradeScanner.rowNumber < rowAfterFirst {
+		t.Fatal("later trade range reopened the same daily ZIP instead of streaming forward")
+	}
+}
+
+func TestPublicDataKlineScannerStreamsForwardAcrossRanges(t *testing.T) {
+	date := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	filename := "BTCUSDT-1s-2026-09-11.zip"
+	csv := "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_base,taker_buy_quote,ignore\n" +
+		"1789084800000,100,101,99,100,1,1789084800999,100,1,1,100,0\n" +
+		"1789084801000,100,101,99,100,1,1789084801999,100,1,1,100,0\n" +
+		"1789084860000,101,102,100,101,1,1789084860999,101,1,1,101,0\n"
+	zipped := publicDataTestZIP(t, strings.TrimSuffix(filename, ".zip")+".csv", csv)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".CHECKSUM") {
+			fmt.Fprint(w, publicDataChecksum(zipped, filename))
+			return
+		}
+		w.Write(zipped)
+	}))
+	defer server.Close()
+	client, err := NewPublicDataClient(PublicDataClientConfig{BaseURL: server.URL, CacheDir: t.TempDir(), HTTPClient: server.Client()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	archive, err := client.FetchArchive(context.Background(), PublicDataArchiveSpec{Kind: ArchiveKindKlines, Period: ArchivePeriodDaily, Symbol: "BTCUSDT", Interval: "1s", Date: date})
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := client.ParseKlines(context.Background(), archive, 1789084800000, 1789084859999)
+	if err != nil || len(first) != 2 {
+		t.Fatalf("first range rows=%d err=%v", len(first), err)
+	}
+	scanner := client.klineScanner
+	if scanner == nil {
+		t.Fatal("kline scanner was not created")
+	}
+	rowAfterFirst := scanner.rowNumber
+	second, err := client.ParseKlines(context.Background(), archive, 1789084860000, 1789084919999)
+	if err != nil || len(second) != 1 || second[0].OpenTime != 1789084860000 {
+		t.Fatalf("second range rows=%+v err=%v", second, err)
+	}
+	if client.klineScanner != scanner || client.klineScanner.rowNumber < rowAfterFirst {
+		t.Fatal("later kline range reopened the same daily ZIP instead of streaming forward")
+	}
+}
+
+func TestPublicDataTradeScannerReopensOnBackwardRange(t *testing.T) {
+	date := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	filename := "BTCUSDT-trades-2026-09-11.zip"
+	csv := "id,price,qty,quoteQty,time,isBuyerMaker\n" +
+		"1,100,1,100,1789084800100,false\n" +
+		"2,101,1,101,1789084860100,false\n"
+	zipped := publicDataTestZIP(t, strings.TrimSuffix(filename, ".zip")+".csv", csv)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".CHECKSUM") {
+			fmt.Fprint(w, publicDataChecksum(zipped, filename))
+			return
+		}
+		w.Write(zipped)
+	}))
+	defer server.Close()
+	client, err := NewPublicDataClient(PublicDataClientConfig{BaseURL: server.URL, CacheDir: t.TempDir(), HTTPClient: server.Client()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	archive, err := client.FetchArchive(context.Background(), PublicDataArchiveSpec{Kind: ArchiveKindTrades, Period: ArchivePeriodDaily, Symbol: "BTCUSDT", Date: date})
+	if err != nil {
+		t.Fatal(err)
+	}
+	later, err := client.ParseTrades(context.Background(), archive, 1789084860000, 1789084919999)
+	if err != nil || len(later) != 1 || later[0].TradeID != 2 {
+		t.Fatalf("later=%+v err=%v", later, err)
+	}
+	oldScanner := client.tradeScanner
+	earlier, err := client.ParseTrades(context.Background(), archive, 1789084800000, 1789084859999)
+	if err != nil || len(earlier) != 1 || earlier[0].TradeID != 1 {
+		t.Fatalf("earlier=%+v err=%v", earlier, err)
+	}
+	if client.tradeScanner == nil || client.tradeScanner == oldScanner {
+		t.Fatal("backward range must reopen the archive scanner")
+	}
+}
+
+func TestPublicDataScannerOpenFailureClearsClosedSlot(t *testing.T) {
+	date := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	filename := "BTCUSDT-trades-2026-09-11.zip"
+	zipped := publicDataTestZIP(t, strings.TrimSuffix(filename, ".zip")+".csv", "1,100,1,100,1789084860100,false\n")
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".CHECKSUM") {
+			fmt.Fprint(w, publicDataChecksum(zipped, filename))
+			return
+		}
+		w.Write(zipped)
+	}))
+	defer server.Close()
+	client, err := NewPublicDataClient(PublicDataClientConfig{BaseURL: server.URL, CacheDir: t.TempDir(), HTTPClient: server.Client()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	archive, err := client.FetchArchive(context.Background(), PublicDataArchiveSpec{Kind: ArchiveKindTrades, Period: ArchivePeriodDaily, Symbol: "BTCUSDT", Date: date})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = client.ParseTrades(context.Background(), archive, 1789084860000, 1789084919999); err != nil {
+		t.Fatal(err)
+	}
+	if client.tradeScanner == nil {
+		t.Fatal("scanner was not created")
+	}
+	if err := os.Remove(archive.Path); err != nil {
+		t.Fatal(err)
+	}
+	_, err = client.ParseTrades(context.Background(), archive, 1789084800000, 1789084859999)
+	if err == nil {
+		t.Fatal("expected scanner reopen failure after archive removal")
+	}
+	if client.tradeScanner != nil {
+		t.Fatal("failed reopen must clear the closed scanner slot")
 	}
 }
 
@@ -274,5 +439,45 @@ func TestPublicDataDownloadHonorsContextCancel(t *testing.T) {
 	_, err = client.FetchArchive(ctx, PublicDataArchiveSpec{Kind: ArchiveKindTrades, Period: ArchivePeriodDaily, Symbol: "BTCUSDT", Date: time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)})
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("expected context cancellation, got %v", err)
+	}
+}
+
+func TestPublicDataTempRootCreatesOwnedRunDirAndCloseRemovesOnlyRunDir(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "cache", "tmp")
+	client, err := NewPublicDataClient(PublicDataClientConfig{
+		BaseURL:     "https://example.test",
+		TempRootDir: root,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	runDir := client.cacheDir
+	if filepath.Dir(runDir) != root {
+		t.Fatalf("cache dir parent=%q want=%q", filepath.Dir(runDir), root)
+	}
+	if !strings.HasPrefix(filepath.Base(runDir), "binance-public-data-") {
+		t.Fatalf("unexpected run cache dir %q", runDir)
+	}
+	if err := os.WriteFile(filepath.Join(runDir, "test.zip"), []byte("test"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(runDir); !os.IsNotExist(err) {
+		t.Fatalf("run cache dir should be removed, stat err=%v", err)
+	}
+	if info, err := os.Stat(root); err != nil || !info.IsDir() {
+		t.Fatalf("temp root should remain, info=%v err=%v", info, err)
+	}
+}
+
+func TestPublicDataRejectsPersistentAndTempCacheDirsTogether(t *testing.T) {
+	_, err := NewPublicDataClient(PublicDataClientConfig{
+		CacheDir:    filepath.Join(t.TempDir(), "persistent"),
+		TempRootDir: filepath.Join(t.TempDir(), "temp-root"),
+	})
+	if err == nil || !strings.Contains(err.Error(), "cannot both be configured") {
+		t.Fatalf("expected mutually exclusive cache dir error, got %v", err)
 	}
 }

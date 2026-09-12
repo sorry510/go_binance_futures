@@ -271,4 +271,6 @@ V3-4 的核心设计目标"以 1m 为主时间轴、仅在歧义或 ROI Gate 可
 - **I-9**：已增加 archive SHA256 的合法 hex 校验，并补测试。
 - **I-10**：不新增 schema。当前生产模型无独立 Limit 挂单/部分成交对象；Phase 文档明确未来真正接入 Limit 时再要求显式 Run metadata。
 
-另外修复了 review 后人工测试发现的两项回归：Standard 1m `visibleBars` O(n²) 全历史复制导致长回测从秒级退化到 20+ 分钟，以及详情 Drawer 重建后 ECharts 仍绑定旧 DOM 导致 Chart 空白。
+另外修复了 review 后人工测试发现的两项回归：Standard 1m `visibleBars` O(n²) 全历史复制导致长回测从秒级退化到 20+ 分钟，以及详情 Drawer 重建后 ECharts 仍绑定旧 DOM 导致 Chart 空白。 后续 Adaptive 实测又修复了两类 ZIP 重复解析：sparse trades 父范围现可覆盖秒级子范围；同一 Run 内 daily 1s/trades archive 改为前向流式 scanner，不同候选分钟不再从 ZIP 起点重复解压。
+
+后续 Adaptive 实测又发现并修复两项性能问题：① 分钟级 verified trades 的 `range` coverage 未被秒级子请求复用，导致每个候选秒反复从 daily ZIP 起点解压/扫描；现改为父范围可覆盖子范围，并有 0-network / `TradeCacheHits` 集成测试。② `BuildIntrabar` 的 overlay/高周期构造会复制或扫描从回测起点到当前的完整历史；现改为二分定位当前窗口，指标输入只复制最后 200 根。真实 BTCUSDT 同策略复现区间从 10.24s 降至 4.94s，结果/DataHash 不变。

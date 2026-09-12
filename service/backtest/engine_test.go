@@ -617,3 +617,42 @@ func TestAdaptiveV8TradeReplayIgnoresFutureTrade(t *testing.T) {
 		t.Fatalf("future trade leaked into current second: %+v", result.Trades)
 	}
 }
+
+func TestAdaptiveROIOnlyStableCloseSkipsHighResolutionWhenRuleCannotPass(t *testing.T) {
+	d := fixtureDataset([]float64{100, 100, 100, 100})
+	provider := &intrabarFixtureProvider{}
+	engine := Engine{ResolutionProviderFactory: func() (historicalmarket.ResolutionProvider, error) { return provider, nil }}
+	config := zeroCosts()
+	config.TakeProfitPct = 0.1
+	strategy := StrategySnapshot{TemplateID: 1, TemplateName: "stable-roi", TechnologyJSON: "{}", StrategyJSON: strategyJSON(
+		Rule{Name: "open", Enable: true, Type: "long", Code: "NowPrice >= 100"},
+		Rule{Name: "close", Enable: true, Type: "close_long", Code: "ROI >= 0.05 && 1 == 0"},
+	)}
+	result, err := engine.RunWithResolution(context.Background(), d, strategy, config, ResolutionModeAdaptive, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if provider.secondCalls != 0 || provider.tradeCalls != 0 {
+		t.Fatalf("provably impossible intraminute close must not fetch high-resolution data: seconds=%d trades=%d", provider.secondCalls, provider.tradeCalls)
+	}
+	if len(result.Trades) != 1 || result.Trades[0].ExitReason != "end_of_data" {
+		t.Fatalf("unexpected result after ROI-only pruning: %+v", result.Trades)
+	}
+}
+
+func TestCloseRuleROIProfileRejectsCurrentBarAndDynamicFields(t *testing.T) {
+	stable := analyzeCloseRuleROIProfile([]Rule{{Enable: true, Type: "close_long", Code: "ROI >= 5 && kline_1h.Close[1] > 0"}}, "LONG")
+	if !stable.Eligible || len(stable.Thresholds) != 1 || stable.Thresholds[0] != 5 {
+		t.Fatalf("completed-bar ROI rule should be eligible: %+v", stable)
+	}
+	for _, code := range []string{
+		"ROI >= 5 && kline_1h.Close[0] > 0",
+		"ROI >= 5 && NowPrice > 100",
+		"ROI >= 5 && IsAsc(kline_1h.Close, 3)",
+		"ROI * 2 >= 5",
+	} {
+		if got := analyzeCloseRuleROIProfile([]Rule{{Enable: true, Type: "close_long", Code: code}}, "LONG"); got.Eligible {
+			t.Fatalf("dynamic/non-comparison ROI rule must use conservative replay: code=%q profile=%+v", code, got)
+		}
+	}
+}

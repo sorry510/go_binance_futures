@@ -128,7 +128,22 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		manager.finishError(row.RunID, ctx, err)
 		return
 	}
-	result, err := manager.engine.RunWithResolution(ctx, dataset, StrategySnapshot{TemplateID: row.StrategyTemplateID, TemplateName: row.StrategyTemplateName, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON, Version: row.StrategyVersion}, request.Config, row.ResolutionMode, func(completed, total int) {
+	runEngine := manager.engine
+	lastResolutionActivity := time.Time{}
+	lastResolutionStage := ""
+	runEngine.ResolutionActivity = func(stage string) {
+		if stage == "" {
+			stage = "resolving_intrabar_data"
+		}
+		now := time.Now()
+		if stage == lastResolutionStage && now.Sub(lastResolutionActivity) < time.Second {
+			return
+		}
+		lastResolutionStage = stage
+		lastResolutionActivity = now
+		manager.updateProgress(row.RunID, stage, lastProgress)
+	}
+	result, err := runEngine.RunWithResolution(ctx, dataset, StrategySnapshot{TemplateID: row.StrategyTemplateID, TemplateName: row.StrategyTemplateName, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON, Version: row.StrategyVersion}, request.Config, row.ResolutionMode, func(completed, total int) {
 		reportProgress("running_backtest", 35, 55, completed, total)
 	})
 	if err != nil {

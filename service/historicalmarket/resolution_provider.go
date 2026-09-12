@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -51,7 +52,11 @@ type AdaptiveResolutionProvider struct {
 
 func DefaultAdaptiveResolutionProvider() (ResolutionProvider, error) {
 	proxyURL, _ := config.String("binance::proxy_url")
-	client, err := NewPublicDataClient(PublicDataClientConfig{ProxyURL: proxyURL})
+	tempRootDir, _ := config.String("binance::public_data_cache_dir")
+	if strings.TrimSpace(tempRootDir) == "" {
+		tempRootDir = "./cache/tmp"
+	}
+	client, err := NewPublicDataClient(PublicDataClientConfig{ProxyURL: proxyURL, TempRootDir: tempRootDir})
 	if err != nil {
 		return nil, err
 	}
@@ -71,6 +76,13 @@ func NewAdaptiveResolutionProvider(repo *Repository, public *PublicDataClient) (
 		return nil, fmt.Errorf("public data client is required")
 	}
 	return &AdaptiveResolutionProvider{repo: repo, public: public}, nil
+}
+
+func (provider *AdaptiveResolutionProvider) SetActivity(activity func(string)) {
+	if provider == nil || provider.public == nil {
+		return
+	}
+	provider.public.SetActivity(activity)
 }
 
 func (provider *AdaptiveResolutionProvider) Close() error {
@@ -175,7 +187,7 @@ func (provider *AdaptiveResolutionProvider) Trades(ctx context.Context, market, 
 		return nil, ResolutionEvidence{}, err
 	}
 	rangeTag := resolutionRangeTag(start, end)
-	if sparseTradeRangeCached(local, rangeTag) {
+	if sparseTradeRangeCached(local, start, end) {
 		provider.mu.Lock()
 		provider.stats.TradeCacheHits++
 		provider.mu.Unlock()
@@ -274,16 +286,42 @@ func sparseSecondRangeCached(rows []Kline, start, end int64) bool {
 	return true
 }
 
-func sparseTradeRangeCached(rows []PublicDataTrade, rangeTag string) bool {
+func sparseTradeRangeCached(rows []PublicDataTrade, start, end int64) bool {
 	if len(rows) == 0 {
 		return false
 	}
 	for _, row := range rows {
-		if !strings.Contains(row.SourceRef, rangeTag) || !validSHA256Hex(row.ArchiveSHA256) {
+		coverageStart, coverageEnd, ok := sourceRefRange(row.SourceRef)
+		if !ok || coverageStart > start || coverageEnd < end || !validSHA256Hex(row.ArchiveSHA256) {
 			return false
 		}
 	}
 	return true
+}
+
+func sourceRefRange(sourceRef string) (int64, int64, bool) {
+	marker := "range="
+	index := strings.LastIndex(sourceRef, marker)
+	if index < 0 {
+		return 0, 0, false
+	}
+	value := sourceRef[index+len(marker):]
+	if amp := strings.IndexByte(value, '&'); amp >= 0 {
+		value = value[:amp]
+	}
+	parts := strings.SplitN(value, "-", 2)
+	if len(parts) != 2 {
+		return 0, 0, false
+	}
+	start, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil {
+		return 0, 0, false
+	}
+	end, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil || end < start {
+		return 0, 0, false
+	}
+	return start, end, true
 }
 
 func resolutionRangeTag(start, end int64) string {

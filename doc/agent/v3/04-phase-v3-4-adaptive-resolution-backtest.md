@@ -123,6 +123,7 @@ Binance Public Data daily trades → 聚合目标分钟 1s
 - 网络错误 / 5xx 做有限指数退避；支持 context cancel。
 - 同一个 `{kind,symbol,date}` 使用 singleflight 去重，多个 Backtest 不重复下载同一 ZIP。
 - 单次 Run 可保留临时 daily ZIP，Run 结束后清理；跨 Run 只长期保存真正使用到的 sparse 数据。
+- 临时 ZIP 根目录通过 `binance::public_data_cache_dir` 配置，默认 `./cache/tmp`。每个 Adaptive Run 在该目录下创建独立的 `binance-public-data-*` 子目录，Run 结束只删除本次子目录，保留 `cache/tmp` 根目录。
 ## 5. V3-4A：Adaptive Intrabar Execution
 
 ### 5.1 数据模型
@@ -477,4 +478,19 @@ V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v8`，�
 - API：`/agents/backtests/:id/trades` 与 `/events` 改为分页响应 `{list,total,page,limit}`；默认 Trades 20 条/页、Events 50 条/页，避免大结果一次性加载造成页面卡顿。
 - 执行假设：当前回测模型没有独立的 Limit 挂单/部分成交对象，因此 `IntrabarResolver` 的 Limit 排队简化假设尚未进入生产执行路径；未来加入 Limit 模型时必须显式记录对应 Run metadata。
 - 数据库版本：V3-4 从现有 **v10** 顺序升级到 **v11**。若后续与另一个同样使用 v11 的分支合并，再由合并结果统一提升到下一个数据库版本，避免提前跳号。
+- Adaptive 性能修复：verified trades 的父 `range` coverage 可直接服务秒级子请求，避免同一 daily trades ZIP 被每秒重复解压扫描；intrabar environment 使用二分定位当前窗口并限制指标序列为 warmup 范围，避免长历史 O(n) 复制被每个 trade 放大。
+- 真实 BTCUSDT 复现验证：相同策略/配置截取到首次问题区间，Adaptive 完成 3 个 1s drill-down 分钟、104 个 trade drill-down 秒，全部命中 sparse cache，结果/DataHash 稳定。
 - 验证：`go test ./...`、`go test -race ./service/historicalmarket ./service/backtest`、`go build ./...`、前端 `pnpm build`、`git diff --check` 均通过。SQLite schema/idempotency 自动测试通过；本次未直接修改服务器 MySQL/PostgreSQL，部署时统一执行 `./go_binance_futures sync db`。
+
+
+- 同一 Run 内 Public Data daily ZIP 使用前向流式 CSV scanner，避免不同候选分钟重复解压。
+
+
+## 复核与性能补充（2026-09-12）
+
+- Public Data daily ZIP 使用单 Run forward scanner，同一 archive 的后续时间范围不再从 ZIP 起点重复解压。
+- 404 archive 在单 Run 内 negative cache；父级 sparse trades range 可覆盖子级秒请求。
+- Adaptive 对可证明为 ROI-only 动态的平仓规则先做 ROI 范围可达性判断，无法成立的分钟不下钻 1s/trades。
+- 高精度阶段区分为读取缓存、下载 ZIP、解析 ZIP，并暴露给前端实时展示。
+- 回测页面新增 Run 耗时展示；运行中持续更新，结束后使用 started_at/completed_at 固化。
+- BTCUSDT 2026-01-01 ~ 2026-01-15 真实只读 benchmark：Dataset ≈0.36s，Adaptive Engine ≈50.3s，SecondDrilldownMinutes=55，TradeDrilldownSeconds=2859。
