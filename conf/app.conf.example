@@ -21,6 +21,8 @@ api_secret = ""
 # Binance HTTP/WebSocket SOCKS5 代理，不需要时留空；多个代理使用英文逗号分隔并轮询使用
 # 支持 socks5:// 与 socks5h://，可使用 socks5://user:password@host:port
 proxy_url = ""
+# Binance Public Data 临时 ZIP 根目录；每次 Adaptive Run 创建独立子目录，Run 结束自动删除子目录
+public_data_cache_dir = "./cache/tmp"
 
 [database]
 # mysql

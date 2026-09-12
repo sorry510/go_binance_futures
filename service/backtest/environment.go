@@ -107,15 +107,39 @@ func (builder *historicalEnvironment) marketConditionAt(asOf int64) int {
 }
 
 func (builder *historicalEnvironment) series(symbol, interval string, asOf int64, limit int) []Bar {
-	all := builder.visibleBars(symbol, interval, asOf)
-	if len(all) == 0 {
-		return nil
+	key := BarSeriesKey(symbol, interval)
+	all := builder.dataset.Bars[key]
+	end := sort.Search(len(all), func(i int) bool { return all[i].CloseTime > asOf })
+	overlay, hasOverlay := builder.overlays[key]
+	if hasOverlay && (overlay.OpenTime > asOf || overlay.CloseTime > asOf) {
+		hasOverlay = false
+	}
+	replacesLast := hasOverlay && end > 0 && all[end-1].OpenTime == overlay.OpenTime
+	canonicalLimit := limit
+	if limit > 0 && hasOverlay && !replacesLast {
+		canonicalLimit--
+		if canonicalLimit < 0 {
+			canonicalLimit = 0
+		}
 	}
 	start := 0
-	if limit > 0 && len(all) > limit {
-		start = len(all) - limit
+	if limit > 0 && end > canonicalLimit {
+		start = end - canonicalLimit
 	}
-	out := append([]Bar(nil), all[start:]...)
+	out := append([]Bar(nil), all[start:end]...)
+	if hasOverlay {
+		if len(out) > 0 && out[len(out)-1].OpenTime == overlay.OpenTime {
+			out[len(out)-1] = overlay
+		} else {
+			out = append(out, overlay)
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	if limit > 0 && len(out) > limit {
+		out = out[len(out)-limit:]
+	}
 	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
 		out[i], out[j] = out[j], out[i]
 	}
@@ -144,16 +168,23 @@ func (builder *historicalEnvironment) visibleBars(symbol, interval string, asOf 
 }
 
 func (builder *historicalEnvironment) tickerStats(symbol string, asOf int64) map[string]interface{} {
-	all := builder.visibleBars(symbol, builder.dataset.ExecutionInterval, asOf)
-	if len(all) == 0 {
+	key := BarSeriesKey(symbol, builder.dataset.ExecutionInterval)
+	all := builder.dataset.Bars[key]
+	end := sort.Search(len(all), func(i int) bool { return all[i].CloseTime > asOf })
+	startTime := asOf - (24 * time.Hour).Milliseconds()
+	start := sort.Search(end, func(i int) bool { return all[i].CloseTime >= startTime })
+	window := append([]Bar(nil), all[start:end]...)
+	overlay, hasOverlay := builder.overlays[key]
+	if hasOverlay && overlay.OpenTime <= asOf && overlay.CloseTime <= asOf {
+		if len(window) > 0 && window[len(window)-1].OpenTime == overlay.OpenTime {
+			window[len(window)-1] = overlay
+		} else {
+			window = append(window, overlay)
+		}
+	}
+	if len(window) == 0 {
 		return map[string]interface{}{"PercentChange": 0.0, "Close": 0.0, "Open": 0.0, "Low": 0.0, "High": 0.0}
 	}
-	startTime := asOf - (24 * time.Hour).Milliseconds()
-	start := sort.Search(len(all), func(i int) bool { return all[i].CloseTime >= startTime })
-	if start >= len(all) {
-		start = len(all) - 1
-	}
-	window := all[start:]
 	open := window[0].Open
 	close := window[len(window)-1].Close
 	low, high := window[0].Low, window[0].High
@@ -186,11 +217,10 @@ func buildIntrabarOverlays(dataset Dataset, partialMinute Bar, asOf int64) (map[
 		if err != nil {
 			return nil, err
 		}
-		components := make([]Bar, 0)
-		for _, bar := range minuteBars {
-			if bar.OpenTime < windowStart || bar.OpenTime >= partialMinute.OpenTime {
-				continue
-			}
+		startIndex := sort.Search(len(minuteBars), func(i int) bool { return minuteBars[i].OpenTime >= windowStart })
+		endIndex := sort.Search(len(minuteBars), func(i int) bool { return minuteBars[i].OpenTime >= partialMinute.OpenTime })
+		components := make([]Bar, 0, endIndex-startIndex+1)
+		for _, bar := range minuteBars[startIndex:endIndex] {
 			if bar.CloseTime > asOf {
 				break
 			}

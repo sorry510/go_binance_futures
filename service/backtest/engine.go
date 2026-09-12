@@ -18,6 +18,7 @@ import (
 
 type Engine struct {
 	ResolutionProviderFactory ResolutionProviderFactory
+	ResolutionActivity        func(string)
 }
 
 func (engine Engine) Run(ctx context.Context, dataset Dataset, strategy StrategySnapshot, config RunConfig) (Result, error) {
@@ -69,7 +70,7 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 		progress(0, len(bars))
 	}
 	result := Result{DatasetID: dataset.DatasetID, DatasetSpecHash: dataset.DatasetSpecHash, DataHash: dataset.DataHash, StrategyVersion: strategy.Version, EngineVersion: engineVersion, MarketConditionModel: MarketConditionModel, ResolutionMode: mode, ResolutionModel: resolutionModel, Trades: []Trade{}, Events: []AuditEvent{}, Equity: []EquityPoint{}}
-	adaptiveState := adaptiveRunState{factory: engine.ResolutionProviderFactory}
+	adaptiveState := adaptiveRunState{factory: engine.ResolutionProviderFactory, activity: engine.ResolutionActivity}
 	defer adaptiveState.close()
 	cash := config.InitialEquity
 	peak := cash

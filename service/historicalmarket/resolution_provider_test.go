@@ -162,3 +162,57 @@ func TestAggregateTradesToSecondsUsesTakerBuySemantics(t *testing.T) {
 		t.Fatalf("buyer-maker semantics inverted: %+v", rows[0])
 	}
 }
+
+func TestSparseTradeRangeCachedAcceptsVerifiedParentRange(t *testing.T) {
+	minuteStart := time.Date(2026, 1, 2, 14, 50, 0, 0, time.UTC).UnixMilli()
+	hash := strings.Repeat("a", 64)
+	rows := []PublicDataTrade{
+		{TradeID: 1, TradeTime: minuteStart + 13_100, ArchiveSHA256: hash, SourceRef: "archive#sha256=" + hash + "&" + resolutionRangeTag(minuteStart, minuteStart+59_999)},
+		{TradeID: 2, TradeTime: minuteStart + 13_900, ArchiveSHA256: hash, SourceRef: "archive#sha256=" + hash + "&" + resolutionRangeTag(minuteStart, minuteStart+59_999)},
+	}
+	if !sparseTradeRangeCached(rows, minuteStart+13_000, minuteStart+13_999) {
+		t.Fatal("verified minute coverage must satisfy a child-second request")
+	}
+	if sparseTradeRangeCached(rows, minuteStart-1, minuteStart+13_999) {
+		t.Fatal("coverage must not satisfy a request starting before the verified range")
+	}
+	if sparseTradeRangeCached(rows, minuteStart+13_000, minuteStart+60_000) {
+		t.Fatal("coverage must not satisfy a request ending after the verified range")
+	}
+}
+
+func TestResolutionProviderTradesReusesVerifiedParentRangeFromSparseStore(t *testing.T) {
+	setupRepositoryTest(t)
+	repo := NewRepository(nil)
+	minuteStart := time.Date(2026, 1, 2, 14, 50, 0, 0, time.UTC).UnixMilli()
+	hash := strings.Repeat("b", 64)
+	parentRef := "archive#sha256=" + hash + "&" + resolutionRangeTag(minuteStart, minuteStart+59_999)
+	rows := []PublicDataTrade{
+		{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", TradeID: 1, TradeTime: minuteStart + 13_100, Price: 100, Quantity: 1, QuoteQuantity: 100, Source: SourceBinancePublicData, SourceRef: parentRef, ArchiveSHA256: hash},
+		{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", TradeID: 2, TradeTime: minuteStart + 13_900, Price: 101, Quantity: 1, QuoteQuantity: 101, Source: SourceBinancePublicData, SourceRef: parentRef, ArchiveSHA256: hash},
+	}
+	if _, err := repo.StoreSparseTrades(context.Background(), rows); err != nil {
+		t.Fatal(err)
+	}
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		http.Error(w, "must not fetch verified parent range", http.StatusInternalServerError)
+	}))
+	defer server.Close()
+	client, err := NewPublicDataClient(PublicDataClientConfig{BaseURL: server.URL, CacheDir: t.TempDir(), HTTPClient: server.Client()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	provider, err := NewAdaptiveResolutionProvider(repo, client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, evidence, err := provider.Trades(context.Background(), MarketFuturesUSDT, "BTCUSDT", minuteStart+13_000, minuteStart+13_999)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 2 || !evidence.CacheHit || provider.Stats().TradeCacheHits != 1 || requests.Load() != 0 {
+		t.Fatalf("parent-range sparse cache not reused: rows=%d evidence=%+v stats=%+v requests=%d", len(got), evidence, provider.Stats(), requests.Load())
+	}
+}
