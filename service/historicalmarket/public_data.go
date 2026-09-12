@@ -74,6 +74,7 @@ type PublicDataClientConfig struct {
 	BaseURL      string
 	ProxyURL     string
 	CacheDir     string
+	TempRootDir  string
 	Timeout      time.Duration
 	MaxRetries   int
 	RetryBackoff time.Duration
@@ -91,7 +92,12 @@ type PublicDataClient struct {
 	mu          sync.Mutex
 	archives    map[string]PublicDataArchive
 	unavailable map[string]struct{}
+	activity    func(string)
 	group       singleflight.Group
+
+	parseMu      sync.Mutex
+	klineScanner *publicDataCSVScanner
+	tradeScanner *publicDataCSVScanner
 }
 
 func NewPublicDataClient(config PublicDataClientConfig) (*PublicDataClient, error) {
@@ -116,10 +122,19 @@ func NewPublicDataClient(config PublicDataClientConfig) (*PublicDataClient, erro
 		client = &http.Client{Transport: transport, Timeout: timeout}
 	}
 	cacheDir := strings.TrimSpace(config.CacheDir)
+	tempRootDir := strings.TrimSpace(config.TempRootDir)
+	if cacheDir != "" && tempRootDir != "" {
+		return nil, fmt.Errorf("public data CacheDir and TempRootDir cannot both be configured")
+	}
 	ownsCacheDir := false
 	if cacheDir == "" {
+		if tempRootDir != "" {
+			if err := os.MkdirAll(tempRootDir, 0o750); err != nil {
+				return nil, fmt.Errorf("create public data temp root dir: %w", err)
+			}
+		}
 		var err error
-		cacheDir, err = os.MkdirTemp("", "binance-public-data-*")
+		cacheDir, err = os.MkdirTemp(tempRootDir, "binance-public-data-*")
 		if err != nil {
 			return nil, fmt.Errorf("create public data cache dir: %w", err)
 		}
@@ -145,10 +160,40 @@ func NewPublicDataClient(config PublicDataClientConfig) (*PublicDataClient, erro
 }
 
 func (client *PublicDataClient) Close() error {
-	if client == nil || !client.ownsCacheDir || client.cacheDir == "" {
+	if client == nil {
+		return nil
+	}
+	client.parseMu.Lock()
+	closePublicDataCSVScanner(client.klineScanner)
+	closePublicDataCSVScanner(client.tradeScanner)
+	client.klineScanner = nil
+	client.tradeScanner = nil
+	client.parseMu.Unlock()
+	if !client.ownsCacheDir || client.cacheDir == "" {
 		return nil
 	}
 	return os.RemoveAll(client.cacheDir)
+}
+
+func (client *PublicDataClient) SetActivity(activity func(string)) {
+	if client == nil {
+		return
+	}
+	client.mu.Lock()
+	client.activity = activity
+	client.mu.Unlock()
+}
+
+func (client *PublicDataClient) notifyActivity(stage string) {
+	if client == nil {
+		return
+	}
+	client.mu.Lock()
+	activity := client.activity
+	client.mu.Unlock()
+	if activity != nil {
+		activity(stage)
+	}
 }
 
 func (client *PublicDataClient) ArchiveURL(spec PublicDataArchiveSpec) (string, error) {
@@ -233,6 +278,7 @@ func (client *PublicDataClient) FetchArchive(ctx context.Context, spec PublicDat
 		if client.archiveUnavailable(archiveURL) {
 			return PublicDataArchive{}, fmt.Errorf("%w: %s", ErrPublicDataArchiveNotFound, archiveURL)
 		}
+		client.notifyActivity("downloading_intrabar_archive")
 		archive, err := client.downloadArchive(ctx, spec, archiveURL)
 		if err != nil {
 			if errors.Is(err, ErrPublicDataArchiveNotFound) {
@@ -447,8 +493,9 @@ func parsePublicDataChecksum(value string) (string, string, error) {
 }
 
 func (client *PublicDataClient) ParseKlines(ctx context.Context, archive PublicDataArchive, start, end int64) ([]Kline, error) {
+	client.notifyActivity("parsing_intrabar_archive")
 	rows := make([]Kline, 0, 64)
-	err := readPublicDataCSV(ctx, archive.Path, func(record []string, rowNumber int) error {
+	err := client.readPublicDataCSVRange(ctx, archive, start, end, 0, false, func(record []string, rowNumber int) error {
 		if len(record) < 12 {
 			return fmt.Errorf("kline CSV row %d has %d columns", rowNumber, len(record))
 		}
@@ -524,8 +571,9 @@ func (client *PublicDataClient) ParseKlines(ctx context.Context, archive PublicD
 }
 
 func (client *PublicDataClient) ParseTrades(ctx context.Context, archive PublicDataArchive, start, end int64) ([]PublicDataTrade, error) {
+	client.notifyActivity("parsing_intrabar_archive")
 	rows := make([]PublicDataTrade, 0, 1024)
-	err := readPublicDataCSV(ctx, archive.Path, func(record []string, rowNumber int) error {
+	err := client.readPublicDataCSVRange(ctx, archive, start, end, 4, true, func(record []string, rowNumber int) error {
 		if len(record) < 6 {
 			return fmt.Errorf("trade CSV row %d has %d columns", rowNumber, len(record))
 		}
@@ -583,21 +631,33 @@ func (client *PublicDataClient) ParseTrades(ctx context.Context, archive PublicD
 	return rows, nil
 }
 
-var errStopCSV = errors.New("stop public data CSV scan")
+type publicDataCSVScanner struct {
+	archiveURL  string
+	file        *os.File
+	stream      io.ReadCloser
+	reader      *csv.Reader
+	rowNumber   int
+	lastTime    int64
+	pending     []string
+	pendingRow  int
+	pendingTime int64
+	eof         bool
+}
 
-func readPublicDataCSV(ctx context.Context, archivePath string, visit func([]string, int) error) error {
-	file, err := os.Open(archivePath)
+func openPublicDataCSVScanner(archive PublicDataArchive) (*publicDataCSVScanner, error) {
+	file, err := os.Open(archive.Path)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer file.Close()
 	info, err := file.Stat()
 	if err != nil {
-		return err
+		file.Close()
+		return nil, err
 	}
 	reader, err := zip.NewReader(file, info.Size())
 	if err != nil {
-		return fmt.Errorf("open public data ZIP: %w", err)
+		file.Close()
+		return nil, fmt.Errorf("open public data ZIP: %w", err)
 	}
 	for _, item := range reader.File {
 		if item.FileInfo().IsDir() || !strings.HasSuffix(strings.ToLower(item.Name), ".csv") {
@@ -605,40 +665,131 @@ func readPublicDataCSV(ctx context.Context, archivePath string, visit func([]str
 		}
 		stream, err := item.Open()
 		if err != nil {
-			return err
+			file.Close()
+			return nil, err
 		}
 		csvReader := csv.NewReader(stream)
 		csvReader.FieldsPerRecord = -1
 		csvReader.ReuseRecord = true
-		rowNumber := 0
-		for {
-			if rowNumber%1024 == 0 {
-				if err := ctx.Err(); err != nil {
-					stream.Close()
-					return err
-				}
-			}
-			record, err := csvReader.Read()
+		return &publicDataCSVScanner{archiveURL: archive.URL, file: file, stream: stream, reader: csvReader}, nil
+	}
+	file.Close()
+	return nil, fmt.Errorf("public data ZIP contains no CSV file")
+}
+
+func closePublicDataCSVScanner(scanner *publicDataCSVScanner) {
+	if scanner == nil {
+		return
+	}
+	if scanner.stream != nil {
+		_ = scanner.stream.Close()
+	}
+	if scanner.file != nil {
+		_ = scanner.file.Close()
+	}
+}
+
+// readPublicDataCSVRange keeps one forward-only ZIP/CSV scanner per data kind.
+// Adaptive replay is chronological, so later ranges on the same daily archive
+// continue from the current decompression position instead of reopening and
+// inflating the same ZIP from byte zero for every candidate minute. If a caller
+// genuinely moves backwards, the scanner is reopened to preserve correctness.
+func (client *PublicDataClient) readPublicDataCSVRange(ctx context.Context, archive PublicDataArchive, start, end int64, timeColumn int, trades bool, visit func([]string, int) error) error {
+	client.parseMu.Lock()
+	defer client.parseMu.Unlock()
+
+	scannerSlot := &client.klineScanner
+	if trades {
+		scannerSlot = &client.tradeScanner
+	}
+	scanner := *scannerSlot
+	if scanner == nil || scanner.archiveURL != archive.URL || (start > 0 && scanner.lastTime > 0 && start < scanner.lastTime) {
+		closePublicDataCSVScanner(scanner)
+		*scannerSlot = nil
+		var err error
+		scanner, err = openPublicDataCSVScanner(archive)
+		if err != nil {
+			return err
+		}
+		*scannerSlot = scanner
+	}
+	return scanner.scanRange(ctx, start, end, timeColumn, visit)
+}
+
+func (scanner *publicDataCSVScanner) scanRange(ctx context.Context, start, end int64, timeColumn int, visit func([]string, int) error) error {
+	for {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if scanner.eof {
+			return nil
+		}
+		var record []string
+		var rowNumber int
+		var recordTime int64
+		if scanner.pending != nil {
+			record = scanner.pending
+			rowNumber = scanner.pendingRow
+			recordTime = scanner.pendingTime
+			scanner.pending = nil
+			scanner.pendingRow = 0
+			scanner.pendingTime = 0
+		} else {
+			row, err := scanner.reader.Read()
 			if errors.Is(err, io.EOF) {
-				break
+				scanner.eof = true
+				return nil
 			}
 			if err != nil {
-				stream.Close()
 				return fmt.Errorf("read public data CSV: %w", err)
 			}
-			rowNumber++
-			if err := visit(record, rowNumber); err != nil {
-				stream.Close()
-				if errors.Is(err, errStopCSV) {
-					return nil
-				}
-				return err
+			scanner.rowNumber++
+			rowNumber = scanner.rowNumber
+			record = row
+			if timeColumn >= len(record) {
+				return fmt.Errorf("public data CSV row %d has no time column %d", rowNumber, timeColumn)
 			}
+			value, err := parseArchiveInt64(record[timeColumn])
+			if err != nil {
+				if rowNumber == 1 {
+					if visitErr := visit(record, rowNumber); visitErr != nil {
+						if errors.Is(visitErr, errStopCSV) {
+							return nil
+						}
+						return visitErr
+					}
+					continue
+				}
+				return fmt.Errorf("public data CSV row %d time: %w", rowNumber, err)
+			}
+			recordTime = normalizeArchiveMillis(value)
 		}
-		return stream.Close()
+
+		if end > 0 && recordTime > end {
+			// csv.Reader.ReuseRecord reuses its backing array, so retain a copy.
+			// Do not advance lastTime for this look-ahead record: the next
+			// chronological range may legitimately begin before pendingTime.
+			scanner.pending = append([]string(nil), record...)
+			scanner.pendingRow = rowNumber
+			scanner.pendingTime = recordTime
+			return nil
+		}
+		if recordTime > scanner.lastTime {
+			scanner.lastTime = recordTime
+		}
+		if start > 0 && recordTime < start {
+			continue
+		}
+		if err := visit(record, rowNumber); err != nil {
+			if errors.Is(err, errStopCSV) {
+				return nil
+			}
+			return err
+		}
 	}
-	return fmt.Errorf("public data ZIP contains no CSV file")
 }
+
+var errStopCSV = errors.New("stop public data CSV scan")
 
 func parseArchiveInt64(value string) (int64, error) {
 	return strconv.ParseInt(strings.TrimSpace(strings.TrimPrefix(value, "\ufeff")), 10, 64)
