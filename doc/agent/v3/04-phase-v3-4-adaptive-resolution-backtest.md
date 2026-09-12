@@ -477,7 +477,7 @@ V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v9`，�
 - UI：支持标准 1m / 自适应精度选择，展示 drill-down/cache/download 统计、Trade resolution badge 和 Intrabar evidence。
 - API：`/agents/backtests/:id/trades` 与 `/events` 改为分页响应 `{list,total,page,limit}`；默认 Trades 20 条/页、Events 50 条/页，避免大结果一次性加载造成页面卡顿。
 - 执行假设：当前回测模型没有独立的 Limit 挂单/部分成交对象，因此 `IntrabarResolver` 的 Limit 排队简化假设尚未进入生产执行路径；未来加入 Limit 模型时必须显式记录对应 Run metadata。
-- 数据库版本：V3-4 从现有 **v10** 顺序升级到 **v11**。若后续与另一个同样使用 v11 的分支合并，再由合并结果统一提升到下一个数据库版本，避免提前跳号。
+- 数据库版本：V3-4 独立实现从 **v10** 顺序升级到 **v11**；V3-5 trade 分支合并后，当前 `feat/ai-agent-v3` 统一提升到 **v12**，用于强制已处于任一分支 v11 的数据库再次执行 `./go_binance_futures sync db`，同步两边 ORM Schema。
 - Adaptive 性能修复：verified trades 的父 `range` coverage 可直接服务秒级子请求，避免同一 daily trades ZIP 被每秒重复解压扫描；intrabar environment 使用二分定位当前窗口并限制指标序列为 warmup 范围，避免长历史 O(n) 复制被每个 trade 放大。
 - 真实 BTCUSDT 首次问题区间复现验证：相同策略/配置下，Adaptive 完成 3 个 1s drill-down 分钟、104 个 trade drill-down 秒，全部命中 sparse cache，结果/DataHash 稳定。
 - 验证：`go test ./...`、`go test -race ./service/historicalmarket ./service/backtest`、`go build ./...`、前端 `pnpm build`、`git diff --check` 均通过。SQLite schema/idempotency 自动测试通过；本次未直接修改服务器 MySQL/PostgreSQL，部署时统一执行 `./go_binance_futures sync db`。

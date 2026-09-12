@@ -148,13 +148,38 @@ func GetAllSymbols() (symbols []*models.Symbols, err error) {
 	return symbols, err
 }
 
-// 判断 btc 的涨跌是否大于 5%，判断 当前所有币种涨跌数量是否 80%，是否是一个单项行情
+func autoStopNeutralROI(nowProfit float64) bool {
+	return nowProfit > -3 && nowProfit < 3
+}
+
+func baseMarketBreadthPermissions(riseCount, fallCount, total int, btcPercentChange float64) (canLong, canShort bool) {
+	if total <= 0 {
+		return false, false
+	}
+	canLong, canShort = true, true
+	risePercent := float64(riseCount) * 100 / float64(total)
+	fallPercent := float64(fallCount) * 100 / float64(total)
+	if risePercent >= 75 {
+		canShort = false
+	}
+	if fallPercent >= 75 {
+		canLong = false
+	}
+	if risePercent >= 60 && btcPercentChange > 5 {
+		canShort = false
+	}
+	if fallPercent >= 60 && btcPercentChange < -5 {
+		canLong = false
+	}
+	return canLong, canShort
+}
+
+// 判断 btc 的涨跌是否大于 5%，结合 75%/60% 市场宽度阈值判断是否为单边行情
 func BaseCheckCanLongOrShort() (canLong bool, canShort bool) {
 	coins, err := GetAllSymbols()
 	if err != nil {
 		return false, false
 	}
-	canLong, canShort = true, true
 	riseCount, fallCount := 0, 0
 	btcPercentChange := 0.0
 	for _, coin := range coins {
@@ -167,22 +192,5 @@ func BaseCheckCanLongOrShort() (canLong bool, canShort bool) {
 			btcPercentChange = coin.PercentChange
 		}
 	}
-	// logs.Info(riseCount, fallCount, btcPercentChange, len(coins))
-	if riseCount/len(coins) > 75 {
-		// 都在涨，不要做空
-		canShort = false
-	}
-	if fallCount/len(coins) > 75 {
-		// 都在跌，不要做多
-		canLong = false
-	}
-	if riseCount/len(coins) > 60 && btcPercentChange > 5 {
-		// 60% 的币种都在涨，btc 涨幅大于 5，不要做空
-		canShort = false
-	}
-	if fallCount/len(coins) < 60 && btcPercentChange < -5 {
-		// 60% 的币种都在跌，btc 跌幅大于 5，不要做多
-		canLong = false
-	}
-	return canLong, canShort
+	return baseMarketBreadthPermissions(riseCount, fallCount, len(coins), btcPercentChange)
 }
