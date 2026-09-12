@@ -1,5 +1,8 @@
 # Phase V3-5：真实交易安全与仓位/订单归属隔离
 
+> 状态：✅ 已完成（2026-09-10）。实施结果见 [`v3-5-implementation-report.md`](./v3-5-implementation-report.md)。
+> 人工验证：[`v3-5-agent-trade-ownership-testing-guide.md`](./v3-5-agent-trade-ownership-testing-guide.md)。
+
 > 定位：P0。先解决真实资金下“谁创建、谁管理”的 ownership 边界，再补齐 Agent 受控交易的保护单、整仓平仓和重启恢复。
 >
 > **详细 ownership 设计真相源：** `doc/trade/合约自动交易仓位归属隔离改造计划.md`。本文件只定义 V3-5 的实施顺序、阶段边界和验收 Gate；如两份文档存在 ownership 细节差异，以详细设计文档为准。
@@ -79,16 +82,16 @@ account_qty == 0
 → managed position 关闭
 ```
 
-### 2.4 FutureExcludeSymbols 继续作为人工保护开关
+### 2.4 Ownership 作为唯一仓位/订单修改边界
 
-`FutureExcludeSymbols` 与 ownership 是两层不同保护：
+不再提供 `FutureExcludeSymbols` 人工排除列表。真实交易的修改权限只由 ownership 决定：
 
 ```text
-ownership = 系统有权管理
-exclude   = 用户当前要求暂停自动操作
+managed by current owner = 允许该 owner 管理
+unmanaged / other owner = 只读，不平仓、不撤单、不改单
 ```
 
-因此排除列表仍优先于自动平仓和自动撤单。
+手工仓位、其它 owner 仓位和来源不明仓位无需加入额外排除列表。
 
 ## 3. V3-5A：Ownership Foundation
 
@@ -145,7 +148,7 @@ managedPositions / managedOrders(owner=auto_strategy)
 - 自动止损、止盈、AutoStopOrder、策略反转平仓只遍历 `auto_strategy` managed position。
 - 平仓前重新获取账户数量，`close_qty = min(managed_qty, current_account_qty)`。
 - 已存在 unmanaged 或其它 owner 同方向仓位时，新的 `auto_strategy` 开仓安全拒绝。
-- `FutureExcludeSymbols` 继续优先跳过自动平仓和撤单。
+- 不再依赖人工排除列表；ownership 无法确认时一律 fail closed。
 
 ### V3-5B Gate
 
@@ -272,9 +275,9 @@ V2 Controlled Trade 已具备：
 
 不建设大型交易终端，优先复用现有页面：
 
-- 配置中心继续保留合约交易开关和 `FutureExcludeSymbols`。
-- ownership 隔离完成后，开启合约交易的警告文案改成“只管理本系统创建并登记的仓位/订单”。
-- `AI → 受控交易` 展示 Agent Managed Position、Stop/TP、order id、clientOrderId 和最近 Reconcile 时间。
+- 配置中心保留合约交易总开关，但移除 `FutureExcludeSymbols`。
+- 合约交易总开关切换后直接保存，不再弹出二次确认框；交易安全由 ownership 边界保证。
+- `合约交易 → 仓位与受控交易` 展示 Agent Managed Position、Stop/TP、order id、clientOrderId 和最近 Reconcile 时间。
 - 对 unmanaged / 其它 owner 仓位明确显示归属，但不提供越权操作按钮。
 
 ## 10. 本阶段明确不做

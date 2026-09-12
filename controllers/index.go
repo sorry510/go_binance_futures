@@ -22,7 +22,6 @@ func (ctrl *IndexController) GetServiceConfig() {
 		return
 	}
 
-	var coinExcludeSymbols = systemConfig.FutureExcludeSymbols
 	var coinMaxCount = systemConfig.FutureMaxCount
 	var coinOrderType = systemConfig.FutureOrderType
 	var coinAllowLong = systemConfig.FutureAllowLong
@@ -57,11 +56,10 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"wsDeliveryEnable":             systemConfig.WsDeliveryEnable,
 			"futuresPositionConvertEnable": systemConfig.FuturesPositionConvertEnable,
 
-			"coinExcludeSymbols": coinExcludeSymbols,
-			"coinMaxCount":       coinMaxCount,
-			"coinOrderType":      coinOrderType,
-			"coinAllowLong":      coinAllowLong,
-			"coinAllowShort":     coinAllowShort,
+			"coinMaxCount":   coinMaxCount,
+			"coinOrderType":  coinOrderType,
+			"coinAllowLong":  coinAllowLong,
+			"coinAllowShort": coinAllowShort,
 
 			"tradeFutureTest":               tradeFutureTest,
 			"tradeFutureTestNoticeLimitMin": tradeFutureTestNoticeLimitMin,

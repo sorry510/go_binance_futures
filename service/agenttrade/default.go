@@ -8,6 +8,7 @@ import (
 
 	binanceapi "go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	futuresownership "go_binance_futures/service/futuresownership"
 	"go_binance_futures/utils"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -110,23 +111,25 @@ func (BinanceBroker) SubmitMarket(ctx context.Context, request BrokerOrderReques
 	} else {
 		return BrokerOrderResult{}, fmt.Errorf("unsupported trade side %q", request.Side)
 	}
-	order, err := binanceapi.CreateAgentMarketOrder(ctx, request.Symbol, request.Quantity, side, positionSide, request.ClientOrderID)
+	result, err := futuresownership.DefaultExecutor().Execute(ctx, futuresownership.OrderRequest{
+		Owner: futuresownership.OwnerAgentTrade, Symbol: request.Symbol, PositionSide: string(positionSide),
+		Intent: futuresownership.IntentOpen, Side: string(side), OrderType: string(futures.OrderTypeMarket),
+		Quantity: request.Quantity, SourceRef: request.ProposalID, ClientOrderID: request.ClientOrderID,
+	})
 	if err != nil {
 		return BrokerOrderResult{}, err
 	}
-	avg, _ := strconv.ParseFloat(order.AvgPrice, 64)
-	return BrokerOrderResult{ExchangeOrderID: strconv.FormatInt(order.OrderID, 10), ClientOrderID: order.ClientOrderID, AveragePrice: avg}, nil
+	return BrokerOrderResult{ExchangeOrderID: result.ExchangeOrderID, ClientOrderID: result.ClientOrderID, AveragePrice: result.AveragePrice}, nil
 }
 
 func (BinanceBroker) LookupByClientOrderID(ctx context.Context, symbol, clientOrderID string) (BrokerOrderResult, error) {
-	order, err := binanceapi.GetOrderByClientOrderID(ctx, strings.ToUpper(strings.TrimSpace(symbol)), strings.TrimSpace(clientOrderID))
+	result, err := futuresownership.DefaultExecutor().Reconcile(ctx, strings.ToUpper(strings.TrimSpace(symbol)), strings.TrimSpace(clientOrderID))
 	if err != nil {
 		return BrokerOrderResult{}, err
 	}
-	avg, _ := strconv.ParseFloat(order.AvgPrice, 64)
 	return BrokerOrderResult{
-		ExchangeOrderID: strconv.FormatInt(order.OrderID, 10),
-		ClientOrderID:   order.ClientOrderID,
-		AveragePrice:    avg,
+		ExchangeOrderID: result.ExchangeOrderID,
+		ClientOrderID:   result.ClientOrderID,
+		AveragePrice:    result.AveragePrice,
 	}, nil
 }

@@ -12,13 +12,16 @@ import (
 	"go_binance_futures/middlewares"
 	"go_binance_futures/models"
 	_ "go_binance_futures/routers"
+	agenttrade "go_binance_futures/service/agenttrade"
 	alertpipeline "go_binance_futures/service/alertpipeline"
+	futuresownership "go_binance_futures/service/futuresownership"
 	marketintelligence "go_binance_futures/service/marketintelligence"
 	"go_binance_futures/spot"
 	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"go_binance_futures/webnotification"
 	"os"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -34,7 +37,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 11 // 每次变动数据库版本号 +1
+var dbVersion int64 = 12 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -49,6 +52,8 @@ var dbCollation, _ = config.String("database::collation")
 var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var tradeKey, _ = config.String("binance::api_key")
 var tradeSecret, _ = config.String("binance::api_secret")
+var binanceTestnet, _ = config.Bool("binance::testnet")
+var testnetTradeKey, _ = config.String("binance::testnet_api_key")
 var tradeProxyURL, _ = config.String("binance::proxy_url")
 var mcpServerEnable, _ = config.Bool("mcp::mcp_server_enable")
 var SystemConfig models.Config
@@ -91,6 +96,8 @@ func registerModels() {
 	orm.RegisterModel(new(models.DeliverySymbols))
 	orm.RegisterModel(new(models.FuturesPosition))
 	orm.RegisterModel(new(models.FuturesOrder))
+	orm.RegisterModel(new(models.FuturesManagedPosition))
+	orm.RegisterModel(new(models.FuturesManagedOrder))
 	orm.RegisterModel(new(models.NotifyConfig))
 	orm.RegisterModel(new(models.FuturesLiquidationOrder))
 	orm.RegisterModel(new(models.SymbolAnalysisHistory))
@@ -227,6 +234,20 @@ func initializeRuntimeDatabase() {
 	if err := feature.BackfillEmptyFuturesSymbolTypes(); err != nil {
 		logs.Error("backfill empty futures symbol types error:", err)
 	}
+	if futuresTradingConfigured() {
+		if summaries, err := futuresownership.DefaultReconciler().ReconcileAll(context.Background()); err != nil {
+			logs.Error("reconcile futures ownership on startup:", err)
+		} else {
+			logs.Info("futures ownership startup reconcile complete:", len(summaries), "owners checked")
+		}
+	}
+}
+
+func futuresTradingConfigured() bool {
+	if binanceTestnet {
+		return strings.TrimSpace(testnetTradeKey) != ""
+	}
+	return strings.TrimSpace(tradeKey) != ""
 }
 
 func isSyncDatabaseCommand(args []string) bool {
@@ -293,7 +314,7 @@ func main() {
 	// ws 订阅用户数据信息(仓位,当前挂单)
 	// 如果开启，则使用本地数据库管理仓位信息，不再每次请求查询 api 接口，可以有效降低请求频率(openOrders, getPosition)
 	// 但是需要注意，这里面的仓位信息推送，只有仓位发生变化时才会推送数据(当前仓位的盈利多少变化不会推送，需要根据 symbols 表的 close 价格计算)
-	if wsFuturesUserData == "1" && tradeKey != "" {
+	if wsFuturesUserData == "1" && futuresTradingConfigured() {
 		feature.SyncUserData()
 	}
 
@@ -345,7 +366,29 @@ func main() {
 	// 自动合约交易
 	loopRun(func() {
 		feature.StartTrade(&SystemConfig)
-	}, time.Second*2) // 2秒间隔, 1min 中不能超过 2400 权重和
+	}, time.Second*2) // 2秒间隔；REST 权重随 managed orders/WS 状态变化，不使用固定预算假设
+
+	// Ownership 低频全量对账：补齐 notice/rush/funding/agent 等非 StartTrade owner
+	// 的交易所成交、外部减仓/平仓状态。auto_strategy 虽有 2 秒内循环对账，
+	// 在这里重复检查一次也仅作为低频兜底。
+	loopRun(func() {
+		if !futuresTradingConfigured() {
+			return
+		}
+		if summaries, err := futuresownership.DefaultReconciler().ReconcileAll(context.Background()); err != nil {
+			logs.Warning("periodic futures ownership reconcile:", err)
+		} else {
+			logs.Debug("periodic futures ownership reconcile complete:", len(summaries), "owners checked")
+			if updated, syncErr := agenttrade.DefaultService().SyncClosedManagedProposals(context.Background(), "ownership_reconcile"); syncErr != nil {
+				logs.Warning("sync closed agent trade proposals:", syncErr)
+			} else if updated > 0 {
+				logs.Info("agent trade proposal ownership reconcile:", updated, "proposals closed")
+			}
+			// Only rebuild notice protection after account/ownership reconciliation
+			// succeeds; otherwise stale managed quantity could over-protect a position.
+			feature.RepairNoticeAutoOrderProtections()
+		}
+	}, time.Minute)
 
 	// 30 分钟检查一次所有未平仓的订单, 一次 200 条，此处是兜底行为，处理一些意外情况
 	// 处理 app 上已经平仓的订单，但是系统中没有找到对应的平仓订单
