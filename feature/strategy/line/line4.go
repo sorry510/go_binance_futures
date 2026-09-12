@@ -24,31 +24,31 @@ func (TradeLine4 TradeLine4) GetCanLongOrShort(openParams strategy.OpenParams) (
 	symbols := openParams.Symbols
 	openResult.CanLong = false
 	openResult.CanShort = false
-	
+
 	kline_6h, err1 := binance.GetKlineData(symbols.Symbol, "6h", 50)
 	kline_1h, err2 := binance.GetKlineData(symbols.Symbol, "2h", 24)
 	if err1 != nil || err2 != nil {
 		return openResult
 	}
 	kline_6h_close := GetLineClosePrices(kline_6h)
-	
+
 	ma6h_3, _ := CalculateSimpleMovingAverage(kline_6h_close, 3) // ma3
 	ma6h_7, _ := CalculateSimpleMovingAverage(kline_6h_close, 7) // ma7
-	rsi6, _ := CalculateRSI(kline_6h_close, 6) // rsi6
-	rsi14, _ := CalculateRSI(kline_6h_close, 14) // rsi14
-	if (rsi6 == nil || rsi14 == nil || len(rsi6) < 2 || len(rsi14) < 2) {
+	rsi6, _ := CalculateRSI(kline_6h_close, 6)                   // rsi6
+	rsi14, _ := CalculateRSI(kline_6h_close, 14)                 // rsi14
+	if rsi6 == nil || rsi14 == nil || len(rsi6) < 2 || len(rsi14) < 2 {
 		// 开盘小于 4.5 天
 		return openResult
 	}
 	baseCanLong, baseCanShort := BaseCheckCanLongOrShort() // 基本盘
 	isRsi := rsi6[0] < 80 && rsi6[0] > 30 && rsi14[0] < 75 && rsi14[0] > 28
 	// logs.Info(symbol, KdjSimple(ma6h_3, ma6h_7, 4), KdjSimple(ma6h_7, ma6h_3, 4), rsi6[1], rsi14[1])
-	if KdjSimple(ma6h_3, ma6h_7, 4) && TradeLine4.checkLongLine(kline_1h) && isRsi && baseCanLong{ // 1天之内发生过金叉, rsi 没有超买
+	if KdjSimple(ma6h_3, ma6h_7, 4) && TradeLine4.checkLongLine(kline_1h) && isRsi && baseCanLong { // 1天之内发生过金叉, rsi 没有超买
 		// 短线穿越长线金叉
 		openResult.CanLong = true
 		return openResult
 	}
-	if KdjSimple(ma6h_7, ma6h_3, 4) && TradeLine4.checkShortLine(kline_1h)&& isRsi && baseCanShort {
+	if KdjSimple(ma6h_7, ma6h_3, 4) && TradeLine4.checkShortLine(kline_1h) && isRsi && baseCanShort {
 		openResult.CanShort = true
 		return openResult
 	}
@@ -58,10 +58,10 @@ func (TradeLine4 TradeLine4) GetCanLongOrShort(openParams strategy.OpenParams) (
 // 达到止盈或止损后判断是否可以平仓
 // 5min 最新价格是否跌破前一个5min的收盘价
 func (TradeLine4 TradeLine4) CanOrderComplete(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
-	symbols := closeParams.Symbols // 交易对
+	symbols := closeParams.Symbols   // 交易对
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
-	
+
 	lines, err := binance.GetKlineData(symbols.Symbol, "5m", 2)
 	if err != nil {
 		closeResult.Complete = true
@@ -84,8 +84,8 @@ func (TradeLine4 TradeLine4) CanOrderComplete(closeParams strategy.CloseParams) 
 func (TradeLine4 TradeLine4) AutoStopOrder(closeParams strategy.CloseParams) (closeResult strategy.CloseResult) {
 	position := closeParams.Position // 当前仓位
 	closeResult.Complete = false
-	
-	if closeParams.NowProfit < 3 || closeParams.NowProfit > -3 {
+
+	if autoStopNeutralROI(closeParams.NowProfit) {
 		closeResult.Complete = false
 		return closeResult
 	}
@@ -99,12 +99,12 @@ func (TradeLine4 TradeLine4) MarketReversal(symbol string, positionSide string) 
 		return false
 	}
 	kline_1d_close := GetLineClosePrices(kline_1d)
-	
-	ma1d_3, _ := CalculateSimpleMovingAverage(kline_1d_close, 3) // ma3
-	ma1d_7, _ := CalculateSimpleMovingAverage(kline_1d_close, 7) // ma7
+
+	ma1d_3, _ := CalculateSimpleMovingAverage(kline_1d_close, 3)   // ma3
+	ma1d_7, _ := CalculateSimpleMovingAverage(kline_1d_close, 7)   // ma7
 	ma1d_15, _ := CalculateSimpleMovingAverage(kline_1d_close, 15) // ma15
-	
-	if positionSide== "LONG" {
+
+	if positionSide == "LONG" {
 		if KdjSimple(ma1d_7, ma1d_3, 4) && KdjSimple(ma1d_15, ma1d_3, 4) && utils.IsAsc(ma1d_3[0:3]) {
 			return true
 		}
@@ -122,13 +122,13 @@ func (TradeLine4 TradeLine4) checkLongLine(klines []*futures.Kline) bool {
 	minIndex := lineData.MinIndex
 	line := lineData.Line
 	if minIndex >= 1 && minIndex <= 11 {
-		linePoint := line[minIndex] // 最低的那个line
-		underLength := math.Abs(linePoint.Close - linePoint.Low) // 下影线长度
+		linePoint := line[minIndex]                                // 最低的那个line
+		underLength := math.Abs(linePoint.Close - linePoint.Low)   // 下影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if	getRightLine(line[minIndex:minIndex+8], "SHORT") && // 最低点到最低点+8个line里面至少6个是红线
+		if getRightLine(line[minIndex:minIndex+8], "SHORT") &&     // 最低点到最低点+8个line里面至少6个是红线
 			linePoint.Position == "SHORT" && // 最低点的line是跌
-			(underLength / entityLength) > 0.5 { // 下影线长度  实体长度
-				return true
+			(underLength/entityLength) > 0.5 { // 下影线长度  实体长度
+			return true
 		}
 	}
 	return false
@@ -139,13 +139,13 @@ func (TradeLine4 TradeLine4) checkShortLine(klines []*futures.Kline) bool {
 	maxIndex := lineData.MaxIndex
 	line := lineData.Line
 	if maxIndex >= 1 && maxIndex <= 11 {
-		linePoint := line[maxIndex] // 最高的那个line
-		upperLength := math.Abs(linePoint.High - linePoint.Close) // 上影线长度
+		linePoint := line[maxIndex]                                // 最高的那个line
+		upperLength := math.Abs(linePoint.High - linePoint.Close)  // 上影线长度
 		entityLength := math.Abs(linePoint.Open - linePoint.Close) // 实体长度
-		if	getRightLine(line[maxIndex:maxIndex+8], "LONG") && // 最低点到最低点+8个line里面至少6个是绿线
+		if getRightLine(line[maxIndex:maxIndex+8], "LONG") &&      // 最低点到最低点+8个line里面至少6个是绿线
 			linePoint.Position == "LONG" && // 最低点的line是涨
-			(upperLength / entityLength) > 0.5 { // 上影线长度 > 实体长度
-				return true
+			(upperLength/entityLength) > 0.5 { // 上影线长度 > 实体长度
+			return true
 		}
 	}
 	return false

@@ -116,6 +116,17 @@ func (s Service) ClaimOrder(ctx context.Context, input ClaimOrderInput) (models.
 			return models.FuturesManagedOrder{}, err
 		}
 	} else {
+		if intent == IntentClose {
+			var liveCloses []models.FuturesManagedOrder
+			if _, queryErr := o.QueryTable(new(models.FuturesManagedOrder)).Filter("owner", owner).Filter("symbol", symbol).Filter("position_side", side).Filter("intent", IntentClose).All(&liveCloses); queryErr != nil {
+				return models.FuturesManagedOrder{}, queryErr
+			}
+			for _, closeOrder := range liveCloses {
+				if liveOrderStatus(closeOrder.Status) {
+					return models.FuturesManagedOrder{}, fmt.Errorf("%s %s owner %s already has live close order %s", symbol, side, owner, closeOrder.ClientOrderID)
+				}
+			}
+		}
 		position, positionErr := s.getPosition(o, owner, symbol, side)
 		if positionErr != nil {
 			return models.FuturesManagedOrder{}, fmt.Errorf("%s %s is not managed by owner %s: %w", symbol, side, owner, positionErr)
@@ -296,6 +307,19 @@ func (s Service) GetPosition(ctx context.Context, owner, symbol, side string) (m
 		return models.FuturesManagedPosition{}, err
 	}
 	return s.getPosition(orm.NewOrm(), owner, symbol, side)
+}
+
+func (s Service) GetOrder(ctx context.Context, clientOrderID string) (models.FuturesManagedOrder, error) {
+	if err := ctx.Err(); err != nil {
+		return models.FuturesManagedOrder{}, err
+	}
+	clientOrderID = strings.TrimSpace(clientOrderID)
+	if clientOrderID == "" {
+		return models.FuturesManagedOrder{}, fmt.Errorf("client order id is required")
+	}
+	var row models.FuturesManagedOrder
+	err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("client_order_id", clientOrderID).One(&row)
+	return row, err
 }
 
 func (s Service) ActivePositions(ctx context.Context, owner string) ([]models.FuturesManagedPosition, error) {

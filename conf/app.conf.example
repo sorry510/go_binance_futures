@@ -16,8 +16,14 @@ debug = 0
 log_level = 6
 
 [binance]
+testnet = false
+testnet_binance_futures_base_url = "https://testnet.binancefuture.com"
+# 用于 交易 和 获取币安官方新闻
 api_key = ""
 api_secret = ""
+# Binance USD-M Futures Testnet，仅用于显式 E2E 测试；不要填写主网 Key
+testnet_api_key = ""
+testnet_api_secret = ""
 # Binance HTTP/WebSocket SOCKS5 代理，不需要时留空；多个代理使用英文逗号分隔并轮询使用
 # 支持 socks5:// 与 socks5h://，可使用 socks5://user:password@host:port
 proxy_url = ""

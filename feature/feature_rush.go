@@ -8,7 +8,9 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/utils"
+	"math"
 	"strconv"
+	"strings"
 
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
@@ -85,6 +87,10 @@ func TryRush(systemConfig models.Config) {
 
 func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateOrderResponse, err error) {
 	symbol := coin.Symbol
+	side := strings.ToLower(strings.TrimSpace(coin.Side))
+	if side != "buy" && side != "sell" {
+		return nil, fmt.Errorf("unsupported futures rush side %q for %s", coin.Side, symbol)
+	}
 	usdt := coin.Usdt
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
 	buyPrice := 0.0
@@ -104,6 +110,9 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 			return nil, errors.New("无交易价格")
 		}
 	}
+	if math.IsNaN(buyPrice) || math.IsInf(buyPrice, 0) || buyPrice < 0.000000001 {
+		return nil, fmt.Errorf("invalid futures rush price %q for %s", coin.ExpectPrice, symbol)
+	}
 	logs.Info("尝试开始合约抢币symbol:", symbol)
 	logs.Info("预计交易价格为:", buyPrice)
 	// 修改仓位模式
@@ -119,7 +128,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	quantity = utils.GetTradePrecision(quantity, stepSize)   // 合理精度的数量
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
 
-	if coin.Side == "buy" {
+	if side == "buy" {
 		if coin.ExpectPrice != "0" {
 			// 挂单价格
 			res, err = submitNewCoinRushOpen(fmt.Sprintf("new_coin_rush:%d", coin.ID), symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit)
@@ -127,7 +136,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 			// 市价
 			res, err = submitNewCoinRushOpen(fmt.Sprintf("new_coin_rush:%d", coin.ID), symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket)
 		}
-	} else if coin.Side == "sell" {
+	} else {
 		if coin.ExpectPrice != "0" {
 			// 挂单价格
 			res, err = submitNewCoinRushOpen(fmt.Sprintf("new_coin_rush:%d", coin.ID), symbol, quantity, buyPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit)
@@ -138,7 +147,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	}
 
 	positionSide := "long"
-	if coin.Side == "sell" {
+	if side == "sell" {
 		positionSide = "short"
 	}
 	if err != nil {
@@ -148,7 +157,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		pusher.SetModuleName("new_coin_rush").FuturesOpenOrder(notify.FuturesOrderParams{
 			Title:        lang.Lang("futures.new_coin_rush_notice_title"),
 			Symbol:       symbol,
-			Side:         coin.Side,
+			Side:         side,
 			PositionSide: positionSide,
 			Price:        buyPrice,
 			Quantity:     quantity,
