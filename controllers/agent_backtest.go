@@ -99,22 +99,24 @@ func (ctrl *AgentBacktestController) Cancel() {
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": true, "msg": "success"})
 }
 func (ctrl *AgentBacktestController) Trades() {
-	limit, _ := strconv.Atoi(ctrl.GetString("limit", "5000"))
-	items, err := backtestservice.DefaultManager().Trades(strings.TrimSpace(ctrl.Ctx.Input.Param(":id")), limit)
+	page, _ := strconv.Atoi(ctrl.GetString("page", "1"))
+	limit, _ := strconv.Atoi(ctrl.GetString("limit", "20"))
+	items, total, err := backtestservice.DefaultManager().TradesPage(strings.TrimSpace(ctrl.Ctx.Input.Param(":id")), page, limit)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
-	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": items, "msg": "success"})
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": map[string]interface{}{"list": items, "total": total, "page": page, "limit": limit}, "msg": "success"})
 }
 func (ctrl *AgentBacktestController) Events() {
-	limit, _ := strconv.Atoi(ctrl.GetString("limit", "10000"))
-	items, err := backtestservice.DefaultManager().Events(strings.TrimSpace(ctrl.Ctx.Input.Param(":id")), limit)
+	page, _ := strconv.Atoi(ctrl.GetString("page", "1"))
+	limit, _ := strconv.Atoi(ctrl.GetString("limit", "50"))
+	items, total, err := backtestservice.DefaultManager().EventsPage(strings.TrimSpace(ctrl.Ctx.Input.Param(":id")), page, limit)
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
-	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": items, "msg": "success"})
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": map[string]interface{}{"list": items, "total": total, "page": page, "limit": limit}, "msg": "success"})
 }
 func (ctrl *AgentBacktestController) Equity() {
 	limit, _ := strconv.Atoi(ctrl.GetString("limit", "20000"))

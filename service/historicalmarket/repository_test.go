@@ -2,8 +2,10 @@ package historicalmarket
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -24,7 +26,7 @@ func setupRepositoryTest(t *testing.T) {
 		if repositoryTestErr != nil {
 			return
 		}
-		orm.RegisterModel(new(models.MarketKline1m), new(models.MarketKline5m), new(models.MarketFundingRate), new(models.MarketDataImportBatch))
+		orm.RegisterModel(new(models.MarketKline1s), new(models.MarketKline1m), new(models.MarketKline5m), new(models.MarketTrade), new(models.MarketFundingRate), new(models.MarketDataImportBatch))
 		dir, err := os.MkdirTemp("", "historicalmarket-test-*")
 		if err != nil {
 			repositoryTestErr = err
@@ -39,7 +41,7 @@ func setupRepositoryTest(t *testing.T) {
 	if repositoryTestErr != nil {
 		t.Fatal(repositoryTestErr)
 	}
-	for _, table := range []string{"market_data_import_batches", "market_funding_rates", "market_klines_1m", "market_klines_5m"} {
+	for _, table := range []string{"market_data_import_batches", "market_funding_rates", "market_trades", "market_klines_1s", "market_klines_1m", "market_klines_5m"} {
 		if _, err := orm.NewOrm().Raw("DELETE FROM " + table).Exec(); err != nil {
 			t.Fatal(err)
 		}
@@ -139,5 +141,128 @@ func TestKlineTableWhitelist(t *testing.T) {
 	}
 	if _, err := KlineTable("1m;drop table x"); err == nil {
 		t.Fatal("dynamic table input must be rejected")
+	}
+}
+
+func TestSparseSecondRepositoryStoresOnlyRequestedSlice(t *testing.T) {
+	setupRepositoryTest(t)
+	repo := NewRepository(nil)
+	start := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	rows := []Kline{
+		{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", Interval: SparseSecondInterval, OpenTime: start.UnixMilli(), CloseTime: start.Add(time.Second - time.Millisecond).UnixMilli(), Open: 100, High: 101, Low: 99, Close: 100.5, Volume: 2, QuoteVolume: 200, Source: SourceBinancePublicData, SourceRef: "archive-a#sha256=one"},
+		{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", Interval: SparseSecondInterval, OpenTime: start.Add(time.Second).UnixMilli(), CloseTime: start.Add(2*time.Second - time.Millisecond).UnixMilli(), Open: 100.5, High: 102, Low: 100, Close: 101, Volume: 3, QuoteVolume: 303, Source: SourceBinancePublicData, SourceRef: "archive-a#sha256=one"},
+	}
+	if written, err := repo.StoreSparseSecondBars(context.Background(), rows); err != nil || written != 2 {
+		t.Fatalf("store sparse seconds written=%d err=%v", written, err)
+	}
+	got, err := repo.LoadSparseSecondBars(context.Background(), MarketFuturesUSDT, "BTCUSDT", start.Add(time.Second).UnixMilli(), start.Add(2*time.Second-time.Millisecond).UnixMilli())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].OpenTime != rows[1].OpenTime || got[0].Close != 101 || got[0].Interval != SparseSecondInterval {
+		t.Fatalf("unexpected sparse second rows: %+v", got)
+	}
+}
+
+func TestSparseTradeRepositoryOrdersAndUpserts(t *testing.T) {
+	setupRepositoryTest(t)
+	repo := NewRepository(nil)
+	at := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC).UnixMilli()
+	hash := strings.Repeat("a", 64)
+	rows := []PublicDataTrade{
+		{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", TradeID: 12, TradeTime: at + 100, Price: 101, Quantity: 2, QuoteQuantity: 202, IsBuyerMaker: true, Source: SourceBinancePublicData, SourceRef: "archive", ArchiveSHA256: hash},
+		{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", TradeID: 10, TradeTime: at + 100, Price: 100, Quantity: 1, QuoteQuantity: 100, Source: SourceBinancePublicData, SourceRef: "archive", ArchiveSHA256: hash},
+		{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", TradeID: 13, TradeTime: at + 200, Price: 102, Quantity: 3, QuoteQuantity: 306, Source: SourceBinancePublicData, SourceRef: "archive", ArchiveSHA256: hash},
+	}
+	if written, err := repo.StoreSparseTrades(context.Background(), rows); err != nil || written != 3 {
+		t.Fatalf("store sparse trades written=%d err=%v", written, err)
+	}
+	rows[0].Price = 105
+	if _, err := repo.StoreSparseTrades(context.Background(), rows[:1]); err != nil {
+		t.Fatal(err)
+	}
+	got, err := repo.LoadSparseTrades(context.Background(), MarketFuturesUSDT, "BTCUSDT", at, at+999)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 3 || got[0].TradeID != 10 || got[1].TradeID != 12 || got[2].TradeID != 13 {
+		t.Fatalf("unexpected sparse trade ordering: %+v", got)
+	}
+	if got[1].Price != 105 || got[1].ArchiveSHA256 != hash {
+		t.Fatalf("sparse trade upsert/evidence lost: %+v", got[1])
+	}
+}
+
+func TestSparseTradeRejectsNonHexArchiveSHA256(t *testing.T) {
+	setupRepositoryTest(t)
+	repo := NewRepository(nil)
+	trade := PublicDataTrade{
+		Market: MarketFuturesUSDT, Symbol: "BTCUSDT", TradeID: 1, TradeTime: time.Now().UnixMilli(),
+		Price: 100, Quantity: 1, QuoteQuantity: 100, Source: SourceBinancePublicData,
+		SourceRef: "fixture", ArchiveSHA256: strings.Repeat("z", 64),
+	}
+	if _, err := repo.StoreSparseTrades(context.Background(), []PublicDataTrade{trade}); err == nil {
+		t.Fatal("non-hex archive SHA256 must be rejected")
+	}
+}
+
+func TestStoreSparseSecondBarsRollsBackOnCancelBetweenChunks(t *testing.T) {
+	setupRepositoryTest(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	repo := NewRepository(nil)
+	calls := 0
+	repo.Now = func() time.Time {
+		calls++
+		if calls == 1 {
+			cancel()
+		}
+		return time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	}
+	start := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC).UnixMilli()
+	rows := make([]Kline, 60)
+	for i := range rows {
+		open := start + int64(i)*1000
+		rows[i] = Kline{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", Interval: SparseSecondInterval, OpenTime: open, CloseTime: open + 999, Open: 100, High: 101, Low: 99, Close: 100, Volume: 1, QuoteVolume: 100}
+	}
+	written, err := repo.StoreSparseSecondBars(ctx, rows)
+	if !errors.Is(err, context.Canceled) || written != 0 {
+		t.Fatalf("expected atomic cancellation, written=%d err=%v", written, err)
+	}
+	var count int
+	if err := orm.NewOrm().Raw("SELECT COUNT(*) FROM market_klines_1s").QueryRow(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 0 {
+		t.Fatalf("cancelled sparse second write left %d canonical rows", count)
+	}
+}
+
+func TestStoreSparseTradesRollsBackOnCancelBetweenChunks(t *testing.T) {
+	setupRepositoryTest(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	repo := NewRepository(nil)
+	calls := 0
+	repo.Now = func() time.Time {
+		calls++
+		if calls == 1 {
+			cancel()
+		}
+		return time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	}
+	start := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC).UnixMilli()
+	rows := make([]PublicDataTrade, 80)
+	for i := range rows {
+		rows[i] = PublicDataTrade{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", Source: "fixture", TradeID: int64(i + 1), TradeTime: start + int64(i), Price: 100, Quantity: 1, QuoteQuantity: 100}
+	}
+	written, err := repo.StoreSparseTrades(ctx, rows)
+	if !errors.Is(err, context.Canceled) || written != 0 {
+		t.Fatalf("expected atomic cancellation, written=%d err=%v", written, err)
+	}
+	var count int
+	if err := orm.NewOrm().Raw("SELECT COUNT(*) FROM market_trades").QueryRow(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 0 {
+		t.Fatalf("cancelled sparse trade write left %d canonical rows", count)
 	}
 }

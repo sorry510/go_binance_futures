@@ -34,7 +34,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 10 // 每次变动数据库版本号 +1
+var dbVersion int64 = 11 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -103,6 +103,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentMarketSourceStatus))
 	orm.RegisterModel(new(models.MarketConditionHistory))
 	orm.RegisterModel(new(models.MarketDataImportBatch))
+	orm.RegisterModel(new(models.MarketKline1s))
 	orm.RegisterModel(new(models.MarketKline1m))
 	orm.RegisterModel(new(models.MarketKline3m))
 	orm.RegisterModel(new(models.MarketKline5m))
@@ -119,6 +120,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.MarketKline1w))
 	orm.RegisterModel(new(models.MarketKline1mo))
 	orm.RegisterModel(new(models.MarketFundingRate))
+	orm.RegisterModel(new(models.MarketTrade))
 	orm.RegisterModel(new(models.AgentBacktestDataset))
 	orm.RegisterModel(new(models.AgentBacktestRun))
 	orm.RegisterModel(new(models.AgentBacktestTrade))
