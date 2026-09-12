@@ -1,8 +1,10 @@
 # Phase V3-4：Adaptive Resolution Backtest
 
+> 状态：✅ 已完成（2026-09-11）
+>
 > 定位：V3-3 Historical Backtest 的精度增强层，不推翻 1m 主回放架构。
 >
-> 核心目标：仅在 1m OHLC 无法确定事件先后顺序时，按需升级到 1s；若同一秒仍无法确定，再按需升级到逐笔 trades。
+> 核心目标：以 1m 为主时间轴；当价格路径顺序无法确定，或 1m High/Low 证明 ROI Gate 可能在分钟内触发时，才按需升级到 1s，必要时继续下钻逐笔 trades。
 
 ## 1. 为什么做 V3-4
 
@@ -121,6 +123,7 @@ Binance Public Data daily trades → 聚合目标分钟 1s
 - 网络错误 / 5xx 做有限指数退避；支持 context cancel。
 - 同一个 `{kind,symbol,date}` 使用 singleflight 去重，多个 Backtest 不重复下载同一 ZIP。
 - 单次 Run 可保留临时 daily ZIP，Run 结束后清理；跨 Run 只长期保存真正使用到的 sparse 数据。
+- 临时 ZIP 根目录通过 `binance::public_data_cache_dir` 配置，默认 `./cache/tmp`。每个 Adaptive Run 在该目录下创建独立的 `binance-public-data-*` 子目录，Run 结束只删除本次子目录，保留 `cache/tmp` 根目录。
 ## 5. V3-4A：Adaptive Intrabar Execution
 
 ### 5.1 数据模型
@@ -207,14 +210,14 @@ Adaptive Run 必须记录：
 - 1s drill-down 分钟数。
 - trade drill-down 秒数。
 - archive cache hit / download 次数与字节数。
-- unresolved / conservative fallback 次数。
+- unresolved / conservative fallback 次数。当前首版仅实现 `strict`：高精度数据无法取得时 Run 直接失败，不做 conservative fallback，因此成功 Run 的 `unresolved` 保留为 0；“rule=false”属于明确的不平仓结果，不计 unresolved。
 - 实际使用的 archive URL、SHA256 或对应 evidence hash。
 
 最终 `data_hash` 不能只包含 V3-3 的 1m/Funding/MarketCondition，还必须合并本次真正使用到的 1s/trade/mark-price evidence hash。
 
 Audit Event 增加 `intrabar_resolution`，至少记录：候选事件、1m OHLC、使用精度、首次命中时间、最终事件、数据 source_ref/checksum。
 
-Engine 语义变化后提升 EngineVersion；建议 V3-4A 使用 `backtest_engine_v7`，旧 V6 Run 不回写。
+Engine 语义变化后提升 EngineVersion。最终实现将 A/B 合并到同一 Adaptive 路径，统一使用 `backtest_engine_v9`；标准模式继续保持 V6，旧 V6 Run 不回写。
 ## 6. V3-4B：Adaptive Strategy Evaluation
 
 V3-4B 才处理当前 ROI Gate / close strategy 在分钟内部可能成立又消失的问题。
@@ -226,6 +229,8 @@ V3-4B 才处理当前 ROI Gate / close strategy 在分钟内部可能成立又�
 - 当前有仓位，1m High/Low 推导的 ROI 范围曾越过 StopLossPct / TakeProfitPct，但 Close ROI 未必越线。
 - V3-4A 已识别到多个 PriceEvent 冲突。
 - 已有订单/保护事件需要和 Strategy close 共同排序。
+
+首版 V3-4 的生产引擎只接入 ROI Gate / close strategy 的高精度重放。`IntrabarResolver` / `PriceEvent` 作为后续硬 TP/SL、Limit 等确定性事件的基础能力保留；由于 V3-3 当前不存在这些订单对象，它们尚未进入生产执行链路。
 
 不尝试通过静态解析任意 expr 猜所有可能的秒级开仓机会。
 
@@ -286,7 +291,7 @@ V3-4B 不要求所有 long/short 开仓规则都变成秒级；“捕捉 1m Clos
 
 ### 6.5 Engine Version
 
-V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v8`，与 V7 的纯 Intrabar Execution 明确分离。
+V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v9`，与 V7 的纯 Intrabar Execution 明确分离。
 ## 7. UI / API
 
 回测页面增加精度模式：
@@ -311,6 +316,8 @@ V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v8`，�
 现有“获取历史数据”仍只准备 1m + Technology intervals + Funding + MarketCondition，不允许因此全范围下载 1s/trades。
 
 高精度 archive 必须在真正发生 drill-down 时 lazy fetch；可在 UI 显示 `resolving_intrabar_data` 阶段和当前日期。
+
+实际公网复核（2026-09-11）：Binance Public Data 的 USD-M Futures `BTCUSDT` `1m` daily archive 可正常取得，但抽查多个日期的 `1s` daily archive 返回 404。因此当前 Provider 会按既定 fallback 使用该日 `trades` archive，并只把目标分钟聚合成 1s / sparse rows；这不是全区间 1s 入库。保留 1s archive 尝试是为了兼容 Binance 后续可能提供该数据。
 ## 8. 开发顺序
 
 ### V3-4A-0：冻结 V3-3 基线
@@ -458,3 +465,30 @@ V3-4B 再次改变 Strategy 时间语义，建议使用 `backtest_engine_v8`，�
 ## 13. Definition of Done
 
 > V3-4 完成后，Backtest 仍以 1m 为主时间轴；绝大多数历史 Bar 保持 V3-3 的速度和存储成本。只有当 1m 无法确定执行顺序或当前 ROI Gate 在分钟内可能触发时，Engine 才按需取得 Binance 官方 1s/trades 数据进行更高精度重放，并把所有下钻证据、数据版本和最终决策完整记录，且不存在未来数据泄漏。
+## 14. 实现结果（2026-09-11）
+
+- Engine：`standard_1m` 保持 `backtest_engine_v6`；Adaptive 使用 `backtest_engine_v9`。
+- 数据源：Go 原生 Binance Public Data Client，支持 1s Kline / trades、CHECKSUM、proxy、retry、cancel、singleflight。
+- 存储：新增 sparse `market_klines_1s` / `market_trades`，只保存实际下钻使用的数据；写入使用事务避免取消时留下半截 canonical 数据。
+- 时序：Live `InitParseEnv` 使用当前动态 Kline；Adaptive 以截至当前秒/当前 trade 已知数据构造 partial Kline，不读取未来 1m/高周期数据。
+- ROI：1m High/Low 只做 Candidate Detector；真正 close rule 在 1s/trade Env 中重新执行，`rule=false` 不平仓。
+- Funding：按当前 second/trade 时间推进，同秒较晚 Funding 不会泄漏给更早 crossing。
+- 审计：Run 保存 resolution mode/model/stats；Trade 保存 entry/exit resolution；实际使用的高精度 evidence 合并进 DataHash，并写入 Audit Event。
+- UI：支持标准 1m / 自适应精度选择，展示 drill-down/cache/download 统计、Trade resolution badge 和 Intrabar evidence。
+- API：`/agents/backtests/:id/trades` 与 `/events` 改为分页响应 `{list,total,page,limit}`；默认 Trades 20 条/页、Events 50 条/页，避免大结果一次性加载造成页面卡顿。
+- 执行假设：当前回测模型没有独立的 Limit 挂单/部分成交对象，因此 `IntrabarResolver` 的 Limit 排队简化假设尚未进入生产执行路径；未来加入 Limit 模型时必须显式记录对应 Run metadata。
+- 数据库版本：V3-4 从现有 **v10** 顺序升级到 **v11**。若后续与另一个同样使用 v11 的分支合并，再由合并结果统一提升到下一个数据库版本，避免提前跳号。
+- Adaptive 性能修复：verified trades 的父 `range` coverage 可直接服务秒级子请求，避免同一 daily trades ZIP 被每秒重复解压扫描；intrabar environment 使用二分定位当前窗口并限制指标序列为 warmup 范围，避免长历史 O(n) 复制被每个 trade 放大。
+- 真实 BTCUSDT 首次问题区间复现验证：相同策略/配置下，Adaptive 完成 3 个 1s drill-down 分钟、104 个 trade drill-down 秒，全部命中 sparse cache，结果/DataHash 稳定。
+- 验证：`go test ./...`、`go test -race ./service/historicalmarket ./service/backtest`、`go build ./...`、前端 `pnpm build`、`git diff --check` 均通过。SQLite schema/idempotency 自动测试通过；本次未直接修改服务器 MySQL/PostgreSQL，部署时统一执行 `./go_binance_futures sync db`。
+
+## 复核与性能补充（2026-09-12）
+
+- Public Data daily ZIP 使用单 Run forward scanner，同一 archive 的后续时间范围不再从 ZIP 起点重复解压；`start == lastTime` 边界会保守重开 scanner，避免漏掉已消费边界记录。
+- 404 archive 在单 Run 内 negative cache；父级 sparse trades range 可覆盖子级秒请求。
+- Adaptive 对可证明为 ROI-only 动态的平仓规则先做 ROI 范围可达性判断，无法成立的分钟不下钻 1s/trades；阈值解析支持科学计数法/数字下划线，无法完整证明的表达式保守回退完整重放。
+- 高精度阶段区分为读取缓存、下载 ZIP、解析 ZIP，并暴露给前端实时展示。
+- 回测页面新增 Run 耗时展示；运行中持续更新，结束后使用 started_at/completed_at 固化。
+- BTCUSDT `2026-01-01 ~ 2026-01-15` 真实只读 benchmark：Dataset ≈0.36s，Adaptive Engine ≈50.3s，SecondDrilldownMinutes=55，TradeDrilldownSeconds=2859。
+- ROI 剪枝/证据获取行为已在已有 V8 Run 之后继续变化，因此当前 Adaptive EngineVersion 提升到 `backtest_engine_v9`；数据库 schema/version 不变。
+- 1s evidence 在首次生成与 sparse cache 命中时使用相同 canonical hash kind，保证 cache 状态不改变最终 DataHash。
