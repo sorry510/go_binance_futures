@@ -122,10 +122,24 @@ func (provider *AdaptiveResolutionProvider) SecondBars(ctx context.Context, mark
 		provider.mu.Lock()
 		provider.stats.SecondCacheHits++
 		provider.mu.Unlock()
-		evidence := ResolutionEvidence{Resolution: SparseSecondInterval, Rows: len(local), CacheHit: true, EvidenceHash: klineEvidenceHash("second-local", start, end, local)}
+		resolution := SparseSecondInterval
+		hashKind := SparseSecondInterval
+		sourceRef := ""
+		archiveSHA := ""
 		if len(local) > 0 {
-			evidence.SourceRef = local[0].SourceRef
-			evidence.ArchiveSHA256 = archiveHashFromSourceRef(local[0].SourceRef)
+			sourceRef = local[0].SourceRef
+			archiveSHA = archiveHashFromSourceRef(sourceRef)
+			if strings.Contains(sourceRef, "derived=trades") {
+				resolution = "1s_from_trades"
+				hashKind = "second-from-trades"
+				if index := strings.Index(sourceRef, "&derived=trades"); index >= 0 {
+					sourceRef = sourceRef[:index]
+				}
+			}
+		}
+		evidence := ResolutionEvidence{
+			Resolution: resolution, Rows: len(local), CacheHit: true, SourceRef: sourceRef, ArchiveSHA256: archiveSHA,
+			EvidenceHash: klineEvidenceHash(hashKind, start, end, local),
 		}
 		return local, evidence, nil
 	}

@@ -268,6 +268,44 @@ func TestPublicDataTradeScannerReopensOnBackwardRange(t *testing.T) {
 	}
 }
 
+func TestPublicDataTradeScannerReopensWhenStartEqualsLastConsumedTime(t *testing.T) {
+	date := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	filename := "BTCUSDT-trades-2026-09-11.zip"
+	csv := "id,price,qty,quoteQty,time,isBuyerMaker\n" +
+		"1,100,1,100,1789084800100,false\n" +
+		"2,101,1,101,1789084800200,false\n"
+	zipped := publicDataTestZIP(t, strings.TrimSuffix(filename, ".zip")+".csv", csv)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".CHECKSUM") {
+			fmt.Fprint(w, publicDataChecksum(zipped, filename))
+			return
+		}
+		w.Write(zipped)
+	}))
+	defer server.Close()
+	client, err := NewPublicDataClient(PublicDataClientConfig{BaseURL: server.URL, CacheDir: t.TempDir(), HTTPClient: server.Client()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	archive, err := client.FetchArchive(context.Background(), PublicDataArchiveSpec{Kind: ArchiveKindTrades, Period: ArchivePeriodDaily, Symbol: "BTCUSDT", Date: date})
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := client.ParseTrades(context.Background(), archive, 1789084800000, 1789084800100)
+	if err != nil || len(first) != 1 || first[0].TradeID != 1 {
+		t.Fatalf("first=%+v err=%v", first, err)
+	}
+	oldScanner := client.tradeScanner
+	again, err := client.ParseTrades(context.Background(), archive, 1789084800100, 1789084800100)
+	if err != nil || len(again) != 1 || again[0].TradeID != 1 {
+		t.Fatalf("equal-start range lost the consumed boundary trade: rows=%+v err=%v", again, err)
+	}
+	if client.tradeScanner == nil || client.tradeScanner == oldScanner {
+		t.Fatal("start equal to last consumed time must reopen scanner")
+	}
+}
+
 func TestPublicDataScannerOpenFailureClearsClosedSlot(t *testing.T) {
 	date := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
 	filename := "BTCUSDT-trades-2026-09-11.zip"
