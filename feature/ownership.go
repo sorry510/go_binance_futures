@@ -94,7 +94,11 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]type
 	if err != nil {
 		return nil, err
 	}
-	accountQtyByKey, err := ownershipAccountQuantities(accountPositions, len(managedOrders) > 0 || wsFuturesUserData == "1")
+	// accountPositions is already the current StartTrade snapshot: it comes from
+	// the User Data WS/local tables when enabled, or directly from Binance REST
+	// otherwise. Only refresh from Binance after reconciling active managed orders,
+	// because a just-confirmed fill can make the pre-reconcile snapshot stale.
+	accountQtyByKey, err := ownershipAccountQuantities(accountPositions, shouldRefreshOwnershipAccountQuantities(len(managedOrders)))
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +127,10 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]type
 		result = append(result, managedAccountPosition(account, managed))
 	}
 	return result, nil
+}
+
+func shouldRefreshOwnershipAccountQuantities(activeManagedOrders int) bool {
+	return activeManagedOrders > 0
 }
 
 func managedAccountPosition(account types.FuturesPosition, managed models.FuturesManagedPosition) types.FuturesPosition {
