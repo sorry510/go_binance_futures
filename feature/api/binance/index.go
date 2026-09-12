@@ -32,14 +32,12 @@ var proxyPool *binanceproxy.Pool
 var pusher = notify.GetNotifyChannel()
 
 const (
-	futuresWsFlushInterval                             = time.Second
-	historicalRESTMinInterval                          = 300 * time.Millisecond
-	futuresWsBatchSize                                 = 500
-	wsNoDataAlertThreshold                             = 3 * time.Minute
-	wsNoDataAlertInterval                              = 10 * time.Minute
-	wsNoDataCheckInterval                              = 30 * time.Second
-	futuresOrderTypeTakeProfitMarket futures.OrderType = "TAKE_PROFIT_MARKET"
-	futuresOrderTypeStopMarket       futures.OrderType = "STOP_MARKET"
+	futuresWsFlushInterval    = time.Second
+	historicalRESTMinInterval = 300 * time.Millisecond
+	futuresWsBatchSize        = 500
+	wsNoDataAlertThreshold    = 3 * time.Minute
+	wsNoDataAlertInterval     = 10 * time.Minute
+	wsNoDataCheckInterval     = 30 * time.Second
 )
 
 var wsLatestTickerMap = make(map[string]futures.WsMarketTickerEvent)
@@ -498,6 +496,37 @@ func CreateAgentMarketOrder(ctx context.Context, symbol string, quantity float64
 		Do(ctx)
 }
 
+type OwnedOrderParams struct {
+	Symbol        string
+	Quantity      float64
+	Price         float64
+	Side          futures.SideType
+	PositionSide  futures.PositionSideType
+	OrderType     futures.OrderType
+	StopPrice     float64
+	ClientOrderID string
+}
+
+// CreateOwnedOrder is the common order primitive for V3-5 ownership-aware execution.
+// Ownership must be persisted by the caller before this function is invoked.
+func CreateOwnedOrder(ctx context.Context, params OwnedOrderParams) (*futures.CreateOrderResponse, error) {
+	service := futuresClient.NewCreateOrderService().
+		Symbol(params.Symbol).
+		Side(params.Side).
+		PositionSide(params.PositionSide).
+		Type(params.OrderType).
+		Quantity(strconv.FormatFloat(params.Quantity, 'f', -1, 64)).
+		NewClientOrderID(params.ClientOrderID)
+	if params.OrderType == futures.OrderTypeLimit {
+		service = service.TimeInForce(futures.TimeInForceTypeGTC).
+			Price(strconv.FormatFloat(params.Price, 'f', -1, 64))
+	}
+	if params.StopPrice > 0 {
+		service = service.StopPrice(strconv.FormatFloat(params.StopPrice, 'f', -1, 64))
+	}
+	return service.Do(ctx)
+}
+
 func GetOrderByClientOrderID(ctx context.Context, symbol, clientOrderID string) (*futures.Order, error) {
 	return futuresClient.NewGetOrderService().Symbol(symbol).OrigClientOrderID(clientOrderID).Do(ctx)
 }
@@ -611,48 +640,6 @@ func GetExchangeInfo() (res *futures.ExchangeInfo, err error) {
 	}
 	// logs.Info(utils.ToJson(res))
 	return res, err
-}
-
-// 挂止盈单
-// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
-// @returns /doc/order.js
-func OrderTakeProfit(symbol string, stopPrice float64, side futures.SideType, positionSide futures.PositionSideType) (order *futures.CreateOrderResponse, err error) {
-	order, err = futuresClient.NewCreateOrderService().
-		Symbol(symbol).
-		Side(side).
-		PositionSide(positionSide).
-		Type(futuresOrderTypeTakeProfitMarket).                 // 止盈市价单
-		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 触发价格
-		ClosePosition(true).                                    // 是否市价全平(和quantity参数互斥)
-		// Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		// TimeInForce(binance.TimeInForceTypeGTC).
-		Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	return order, err
-}
-
-// 挂单止损
-// @see https://binance-docs.github.io/apidocs/futures/cn/#trade-3
-// @returns /doc/order.js
-func OrderStopLoss(symbol string, stopPrice float64, side futures.SideType, positionSide futures.PositionSideType) (order *futures.CreateOrderResponse, err error) {
-	order, err = futuresClient.NewCreateOrderService().
-		Symbol(symbol).
-		Side(side).
-		PositionSide(positionSide).
-		Type(futuresOrderTypeStopMarket).                       // 止损限价单
-		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 触发价格
-		ClosePosition(true).                                    // 是否市价全平(和quantity参数互斥)
-		// Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		// TimeInForce(binance.TimeInForceTypeGTC).
-		Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	return order, err
 }
 
 type FundingRateParams struct {

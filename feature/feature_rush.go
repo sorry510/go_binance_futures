@@ -2,6 +2,7 @@ package feature
 
 import (
 	"errors"
+	"fmt"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
@@ -15,14 +16,15 @@ import (
 )
 
 var flagFuturesRush = 0
+
 func TryRush(systemConfig models.Config) {
-	if (systemConfig.FutureNewEnable == 1) {
-		if (flagFuturesRush == 0) {
+	if systemConfig.FutureNewEnable == 1 {
+		if flagFuturesRush == 0 {
 			logs.Info("futures rush bot start")
 			flagFuturesRush = 1
 		}
 	} else {
-		if (flagFuturesRush == 1) {
+		if flagFuturesRush == 1 {
 			logs.Info("futures rush bot stop")
 			flagFuturesRush = 0
 		}
@@ -31,9 +33,9 @@ func TryRush(systemConfig models.Config) {
 	o := orm.NewOrm()
 	var coins []models.NewSymbols
 	o.QueryTable("new_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 2).All(&coins) // 允许抢购的合约币
-	
+
 	notHasSizeSymbols := []string{}
-	
+
 	for _, coin := range coins {
 		if coin.StepSize != "0" {
 			_, err := tryBuyMarket(coin, coin.StepSize)
@@ -49,7 +51,7 @@ func TryRush(systemConfig models.Config) {
 		// logs.Info("没有币需要更新交易精度")
 		return
 	}
-	
+
 	res, err := binance.GetExchangeInfo()
 	if err != nil {
 		logs.Error("GetExchangeInfoError:", err)
@@ -62,13 +64,13 @@ func TryRush(systemConfig models.Config) {
 			symbolMap[item.Symbol] = lotSizeFilter.StepSize
 		}
 	}
-	
+
 	for _, coin := range coins {
 		// 找到了币的精度，说明币可能上线了
 		if stepSize, ok := symbolMap[coin.Symbol]; ok {
 			logs.Info("lotSize:", stepSize)
 			_, err := tryBuyMarket(coin, stepSize)
-		
+
 			if err == nil {
 				coin.Enable = 0 // 更新为禁用
 				logs.Info("合约抢购成功，关闭交易")
@@ -86,7 +88,7 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	usdt := coin.Usdt
 	usdt_float64, _ := strconv.ParseFloat(usdt, 64) // 交易金额
 	buyPrice := 0.0
-	if (coin.ExpectPrice != "0") {
+	if coin.ExpectPrice != "0" {
 		// 定义的挂单价格
 		buyPrice, _ = strconv.ParseFloat(coin.ExpectPrice, 64) // 挂单价格
 	} else {
@@ -110,31 +112,31 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	} else {
 		binance.SetMarginType(symbol, futures.MarginTypeCrossed)
 	}
-	
-	binance.SetLeverage(symbol, int(coin.Leverage))  // 修改合约倍数
-	leverage_float64 := float64(coin.Leverage) // 合约倍数
-	quantity := (usdt_float64 / buyPrice) * leverage_float64  // 购买数量
-	quantity = utils.GetTradePrecision(quantity, stepSize) // 合理精度的数量
+
+	binance.SetLeverage(symbol, int(coin.Leverage))          // 修改合约倍数
+	leverage_float64 := float64(coin.Leverage)               // 合约倍数
+	quantity := (usdt_float64 / buyPrice) * leverage_float64 // 购买数量
+	quantity = utils.GetTradePrecision(quantity, stepSize)   // 合理精度的数量
 	// logs.Info("symbol:", symbol, "buyPrice:", buyPrice, "quantity:", quantity)
-	
+
 	if coin.Side == "buy" {
 		if coin.ExpectPrice != "0" {
 			// 挂单价格
-			res, err = binance.BuyLimit(symbol, quantity, buyPrice, futures.PositionSideTypeLong)
+			res, err = submitNewCoinRushOpen(fmt.Sprintf("new_coin_rush:%d", coin.ID), symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit)
 		} else {
 			// 市价
-			res, err = binance.BuyMarket(symbol, quantity, futures.PositionSideTypeLong)
+			res, err = submitNewCoinRushOpen(fmt.Sprintf("new_coin_rush:%d", coin.ID), symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket)
 		}
 	} else if coin.Side == "sell" {
 		if coin.ExpectPrice != "0" {
 			// 挂单价格
-			res, err = binance.SellLimit(symbol, quantity, buyPrice, futures.PositionSideTypeShort)
+			res, err = submitNewCoinRushOpen(fmt.Sprintf("new_coin_rush:%d", coin.ID), symbol, quantity, buyPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit)
 		} else {
 			// 市价
-			res, err = binance.SellMarket(symbol, quantity, futures.PositionSideTypeShort)
+			res, err = submitNewCoinRushOpen(fmt.Sprintf("new_coin_rush:%d", coin.ID), symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket)
 		}
 	}
-	
+
 	positionSide := "long"
 	if coin.Side == "sell" {
 		positionSide = "short"
@@ -144,14 +146,14 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		logs.Info("err in feature_rush: ", err.Error())
 	} else {
 		pusher.SetModuleName("new_coin_rush").FuturesOpenOrder(notify.FuturesOrderParams{
-			Title: lang.Lang("futures.new_coin_rush_notice_title"),
-			Symbol: symbol,
-			Side: coin.Side,
+			Title:        lang.Lang("futures.new_coin_rush_notice_title"),
+			Symbol:       symbol,
+			Side:         coin.Side,
 			PositionSide: positionSide,
-			Price: buyPrice,
-			Quantity: quantity,
-			Leverage: leverage_float64,
-			Status: "success",
+			Price:        buyPrice,
+			Quantity:     quantity,
+			Leverage:     leverage_float64,
+			Status:       "success",
 		})
 	}
 	return res, err
