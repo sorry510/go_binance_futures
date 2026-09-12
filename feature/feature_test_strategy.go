@@ -223,7 +223,7 @@ func CheckTestResults(systemConfig *models.Config) {
 			continue
 		}
 
-		findStrategy := false
+		hasCloseStrategy := false
 		env := line.InitParseEnv(result.Symbol, result.Technology)
 		floatNowPrice, ok := env["NowPrice"].(float64)
 		if !ok {
@@ -275,6 +275,10 @@ func CheckTestResults(systemConfig *models.Config) {
 					continue
 				}
 
+				// 只要存在适用于当前持仓方向且已启用的平仓策略，就不能再走系统 ROI fallback。
+				// 编译/执行失败属于策略错误，不应被误判为“没有定义平仓策略”。
+				hasCloseStrategy = true
+
 				program, err := expr.Compile(strategy.Code, expr.Env(env))
 				if err != nil {
 					logs.Error("Error Strategy Compile Symbol: ", result.Symbol)
@@ -287,7 +291,6 @@ func CheckTestResults(systemConfig *models.Config) {
 					logs.Error("Error Strategy Run:", err.Error())
 					continue
 				}
-				findStrategy = true // 发现有正常能执行的平仓策略
 				if res, ok := output.(bool); ok && res {
 					result.ClosePrice = position.MarkPrice
 					result.CloseProfit = strconv.FormatFloat(tradeProfit.NetProfit, 'f', 3, 64)
@@ -319,7 +322,7 @@ func CheckTestResults(systemConfig *models.Config) {
 				}
 			}
 		}
-		if !findStrategy && (nowProfit > 10 || nowProfit < -10) {
+		if !hasCloseStrategy && (nowProfit > 10 || nowProfit < -10) {
 			// 没有定义平仓策略，使用超过 10 % 就平仓
 			result.ClosePrice = position.MarkPrice
 			result.CloseProfit = strconv.FormatFloat(tradeProfit.NetProfit, 'f', 3, 64)
