@@ -173,3 +173,27 @@ func TestSameOwnerCannotAddOrCreateSecondOpenOrder(t *testing.T) {
 		t.Fatal("same owner must not add to an active managed position in V3 first version")
 	}
 }
+
+func TestClaimOrderRejectsSecondLiveCloseButAllowsRetryAfterTerminal(t *testing.T) {
+	prepareOwnershipDB(t)
+	service := testService()
+	claimOpen(t, service, OwnerAutoStrategy, "AVAXUSDT", "SHORT", "aut_avax_open", 2)
+	if _, err := service.ApplyFill(context.Background(), "aut_avax_open", 2, 20); err != nil {
+		t.Fatal(err)
+	}
+	first := ClaimOrderInput{Owner: OwnerAutoStrategy, Symbol: "AVAXUSDT", PositionSide: "SHORT", Intent: IntentClose, ClientOrderID: "aut_avax_close_1", RequestedQty: 2, OrderType: "MARKET"}
+	if _, err := service.ClaimOrder(context.Background(), first); err != nil {
+		t.Fatal(err)
+	}
+	second := first
+	second.ClientOrderID = "aut_avax_close_2"
+	if _, err := service.ClaimOrder(context.Background(), second); err == nil {
+		t.Fatal("second live close for same owner/symbol/side must be rejected")
+	}
+	if err := service.SetOrderStatus(context.Background(), first.ClientOrderID, OrderCanceled); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.ClaimOrder(context.Background(), second); err != nil {
+		t.Fatalf("terminal close must allow a later remaining-quantity attempt: %v", err)
+	}
+}

@@ -110,3 +110,60 @@ func TestReconcileKeepsUnknownExchangeResultFailClosed(t *testing.T) {
 		t.Fatalf("unknown order must stay reconcile_required: %+v err=%v", row, err)
 	}
 }
+
+type mapOrderBroker struct {
+	orders      map[string]ExchangeOrder
+	cancelCalls int
+}
+
+func (b *mapOrderBroker) Submit(context.Context, OrderRequest, string) (ExchangeOrder, error) {
+	return ExchangeOrder{}, errors.New("unexpected submit")
+}
+func (b *mapOrderBroker) Lookup(_ context.Context, _ string, clientOrderID, _ string) (ExchangeOrder, error) {
+	row, ok := b.orders[clientOrderID]
+	if !ok {
+		return ExchangeOrder{}, errors.New("not found")
+	}
+	return row, nil
+}
+func (b *mapOrderBroker) Cancel(_ context.Context, _ string, _ int64, _ string) error {
+	b.cancelCalls++
+	return nil
+}
+
+func TestReconcileCancelsSiblingProtectionAfterProtectiveFillClosesPosition(t *testing.T) {
+	prepareOwnershipDB(t)
+	service := testService()
+	claimOpen(t, service, OwnerNoticeAutoOrder, "LINKUSDT", "LONG", "notice_entry", 1)
+	if _, err := service.ApplyFill(context.Background(), "notice_entry", 1, 10); err != nil {
+		t.Fatal(err)
+	}
+	for _, input := range []ClaimOrderInput{
+		{Owner: OwnerNoticeAutoOrder, Symbol: "LINKUSDT", PositionSide: "LONG", Intent: IntentStopLoss, ClientOrderID: "notice_sl", RequestedQty: 1, OrderType: "STOP_MARKET"},
+		{Owner: OwnerNoticeAutoOrder, Symbol: "LINKUSDT", PositionSide: "LONG", Intent: IntentTakeProfit, ClientOrderID: "notice_tp", RequestedQty: 1, OrderType: "TAKE_PROFIT_MARKET"},
+	} {
+		if _, err := service.ClaimOrder(context.Background(), input); err != nil {
+			t.Fatal(err)
+		}
+	}
+	broker := &mapOrderBroker{orders: map[string]ExchangeOrder{
+		"notice_sl": {ExchangeOrderID: "101", ClientOrderID: "notice_sl", Status: "FILLED", FilledQty: 1, AveragePrice: 9},
+		"notice_tp": {ExchangeOrderID: "102", ClientOrderID: "notice_tp", Status: "NEW"},
+	}}
+	reconciler := Reconciler{Ownership: service, Executor: Executor{Ownership: service, Broker: broker}, Account: fakeAccountPositionSource{}}
+	summary, err := reconciler.ReconcileOwner(context.Background(), OwnerNoticeAutoOrder)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if summary.PositionsChecked != 0 {
+		// The stop fill already closed ownership while active orders were reconciled.
+		t.Fatalf("protective fill should close before account-position reconcile: %+v", summary)
+	}
+	if broker.cancelCalls != 1 {
+		t.Fatalf("remaining sibling protection must be canceled, cancel calls=%d summary=%+v", broker.cancelCalls, summary)
+	}
+	tp, err := findTestOrder("notice_tp")
+	if err != nil || tp.Status != OrderCanceled {
+		t.Fatalf("sibling protection status=%+v err=%v", tp, err)
+	}
+}

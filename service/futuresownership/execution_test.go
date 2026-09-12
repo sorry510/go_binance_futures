@@ -3,12 +3,44 @@ package futuresownership
 import (
 	"context"
 	"errors"
+	"math"
 	"testing"
 
 	"go_binance_futures/models"
 
+	"github.com/adshao/go-binance/v2/common"
 	"github.com/beego/beego/v2/client/orm"
 )
+
+func TestValidateOrderRequestDirectionAndPositiveQuantity(t *testing.T) {
+	tests := []struct {
+		name    string
+		req     OrderRequest
+		wantErr bool
+	}{
+		{name: "open long", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: 1}},
+		{name: "open short", req: OrderRequest{PositionSide: "SHORT", Intent: IntentOpen, Side: "SELL", Quantity: 1}},
+		{name: "close long", req: OrderRequest{PositionSide: "LONG", Intent: IntentClose, Side: "SELL", Quantity: 1}},
+		{name: "close short", req: OrderRequest{PositionSide: "SHORT", Intent: IntentClose, Side: "BUY", Quantity: 1}},
+		{name: "take profit long", req: OrderRequest{PositionSide: "LONG", Intent: IntentTakeProfit, Side: "SELL", Quantity: 1}},
+		{name: "stop loss short", req: OrderRequest{PositionSide: "SHORT", Intent: IntentStopLoss, Side: "BUY", Quantity: 1}},
+		{name: "reversed open long", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "SELL", Quantity: 1}, wantErr: true},
+		{name: "reversed open short", req: OrderRequest{PositionSide: "SHORT", Intent: IntentOpen, Side: "BUY", Quantity: 1}, wantErr: true},
+		{name: "reversed close long", req: OrderRequest{PositionSide: "LONG", Intent: IntentClose, Side: "BUY", Quantity: 1}, wantErr: true},
+		{name: "reversed close short", req: OrderRequest{PositionSide: "SHORT", Intent: IntentClose, Side: "SELL", Quantity: 1}, wantErr: true},
+		{name: "negative quantity", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: -1}, wantErr: true},
+		{name: "zero quantity", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: 0}, wantErr: true},
+		{name: "nan quantity", req: OrderRequest{PositionSide: "LONG", Intent: IntentOpen, Side: "BUY", Quantity: math.NaN()}, wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateOrderRequest(tt.req)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("validateOrderRequest() err=%v wantErr=%v request=%+v", err, tt.wantErr, tt.req)
+			}
+		})
+	}
+}
 
 type fakeOrderBroker struct {
 	submitResult ExchangeOrder
@@ -17,6 +49,7 @@ type fakeOrderBroker struct {
 	lookupErr    error
 	submitCalls  int
 	lookupCalls  int
+	cancelCalls  int
 }
 
 func (f *fakeOrderBroker) Submit(context.Context, OrderRequest, string) (ExchangeOrder, error) {
@@ -24,12 +57,60 @@ func (f *fakeOrderBroker) Submit(context.Context, OrderRequest, string) (Exchang
 	return f.submitResult, f.submitErr
 }
 
-func (f *fakeOrderBroker) Lookup(context.Context, string, string) (ExchangeOrder, error) {
+func (f *fakeOrderBroker) Lookup(context.Context, string, string, string) (ExchangeOrder, error) {
 	f.lookupCalls++
 	return f.lookupResult, f.lookupErr
 }
 
-func (f *fakeOrderBroker) Cancel(context.Context, string, int64) error { return nil }
+func (f *fakeOrderBroker) Cancel(context.Context, string, int64, string) error {
+	f.cancelCalls++
+	return nil
+}
+
+func TestExecutorMarksDeterministicExchangeRejectionFailedAndReleasesSlot(t *testing.T) {
+	prepareOwnershipDB(t)
+	broker := &fakeOrderBroker{submitErr: &common.APIError{Code: -2010, Message: "New order rejected"}}
+	executor := Executor{Ownership: testService(), Broker: broker}
+	_, err := executor.Execute(context.Background(), OrderRequest{
+		Owner: OwnerAutoStrategy, Symbol: "DOGEUSDT", PositionSide: "LONG", Intent: IntentOpen,
+		Side: "BUY", OrderType: "MARKET", Quantity: 1, ClientOrderID: "aut_rejected_1",
+	})
+	if err == nil {
+		t.Fatal("deterministic Binance rejection must be returned")
+	}
+	row, loadErr := findTestOrder("aut_rejected_1")
+	if loadErr != nil || row.Status != OrderFailed {
+		t.Fatalf("rejected order must be terminal failed: %+v err=%v", row, loadErr)
+	}
+	if broker.lookupCalls != 0 {
+		t.Fatalf("deterministic rejection must not be treated as ambiguous, lookups=%d", broker.lookupCalls)
+	}
+	broker.submitErr = nil
+	broker.submitResult = ExchangeOrder{ExchangeOrderID: "990", ClientOrderID: "aut_rejected_2", Status: "FILLED", FilledQty: 1, AveragePrice: 1}
+	if _, err := executor.Execute(context.Background(), OrderRequest{
+		Owner: OwnerAutoStrategy, Symbol: "DOGEUSDT", PositionSide: "LONG", Intent: IntentOpen,
+		Side: "BUY", OrderType: "MARKET", Quantity: 1, ClientOrderID: "aut_rejected_2",
+	}); err != nil {
+		t.Fatalf("failed deterministic order must release open slot for a new attempt: %v", err)
+	}
+}
+
+func TestExecutorKeepsBinanceUnknownResultFailClosed(t *testing.T) {
+	prepareOwnershipDB(t)
+	broker := &fakeOrderBroker{submitErr: &common.APIError{Code: -1007, Message: "Timeout waiting for response"}, lookupErr: errors.New("not found")}
+	executor := Executor{Ownership: testService(), Broker: broker}
+	_, err := executor.Execute(context.Background(), OrderRequest{
+		Owner: OwnerAutoStrategy, Symbol: "LTCUSDT", PositionSide: "SHORT", Intent: IntentOpen,
+		Side: "SELL", OrderType: "MARKET", Quantity: 1, ClientOrderID: "aut_timeout",
+	})
+	if err == nil {
+		t.Fatal("unknown Binance execution result must remain fail-closed")
+	}
+	row, loadErr := findTestOrder("aut_timeout")
+	if loadErr != nil || row.Status != OrderReconcile {
+		t.Fatalf("unknown execution must remain reconcile_required: %+v err=%v", row, loadErr)
+	}
+}
 
 func TestExecutorPersistsOwnershipBeforeAndAfterFill(t *testing.T) {
 	prepareOwnershipDB(t)
@@ -129,4 +210,17 @@ func findTestOrder(clientOrderID string) (models.FuturesManagedOrder, error) {
 	var row models.FuturesManagedOrder
 	err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("client_order_id", clientOrderID).One(&row)
 	return row, err
+}
+
+func TestManagedOrderTypeRoutesConditionalOrdersToAlgoAPI(t *testing.T) {
+	tests := map[string]bool{
+		"MARKET": false, "LIMIT": false,
+		"STOP_MARKET": true, "TAKE_PROFIT_MARKET": true,
+		"STOP": true, "TAKE_PROFIT": true, "TRAILING_STOP_MARKET": true,
+	}
+	for orderType, want := range tests {
+		if got := isAlgoManagedOrderType(orderType); got != want {
+			t.Fatalf("isAlgoManagedOrderType(%q)=%v want %v", orderType, got, want)
+		}
+	}
 }

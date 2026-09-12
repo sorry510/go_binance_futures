@@ -62,6 +62,7 @@ func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (Reconcile
 		return summary, err
 	}
 	if len(managed) == 0 {
+		summary.OrdersUnresolved += r.cancelOrphanMutations(ctx, owner, managed)
 		return summary, nil
 	}
 	if r.Account == nil {
@@ -88,7 +89,37 @@ func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (Reconcile
 			summary.PositionsShrunk++
 		}
 	}
+	remaining, err := r.Ownership.ActivePositions(ctx, owner)
+	if err != nil {
+		return summary, err
+	}
+	summary.OrdersUnresolved += r.cancelOrphanMutations(ctx, owner, remaining)
 	return summary, nil
+}
+
+func (r Reconciler) cancelOrphanMutations(ctx context.Context, owner string, positions []models.FuturesManagedPosition) int {
+	active := make(map[string]bool, len(positions))
+	for _, position := range positions {
+		active[positionKey(position.Symbol, position.PositionSide)] = true
+	}
+	orders, err := r.Ownership.ActiveOrders(ctx, owner)
+	if err != nil {
+		return 1
+	}
+	unresolved := 0
+	for _, order := range orders {
+		if order.Intent == IntentOpen || active[positionKey(order.Symbol, order.PositionSide)] {
+			continue
+		}
+		if strings.TrimSpace(order.ExchangeOrderID) == "" {
+			unresolved++
+			continue
+		}
+		if err := r.Executor.Cancel(ctx, owner, order); err != nil {
+			unresolved++
+		}
+	}
+	return unresolved
 }
 
 func (r Reconciler) ReconcileAll(ctx context.Context) ([]ReconcileSummary, error) {
