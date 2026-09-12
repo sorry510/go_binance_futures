@@ -82,7 +82,7 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | AI → MCP 管理 | 接入和治理第三方 HTTP MCP Server，管理 Tool、Resource、Prompt、OAuth/认证和 Skill 权限 |
 | AI → Memory 管理 | 查看和维护 Agent 长期 Memory、Scope、TTL 与状态 |
 | AI → 业务 Workflow | 运行市场扫描、策略复盘、策略实验、报警归并和每日市场摘要等业务 Workflow，并查看父任务与子 Agent Task |
-| AI → 受控交易 | 将成功的单币分析转换为 Trade Proposal，经确定性 Risk Engine、人工审批和执行前复检后受控提交 Binance，并保留完整审计 |
+| 合约交易 → 受控交易 | 将成功的单币分析转换为 Trade Proposal，经确定性 Risk Engine、人工审批和执行前复检后受控提交 Binance，并保留完整审计 |
 | AI → 任务中心 | 查看 Agent 治理、Scheduler、运行指标和 Agent Task 历史 |
 | AI → 可观测性 | 查看长期 Trace、模型/Tool/Skill 运行指标、延迟、Token、错误率和变更记录 |
 | AI → 报警链路历史 | 查看 FastMove、爆仓等 Signal 从事件、AI 分析/归并到通知或 fallback 的完整链路 |
@@ -92,7 +92,8 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | 合约交易 → 合约账户 | 查看币安合约资产、持仓和当前挂单 |
 | 合约交易 → 本地合约账户 | 查看程序记录的本地资产、持仓和挂单 |
 | 合约交易 → 策略模板 | 新增和维护技术指标、策略方法模板 |
-| 合约交易 → 测试结果 | 查询模拟交易结果，可按币种和时间筛选 |
+| 合约交易 → 测试结果 | 查询实时模拟交易结果，可按币种和时间筛选 |
+| 合约交易 → 历史回测 | 使用历史 1m 行情、Funding 与 MarketCondition 回放策略；支持标准 1m 与自适应精度模式，并查看交易、权益曲线、审计事件和高精度下钻统计 |
 | 币种提醒 → 现货提醒 / 合约提醒 | 配置到价提醒和可选的自动交易 |
 | 市场监听 → 现货监听 / 合约监听 | 配置 K 线、阈值、技术指标和自定义策略监听 |
 | 资金费率监听 | 查看资金费率并配置自动交易 |
@@ -285,7 +286,53 @@ Skill 注册与治理配置保存在数据库中。Native 与 Portable Skill 分
 
 `LIMIT` 为限价挂单，`MARKET` 为市价单。页面会根据选择显示对应模式。
 
-## 合约自定义策略的模拟盘测试（无回测功能）
+## 历史回测
+
+`合约交易 → 历史回测` 用于使用历史行情重放策略，与实时 `测试策略` 模拟盘相互独立。回测不会向 Binance 提交真实订单，适合比较策略版本、手续费/滑点/杠杆参数以及不同回放精度下的执行结果。
+
+### 回测模式
+
+- **标准 1m（Standard 1m）**：以 1 分钟 K 线为执行主时间轴，使用历史 K 线、Funding、MarketCondition 和当前策略模板进行确定性回放，速度最快，适合作为基准结果。
+- **自适应精度（Adaptive Resolution）**：主时间轴仍然是 1m。只有当 1m 无法确定分钟内真实触发顺序，或 ROI Gate 在分钟内可能成立时，才按需下钻到 `1s`；仍有歧义时再读取逐笔 `trades`。不会把整个历史区间全量转换为秒级或逐笔数据。
+- 1m 的 `High/Low` 只用于判断“是否需要下钻”，不会直接当成止盈/止损已经成交。真正的平仓规则会在 1s/trade 时间点重新计算并执行，因此 Adaptive 与 Standard 的交易数量、平仓时间和收益出现差异是正常现象。
+
+### 历史数据与高精度缓存
+
+基础回放数据来自本地历史 K 线、策略需要的技术周期、Funding 和 MarketCondition。页面的“获取历史数据”只预取这些基础数据，高精度数据保持 lazy fetch，只在 Adaptive 真正需要时读取。
+
+高精度数据优先读取数据库中的 sparse cache：
+
+- `market_klines_1s`：只保存实际发生 drill-down 的 1s K 线。
+- `market_trades`：只保存实际需要的逐笔成交范围。
+- Binance USD-M Futures 的官方 1s archive 在部分日期不可用时，会回退到 Binance Public Data 的 daily trades ZIP，并由已校验的 trades 聚合出目标分钟的 1s K 线。
+- 同一份 sparse 数据可以跨 Run 复用。首次 Adaptive Run 可能需要下载和解析较大的 daily trades ZIP；后续相同范围命中数据库 cache 时通常会明显更快。
+- 每个 ZIP 会校验 Binance 提供的 SHA256 `.CHECKSUM`。逐笔成交按 `trade_time + trade_id` 排序，避免同毫秒成交顺序不确定。
+
+### 结果、审计与可复现性
+
+回测结果会保存策略版本、起止时间、初始资金、仓位比例、杠杆、手续费、滑点、止盈/止损等输入，并展示净收益、回报率、最大回撤、胜率、Profit Factor、Sharpe、Sortino、手续费、Funding、交易次数、持仓时长和多空分项结果。
+
+Adaptive Run 还会记录：
+
+- 1s drill-down 分钟数、trade drill-down 秒数。
+- 1s/trade cache hit、archive cache hit、ZIP 下载次数和下载字节数。
+- 每笔交易的 `entry_resolution` / `exit_resolution`（例如 `1m`、`1s`、`trades`）。
+- Intrabar Resolution 审计事件和实际消费的高精度 evidence。
+- `DataHash` 会合并实际使用的高精度数据证据；Engine/Resolution Model 也会随 Run 保存，便于区分不同实现版本。
+
+页面会实时显示构建数据集、普通回放、读取高精度数据、下载 ZIP、解析 ZIP、保存结果等阶段，并显示本次 Run 已消耗的时间。Trades 和 Audit Events 使用分页加载，长区间回测不会一次性把全部明细塞到浏览器。
+
+### 使用建议
+
+1. 升级程序后先执行 `./go_binance_futures sync db`，确保回测表和 sparse 高精度表已创建。
+2. 在 `合约交易 → 历史回测` 选择策略模板、Symbol、时间范围和回放精度，按需要设置初始资金、仓位比例、杠杆、手续费、滑点、止盈和止损。
+3. 首次使用较长区间时可先执行“获取历史数据”；若 MarketCondition 历史缺失，可在页面执行对应的回填操作。
+4. 需要对比 Standard 与 Adaptive 时，应固定相同的 `start_time`、`end_time`、策略版本和运行参数，避免把时间区间差异误认为精度差异。
+5. Adaptive 的第一次运行可能受 Binance Public Data ZIP 下载速度影响；第二次相同范围若 `second_cache_hits` / `trade_cache_hits` 接近 drill-down 数量且 `archive_downloads=0`，说明数据库高精度缓存已经生效。
+
+> 回测是历史模拟，不是交易所撮合引擎的完整复刻。目前不模拟 order-book queue、maker 排队和完整部分成交深度，因此结果不能作为未来收益保证。
+
+## 合约自定义策略的实时模拟盘测试（与历史回测独立）
 
 ### 开启方法
 
@@ -387,6 +434,17 @@ Skill 注册与治理配置保存在数据库中。Native 与 Portable Skill 分
 ```
 cp conf/app.conf.example conf/app.conf
 ```
+
+#### 历史回测临时 ZIP 目录
+
+Adaptive 回测按需下载 Binance Public Data ZIP。可在 `[binance]` 中配置临时 ZIP 根目录：
+
+```ini
+[binance]
+public_data_cache_dir = "./cache/tmp"
+```
+
+每个 Adaptive Run 会在该目录下创建独立的 `binance-public-data-*` 子目录；Run 正常结束、失败或正常取消后删除本次子目录，但保留 `cache/tmp` 根目录。也可以配置为其它磁盘的绝对路径。
 
 #### 数据库配置
 
