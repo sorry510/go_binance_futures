@@ -395,19 +395,109 @@ func normalizePage(page, limit, defaultLimit, maxLimit int) (int, int) {
 	}
 	return page, limit
 }
+
+const maxEquityChartPoints = 20000
+
 func (manager *Manager) Equity(runID string, limit int) ([]EquityPoint, error) {
-	if limit <= 0 || limit > 20000 {
-		limit = 20000
+	if limit <= 0 || limit > maxEquityChartPoints {
+		limit = maxEquityChartPoints
 	}
-	var rows []models.AgentBacktestEquityPoint
-	if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).OrderBy("sequence").Limit(limit).All(&rows); err != nil {
+	runID = strings.TrimSpace(runID)
+	if runID == "" {
+		return nil, fmt.Errorf("run id is required")
+	}
+	o := orm.NewOrm()
+	total, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).Count()
+	if err != nil {
 		return nil, err
 	}
+	if total == 0 {
+		return []EquityPoint{}, nil
+	}
+	var rows []models.AgentBacktestEquityPoint
+	if total <= int64(limit) {
+		if _, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).OrderBy("sequence").All(&rows); err != nil {
+			return nil, err
+		}
+		return equityPointsFromRows(rows), nil
+	}
+	var bounds []models.AgentBacktestEquityPoint
+	if _, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).OrderBy("sequence").Limit(1).All(&bounds); err != nil {
+		return nil, err
+	}
+	if len(bounds) == 0 {
+		return []EquityPoint{}, nil
+	}
+	minSequence := bounds[0].Sequence
+	bounds = bounds[:0]
+	if _, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).OrderBy("-sequence").Limit(1).All(&bounds); err != nil {
+		return nil, err
+	}
+	maxSequence := bounds[0].Sequence
+	targets := equitySampleSequences(minSequence, maxSequence, limit)
+	rows = make([]models.AgentBacktestEquityPoint, 0, len(targets))
+	const queryBatch = 400
+	for start := 0; start < len(targets); start += queryBatch {
+		end := start + queryBatch
+		if end > len(targets) {
+			end = len(targets)
+		}
+		placeholders := make([]string, end-start)
+		args := make([]interface{}, 0, 1+end-start)
+		args = append(args, runID)
+		for i, sequence := range targets[start:end] {
+			placeholders[i] = "?"
+			args = append(args, sequence)
+		}
+		query := "SELECT id,run_id,sequence,bar_time,equity,cash,unrealized_pnl,drawdown_pct,COALESCE(position_side, '') AS position_side FROM agent_backtest_equity_points WHERE run_id=? AND sequence IN (" + strings.Join(placeholders, ",") + ") ORDER BY sequence"
+		var batchRows []models.AgentBacktestEquityPoint
+		if _, err := o.Raw(query, args...).QueryRows(&batchRows); err != nil {
+			return nil, err
+		}
+		rows = append(rows, batchRows...)
+	}
+	return equityPointsFromRows(rows), nil
+}
+
+func equitySampleSequences(minSequence, maxSequence, limit int) []int {
+	if limit <= 0 || maxSequence < minSequence {
+		return nil
+	}
+	count := maxSequence - minSequence + 1
+	if count <= limit {
+		result := make([]int, 0, count)
+		for sequence := minSequence; sequence <= maxSequence; sequence++ {
+			result = append(result, sequence)
+		}
+		return result
+	}
+	if limit == 1 {
+		return []int{minSequence}
+	}
+	result := make([]int, 0, limit)
+	span := int64(maxSequence - minSequence)
+	denominator := int64(limit - 1)
+	last := minSequence - 1
+	for i := 0; i < limit; i++ {
+		sequence := minSequence + int(span*int64(i)/denominator)
+		if sequence == last {
+			continue
+		}
+		result = append(result, sequence)
+		last = sequence
+	}
+	if result[len(result)-1] != maxSequence {
+		result[len(result)-1] = maxSequence
+	}
+	return result
+}
+
+func equityPointsFromRows(rows []models.AgentBacktestEquityPoint) []EquityPoint {
 	out := make([]EquityPoint, 0, len(rows))
 	for _, r := range rows {
 		out = append(out, EquityPoint{Sequence: r.Sequence, BarTime: r.BarTime, Equity: r.Equity, Cash: r.Cash, UnrealizedPnL: r.UnrealizedPnL, DrawdownPct: r.DrawdownPct, PositionSide: r.PositionSide})
 	}
-	return out, nil
+	return out
 }
 
 func saveDataset(ctx context.Context, d Dataset) (DatasetManifest, error) {
