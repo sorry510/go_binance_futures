@@ -29,6 +29,8 @@ type Manager struct {
 	marketConditionJobs     map[string]MarketConditionBackfillSummary
 	marketConditionActive   string
 	marketConditionEarliest earliestKlineSource
+	deleteMu                sync.Mutex
+	deleting                map[string]bool
 }
 
 var defaultManagerOnce sync.Once
@@ -38,6 +40,7 @@ func DefaultManager() *Manager {
 	defaultManagerOnce.Do(func() {
 		defaultManager = NewManager(DatasetBuilder{Repository: historicalmarket.DefaultRepository()})
 		_ = defaultManager.markInterrupted()
+		defaultManager.resumeDeletingRuns()
 	})
 	return defaultManager
 }
@@ -45,7 +48,7 @@ func NewManager(builder DatasetBuilder) *Manager {
 	return &Manager{
 		builder: builder, engine: Engine{ResolutionProviderFactory: historicalmarket.DefaultAdaptiveResolutionProvider}, cancel: map[string]context.CancelFunc{},
 		prefetchJobs: map[string]PrefetchSummary{}, marketConditionJobs: map[string]MarketConditionBackfillSummary{},
-		marketConditionEarliest: historicalmarket.BinanceSource{},
+		marketConditionEarliest: historicalmarket.BinanceSource{}, deleting: map[string]bool{},
 	}
 }
 
@@ -218,14 +221,13 @@ func (manager *Manager) Cancel(runID string) error {
 	return nil
 }
 
-func (manager *Manager) Delete(runID string) error {
+func (manager *Manager) StartDelete(runID string) error {
 	runID = strings.TrimSpace(runID)
 	if runID == "" {
 		return fmt.Errorf("run_id is required")
 	}
-	o := orm.NewOrm()
 	var row models.AgentBacktestRun
-	if err := o.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).One(&row); err != nil {
+	if err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).One(&row); err != nil {
 		if err == orm.ErrNoRows {
 			return fmt.Errorf("backtest run %q not found", runID)
 		}
@@ -240,26 +242,132 @@ func (manager *Manager) Delete(runID string) error {
 	if active {
 		return fmt.Errorf("backtest run is still active; wait for cancellation to finish before deleting")
 	}
-	// Large 1m backtests can contain millions of equity rows. Deleting all child
-	// rows in one statement can exceed the MySQL driver's readTimeout while InnoDB
-	// maintains indexes and undo/redo logs. Delete children in bounded autocommit
-	// batches instead. The run row is intentionally kept until all child rows are
-	// gone, so an interrupted delete is safe to retry and resumes from what remains.
-	for _, item := range []struct {
-		name  string
-		table string
-	}{
-		{name: "equity points", table: "agent_backtest_equity_points"},
-		{name: "events", table: "agent_backtest_events"},
-		{name: "trades", table: "agent_backtest_trades"},
-	} {
-		if err := deleteBacktestRowsInBatches(item.table, runID); err != nil {
+	if row.Status != "deleting" {
+		now := time.Now().UnixMilli()
+		startProgress := 0
+		if row.Status == "delete_failed" && row.Progress > 0 {
+			startProgress = row.Progress
+		}
+		if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).Update(orm.Params{
+			"status": "deleting", "stage": "deleting_equity", "progress": startProgress, "error": "", "updated_at": now,
+		}); err != nil {
+			return fmt.Errorf("mark backtest deleting: %w", err)
+		}
+		row.Status = "deleting"
+		row.Stage = "deleting_equity"
+		row.Progress = startProgress
+	}
+	manager.startDeleteWorker(row)
+	return nil
+}
+
+// Delete keeps a synchronous path for internal callers and tests. HTTP deletion
+// uses StartDelete so a large history never holds the request open.
+func (manager *Manager) Delete(runID string) error {
+	runID = strings.TrimSpace(runID)
+	if runID == "" {
+		return fmt.Errorf("run_id is required")
+	}
+	var row models.AgentBacktestRun
+	if err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("run_id", runID).One(&row); err != nil {
+		return err
+	}
+	if row.Status == "queued" || row.Status == "running" {
+		return fmt.Errorf("active backtest run cannot be deleted; cancel it first")
+	}
+	return manager.deleteRunData(row, nil)
+}
+
+func (manager *Manager) startDeleteWorker(row models.AgentBacktestRun) {
+	manager.deleteMu.Lock()
+	if manager.deleting[row.RunID] {
+		manager.deleteMu.Unlock()
+		return
+	}
+	manager.deleting[row.RunID] = true
+	manager.deleteMu.Unlock()
+	go func() {
+		defer func() {
+			manager.deleteMu.Lock()
+			delete(manager.deleting, row.RunID)
+			manager.deleteMu.Unlock()
+		}()
+		currentProgress := row.Progress
+		if err := manager.deleteRunData(row, func(stage string, progress int) {
+			if progress < currentProgress {
+				progress = currentProgress
+			}
+			currentProgress = progress
+			manager.updateProgress(row.RunID, stage, progress)
+		}); err != nil {
+			manager.updateState(row.RunID, "delete_failed", "delete_failed", currentProgress, err.Error(), false)
+		}
+	}()
+}
+
+func (manager *Manager) resumeDeletingRuns() {
+	var rows []models.AgentBacktestRun
+	if _, err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("status", "deleting").All(&rows); err != nil {
+		return
+	}
+	for _, row := range rows {
+		manager.startDeleteWorker(row)
+	}
+}
+
+type backtestDeleteTable struct {
+	name  string
+	table string
+	stage string
+}
+
+var backtestDeleteTables = []backtestDeleteTable{
+	{name: "equity points", table: "agent_backtest_equity_points", stage: "deleting_equity"},
+	{name: "events", table: "agent_backtest_events", stage: "deleting_events"},
+	{name: "trades", table: "agent_backtest_trades", stage: "deleting_trades"},
+}
+
+func (manager *Manager) deleteRunData(row models.AgentBacktestRun, progress func(stage string, progress int)) error {
+	o := orm.NewOrm()
+	total := int64(0)
+	counts := make(map[string]int64, len(backtestDeleteTables))
+	for _, item := range backtestDeleteTables {
+		var count int64
+		if err := o.Raw("SELECT COUNT(*) FROM "+item.table+" WHERE run_id = ?", row.RunID).QueryRow(&count); err != nil {
+			return fmt.Errorf("count backtest %s: %w", item.name, err)
+		}
+		counts[item.table] = count
+		total += count
+	}
+	deletedTotal := int64(0)
+	report := func(stage string) {
+		if progress == nil {
+			return
+		}
+		value := 95
+		if total > 0 {
+			value = 5 + int(deletedTotal*90/total)
+			if value > 95 {
+				value = 95
+			}
+		}
+		progress(stage, value)
+	}
+	for _, item := range backtestDeleteTables {
+		report(item.stage)
+		if counts[item.table] == 0 {
+			continue
+		}
+		if err := deleteBacktestRowsInBatches(item.table, row.RunID, func(deleted int64) {
+			deletedTotal += deleted
+			report(item.stage)
+		}); err != nil {
 			return fmt.Errorf("delete backtest %s: %w", item.name, err)
 		}
 	}
-
-	// Only the small metadata cleanup needs to be atomic. Keeping the expensive
-	// child-row deletion out of this transaction avoids a huge long-lived undo log.
+	if progress != nil {
+		progress("finalizing_delete", 99)
+	}
 	tx, err := o.Begin()
 	if err != nil {
 		return fmt.Errorf("begin delete backtest transaction: %w", err)
@@ -268,7 +376,7 @@ func (manager *Manager) Delete(runID string) error {
 		_ = tx.Rollback()
 		return cause
 	}
-	result, err := tx.Raw("DELETE FROM agent_backtest_runs WHERE run_id = ?", runID).Exec()
+	result, err := tx.Raw("DELETE FROM agent_backtest_runs WHERE run_id = ?", row.RunID).Exec()
 	if err != nil {
 		return rollback(fmt.Errorf("delete backtest run: %w", err))
 	}
@@ -277,7 +385,7 @@ func (manager *Manager) Delete(runID string) error {
 		return rollback(fmt.Errorf("read deleted backtest run count: %w", err))
 	}
 	if deleted == 0 {
-		return rollback(fmt.Errorf("backtest run %q not found", runID))
+		return rollback(fmt.Errorf("backtest run %q not found", row.RunID))
 	}
 	if strings.TrimSpace(row.DatasetID) != "" {
 		refs, err := tx.QueryTable(new(models.AgentBacktestRun)).Filter("dataset_id", row.DatasetID).Count()
@@ -296,11 +404,23 @@ func (manager *Manager) Delete(runID string) error {
 	return nil
 }
 
-const backtestDeleteBatchSize = 20000
+const (
+	backtestDeleteBatchSizeMySQL   = 50000
+	backtestDeleteBatchSizeGeneric = 20000
+)
 
-func deleteBacktestRowsInBatches(table, runID string) error {
-	// table is supplied only by the fixed internal list in Manager.Delete.
-	query := "DELETE FROM " + table + " WHERE id IN (SELECT id FROM (SELECT id FROM " + table + " WHERE run_id = ? ORDER BY id LIMIT " + fmt.Sprint(backtestDeleteBatchSize) + ") AS delete_batch)"
+func deleteBacktestRowsInBatches(table, runID string, progress func(deleted int64)) error {
+	batchSize := backtestDeleteBatchSizeGeneric
+	query := ""
+	if backtestDeleteMySQL() {
+		batchSize = backtestDeleteBatchSizeMySQL
+		// MySQL supports ORDER BY/LIMIT directly on DELETE. This avoids the nested
+		// ID subquery previously executed for every batch and is substantially
+		// faster for multi-million-row 1m equity histories.
+		query = fmt.Sprintf("DELETE FROM %s WHERE run_id = ? LIMIT %d", table, batchSize)
+	} else {
+		query = fmt.Sprintf("DELETE FROM %s WHERE id IN (SELECT id FROM (SELECT id FROM %s WHERE run_id = ? ORDER BY id LIMIT %d) AS delete_batch)", table, table, batchSize)
+	}
 	for {
 		result, err := orm.NewOrm().Raw(query, runID).Exec()
 		if err != nil {
@@ -310,10 +430,26 @@ func deleteBacktestRowsInBatches(table, runID string) error {
 		if err != nil {
 			return err
 		}
-		if deleted < backtestDeleteBatchSize {
+		if progress != nil && deleted > 0 {
+			progress(deleted)
+		}
+		if deleted < int64(batchSize) {
 			return nil
 		}
 	}
+}
+
+func backtestDeleteMySQL() bool {
+	if db, err := orm.GetDB("default"); err == nil {
+		driverType := strings.ToLower(fmt.Sprintf("%T", db.Driver()))
+		if strings.Contains(driverType, "mysql") {
+			return true
+		}
+		if strings.Contains(driverType, "sqlite") || strings.Contains(driverType, "pq") || strings.Contains(driverType, "postgres") {
+			return false
+		}
+	}
+	return false
 }
 
 func (manager *Manager) markInterrupted() error {

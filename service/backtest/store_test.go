@@ -494,3 +494,50 @@ func TestEquityReturnsAllPointsWhenWithinLimit(t *testing.T) {
 		t.Fatalf("unexpected full equity response: %+v", points)
 	}
 }
+
+func TestManagerStartDeleteRunsLargeHistoryAsynchronously(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	run := models.AgentBacktestRun{RunID: "bt_async_delete_fixture", Status: "succeeded", Stage: "completed", Progress: 100}
+	if _, err := o.Insert(&run); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw(`WITH RECURSIVE seq(x) AS (
+		SELECT 1
+		UNION ALL
+		SELECT x + 1 FROM seq WHERE x < 70000
+	)
+	INSERT INTO agent_backtest_equity_points
+		(run_id, sequence, bar_time, equity, cash, unrealized_pnl, drawdown_pct, position_side)
+	SELECT ?, x, x, 1000, 1000, 0, 0, '' FROM seq`, run.RunID).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	manager := NewManager(DatasetBuilder{})
+	started := time.Now()
+	if err := manager.StartDelete(run.RunID); err != nil {
+		t.Fatal(err)
+	}
+	if elapsed := time.Since(started); elapsed > time.Second {
+		t.Fatalf("async delete request took too long before returning: %v", elapsed)
+	}
+	var current models.AgentBacktestRun
+	if err := o.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", run.RunID).One(&current); err == nil {
+		if current.Status != "deleting" {
+			t.Fatalf("run should be marked deleting while background cleanup is active: %+v", current)
+		}
+	} else if err != orm.ErrNoRows {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if !o.QueryTable(new(models.AgentBacktestRun)).Filter("run_id", run.RunID).Exist() {
+			count, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", run.RunID).Count()
+			if err != nil || count != 0 {
+				t.Fatalf("equity rows remain after async delete: count=%d err=%v", count, err)
+			}
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatal("async delete did not finish within timeout")
+}
