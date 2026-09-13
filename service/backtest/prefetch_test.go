@@ -136,3 +136,91 @@ func TestPrefetchReportsKlineProgressBeforeRemoteRangeCompletes(t *testing.T) {
 		t.Fatalf("expected progress while K-line range was still downloading, values=%v totals=%v", values, totals)
 	}
 }
+
+type chunkTrackingHistorySource struct {
+	mu     sync.Mutex
+	ranges [][2]int64
+}
+
+func (source *chunkTrackingHistorySource) Klines(ctx context.Context, market, symbol, interval string, start, end int64) ([]historicalmarket.Kline, error) {
+	source.mu.Lock()
+	source.ranges = append(source.ranges, [2]int64{start, end})
+	source.mu.Unlock()
+	return fixtureHistorySource{}.Klines(ctx, market, symbol, interval, start, end)
+}
+
+func (source *chunkTrackingHistorySource) Funding(context.Context, string, string, int64, int64) ([]historicalmarket.FundingRate, error) {
+	return []historicalmarket.FundingRate{}, nil
+}
+
+func (source *chunkTrackingHistorySource) snapshotRanges() [][2]int64 {
+	source.mu.Lock()
+	defer source.mu.Unlock()
+	return append([][2]int64(nil), source.ranges...)
+}
+
+func TestPrefetchChunksLongRangesAndReusesPersistedChunks(t *testing.T) {
+	setupBacktestStoreTest(t)
+	start := time.Date(2026, 3, 4, 0, 0, 0, 0, time.UTC)
+	source := &chunkTrackingHistorySource{}
+	builder := DatasetBuilder{
+		Repository:        historicalmarket.NewRepository(source),
+		WarmupBars:        1,
+		PrefetchChunkBars: 3,
+	}
+	request := DatasetRequest{
+		Symbol: "BTCUSDT", ExecutionInterval: ReplayInterval,
+		StartTime: start.UnixMilli(), EndTime: start.Add(10 * time.Minute).UnixMilli(), TechnologyJSON: "{}",
+	}
+	progressValues := []int{}
+	progressTotals := []int{}
+	if _, err := builder.Prefetch(context.Background(), request, func(completed, total int) {
+		progressValues = append(progressValues, completed)
+		progressTotals = append(progressTotals, total)
+	}); err != nil {
+		t.Fatal(err)
+	}
+	firstRanges := source.snapshotRanges()
+	if len(firstRanges) < 3 {
+		t.Fatalf("expected long range to be split into multiple remote chunks, got %d: %v", len(firstRanges), firstRanges)
+	}
+	maxSpan := int64(3*time.Minute/time.Millisecond) - 1
+	for _, item := range firstRanges {
+		if item[1]-item[0] > maxSpan {
+			t.Fatalf("prefetch chunk exceeded configured 3 bars: %v", item)
+		}
+	}
+	for i := 1; i < len(progressValues); i++ {
+		if progressValues[i] < progressValues[i-1] {
+			t.Fatalf("prefetch progress moved backwards: %v", progressValues)
+		}
+	}
+	if len(progressValues) == 0 || progressValues[len(progressValues)-1] != progressTotals[len(progressTotals)-1] {
+		t.Fatalf("prefetch did not report completion: values=%v totals=%v", progressValues, progressTotals)
+	}
+	if _, err := builder.Prefetch(context.Background(), request, nil); err != nil {
+		t.Fatal(err)
+	}
+	secondRanges := source.snapshotRanges()
+	if len(secondRanges) != len(firstRanges) {
+		t.Fatalf("second prefetch refetched already persisted chunks: before=%d after=%d", len(firstRanges), len(secondRanges))
+	}
+}
+
+func TestPrefetchKlineChunksUseDefaultBound(t *testing.T) {
+	start := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()
+	end := time.Date(2021, 1, 20, 0, 0, 0, 0, time.UTC).UnixMilli()
+	chunks, err := (DatasetBuilder{}).prefetchKlineChunks("1m", start, end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(chunks) < 2 {
+		t.Fatalf("expected default 10000-bar chunking for multi-week 1m range, got %d", len(chunks))
+	}
+	maxSpan := int64(defaultPrefetchChunkBars*time.Minute/time.Millisecond) - 1
+	for _, chunk := range chunks {
+		if chunk.End-chunk.Start > maxSpan {
+			t.Fatalf("default prefetch chunk too large: %+v", chunk)
+		}
+	}
+}

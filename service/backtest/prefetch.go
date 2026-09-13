@@ -31,6 +31,49 @@ type PrefetchResult struct {
 	RemoteRows  int          `json:"remote_rows"`
 }
 
+const defaultPrefetchChunkBars = 10000
+
+type prefetchKlineChunk struct {
+	Start int64
+	End   int64
+}
+
+func (builder DatasetBuilder) prefetchKlineChunks(interval string, start, end int64) ([]prefetchKlineChunk, error) {
+	if start > end {
+		return nil, nil
+	}
+	chunkBars := builder.PrefetchChunkBars
+	if chunkBars <= 0 {
+		chunkBars = defaultPrefetchChunkBars
+	}
+	chunks := make([]prefetchKlineChunk, 0)
+	for cursor := start; cursor <= end; {
+		var next int64
+		if interval == "1M" {
+			next = time.UnixMilli(cursor).UTC().AddDate(0, chunkBars, 0).UnixMilli()
+		} else {
+			duration, err := intervalDuration(interval, time.UnixMilli(cursor))
+			if err != nil {
+				return nil, err
+			}
+			next = cursor + int64(chunkBars)*duration.Milliseconds()
+		}
+		if next <= cursor {
+			return nil, fmt.Errorf("invalid prefetch chunk progression for %s", interval)
+		}
+		chunkEnd := next - 1
+		if chunkEnd > end {
+			chunkEnd = end
+		}
+		chunks = append(chunks, prefetchKlineChunk{Start: cursor, End: chunkEnd})
+		if chunkEnd >= end {
+			break
+		}
+		cursor = chunkEnd + 1
+	}
+	return chunks, nil
+}
+
 type prefetchCountingSource struct {
 	inner historicalmarket.Source
 	mu    sync.Mutex
@@ -153,18 +196,44 @@ func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetReque
 		if err != nil {
 			return PrefetchResult{}, err
 		}
+		chunks, err := builder.prefetchKlineChunks(interval, start, plan.EndTime)
+		if err != nil {
+			return PrefetchResult{}, err
+		}
 		base := completed
-		if _, err := fetchRepo.LoadKlinesWithProgress(ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, interval, start, plan.EndTime, func(done, intervalTotal int) {
-			if intervalTotal <= 0 {
-				return
+		for chunkIndex, chunk := range chunks {
+			if err := ctx.Err(); err != nil {
+				return PrefetchResult{}, err
 			}
-			units := done * intervalProgressUnits / intervalTotal
+			if _, err := fetchRepo.LoadKlinesWithProgress(ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, interval, chunk.Start, chunk.End, func(done, chunkTotal int) {
+				if chunkTotal <= 0 || len(chunks) == 0 {
+					return
+				}
+				chunkFraction := float64(done) / float64(chunkTotal)
+				if chunkFraction < 0 {
+					chunkFraction = 0
+				}
+				if chunkFraction > 1 {
+					chunkFraction = 1
+				}
+				intervalFraction := (float64(chunkIndex) + chunkFraction) / float64(len(chunks))
+				units := int(intervalFraction * float64(intervalProgressUnits))
+				if units >= intervalProgressUnits {
+					units = intervalProgressUnits - 1
+				}
+				report(base + units)
+			}); err != nil {
+				return PrefetchResult{}, fmt.Errorf("prefetch %s %s chunk %d/%d: %w", plan.Symbol, interval, chunkIndex+1, len(chunks), err)
+			}
+			// A chunk is counted complete only after LoadKlinesWithProgress has re-read
+			// the cache and verified that no gaps remain. This keeps the UI moving
+			// during multi-year imports without pretending a download is complete
+			// before its rows have actually been persisted.
+			units := (chunkIndex + 1) * intervalProgressUnits / len(chunks)
 			if units >= intervalProgressUnits {
 				units = intervalProgressUnits - 1
 			}
 			report(base + units)
-		}); err != nil {
-			return PrefetchResult{}, fmt.Errorf("prefetch %s %s: %w", plan.Symbol, interval, err)
 		}
 		completed += intervalProgressUnits
 		report(completed)
