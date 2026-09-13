@@ -1,6 +1,8 @@
 ---
 name: custom-strategy
 description: Design, validate, export, persist, evaluate, and optimize efficient expr-lang custom futures strategies for this go_binance_futures project and its go_binance_futrues_new_ui frontend. Use when the user asks to create, revise, simplify, inspect, test, export, insert, or update a strategy_templates custom strategy, or to judge and optimize a tested strategy from test_strategy_results.
+metadata:
+  trusted: false
 ---
 
 # Custom Strategy
@@ -28,7 +30,7 @@ When `GET /strategy-templates` uses pagination, keep every frontend consumer on 
 
 ## Audit existing templates safely
 
-1. Read database connection values from `[database]` in `conf/app.conf` without printing credentials or changing the file.
+1. Read database connection values from `[database]` in `conf/app.conf` without printing credentials or changing the file. When the user selects the commented `# arm` block, parse that block explicitly instead of silently using the active local connection. For programmatic reads, follow the read-only transaction guidance in `references/test-strategy-results.md`; never use App UI when the user prohibits it.
 2. Query `strategy_templates` read-only before designing. Summarize each template by enabled indicators and enabled `long`, `short`, `close_long`, and `close_short` rules.
 3. Expand relevant `technology` and `strategy` JSON completely. Check for duplicated names, asymmetric rules, impossible conditions, distant indexes, excessive intervals, and stale comments.
 4. Never write during the audit. Treat database insertion, template assignment, trading enablement, and order placement as separate authorization boundaries.
@@ -54,6 +56,8 @@ Useful pairings:
 - Donchian `High[1]`/`Low[1]` for a live breakout, because the current channel includes the current candle;
 - RSI, ROC, MFI, or OBV change for one focused confirmation;
 - ATR for price-scale-independent stop and take-profit distances.
+
+Check the algebra of combined price/volume conditions. Adjacent-bar OBV change is the signed current bar's turnover: a rising close already implies rising OBV when turnover is positive. Do not count that as independent confirmation or combine a strictly rising close with non-increasing adjacent OBV as an exhaustion signal. Test indicator identities and reachable branches, not only syntax.
 
 ## Write four cohesive rules
 
@@ -135,7 +139,7 @@ Read `references/test-strategy-results.md` completely before deciding whether a 
 4. Recompute gross PnL, both fees, and fee-adjusted simulated net PnL from execution prices, signed quantity, and the row's fee-rate snapshots. Reconcile stored `close_profit` within its 0.001-USDT rounding precision; report discrepancies separately. Current writers store net PnL, so do not subtract fees from `close_profit` again. Zero-fee legacy rows require a separate coverage segment and are not proof of fee-free execution.
 5. Report closed count, wins/losses/breakeven, gross PnL, fees, net PnL, net profit factor, expectancy, mean/median margin return, median/p90 holding time, close-order drawdown, and losing streak. Validate numeric values first. Margin return is recomputed net PnL / `usdt` * 100; it differs from the evaluator's mark-price-denominator `ROI`/`NetROI`. Segment by side, symbol, time, fee/risk settings, and full open/close rule hashes within each template version.
 6. Use API `stats` for full-filter closed-trade summaries after checking its implementation; the current `current_profit` covers the full filter too, but combines realized and open mark-to-market PnL. It is not a realized-profit total. UI/API monetary `gross_profit` means signed gross PnL, not the positive-profit numerator of profit factor. Report funding and additional close slippage as unmodeled.
-7. Separate `close_strategy_type=system` / `system_roi_10pct_fallback` from normal rule exits; preserve unknown legacy exits as unknown. A successfully executed matching close rule returning `false` must suppress fallback in the current simulator. If a snapshot with an enabled matching rule nevertheless records system exits, flag execution/version/backfill uncertainty before crediting the strategy or optimizing thresholds. Full rule hashes identify programs, not internal Boolean branches or historical indicator values.
+7. Separate `close_strategy_type=system` / `system_roi_10pct_fallback` from normal rule exits; preserve unknown legacy exits as unknown. Current simulator and live custom evaluators suppress fallback whenever an enabled matching close rule exists, even if compilation/execution fails or returns `false`. If such a snapshot nevertheless records system exits, flag deployment/version/backfill uncertainty before crediting the strategy or optimizing thresholds. Full rule hashes identify programs, not internal Boolean branches or historical indicator values.
 8. Return exactly one verdict per independently evaluated version: `insufficient evidence`, `promising under tested conditions`, `needs optimization`, or `invalidated`. Use 20 closed trades as a preliminary minimum and 50 as more stable; raise the requirement for concentrated profits, pending positions, narrow time/regime coverage, or unresolved execution anomalies. Compare top-symbol-excluded and common-window results before ranking controls.
 9. Optimize only when the evidence points to a specific failure mode. Change one logical dimension at a time, create a new named strategy version, preserve the old template and results, and compare non-overlapping version cohorts. Never update templates, delete test rows, or enable trading without explicit authorization.
 

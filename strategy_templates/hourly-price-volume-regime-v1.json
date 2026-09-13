@@ -1,0 +1,78 @@
+{
+  "name": "小时量价状态分流 v1",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_4h_34",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 34
+      }
+    ],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [
+      {
+        "name": "dc_1h_12",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 12
+      }
+    ],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "hourly_price_volume_regime_long_v1",
+      "type": "long",
+      "code": "if !(len(kline_1h.Close) >= 10 && len(kline_1h.Open) >= 4 && len(kline_1h.High) >= 4 && len(kline_1h.Low) >= 4 && len(kline_1h.Amount) >= 10 && len(kline_4h.Close) >= 2 && len(ema_4h_34.Data) >= 3 && len(adx_1h_14.ADX) >= 3 && len(adx_1h_14.PlusDI) >= 2 && len(adx_1h_14.MinusDI) >= 2 && len(dc_1h_12.High) >= 5 && len(dc_1h_12.Low) >= 5 && len(dc_1h_12.Mid) >= 3 && len(atr_1h_14.Data) >= 2) { false } else {\nlet a = atr_1h_14.Data[1];\nlet p = kline_1h.Close[0];\nlet c = kline_1h.Close[1];\nlet v = (kline_1h.Amount[4] + kline_1h.Amount[5] + kline_1h.Amount[6] + kline_1h.Amount[7] + kline_1h.Amount[8] + kline_1h.Amount[9]) / 6;\nlet liquid = v >= 500000;\nlet risk_ok = c > 0 && a > 0 && a / c >= 0.0025 && a / c <= 0.012;\nlet fresh = NowTime % 3600000 < 1200000;\nlet ranging = adx_1h_14.ADX[1] <= 18 && ema_4h_34.Data[1] > 0 && abs(ema_4h_34.Data[1] / ema_4h_34.Data[2] - 1) <= 0.002;\nlet up = kline_4h.Close[1] > ema_4h_34.Data[1] && ema_4h_34.Data[1] > ema_4h_34.Data[2] && adx_1h_14.ADX[1] >= 22 && adx_1h_14.PlusDI[1] > adx_1h_14.MinusDI[1] * 1.15;\nlet level = dc_1h_12.High[4];\nlet impulse = kline_1h.Close[3] > level && kline_1h.Close[3] > kline_1h.Open[3] && kline_1h.Amount[3] >= v * 1.2 && kline_1h.Amount[3] <= v * 2.5 && kline_1h.High[3] - kline_1h.Low[3] <= a * 1.8;\nlet retest = kline_1h.Low[2] <= level + a * 0.2 && kline_1h.Close[2] >= level - a * 0.15 && kline_1h.Amount[2] <= kline_1h.Amount[3] * 0.8;\nlet resume = c > kline_1h.Open[1] && c > kline_1h.High[2] && kline_1h.Amount[1] >= kline_1h.Amount[2] * 1.1 && kline_1h.Amount[1] <= v * 1.8;\nlet near_support = p > level && p - (level - a * 0.25) <= p * 0.006;\nlet trend_entry = up && impulse && retest && resume && near_support;\nlet reclaim = kline_1h.Low[1] < dc_1h_12.Low[2] && c > dc_1h_12.Low[2] + a * 0.15 && c > kline_1h.Open[1] && kline_1h.Open[1] - kline_1h.Low[1] >= a * 0.25;\nlet range_entry = ranging && reclaim && kline_1h.Amount[1] >= v * 0.8 && kline_1h.Amount[1] <= v * 1.8 && dc_1h_12.Mid[2] - p >= p * 0.008;\nlet live_hold = p >= c - a * 0.10 && p <= c + a * 0.25 && p >= kline_1h.Open[0];\nliquid && risk_ok && fresh && live_hold && (trend_entry || range_entry)\n}",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "hourly_price_volume_regime_short_v1",
+      "type": "short",
+      "code": "if !(len(kline_1h.Close) >= 10 && len(kline_1h.Open) >= 4 && len(kline_1h.High) >= 4 && len(kline_1h.Low) >= 4 && len(kline_1h.Amount) >= 10 && len(kline_4h.Close) >= 2 && len(ema_4h_34.Data) >= 3 && len(adx_1h_14.ADX) >= 3 && len(adx_1h_14.PlusDI) >= 2 && len(adx_1h_14.MinusDI) >= 2 && len(dc_1h_12.High) >= 5 && len(dc_1h_12.Low) >= 5 && len(dc_1h_12.Mid) >= 3 && len(atr_1h_14.Data) >= 2) { false } else {\nlet a = atr_1h_14.Data[1];\nlet p = kline_1h.Close[0];\nlet c = kline_1h.Close[1];\nlet v = (kline_1h.Amount[4] + kline_1h.Amount[5] + kline_1h.Amount[6] + kline_1h.Amount[7] + kline_1h.Amount[8] + kline_1h.Amount[9]) / 6;\nlet liquid = v >= 500000;\nlet risk_ok = c > 0 && a > 0 && a / c >= 0.0025 && a / c <= 0.012;\nlet fresh = NowTime % 3600000 < 1200000;\nlet ranging = adx_1h_14.ADX[1] <= 18 && ema_4h_34.Data[1] > 0 && abs(ema_4h_34.Data[1] / ema_4h_34.Data[2] - 1) <= 0.002;\nlet down = kline_4h.Close[1] < ema_4h_34.Data[1] && ema_4h_34.Data[1] < ema_4h_34.Data[2] && adx_1h_14.ADX[1] >= 22 && adx_1h_14.MinusDI[1] > adx_1h_14.PlusDI[1] * 1.15;\nlet level = dc_1h_12.Low[4];\nlet impulse = kline_1h.Close[3] < level && kline_1h.Close[3] < kline_1h.Open[3] && kline_1h.Amount[3] >= v * 1.2 && kline_1h.Amount[3] <= v * 2.5 && kline_1h.High[3] - kline_1h.Low[3] <= a * 1.8;\nlet retest = kline_1h.High[2] >= level - a * 0.2 && kline_1h.Close[2] <= level + a * 0.15 && kline_1h.Amount[2] <= kline_1h.Amount[3] * 0.8;\nlet resume = c < kline_1h.Open[1] && c < kline_1h.Low[2] && kline_1h.Amount[1] >= kline_1h.Amount[2] * 1.1 && kline_1h.Amount[1] <= v * 1.8;\nlet near_resistance = p < level && (level + a * 0.25) - p <= p * 0.006;\nlet trend_entry = down && impulse && retest && resume && near_resistance;\nlet rejection = kline_1h.High[1] > dc_1h_12.High[2] && c < dc_1h_12.High[2] - a * 0.15 && c < kline_1h.Open[1] && kline_1h.High[1] - kline_1h.Open[1] >= a * 0.25;\nlet range_entry = ranging && rejection && kline_1h.Amount[1] >= v * 0.8 && kline_1h.Amount[1] <= v * 1.8 && p - dc_1h_12.Mid[2] >= p * 0.008;\nlet live_hold = p <= c + a * 0.10 && p >= c - a * 0.25 && p <= kline_1h.Open[0];\nliquid && risk_ok && fresh && live_hold && (trend_entry || range_entry)\n}",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "hourly_price_volume_regime_close_long_v1",
+      "type": "close_long",
+      "code": "Position.Side == \"LONG\" && (ROI <= -7 || (if !(len(kline_1h.Close) >= 3 && len(kline_1h.Open) >= 2 && len(kline_1h.High) >= 2 && len(kline_1h.Low) >= 2 && len(kline_1h.Amount) >= 6 && len(atr_1h_14.Data) >= 2 && len(adx_1h_14.ADX) >= 2 && len(dc_1h_12.Mid) >= 3) { false } else {\nlet a = atr_1h_14.Data[1];\nlet p = kline_1h.Close[0];\nlet v = (kline_1h.Amount[2] + kline_1h.Amount[3] + kline_1h.Amount[4] + kline_1h.Amount[5]) / 4;\nlet live_reversal = p < kline_1h.Open[0] && p < kline_1h.Close[1] - a * 0.15;\nlet selling = v > 0 && kline_1h.Close[1] < kline_1h.Open[1] && kline_1h.Close[1] < kline_1h.Close[2] && kline_1h.Amount[1] >= v * 0.9;\nlet range_target = adx_1h_14.ADX[1] <= 18 && p >= dc_1h_12.Mid[1] && kline_1h.High[0] - p >= a * 0.15;\nlet failed = p < kline_1h.Low[1] - a * 0.10 || (selling && kline_1h.Close[1] < dc_1h_12.Mid[2]);\na > 0 && ((ROI >= 5 && (live_reversal || selling || range_target)) || (ROI <= -5 && failed))\n}))",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "hourly_price_volume_regime_close_short_v1",
+      "type": "close_short",
+      "code": "Position.Side == \"SHORT\" && (ROI <= -7 || (if !(len(kline_1h.Close) >= 3 && len(kline_1h.Open) >= 2 && len(kline_1h.High) >= 2 && len(kline_1h.Low) >= 2 && len(kline_1h.Amount) >= 6 && len(atr_1h_14.Data) >= 2 && len(adx_1h_14.ADX) >= 2 && len(dc_1h_12.Mid) >= 3) { false } else {\nlet a = atr_1h_14.Data[1];\nlet p = kline_1h.Close[0];\nlet v = (kline_1h.Amount[2] + kline_1h.Amount[3] + kline_1h.Amount[4] + kline_1h.Amount[5]) / 4;\nlet live_reversal = p > kline_1h.Open[0] && p > kline_1h.Close[1] + a * 0.15;\nlet buying = v > 0 && kline_1h.Close[1] > kline_1h.Open[1] && kline_1h.Close[1] > kline_1h.Close[2] && kline_1h.Amount[1] >= v * 0.9;\nlet range_target = adx_1h_14.ADX[1] <= 18 && p <= dc_1h_12.Mid[1] && p - kline_1h.Low[0] >= a * 0.15;\nlet failed = p > kline_1h.High[1] + a * 0.10 || (buying && kline_1h.Close[1] > dc_1h_12.Mid[2]);\na > 0 && ((ROI >= 5 && (live_reversal || buying || range_target)) || (ROI <= -5 && failed))\n}))",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
