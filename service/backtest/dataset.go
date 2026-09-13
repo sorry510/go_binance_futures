@@ -20,8 +20,9 @@ import (
 )
 
 type DatasetBuilder struct {
-	Repository *historicalmarket.Repository
-	WarmupBars int
+	Repository        *historicalmarket.Repository
+	WarmupBars        int
+	PrefetchChunkBars int
 }
 
 func (builder DatasetBuilder) Build(ctx context.Context, request DatasetRequest) (Dataset, error) {
