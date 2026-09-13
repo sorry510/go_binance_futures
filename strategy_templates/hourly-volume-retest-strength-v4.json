@@ -1,0 +1,74 @@
+{
+  "name": "小时量价趋势回踩双向 v4",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_4h_34",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 34
+      }
+    ],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "mfi": [],
+    "obv": [
+      {
+        "name": "obv_1h",
+        "enable": true,
+        "kline_interval": "1h"
+      }
+    ],    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "hourly_volume_retest_strength_long_v4",
+      "type": "long",
+      "code": "let avg_volume = (kline_1h.Amount[3] + kline_1h.Amount[4] + kline_1h.Amount[5] + kline_1h.Amount[6] + kline_1h.Amount[7] + kline_1h.Amount[8]) / 6;\nlet atr = atr_1h_14.Data[2];\nlet trend_up = kline_4h.Close[1] > ema_4h_34.Data[1] && ema_4h_34.Data[1] >= ema_4h_34.Data[2];\nlet strength = adx_1h_14.ADX[2] >= 20 && adx_1h_14.PlusDI[2] > adx_1h_14.MinusDI[2] * 1.08;\nlet body = kline_1h.Close[2] - kline_1h.Open[2];\nlet impulse = avg_volume > 0 && atr > 0 && body > 0 && kline_1h.Close[2] > kline_1h.High[3] && kline_1h.Close[2] > kline_1h.High[4] && kline_1h.Amount[2] >= avg_volume * 1.10 && body >= atr * 0.25 && body <= atr * 1.35 && obv_1h.Data[2] > obv_1h.Data[3];\nlet controlled_retest = kline_1h.Low[1] >= kline_1h.Close[2] - atr * 0.95 && kline_1h.Close[1] >= kline_1h.Open[2] + body * 0.45 && kline_1h.Amount[1] <= kline_1h.Amount[2] * 0.95;\nlet reclaim = kline_1h.Close[1] >= kline_1h.Open[1] || kline_1h.Close[0] >= kline_1h.Close[1] + atr * 0.10;\nlet not_chasing = kline_1h.Close[0] <= kline_1h.Close[2] + atr * 0.65;\n\ntrend_up && strength && impulse && controlled_retest && reclaim && not_chasing",
+      "fullScreen": false,
+      "enable": true
+    },
+    {      "name": "hourly_volume_retest_strength_short_v4",
+      "type": "short",
+      "code": "let avg_volume = (kline_1h.Amount[3] + kline_1h.Amount[4] + kline_1h.Amount[5] + kline_1h.Amount[6] + kline_1h.Amount[7] + kline_1h.Amount[8]) / 6;\nlet atr = atr_1h_14.Data[2];\nlet trend_down = kline_4h.Close[1] < ema_4h_34.Data[1] && ema_4h_34.Data[1] <= ema_4h_34.Data[2];\nlet strength = adx_1h_14.ADX[2] >= 20 && adx_1h_14.MinusDI[2] > adx_1h_14.PlusDI[2] * 1.08;\nlet body = kline_1h.Open[2] - kline_1h.Close[2];\nlet impulse = avg_volume > 0 && atr > 0 && body > 0 && kline_1h.Close[2] < kline_1h.Low[3] && kline_1h.Close[2] < kline_1h.Low[4] && kline_1h.Amount[2] >= avg_volume * 1.10 && body >= atr * 0.25 && body <= atr * 1.35 && obv_1h.Data[2] < obv_1h.Data[3];\nlet controlled_retest = kline_1h.High[1] <= kline_1h.Close[2] + atr * 0.95 && kline_1h.Close[1] <= kline_1h.Open[2] - body * 0.45 && kline_1h.Amount[1] <= kline_1h.Amount[2] * 0.95;\nlet reclaim = kline_1h.Close[1] <= kline_1h.Open[1] || kline_1h.Close[0] <= kline_1h.Close[1] - atr * 0.10;\nlet not_chasing = kline_1h.Close[0] >= kline_1h.Close[2] - atr * 0.65;\n\ntrend_down && strength && impulse && controlled_retest && reclaim && not_chasing",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "hourly_volume_retest_strength_close_long_v4",
+      "type": "close_long",
+      "code": "let atr = atr_1h_14.Data[1];\nlet trend_failed = kline_4h.Close[1] < ema_4h_34.Data[1] || ema_4h_34.Data[1] < ema_4h_34.Data[2];\nlet direction_weakened = adx_1h_14.MinusDI[1] >= adx_1h_14.PlusDI[1] * 0.95;\nlet local_break = atr > 0 && (kline_1h.Close[1] < kline_1h.Low[2] || kline_1h.Close[1] < kline_1h.Close[2] - atr * 0.30);\nlet flow_failed = kline_1h.Close[1] < kline_1h.Open[1] && obv_1h.Data[1] < obv_1h.Data[2];\nlet setup_failed = trend_failed || (direction_weakened && local_break) || (local_break && flow_failed);\nlet adx_fading = adx_1h_14.ADX[1] < adx_1h_14.ADX[2];\nlet pullback = atr > 0 && kline_1h.Close[1] < kline_1h.Close[2] - atr * 0.20;\nlet upper_rejection = atr > 0 && (kline_1h.High[1] - kline_1h.Close[1]) >= atr * 0.30 && kline_1h.Close[1] < kline_1h.Open[1];\nlet loss_close = ROI <= -4 && setup_failed;\nlet accelerated_stop = ROI <= -5.5 && (local_break || direction_weakened || flow_failed);\nlet profit_close = ROI >= 6 && (trend_failed || upper_rejection || (adx_fading && pullback));\nlet extended_profit_lock = ROI >= 9 && (adx_fading || pullback || direction_weakened);\nlet catastrophic_stop = ROI <= -7;\n\ncatastrophic_stop || accelerated_stop || loss_close || extended_profit_lock || profit_close",
+      "fullScreen": false,
+      "enable": true
+    },    {
+      "name": "hourly_volume_retest_strength_close_short_v4",
+      "type": "close_short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet trend_failed = kline_4h.Close[1] > ema_4h_34.Data[1] || ema_4h_34.Data[1] > ema_4h_34.Data[2];\nlet direction_weakened = adx_1h_14.PlusDI[1] >= adx_1h_14.MinusDI[1] * 0.95;\nlet local_break = atr > 0 && (kline_1h.Close[1] > kline_1h.High[2] || kline_1h.Close[1] > kline_1h.Close[2] + atr * 0.30);\nlet flow_failed = kline_1h.Close[1] > kline_1h.Open[1] && obv_1h.Data[1] > obv_1h.Data[2];\nlet setup_failed = trend_failed || (direction_weakened && local_break) || (local_break && flow_failed);\nlet adx_fading = adx_1h_14.ADX[1] < adx_1h_14.ADX[2];\nlet pullback = atr > 0 && kline_1h.Close[1] > kline_1h.Close[2] + atr * 0.20;\nlet lower_rejection = atr > 0 && (kline_1h.Close[1] - kline_1h.Low[1]) >= atr * 0.30 && kline_1h.Close[1] > kline_1h.Open[1];\nlet loss_close = ROI <= -4 && setup_failed;\nlet accelerated_stop = ROI <= -5.5 && (local_break || direction_weakened || flow_failed);\nlet profit_close = ROI >= 6 && (trend_failed || lower_rejection || (adx_fading && pullback));\nlet extended_profit_lock = ROI >= 9 && (adx_fading || pullback || direction_weakened);\nlet catastrophic_stop = ROI <= -7;\n\ncatastrophic_stop || accelerated_stop || loss_close || extended_profit_lock || profit_close",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

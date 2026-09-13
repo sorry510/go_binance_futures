@@ -1,0 +1,56 @@
+{
+  "name": "4h趋势1h回归确认 v5",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name": "ema_1h_20", "enable": true, "kline_interval": "1h", "period": 20}
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [
+      {"name": "rsi_1h_14", "enable": true, "kline_interval": "1h", "period": 14}
+    ],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {"name": "atr_1h_14", "enable": true, "kline_interval": "1h", "period": 14}
+    ],
+    "supertrend": [
+      {"name": "supertrend_4h_10_3", "enable": true, "kline_interval": "4h", "period": 10, "multiplier": 3}
+    ]
+  },
+  "strategy": [    {
+      "name": "four_hour_trend_hourly_reclaim_long_v5",
+      "type": "long",
+      "code": "let fresh_hour = NowTime % 3600000 < 180000;\nlet atr = atr_1h_14.Data[1];\nlet htf_bull = supertrend_4h_10_3.Trend[1] == 1 && supertrend_4h_10_3.Trend[2] == 1 && kline_4h.Close[1] > supertrend_4h_10_3.Data[1];\nlet ema_rising = ema_1h_20.Data[1] >= ema_1h_20.Data[2];\nlet pullback = kline_1h.Low[2] <= ema_1h_20.Data[2] || kline_1h.Close[2] <= ema_1h_20.Data[2];\nlet reclaim = kline_1h.Close[1] > ema_1h_20.Data[1] && kline_1h.Close[1] > kline_1h.Open[1] && kline_1h.Close[1] > kline_1h.Close[2];\nlet momentum = rsi_1h_14.Data[2] <= 50 && rsi_1h_14.Data[1] > 50 && rsi_1h_14.Data[1] <= 67;\nlet body = kline_1h.Close[1] - kline_1h.Open[1];\nlet candle_ok = atr > 0 && body >= atr * 0.15 && body <= atr * 1.10;\nlet not_extended = atr > 0 && kline_1h.Close[1] - ema_1h_20.Data[1] <= atr * 0.60;\n\nfresh_hour && htf_bull && ema_rising && pullback && reclaim && momentum && candle_ok && not_extended",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "four_hour_trend_hourly_reclaim_short_v5",
+      "type": "short",
+      "code": "let fresh_hour = NowTime % 3600000 < 180000;\nlet atr = atr_1h_14.Data[1];\nlet htf_bear = supertrend_4h_10_3.Trend[1] == -1 && supertrend_4h_10_3.Trend[2] == -1 && kline_4h.Close[1] < supertrend_4h_10_3.Data[1];\nlet ema_falling = ema_1h_20.Data[1] <= ema_1h_20.Data[2];\nlet pullback = kline_1h.High[2] >= ema_1h_20.Data[2] || kline_1h.Close[2] >= ema_1h_20.Data[2];\nlet reclaim = kline_1h.Close[1] < ema_1h_20.Data[1] && kline_1h.Close[1] < kline_1h.Open[1] && kline_1h.Close[1] < kline_1h.Close[2];\nlet momentum = rsi_1h_14.Data[2] >= 50 && rsi_1h_14.Data[1] < 50 && rsi_1h_14.Data[1] >= 33;\nlet body = kline_1h.Open[1] - kline_1h.Close[1];\nlet candle_ok = atr > 0 && body >= atr * 0.15 && body <= atr * 1.10;\nlet not_extended = atr > 0 && ema_1h_20.Data[1] - kline_1h.Close[1] <= atr * 0.60;\n\nfresh_hour && htf_bear && ema_falling && pullback && reclaim && momentum && candle_ok && not_extended",
+      "fullScreen": false,
+      "enable": true
+    },    {
+      "name": "four_hour_trend_hourly_reclaim_close_long_v5",
+      "type": "close_long",
+      "code": "let atr = atr_1h_14.Data[1];\nlet htf_break = supertrend_4h_10_3.Trend[1] == -1 || kline_4h.Close[1] < supertrend_4h_10_3.Data[1];\nlet ema_break = kline_1h.Close[1] < ema_1h_20.Data[1] && kline_1h.Close[1] < kline_1h.Close[2];\nlet momentum_break = rsi_1h_14.Data[1] < 45 && rsi_1h_14.Data[1] < rsi_1h_14.Data[2];\nlet loss_confirmed = htf_break || (ema_break && momentum_break);\nlet profit_reversal = atr > 0 && rsi_1h_14.Data[2] >= 65 && rsi_1h_14.Data[1] < rsi_1h_14.Data[2] && kline_1h.Close[1] < kline_1h.Open[1] && (kline_1h.High[1] - kline_1h.Close[1]) >= atr * 0.25;\nlet profit_close = ROI >= 6 && (htf_break || profit_reversal || (ema_break && rsi_1h_14.Data[1] < 50));\nlet extended_profit_lock = ROI >= 10 && rsi_1h_14.Data[1] < rsi_1h_14.Data[2] && kline_1h.Close[1] < kline_1h.Close[2];\nlet loss_close = ROI <= -4 && loss_confirmed;\nlet catastrophic_stop = ROI <= -7;\n\ncatastrophic_stop || extended_profit_lock || profit_close || loss_close",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "four_hour_trend_hourly_reclaim_close_short_v5",
+      "type": "close_short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet htf_break = supertrend_4h_10_3.Trend[1] == 1 || kline_4h.Close[1] > supertrend_4h_10_3.Data[1];\nlet ema_break = kline_1h.Close[1] > ema_1h_20.Data[1] && kline_1h.Close[1] > kline_1h.Close[2];\nlet momentum_break = rsi_1h_14.Data[1] > 55 && rsi_1h_14.Data[1] > rsi_1h_14.Data[2];\nlet loss_confirmed = htf_break || (ema_break && momentum_break);\nlet profit_reversal = atr > 0 && rsi_1h_14.Data[2] <= 35 && rsi_1h_14.Data[1] > rsi_1h_14.Data[2] && kline_1h.Close[1] > kline_1h.Open[1] && (kline_1h.Close[1] - kline_1h.Low[1]) >= atr * 0.25;\nlet profit_close = ROI >= 6 && (htf_break || profit_reversal || (ema_break && rsi_1h_14.Data[1] > 50));\nlet extended_profit_lock = ROI >= 10 && rsi_1h_14.Data[1] > rsi_1h_14.Data[2] && kline_1h.Close[1] > kline_1h.Close[2];\nlet loss_close = ROI <= -4 && loss_confirmed;\nlet catastrophic_stop = ROI <= -7;\n\ncatastrophic_stop || extended_profit_lock || profit_close || loss_close",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
