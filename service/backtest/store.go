@@ -240,19 +240,11 @@ func (manager *Manager) Delete(runID string) error {
 	if active {
 		return fmt.Errorf("backtest run is still active; wait for cancellation to finish before deleting")
 	}
-	tx, err := o.Begin()
-	if err != nil {
-		return fmt.Errorf("begin delete backtest transaction: %w", err)
-	}
-	rollback := func(cause error) error {
-		_ = tx.Rollback()
-		return cause
-	}
-	// Use direct predicate deletes instead of QuerySeter.Delete. Beego may expand
-	// large result sets into primary-key IN (?, ?, ...) lists; a 1m backtest can
-	// contain hundreds of thousands of equity points and exceed the database
-	// prepared-statement placeholder limit. Each statement below always uses one
-	// placeholder regardless of the number of child rows.
+	// Large 1m backtests can contain millions of equity rows. Deleting all child
+	// rows in one statement can exceed the MySQL driver's readTimeout while InnoDB
+	// maintains indexes and undo/redo logs. Delete children in bounded autocommit
+	// batches instead. The run row is intentionally kept until all child rows are
+	// gone, so an interrupted delete is safe to retry and resumes from what remains.
 	for _, item := range []struct {
 		name  string
 		table string
@@ -261,9 +253,20 @@ func (manager *Manager) Delete(runID string) error {
 		{name: "events", table: "agent_backtest_events"},
 		{name: "trades", table: "agent_backtest_trades"},
 	} {
-		if _, err := tx.Raw("DELETE FROM "+item.table+" WHERE run_id = ?", runID).Exec(); err != nil {
-			return rollback(fmt.Errorf("delete backtest %s: %w", item.name, err))
+		if err := deleteBacktestRowsInBatches(item.table, runID); err != nil {
+			return fmt.Errorf("delete backtest %s: %w", item.name, err)
 		}
+	}
+
+	// Only the small metadata cleanup needs to be atomic. Keeping the expensive
+	// child-row deletion out of this transaction avoids a huge long-lived undo log.
+	tx, err := o.Begin()
+	if err != nil {
+		return fmt.Errorf("begin delete backtest transaction: %w", err)
+	}
+	rollback := func(cause error) error {
+		_ = tx.Rollback()
+		return cause
 	}
 	result, err := tx.Raw("DELETE FROM agent_backtest_runs WHERE run_id = ?", runID).Exec()
 	if err != nil {
@@ -292,6 +295,27 @@ func (manager *Manager) Delete(runID string) error {
 	}
 	return nil
 }
+
+const backtestDeleteBatchSize = 20000
+
+func deleteBacktestRowsInBatches(table, runID string) error {
+	// table is supplied only by the fixed internal list in Manager.Delete.
+	query := "DELETE FROM " + table + " WHERE id IN (SELECT id FROM (SELECT id FROM " + table + " WHERE run_id = ? ORDER BY id LIMIT " + fmt.Sprint(backtestDeleteBatchSize) + ") AS delete_batch)"
+	for {
+		result, err := orm.NewOrm().Raw(query, runID).Exec()
+		if err != nil {
+			return err
+		}
+		deleted, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if deleted < backtestDeleteBatchSize {
+			return nil
+		}
+	}
+}
+
 func (manager *Manager) markInterrupted() error {
 	now := time.Now().UnixMilli()
 	_, err := orm.NewOrm().QueryTable(new(models.AgentBacktestRun)).Filter("status__in", "queued", "running").Update(orm.Params{"status": "interrupted", "stage": "interrupted", "progress": 100, "error": "process restarted before backtest completed", "updated_at": now, "completed_at": now})
