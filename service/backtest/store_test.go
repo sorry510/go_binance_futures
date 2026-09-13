@@ -443,3 +443,54 @@ func TestManagerRejectsUnsupportedResolutionMode(t *testing.T) {
 		t.Fatalf("unsupported resolution mode must fail closed, got %v", err)
 	}
 }
+
+func TestEquitySamplesAcrossEntireRange(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	const runID = "run-equity-sample"
+	start := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+	rows := make([]models.AgentBacktestEquityPoint, 0, 101)
+	for i := 1; i <= 101; i++ {
+		rows = append(rows, models.AgentBacktestEquityPoint{
+			RunID: runID, Sequence: i, BarTime: start.Add(time.Duration(i-1) * 24 * time.Hour).UnixMilli(),
+			Equity: 1000 + float64(i), Cash: 1000, DrawdownPct: float64(i % 7),
+		})
+	}
+	if _, err := o.InsertMulti(100, rows); err != nil {
+		t.Fatal(err)
+	}
+	manager := NewManager(DatasetBuilder{})
+	points, err := manager.Equity(runID, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(points) != 10 {
+		t.Fatalf("sampled points=%d want=10: %+v", len(points), points)
+	}
+	if points[0].Sequence != 1 || points[len(points)-1].Sequence != 101 {
+		t.Fatalf("sample must cover full range: first=%d last=%d", points[0].Sequence, points[len(points)-1].Sequence)
+	}
+	for i := 1; i < len(points); i++ {
+		if points[i].Sequence <= points[i-1].Sequence {
+			t.Fatalf("sample not strictly ordered: %+v", points)
+		}
+	}
+}
+
+func TestEquityReturnsAllPointsWhenWithinLimit(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	const runID = "run-equity-small"
+	for i := 1; i <= 5; i++ {
+		if _, err := o.Insert(&models.AgentBacktestEquityPoint{RunID: runID, Sequence: i, BarTime: int64(i), Equity: float64(i), Cash: float64(i)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	points, err := NewManager(DatasetBuilder{}).Equity(runID, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(points) != 5 || points[0].Sequence != 1 || points[4].Sequence != 5 {
+		t.Fatalf("unexpected full equity response: %+v", points)
+	}
+}
