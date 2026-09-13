@@ -1,6 +1,6 @@
 # Test Strategy Results Evaluation
 
-Evaluate immutable forward-test snapshots, not template names or the latest UI page. This contract was verified against the repository and all three arm databases on 2026-09-06; recheck schemas and writers on later runs.
+Evaluate immutable forward-test snapshots, not template names or the latest UI page. Schemas and exit-fallback semantics were rechecked against the repository and all three arm databases on 2026-09-13; recheck schemas and writers on later runs.
 
 ## Source and field contract
 
@@ -33,6 +33,15 @@ Use `(database, template ID or unresolved attribution, snapshot hash)` as the in
 Validate side/type consistency and that named rules exist in the saved strategy. A name or template-ID match alone does not prove that the live template still contains the tested version. Identity fields may have been backfilled: complete metadata does not establish when the new writer was deployed.
 
 ## Read a complete, stable cohort
+
+### Direct programmatic access when requested
+
+- If the user requests `app.conf` arm access, use the existing MySQL driver and parse only the explicitly selected commented `# arm` block. Require host, port, username and password; whitelist the three requested database names. Do not uncomment or modify configuration, print credentials/DSNs, or operate an App UI if prohibited.
+- Start a read-only `REPEATABLE READ` transaction. On one MySQL server, read the three schemas through that same transaction; establish the data snapshot before recording its cutoff timestamp. Inspect current columns, then capture both tables, counts and ID bounds. Validate returned counts and unique IDs before calculating statistics. Commit/rollback and close connections promptly. Store exported data with restrictive file permissions; keep credentials out of artifacts.
+- Do not replace a failed remote connection with localhost. Network sandbox failures may require approval for the same read-only operation, not changes to database permissions or server configuration.
+- Compare actual row settings before choosing a new candidate's risk assumptions. Same strategy hash with different leverage or profit/loss gates is not an identical A/B/C test. Preserve explicit user settings and label any differences; do not silently change running symbols.
+
+### DBX access when available and permitted
 
 1. Refresh DBX connections and resolve the requested connection (historically `arm`) instead of trusting cached IDs. Inspect both tables in each requested database; feature availability may differ across deployments.
 2. Record `as_of`, database timezone, row count, minimum/maximum IDs and entry/close times. Use `UNIX_TIMESTAMP(CURRENT_TIMESTAMP(3))*1000` for epoch time; do not pass UTC_TIMESTAMP through UNIX_TIMESTAMP under an unverified non-UTC session.
@@ -122,8 +131,9 @@ The current system fallback identity is:
 
 Separate system, normal rule and unknown legacy exits. Blank legacy close text is not by itself proof of fallback. Neither a whole-rule hash nor an ROI near a threshold identifies the internal branch that fired.
 
-In current `CheckTestResults`, `findStrategy` becomes true after a matching enabled close rule compiles and executes successfully, even when the result is false. Fallback requires `!findStrategy`. Therefore:
-- system exits alongside a saved enabled matching close rule require investigation of runtime compilation/evaluation failures, missing indicators/environment, deployed code differences, or historical backfill;
+In current `CheckTestResults`, `hasCloseStrategy` becomes true before compiling a matching enabled close rule. Live `TradeLineCustom.CanOrderComplete` similarly checks `HasEnabledCloseStrategy` independently of execution. Fallback requires that no matching enabled close rule exists. Therefore:
+- current compilation/evaluation errors, missing indicators, and a `false` result cannot themselves authorize fallback;
+- system exits alongside a saved enabled matching close rule require investigation of deployed code differences or historical backfill; older deployments may have used execution-success-based fallback, so date these records and do not apply current semantics retroactively as proof of a historical bug;
 - do not infer that “normal rules were not satisfied” should trigger fallback;
 - do not treat system-exit profits as proof the intended profit-taking branch worked;
 - do not infer that deleting losing exits and retaining profitable system exits would recreate those outcomes: exit groups are selected by outcomes and execution paths, not randomized control groups;
