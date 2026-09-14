@@ -11,7 +11,7 @@
     "close": "平仓",
     "close_long": "平仓(多)",
     "close_short": "平仓(空)",
-    "position_side": "持仓方向",  
+    "position_side": "持仓方向",
     "time": "时间",
     "profit": "盈亏",
     "auto_order": "自动下单",
@@ -31,7 +31,6 @@
     "remarks": "备注",
     "strategy_name": "策略名称",
     "custom_strategy_test": "合约自定义策略测试",
-    
     "open_notice_title": "开仓合约交易通知",
     "close_notice_title": "平仓合约交易通知",
     "new_coin_rush_notice_title": "新合约抢购通知",
@@ -87,7 +86,6 @@
     "remarks": "备注",
     "success": "成功",
     "fail": "失败",
-    
     "new_coin_rush_notice_title": "新币交易通知",
     "notice_title": "现货交易通知",
     "notice_price_title": "现货通知价格",
@@ -124,7 +122,8 @@
     },
     "signal_type": {
       "fast_move": "快速行情波动",
-      "liquidation_spike": "大额强平"
+      "liquidation_spike": "大额强平",
+      "opportunity": "交易机会"
     },
     "severity": {
       "low": "低",
@@ -149,6 +148,7 @@
       "liquidation_evidence": "%s 出现%s强平，累计 %.2f USDT，共 %.0f 笔订单",
       "generic": "%s 触发 %s 信号",
       "generic_context": "确定性 Signal Engine 已命中规则"
-    }
+    },
+    "agent_opportunity_title": "AI 交易机会"
   }
 }
