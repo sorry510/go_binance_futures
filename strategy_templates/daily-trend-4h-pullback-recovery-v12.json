@@ -1,0 +1,50 @@
+{
+  "name": "日线趋势4h回调恢复 v12",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name":"ema_1d_50","enable":true,"kline_interval":"1d","period":50}
+    ],
+    "macd": [], "adx": [], "mfi": [], "obv": [], "cci": [], "roc": [], "kdj": [],
+    "rsi": [
+      {"name":"rsi_4h_14","enable":true,"kline_interval":"4h","period":14}
+    ],
+    "kc": [],
+    "boll": [
+      {"name":"boll_4h_20_2","enable":true,"kline_interval":"4h","period":20,"std_dev_multiplier":2}
+    ],
+    "donchian": [],
+    "atr": [
+      {"name":"atr_4h_14","enable":true,"kline_interval":"4h","period":14}
+    ],
+    "supertrend": []
+  },
+  "strategy": [    {
+      "name": "daily_trend_4h_pullback_recovery_long_v12",
+      "type": "long",
+      "code": "let atr = atr_4h_14.Data[1];\nlet new_4h_window = NowTime % 14400000 < 300000;\nlet daily_up = kline_1d.Close[1] > ema_1d_50.Data[1] && ema_1d_50.Data[1] >= ema_1d_50.Data[3];\nlet pullback = atr > 0 && kline_4h.Low[2] <= boll_4h_20_2.Low[2] && rsi_4h_14.Data[2] <= 40;\nlet body = kline_4h.Close[1] - kline_4h.Open[1];\nlet recovery = kline_4h.Close[1] > boll_4h_20_2.Low[1] && kline_4h.Close[1] > kline_4h.Open[1] && rsi_4h_14.Data[1] >= 43 && rsi_4h_14.Data[1] >= rsi_4h_14.Data[2] + 3 && body >= atr * 0.15 && body <= atr * 1.20;\nlet not_extended = kline_4h.Close[1] <= boll_4h_20_2.Mid[1] + atr * 0.35;\nlet no_chase = kline_4h.Close[0] >= kline_4h.Close[1] - atr * 0.15 && kline_4h.Close[0] <= kline_4h.Close[1] + atr * 0.35;\n\nnew_4h_window && daily_up && pullback && recovery && not_extended && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "daily_trend_4h_pullback_recovery_short_v12",
+      "type": "short",
+      "code": "let atr = atr_4h_14.Data[1];\nlet new_4h_window = NowTime % 14400000 < 300000;\nlet daily_down = kline_1d.Close[1] < ema_1d_50.Data[1] && ema_1d_50.Data[1] <= ema_1d_50.Data[3];\nlet pullback = atr > 0 && kline_4h.High[2] >= boll_4h_20_2.High[2] && rsi_4h_14.Data[2] >= 60;\nlet body = kline_4h.Open[1] - kline_4h.Close[1];\nlet recovery = kline_4h.Close[1] < boll_4h_20_2.High[1] && kline_4h.Close[1] < kline_4h.Open[1] && rsi_4h_14.Data[1] <= 57 && rsi_4h_14.Data[1] <= rsi_4h_14.Data[2] - 3 && body >= atr * 0.15 && body <= atr * 1.20;\nlet not_extended = kline_4h.Close[1] >= boll_4h_20_2.Mid[1] - atr * 0.35;\nlet no_chase = kline_4h.Close[0] <= kline_4h.Close[1] + atr * 0.15 && kline_4h.Close[0] >= kline_4h.Close[1] - atr * 0.35;\n\nnew_4h_window && daily_down && pullback && recovery && not_extended && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },    {
+      "name": "daily_trend_4h_pullback_recovery_close_long_v12",
+      "type": "close_long",
+      "code": "let daily_fail = kline_1d.Close[1] < ema_1d_50.Data[1];\nlet failed_recovery = kline_4h.Close[1] < boll_4h_20_2.Low[1] && rsi_4h_14.Data[1] < 38 && rsi_4h_14.Data[1] < rsi_4h_14.Data[2];\nlet upper_exhaustion = kline_4h.High[1] >= boll_4h_20_2.High[1] && kline_4h.Close[1] < kline_4h.Open[1] && rsi_4h_14.Data[1] >= 65;\nlet rsi_rollover = rsi_4h_14.Data[2] >= 68 && rsi_4h_14.Data[1] <= rsi_4h_14.Data[2] - 3;\nlet profit_reversal = ROI >= 20 && (upper_exhaustion || rsi_rollover || daily_fail);\nlet loss_reversal = ROI <= -12 && (daily_fail || failed_recovery);\nlet extended_profit_lock = ROI >= 30 && rsi_4h_14.Data[1] < rsi_4h_14.Data[2] && kline_4h.Close[1] < kline_4h.Close[2];\nlet catastrophic_stop = ROI <= -20;\n\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "daily_trend_4h_pullback_recovery_close_short_v12",
+      "type": "close_short",
+      "code": "let daily_fail = kline_1d.Close[1] > ema_1d_50.Data[1];\nlet failed_recovery = kline_4h.Close[1] > boll_4h_20_2.High[1] && rsi_4h_14.Data[1] > 62 && rsi_4h_14.Data[1] > rsi_4h_14.Data[2];\nlet lower_exhaustion = kline_4h.Low[1] <= boll_4h_20_2.Low[1] && kline_4h.Close[1] > kline_4h.Open[1] && rsi_4h_14.Data[1] <= 35;\nlet rsi_rollover = rsi_4h_14.Data[2] <= 32 && rsi_4h_14.Data[1] >= rsi_4h_14.Data[2] + 3;\nlet profit_reversal = ROI >= 20 && (lower_exhaustion || rsi_rollover || daily_fail);\nlet loss_reversal = ROI <= -12 && (daily_fail || failed_recovery);\nlet extended_profit_lock = ROI >= 30 && rsi_4h_14.Data[1] > rsi_4h_14.Data[2] && kline_4h.Close[1] > kline_4h.Close[2];\nlet catastrophic_stop = ROI <= -20;\n\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

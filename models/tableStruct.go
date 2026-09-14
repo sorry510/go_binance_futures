@@ -84,12 +84,14 @@ type Order struct {
 	Amount         string `orm:"column(amount)" json:"amount"`       // 数量，都是正数
 	Avg_price      string `orm:"column(avg_price)" json:"avg_price"` // 开仓价 或 平仓价
 	Leverage       int64  `orm:"column(leverage)" json:"leverage"`
-	Inexact_profit string `orm:"column(inexact_profit)" json:"inexact_profit"` // 平仓的收益 usdt，开仓为结束时是 0.0，结束时为对应平仓记录的收益
+	Inexact_profit string `orm:"column(inexact_profit)" json:"inexact_profit"` // 平仓的收益 usdt，开仓未结束时为 0.0，结束时为对应平仓记录的收益
 	Side           string `orm:"column(side)" json:"side"`                     // open, close
 	PositionSide   string `orm:"column(positionSide)" json:"positionSide"`     // LONG, SHORT
 	OrderId        int64  `orm:"column(order_id)" json:"order_id"`
 	UpdateTime     int64  `orm:"column(updateTime);index" json:"updateTime"`
-	ClosedTime     int64  `orm:"column(closedTime)" json:"closedTime"` // 平仓时间(只针对 side = 'open' 的订单)
+	ClosedTime     int64  `orm:"column(closedTime)" json:"closedTime"`           // 平仓时间(只针对 side = 'open' 的订单)
+	ClosedPrice    string `orm:"column(closedPrice)" json:"closedPrice"`         // 平仓价格(只针对 side = 'open' 的订单)
+	CloseOrderId   int64  `orm:"column(closeOrderId);index" json:"closeOrderId"` // 对应 side = 'close' 的 order.id
 }
 
 type Symbols struct {
