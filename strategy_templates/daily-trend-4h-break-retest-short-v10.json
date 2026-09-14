@@ -1,0 +1,28 @@
+{
+  "name": "日线趋势4h破位回抽做空 v10",
+  "technology": {
+    "ma": [], "ema": [], "macd": [],
+    "adx": [{"name":"adx_4h_14","enable":true,"kline_interval":"4h","period":14}],
+    "mfi": [], "obv": [], "cci": [], "roc": [], "kdj": [], "rsi": [],
+    "kc": [], "boll": [],
+    "donchian": [{"name":"donchian_4h_20","enable":true,"kline_interval":"4h","period":20}],
+    "atr": [{"name":"atr_4h_14","enable":true,"kline_interval":"4h","period":14}],
+    "supertrend": [{"name":"supertrend_1d_10_3","enable":true,"kline_interval":"1d","period":10,"multiplier":3}]
+  },
+  "strategy": [
+    {
+      "name": "daily_trend_4h_break_retest_short_v10",
+      "type": "short",
+      "code": "let atr = atr_4h_14.Data[1];\nlet break_atr = atr_4h_14.Data[2];\nlet new_4h_window = NowTime % 14400000 < 300000;\nlet daily_trend = supertrend_1d_10_3.Trend[1] == -1 && supertrend_1d_10_3.Trend[2] == -1 && kline_1d.Close[1] < supertrend_1d_10_3.Data[1];\nlet break_level = donchian_4h_20.Low[3];\nlet break_body = kline_4h.Open[2] - kline_4h.Close[2];\nlet valid_break = break_atr > 0 && kline_4h.Close[2] < break_level && kline_4h.Close[2] < kline_4h.Open[2] && break_body >= break_atr * 0.25 && break_body <= break_atr * 1.50;\nlet strength = adx_4h_14.ADX[1] >= 22 && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1] * 1.15;\nlet retest_touch = atr > 0 && kline_4h.High[1] >= break_level - atr * 0.25;\nlet retest_failed = kline_4h.Close[1] < break_level && kline_4h.Close[1] <= kline_4h.Open[1] && (kline_4h.High[1] - kline_4h.Open[1]) >= atr * 0.12;\nlet controlled_retest = kline_4h.High[1] <= break_level + atr * 0.80;\nlet no_chase = kline_4h.Close[0] <= kline_4h.Close[1] + atr * 0.20 && kline_4h.Close[0] >= kline_4h.Close[1] - atr * 0.35;\n\nnew_4h_window && daily_trend && valid_break && strength && retest_touch && retest_failed && controlled_retest && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "daily_trend_4h_break_retest_close_short_v10",
+      "type": "close_short",
+      "code": "let atr = atr_4h_14.Data[1];\nlet daily_flip = supertrend_1d_10_3.Trend[1] == 1 && kline_1d.Close[1] > supertrend_1d_10_3.Data[1];\nlet dmi_reversal = adx_4h_14.ADX[1] >= 20 && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1] * 1.10;\nlet structure_break = kline_4h.Close[1] > donchian_4h_20.Mid[2] && kline_4h.Close[1] > kline_4h.Close[2];\nlet confirmed_failure = daily_flip || (dmi_reversal && structure_break);\nlet adx_fading = adx_4h_14.ADX[1] < adx_4h_14.ADX[2];\nlet lower_rejection = atr > 0 && kline_4h.Close[1] > kline_4h.Open[1] && (kline_4h.Close[1] - kline_4h.Low[1]) >= atr * 0.45;\nlet profit_reversal = ROI >= 20 && (daily_flip || lower_rejection || (adx_fading && structure_break));\nlet loss_reversal = ROI <= -12 && confirmed_failure;\nlet extended_profit_lock = ROI >= 32 && adx_fading && kline_4h.Close[1] > kline_4h.Close[2];\nlet catastrophic_stop = ROI <= -20;\n\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

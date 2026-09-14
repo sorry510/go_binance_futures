@@ -178,6 +178,15 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 
 Select a real USDT perpetual Symbol and optionally add an analysis focus. The application runs the `symbol_analysis` Skill with market data, current market regime, and the latest successful comparison context, then returns a structured `TradingPlan`. History shows status, direction, confidence, market regime, analysis-time price, current price, later movement, and summary.
 
+### Opportunities
+
+**AI → Opportunities** is the V3-6 Opportunity Watch entry point. The system can discover candidates from FastMove, liquidation Signals, MarketEvent/Binance Announcement, and scheduled `market_scan`, then reuse the existing `symbol_analysis` Skill after deterministic deduplication and cooldown checks to produce a complete `TradingPlanV1`. Opportunities expire after 60 minutes by default, and the same Symbol + source type is analyzed at most once per 30-minute cooldown window.
+
+- Opportunity Watch is disabled by default. Enable it under **AI → AI Configuration** and configure the Market Scan interval and minimum confidence.
+- `neutral`, `partial`, `data_missing`, `failed`, and expired opportunities are view-only and cannot create a real-trading Proposal.
+- An eligible opportunity can create a Controlled Trade Proposal only after a user action; the existing Risk Engine, human approval, and V3-5 Ownership-safe Execution remain mandatory, and Opportunity Watch itself has no Binance submission path.
+- The detail view reads the original `symbol_analysis` Agent Task for the full plan and can jump back to Symbol Analysis for a fresh run; full AI JSON is not duplicated into the Opportunity record.
+
 ### Model Configuration
 
 LLM configurations are database-backed. The page supports provider templates and custom providers, configuration name, API endpoint, API key, model, request timeout, Temperature, connection testing, and switching the active model. New Agent tasks use the active configuration without restarting the service. API keys are never returned in plaintext.
@@ -217,13 +226,14 @@ Controlled trading does **not** expose a direct trading Tool to the LLM. Real ex
 - Risk is run again before real execution, and the Kill Switch is read again immediately before broker submission.
 - A unique `client_order_id` makes submission idempotent. Ambiguous network results are never automatically resubmitted; they can only be reconciled by that ID.
 - Proposal, Risk, approval/rejection, execution, and reconciliation actions are audited.
-- Current controlled execution submits an opening `MARKET` order. TradingPlan take-profit/stop-loss values are used by Risk and approval but do not yet automatically create Binance protective TP/SL orders.
+- After a controlled-trade entry fills, the V3-5 Ownership Lifecycle creates the required `STOP_MARKET` protection for the managed position and, when the TradingPlan has a valid target, an optional `TAKE_PROFIT_MARKET`; after a manual partial reduction it reconciles and repairs protection to the remaining managed quantity.
 
 ### AI Configuration
 
 All AI runtime configuration is centralized under **AI → AI Configuration**, including:
 
 - Alert Pipeline / AI analysis switches, minimum severity, cooldown, concurrency, and per-minute limits.
+- Opportunity Watch master switch, Market Scan interval, and minimum confidence.
 - Market-regime update and daily-market-brief Schedulers.
 - Global Agent admission limits plus Token and Tool-call budgets.
 - Controlled-trading Kill Switch, Symbol allowlist, max per-trade risk/notional, total exposure, leverage, price freshness, slippage, cooldown, and Proposal TTL.

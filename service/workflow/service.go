@@ -313,6 +313,16 @@ func firstNonEmpty(values ...string) string {
 	return "unknown error"
 }
 
+// BuildMarketScanInput is shared by the Opportunity Watch scheduler and manual workflow.
+func BuildMarketScanInput(ctx context.Context, analyze int) (string, error) {
+	v, err := buildMarketScanInput(ctx, analyze)
+	if err != nil {
+		return "", err
+	}
+	raw, err := json.Marshal(v)
+	return string(raw), err
+}
+
 // BuildDailyMarketBriefInput is shared by the scheduler and manual workflow.
 func BuildDailyMarketBriefInput(ctx context.Context, windowHours int) (string, error) {
 	v, err := buildDailyBriefInput(ctx, windowHours)

@@ -1,0 +1,52 @@
+{
+  "name": "4h波动收缩扩张突破 v11",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name":"ema_1d_50","enable":true,"kline_interval":"1d","period":50}
+    ],
+    "macd": [],
+    "adx": [
+      {"name":"adx_4h_14","enable":true,"kline_interval":"4h","period":14}
+    ],
+    "mfi": [], "obv": [], "cci": [], "roc": [], "kdj": [], "rsi": [], "kc": [],
+    "boll": [
+      {"name":"boll_4h_20_2","enable":true,"kline_interval":"4h","period":20,"std_dev_multiplier":2}
+    ],
+    "donchian": [],
+    "atr": [
+      {"name":"atr_4h_14","enable":true,"kline_interval":"4h","period":14}
+    ],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "volatility_squeeze_expansion_long_v11",
+      "type": "long",
+      "code": "let atr = atr_4h_14.Data[1];\nlet new_4h_window = NowTime % 14400000 < 300000;\nlet daily_up = kline_1d.Close[1] > ema_1d_50.Data[1] && ema_1d_50.Data[1] >= ema_1d_50.Data[2];\nlet width2 = (boll_4h_20_2.High[2] - boll_4h_20_2.Low[2]) / boll_4h_20_2.Mid[2];\nlet width3 = (boll_4h_20_2.High[3] - boll_4h_20_2.Low[3]) / boll_4h_20_2.Mid[3];\nlet width4 = (boll_4h_20_2.High[4] - boll_4h_20_2.Low[4]) / boll_4h_20_2.Mid[4];\nlet width1 = (boll_4h_20_2.High[1] - boll_4h_20_2.Low[1]) / boll_4h_20_2.Mid[1];\nlet squeeze = width2 > 0 && width2 <= width3 * 0.92 && width3 <= width4 * 1.05;\nlet expansion = width1 >= width2 * 1.15;\nlet body = kline_4h.Close[1] - kline_4h.Open[1];\nlet breakout = atr > 0 && kline_4h.Close[1] > boll_4h_20_2.High[2] && kline_4h.Close[1] > kline_4h.Open[1] && body >= atr * 0.35 && body <= atr * 1.80;\nlet strength = adx_4h_14.ADX[1] >= 20 && adx_4h_14.ADX[1] > adx_4h_14.ADX[2] && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1] * 1.10;\nlet no_chase = kline_4h.Close[0] >= kline_4h.Close[1] - atr * 0.15 && kline_4h.Close[0] <= kline_4h.Close[1] + atr * 0.45;\n\nnew_4h_window && daily_up && squeeze && expansion && breakout && strength && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "volatility_squeeze_expansion_short_v11",
+      "type": "short",
+      "code": "let atr = atr_4h_14.Data[1];\nlet new_4h_window = NowTime % 14400000 < 300000;\nlet daily_down = kline_1d.Close[1] < ema_1d_50.Data[1] && ema_1d_50.Data[1] <= ema_1d_50.Data[2];\nlet width2 = (boll_4h_20_2.High[2] - boll_4h_20_2.Low[2]) / boll_4h_20_2.Mid[2];\nlet width3 = (boll_4h_20_2.High[3] - boll_4h_20_2.Low[3]) / boll_4h_20_2.Mid[3];\nlet width4 = (boll_4h_20_2.High[4] - boll_4h_20_2.Low[4]) / boll_4h_20_2.Mid[4];\nlet width1 = (boll_4h_20_2.High[1] - boll_4h_20_2.Low[1]) / boll_4h_20_2.Mid[1];\nlet squeeze = width2 > 0 && width2 <= width3 * 0.92 && width3 <= width4 * 1.05;\nlet expansion = width1 >= width2 * 1.15;\nlet body = kline_4h.Open[1] - kline_4h.Close[1];\nlet breakdown = atr > 0 && kline_4h.Close[1] < boll_4h_20_2.Low[2] && kline_4h.Close[1] < kline_4h.Open[1] && body >= atr * 0.35 && body <= atr * 1.80;\nlet strength = adx_4h_14.ADX[1] >= 20 && adx_4h_14.ADX[1] > adx_4h_14.ADX[2] && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1] * 1.10;\nlet no_chase = kline_4h.Close[0] <= kline_4h.Close[1] + atr * 0.15 && kline_4h.Close[0] >= kline_4h.Close[1] - atr * 0.45;\n\nnew_4h_window && daily_down && squeeze && expansion && breakdown && strength && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "volatility_squeeze_expansion_close_long_v11",
+      "type": "close_long",
+      "code": "let atr = atr_4h_14.Data[1];\nlet daily_fail = kline_1d.Close[1] < ema_1d_50.Data[1];\nlet mid_fail = kline_4h.Close[1] < boll_4h_20_2.Mid[1] && kline_4h.Close[1] < kline_4h.Close[2];\nlet dmi_fail = adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1] * 1.05;\nlet confirmed_failure = daily_fail || (mid_fail && dmi_fail);\nlet adx_fading = adx_4h_14.ADX[1] < adx_4h_14.ADX[2];\nlet upper_rejection = atr > 0 && kline_4h.Close[1] < kline_4h.Open[1] && (kline_4h.High[1] - kline_4h.Close[1]) >= atr * 0.40;\nlet profit_reversal = ROI >= 20 && (upper_rejection || (adx_fading && mid_fail) || daily_fail);\nlet loss_reversal = ROI <= -12 && confirmed_failure;\nlet extended_profit_lock = ROI >= 32 && adx_fading && kline_4h.Close[1] < kline_4h.Close[2];\nlet catastrophic_stop = ROI <= -20;\n\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "volatility_squeeze_expansion_close_short_v11",
+      "type": "close_short",
+      "code": "let atr = atr_4h_14.Data[1];\nlet daily_fail = kline_1d.Close[1] > ema_1d_50.Data[1];\nlet mid_fail = kline_4h.Close[1] > boll_4h_20_2.Mid[1] && kline_4h.Close[1] > kline_4h.Close[2];\nlet dmi_fail = adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1] * 1.05;\nlet confirmed_failure = daily_fail || (mid_fail && dmi_fail);\nlet adx_fading = adx_4h_14.ADX[1] < adx_4h_14.ADX[2];\nlet lower_rejection = atr > 0 && kline_4h.Close[1] > kline_4h.Open[1] && (kline_4h.Close[1] - kline_4h.Low[1]) >= atr * 0.40;\nlet profit_reversal = ROI >= 20 && (lower_rejection || (adx_fading && mid_fail) || daily_fail);\nlet loss_reversal = ROI <= -12 && confirmed_failure;\nlet extended_profit_lock = ROI >= 32 && adx_fading && kline_4h.Close[1] > kline_4h.Close[2];\nlet catastrophic_stop = ROI <= -20;\n\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
