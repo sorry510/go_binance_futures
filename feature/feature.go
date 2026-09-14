@@ -637,7 +637,12 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 	order.UpdateTime = time.Now().Unix() * 1000
 
 	o := orm.NewOrm()
-	o.Insert(order)
+	closeOrderID, err := o.Insert(order)
+	if err != nil {
+		logs.Error("insert futures close order:", err)
+		return
+	}
+	order.ID = closeOrderID
 
 	// 自动缩放
 	AutoLossScale(systemConfig, unRealizedProfit >= 0)
@@ -655,10 +660,14 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 		OrderBy("-Id").
 		One(&openOrder)
 	if openOrder.OrderId != 0 {
-		// 找到对应的开仓订单，进行处理
+		// 一对一关联本次平仓记录；当前订单模型不处理部分开仓/部分平仓。
 		openOrder.Inexact_profit = order.Inexact_profit
 		openOrder.ClosedTime = order.UpdateTime
-		o.Update(&openOrder)
+		openOrder.ClosedPrice = order.Avg_price
+		openOrder.CloseOrderId = order.ID
+		if _, err := o.Update(&openOrder, "Inexact_profit", "ClosedTime", "ClosedPrice", "CloseOrderId"); err != nil {
+			logs.Error("link futures close order to open order:", err)
+		}
 		logs.Info("Updated order status for open order, symbol:", openOrder.Symbol)
 	}
 }
