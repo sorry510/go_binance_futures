@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -19,6 +20,29 @@ import (
 type Service struct {
 	Alias string
 	Now   func() time.Time
+}
+
+type EventObserver func(Event)
+
+var eventObserverMu sync.RWMutex
+var eventObserver EventObserver
+
+func SetEventObserver(observer EventObserver) {
+	eventObserverMu.Lock()
+	eventObserver = observer
+	eventObserverMu.Unlock()
+}
+
+func notifyEventObserver(item Event, created bool) {
+	if !created {
+		return
+	}
+	eventObserverMu.RLock()
+	observer := eventObserver
+	eventObserverMu.RUnlock()
+	if observer != nil {
+		go observer(item)
+	}
 }
 
 func DefaultService() Service { return Service{} }
@@ -90,6 +114,9 @@ func (service Service) IngestEvent(ctx context.Context, input EventInput) (Event
 	}
 	_ = service.RecordSourceSuccess(ctx, input.Source, input.ObservedAt)
 	item, convertErr := service.eventFromRow(ctx, row, service.now())
+	if convertErr == nil {
+		notifyEventObserver(item, created)
+	}
 	return item, created, convertErr
 }
 
