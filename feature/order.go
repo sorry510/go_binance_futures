@@ -11,14 +11,14 @@ import (
 func UpdateOrderStatus() {
 	o := orm.NewOrm()
 	var openOrders []models.Order
-	sql := "SELECT * FROM `order` where side = 'open' and closedTime = 0 limit 200"
+	sql := "SELECT * FROM `order` where side = 'open' and closeOrderId = 0 limit 200"
 	_, err := o.Raw(sql).QueryRows(&openOrders)
 	if err != nil {
 		logs.Error("Error fetching orders:", err)
 	}
-	
+
 	positions, _ := GetTransformPositions()
-	
+
 	for _, openOrder := range openOrders {
 		var closeOrder models.Order
 		o.QueryTable("order").
@@ -30,10 +30,14 @@ func UpdateOrderStatus() {
 			OrderBy("Id").
 			One(&closeOrder)
 		if closeOrder.OrderId != 0 {
-			// 找到对应的平仓订单，进行处理
+			// 找到对应的平仓订单，补齐开仓记录上的一对一平仓关联。
 			openOrder.Inexact_profit = closeOrder.Inexact_profit
 			openOrder.ClosedTime = closeOrder.UpdateTime
-			o.Update(&openOrder)
+			openOrder.ClosedPrice = closeOrder.Avg_price
+			openOrder.CloseOrderId = closeOrder.ID
+			if _, err := o.Update(&openOrder, "Inexact_profit", "ClosedTime", "ClosedPrice", "CloseOrderId"); err != nil {
+				logs.Error("update order close link:", err)
+			}
 			logs.Info("Updated order status for open order, symbol:", openOrder.Symbol)
 		} else {
 			// 检查当前持仓情况，是否已经没有持仓，就删掉对应的开仓订单

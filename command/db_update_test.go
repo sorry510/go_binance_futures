@@ -299,6 +299,26 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err := SyncDatabase(13); err != nil {
 		t.Fatalf("second version-13 sync should be idempotent: %v", err)
 	}
+
+	if err := SyncDatabase(14); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 14 {
+		t.Fatalf("expected database version 14 after order close-link schema sync, config=%+v err=%v", config, err)
+	}
+	for _, column := range []string{"closedPrice", "closeOrderId"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('order') WHERE name=?", column).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected order.%s after version 14 sync, count=%d err=%v", column, count, err)
+		}
+	}
+	if !sqliteHasIndexColumns(t, o, "order", []string{"closeOrderId"}) {
+		t.Fatal("expected order(closeOrderId) index after version 14 sync")
+	}
+	if err := SyncDatabase(14); err != nil {
+		t.Fatalf("second version-14 sync should be idempotent: %v", err)
+	}
 }
 
 func sqliteHasIndexColumns(t *testing.T, o orm.Ormer, table string, want []string) bool {

@@ -1,5 +1,7 @@
 # Phase V3-7：交易复盘与策略比较
 
+> 状态：✅ 已完成。个人自用轻量实现，优先复用现有表和确定性 SQL/Go 聚合。
+>
 > 定位：P1。解决个人使用最实际的问题：哪些策略、哪些行情和哪些分析真的有效。
 
 ## 1. 目标
@@ -44,14 +46,12 @@
 
 ### 真实受控交易
 
-按 Proposal / Symbol / Direction 查看：
+最终个人版按确定性数据边界收窄：以 Proposal 为入口查看 Risk、Execution、Managed Position / Order 和 Audit 链路，并保留来源 Task、Symbol、Direction、MarketCondition 与执行异常信息。
 
-- Entry / Exit / Stop / TP
-- 实际 PnL、手续费、Funding（能获取时）
-- Risk 计算值
-- 来源分析 Task
-- MarketCondition
-- 执行异常 / Reconcile 情况
+- 页面展示 Proposal / 已执行 / Managed Position / Managed Order 统计。
+- 最近 Proposal 可以在复盘页直接下钻到 Proposal → Risk → Execution → Managed Position → Audit。
+- Entry / Stop / TP 等计划字段可在 Proposal 详情中查看。
+- 实际 PnL、手续费、Funding 只有在能够可靠归因到受控仓位时才展示；当前版本无法确定性归因，因此明确不计算、不估算。
 
 不要把 Backtest、Paper、Live 混成一个收益率指标。
 
@@ -105,6 +105,8 @@ Model / Prompt / Skill 的调用成本和失败率继续放在现有 Observabili
 - 不让 LLM 计算财务指标。
 - Snapshot Hash 相同的模拟盘结果可以聚合；Hash 不同不能强行合并。
 - Backtest 使用 Run 自己保存的 Snapshot / DataHash，不读取当前 Strategy Template 内容替代历史快照。
+- 多 Run 的 `ReturnPct = ΣNetPnL / ΣInitialEquity × 100%`，表示按初始资金加权的 Run 收益口径，不等同于把多个 Run 串成一条组合权益曲线。
+- 多 Run 最大回撤取匹配 Run 的最大值；按 LONG/SHORT 或 MarketCondition 等交易子集筛选时无法确定性重建子集权益曲线，因此返回“不可用”而不是估算。
 
 ## 7. 验收 Gate
 
@@ -122,3 +124,23 @@ Model / Prompt / Skill 的调用成本和失败率继续放在现有 Observabili
 - 不做自动“淘汰/晋级”策略。
 - 不做复杂 Model/Prompt Attribution 平台。
 - 不做机构级 BI/Data Warehouse。
+
+## 9. 最终实现与验收记录（个人版）
+
+- 新增 `service/outcomereview` 和 `/agents/outcomes/backtest|paper|live` 只读 API。
+- Backtest 使用 SQL 聚合交易结果，支持时间、策略、Symbol、方向筛选，并按 Symbol / LONG-SHORT / MarketCondition 分组。
+- 模拟盘直接复用 `CalculateTestResultReviewStats`，保持 Snapshot Hash 隔离和“未平仓不污染已实现收益”的既有规则。
+- Live 统计 Proposal、已执行交易、Managed Position 和 Managed Order，并返回最近 20 条 Proposal 供页面下钻；详情复用既有只读接口展示 Risk、Execution、Managed Position 和 Audit。当前本地数据无法确定性归因完整手续费/Funding，因此不伪造 Live Net PnL。
+- 前端“交易复盘”放在“合约交易”菜单，Backtest / 模拟盘 / Live 三个 Tab 分开显示；策略比较最多选择 3 个模板，不计算综合评分。
+- 未新增数据库表，数据库版本保持 v13，不需要额外 `sync db`。
+- Backtest 汇总采用数据库聚合，避免复盘查询把大量历史 Trade 全部加载到 Go 内存。
+- Live 当前受控仓位统计与 Ownership 口径一致，仅将 `managed_qty > 0` 且未关闭的仓位计为 Open Position。
+
+### 自动化验证
+
+- `go test ./...`：通过。
+- `go vet ./...`：通过。
+- `go test -race ./service/outcomereview ./controllers ./routers`：通过。
+- Outcome Review SQLite 固定 Fixture：通过。
+- 前端 `vue-tsc --noEmit`：通过。
+- 前端 `pnpm build`：通过，`dist` 已同步到后端 `static`。
