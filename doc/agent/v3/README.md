@@ -51,7 +51,7 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 | [V3-4](./04-phase-v3-4-adaptive-resolution-backtest.md) | P0 | Adaptive Resolution Backtest：1m 主回放，发生路径歧义时按需下钻 1s，极少数同秒冲突再下钻 trades |
 | [V3-5](./05-phase-v3-5-trade-safety.md) | P0 | 真实交易安全：先统一仓位/订单 Ownership，确保“谁创建、谁管理”，再补 Agent Stop、整仓平仓与重启恢复 |
 | [V3-6](./06-phase-v3-6-opportunity-watch.md) | ✅ | Opportunity Watch：自动发现、分析、持久化和提醒机会；真实执行继续由用户确认 |
-| [V3-7](./07-phase-v3-7-outcome-review.md) | P1 | 交易复盘与策略比较：统一查看 Backtest、模拟盘和真实交易表现 |
+| [V3-7](./07-phase-v3-7-outcome-review.md) | ✅ | 交易复盘与策略比较：Backtest、模拟盘、真实受控交易分开复盘，支持轻量策略对比 |
 | [V3-8](./08-phase-v3-8-personal-operations.md) | P2 | 个人运维与 V3 收尾：健康检查、数据增长控制、备份说明和最终清理 |
 
 V3 到 V3-8 结束，不再规划 Agent Studio。
@@ -93,7 +93,7 @@ V3-5 Trade Ownership & Safety ✅
         ↓
 V3-6 Opportunity Watch ✅
         ↓
-V3-7 Outcome Review
+V3-7 Outcome Review ✅
         ↓
 V3-8 Personal Operations / Finalization
 ```

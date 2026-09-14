@@ -22,6 +22,9 @@ func init() {
 	web.Router("/agents/workflows/:id", &controllers.AgentWorkflowController{}, "get:Get")                                               // Workflow 详情
 	web.Router("/agents/trade/ownership", &controllers.AgentTradeController{}, "get:Ownership")                                          // V3-5 合约 ownership 视图
 	web.Router("/agents/trade/ownership/reconcile", &controllers.AgentTradeController{}, "post:ReconcileOwnership")                      // V3-5 手动 ownership 对账
+	web.Router("/agents/outcomes/backtest", &controllers.AgentOutcomeController{}, "get:Backtest")                                       // V3-7 交易复盘：历史回测
+	web.Router("/agents/outcomes/paper", &controllers.AgentOutcomeController{}, "get:Paper")                                             // V3-7 交易复盘：模拟盘
+	web.Router("/agents/outcomes/live", &controllers.AgentOutcomeController{}, "get:Live")                                               // V3-7 交易复盘：真实受控交易
 	web.Router("/agents/opportunities", &controllers.AgentOpportunityController{}, "get:List")                                           // V3-6 Opportunity 列表
 	web.Router("/agents/opportunities/:opportunityId", &controllers.AgentOpportunityController{}, "get:Get")                             // V3-6 Opportunity 详情
 	web.Router("/agents/opportunities/:opportunityId/review", &controllers.AgentOpportunityController{}, "post:Review")                  // V3-6 标记已查看

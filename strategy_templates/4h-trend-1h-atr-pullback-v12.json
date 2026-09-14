@@ -1,0 +1,77 @@
+{
+  "name": "4h趋势1h ATR回踩延续 v12",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_4h_50",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 50
+      },
+      {
+        "name": "ema_1h_20",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 20
+      }
+    ],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "trend_pullback_long_v12",
+      "type": "long",
+      "code": "let atr = atr_1h_14.Data[1];\nlet new_1h_window = NowTime % 3600000 < 300000;\nlet trend = kline_4h.Close[1] > ema_4h_50.Data[1] && ema_4h_50.Data[1] >= ema_4h_50.Data[2] && kline_4h.Close[1] >= kline_4h.Close[2];\nlet pullback = atr > 0 && kline_1h.Low[2] <= ema_1h_20.Data[2] + atr * 0.20 && kline_1h.Close[2] >= ema_1h_20.Data[2] - atr * 0.40;\nlet body = kline_1h.Close[1] - kline_1h.Open[1];\nlet reclaim = atr > 0 && kline_1h.Close[1] > ema_1h_20.Data[1] && kline_1h.Close[1] > kline_1h.Close[2] && body >= atr * 0.20 && body <= atr * 1.20;\nlet strength = adx_1h_14.ADX[1] >= 18 && adx_1h_14.PlusDI[1] > adx_1h_14.MinusDI[1] * 1.10;\nlet no_chase = atr > 0 && kline_1h.Close[0] >= kline_1h.Close[1] - atr * 0.10 && kline_1h.Close[0] <= kline_1h.Close[1] + atr * 0.35;\n\nnew_1h_window && trend && pullback && reclaim && strength && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "trend_pullback_short_v12",
+      "type": "short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet new_1h_window = NowTime % 3600000 < 300000;\nlet trend = kline_4h.Close[1] < ema_4h_50.Data[1] && ema_4h_50.Data[1] <= ema_4h_50.Data[2] && kline_4h.Close[1] <= kline_4h.Close[2];\nlet pullback = atr > 0 && kline_1h.High[2] >= ema_1h_20.Data[2] - atr * 0.20 && kline_1h.Close[2] <= ema_1h_20.Data[2] + atr * 0.40;\nlet body = kline_1h.Open[1] - kline_1h.Close[1];\nlet reclaim = atr > 0 && kline_1h.Close[1] < ema_1h_20.Data[1] && kline_1h.Close[1] < kline_1h.Close[2] && body >= atr * 0.20 && body <= atr * 1.20;\nlet strength = adx_1h_14.ADX[1] >= 18 && adx_1h_14.MinusDI[1] > adx_1h_14.PlusDI[1] * 1.10;\nlet no_chase = atr > 0 && kline_1h.Close[0] <= kline_1h.Close[1] + atr * 0.10 && kline_1h.Close[0] >= kline_1h.Close[1] - atr * 0.35;\n\nnew_1h_window && trend && pullback && reclaim && strength && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "trend_pullback_close_long_v12",
+      "type": "close_long",
+      "code": "let atr = atr_1h_14.Data[1];\nlet trend_fail = kline_4h.Close[1] < ema_4h_50.Data[1];\nlet ema_fail = kline_1h.Close[1] < ema_1h_20.Data[1] && kline_1h.Close[1] < kline_1h.Close[2];\nlet dmi_fail = adx_1h_14.MinusDI[1] > adx_1h_14.PlusDI[1] * 1.05;\nlet confirmed_failure = trend_fail || (ema_fail && dmi_fail);\nlet rejection = atr > 0 && kline_1h.Close[1] < kline_1h.Open[1] && (kline_1h.High[1] - kline_1h.Close[1]) >= atr * 0.35;\nlet adx_fading = adx_1h_14.ADX[1] < adx_1h_14.ADX[2];\nlet profit_reversal = ROI >= 20 && (rejection || (adx_fading && ema_fail) || trend_fail);\nlet loss_reversal = ROI <= -12 && confirmed_failure;\nlet extended_profit_lock = ROI >= 32 && adx_fading && ema_fail;\nlet catastrophic_stop = ROI <= -20;\n\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "trend_pullback_close_short_v12",
+      "type": "close_short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet trend_fail = kline_4h.Close[1] > ema_4h_50.Data[1];\nlet ema_fail = kline_1h.Close[1] > ema_1h_20.Data[1] && kline_1h.Close[1] > kline_1h.Close[2];\nlet dmi_fail = adx_1h_14.PlusDI[1] > adx_1h_14.MinusDI[1] * 1.05;\nlet confirmed_failure = trend_fail || (ema_fail && dmi_fail);\nlet rejection = atr > 0 && kline_1h.Close[1] > kline_1h.Open[1] && (kline_1h.Close[1] - kline_1h.Low[1]) >= atr * 0.35;\nlet adx_fading = adx_1h_14.ADX[1] < adx_1h_14.ADX[2];\nlet profit_reversal = ROI >= 20 && (rejection || (adx_fading && ema_fail) || trend_fail);\nlet loss_reversal = ROI <= -12 && confirmed_failure;\nlet extended_profit_lock = ROI >= 32 && adx_fading && ema_fail;\nlet catastrophic_stop = ROI <= -20;\n\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
