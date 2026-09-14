@@ -16,8 +16,8 @@ import (
 	alertpipeline "go_binance_futures/service/alertpipeline"
 	futuresownership "go_binance_futures/service/futuresownership"
 	marketintelligence "go_binance_futures/service/marketintelligence"
+	opportunityservice "go_binance_futures/service/opportunity"
 	"go_binance_futures/spot"
-	spot_api "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"go_binance_futures/webnotification"
 	"os"
@@ -37,7 +37,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 12 // 每次变动数据库版本号 +1
+var dbVersion int64 = 13 // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -104,6 +104,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentTask))
 	orm.RegisterModel(new(models.AgentTaskEvent))
 	orm.RegisterModel(new(models.AgentAlertPipelineTrace))
+	orm.RegisterModel(new(models.AgentOpportunity))
 	orm.RegisterModel(new(models.AgentMarketEvent))
 	orm.RegisterModel(new(models.AgentMarketEventSource))
 	orm.RegisterModel(new(models.AgentMarketFact))
@@ -295,8 +296,23 @@ func main() {
 	}
 	initializeRuntimeDatabase()
 
+	if manager, err := agentapp.DefaultManager(); err != nil {
+		logs.Error("initialize opportunity pipeline manager:", err)
+	} else if err := opportunityservice.StartDefault(context.Background(), func() models.Config { return SystemConfig }, manager.Start, manager.Get); err != nil {
+		logs.Error("start opportunity pipeline:", err)
+	}
+	marketintelligence.SetEventObserver(func(event marketintelligence.Event) {
+		if event.Type == marketintelligence.EventTypeSignal {
+			return
+		}
+		for _, symbol := range event.Symbols {
+			opportunityservice.DefaultEmit(opportunityservice.Trigger{
+				Symbol: symbol, SourceType: "market_event", SourceID: event.EventKey + ":" + symbol,
+				Prompt: fmt.Sprintf("Market event trigger type=%s category=%s headline=%s. Analyze the affected symbol using current market data; treat the event only as context, not proof of direction.", event.Type, event.Category, event.Headline),
+			})
+		}
+	})
 	go marketintelligence.RunBinanceAnnouncementStream(context.Background(), marketintelligence.BinanceAnnouncementConfig{APIKey: tradeKey, Secret: tradeSecret, ProxyURL: tradeProxyURL})
-
 	if err := alertpipeline.StartDefault(context.Background(), func() models.Config { return SystemConfig }); err != nil {
 		logs.Error("start alert pipeline:", err)
 	}
@@ -339,17 +355,6 @@ func main() {
 	go binance.UpdateCoinByWs(&SystemConfig, 0)
 	// websocket 订阅全市场强平订单
 	go binance.CollectFuturesLiquidationOrders(&SystemConfig)
-
-	go func() {
-		return
-		logs.Info("spot websocket start: auto update symbols price")
-		spot_api.UpdateCoinByWs(&SystemConfig, 0)
-	}()
-	go func() {
-		return
-		logs.Info("delivery websocket start: auto update symbols price")
-		binance.UpdateDeliveryCoinByWs(&SystemConfig)
-	}()
 
 	/*******************************************更新基本信息 end****************************************************/
 

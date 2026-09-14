@@ -11,6 +11,7 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	marketintelligence "go_binance_futures/service/marketintelligence"
+	opportunityservice "go_binance_futures/service/opportunity"
 	signalservice "go_binance_futures/service/signal"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -61,6 +62,7 @@ func StartDefault(ctx context.Context, provider ConfigProvider) error {
 		defaultEngine, err = signalservice.NewEngine(bus,
 			func() signalservice.Settings { return settings().Signal }, func(value signalservice.Signal) bool {
 				go persistMarketIntelligenceSignal(value)
+				_ = opportunityservice.DefaultEmitSignal(value)
 				return defaultPipeline.Emit(value)
 			})
 		if err != nil {

@@ -44,6 +44,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.AgentTradeProposal),
 		new(models.AgentTradeExecution),
 		new(models.AgentTradeAudit),
+		new(models.AgentOpportunity),
 		new(models.LLMConfig),
 		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus), new(models.MarketConditionHistory),
 		new(models.MarketDataImportBatch), new(models.MarketKline1s), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate), new(models.MarketTrade),
@@ -282,6 +283,21 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	}
 	if err := SyncDatabase(12); err != nil {
 		t.Fatalf("second version-12 sync should be idempotent: %v", err)
+	}
+
+	if err := SyncDatabase(13); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 13 {
+		t.Fatalf("expected database version 13 after V3-6 opportunity schema sync, config=%+v err=%v", config, err)
+	}
+	var opportunityTableCount int
+	if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='agent_opportunities'").QueryRow(&opportunityTableCount); err != nil || opportunityTableCount != 1 {
+		t.Fatalf("expected agent_opportunities after version 13 sync, count=%d err=%v", opportunityTableCount, err)
+	}
+	if err := SyncDatabase(13); err != nil {
+		t.Fatalf("second version-13 sync should be idempotent: %v", err)
 	}
 }
 
