@@ -14,6 +14,7 @@ import (
 	"go_binance_futures/agent/task"
 	"go_binance_futures/models"
 	marketservice "go_binance_futures/service/market"
+	opportunityservice "go_binance_futures/service/opportunity"
 	workflowservice "go_binance_futures/service/workflow"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -71,6 +72,26 @@ func StartDefaultScheduler(ctx context.Context, provider SchedulerConfigProvider
 				},
 				OnError: func(callbackCtx context.Context, err error) {
 					applyMarketRegimeFallback(callbackCtx, provider, err.Error())
+				},
+			},
+			{
+				Name:    "opportunity_market_scan",
+				Skill:   workflowSkills.MarketScanName,
+				Enabled: func() bool { return provider().AgentOpportunityWatchEnable == 1 },
+				Interval: func() time.Duration {
+					minutes := provider().AgentOpportunityScanIntervalMin
+					if minutes <= 0 {
+						minutes = 60
+					}
+					return time.Duration(minutes) * time.Minute
+				},
+				Timeout:           8 * time.Minute,
+				ConcurrencyPolicy: scheduler.SkipIfRunning,
+				BuildInput: func(buildCtx context.Context) (string, error) {
+					return workflowservice.BuildMarketScanInput(buildCtx, 8)
+				},
+				OnComplete: func(_ context.Context, item *task.Task) {
+					opportunityservice.DefaultEmitMarketScanTask(item)
 				},
 			},
 			{

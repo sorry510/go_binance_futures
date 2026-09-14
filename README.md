@@ -175,6 +175,15 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 
 从真实 USDT 永续合约列表选择一个 Symbol，并可补充希望 AI 重点判断的方向。系统启动 `symbol_analysis` Skill，读取行情、市场环境和最近一次成功分析，输出结构化 `TradingPlan`。历史列表展示分析状态、方向、置信度、市场环境、当时价格、当前价格、后续涨跌和总结。
 
+### 机会
+
+`AI → 机会` 是 V3-6 Opportunity Watch 的用户入口。系统可以从 FastMove、强平 Signal、MarketEvent/Binance Announcement 和定时 `market_scan` 主动发现候选，并在去重/冷却后调用现有 `symbol_analysis` 生成完整 `TradingPlanV1`。机会默认 60 分钟过期，同一 Symbol + 同类来源默认 30 分钟内只分析一次。
+
+- Opportunity Watch 默认关闭，可在 `AI → AI 配置` 开启，并配置 Market Scan 周期和最低 Confidence。
+- `neutral`、`partial`、`data_missing`、`failed` 或已过期机会只能查看，不能创建真实交易 Proposal。
+- 满足条件的机会可以由用户点击“创建受控交易”，但后续仍固定经过现有 Risk、人工批准和 V3-5 Ownership-safe Execution；Opportunity 本身没有 Binance Submit 路径。
+- 打开机会详情可查看原 `symbol_analysis` 的完整分析，也可跳转单币分析重新分析；完整 AI 结果继续保存在 Agent Task，不复制到 Opportunity 表。
+
 ### 模型配置
 
 LLM 配置保存在数据库中。页面支持 Provider 模板、自定义 Provider、配置名称、API 地址、API Key、模型名称、请求超时和 Temperature，支持连接测试和切换当前模型。Agent 新任务直接读取当前配置，无需重启服务；API Key 不会由接口回传明文。
@@ -214,13 +223,14 @@ Skill 注册与治理配置保存在数据库中。Native 与 Portable Skill 分
 - 即使已经人工批准，真实执行前仍会重新运行 Risk；Broker 提交前还会再次检查 Kill Switch。
 - 使用唯一 `client_order_id` 保证幂等。网络结果不确定时不会自动重复下单，只允许按 `client_order_id` 对账。
 - 所有 Proposal、Risk、批准/拒绝、执行和对账动作都会写入审计。
-- 当前受控执行提交的是开仓 `MARKET` 订单；TradingPlan 中的止盈/止损用于 Risk 与审批依据，暂不会自动创建 Binance 保护性止盈/止损单。
+- 受控交易开仓成交后由 V3-5 Ownership Lifecycle 为 managed position 创建必需的 `STOP_MARKET` 止损，并在 TradingPlan 提供有效目标时创建可选的 `TAKE_PROFIT_MARKET`；部分人工减仓后会按剩余 managed quantity 对账并修复保护单。
 
 ### AI 配置
 
 所有 AI 相关运行配置集中在 `AI → AI 配置`，包括：
 
 - AI 报警 Pipeline、AI 分析开关、最小严重级别、cooldown、并发与每分钟上限。
+- Opportunity Watch 总开关、Market Scan 周期和最低 Confidence。
 - 市场环境自动更新和每日市场摘要 Scheduler。
 - Agent 每分钟/每小时启动额度、全局 Token 与 Tool 调用预算。
 - 受控交易 Kill Switch、Symbol 白名单、最大单笔风险、最大名义金额、总 Exposure、最大杠杆、价格 freshness、滑点、cooldown 和 Proposal TTL。
