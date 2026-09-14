@@ -11,7 +11,7 @@
     "close": "close",
     "close_long": "close long",
     "close_short": "close short",
-    "position_side": "position side",  
+    "position_side": "position side",
     "time": "time",
     "profit": "profit",
     "auto_order": "auto order",
@@ -31,7 +31,6 @@
     "remarks": "remarks",
     "strategy_name": "strategy name",
     "custom_strategy_test": "custom strategy test",
-    
     "open_notice_title": "futures open notice",
     "close_notice_title": "futures close notice",
     "new_coin_rush_notice_title": "new futures rush notice",
@@ -87,7 +86,6 @@
     "remarks": "remarks",
     "success": "success",
     "fail": "fail",
-    
     "new_coin_rush_notice_title": "spot new coin rush notice",
     "notice_title": "spot notice",
     "notice_price_title": "spot notice price",
@@ -124,7 +122,8 @@
     },
     "signal_type": {
       "fast_move": "Fast Market Move",
-      "liquidation_spike": "Large Liquidation Spike"
+      "liquidation_spike": "Large Liquidation Spike",
+      "opportunity": "Trading Opportunity"
     },
     "severity": {
       "low": "Low",
@@ -149,6 +148,7 @@
       "liquidation_evidence": "%s had %s liquidations totaling %.2f USDT across %.0f orders",
       "generic": "%s triggered the %s signal",
       "generic_context": "The deterministic Signal Engine matched its rule"
-    }
+    },
+    "agent_opportunity_title": "AI Trading Opportunity"
   }
 }
