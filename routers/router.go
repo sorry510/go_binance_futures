@@ -63,9 +63,10 @@ func init() {
 	web.Router("/agents/alerts/traces", &controllers.AgentController{}, "get:ListAlertPipelineTraces") // 分页查询完整事件→信号→任务→通知链路
 	web.Router("/agents/scheduler/status", &controllers.AgentController{}, "get:GetSchedulerStatus")   // 查询 Agent Scheduler 状态
 	web.Router("/agents/governance/status", &controllers.AgentController{}, "get:GetGovernanceStatus")
-	web.Router("/agents/observability/summary", &controllers.AgentObservabilityController{}, "get:Summary")                   // V2-10 长期运营指标
-	web.Router("/agents/observability/traces", &controllers.AgentObservabilityController{}, "get:Traces")                     // V2-10 持久化节点 Trace
-	web.Router("/agents/observability/changes", &controllers.AgentObservabilityController{}, "get:Changes")                   // V2-10 MCP/Skill 变更历史                                   // 查询 Agent 权限、预算和运行指标
+	web.Router("/agents/observability/summary", &controllers.AgentObservabilityController{}, "get:Summary") // V2-10 长期运营指标
+	web.Router("/agents/observability/traces", &controllers.AgentObservabilityController{}, "get:Traces")   // V2-10 持久化节点 Trace
+	web.Router("/agents/observability/changes", &controllers.AgentObservabilityController{}, "get:Changes")
+	web.Router("/system/health", &controllers.SystemDashboardController{}, "get:Health")                                      // V3-8 系统看板只读健康摘要
 	web.Router("/agents/skills/implementations", &controllers.AgentSkillController{}, "get:GetImplementations")               // 可用 Skill implementation
 	web.Router("/agents/skills", &controllers.AgentSkillController{}, "get:Get;post:Post")                                    // Agent Skill 配置
 	web.Router("/agents/skills/:id", &controllers.AgentSkillController{}, "put:Put;delete:Delete")                            // Agent Skill 更新/删除
