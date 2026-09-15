@@ -74,8 +74,11 @@ const (
 	// Keep the historical 150-bar baseline so existing EMA/Wilder-based strategy values
 	// do not change merely because their mathematical minimum is smaller. The value is
 	// now a floor, not a hard cap: indicators with longer warmup automatically request more.
-	defaultStrategyKlineLimit      = 150
-	strategyIndicatorOutputReserve = 32
+	defaultStrategyKlineLimit = 150
+	// StrategyIndicatorOutputReserve keeps enough computed indicator values for strategy expressions
+	// that reference recent history such as Data[1], Data[4], etc.
+	StrategyIndicatorOutputReserve = 32
+	strategyIndicatorOutputReserve = StrategyIndicatorOutputReserve
 	// Binance Futures Kline REST supports at most 1500 rows per request.
 	maxStrategyKlineLimit = 1500
 )
@@ -637,6 +640,11 @@ func technologyIndicatorGroups(config technology.TechnologyConfig) []struct {
 		{name: "atr", items: config.ATR},
 		{name: "supertrend", items: config.Supertrend},
 	}
+}
+
+// TechnologyKlineLimit returns the maximum K-line input count required by enabled indicators.
+func TechnologyKlineLimit(config technology.TechnologyConfig) int {
+	return technologyKlineLimit(config)
 }
 
 func technologyKlineLimit(config technology.TechnologyConfig) int {

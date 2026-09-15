@@ -21,6 +21,7 @@ var ErrInsufficientHistoricalBars = errors.New("insufficient historical bars")
 type historicalEnvironment struct {
 	dataset    Dataset
 	technology technology.TechnologyConfig
+	warmupBars int
 	overlays   map[string]Bar
 }
 
@@ -34,7 +35,11 @@ func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historic
 			return nil, err
 		}
 	}
-	return &historicalEnvironment{dataset: dataset, technology: config}, nil
+	warmupBars := DefaultWarmupBars
+	if required := line.TechnologyKlineLimit(config); required > warmupBars {
+		warmupBars = required
+	}
+	return &historicalEnvironment{dataset: dataset, technology: config, warmupBars: warmupBars}, nil
 }
 
 func (builder *historicalEnvironment) Build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
@@ -56,7 +61,7 @@ func (builder *historicalEnvironment) BuildIntrabar(asOf int64, partialMinute Ba
 }
 
 func (builder *historicalEnvironment) build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
-	currentBars := builder.series(builder.dataset.Symbol, builder.dataset.ExecutionInterval, asOf, DefaultWarmupBars)
+	currentBars := builder.series(builder.dataset.Symbol, builder.dataset.ExecutionInterval, asOf, builder.warmupBars)
 	if len(currentBars) == 0 {
 		return nil, 0, fmt.Errorf("%w: no execution bars visible at %d", ErrInsufficientHistoricalBars, asOf)
 	}
@@ -295,7 +300,7 @@ func (builder *historicalEnvironment) addIndicators(env map[string]interface{}, 
 			}
 			p, ok := prices[item.KlineInterval]
 			if !ok {
-				bars := builder.series(builder.dataset.Symbol, item.KlineInterval, asOf, DefaultWarmupBars)
+				bars := builder.series(builder.dataset.Symbol, item.KlineInterval, asOf, builder.warmupBars)
 				if len(bars) == 0 {
 					return fmt.Errorf("%w: indicator %s has no visible bars", ErrInsufficientHistoricalBars, item.Name)
 				}

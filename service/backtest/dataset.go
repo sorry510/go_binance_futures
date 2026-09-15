@@ -34,8 +34,9 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 	if repo == nil {
 		repo = historicalmarket.DefaultRepository()
 	}
-	if builder.WarmupBars <= 0 {
-		builder.WarmupBars = DefaultWarmupBars
+	warmupBars, err := builder.effectiveWarmupBars(request.TechnologyJSON)
+	if err != nil {
+		return Dataset{}, err
 	}
 	request.Symbol = strings.ToUpper(strings.TrimSpace(request.Symbol))
 	request.ExecutionInterval = strings.TrimSpace(request.ExecutionInterval)
@@ -57,7 +58,7 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 	}
 	warmupStart := request.StartTime
 	for _, interval := range intervals {
-		candidate, err := subtractBars(request.StartTime, interval, builder.WarmupBars)
+		candidate, err := subtractBars(request.StartTime, interval, warmupBars)
 		if err != nil {
 			return Dataset{}, err
 		}
@@ -79,7 +80,7 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 	}
 	report()
 	for _, interval := range intervals {
-		start, _ := subtractBars(request.StartTime, interval, builder.WarmupBars)
+		start, _ := subtractBars(request.StartTime, interval, warmupBars)
 		rows, err := repo.LoadKlines(ctx, dataset.Market, request.Symbol, interval, start, request.EndTime)
 		if err != nil {
 			return Dataset{}, fmt.Errorf("load historical %s %s: %w", request.Symbol, interval, err)
@@ -115,6 +116,27 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 	dataset.DatasetID = "ds_" + dataset.DatasetSpecHash[:24]
 	dataset.DataHash = DatasetDataHash(dataset)
 	return dataset, nil
+}
+
+func (builder DatasetBuilder) effectiveWarmupBars(rawTechnology string) (int, error) {
+	if builder.WarmupBars > 0 {
+		return builder.WarmupBars, nil
+	}
+	warmup := DefaultWarmupBars
+	if strings.TrimSpace(rawTechnology) == "" {
+		return warmup, nil
+	}
+	var config technology.TechnologyConfig
+	if err := json.Unmarshal([]byte(rawTechnology), &config); err != nil {
+		return 0, fmt.Errorf("decode technology config: %w", err)
+	}
+	if err := line.ValidateTechnologyConfig(config); err != nil {
+		return 0, err
+	}
+	if required := line.TechnologyKlineLimit(config); required > warmup {
+		warmup = required
+	}
+	return warmup, nil
 }
 
 func convertHistoricalKlines(rows []historicalmarket.Kline) []Bar {
