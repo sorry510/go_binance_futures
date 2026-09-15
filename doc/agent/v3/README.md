@@ -42,7 +42,7 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 | [V3-5](./05-phase-v3-5-trade-safety.md) | ✅ | Trade Ownership & Safety：Owner 隔离、Managed Position、Stop/TP、Close、Restart/Reconcile |
 
 > 原 V3-4 Strategy Lab 仍保持取消；编号 V3-4 现重新用于 Backtest 精度增强，不恢复 Strategy Lab。
-> V3-4～V3-6 已合并到当前分支；当前数据库版本为 **v13**，升级后需执行 `./go_binance_futures sync db`。
+> V3-4～V3-8 已合并到当前开发线；当前二进制要求数据库 Schema Version **v14**。升级后若数据库版本落后，需先执行 `./go_binance_futures sync db`。
 
 ## 4. 后续 Phase
 
@@ -52,7 +52,7 @@ V3-3 的 Backtest Run 已保存完整 `technology_json`、`strategy_json` 和策
 | [V3-5](./05-phase-v3-5-trade-safety.md) | P0 | 真实交易安全：先统一仓位/订单 Ownership，确保“谁创建、谁管理”，再补 Agent Stop、整仓平仓与重启恢复 |
 | [V3-6](./06-phase-v3-6-opportunity-watch.md) | ✅ | Opportunity Watch：自动发现、分析、持久化和提醒机会；真实执行继续由用户确认 |
 | [V3-7](./07-phase-v3-7-outcome-review.md) | ✅ | 交易复盘与策略比较：Backtest、模拟盘、真实受控交易分开复盘，支持轻量策略对比 |
-| [V3-8](./08-phase-v3-8-personal-operations.md) | P2 | 个人运维与 V3 收尾：健康检查、数据增长控制、备份说明和最终清理 |
+| [V3-8](./08-phase-v3-8-personal-operations.md) | ✅ | 系统看板、只读 `doctor`、白名单日志清理与 V3 最终收尾 |
 
 V3 到 V3-8 结束，不再规划 Agent Studio。
 
@@ -95,7 +95,7 @@ V3-6 Opportunity Watch ✅
         ↓
 V3-7 Outcome Review ✅
         ↓
-V3-8 Personal Operations / Finalization
+V3-8 Personal Operations / Finalization ✅
 ```
 
 V3-5 已在独立 trade 分支并行完成，因此不受 V3-4 当前进度阻塞；后续 Phase 仍按各自 Gate 推进，所有真实交易能力必须继续复用 Ownership-safe Execution。
@@ -117,4 +117,4 @@ V3-5 已在独立 trade 分支并行完成，因此不受 V3-4 当前进度阻�
 - 真实交易只管理本系统自己的订单/仓位，并具备 Stop、可选 TP、确定性平仓和重启恢复能力。
 - 自动发现机会后可以通知用户并快速进入现有受控交易流程，但不会绕过用户确认。
 - Backtest、模拟盘和真实交易可以按策略/Symbol/行情环境做实用复盘。
-- 系统长期运行时可以快速检查数据源、Agent、Scheduler、DB 和交易链路健康状态，并控制大表增长。
+- 系统长期运行时可以通过顶级“系统看板”或只读 `doctor` 快速检查数据源、Agent、Scheduler、DB 和交易链路健康状态，并可用固定白名单命令清理过期纯日志。

@@ -87,7 +87,7 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | AI → Workflows (`AI → 业务 Workflow`) | Run market scan, strategy review, strategy experiments, alert triage, and daily market brief workflows and inspect parent/child tasks |
 | Futures Trade → Controlled Trading (`合约交易 → 受控交易`) | Convert a successful symbol analysis into a Trade Proposal, run deterministic risk checks, require human approval, re-check risk before execution, submit through the controlled Binance path, and retain audit history |
 | AI → Task Center (`AI → 任务中心`) | View Agent governance, Scheduler state, runtime metrics, and Agent Task history |
-| AI → Observability (`AI → 可观测性`) | Inspect long-term traces, model/Tool/Skill metrics, latency, token use, errors, and change history |
+| System Dashboard (`系统看板`) | Top-level menu for Database, Binance, Market Intelligence, MCP, LLM, Scheduler, Agent Runtime, and Trade Safety health, while retaining long-term traces, model/Tool/Skill metrics, and change history |
 | AI → Alert Pipeline History (`AI → 报警链路历史`) | Trace FastMove/liquidation Signals from event processing through AI analysis/triage to notification or fallback |
 | AI → AI Configuration (`AI → AI 配置`) | Central configuration for AI alerts, AI Schedulers, global Agent budgets/governance, and controlled-trading Risk Policy |
 | Futures Trade → Futures Trade (`合约交易 → 合约交易`) | Browse `Favorites`, `USDT`, and `USDC` symbols; add, search, batch-edit, enable all, or disable all symbol configurations |
@@ -240,11 +240,31 @@ All AI runtime configuration is centralized under **AI → AI Configuration**, i
 
 These settings have been moved out of **Configuration Center**, which now contains only non-AI trading, market-monitoring, alert, and system runtime settings.
 
-### Task Center, Observability, and Alert History
+### Task Center, System Dashboard, and Alert History
 
 - **Task Center:** governance state, direct Runtime trade permission vs controlled execution state, Scheduler jobs, Task history, model identity, tokens, and task details.
-- **Observability:** long-term traces and per-Skill/model/Tool metrics including errors, latency, tokens, and change history.
+- **System Dashboard:** the former **AI → Observability** page is now the first top-level menu. It retains long-term traces, per-Skill/model/Tool metrics, and change history, and adds read-only health for Database, Binance REST/Futures WS, Announcement, Market Intelligence, MCP, LLM, Scheduler, Agent Runtime, and Trade Safety.
 - **Alert Pipeline History:** the end-to-end Signal path from Event Bus and Signal Engine through AI analysis/triage to Notification or deterministic fallback.
+
+### System diagnosis and log cleanup
+
+When the Web UI is unavailable or you need a quick server-side diagnosis, run the read-only command:
+
+```bash
+./go_binance_futures doctor
+```
+
+`doctor` reads database state, current configuration, and external connectivity only. It does not start Web/WebSocket/Scheduler/trading loops, perform Reconcile, or implicitly migrate the schema.
+
+`doctor` exits with code `1` when `Overall=error`; Healthy/Warning/Disabled states exit with `0`, so shell scripts can detect hard failures.
+
+To remove old pure operational logs after long-running use:
+
+```bash
+./go_binance_futures cleanup logs --before-days 90
+```
+
+This command deletes only whitelist records older than 90 days from `agent_observations`, `agent_change_events`, `agent_task_events`, `agent_alert_pipeline_traces`, and `notifications`. It never removes market/Funding data, Backtests, Strategies, Paper/Live trades, Ownership, Agent Trade Proposal/Execution/Audit, Opportunities, Conversations, Memory, Skill/MCP configuration, or Workflows. `--before-days` must be greater than 0.
 
 ## futures-trade
 
