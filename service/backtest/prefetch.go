@@ -131,8 +131,9 @@ func (source *prefetchCountingSource) Funding(ctx context.Context, market, symbo
 }
 
 func (builder DatasetBuilder) PrefetchPlan(request DatasetRequest) (PrefetchPlan, error) {
-	if builder.WarmupBars <= 0 {
-		builder.WarmupBars = DefaultWarmupBars
+	warmupBars, err := builder.effectiveWarmupBars(request.TechnologyJSON)
+	if err != nil {
+		return PrefetchPlan{}, err
 	}
 	request.Symbol = strings.ToUpper(strings.TrimSpace(request.Symbol))
 	if request.Symbol == "" || !strings.HasSuffix(request.Symbol, "USDT") {
@@ -150,7 +151,7 @@ func (builder DatasetBuilder) PrefetchPlan(request DatasetRequest) (PrefetchPlan
 	}
 	warmupStart := request.StartTime
 	for _, interval := range intervals {
-		candidate, err := subtractBars(request.StartTime, interval, builder.WarmupBars)
+		candidate, err := subtractBars(request.StartTime, interval, warmupBars)
 		if err != nil {
 			return PrefetchPlan{}, err
 		}
@@ -175,9 +176,9 @@ func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetReque
 	counter := &prefetchCountingSource{inner: repo.Source}
 	fetchRepo := *repo
 	fetchRepo.Source = counter
-	warmupBars := builder.WarmupBars
-	if warmupBars <= 0 {
-		warmupBars = DefaultWarmupBars
+	warmupBars, err := builder.effectiveWarmupBars(request.TechnologyJSON)
+	if err != nil {
+		return PrefetchResult{}, err
 	}
 	const (
 		intervalProgressUnits = 1000
