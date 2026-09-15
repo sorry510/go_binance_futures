@@ -84,7 +84,7 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | AI → 业务 Workflow | 运行市场扫描、策略复盘、策略实验、报警归并和每日市场摘要等业务 Workflow，并查看父任务与子 Agent Task |
 | 合约交易 → 受控交易 | 将成功的单币分析转换为 Trade Proposal，经确定性 Risk Engine、人工审批和执行前复检后受控提交 Binance，并保留完整审计 |
 | AI → 任务中心 | 查看 Agent 治理、Scheduler、运行指标和 Agent Task 历史 |
-| AI → 可观测性 | 查看长期 Trace、模型/Tool/Skill 运行指标、延迟、Token、错误率和变更记录 |
+| 系统看板 | 顶级菜单；集中查看 Database、Binance、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime、Trade Safety 健康状态，并保留原长期 Trace、模型/Tool/Skill 指标和变更记录 |
 | AI → 报警链路历史 | 查看 FastMove、爆仓等 Signal 从事件、AI 分析/归并到通知或 fallback 的完整链路 |
 | AI → AI 配置 | 集中管理 AI 报警、AI Scheduler、Agent 全局预算/治理参数和受控交易 Risk Policy |
 | 合约交易 → 合约交易 | 按 `自选`、`USDT`、`USDC` 查看币种；新增、查询、批量编辑、全部开启或全部关闭币种配置 |
@@ -237,11 +237,31 @@ Skill 注册与治理配置保存在数据库中。Native 与 Portable Skill 分
 
 这些 AI 配置已从“配置中心”迁出；`配置中心` 只保留非 AI 的交易、行情监听、提醒和系统运行配置。
 
-### 任务中心与可观测性
+### 任务中心、系统看板与报警历史
 
 - **任务中心**：查看 Agent 治理状态、Runtime 直接交易权限与受控执行开关、Scheduler、Task 历史、模型和 Token 等运行信息。
-- **可观测性**：查看长期 Trace、各 Skill/模型/Tool 指标、错误率、延迟、Token 和变更记录。
+- **系统看板**：原“AI → 可观测性”已提升为最上方顶级菜单。在保留长期 Trace、Skill/模型/Tool 指标和变更历史的基础上，增加 Database、Binance REST/Futures WS、Announcement、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime 和 Trade Safety 的只读健康摘要。
 - **报警链路历史**：查看 Signal 从 Event Bus、Signal Engine、AI 分析/归并到 Notification 或 fallback 的完整处理历史。
+
+### 系统诊断与日志清理
+
+Web 页面不可用或需要在服务器上快速诊断时，可执行只读命令：
+
+```bash
+./go_binance_futures doctor
+```
+
+`doctor` 只读取数据库、当前配置和外部连通性，不启动 Web/WebSocket/Scheduler/交易循环，不执行 Reconcile，也不会隐式迁移 Schema。
+
+当 `Overall=error` 时 `doctor` 以退出码 `1` 结束；Healthy/Warning/Disabled 返回 `0`，便于脚本区分硬故障。
+
+长期运行后如需清理纯日志，执行：
+
+```bash
+./go_binance_futures cleanup logs --before-days 90
+```
+
+该命令只删除 90 天以前的固定白名单记录：`agent_observations`、`agent_change_events`、`agent_task_events`、`agent_alert_pipeline_traces`、`notifications`。它不会删除行情、Funding、Backtest、Strategy、Paper/Live Trade、Ownership、Agent Trade Proposal/Execution/Audit、Opportunity、Conversation、Memory、Skill/MCP 配置或 Workflow。`--before-days` 必须大于 0。
 
 ## 合约交易
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	agentapp "go_binance_futures/agent/app"
+	"go_binance_futures/appversion"
 	"go_binance_futures/command"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
@@ -21,6 +22,7 @@ import (
 	"go_binance_futures/utils"
 	"go_binance_futures/webnotification"
 	"os"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -37,7 +39,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbVersion int64 = 14 // 每次变动数据库版本号 +1
+var dbVersion int64 = appversion.DatabaseSchemaVersion // 每次变动数据库版本号 +1
 var debug, _ = config.String("debug")
 var webPort, _ = config.String("web::port")
 var webIndex, _ = config.String("web::index") // 如果不是 zmkm, 前端项目需要修改 api 请求地址，增加 /zmkm 前缀
@@ -65,7 +67,7 @@ func init() {
 	web.SetStaticPath("/"+webIndex, "static") // 设置静态文件
 
 	registerModels() // 注册模型和数据库驱动
-	if isSyncDatabaseCommand(os.Args[1:]) {
+	if isCLICommand(os.Args[1:]) {
 		return
 	}
 	registerMiddlewares() // 添加中间件
@@ -255,15 +257,63 @@ func isSyncDatabaseCommand(args []string) bool {
 	return len(args) == 2 && args[0] == "sync" && args[1] == "db"
 }
 
+func isCLICommand(args []string) bool {
+	if isSyncDatabaseCommand(args) {
+		return true
+	}
+	return len(args) > 0 && (args[0] == "doctor" || args[0] == "cleanup")
+}
+
 func runCommand(args []string) bool {
-	if !isSyncDatabaseCommand(args) {
-		return false
+	if isSyncDatabaseCommand(args) {
+		if err := command.SyncDatabase(dbVersion); err != nil {
+			logs.Error("sync database failed:", err)
+			os.Exit(1)
+		}
+		return true
 	}
-	if err := command.SyncDatabase(dbVersion); err != nil {
-		logs.Error("sync database failed:", err)
-		os.Exit(1)
+	if len(args) > 0 && args[0] == "doctor" {
+		if len(args) != 1 {
+			logs.Error("doctor usage: ./go_binance_futures doctor")
+			os.Exit(1)
+		}
+		report, err := command.Doctor(context.Background(), os.Stdout)
+		if err != nil {
+			logs.Error("doctor failed:", err)
+			os.Exit(1)
+		}
+		if exitCode := command.DoctorExitCode(report); exitCode != 0 {
+			os.Exit(exitCode)
+		}
+		return true
 	}
-	return true
+	if len(args) > 0 && args[0] == "cleanup" {
+		if len(args) < 2 || args[1] != "logs" {
+			logs.Error("cleanup usage: ./go_binance_futures cleanup logs --before-days N")
+			os.Exit(1)
+		}
+		beforeDays := 0
+		for i := 2; i < len(args); i++ {
+			if args[i] == "--before-days" && i+1 < len(args) {
+				value, err := strconv.Atoi(args[i+1])
+				if err != nil {
+					logs.Error("cleanup logs: invalid --before-days")
+					os.Exit(1)
+				}
+				beforeDays = value
+				i++
+				continue
+			}
+			logs.Error("cleanup logs usage: ./go_binance_futures cleanup logs --before-days N")
+			os.Exit(1)
+		}
+		if err := command.CleanupLogs(context.Background(), beforeDays, time.Now(), os.Stdout); err != nil {
+			logs.Error("cleanup logs failed:", err)
+			os.Exit(1)
+		}
+		return true
+	}
+	return false
 }
 
 func registerMiddlewares() {
