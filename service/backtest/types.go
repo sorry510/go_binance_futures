@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	StandardEngineVersion   = "backtest_engine_v6"
-	AdaptiveEngineVersion   = "backtest_engine_v9"
+	StandardEngineVersion   = "backtest_engine_v7"
+	AdaptiveEngineVersion   = "backtest_engine_v10"
 	EngineVersion           = StandardEngineVersion
 	MarketConditionModel    = "historical_market_condition_v1"
 	ResolutionModeStandard  = "standard_1m"

@@ -162,7 +162,10 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 			}
 		}
 		advanceFunding(bar.CloseTime, bar.Close)
-		env, condition, envErr := environment.Build(bar.CloseTime, position, cash, config)
+		// Evaluate minute-close strategy rules with the same K-line time semantics as live
+		// InitParseEnv: [0] is the currently forming interval reconstructed only from
+		// 1m data observed through this minute, while [1] is the latest completed bar.
+		env, condition, envErr := environment.BuildMinuteClose(bar.CloseTime, bar, position, cash, config)
 		if envErr == nil {
 			if position != nil {
 				roi, _ := env["ROI"].(float64)
