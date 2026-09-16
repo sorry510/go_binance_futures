@@ -19,10 +19,12 @@ import (
 var ErrInsufficientHistoricalBars = errors.New("insufficient historical bars")
 
 type historicalEnvironment struct {
-	dataset    Dataset
-	technology technology.TechnologyConfig
-	warmupBars int
-	overlays   map[string]Bar
+	dataset                 Dataset
+	technology              technology.TechnologyConfig
+	warmupBars              int
+	overlays                map[string]Bar
+	minuteCloseOverlays     map[string]Bar
+	minuteCloseLastOpenTime int64
 }
 
 func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historicalEnvironment, error) {
@@ -58,6 +60,79 @@ func (builder *historicalEnvironment) BuildIntrabar(asOf int64, partialMinute Ba
 	clone := *builder
 	clone.overlays = overlays
 	return clone.build(asOf, position, cash, config)
+}
+
+// BuildMinuteClose mirrors the live environment at a completed replay minute without
+// rescanning the whole current higher-interval window on every minute. The first
+// minute (or a discontinuity) rebuilds overlays from observed 1m data; subsequent
+// minutes update the forming higher-interval bars incrementally.
+func (builder *historicalEnvironment) BuildMinuteClose(asOf int64, minute Bar, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
+	if minute.Interval != "1m" || minute.CloseTime != asOf {
+		return nil, 0, fmt.Errorf("invalid minute-close replay bar at %d", asOf)
+	}
+	sequential := builder.minuteCloseOverlays != nil && minute.OpenTime == builder.minuteCloseLastOpenTime+time.Minute.Milliseconds()
+	if !sequential {
+		overlays, err := buildIntrabarOverlays(builder.dataset, minute, asOf)
+		if err != nil {
+			return nil, 0, err
+		}
+		builder.minuteCloseOverlays = overlays
+	} else {
+		if err := builder.advanceMinuteCloseOverlays(minute, asOf); err != nil {
+			return nil, 0, err
+		}
+	}
+	builder.minuteCloseLastOpenTime = minute.OpenTime
+	clone := *builder
+	clone.overlays = builder.minuteCloseOverlays
+	return clone.build(asOf, position, cash, config)
+}
+
+func (builder *historicalEnvironment) advanceMinuteCloseOverlays(minute Bar, asOf int64) error {
+	builder.minuteCloseOverlays[BarSeriesKey(builder.dataset.Symbol, "1m")] = minute
+	for _, interval := range builder.dataset.Intervals {
+		if interval == "1m" {
+			continue
+		}
+		windowStart, err := intervalWindowStart(interval, asOf)
+		if err != nil {
+			return err
+		}
+		key := BarSeriesKey(builder.dataset.Symbol, interval)
+		current, ok := builder.minuteCloseOverlays[key]
+		if !ok || current.OpenTime != windowStart {
+			if minute.OpenTime != windowStart {
+				overlays, rebuildErr := buildIntrabarOverlays(builder.dataset, minute, asOf)
+				if rebuildErr != nil {
+					return rebuildErr
+				}
+				builder.minuteCloseOverlays = overlays
+				return nil
+			}
+			builder.minuteCloseOverlays[key] = Bar{
+				Symbol: builder.dataset.Symbol, Interval: interval,
+				OpenTime: windowStart, CloseTime: asOf,
+				Open: minute.Open, High: minute.High, Low: minute.Low, Close: minute.Close,
+				Volume: minute.Volume, QuoteVolume: minute.QuoteVolume, TradeCount: minute.TradeCount,
+				TakerBuyQuoteVolume: minute.TakerBuyQuoteVolume,
+			}
+			continue
+		}
+		if minute.High > current.High {
+			current.High = minute.High
+		}
+		if minute.Low < current.Low {
+			current.Low = minute.Low
+		}
+		current.CloseTime = asOf
+		current.Close = minute.Close
+		current.Volume += minute.Volume
+		current.QuoteVolume += minute.QuoteVolume
+		current.TradeCount += minute.TradeCount
+		current.TakerBuyQuoteVolume += minute.TakerBuyQuoteVolume
+		builder.minuteCloseOverlays[key] = current
+	}
+	return nil
 }
 
 func (builder *historicalEnvironment) build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
@@ -386,7 +461,7 @@ func toKLinePrice(bars []Bar) line.KLinePrice {
 		p.Close = append(p.Close, b.Close)
 		p.Open = append(p.Open, b.Open)
 		p.Amount = append(p.Amount, b.QuoteVolume)
-		seconds := float64(b.CloseTime-b.OpenTime) / 1000
+		seconds := klineQPSDurationSeconds(b)
 		if seconds > 0 {
 			p.Qps = append(p.Qps, b.QuoteVolume/seconds)
 		} else {
@@ -394,6 +469,25 @@ func toKLinePrice(bars []Bar) line.KLinePrice {
 		}
 	}
 	return p
+}
+
+func klineQPSDurationSeconds(bar Bar) float64 {
+	durationMillis := bar.CloseTime - bar.OpenTime
+	// Live InitParseEnv calculates QPS from Binance's K-line CloseTime/OpenTime.
+	// Binance keeps CloseTime at the nominal interval end even while the current
+	// K-line is still forming. Backtest overlays use asOf as CloseTime to prevent
+	// future visibility, so use the nominal interval length only for that shorter
+	// partial-bar case. Completed historical bars keep their original duration.
+	if nominal, err := intervalDuration(bar.Interval, time.UnixMilli(bar.OpenTime).UTC()); err == nil {
+		nominalMillis := nominal.Milliseconds() - 1
+		if nominalMillis > durationMillis {
+			durationMillis = nominalMillis
+		}
+	}
+	if durationMillis <= 0 {
+		return 0
+	}
+	return float64(durationMillis) / 1000
 }
 
 func unrealizedPnL(p *Position, price float64) float64 {
