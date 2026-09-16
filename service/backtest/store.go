@@ -698,11 +698,24 @@ func saveResult(ctx context.Context, runID string, result Result) error {
 	return saveResultWithProgress(ctx, runID, result, nil)
 }
 
+const (
+	backtestResultInsertBatchSizeMySQL   = 2000
+	backtestResultInsertBatchSizeGeneric = 500
+)
+
+func backtestResultInsertBatchSize() int {
+	if backtestDeleteMySQL() {
+		return backtestResultInsertBatchSizeMySQL
+	}
+	return backtestResultInsertBatchSizeGeneric
+}
+
 func saveResultWithProgress(ctx context.Context, runID string, result Result, progress ProgressCallback) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
 	o := orm.NewOrm()
+	batchSize := backtestResultInsertBatchSize()
 	totalRows := len(result.Trades) + len(result.Events) + len(result.Equity)
 	completedRows := 0
 	report := func() {
@@ -720,42 +733,40 @@ func saveResultWithProgress(ctx context.Context, runID string, result Result, pr
 		tradeRows = append(tradeRows, models.AgentBacktestTrade{RunID: runID, Sequence: t.Sequence, Symbol: t.Symbol, Side: t.Side, EntryTime: t.EntryTime, ExitTime: t.ExitTime, EntryPrice: t.EntryPrice, ExitPrice: t.ExitPrice, Quantity: t.Quantity, GrossPnL: t.GrossPnL, Fees: t.Fees, FundingPnL: t.FundingPnL, NetPnL: t.NetPnL, HoldingMs: t.HoldingMs, ExitReason: t.ExitReason, OpenStrategyName: t.OpenStrategyName, OpenStrategyType: t.OpenStrategyType, OpenStrategyHash: t.OpenStrategyHash, CloseStrategyName: t.CloseStrategyName, CloseStrategyType: t.CloseStrategyType, CloseStrategyHash: t.CloseStrategyHash, MarketCondition: t.MarketCondition, EntryResolution: t.EntryResolution, ExitResolution: t.ExitResolution})
 	}
 	if len(tradeRows) > 0 {
-		if _, err := o.InsertMulti(500, &tradeRows); err != nil {
+		if _, err := o.InsertMulti(batchSize, &tradeRows); err != nil {
 			return err
 		}
 		completedRows += len(tradeRows)
 		report()
 	}
-	eventRows := make([]models.AgentBacktestEvent, 0, len(result.Events))
-	for _, e := range result.Events {
-		eventRows = append(eventRows, models.AgentBacktestEvent{RunID: runID, Sequence: e.Sequence, EventTime: e.EventTime, Type: e.Type, Action: e.Action, Side: e.Side, Price: e.Price, Quantity: e.Quantity, DataJSON: string(e.Data)})
-	}
-	for start := 0; start < len(eventRows); start += 500 {
-		end := start + 500
-		if end > len(eventRows) {
-			end = len(eventRows)
+	for start := 0; start < len(result.Events); start += batchSize {
+		end := start + batchSize
+		if end > len(result.Events) {
+			end = len(result.Events)
 		}
-		chunk := eventRows[start:end]
-		if _, err := o.InsertMulti(500, &chunk); err != nil {
+		eventRows := make([]models.AgentBacktestEvent, 0, end-start)
+		for _, e := range result.Events[start:end] {
+			eventRows = append(eventRows, models.AgentBacktestEvent{RunID: runID, Sequence: e.Sequence, EventTime: e.EventTime, Type: e.Type, Action: e.Action, Side: e.Side, Price: e.Price, Quantity: e.Quantity, DataJSON: string(e.Data)})
+		}
+		if _, err := o.InsertMulti(batchSize, &eventRows); err != nil {
 			return err
 		}
-		completedRows += len(chunk)
+		completedRows += len(eventRows)
 		report()
 	}
-	eqRows := make([]models.AgentBacktestEquityPoint, 0, len(result.Equity))
-	for _, e := range result.Equity {
-		eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
-	}
-	for start := 0; start < len(eqRows); start += 500 {
-		end := start + 500
-		if end > len(eqRows) {
-			end = len(eqRows)
+	for start := 0; start < len(result.Equity); start += batchSize {
+		end := start + batchSize
+		if end > len(result.Equity) {
+			end = len(result.Equity)
 		}
-		chunk := eqRows[start:end]
-		if _, err := o.InsertMulti(500, &chunk); err != nil {
+		eqRows := make([]models.AgentBacktestEquityPoint, 0, end-start)
+		for _, e := range result.Equity[start:end] {
+			eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
+		}
+		if _, err := o.InsertMulti(batchSize, &eqRows); err != nil {
 			return err
 		}
-		completedRows += len(chunk)
+		completedRows += len(eqRows)
 		report()
 	}
 	if totalRows == 0 {

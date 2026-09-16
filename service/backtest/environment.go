@@ -136,7 +136,7 @@ func (builder *historicalEnvironment) advanceMinuteCloseOverlays(minute Bar, asO
 }
 
 func (builder *historicalEnvironment) build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
-	currentBars := builder.series(builder.dataset.Symbol, builder.dataset.ExecutionInterval, asOf, builder.warmupBars)
+	currentBars := builder.series(builder.dataset.Symbol, builder.dataset.ExecutionInterval, asOf, 1)
 	if len(currentBars) == 0 {
 		return nil, 0, fmt.Errorf("%w: no execution bars visible at %d", ErrInsufficientHistoricalBars, asOf)
 	}
@@ -206,24 +206,83 @@ func (builder *historicalEnvironment) series(symbol, interval string, asOf int64
 	if limit > 0 && end > canonicalLimit {
 		start = end - canonicalLimit
 	}
-	out := append([]Bar(nil), all[start:end]...)
-	if hasOverlay {
-		if len(out) > 0 && out[len(out)-1].OpenTime == overlay.OpenTime {
-			out[len(out)-1] = overlay
-		} else {
-			out = append(out, overlay)
-		}
+	count := end - start
+	if hasOverlay && !replacesLast {
+		count++
 	}
-	if len(out) == 0 {
+	if count <= 0 {
 		return nil
 	}
-	if limit > 0 && len(out) > limit {
-		out = out[len(out)-limit:]
+	out := make([]Bar, 0, count)
+	canonicalEnd := end
+	if hasOverlay {
+		out = append(out, overlay)
+		if replacesLast {
+			canonicalEnd--
+		}
 	}
-	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
-		out[i], out[j] = out[j], out[i]
+	for i := canonicalEnd - 1; i >= start; i-- {
+		out = append(out, all[i])
 	}
 	return out
+}
+
+func (builder *historicalEnvironment) klinePriceSeries(symbol, interval string, asOf int64, limit int) line.KLinePrice {
+	key := BarSeriesKey(symbol, interval)
+	all := builder.dataset.Bars[key]
+	end := sort.Search(len(all), func(i int) bool { return all[i].CloseTime > asOf })
+	overlay, hasOverlay := builder.overlays[key]
+	if hasOverlay && (overlay.OpenTime > asOf || overlay.CloseTime > asOf) {
+		hasOverlay = false
+	}
+	replacesLast := hasOverlay && end > 0 && all[end-1].OpenTime == overlay.OpenTime
+	canonicalLimit := limit
+	if limit > 0 && hasOverlay && !replacesLast {
+		canonicalLimit--
+		if canonicalLimit < 0 {
+			canonicalLimit = 0
+		}
+	}
+	start := 0
+	if limit > 0 && end > canonicalLimit {
+		start = end - canonicalLimit
+	}
+	count := end - start
+	if hasOverlay && !replacesLast {
+		count++
+	}
+	if count <= 0 {
+		return line.KLinePrice{}
+	}
+	p := line.KLinePrice{
+		High: make([]float64, 0, count), Low: make([]float64, 0, count),
+		Close: make([]float64, 0, count), Open: make([]float64, 0, count),
+		Amount: make([]float64, 0, count), Qps: make([]float64, 0, count),
+	}
+	appendBar := func(bar Bar) {
+		p.High = append(p.High, bar.High)
+		p.Low = append(p.Low, bar.Low)
+		p.Close = append(p.Close, bar.Close)
+		p.Open = append(p.Open, bar.Open)
+		p.Amount = append(p.Amount, bar.QuoteVolume)
+		seconds := klineQPSDurationSeconds(bar)
+		if seconds > 0 {
+			p.Qps = append(p.Qps, bar.QuoteVolume/seconds)
+		} else {
+			p.Qps = append(p.Qps, 0)
+		}
+	}
+	canonicalEnd := end
+	if hasOverlay {
+		appendBar(overlay)
+		if replacesLast {
+			canonicalEnd--
+		}
+	}
+	for i := canonicalEnd - 1; i >= start; i-- {
+		appendBar(all[i])
+	}
+	return p
 }
 
 func (builder *historicalEnvironment) visibleBars(symbol, interval string, asOf int64) []Bar {
@@ -253,28 +312,38 @@ func (builder *historicalEnvironment) tickerStats(symbol string, asOf int64) map
 	end := sort.Search(len(all), func(i int) bool { return all[i].CloseTime > asOf })
 	startTime := asOf - (24 * time.Hour).Milliseconds()
 	start := sort.Search(end, func(i int) bool { return all[i].CloseTime >= startTime })
-	window := append([]Bar(nil), all[start:end]...)
 	overlay, hasOverlay := builder.overlays[key]
-	if hasOverlay && overlay.OpenTime <= asOf && overlay.CloseTime <= asOf {
-		if len(window) > 0 && window[len(window)-1].OpenTime == overlay.OpenTime {
-			window[len(window)-1] = overlay
+	if hasOverlay && (overlay.OpenTime > asOf || overlay.CloseTime > asOf) {
+		hasOverlay = false
+	}
+	replacesLast := hasOverlay && end > start && all[end-1].OpenTime == overlay.OpenTime
+	count := 0
+	open, close, low, high := 0.0, 0.0, 0.0, 0.0
+	apply := func(bar Bar) {
+		if count == 0 {
+			open, low, high = bar.Open, bar.Low, bar.High
 		} else {
-			window = append(window, overlay)
+			if bar.Low < low {
+				low = bar.Low
+			}
+			if bar.High > high {
+				high = bar.High
+			}
 		}
+		close = bar.Close
+		count++
 	}
-	if len(window) == 0 {
+	for i := start; i < end; i++ {
+		if replacesLast && i == end-1 {
+			continue
+		}
+		apply(all[i])
+	}
+	if hasOverlay {
+		apply(overlay)
+	}
+	if count == 0 {
 		return map[string]interface{}{"PercentChange": 0.0, "Close": 0.0, "Open": 0.0, "Low": 0.0, "High": 0.0}
-	}
-	open := window[0].Open
-	close := window[len(window)-1].Close
-	low, high := window[0].Low, window[0].High
-	for _, bar := range window {
-		if bar.Low < low {
-			low = bar.Low
-		}
-		if bar.High > high {
-			high = bar.High
-		}
 	}
 	change := 0.0
 	if open > 0 {
@@ -375,11 +444,10 @@ func (builder *historicalEnvironment) addIndicators(env map[string]interface{}, 
 			}
 			p, ok := prices[item.KlineInterval]
 			if !ok {
-				bars := builder.series(builder.dataset.Symbol, item.KlineInterval, asOf, builder.warmupBars)
-				if len(bars) == 0 {
+				p = builder.klinePriceSeries(builder.dataset.Symbol, item.KlineInterval, asOf, builder.warmupBars)
+				if len(p.Close) == 0 {
 					return fmt.Errorf("%w: indicator %s has no visible bars", ErrInsufficientHistoricalBars, item.Name)
 				}
-				p = toKLinePrice(bars)
 				prices[item.KlineInterval] = p
 				env["kline_"+item.KlineInterval] = p
 			}
@@ -454,7 +522,11 @@ func (builder *historicalEnvironment) addIndicators(env map[string]interface{}, 
 	return nil
 }
 func toKLinePrice(bars []Bar) line.KLinePrice {
-	p := line.KLinePrice{}
+	p := line.KLinePrice{
+		High: make([]float64, 0, len(bars)), Low: make([]float64, 0, len(bars)),
+		Close: make([]float64, 0, len(bars)), Open: make([]float64, 0, len(bars)),
+		Amount: make([]float64, 0, len(bars)), Qps: make([]float64, 0, len(bars)),
+	}
 	for _, b := range bars {
 		p.High = append(p.High, b.High)
 		p.Low = append(p.Low, b.Low)

@@ -541,3 +541,39 @@ func TestManagerStartDeleteRunsLargeHistoryAsynchronously(t *testing.T) {
 	}
 	t.Fatal("async delete did not finish within timeout")
 }
+
+func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
+	setupBacktestStoreTest(t)
+	const runID = "bt_save_result_batches"
+	result := Result{
+		Events: make([]AuditEvent, 0, 1001),
+		Equity: make([]EquityPoint, 0, 1201),
+	}
+	for i := 1; i <= 1001; i++ {
+		result.Events = append(result.Events, AuditEvent{Sequence: i, EventTime: int64(i), Type: "signal", Action: "test"})
+	}
+	for i := 1; i <= 1201; i++ {
+		result.Equity = append(result.Equity, EquityPoint{Sequence: i, BarTime: int64(i), Equity: 1000 + float64(i), Cash: 1000})
+	}
+	lastCompleted, lastTotal := -1, -1
+	if err := saveResultWithProgress(context.Background(), runID, result, func(completed, total int) {
+		lastCompleted, lastTotal = completed, total
+	}); err != nil {
+		t.Fatal(err)
+	}
+	o := orm.NewOrm()
+	events, err := o.QueryTable(new(models.AgentBacktestEvent)).Filter("run_id", runID).Count()
+	if err != nil {
+		t.Fatal(err)
+	}
+	equity, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).Count()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if events != 1001 || equity != 1201 {
+		t.Fatalf("persisted rows events=%d equity=%d", events, equity)
+	}
+	if lastCompleted != 2202 || lastTotal != 2202 {
+		t.Fatalf("progress completed=%d total=%d", lastCompleted, lastTotal)
+	}
+}

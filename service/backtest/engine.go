@@ -57,19 +57,16 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 		return Result{}, err
 	}
 	execution := dataset.Bars[BarSeriesKey(dataset.Symbol, dataset.ExecutionInterval)]
-	bars := make([]Bar, 0, len(execution))
-	for _, bar := range execution {
-		if bar.CloseTime >= dataset.StartTime && bar.CloseTime <= dataset.EndTime {
-			bars = append(bars, bar)
-		}
-	}
+	startIndex := sort.Search(len(execution), func(i int) bool { return execution[i].CloseTime >= dataset.StartTime })
+	endIndex := sort.Search(len(execution), func(i int) bool { return execution[i].CloseTime > dataset.EndTime })
+	bars := execution[startIndex:endIndex]
 	if len(bars) < 2 {
 		return Result{}, fmt.Errorf("backtest requires at least two execution bars")
 	}
 	if progress != nil {
 		progress(0, len(bars))
 	}
-	result := Result{DatasetID: dataset.DatasetID, DatasetSpecHash: dataset.DatasetSpecHash, DataHash: dataset.DataHash, StrategyVersion: strategy.Version, EngineVersion: engineVersion, MarketConditionModel: MarketConditionModel, ResolutionMode: mode, ResolutionModel: resolutionModel, Trades: []Trade{}, Events: []AuditEvent{}, Equity: []EquityPoint{}}
+	result := Result{DatasetID: dataset.DatasetID, DatasetSpecHash: dataset.DatasetSpecHash, DataHash: dataset.DataHash, StrategyVersion: strategy.Version, EngineVersion: engineVersion, MarketConditionModel: MarketConditionModel, ResolutionMode: mode, ResolutionModel: resolutionModel, Trades: []Trade{}, Events: []AuditEvent{}, Equity: make([]EquityPoint, 0, len(bars))}
 	adaptiveState := adaptiveRunState{factory: engine.ResolutionProviderFactory, activity: engine.ResolutionActivity}
 	defer adaptiveState.close()
 	cash := config.InitialEquity
