@@ -81,6 +81,17 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 	report()
 	for _, interval := range intervals {
 		start, _ := subtractBars(request.StartTime, interval, warmupBars)
+		if request.ExecutionInterval == "1m" && interval == "1m" {
+			for _, strategyInterval := range intervals {
+				windowStart, windowErr := intervalWindowStart(strategyInterval, request.StartTime)
+				if windowErr != nil {
+					return Dataset{}, windowErr
+				}
+				if windowStart < start {
+					start = windowStart
+				}
+			}
+		}
 		rows, err := repo.LoadKlines(ctx, dataset.Market, request.Symbol, interval, start, request.EndTime)
 		if err != nil {
 			return Dataset{}, fmt.Errorf("load historical %s %s: %w", request.Symbol, interval, err)

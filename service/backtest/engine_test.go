@@ -269,7 +269,7 @@ func TestHistoricalEnvironmentUsesLatestVisibleMarketCondition(t *testing.T) {
 	}
 }
 
-func TestV34AStandardOneMinuteBaselineKeepsV6Semantics(t *testing.T) {
+func TestStandardOneMinuteBaselineKeepsExecutionSemantics(t *testing.T) {
 	d := fixtureDataset([]float64{100, 100, 101.02, 101.02})
 	bars := d.Bars[BarSeriesKey("BTCUSDT", "1m")]
 	d.MarketConditionRequired = true
@@ -281,11 +281,11 @@ func TestV34AStandardOneMinuteBaselineKeepsV6Semantics(t *testing.T) {
 	d.DataHash = ""
 
 	r := runFixture(t, d, []Rule{
-		{Name: "open-v6", Enable: true, Type: "long", Code: `MarketCondition == "2" && NowPrice >= 100`},
-		{Name: "close-v6", Enable: true, Type: "close_long", Code: `MarketCondition == "4" && NowPrice >= 101`},
+		{Name: "open-baseline", Enable: true, Type: "long", Code: `MarketCondition == "2" && NowPrice >= 100`},
+		{Name: "close-baseline", Enable: true, Type: "close_long", Code: `MarketCondition == "4" && NowPrice >= 101`},
 	}, RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 10, TakeProfitPct: 10})
 
-	if r.EngineVersion != "backtest_engine_v6" {
+	if r.EngineVersion != StandardEngineVersion {
 		t.Fatalf("standard baseline engine version changed: %s", r.EngineVersion)
 	}
 	if len(r.Trades) != 1 {
@@ -293,13 +293,13 @@ func TestV34AStandardOneMinuteBaselineKeepsV6Semantics(t *testing.T) {
 	}
 	trade := r.Trades[0]
 	if trade.EntryTime != bars[1].OpenTime || trade.ExitTime != bars[3].OpenTime {
-		t.Fatalf("V6 next-open timing changed: %+v", trade)
+		t.Fatalf("standard next-open timing changed: %+v", trade)
 	}
 	if !closeEnough(trade.EntryPrice, 100) || !closeEnough(trade.ExitPrice, 101.02) || trade.ExitReason != "take_profit" {
-		t.Fatalf("V6 ROI gate/fill semantics changed: %+v", trade)
+		t.Fatalf("standard ROI gate/fill semantics changed: %+v", trade)
 	}
 	if !closeEnough(trade.FundingPnL, -10) || trade.MarketCondition != 2 {
-		t.Fatalf("V6 funding/MarketCondition semantics changed: %+v", trade)
+		t.Fatalf("standard funding/MarketCondition semantics changed: %+v", trade)
 	}
 	fundingEvents := 0
 	for _, event := range r.Events {
@@ -439,6 +439,75 @@ func TestAdaptiveIntrabarEnvironmentUsesOnlyObservedPartialKline(t *testing.T) {
 	}
 	if roi := env["ROI"].(float64); roi <= 0 {
 		t.Fatalf("intrabar ROI did not use current observed price: %v", roi)
+	}
+}
+
+func TestStandardReplayUsesLiveEquivalentCurrentHigherIntervalKline(t *testing.T) {
+	start := time.Date(2026, 1, 1, 8, 0, 0, 0, time.UTC)
+	closes := []float64{110, 111, 112}
+	minuteBars := make([]Bar, 0, len(closes))
+	for i, closePrice := range closes {
+		at := start.Add(time.Duration(i) * time.Minute)
+		minuteBars = append(minuteBars, Bar{
+			Symbol: "BTCUSDT", Interval: "1m",
+			OpenTime: at.UnixMilli(), CloseTime: at.Add(time.Minute - time.Millisecond).UnixMilli(),
+			Open: closePrice - 1, High: closePrice + 0.2, Low: closePrice - 1.2, Close: closePrice,
+			QuoteVolume: 6000,
+		})
+	}
+	completed4hOpen := start.Add(-4 * time.Hour)
+	completed4h := Bar{
+		Symbol: "BTCUSDT", Interval: "4h",
+		OpenTime: completed4hOpen.UnixMilli(), CloseTime: start.Add(-time.Millisecond).UnixMilli(),
+		Open: 99, High: 101, Low: 98, Close: 100, QuoteVolume: 100000,
+	}
+	futureFull4h := Bar{
+		Symbol: "BTCUSDT", Interval: "4h",
+		OpenTime: start.UnixMilli(), CloseTime: start.Add(4*time.Hour - time.Millisecond).UnixMilli(),
+		Open: 100, High: 1000, Low: 90, Close: 999, QuoteVolume: 999999,
+	}
+	d := Dataset{
+		Market: "futures_usdt", Symbol: "BTCUSDT", ExecutionInterval: "1m", Intervals: []string{"1m", "4h"},
+		StartTime: minuteBars[0].CloseTime, EndTime: minuteBars[len(minuteBars)-1].CloseTime,
+		Bars: map[string][]Bar{
+			BarSeriesKey("BTCUSDT", "1m"): minuteBars,
+			BarSeriesKey("BTCUSDT", "4h"): {completed4h, futureFull4h},
+		},
+	}
+	d.DatasetSpecHash = DatasetSpecHash(d)
+	d.DatasetID = "ds_" + d.DatasetSpecHash[:24]
+	d.DataHash = DatasetDataHash(d)
+	strategy := StrategySnapshot{
+		TemplateID: 1, TemplateName: "live-current-4h",
+		TechnologyJSON: `{"ma":[{"name":"ma_4h_1","enable":true,"kline_interval":"4h","period":1}]}`,
+		StrategyJSON: strategyJSON(Rule{
+			Name: "open-current-4h", Enable: true, Type: "long",
+			Code: "kline_4h.Close[0] >= 110 && kline_4h.Close[0] < 200 && kline_4h.Close[1] == 100",
+		}),
+	}
+	result, err := (Engine{}).Run(context.Background(), d, strategy, zeroCosts())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Trades) != 1 {
+		t.Fatalf("standard replay did not use current forming 4h K-line: trades=%+v events=%+v", result.Trades, result.Events)
+	}
+	if result.Trades[0].EntryTime != minuteBars[1].OpenTime {
+		t.Fatalf("signal must fill at next 1m open: got=%d want=%d", result.Trades[0].EntryTime, minuteBars[1].OpenTime)
+	}
+}
+
+func TestPartialKlineQPSUsesLiveNominalIntervalDuration(t *testing.T) {
+	open := time.Date(2026, 1, 1, 8, 0, 0, 0, time.UTC)
+	bar := Bar{
+		Symbol: "BTCUSDT", Interval: "4h",
+		OpenTime: open.UnixMilli(), CloseTime: open.Add(time.Minute - time.Millisecond).UnixMilli(),
+		Open: 100, High: 101, Low: 99, Close: 100.5, QuoteVolume: 14400,
+	}
+	price := toKLinePrice([]Bar{bar})
+	want := bar.QuoteVolume / (float64((4*time.Hour - time.Millisecond).Milliseconds()) / 1000)
+	if len(price.Qps) != 1 || math.Abs(price.Qps[0]-want) > 1e-12 {
+		t.Fatalf("partial 4h QPS must match live full-interval denominator: got=%v want=%v", price.Qps, want)
 	}
 }
 
