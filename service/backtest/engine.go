@@ -17,8 +17,9 @@ import (
 )
 
 type Engine struct {
-	ResolutionProviderFactory ResolutionProviderFactory
-	ResolutionActivity        func(string)
+	ResolutionProviderFactory    ResolutionProviderFactory
+	ResolutionActivity           func(string)
+	disableStandardOptimizations bool
 }
 
 func (engine Engine) Run(ctx context.Context, dataset Dataset, strategy StrategySnapshot, config RunConfig) (Result, error) {
@@ -55,6 +56,9 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 	environment, err := newHistoricalEnvironment(dataset, strategy.TechnologyJSON)
 	if err != nil {
 		return Result{}, err
+	}
+	if mode == ResolutionModeStandard && !engine.disableStandardOptimizations {
+		environment.enableStandardOptimizations(strategy.StrategyJSON)
 	}
 	execution := dataset.Bars[BarSeriesKey(dataset.Symbol, dataset.ExecutionInterval)]
 	startIndex := sort.Search(len(execution), func(i int) bool { return execution[i].CloseTime >= dataset.StartTime })
