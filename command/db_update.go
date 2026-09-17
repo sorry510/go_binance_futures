@@ -185,8 +185,82 @@ func migrateDeprecatedStrategyMarketEnv(executor rawExecutor) error {
 	return nil
 }
 
+var redundantBacktestEquityIndexes = []string{
+	"agent_backtest_equity_points_run_id",
+	"agent_backtest_equity_points_sequence",
+	"agent_backtest_equity_points_bar_time",
+}
+
+func defaultDatabaseIsMySQL() bool {
+	db, err := orm.GetDB("default")
+	if err != nil {
+		return false
+	}
+	driverType := strings.ToLower(fmt.Sprintf("%T", db.Driver()))
+	return strings.Contains(driverType, "mysql")
+}
+
+// dropRedundantBacktestEquityIndexes removes single-column indexes that are
+// redundant with the retained (run_id, sequence) access path used by backtests.
+// MySQL is forced to use online/in-place DDL; never silently fall back to COPY.
+func dropRedundantBacktestEquityIndexes(executor rawExecutor) error {
+	if defaultDatabaseIsMySQL() {
+		// Never remove the single-column fallback indexes unless the composite
+		// access path used by every production equity query is present first.
+		var retainedColumns int
+		if err := executor.Raw("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='agent_backtest_equity_points' AND index_name='agent_backtest_equity_points_run_id_sequence' AND ((seq_in_index=1 AND column_name='run_id') OR (seq_in_index=2 AND column_name='sequence'))").QueryRow(&retainedColumns); err != nil {
+			return fmt.Errorf("inspect retained backtest equity index: %w", err)
+		}
+		if retainedColumns != 2 {
+			return fmt.Errorf("refuse to drop redundant backtest equity indexes: retained (run_id, sequence) index is missing or invalid")
+		}
+
+		existing := make([]string, 0, len(redundantBacktestEquityIndexes))
+		for _, indexName := range redundantBacktestEquityIndexes {
+			var count int
+			if err := executor.Raw("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='agent_backtest_equity_points' AND index_name=?", indexName).QueryRow(&count); err != nil {
+				return fmt.Errorf("inspect backtest equity index %s: %w", indexName, err)
+			}
+			if count > 0 {
+				existing = append(existing, indexName)
+			}
+		}
+		if len(existing) == 0 {
+			return nil
+		}
+		drops := make([]string, 0, len(existing))
+		for _, indexName := range existing {
+			drops = append(drops, fmt.Sprintf("DROP INDEX `%s`", indexName))
+		}
+		query := "ALTER TABLE `agent_backtest_equity_points` " + strings.Join(drops, ", ") + ", ALGORITHM=INPLACE, LOCK=NONE"
+		logs.Info("dropping redundant backtest equity indexes with online DDL:", strings.Join(existing, ","))
+		if _, err := executor.Raw(query).Exec(); err != nil {
+			return fmt.Errorf("drop redundant backtest equity indexes with online DDL: %w", err)
+		}
+		logs.Info("redundant backtest equity indexes dropped")
+		return nil
+	}
+
+	// SQLite/PostgreSQL do not support MySQL's online ALTER syntax. The index
+	// names are fixed identifiers, so unquoted DROP INDEX is portable here.
+	for _, indexName := range redundantBacktestEquityIndexes {
+		if _, err := executor.Raw(fmt.Sprintf("DROP INDEX IF EXISTS %s", indexName)).Exec(); err != nil {
+			return fmt.Errorf("drop redundant backtest equity index %s: %w", indexName, err)
+		}
+	}
+	return nil
+}
+
 func UpdateDatabase(oldVersion int64, newVersion int64) error {
 	o := orm.NewOrm()
+	// MySQL online DDL is intentionally executed outside the transaction.
+	// ALTER TABLE implicitly commits on MySQL, while the migration itself is
+	// idempotent and the schema version is only advanced after it succeeds.
+	if oldVersion < 15 && newVersion >= 15 {
+		if err := dropRedundantBacktestEquityIndexes(o); err != nil {
+			return fmt.Errorf("migrate database version 15 backtest equity indexes failed: %w", err)
+		}
+	}
 	to, err := o.Begin()
 	if err != nil {
 		logs.Error("begin transaction error:", err)
