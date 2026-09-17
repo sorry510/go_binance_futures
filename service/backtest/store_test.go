@@ -546,8 +546,12 @@ func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
 	setupBacktestStoreTest(t)
 	const runID = "bt_save_result_batches"
 	result := Result{
+		Trades: make([]Trade, 0, 1001),
 		Events: make([]AuditEvent, 0, 1001),
 		Equity: make([]EquityPoint, 0, 1201),
+	}
+	for i := 1; i <= 1001; i++ {
+		result.Trades = append(result.Trades, Trade{Sequence: i, Symbol: "BTCUSDT", Side: "LONG", EntryTime: int64(i), ExitTime: int64(i + 1), EntryPrice: 100, ExitPrice: 101, Quantity: 1, ExitReason: "test", EntryResolution: "1m", ExitResolution: "1m"})
 	}
 	for i := 1; i <= 1001; i++ {
 		result.Events = append(result.Events, AuditEvent{Sequence: i, EventTime: int64(i), Type: "signal", Action: "test"})
@@ -562,6 +566,10 @@ func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
 		t.Fatal(err)
 	}
 	o := orm.NewOrm()
+	trades, err := o.QueryTable(new(models.AgentBacktestTrade)).Filter("run_id", runID).Count()
+	if err != nil {
+		t.Fatal(err)
+	}
 	events, err := o.QueryTable(new(models.AgentBacktestEvent)).Filter("run_id", runID).Count()
 	if err != nil {
 		t.Fatal(err)
@@ -570,10 +578,23 @@ func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if events != 1001 || equity != 1201 {
-		t.Fatalf("persisted rows events=%d equity=%d", events, equity)
+	if trades != 1001 || events != 1001 || equity != 1201 {
+		t.Fatalf("persisted rows trades=%d events=%d equity=%d", trades, events, equity)
 	}
-	if lastCompleted != 2202 || lastTotal != 2202 {
+	if lastCompleted != 3203 || lastTotal != 3203 {
 		t.Fatalf("progress completed=%d total=%d", lastCompleted, lastTotal)
+	}
+}
+
+func TestBacktestResultMySQLBatchTargetsStayWithinPlaceholderLimits(t *testing.T) {
+	if backtestResultInsertBatchSizeMySQL != 3000 {
+		t.Fatalf("mysql event/equity batch=%d want=3000", backtestResultInsertBatchSizeMySQL)
+	}
+	if backtestTradeInsertBatchSizeMySQL != 2000 {
+		t.Fatalf("mysql trade batch=%d want=2000", backtestTradeInsertBatchSizeMySQL)
+	}
+	const tradeColumns = 24
+	if backtestTradeInsertBatchSizeMySQL*tradeColumns > 65535 {
+		t.Fatalf("trade batch would exceed MySQL placeholder limit: %d", backtestTradeInsertBatchSizeMySQL*tradeColumns)
 	}
 }

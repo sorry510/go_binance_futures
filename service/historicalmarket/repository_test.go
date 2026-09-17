@@ -266,3 +266,59 @@ func TestStoreSparseTradesRollsBackOnCancelBetweenChunks(t *testing.T) {
 		t.Fatalf("cancelled sparse trade write left %d canonical rows", count)
 	}
 }
+
+func TestReplayKlinesMatchCanonicalLoad(t *testing.T) {
+	setupRepositoryTest(t)
+	start := time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)
+	repo := NewRepository(nil)
+	rows := []Kline{
+		minuteBar(start, 100),
+		minuteBar(start.Add(time.Minute), 101),
+		minuteBar(start.Add(2*time.Minute), 102),
+	}
+	rows[0].TradeCount, rows[0].TakerBuyQuoteVolume = 11, 501
+	rows[1].TradeCount, rows[1].TakerBuyQuoteVolume = 12, 502
+	rows[2].TradeCount, rows[2].TakerBuyQuoteVolume = 13, 503
+	if _, err := repo.Import(context.Background(), ImportRequest{Source: "replay_fixture", Klines: rows}); err != nil {
+		t.Fatal(err)
+	}
+	full, err := repo.LoadKlines(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", rows[0].OpenTime, rows[2].CloseTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lite, err := repo.LoadReplayKlines(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", rows[0].OpenTime, rows[2].CloseTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(full) != len(lite) {
+		t.Fatalf("row count differs full=%d replay=%d", len(full), len(lite))
+	}
+	for i := range full {
+		got, want := lite[i], full[i]
+		if got.OpenTime != want.OpenTime || got.CloseTime != want.CloseTime || got.TradeCount != want.TradeCount ||
+			got.Open != want.Open || got.High != want.High || got.Low != want.Low || got.Close != want.Close ||
+			got.Volume != want.Volume || got.QuoteVolume != want.QuoteVolume || got.TakerBuyQuoteVolume != want.TakerBuyQuoteVolume {
+			t.Fatalf("row=%d replay differs\ngot=%+v\nwant=%+v", i, got, want)
+		}
+	}
+}
+
+func TestReplayKlinesPreserveGapFill(t *testing.T) {
+	setupRepositoryTest(t)
+	start := time.Date(2026, 2, 2, 0, 0, 0, 0, time.UTC)
+	b0 := minuteBar(start, 100)
+	b1 := minuteBar(start.Add(time.Minute), 101)
+	b2 := minuteBar(start.Add(2*time.Minute), 102)
+	source := &countingSource{rows: map[int64]Kline{b1.OpenTime: b1}}
+	repo := NewRepository(source)
+	if _, err := repo.Import(context.Background(), ImportRequest{Source: "replay_gap_fixture", Klines: []Kline{b0, b2}}); err != nil {
+		t.Fatal(err)
+	}
+	rows, err := repo.LoadReplayKlines(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", b0.OpenTime, b2.CloseTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 3 || len(source.calls) != 1 || source.calls[0][0] != b1.OpenTime || source.calls[0][1] != b1.CloseTime {
+		t.Fatalf("replay gap fill mismatch rows=%d calls=%v", len(rows), source.calls)
+	}
+}

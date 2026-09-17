@@ -699,15 +699,16 @@ func saveResult(ctx context.Context, runID string, result Result) error {
 }
 
 const (
-	backtestResultInsertBatchSizeMySQL   = 2000
+	backtestResultInsertBatchSizeMySQL   = 3000
+	backtestTradeInsertBatchSizeMySQL    = 2000
 	backtestResultInsertBatchSizeGeneric = 500
 )
 
-func backtestResultInsertBatchSize() int {
+func backtestResultInsertBatchSizes() (trade, event, equity int) {
 	if backtestDeleteMySQL() {
-		return backtestResultInsertBatchSizeMySQL
+		return backtestTradeInsertBatchSizeMySQL, backtestResultInsertBatchSizeMySQL, backtestResultInsertBatchSizeMySQL
 	}
-	return backtestResultInsertBatchSizeGeneric
+	return backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric
 }
 
 func saveResultWithProgress(ctx context.Context, runID string, result Result, progress ProgressCallback) error {
@@ -715,7 +716,7 @@ func saveResultWithProgress(ctx context.Context, runID string, result Result, pr
 		return err
 	}
 	o := orm.NewOrm()
-	batchSize := backtestResultInsertBatchSize()
+	tradeBatchSize, eventBatchSize, equityBatchSize := backtestResultInsertBatchSizes()
 	totalRows := len(result.Trades) + len(result.Events) + len(result.Equity)
 	completedRows := 0
 	report := func() {
@@ -733,14 +734,21 @@ func saveResultWithProgress(ctx context.Context, runID string, result Result, pr
 		tradeRows = append(tradeRows, models.AgentBacktestTrade{RunID: runID, Sequence: t.Sequence, Symbol: t.Symbol, Side: t.Side, EntryTime: t.EntryTime, ExitTime: t.ExitTime, EntryPrice: t.EntryPrice, ExitPrice: t.ExitPrice, Quantity: t.Quantity, GrossPnL: t.GrossPnL, Fees: t.Fees, FundingPnL: t.FundingPnL, NetPnL: t.NetPnL, HoldingMs: t.HoldingMs, ExitReason: t.ExitReason, OpenStrategyName: t.OpenStrategyName, OpenStrategyType: t.OpenStrategyType, OpenStrategyHash: t.OpenStrategyHash, CloseStrategyName: t.CloseStrategyName, CloseStrategyType: t.CloseStrategyType, CloseStrategyHash: t.CloseStrategyHash, MarketCondition: t.MarketCondition, EntryResolution: t.EntryResolution, ExitResolution: t.ExitResolution})
 	}
 	if len(tradeRows) > 0 {
-		if _, err := o.InsertMulti(batchSize, &tradeRows); err != nil {
-			return err
+		for start := 0; start < len(tradeRows); start += tradeBatchSize {
+			end := start + tradeBatchSize
+			if end > len(tradeRows) {
+				end = len(tradeRows)
+			}
+			chunk := tradeRows[start:end]
+			if _, err := o.InsertMulti(tradeBatchSize, &chunk); err != nil {
+				return err
+			}
+			completedRows += len(chunk)
+			report()
 		}
-		completedRows += len(tradeRows)
-		report()
 	}
-	for start := 0; start < len(result.Events); start += batchSize {
-		end := start + batchSize
+	for start := 0; start < len(result.Events); start += eventBatchSize {
+		end := start + eventBatchSize
 		if end > len(result.Events) {
 			end = len(result.Events)
 		}
@@ -748,14 +756,14 @@ func saveResultWithProgress(ctx context.Context, runID string, result Result, pr
 		for _, e := range result.Events[start:end] {
 			eventRows = append(eventRows, models.AgentBacktestEvent{RunID: runID, Sequence: e.Sequence, EventTime: e.EventTime, Type: e.Type, Action: e.Action, Side: e.Side, Price: e.Price, Quantity: e.Quantity, DataJSON: string(e.Data)})
 		}
-		if _, err := o.InsertMulti(batchSize, &eventRows); err != nil {
+		if _, err := o.InsertMulti(eventBatchSize, &eventRows); err != nil {
 			return err
 		}
 		completedRows += len(eventRows)
 		report()
 	}
-	for start := 0; start < len(result.Equity); start += batchSize {
-		end := start + batchSize
+	for start := 0; start < len(result.Equity); start += equityBatchSize {
+		end := start + equityBatchSize
 		if end > len(result.Equity) {
 			end = len(result.Equity)
 		}
@@ -763,7 +771,7 @@ func saveResultWithProgress(ctx context.Context, runID string, result Result, pr
 		for _, e := range result.Equity[start:end] {
 			eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
 		}
-		if _, err := o.InsertMulti(batchSize, &eqRows); err != nil {
+		if _, err := o.InsertMulti(equityBatchSize, &eqRows); err != nil {
 			return err
 		}
 		completedRows += len(eqRows)

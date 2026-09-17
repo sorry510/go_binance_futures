@@ -25,6 +25,10 @@ type historicalEnvironment struct {
 	overlays                map[string]Bar
 	minuteCloseOverlays     map[string]Bar
 	minuteCloseLastOpenTime int64
+	standardOptimizations   bool
+	klinePriceCache         map[string]cachedKLinePrice
+	indicatorCache          map[string]cachedIndicatorValue
+	indicatorCacheable      map[string]bool
 }
 
 func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historicalEnvironment, error) {
@@ -83,6 +87,13 @@ func (builder *historicalEnvironment) BuildMinuteClose(asOf int64, minute Bar, p
 		}
 	}
 	builder.minuteCloseLastOpenTime = minute.OpenTime
+	if builder.standardOptimizations {
+		previous := builder.overlays
+		builder.overlays = builder.minuteCloseOverlays
+		env, condition, err := builder.build(asOf, position, cash, config)
+		builder.overlays = previous
+		return env, condition, err
+	}
 	clone := *builder
 	clone.overlays = builder.minuteCloseOverlays
 	return clone.build(asOf, position, cash, config)
@@ -432,6 +443,13 @@ func aggregatePartialBars(symbol, interval string, openTime, closeTime int64, ba
 }
 
 func (builder *historicalEnvironment) addIndicators(env map[string]interface{}, asOf int64) error {
+	if builder.standardOptimizations {
+		return builder.addIndicatorsOptimized(env, asOf)
+	}
+	return builder.addIndicatorsLegacy(env, asOf)
+}
+
+func (builder *historicalEnvironment) addIndicatorsLegacy(env map[string]interface{}, asOf int64) error {
 	groups := []struct {
 		name  string
 		items []technology.IndicatorConfig
