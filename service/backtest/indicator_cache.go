@@ -325,16 +325,33 @@ func runIndicatorTasks(tasks []indicatorTask) []indicatorTaskResult {
 	if len(tasks) == 0 {
 		return results
 	}
+
+	// Non-cacheable indicators depend on the current forming bar and therefore
+	// run every replay minute. Their windows are intentionally small; spawning a
+	// worker pool every minute costs more than the indicator calculation itself.
+	// Keep them on the caller goroutine. Parallelism is reserved for completed-
+	// indicator cache misses, which only happen at higher-interval boundaries.
+	parallel := make([]int, 0, len(tasks))
+	for i := range tasks {
+		if !tasks[i].cacheable {
+			results[i].value, results[i].err = calculateIndicatorValue(tasks[i])
+			continue
+		}
+		parallel = append(parallel, i)
+	}
+	if len(parallel) == 0 {
+		return results
+	}
 	workers := runtime.GOMAXPROCS(0)
 	if workers > 4 {
 		workers = 4
 	}
-	if workers > len(tasks) {
-		workers = len(tasks)
+	if workers > len(parallel) {
+		workers = len(parallel)
 	}
-	if workers <= 1 {
-		for i := range tasks {
-			results[i].value, results[i].err = calculateIndicatorValue(tasks[i])
+	if workers <= 1 || len(parallel) < 2 {
+		for _, index := range parallel {
+			results[index].value, results[index].err = calculateIndicatorValue(tasks[index])
 		}
 		return results
 	}
@@ -349,8 +366,8 @@ func runIndicatorTasks(tasks []indicatorTask) []indicatorTaskResult {
 			}
 		}()
 	}
-	for i := range tasks {
-		jobs <- i
+	for _, index := range parallel {
+		jobs <- index
 	}
 	close(jobs)
 	wg.Wait()

@@ -117,9 +117,9 @@ func (*AgentBacktestEvent) TableIndex() [][]string {
 // AgentBacktestEquityPoint stores the replayable equity curve.
 type AgentBacktestEquityPoint struct {
 	ID            int64   `orm:"column(id);auto" json:"id"`
-	RunID         string  `orm:"column(run_id);size(64);index" json:"run_id"`
-	Sequence      int     `orm:"column(sequence);index" json:"sequence"`
-	BarTime       int64   `orm:"column(bar_time);index" json:"bar_time"`
+	RunID         string  `orm:"column(run_id);size(64)" json:"run_id"`
+	Sequence      int     `orm:"column(sequence)" json:"sequence"`
+	BarTime       int64   `orm:"column(bar_time)" json:"bar_time"`
 	Equity        float64 `orm:"column(equity);digits(30);decimals(8)" json:"equity"`
 	Cash          float64 `orm:"column(cash);digits(30);decimals(8)" json:"cash"`
 	UnrealizedPnL float64 `orm:"column(unrealized_pnl);digits(30);decimals(8)" json:"unrealized_pnl"`
