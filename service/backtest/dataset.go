@@ -92,7 +92,13 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 				}
 			}
 		}
-		rows, err := repo.LoadReplayKlines(ctx, dataset.Market, request.Symbol, interval, start, request.EndTime)
+		rows, cacheStats, err := repo.LoadReplayKlinesWithStats(ctx, dataset.Market, request.Symbol, interval, start, request.EndTime)
+		if interval == "1m" {
+			dataset.replay1mCacheFilesHit += cacheStats.FilesHit
+			dataset.replay1mCacheFilesMiss += cacheStats.FilesMiss
+			dataset.replay1mCacheReadMs += cacheStats.ReadMs
+			dataset.replay1mCacheWriteMs += cacheStats.WriteMs
+		}
 		if err != nil {
 			return Dataset{}, fmt.Errorf("load historical %s %s: %w", request.Symbol, interval, err)
 		}

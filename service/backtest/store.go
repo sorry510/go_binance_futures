@@ -172,17 +172,21 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		return
 	}
 	result.ResolutionStats.Timing = &BacktestTimingStats{
-		DatasetBuildMs:     datasetBuildMs,
-		DatasetSaveMs:      datasetSaveMs,
-		EngineMs:           engineMs,
-		SaveTradesMs:       saveTiming.TradesMs,
-		SaveEventsMs:       saveTiming.EventsMs,
-		SaveEquityMs:       saveTiming.EquityMs,
-		SaveEquityBuildMs:  saveTiming.EquityBuildMs,
-		SaveEquityExecMs:   saveTiming.EquityExecMs,
-		SaveEquityCommitMs: saveTiming.EquityCommitMs,
-		SaveTotalMs:        saveTotalMs,
-		TotalMs:            time.Since(runStarted).Milliseconds(),
+		DatasetBuildMs:          datasetBuildMs,
+		DatasetSaveMs:           datasetSaveMs,
+		Dataset1mCacheFilesHit:  dataset.replay1mCacheFilesHit,
+		Dataset1mCacheFilesMiss: dataset.replay1mCacheFilesMiss,
+		Dataset1mCacheReadMs:    dataset.replay1mCacheReadMs,
+		Dataset1mCacheWriteMs:   dataset.replay1mCacheWriteMs,
+		EngineMs:                engineMs,
+		SaveTradesMs:            saveTiming.TradesMs,
+		SaveEventsMs:            saveTiming.EventsMs,
+		SaveEquityMs:            saveTiming.EquityMs,
+		SaveEquityBuildMs:       saveTiming.EquityBuildMs,
+		SaveEquityExecMs:        saveTiming.EquityExecMs,
+		SaveEquityCommitMs:      saveTiming.EquityCommitMs,
+		SaveTotalMs:             saveTotalMs,
+		TotalMs:                 time.Since(runStarted).Milliseconds(),
 	}
 	if err := ctx.Err(); err != nil {
 		manager.finishError(row.RunID, ctx, err)
