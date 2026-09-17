@@ -11,58 +11,79 @@ import (
 // LoadReplayKlines preserves the same gap detection/fill semantics as LoadKlines
 // but returns only fields consumed by the backtest replay engine.
 func (repo *Repository) LoadReplayKlines(ctx context.Context, market, symbol, interval string, start, end int64) ([]ReplayKline, error) {
+	rows, _, err := repo.LoadReplayKlinesWithStats(ctx, market, symbol, interval, start, end)
+	return rows, err
+}
+
+func (repo *Repository) LoadReplayKlinesWithStats(ctx context.Context, market, symbol, interval string, start, end int64) ([]ReplayKline, ReplayKlineCacheStats, error) {
+	var stats ReplayKlineCacheStats
 	if err := validateRange(market, symbol, start, end); err != nil {
-		return nil, err
+		return nil, stats, err
 	}
 	if _, err := KlineTable(interval); err != nil {
-		return nil, err
+		return nil, stats, err
 	}
-	rows, err := repo.queryReplayKlines(market, symbol, interval, start, end)
+	rows, queryStats, err := repo.queryReplayKlines(market, symbol, interval, start, end)
+	stats.add(queryStats)
 	if err != nil {
-		return nil, err
+		return nil, stats, err
 	}
 	missing, err := missingReplayKlineRanges(interval, start, end, rows)
 	if err != nil {
-		return nil, err
+		return nil, stats, err
 	}
 	if len(missing) > 0 && repo.Source != nil {
 		for _, gap := range missing {
 			remote, err := repo.Source.Klines(ctx, market, symbol, interval, gap[0], gap[1])
 			if err != nil {
-				return nil, err
+				return nil, stats, err
 			}
 			if len(remote) > 0 {
 				if _, err := repo.Import(ctx, ImportRequest{Source: SourceBinanceREST, SourceRef: fmt.Sprintf("%s:%s:%d-%d", symbol, interval, gap[0], gap[1]), Klines: remote}); err != nil {
-					return nil, err
+					return nil, stats, err
 				}
 			}
 		}
-		rows, err = repo.queryReplayKlines(market, symbol, interval, start, end)
+		var refreshStats ReplayKlineCacheStats
+		rows, refreshStats, err = repo.queryReplayKlines(market, symbol, interval, start, end)
+		stats.add(refreshStats)
 		if err != nil {
-			return nil, err
+			return nil, stats, err
 		}
 		missing, err = missingReplayKlineRanges(interval, start, end, rows)
 		if err != nil {
-			return nil, err
+			return nil, stats, err
 		}
 	}
 	if len(missing) > 0 {
-		return nil, fmt.Errorf("historical K-line gaps remain for %s %s: %v", symbol, interval, missing)
+		return nil, stats, fmt.Errorf("historical K-line gaps remain for %s %s: %v", symbol, interval, missing)
 	}
-	return rows, nil
+	return rows, stats, nil
 }
 
-func (repo *Repository) queryReplayKlines(market, symbol, interval string, start, end int64) ([]ReplayKline, error) {
-	table, err := KlineTable(interval)
-	if err != nil {
-		return nil, err
+func (repo *Repository) queryReplayKlines(market, symbol, interval string, start, end int64) ([]ReplayKline, ReplayKlineCacheStats, error) {
+	if interval == "1m" {
+		return repo.queryReplay1mCached(market, symbol, start, end)
 	}
+	rows, err := repo.queryReplayKlinesDB(market, symbol, interval, start, end)
+	return rows, ReplayKlineCacheStats{}, err
+}
+
+func (repo *Repository) queryReplayKlinesDB(market, symbol, interval string, start, end int64) ([]ReplayKline, error) {
 	first, last, ok, err := expectedKlineBounds(interval, start, end)
 	if err != nil {
 		return nil, err
 	}
 	if !ok {
 		return []ReplayKline{}, nil
+	}
+	return repo.queryReplayKlinesDBOpenRange(market, symbol, interval, first, last)
+}
+
+func (repo *Repository) queryReplayKlinesDBOpenRange(market, symbol, interval string, first, last int64) ([]ReplayKline, error) {
+	table, err := KlineTable(interval)
+	if err != nil {
+		return nil, err
 	}
 	from := " FROM " + table
 	if repo.mysql() {
