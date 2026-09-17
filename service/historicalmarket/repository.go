@@ -17,12 +17,18 @@ import (
 )
 
 type Repository struct {
-	Source Source
-	Now    func() time.Time
+	Source               Source
+	Now                  func() time.Time
+	Replay1mCacheEnabled bool
+	Replay1mCacheRootDir string
 }
 
 func NewRepository(source Source) *Repository { return &Repository{Source: source, Now: time.Now} }
-func DefaultRepository() *Repository          { return NewRepository(BinanceSource{}) }
+func DefaultRepository() *Repository {
+	repo := NewRepository(BinanceSource{})
+	repo.Replay1mCacheEnabled = true
+	return repo
+}
 
 func (repo *Repository) LoadKlines(ctx context.Context, market, symbol, interval string, start, end int64) ([]Kline, error) {
 	return repo.LoadKlinesWithProgress(ctx, market, symbol, interval, start, end, nil)
@@ -194,6 +200,7 @@ func (repo *Repository) Import(ctx context.Context, request ImportRequest) (Impo
 	if len(request.Klines) > 0 {
 		written, err := repo.upsertKlines(request.Klines)
 		result.WrittenRows += written
+		repo.invalidateReplay1mCache(request.Klines)
 		if err != nil {
 			finish("failed", err)
 			return result, err

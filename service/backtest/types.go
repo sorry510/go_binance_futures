@@ -62,6 +62,10 @@ type Dataset struct {
 	Funding                 []Funding              `json:"funding"`
 	MarketConditions        []MarketConditionPoint `json:"market_conditions,omitempty"`
 	MarketConditionRequired bool                   `json:"market_condition_required,omitempty"`
+	replay1mCacheFilesHit   int                    `json:"-"`
+	replay1mCacheFilesMiss  int                    `json:"-"`
+	replay1mCacheReadMs     int64                  `json:"-"`
+	replay1mCacheWriteMs    int64                  `json:"-"`
 }
 
 func BarSeriesKey(symbol, interval string) string { return symbol + "|" + interval }
@@ -209,17 +213,21 @@ type Metrics struct {
 }
 
 type BacktestTimingStats struct {
-	DatasetBuildMs     int64 `json:"dataset_build_ms"`
-	DatasetSaveMs      int64 `json:"dataset_save_ms"`
-	EngineMs           int64 `json:"engine_ms"`
-	SaveTradesMs       int64 `json:"save_trades_ms"`
-	SaveEventsMs       int64 `json:"save_events_ms"`
-	SaveEquityMs       int64 `json:"save_equity_ms"`
-	SaveEquityBuildMs  int64 `json:"save_equity_build_ms"`
-	SaveEquityExecMs   int64 `json:"save_equity_exec_ms"`
-	SaveEquityCommitMs int64 `json:"save_equity_commit_ms"`
-	SaveTotalMs        int64 `json:"save_total_ms"`
-	TotalMs            int64 `json:"total_ms"`
+	DatasetBuildMs          int64 `json:"dataset_build_ms"`
+	DatasetSaveMs           int64 `json:"dataset_save_ms"`
+	Dataset1mCacheFilesHit  int   `json:"dataset_1m_cache_files_hit"`
+	Dataset1mCacheFilesMiss int   `json:"dataset_1m_cache_files_miss"`
+	Dataset1mCacheReadMs    int64 `json:"dataset_1m_cache_read_ms"`
+	Dataset1mCacheWriteMs   int64 `json:"dataset_1m_cache_write_ms"`
+	EngineMs                int64 `json:"engine_ms"`
+	SaveTradesMs            int64 `json:"save_trades_ms"`
+	SaveEventsMs            int64 `json:"save_events_ms"`
+	SaveEquityMs            int64 `json:"save_equity_ms"`
+	SaveEquityBuildMs       int64 `json:"save_equity_build_ms"`
+	SaveEquityExecMs        int64 `json:"save_equity_exec_ms"`
+	SaveEquityCommitMs      int64 `json:"save_equity_commit_ms"`
+	SaveTotalMs             int64 `json:"save_total_ms"`
+	TotalMs                 int64 `json:"total_ms"`
 }
 
 type ResolutionStats struct {

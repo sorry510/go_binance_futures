@@ -322,3 +322,76 @@ func TestReplayKlinesPreserveGapFill(t *testing.T) {
 		t.Fatalf("replay gap fill mismatch rows=%d calls=%v", len(rows), source.calls)
 	}
 }
+
+func TestReplay1mDiskCachePersistsAndInvalidatesByMonth(t *testing.T) {
+	setupRepositoryTest(t)
+	root := t.TempDir()
+	now := time.Date(2026, 3, 15, 12, 0, 0, 0, time.UTC)
+	repo := NewRepository(nil)
+	repo.Replay1mCacheRootDir = root
+	repo.Now = func() time.Time { return now }
+	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	bars := []Kline{minuteBar(start, 100), minuteBar(start.Add(time.Minute), 101), minuteBar(start.Add(2*time.Minute), 102)}
+	if _, err := repo.Import(context.Background(), ImportRequest{Source: "fixture", Klines: bars}); err != nil {
+		t.Fatal(err)
+	}
+	end := bars[2].CloseTime
+	first, firstStats, err := repo.LoadReplayKlinesWithStats(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first) != 3 || firstStats.FilesMiss != 1 || firstStats.FilesHit != 0 {
+		t.Fatalf("unexpected first cache load rows=%d stats=%+v", len(first), firstStats)
+	}
+	path, ok := replay1mCachePath(root, MarketFuturesUSDT, "BTCUSDT", replayMonthStart(start.UnixMilli()))
+	if !ok {
+		t.Fatal("cache path rejected valid symbol")
+	}
+	if _, err := os.Stat(path); err != nil {
+		t.Fatalf("expected persistent cache file: %v", err)
+	}
+	second, secondStats, err := repo.LoadReplayKlinesWithStats(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(second) != 3 || secondStats.FilesHit != 1 || secondStats.FilesMiss != 0 {
+		t.Fatalf("unexpected second cache load rows=%d stats=%+v", len(second), secondStats)
+	}
+	overwrite := minuteBar(start.Add(time.Minute), 777)
+	if _, err := repo.Import(context.Background(), ImportRequest{Source: "fixture-update", Klines: []Kline{overwrite}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("1m import must invalidate affected monthly cache, err=%v", err)
+	}
+	third, thirdStats, err := repo.LoadReplayKlinesWithStats(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if thirdStats.FilesMiss != 1 || len(third) != 3 || third[1].Close != 777 {
+		t.Fatalf("stale cache reused after import rows=%+v stats=%+v", third, thirdStats)
+	}
+}
+
+func TestReplay1mDiskCacheSkipsCurrentMonth(t *testing.T) {
+	setupRepositoryTest(t)
+	root := t.TempDir()
+	now := time.Date(2026, 3, 15, 12, 0, 0, 0, time.UTC)
+	repo := NewRepository(nil)
+	repo.Replay1mCacheRootDir = root
+	repo.Now = func() time.Time { return now }
+	start := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
+	bars := []Kline{minuteBar(start, 100), minuteBar(start.Add(time.Minute), 101)}
+	if _, err := repo.Import(context.Background(), ImportRequest{Source: "fixture", Klines: bars}); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		rows, stats, err := repo.LoadReplayKlinesWithStats(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), bars[1].CloseTime)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(rows) != 2 || stats.FilesHit != 0 || stats.FilesMiss != 0 {
+			t.Fatalf("current month must bypass disk cache rows=%d stats=%+v", len(rows), stats)
+		}
+	}
+}
