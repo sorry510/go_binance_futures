@@ -96,6 +96,7 @@ func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 }
 func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, request StartRequest) {
 	defer manager.finishActive(row.RunID)
+	runStarted := time.Now()
 	manager.updateState(row.RunID, "running", "building_dataset", 5, "", false)
 	lastProgress := 5
 	reportProgress := func(stage string, base, span, completed, total int) {
@@ -112,14 +113,18 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		lastProgress = value
 		manager.updateProgress(row.RunID, stage, value)
 	}
+	datasetBuildStarted := time.Now()
 	dataset, err := manager.builder.BuildWithProgress(ctx, DatasetRequest{Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON}, func(completed, total int) {
 		reportProgress("building_dataset", 5, 25, completed, total)
 	})
+	datasetBuildMs := time.Since(datasetBuildStarted).Milliseconds()
 	if err != nil {
 		manager.finishError(row.RunID, ctx, err)
 		return
 	}
+	datasetSaveStarted := time.Now()
 	manifest, err := saveDataset(ctx, dataset)
+	datasetSaveMs := time.Since(datasetSaveStarted).Milliseconds()
 	if err != nil {
 		manager.finishError(row.RunID, ctx, err)
 		return
@@ -146,20 +151,35 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		lastResolutionActivity = now
 		manager.updateProgress(row.RunID, stage, lastProgress)
 	}
+	engineStarted := time.Now()
 	result, err := runEngine.RunWithResolution(ctx, dataset, StrategySnapshot{TemplateID: row.StrategyTemplateID, TemplateName: row.StrategyTemplateName, TechnologyJSON: row.TechnologyJSON, StrategyJSON: row.StrategyJSON, Version: row.StrategyVersion}, request.Config, row.ResolutionMode, func(completed, total int) {
 		reportProgress("running_backtest", 35, 55, completed, total)
 	})
+	engineMs := time.Since(engineStarted).Milliseconds()
 	if err != nil {
 		manager.finishError(row.RunID, ctx, err)
 		return
 	}
 	lastProgress = 90
 	manager.updateProgress(row.RunID, "saving_results", 90)
-	if err := saveResultWithProgress(ctx, row.RunID, result, func(completed, total int) {
+	saveStarted := time.Now()
+	saveTiming, err := saveResultWithProgressTimed(ctx, row.RunID, result, func(completed, total int) {
 		reportProgress("saving_results", 90, 9, completed, total)
-	}); err != nil {
+	})
+	saveTotalMs := time.Since(saveStarted).Milliseconds()
+	if err != nil {
 		manager.finishError(row.RunID, ctx, err)
 		return
+	}
+	result.ResolutionStats.Timing = &BacktestTimingStats{
+		DatasetBuildMs: datasetBuildMs,
+		DatasetSaveMs:  datasetSaveMs,
+		EngineMs:       engineMs,
+		SaveTradesMs:   saveTiming.TradesMs,
+		SaveEventsMs:   saveTiming.EventsMs,
+		SaveEquityMs:   saveTiming.EquityMs,
+		SaveTotalMs:    saveTotalMs,
+		TotalMs:        time.Since(runStarted).Milliseconds(),
 	}
 	if err := ctx.Err(); err != nil {
 		manager.finishError(row.RunID, ctx, err)
@@ -711,9 +731,23 @@ func backtestResultInsertBatchSizes() (trade, event, equity int) {
 	return backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric
 }
 
+type resultSaveTiming struct {
+	TradesMs int64
+	EventsMs int64
+	EquityMs int64
+}
+
+const backtestEquityTransactionBatchCount = 10
+
 func saveResultWithProgress(ctx context.Context, runID string, result Result, progress ProgressCallback) error {
+	_, err := saveResultWithProgressTimed(ctx, runID, result, progress)
+	return err
+}
+
+func saveResultWithProgressTimed(ctx context.Context, runID string, result Result, progress ProgressCallback) (resultSaveTiming, error) {
+	var timing resultSaveTiming
 	if err := ctx.Err(); err != nil {
-		return err
+		return timing, err
 	}
 	o := orm.NewOrm()
 	tradeBatchSize, eventBatchSize, equityBatchSize := backtestResultInsertBatchSizes()
@@ -729,25 +763,36 @@ func saveResultWithProgress(ctx context.Context, runID string, result Result, pr
 		}
 	}
 	report()
+
+	tradeStarted := time.Now()
 	tradeRows := make([]models.AgentBacktestTrade, 0, len(result.Trades))
 	for _, t := range result.Trades {
 		tradeRows = append(tradeRows, models.AgentBacktestTrade{RunID: runID, Sequence: t.Sequence, Symbol: t.Symbol, Side: t.Side, EntryTime: t.EntryTime, ExitTime: t.ExitTime, EntryPrice: t.EntryPrice, ExitPrice: t.ExitPrice, Quantity: t.Quantity, GrossPnL: t.GrossPnL, Fees: t.Fees, FundingPnL: t.FundingPnL, NetPnL: t.NetPnL, HoldingMs: t.HoldingMs, ExitReason: t.ExitReason, OpenStrategyName: t.OpenStrategyName, OpenStrategyType: t.OpenStrategyType, OpenStrategyHash: t.OpenStrategyHash, CloseStrategyName: t.CloseStrategyName, CloseStrategyType: t.CloseStrategyType, CloseStrategyHash: t.CloseStrategyHash, MarketCondition: t.MarketCondition, EntryResolution: t.EntryResolution, ExitResolution: t.ExitResolution})
 	}
 	if len(tradeRows) > 0 {
 		for start := 0; start < len(tradeRows); start += tradeBatchSize {
+			if err := ctx.Err(); err != nil {
+				return timing, err
+			}
 			end := start + tradeBatchSize
 			if end > len(tradeRows) {
 				end = len(tradeRows)
 			}
 			chunk := tradeRows[start:end]
 			if _, err := o.InsertMulti(tradeBatchSize, &chunk); err != nil {
-				return err
+				return timing, err
 			}
 			completedRows += len(chunk)
 			report()
 		}
 	}
+	timing.TradesMs = time.Since(tradeStarted).Milliseconds()
+
+	eventStarted := time.Now()
 	for start := 0; start < len(result.Events); start += eventBatchSize {
+		if err := ctx.Err(); err != nil {
+			return timing, err
+		}
 		end := start + eventBatchSize
 		if end > len(result.Events) {
 			end = len(result.Events)
@@ -757,31 +802,61 @@ func saveResultWithProgress(ctx context.Context, runID string, result Result, pr
 			eventRows = append(eventRows, models.AgentBacktestEvent{RunID: runID, Sequence: e.Sequence, EventTime: e.EventTime, Type: e.Type, Action: e.Action, Side: e.Side, Price: e.Price, Quantity: e.Quantity, DataJSON: string(e.Data)})
 		}
 		if _, err := o.InsertMulti(eventBatchSize, &eventRows); err != nil {
-			return err
+			return timing, err
 		}
 		completedRows += len(eventRows)
 		report()
 	}
-	for start := 0; start < len(result.Equity); start += equityBatchSize {
-		end := start + equityBatchSize
-		if end > len(result.Equity) {
-			end = len(result.Equity)
+	timing.EventsMs = time.Since(eventStarted).Milliseconds()
+
+	equityStarted := time.Now()
+	transactionRows := equityBatchSize * backtestEquityTransactionBatchCount
+	for groupStart := 0; groupStart < len(result.Equity); groupStart += transactionRows {
+		if err := ctx.Err(); err != nil {
+			return timing, err
 		}
-		eqRows := make([]models.AgentBacktestEquityPoint, 0, end-start)
-		for _, e := range result.Equity[start:end] {
-			eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
+		groupEnd := groupStart + transactionRows
+		if groupEnd > len(result.Equity) {
+			groupEnd = len(result.Equity)
 		}
-		if _, err := o.InsertMulti(equityBatchSize, &eqRows); err != nil {
-			return err
+		tx, err := o.BeginWithCtx(ctx)
+		if err != nil {
+			return timing, err
 		}
-		completedRows += len(eqRows)
+		groupRows := 0
+		for start := groupStart; start < groupEnd; start += equityBatchSize {
+			if err := ctx.Err(); err != nil {
+				_ = tx.Rollback()
+				return timing, err
+			}
+			end := start + equityBatchSize
+			if end > groupEnd {
+				end = groupEnd
+			}
+			eqRows := make([]models.AgentBacktestEquityPoint, 0, end-start)
+			for _, e := range result.Equity[start:end] {
+				eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
+			}
+			if _, err := tx.InsertMultiWithCtx(ctx, equityBatchSize, &eqRows); err != nil {
+				_ = tx.Rollback()
+				return timing, err
+			}
+			groupRows += len(eqRows)
+		}
+		if err := tx.Commit(); err != nil {
+			_ = tx.Rollback()
+			return timing, err
+		}
+		completedRows += groupRows
 		report()
 	}
+	timing.EquityMs = time.Since(equityStarted).Milliseconds()
 	if totalRows == 0 {
 		report()
 	}
-	return nil
+	return timing, nil
 }
+
 func summaryFromRow(row models.AgentBacktestRun) RunSummary {
 	var metrics *Metrics
 	if strings.TrimSpace(row.MetricsJSON) != "" {

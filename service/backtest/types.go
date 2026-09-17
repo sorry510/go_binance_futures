@@ -208,15 +208,27 @@ type Metrics struct {
 	BySide           []GroupMetrics `json:"by_side"`
 }
 
+type BacktestTimingStats struct {
+	DatasetBuildMs int64 `json:"dataset_build_ms"`
+	DatasetSaveMs  int64 `json:"dataset_save_ms"`
+	EngineMs       int64 `json:"engine_ms"`
+	SaveTradesMs   int64 `json:"save_trades_ms"`
+	SaveEventsMs   int64 `json:"save_events_ms"`
+	SaveEquityMs   int64 `json:"save_equity_ms"`
+	SaveTotalMs    int64 `json:"save_total_ms"`
+	TotalMs        int64 `json:"total_ms"`
+}
+
 type ResolutionStats struct {
-	SecondDrilldownMinutes int   `json:"second_drilldown_minutes"`
-	TradeDrilldownSeconds  int   `json:"trade_drilldown_seconds"`
-	SecondCacheHits        int   `json:"second_cache_hits"`
-	TradeCacheHits         int   `json:"trade_cache_hits"`
-	ArchiveCacheHits       int   `json:"archive_cache_hits"`
-	ArchiveDownloads       int   `json:"archive_downloads"`
-	DownloadBytes          int64 `json:"download_bytes"`
-	Unresolved             int   `json:"unresolved"`
+	SecondDrilldownMinutes int                  `json:"second_drilldown_minutes"`
+	TradeDrilldownSeconds  int                  `json:"trade_drilldown_seconds"`
+	SecondCacheHits        int                  `json:"second_cache_hits"`
+	TradeCacheHits         int                  `json:"trade_cache_hits"`
+	ArchiveCacheHits       int                  `json:"archive_cache_hits"`
+	ArchiveDownloads       int                  `json:"archive_downloads"`
+	DownloadBytes          int64                `json:"download_bytes"`
+	Unresolved             int                  `json:"unresolved"`
+	Timing                 *BacktestTimingStats `json:"timing,omitempty"`
 }
 
 type Result struct {
