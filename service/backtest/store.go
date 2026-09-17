@@ -719,16 +719,26 @@ func saveResult(ctx context.Context, runID string, result Result) error {
 }
 
 const (
-	backtestResultInsertBatchSizeMySQL   = 3000
-	backtestTradeInsertBatchSizeMySQL    = 2000
-	backtestResultInsertBatchSizeGeneric = 500
+	backtestEventInsertBatchSizeMySQL       = 3000
+	backtestEquityInsertBatchSizeMySQL      = 6000
+	backtestTradeInsertBatchSizeMySQL       = 2000
+	backtestResultInsertBatchSizeGeneric    = 500
+	backtestEquityTransactionRowsMySQL      = 30000
+	backtestEquityTransactionBatchesGeneric = 10
 )
 
 func backtestResultInsertBatchSizes() (trade, event, equity int) {
 	if backtestDeleteMySQL() {
-		return backtestTradeInsertBatchSizeMySQL, backtestResultInsertBatchSizeMySQL, backtestResultInsertBatchSizeMySQL
+		return backtestTradeInsertBatchSizeMySQL, backtestEventInsertBatchSizeMySQL, backtestEquityInsertBatchSizeMySQL
 	}
 	return backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric
+}
+
+func backtestEquityTransactionRows(equityBatchSize int) int {
+	if backtestDeleteMySQL() {
+		return backtestEquityTransactionRowsMySQL
+	}
+	return equityBatchSize * backtestEquityTransactionBatchesGeneric
 }
 
 type resultSaveTiming struct {
@@ -736,8 +746,6 @@ type resultSaveTiming struct {
 	EventsMs int64
 	EquityMs int64
 }
-
-const backtestEquityTransactionBatchCount = 10
 
 func saveResultWithProgress(ctx context.Context, runID string, result Result, progress ProgressCallback) error {
 	_, err := saveResultWithProgressTimed(ctx, runID, result, progress)
@@ -810,7 +818,7 @@ func saveResultWithProgressTimed(ctx context.Context, runID string, result Resul
 	timing.EventsMs = time.Since(eventStarted).Milliseconds()
 
 	equityStarted := time.Now()
-	transactionRows := equityBatchSize * backtestEquityTransactionBatchCount
+	transactionRows := backtestEquityTransactionRows(equityBatchSize)
 	for groupStart := 0; groupStart < len(result.Equity); groupStart += transactionRows {
 		if err := ctx.Err(); err != nil {
 			return timing, err

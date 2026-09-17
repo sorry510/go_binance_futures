@@ -593,24 +593,35 @@ func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
 }
 
 func TestBacktestEquityTransactionGrouping(t *testing.T) {
-	if backtestEquityTransactionBatchCount != 10 {
-		t.Fatalf("equity transaction batch count=%d want=10", backtestEquityTransactionBatchCount)
-	}
 	_, _, equityBatch := backtestResultInsertBatchSizes()
 	if equityBatch <= 0 {
 		t.Fatalf("invalid equity batch size: %d", equityBatch)
 	}
+	wantRows := equityBatch * backtestEquityTransactionBatchesGeneric
+	if got := backtestEquityTransactionRows(equityBatch); got != wantRows {
+		t.Fatalf("generic equity transaction rows=%d want=%d", got, wantRows)
+	}
 }
 
 func TestBacktestResultMySQLBatchTargetsStayWithinPlaceholderLimits(t *testing.T) {
-	if backtestResultInsertBatchSizeMySQL != 3000 {
-		t.Fatalf("mysql event/equity batch=%d want=3000", backtestResultInsertBatchSizeMySQL)
+	if backtestEventInsertBatchSizeMySQL != 3000 {
+		t.Fatalf("mysql event batch=%d want=3000", backtestEventInsertBatchSizeMySQL)
+	}
+	if backtestEquityInsertBatchSizeMySQL != 6000 {
+		t.Fatalf("mysql equity batch=%d want=6000", backtestEquityInsertBatchSizeMySQL)
 	}
 	if backtestTradeInsertBatchSizeMySQL != 2000 {
 		t.Fatalf("mysql trade batch=%d want=2000", backtestTradeInsertBatchSizeMySQL)
 	}
+	if backtestEquityTransactionRowsMySQL != 30000 {
+		t.Fatalf("mysql equity transaction rows=%d want=30000", backtestEquityTransactionRowsMySQL)
+	}
 	const tradeColumns = 24
 	if backtestTradeInsertBatchSizeMySQL*tradeColumns > 65535 {
 		t.Fatalf("trade batch would exceed MySQL placeholder limit: %d", backtestTradeInsertBatchSizeMySQL*tradeColumns)
+	}
+	const equityColumns = 8
+	if backtestEquityInsertBatchSizeMySQL*equityColumns > 65535 {
+		t.Fatalf("equity batch would exceed MySQL placeholder limit: %d", backtestEquityInsertBatchSizeMySQL*equityColumns)
 	}
 }
