@@ -29,6 +29,9 @@ type historicalEnvironment struct {
 	klinePriceCache         map[string]cachedKLinePrice
 	indicatorCache          map[string]cachedIndicatorValue
 	indicatorCacheable      map[string]bool
+	currentEMACache         map[string]cachedCurrentEMA
+	currentRSICache         map[string]cachedCurrentRSI
+	currentADXCache         map[string]cachedCurrentADX
 }
 
 func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historicalEnvironment, error) {
