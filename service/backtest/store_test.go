@@ -413,8 +413,14 @@ func TestManagerPersistsAdaptiveResolutionMetadataWithoutChangingV6Execution(t *
 			if detail.ResolutionMode != ResolutionModeAdaptive || detail.ResolutionModel != AdaptiveResolutionModel || detail.EngineVersion != AdaptiveEngineVersion {
 				t.Fatalf("adaptive metadata was not persisted: %+v", detail.RunSummary)
 			}
-			if detail.ResolutionStats != (ResolutionStats{}) {
+			stats := detail.ResolutionStats
+			timing := stats.Timing
+			stats.Timing = nil
+			if stats != (ResolutionStats{}) {
 				t.Fatalf("no-ambiguity adaptive run unexpectedly drilled down: %+v", detail.ResolutionStats)
+			}
+			if timing == nil || timing.TotalMs <= 0 {
+				t.Fatalf("backtest timing metadata was not persisted: %+v", detail.ResolutionStats)
 			}
 			trades, err := manager.Trades(run.RunID, 100)
 			if err != nil || len(trades) == 0 {
@@ -548,7 +554,7 @@ func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
 	result := Result{
 		Trades: make([]Trade, 0, 1001),
 		Events: make([]AuditEvent, 0, 1001),
-		Equity: make([]EquityPoint, 0, 1201),
+		Equity: make([]EquityPoint, 0, 5201),
 	}
 	for i := 1; i <= 1001; i++ {
 		result.Trades = append(result.Trades, Trade{Sequence: i, Symbol: "BTCUSDT", Side: "LONG", EntryTime: int64(i), ExitTime: int64(i + 1), EntryPrice: 100, ExitPrice: 101, Quantity: 1, ExitReason: "test", EntryResolution: "1m", ExitResolution: "1m"})
@@ -556,7 +562,7 @@ func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
 	for i := 1; i <= 1001; i++ {
 		result.Events = append(result.Events, AuditEvent{Sequence: i, EventTime: int64(i), Type: "signal", Action: "test"})
 	}
-	for i := 1; i <= 1201; i++ {
+	for i := 1; i <= 5201; i++ {
 		result.Equity = append(result.Equity, EquityPoint{Sequence: i, BarTime: int64(i), Equity: 1000 + float64(i), Cash: 1000})
 	}
 	lastCompleted, lastTotal := -1, -1
@@ -578,11 +584,21 @@ func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if trades != 1001 || events != 1001 || equity != 1201 {
+	if trades != 1001 || events != 1001 || equity != 5201 {
 		t.Fatalf("persisted rows trades=%d events=%d equity=%d", trades, events, equity)
 	}
-	if lastCompleted != 3203 || lastTotal != 3203 {
+	if lastCompleted != 7203 || lastTotal != 7203 {
 		t.Fatalf("progress completed=%d total=%d", lastCompleted, lastTotal)
+	}
+}
+
+func TestBacktestEquityTransactionGrouping(t *testing.T) {
+	if backtestEquityTransactionBatchCount != 10 {
+		t.Fatalf("equity transaction batch count=%d want=10", backtestEquityTransactionBatchCount)
+	}
+	_, _, equityBatch := backtestResultInsertBatchSizes()
+	if equityBatch <= 0 {
+		t.Fatalf("invalid equity batch size: %d", equityBatch)
 	}
 }
 
