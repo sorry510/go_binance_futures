@@ -3,6 +3,7 @@ package backtest
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"runtime"
 	"sync"
 
@@ -22,6 +23,37 @@ type cachedKLinePrice struct {
 type cachedIndicatorValue struct {
 	windowStart int64
 	value       interface{}
+}
+
+type cachedCurrentEMA struct {
+	windowStart int64
+	interval    string
+	period      int
+	value       line.ConfigData
+}
+
+type cachedCurrentRSI struct {
+	windowStart   int64
+	interval      string
+	period        int
+	previousClose float64
+	avgGain       float64
+	avgLoss       float64
+	value         line.ConfigData
+}
+
+type cachedCurrentADX struct {
+	windowStart     int64
+	interval        string
+	period          int
+	previousHigh    float64
+	previousLow     float64
+	previousClose   float64
+	previousADX     float64
+	smoothedTR      float64
+	smoothedPlusDM  float64
+	smoothedMinusDM float64
+	value           line.ADXConfigData
 }
 
 type indicatorTask struct {
@@ -56,6 +88,9 @@ func (builder *historicalEnvironment) enableStandardOptimizations(strategyJSON s
 	builder.standardOptimizations = true
 	builder.klinePriceCache = make(map[string]cachedKLinePrice)
 	builder.indicatorCache = make(map[string]cachedIndicatorValue)
+	builder.currentEMACache = make(map[string]cachedCurrentEMA)
+	builder.currentRSICache = make(map[string]cachedCurrentRSI)
+	builder.currentADXCache = make(map[string]cachedCurrentADX)
 	builder.indicatorCacheable = analyzeCompletedIndicatorCacheability(strategyJSON, builder.technology)
 }
 
@@ -292,7 +327,7 @@ func (builder *historicalEnvironment) addIndicatorsOptimized(env map[string]inte
 			tasks = append(tasks, indicatorTask{group: group.name, item: item, price: p, cacheable: cacheable, windowStart: windowStart})
 		}
 	}
-	results := runIndicatorTasks(tasks)
+	results := builder.runIndicatorTasks(tasks)
 	resultIndex := 0
 	for _, group := range builder.indicatorGroups() {
 		for _, item := range group.items {
@@ -320,7 +355,7 @@ func (builder *historicalEnvironment) addIndicatorsOptimized(env map[string]inte
 	return nil
 }
 
-func runIndicatorTasks(tasks []indicatorTask) []indicatorTaskResult {
+func (builder *historicalEnvironment) runIndicatorTasks(tasks []indicatorTask) []indicatorTaskResult {
 	results := make([]indicatorTaskResult, len(tasks))
 	if len(tasks) == 0 {
 		return results
@@ -334,7 +369,16 @@ func runIndicatorTasks(tasks []indicatorTask) []indicatorTaskResult {
 	parallel := make([]int, 0, len(tasks))
 	for i := range tasks {
 		if !tasks[i].cacheable {
-			results[i].value, results[i].err = calculateIndicatorValue(tasks[i])
+			switch {
+			case tasks[i].group == "ema" && tasks[i].windowStart > 0:
+				results[i].value, results[i].err = builder.calculateCurrentEMAValue(tasks[i])
+			case tasks[i].group == "rsi" && tasks[i].windowStart > 0:
+				results[i].value, results[i].err = builder.calculateCurrentRSIValue(tasks[i])
+			case tasks[i].group == "adx" && tasks[i].windowStart > 0:
+				results[i].value, results[i].err = builder.calculateCurrentADXValue(tasks[i])
+			default:
+				results[i].value, results[i].err = calculateIndicatorValue(tasks[i])
+			}
 			continue
 		}
 		parallel = append(parallel, i)
@@ -372,6 +416,250 @@ func runIndicatorTasks(tasks []indicatorTask) []indicatorTaskResult {
 	close(jobs)
 	wg.Wait()
 	return results
+}
+
+func (builder *historicalEnvironment) calculateCurrentEMAValue(task indicatorTask) (interface{}, error) {
+	item, p := task.item, task.price
+	if !builder.standardOptimizations || builder.currentEMACache == nil || len(p.Close) == 0 {
+		return calculateIndicatorValue(task)
+	}
+
+	entry, ok := builder.currentEMACache[item.Name]
+	if !ok || entry.windowStart != task.windowStart || entry.interval != item.KlineInterval || entry.period != item.Period || len(entry.value.Data) < 2 {
+		value, err := calculateIndicatorValue(task)
+		if err != nil {
+			return value, err
+		}
+		config, ok := value.(line.ConfigData)
+		if !ok || len(config.Data) < 2 {
+			return value, nil
+		}
+		builder.currentEMACache[item.Name] = cachedCurrentEMA{
+			windowStart: task.windowStart,
+			interval:    item.KlineInterval,
+			period:      item.Period,
+			value:       config,
+		}
+		return config, nil
+	}
+
+	alpha := 2.0 / (float64(item.Period) + 1.0)
+	entry.value.Data[0] = alpha*p.Close[0] + (1.0-alpha)*entry.value.Data[1]
+	builder.currentEMACache[item.Name] = entry
+	return entry.value, nil
+}
+
+func (builder *historicalEnvironment) calculateCurrentRSIValue(task indicatorTask) (interface{}, error) {
+	item, p := task.item, task.price
+	if !builder.standardOptimizations || builder.currentRSICache == nil || len(p.Close) < 2 {
+		return calculateIndicatorValue(task)
+	}
+
+	entry, ok := builder.currentRSICache[item.Name]
+	if !ok || entry.windowStart != task.windowStart || entry.interval != item.KlineInterval || entry.period != item.Period || len(entry.value.Data) < 2 {
+		value, err := calculateIndicatorValue(task)
+		if err != nil {
+			return value, err
+		}
+		config, ok := value.(line.ConfigData)
+		if !ok || len(config.Data) < 2 {
+			return value, nil
+		}
+		avgGain, avgLoss, err := completedRSIState(p.Close[1:], item.Period)
+		if err != nil {
+			return value, nil // full calculation succeeded; keep the legacy result if state caching is unavailable
+		}
+		builder.currentRSICache[item.Name] = cachedCurrentRSI{
+			windowStart:   task.windowStart,
+			interval:      item.KlineInterval,
+			period:        item.Period,
+			previousClose: p.Close[1],
+			avgGain:       avgGain,
+			avgLoss:       avgLoss,
+			value:         config,
+		}
+		return config, nil
+	}
+
+	gain, loss := 0.0, 0.0
+	diff := p.Close[0] - entry.previousClose
+	if diff > 0 {
+		gain = diff
+	} else {
+		loss = math.Abs(diff)
+	}
+	period := float64(item.Period)
+	avgGain := ((entry.avgGain * float64(item.Period-1)) + gain) / period
+	avgLoss := ((entry.avgLoss * float64(item.Period-1)) + loss) / period
+	entry.value.Data[0] = rsiValue(avgGain, avgLoss)
+	builder.currentRSICache[item.Name] = entry
+	return entry.value, nil
+}
+
+func completedRSIState(prices []float64, period int) (float64, float64, error) {
+	if period <= 0 || len(prices) <= period {
+		return 0, 0, fmt.Errorf("insufficient data for RSI state period %d: got %d values", period, len(prices))
+	}
+	reversed := make([]float64, len(prices))
+	for i, value := range prices {
+		reversed[len(prices)-1-i] = value
+	}
+	gains := make([]float64, len(reversed)-1)
+	losses := make([]float64, len(reversed)-1)
+	for i := 1; i < len(reversed); i++ {
+		diff := reversed[i] - reversed[i-1]
+		if diff > 0 {
+			gains[i-1] = diff
+		} else {
+			losses[i-1] = math.Abs(diff)
+		}
+	}
+	var sumGains, sumLosses float64
+	for i := 0; i < period; i++ {
+		sumGains += gains[i]
+		sumLosses += losses[i]
+	}
+	avgGain := sumGains / float64(period)
+	avgLoss := sumLosses / float64(period)
+	for i := period; i < len(gains); i++ {
+		avgGain = ((avgGain * float64(period-1)) + gains[i]) / float64(period)
+		avgLoss = ((avgLoss * float64(period-1)) + losses[i]) / float64(period)
+	}
+	return avgGain, avgLoss, nil
+}
+
+func rsiValue(avgGain, avgLoss float64) float64 {
+	if avgGain == 0 && avgLoss == 0 {
+		return 50
+	}
+	if avgLoss == 0 {
+		return 100
+	}
+	if avgGain == 0 {
+		return 0
+	}
+	rs := avgGain / avgLoss
+	return 100 - (100 / (1 + rs))
+}
+
+func (builder *historicalEnvironment) calculateCurrentADXValue(task indicatorTask) (interface{}, error) {
+	item, p := task.item, task.price
+	if !builder.standardOptimizations || builder.currentADXCache == nil || len(p.High) < 2 || len(p.Low) < 2 || len(p.Close) < 2 {
+		return calculateIndicatorValue(task)
+	}
+
+	entry, ok := builder.currentADXCache[item.Name]
+	if !ok || entry.windowStart != task.windowStart || entry.interval != item.KlineInterval || entry.period != item.Period || len(entry.value.ADX) < 2 || len(entry.value.PlusDI) < 2 || len(entry.value.MinusDI) < 2 {
+		value, err := calculateIndicatorValue(task)
+		if err != nil {
+			return value, err
+		}
+		config, ok := value.(line.ADXConfigData)
+		if !ok || len(config.ADX) < 2 || len(config.PlusDI) < 2 || len(config.MinusDI) < 2 {
+			return value, nil
+		}
+		smoothedTR, smoothedPlusDM, smoothedMinusDM, err := completedADXDirectionalState(p.High[1:], p.Low[1:], p.Close[1:], item.Period)
+		if err != nil {
+			return value, nil // preserve the legacy value if state caching is unavailable
+		}
+		builder.currentADXCache[item.Name] = cachedCurrentADX{
+			windowStart:     task.windowStart,
+			interval:        item.KlineInterval,
+			period:          item.Period,
+			previousHigh:    p.High[1],
+			previousLow:     p.Low[1],
+			previousClose:   p.Close[1],
+			previousADX:     config.ADX[1],
+			smoothedTR:      smoothedTR,
+			smoothedPlusDM:  smoothedPlusDM,
+			smoothedMinusDM: smoothedMinusDM,
+			value:           config,
+		}
+		return config, nil
+	}
+
+	trueRange := math.Max(p.High[0]-p.Low[0], math.Max(math.Abs(p.High[0]-entry.previousClose), math.Abs(p.Low[0]-entry.previousClose)))
+	upMove := p.High[0] - entry.previousHigh
+	downMove := entry.previousLow - p.Low[0]
+	plusDM, minusDM := 0.0, 0.0
+	if upMove > downMove && upMove > 0 {
+		plusDM = upMove
+	} else if downMove > upMove && downMove > 0 {
+		minusDM = downMove
+	}
+	period := float64(item.Period)
+	smoothedTR := (entry.smoothedTR*float64(item.Period-1) + trueRange) / period
+	smoothedPlusDM := (entry.smoothedPlusDM*float64(item.Period-1) + plusDM) / period
+	smoothedMinusDM := (entry.smoothedMinusDM*float64(item.Period-1) + minusDM) / period
+	plusDI, minusDI, dx := 0.0, 0.0, 0.0
+	if smoothedTR != 0 {
+		plusDI = 100 * smoothedPlusDM / smoothedTR
+		minusDI = 100 * smoothedMinusDM / smoothedTR
+		directionalSum := plusDI + minusDI
+		if directionalSum > 0 {
+			dx = 100 * math.Abs(plusDI-minusDI) / directionalSum
+		}
+	}
+	entry.value.PlusDI[0] = plusDI
+	entry.value.MinusDI[0] = minusDI
+	entry.value.ADX[0] = (entry.previousADX*float64(item.Period-1) + dx) / period
+	builder.currentADXCache[item.Name] = entry
+	return entry.value, nil
+}
+
+func completedADXDirectionalState(high, low, close []float64, period int) (float64, float64, float64, error) {
+	if period <= 0 || len(high) != len(low) || len(high) != len(close) || len(high) < period+2 {
+		return 0, 0, 0, fmt.Errorf("insufficient data for ADX state period %d: got %d values", period, len(high))
+	}
+	directionalCount := len(high) - 1
+	tr := make([]float64, directionalCount)
+	plusDM := make([]float64, directionalCount)
+	minusDM := make([]float64, directionalCount)
+	for i := 0; i < directionalCount; i++ {
+		hl := high[i] - low[i]
+		hpc := math.Abs(high[i] - close[i+1])
+		lpc := math.Abs(low[i] - close[i+1])
+		tr[i] = math.Max(hl, math.Max(hpc, lpc))
+		upMove := high[i] - high[i+1]
+		downMove := low[i+1] - low[i]
+		if upMove > downMove && upMove > 0 {
+			plusDM[i] = upMove
+		} else if downMove > upMove && downMove > 0 {
+			minusDM[i] = downMove
+		}
+	}
+	smoothedTR, err := wilderLatest(tr, period)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	smoothedPlusDM, err := wilderLatest(plusDM, period)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	smoothedMinusDM, err := wilderLatest(minusDM, period)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	return smoothedTR, smoothedPlusDM, smoothedMinusDM, nil
+}
+
+func wilderLatest(values []float64, period int) (float64, error) {
+	if period <= 0 || len(values) < period {
+		return 0, fmt.Errorf("insufficient data for Wilder state period %d: got %d values", period, len(values))
+	}
+	reversed := make([]float64, len(values))
+	for i, value := range values {
+		reversed[len(values)-1-i] = value
+	}
+	var sum float64
+	for i := 0; i < period; i++ {
+		sum += reversed[i]
+	}
+	latest := sum / float64(period)
+	for i := period; i < len(reversed); i++ {
+		latest = (latest*float64(period-1) + reversed[i]) / float64(period)
+	}
+	return latest, nil
 }
 
 func calculateIndicatorValue(task indicatorTask) (interface{}, error) {

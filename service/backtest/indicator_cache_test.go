@@ -104,7 +104,7 @@ func TestStandardCompletedIndicatorCacheMatchesLegacyStrategyResults(t *testing.
 	}
 }
 
-func TestUnsafeCurrentIndicatorFallsBackToLegacyCalculation(t *testing.T) {
+func TestCurrentEMAIncrementalFastPathMatchesLegacyCalculation(t *testing.T) {
 	dataset := cacheFixtureDataset(720)
 	legacy, _ := newHistoricalEnvironment(dataset, cacheTechnologyJSON())
 	optimized, _ := newHistoricalEnvironment(dataset, cacheTechnologyJSON())
@@ -115,7 +115,7 @@ func TestUnsafeCurrentIndicatorFallsBackToLegacyCalculation(t *testing.T) {
 		t.Fatal("Data[0] indicator must never use completed-value cache")
 	}
 	bars := dataset.Bars[BarSeriesKey("BTCUSDT", "1m")]
-	for i := 420; i < 430; i++ {
+	for i := 420; i < 550; i++ {
 		left, _, err := legacy.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
 		if err != nil {
 			t.Fatal(err)
@@ -125,7 +125,100 @@ func TestUnsafeCurrentIndicatorFallsBackToLegacyCalculation(t *testing.T) {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(left["ema_1h_3"].(line.ConfigData), right["ema_1h_3"].(line.ConfigData)) {
-			t.Fatalf("minute=%d unsafe indicator output differs from legacy", i)
+			t.Fatalf("minute=%d current EMA fast-path output differs from legacy", i)
+		}
+	}
+	if len(optimized.currentEMACache) == 0 {
+		t.Fatal("expected current EMA fast-path cache to be populated")
+	}
+}
+
+func TestCurrentRSIIncrementalFastPathMatchesLegacyCalculation(t *testing.T) {
+	dataset := cacheFixtureDataset(720)
+	legacy, _ := newHistoricalEnvironment(dataset, cacheTechnologyJSON())
+	optimized, _ := newHistoricalEnvironment(dataset, cacheTechnologyJSON())
+	rule := Rule{Name: "unsafe-rsi", Type: "long", Enable: true, Code: `rsi_1h_3.Data[0] >= 0`}
+	raw, _ := json.Marshal([]Rule{rule})
+	optimized.enableStandardOptimizations(string(raw))
+	if optimized.indicatorCacheable["rsi_1h_3"] {
+		t.Fatal("Data[0] RSI must never use completed-value cache")
+	}
+	bars := dataset.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	for i := 420; i < 550; i++ {
+		left, _, err := legacy.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
+		if err != nil {
+			t.Fatal(err)
+		}
+		right, _, err := optimized.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(left["rsi_1h_3"].(line.ConfigData), right["rsi_1h_3"].(line.ConfigData)) {
+			t.Fatalf("minute=%d current RSI fast-path output differs from legacy", i)
+		}
+	}
+	if len(optimized.currentRSICache) == 0 {
+		t.Fatal("expected current RSI fast-path cache to be populated")
+	}
+}
+
+func TestCurrentADXIncrementalFastPathMatchesLegacyCalculation(t *testing.T) {
+	dataset := cacheFixtureDataset(720)
+	legacy, _ := newHistoricalEnvironment(dataset, cacheTechnologyJSON())
+	optimized, _ := newHistoricalEnvironment(dataset, cacheTechnologyJSON())
+	rule := Rule{Name: "unsafe-adx", Type: "long", Enable: true, Code: `adx_1h_3.ADX[0] >= 0 && adx_1h_3.PlusDI[0] >= 0 && adx_1h_3.MinusDI[0] >= 0`}
+	raw, _ := json.Marshal([]Rule{rule})
+	optimized.enableStandardOptimizations(string(raw))
+	if optimized.indicatorCacheable["adx_1h_3"] {
+		t.Fatal("Data[0] ADX must never use completed-value cache")
+	}
+	bars := dataset.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	for i := 420; i < 550; i++ {
+		left, _, err := legacy.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
+		if err != nil {
+			t.Fatal(err)
+		}
+		right, _, err := optimized.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(left["adx_1h_3"].(line.ADXConfigData), right["adx_1h_3"].(line.ADXConfigData)) {
+			t.Fatalf("minute=%d current ADX fast-path output differs from legacy", i)
+		}
+	}
+	if len(optimized.currentADXCache) == 0 {
+		t.Fatal("expected current ADX fast-path cache to be populated")
+	}
+}
+
+func TestCurrentIndicatorFastPathsMatchLegacyWithProductionPeriods(t *testing.T) {
+	dataset := cacheFixtureDataset(4200)
+	technologyJSON := `{"ema":[{"name":"ema_1h_20","enable":true,"kline_interval":"1h","period":20}],"rsi":[{"name":"rsi_1h_14","enable":true,"kline_interval":"1h","period":14}],"adx":[{"name":"adx_1h_14","enable":true,"kline_interval":"1h","period":14}]}`
+	legacy, err := newHistoricalEnvironment(dataset, technologyJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	optimized, err := newHistoricalEnvironment(dataset, technologyJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rule := Rule{Name: "production-period-current", Type: "long", Enable: true, Code: `ema_1h_20.Data[0] > 0 && rsi_1h_14.Data[0] >= 0 && adx_1h_14.ADX[0] >= 0 && adx_1h_14.PlusDI[0] >= 0 && adx_1h_14.MinusDI[0] >= 0`}
+	raw, _ := json.Marshal([]Rule{rule})
+	optimized.enableStandardOptimizations(string(raw))
+	bars := dataset.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	for i := 2400; i < 2700; i++ {
+		left, _, leftErr := legacy.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
+		right, _, rightErr := optimized.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
+		if (leftErr == nil) != (rightErr == nil) {
+			t.Fatalf("minute=%d error mismatch legacy=%v optimized=%v", i, leftErr, rightErr)
+		}
+		if leftErr != nil {
+			continue
+		}
+		for _, name := range []string{"ema_1h_20", "rsi_1h_14", "adx_1h_14"} {
+			if !reflect.DeepEqual(left[name], right[name]) {
+				t.Fatalf("minute=%d indicator=%s fast-path output differs from legacy", i, name)
+			}
 		}
 	}
 }
@@ -135,7 +228,7 @@ func TestAdaptiveEnvironmentKeepsStandardOptimizationDisabled(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if env.standardOptimizations || env.klinePriceCache != nil || env.indicatorCache != nil {
+	if env.standardOptimizations || env.klinePriceCache != nil || env.indicatorCache != nil || env.currentEMACache != nil || env.currentRSICache != nil || env.currentADXCache != nil {
 		t.Fatal("historical environment must default to legacy behavior; only standard_1m engine may opt in")
 	}
 }
@@ -236,7 +329,7 @@ func TestStandardOptimizedEngineResultIsByteIdenticalToLegacy(t *testing.T) {
 	dataset.DataHash = DatasetDataHash(dataset)
 	rules := []Rule{
 		{Name: "open", Type: "long", Enable: true, Code: `ema_1h_3.Data[1] >= ema_1h_3.Data[2] && adx_1h_3.ADX[1] >= 0 && rsi_1h_3.Data[1] >= 0 && atr_1h_3.Data[1] > 0 && dc_1h_3.High[1] >= dc_1h_3.Low[1] && kline_1h.Close[0] > 0`},
-		{Name: "close", Type: "close_long", Enable: true, Code: `ema_1h_3.Data[1] > 0`},
+		{Name: "close", Type: "close_long", Enable: true, Code: `ema_1h_3.Data[0] > 0 && rsi_1h_3.Data[0] >= 0 && adx_1h_3.ADX[0] >= 0 && adx_1h_3.PlusDI[0] >= 0 && adx_1h_3.MinusDI[0] >= 0`},
 	}
 	rawRules, _ := json.Marshal(rules)
 	strategy := StrategySnapshot{TemplateID: 1, TemplateName: "cache-equivalence", TechnologyJSON: cacheTechnologyJSON(), StrategyJSON: string(rawRules), Version: "cache-equivalence"}
