@@ -84,3 +84,18 @@ type KlineProgressCallback func(completed, total int)
 type KlineProgressSource interface {
 	KlinesWithProgress(context.Context, string, string, string, int64, int64, KlineProgressCallback) ([]Kline, error)
 }
+
+// ReplayKline is the minimal canonical K-line shape needed by deterministic backtests.
+// It intentionally omits source/audit strings and redundant market/symbol metadata.
+type ReplayKline struct {
+	OpenTime            int64   `orm:"column(open_time)"`
+	CloseTime           int64   `orm:"column(close_time)"`
+	TradeCount          int64   `orm:"column(trade_count)"`
+	Open                float64 `orm:"column(open_price)"`
+	High                float64 `orm:"column(high_price)"`
+	Low                 float64 `orm:"column(low_price)"`
+	Close               float64 `orm:"column(close_price)"`
+	Volume              float64 `orm:"column(volume)"`
+	QuoteVolume         float64 `orm:"column(quote_volume)"`
+	TakerBuyQuoteVolume float64 `orm:"column(taker_buy_quote_volume)"`
+}

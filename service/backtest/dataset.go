@@ -92,11 +92,11 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 				}
 			}
 		}
-		rows, err := repo.LoadKlines(ctx, dataset.Market, request.Symbol, interval, start, request.EndTime)
+		rows, err := repo.LoadReplayKlines(ctx, dataset.Market, request.Symbol, interval, start, request.EndTime)
 		if err != nil {
 			return Dataset{}, fmt.Errorf("load historical %s %s: %w", request.Symbol, interval, err)
 		}
-		bars := convertHistoricalKlines(rows)
+		bars := convertReplayKlines(request.Symbol, interval, rows)
 		if interval == request.ExecutionInterval && countTradeBars(bars, request.StartTime, request.EndTime) < 2 {
 			return Dataset{}, fmt.Errorf("insufficient execution bars in requested range")
 		}
@@ -148,6 +148,14 @@ func (builder DatasetBuilder) effectiveWarmupBars(rawTechnology string) (int, er
 		warmup = required
 	}
 	return warmup, nil
+}
+
+func convertReplayKlines(symbol, interval string, rows []historicalmarket.ReplayKline) []Bar {
+	out := make([]Bar, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, Bar{Symbol: symbol, Interval: interval, OpenTime: row.OpenTime, CloseTime: row.CloseTime, Open: row.Open, High: row.High, Low: row.Low, Close: row.Close, Volume: row.Volume, QuoteVolume: row.QuoteVolume, TradeCount: row.TradeCount, TakerBuyQuoteVolume: row.TakerBuyQuoteVolume})
+	}
+	return out
 }
 
 func convertHistoricalKlines(rows []historicalmarket.Kline) []Bar {
