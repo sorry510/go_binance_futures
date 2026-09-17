@@ -603,6 +603,30 @@ func TestBacktestEquityTransactionGrouping(t *testing.T) {
 	}
 }
 
+func TestBacktestEquityRawInsertSQLAndArgs(t *testing.T) {
+	query := backtestEquityInsertSQLMySQL(2)
+	if !strings.HasPrefix(query, "INSERT INTO `agent_backtest_equity_points`") {
+		t.Fatalf("unexpected insert prefix: %s", query)
+	}
+	if got := strings.Count(query, "(?,?,?,?,?,?,?,?)"); got != 2 {
+		t.Fatalf("tuple count=%d want=2", got)
+	}
+	points := []EquityPoint{
+		{Sequence: 1, BarTime: 11, Equity: 101, Cash: 99, UnrealizedPnL: 2, DrawdownPct: 0.1, PositionSide: "LONG"},
+		{Sequence: 2, BarTime: 12, Equity: 102, Cash: 98, UnrealizedPnL: 4, DrawdownPct: 0.2, PositionSide: "SHORT"},
+	}
+	args := backtestEquityInsertArgs("bt_test", points)
+	if len(args) != len(points)*backtestEquityInsertColumnCount {
+		t.Fatalf("args=%d want=%d", len(args), len(points)*backtestEquityInsertColumnCount)
+	}
+	want := []interface{}{"bt_test", 1, int64(11), float64(101), float64(99), float64(2), float64(0.1), "LONG"}
+	for i := range want {
+		if fmt.Sprint(args[i]) != fmt.Sprint(want[i]) {
+			t.Fatalf("arg[%d]=%v want=%v", i, args[i], want[i])
+		}
+	}
+}
+
 func TestBacktestResultMySQLBatchTargetsStayWithinPlaceholderLimits(t *testing.T) {
 	if backtestEventInsertBatchSizeMySQL != 3000 {
 		t.Fatalf("mysql event batch=%d want=3000", backtestEventInsertBatchSizeMySQL)

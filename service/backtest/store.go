@@ -172,14 +172,17 @@ func (manager *Manager) run(ctx context.Context, row models.AgentBacktestRun, re
 		return
 	}
 	result.ResolutionStats.Timing = &BacktestTimingStats{
-		DatasetBuildMs: datasetBuildMs,
-		DatasetSaveMs:  datasetSaveMs,
-		EngineMs:       engineMs,
-		SaveTradesMs:   saveTiming.TradesMs,
-		SaveEventsMs:   saveTiming.EventsMs,
-		SaveEquityMs:   saveTiming.EquityMs,
-		SaveTotalMs:    saveTotalMs,
-		TotalMs:        time.Since(runStarted).Milliseconds(),
+		DatasetBuildMs:     datasetBuildMs,
+		DatasetSaveMs:      datasetSaveMs,
+		EngineMs:           engineMs,
+		SaveTradesMs:       saveTiming.TradesMs,
+		SaveEventsMs:       saveTiming.EventsMs,
+		SaveEquityMs:       saveTiming.EquityMs,
+		SaveEquityBuildMs:  saveTiming.EquityBuildMs,
+		SaveEquityExecMs:   saveTiming.EquityExecMs,
+		SaveEquityCommitMs: saveTiming.EquityCommitMs,
+		SaveTotalMs:        saveTotalMs,
+		TotalMs:            time.Since(runStarted).Milliseconds(),
 	}
 	if err := ctx.Err(); err != nil {
 		manager.finishError(row.RunID, ctx, err)
@@ -742,9 +745,40 @@ func backtestEquityTransactionRows(equityBatchSize int) int {
 }
 
 type resultSaveTiming struct {
-	TradesMs int64
-	EventsMs int64
-	EquityMs int64
+	TradesMs       int64
+	EventsMs       int64
+	EquityMs       int64
+	EquityBuildMs  int64
+	EquityExecMs   int64
+	EquityCommitMs int64
+}
+
+const backtestEquityInsertColumnCount = 8
+
+func backtestEquityInsertSQLMySQL(rows int) string {
+	if rows <= 0 {
+		return ""
+	}
+	const prefix = "INSERT INTO `agent_backtest_equity_points` (`run_id`,`sequence`,`bar_time`,`equity`,`cash`,`unrealized_pnl`,`drawdown_pct`,`position_side`) VALUES "
+	const tuple = "(?,?,?,?,?,?,?,?)"
+	var builder strings.Builder
+	builder.Grow(len(prefix) + rows*(len(tuple)+1))
+	builder.WriteString(prefix)
+	for i := 0; i < rows; i++ {
+		if i > 0 {
+			builder.WriteByte(',')
+		}
+		builder.WriteString(tuple)
+	}
+	return builder.String()
+}
+
+func backtestEquityInsertArgs(runID string, points []EquityPoint) []interface{} {
+	args := make([]interface{}, 0, len(points)*backtestEquityInsertColumnCount)
+	for _, e := range points {
+		args = append(args, runID, e.Sequence, e.BarTime, e.Equity, e.Cash, e.UnrealizedPnL, e.DrawdownPct, e.PositionSide)
+	}
+	return args
 }
 
 func saveResultWithProgress(ctx context.Context, runID string, result Result, progress ProgressCallback) error {
@@ -819,6 +853,11 @@ func saveResultWithProgressTimed(ctx context.Context, runID string, result Resul
 
 	equityStarted := time.Now()
 	transactionRows := backtestEquityTransactionRows(equityBatchSize)
+	mysqlEquityBulkInsert := backtestDeleteMySQL()
+	fullEquityInsertSQL := ""
+	if mysqlEquityBulkInsert {
+		fullEquityInsertSQL = backtestEquityInsertSQLMySQL(equityBatchSize)
+	}
 	for groupStart := 0; groupStart < len(result.Equity); groupStart += transactionRows {
 		if err := ctx.Err(); err != nil {
 			return timing, err
@@ -841,20 +880,44 @@ func saveResultWithProgressTimed(ctx context.Context, runID string, result Resul
 			if end > groupEnd {
 				end = groupEnd
 			}
-			eqRows := make([]models.AgentBacktestEquityPoint, 0, end-start)
-			for _, e := range result.Equity[start:end] {
-				eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
+			buildStarted := time.Now()
+			points := result.Equity[start:end]
+			if mysqlEquityBulkInsert {
+				query := fullEquityInsertSQL
+				if len(points) != equityBatchSize {
+					query = backtestEquityInsertSQLMySQL(len(points))
+				}
+				args := backtestEquityInsertArgs(runID, points)
+				timing.EquityBuildMs += time.Since(buildStarted).Milliseconds()
+
+				execStarted := time.Now()
+				if _, err := tx.Raw(query, args...).Exec(); err != nil {
+					_ = tx.Rollback()
+					return timing, err
+				}
+				timing.EquityExecMs += time.Since(execStarted).Milliseconds()
+			} else {
+				eqRows := make([]models.AgentBacktestEquityPoint, 0, len(points))
+				for _, e := range points {
+					eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
+				}
+				timing.EquityBuildMs += time.Since(buildStarted).Milliseconds()
+
+				execStarted := time.Now()
+				if _, err := tx.InsertMultiWithCtx(ctx, equityBatchSize, &eqRows); err != nil {
+					_ = tx.Rollback()
+					return timing, err
+				}
+				timing.EquityExecMs += time.Since(execStarted).Milliseconds()
 			}
-			if _, err := tx.InsertMultiWithCtx(ctx, equityBatchSize, &eqRows); err != nil {
-				_ = tx.Rollback()
-				return timing, err
-			}
-			groupRows += len(eqRows)
+			groupRows += len(points)
 		}
+		commitStarted := time.Now()
 		if err := tx.Commit(); err != nil {
 			_ = tx.Rollback()
 			return timing, err
 		}
+		timing.EquityCommitMs += time.Since(commitStarted).Milliseconds()
 		completedRows += groupRows
 		report()
 	}

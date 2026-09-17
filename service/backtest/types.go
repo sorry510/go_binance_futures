@@ -209,14 +209,17 @@ type Metrics struct {
 }
 
 type BacktestTimingStats struct {
-	DatasetBuildMs int64 `json:"dataset_build_ms"`
-	DatasetSaveMs  int64 `json:"dataset_save_ms"`
-	EngineMs       int64 `json:"engine_ms"`
-	SaveTradesMs   int64 `json:"save_trades_ms"`
-	SaveEventsMs   int64 `json:"save_events_ms"`
-	SaveEquityMs   int64 `json:"save_equity_ms"`
-	SaveTotalMs    int64 `json:"save_total_ms"`
-	TotalMs        int64 `json:"total_ms"`
+	DatasetBuildMs     int64 `json:"dataset_build_ms"`
+	DatasetSaveMs      int64 `json:"dataset_save_ms"`
+	EngineMs           int64 `json:"engine_ms"`
+	SaveTradesMs       int64 `json:"save_trades_ms"`
+	SaveEventsMs       int64 `json:"save_events_ms"`
+	SaveEquityMs       int64 `json:"save_equity_ms"`
+	SaveEquityBuildMs  int64 `json:"save_equity_build_ms"`
+	SaveEquityExecMs   int64 `json:"save_equity_exec_ms"`
+	SaveEquityCommitMs int64 `json:"save_equity_commit_ms"`
+	SaveTotalMs        int64 `json:"save_total_ms"`
+	TotalMs            int64 `json:"total_ms"`
 }
 
 type ResolutionStats struct {
