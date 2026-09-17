@@ -319,6 +319,52 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err := SyncDatabase(14); err != nil {
 		t.Fatalf("second version-14 sync should be idempotent: %v", err)
 	}
+
+	// Simulate a pre-v15 database that still has the three redundant
+	// single-column equity indexes created by the previous model tags.
+	for _, statement := range []string{
+		"CREATE INDEX IF NOT EXISTS agent_backtest_equity_points_run_id ON agent_backtest_equity_points(run_id)",
+		"CREATE INDEX IF NOT EXISTS agent_backtest_equity_points_sequence ON agent_backtest_equity_points(sequence)",
+		"CREATE INDEX IF NOT EXISTS agent_backtest_equity_points_bar_time ON agent_backtest_equity_points(bar_time)",
+	} {
+		if _, err := o.Raw(statement).Exec(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := o.Raw("INSERT INTO agent_backtest_equity_points (run_id,sequence,bar_time,equity,cash,unrealized_pnl,drawdown_pct,position_side) VALUES (?,?,?,?,?,?,?,?)", "v15-preserve", 7, int64(123456789), 101.25, 99.5, 1.75, 2.5, "LONG").Exec(); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := SyncDatabase(15); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 15 {
+		t.Fatalf("expected database version 15 after equity index cleanup, config=%+v err=%v", config, err)
+	}
+	if !sqliteHasIndexColumns(t, o, "agent_backtest_equity_points", []string{"run_id", "sequence"}) {
+		t.Fatal("expected retained agent_backtest_equity_points(run_id,sequence) index after version 15 sync")
+	}
+	for _, columns := range [][]string{{"run_id"}, {"sequence"}, {"bar_time"}} {
+		if sqliteHasIndexColumns(t, o, "agent_backtest_equity_points", columns) {
+			t.Fatalf("unexpected redundant equity index on (%s) after version 15 sync", strings.Join(columns, ","))
+		}
+	}
+	var preserved struct {
+		Sequence int     `orm:"column(sequence)"`
+		BarTime  int64   `orm:"column(bar_time)"`
+		Equity   float64 `orm:"column(equity)"`
+		Cash     float64 `orm:"column(cash)"`
+	}
+	if err := o.Raw("SELECT sequence,bar_time,equity,cash FROM agent_backtest_equity_points WHERE run_id=?", "v15-preserve").QueryRow(&preserved); err != nil {
+		t.Fatal(err)
+	}
+	if preserved.Sequence != 7 || preserved.BarTime != 123456789 || preserved.Equity != 101.25 || preserved.Cash != 99.5 {
+		t.Fatalf("version 15 index cleanup changed equity data: %+v", preserved)
+	}
+	if err := SyncDatabase(15); err != nil {
+		t.Fatalf("second version-15 sync should be idempotent: %v", err)
+	}
 }
 
 func sqliteHasIndexColumns(t *testing.T, o orm.Ormer, table string, want []string) bool {
