@@ -82,8 +82,82 @@ func (*countingSource) Funding(context.Context, string, string, int64, int64) ([
 	return nil, nil
 }
 
+type listingBoundarySource struct {
+	countingSource
+	earliest      Kline
+	earliestCalls int
+}
+
+func (source *listingBoundarySource) EarliestKline(_ context.Context, market, symbol, interval string) (Kline, error) {
+	source.earliestCalls++
+	row := source.earliest
+	row.Market = market
+	row.Symbol = symbol
+	row.Interval = interval
+	return row, nil
+}
+
 func minuteBar(at time.Time, close float64) Kline {
 	return Kline{Market: MarketFuturesUSDT, Symbol: "BTCUSDT", Interval: "1m", OpenTime: at.UnixMilli(), CloseTime: at.Add(time.Minute - time.Millisecond).UnixMilli(), Open: close, High: close + 1, Low: close - 1, Close: close, Volume: 10, QuoteVolume: 1000, Source: "fixture"}
+}
+
+func TestRepositoryIgnoresOnlyPreListingGap(t *testing.T) {
+	setupRepositoryTest(t)
+	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	listed := start.Add(2 * time.Minute)
+	end := start.Add(5*time.Minute - time.Millisecond)
+	source := &listingBoundarySource{
+		countingSource: countingSource{rows: map[int64]Kline{}},
+		earliest:       minuteBar(listed, 102),
+	}
+	for i := 0; i < 3; i++ {
+		bar := minuteBar(listed.Add(time.Duration(i)*time.Minute), 102+float64(i))
+		source.rows[bar.OpenTime] = bar
+	}
+	repo := NewRepository(source)
+	rows, err := repo.LoadKlines(context.Background(), MarketFuturesUSDT, "SUIUSDT", "1m", start.UnixMilli(), end.UnixMilli())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 3 || rows[0].OpenTime != listed.UnixMilli() {
+		t.Fatalf("unexpected rows after listing clamp: %+v", rows)
+	}
+	if source.earliestCalls != 1 {
+		t.Fatalf("earliest discovery calls=%d want=1", source.earliestCalls)
+	}
+	if len(source.calls) != 1 || source.calls[0][0] != listed.UnixMilli() {
+		t.Fatalf("remote fetch was not clamped to listing boundary: %+v", source.calls)
+	}
+	replay, _, err := repo.LoadReplayKlinesWithStats(context.Background(), MarketFuturesUSDT, "SUIUSDT", "1m", start.UnixMilli(), end.UnixMilli())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(replay) != 3 || replay[0].OpenTime != listed.UnixMilli() {
+		t.Fatalf("unexpected replay rows after listing clamp: %+v", replay)
+	}
+	if source.earliestCalls != 1 {
+		t.Fatalf("earliest boundary should be cached, calls=%d", source.earliestCalls)
+	}
+}
+
+func TestRepositoryStillRejectsGapAfterListing(t *testing.T) {
+	setupRepositoryTest(t)
+	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	listed := start.Add(2 * time.Minute)
+	end := start.Add(5*time.Minute - time.Millisecond)
+	source := &listingBoundarySource{
+		countingSource: countingSource{rows: map[int64]Kline{}},
+		earliest:       minuteBar(listed, 102),
+	}
+	for _, offset := range []int{0, 2} {
+		bar := minuteBar(listed.Add(time.Duration(offset)*time.Minute), 102+float64(offset))
+		source.rows[bar.OpenTime] = bar
+	}
+	repo := NewRepository(source)
+	_, err := repo.LoadKlines(context.Background(), MarketFuturesUSDT, "SUIUSDT", "1m", start.UnixMilli(), end.UnixMilli())
+	if err == nil || !strings.Contains(err.Error(), "historical K-line gaps remain") {
+		t.Fatalf("expected post-listing gap error, got %v", err)
+	}
 }
 
 func TestRepositoryLastWriteWins(t *testing.T) {

@@ -126,6 +126,17 @@ func (source *prefetchCountingSource) KlinesWithProgress(ctx context.Context, ma
 	return rows, err
 }
 
+func (source *prefetchCountingSource) EarliestKline(ctx context.Context, market, symbol, interval string) (historicalmarket.Kline, error) {
+	if source.inner == nil {
+		return historicalmarket.Kline{}, nil
+	}
+	inner, ok := source.inner.(historicalmarket.EarliestKlineSource)
+	if !ok {
+		return historicalmarket.Kline{}, nil
+	}
+	return inner.EarliestKline(ctx, market, symbol, interval)
+}
+
 func (source *prefetchCountingSource) Funding(ctx context.Context, market, symbol string, start, end int64) ([]historicalmarket.FundingRate, error) {
 	if source.inner == nil {
 		return nil, fmt.Errorf("historical funding source is unavailable")
@@ -229,6 +240,18 @@ func (builder DatasetBuilder) PrefetchDetailed(ctx context.Context, request Data
 		start, err := subtractBars(plan.StartTime, interval, warmupBars)
 		if err != nil {
 			return PrefetchResult{}, err
+		}
+		if effectiveStart, hasData, earliestErr := fetchRepo.EffectiveKlineStart(
+			ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, interval, start, plan.EndTime,
+		); earliestErr == nil && hasData {
+			start = effectiveStart
+		} else if earliestErr == nil && !hasData {
+			start = plan.EndTime + 1
+		}
+		if start > plan.EndTime {
+			completed += intervalProgressUnits
+			report("checking", interval, completed)
+			continue
 		}
 		chunks, err := builder.prefetchKlineChunks(interval, start, plan.EndTime)
 		if err != nil {
