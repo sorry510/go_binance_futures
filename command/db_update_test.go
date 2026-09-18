@@ -48,7 +48,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.LLMConfig),
 		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus), new(models.MarketConditionHistory),
 		new(models.MarketDataImportBatch), new(models.MarketKline1s), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate), new(models.MarketTrade),
-		new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint),
+		new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint), new(models.AgentBacktestEquityChunk), new(models.AgentBacktestEquityPreview),
 		new(models.FuturesManagedPosition), new(models.FuturesManagedOrder),
 	)
 
@@ -364,6 +364,28 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	}
 	if err := SyncDatabase(15); err != nil {
 		t.Fatalf("second version-15 sync should be idempotent: %v", err)
+	}
+	if err := SyncDatabase(16); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 16 {
+		t.Fatalf("expected database version 16 after chunked equity schema sync, config=%+v err=%v", config, err)
+	}
+	for _, table := range []string{"agent_backtest_equity_chunks", "agent_backtest_equity_preview"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("expected %s after version 16 sync, count=%d err=%v", table, count, err)
+		}
+	}
+	if !sqliteHasIndexColumns(t, o, "agent_backtest_equity_chunks", []string{"run_id", "chunk_index"}) {
+		t.Fatal("expected unique agent_backtest_equity_chunks(run_id,chunk_index) access path after version 16 sync")
+	}
+	if !sqliteHasIndexColumns(t, o, "agent_backtest_equity_preview", []string{"run_id"}) {
+		t.Fatal("expected unique agent_backtest_equity_preview(run_id) access path after version 16 sync")
+	}
+	if err := SyncDatabase(16); err != nil {
+		t.Fatalf("second version-16 sync should be idempotent: %v", err)
 	}
 }
 
