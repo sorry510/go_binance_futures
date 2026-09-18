@@ -86,9 +86,13 @@ func buildSyntheticStrategyTemplateEnv(config technology.TechnologyConfig, ruleT
 		"NowSymbolOpen":          100.0,
 		"NowSymbolLow":           99.0,
 		"NowSymbolHigh":          102.0,
-		"KdjSimple":              line.KdjSimple,
-		"IsAsc":                  utils.IsAsc,
-		"IsDesc":                 utils.IsDesc,
+		"FundingRate": line.FundingRateData{
+			Data: []float64{-0.0003, -0.0001, 0.0001, 0.0002, 0.0001, 0.00005, 0.0001, 0.00008, 0.0001},
+			Time: []int64{1_700_000_000_000, 1_699_971_200_000, 1_699_942_400_000, 1_699_913_600_000, 1_699_884_800_000, 1_699_856_000_000, 1_699_827_200_000, 1_699_798_400_000, 1_699_769_600_000},
+		},
+		"KdjSimple": line.KdjSimple,
+		"IsAsc":     utils.IsAsc,
+		"IsDesc":    utils.IsDesc,
 	}
 	if ruleType == "long" || ruleType == "short" {
 		env["Positions"] = []types.FuturesPosition{}

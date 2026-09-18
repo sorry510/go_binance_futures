@@ -110,7 +110,7 @@ func (builder DatasetBuilder) BuildWithProgress(ctx context.Context, request Dat
 		completedUnits++
 		report()
 	}
-	fundingRows, err := repo.LoadFunding(ctx, dataset.Market, request.Symbol, request.StartTime, request.EndTime)
+	fundingRows, err := repo.LoadFunding(ctx, dataset.Market, request.Symbol, warmupStart, request.EndTime)
 	if err != nil {
 		return Dataset{}, fmt.Errorf("load historical funding %s: %w", request.Symbol, err)
 	}
