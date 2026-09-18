@@ -38,17 +38,26 @@ func setupBacktestStoreTest(t *testing.T) {
 			return
 		}
 		backtestStoreTestErr = orm.RunSyncdb("default", true, false)
+		if backtestStoreTestErr == nil {
+			_, backtestStoreTestErr = orm.NewOrm().Raw(`CREATE TABLE IF NOT EXISTS market_klines_1m_chunks (
+				market VARCHAR(32) NOT NULL, symbol VARCHAR(32) NOT NULL, month_start BIGINT NOT NULL,
+				start_time BIGINT NOT NULL, end_time BIGINT NOT NULL, point_count INTEGER NOT NULL,
+				encoding VARCHAR(32) NOT NULL, compression VARCHAR(16) NOT NULL, checksum BIGINT NOT NULL,
+				source_manifest TEXT NOT NULL, payload LONGBLOB NOT NULL, created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL,
+				PRIMARY KEY (market, symbol, month_start)
+			)`).Exec()
+		}
 	})
 	if backtestStoreTestErr != nil {
 		t.Fatal(backtestStoreTestErr)
 	}
 	o := orm.NewOrm()
-	for _, table := range []string{"agent_backtest_equity_preview", "agent_backtest_equity_chunks", "agent_backtest_equity_points", "agent_backtest_events", "agent_backtest_trades", "agent_backtest_runs", "agent_backtest_datasets", "market_data_import_batches", "market_funding_rates", "market_klines_1m", "market_klines_1h", "strategy_templates", "market_condition_histories", "config"} {
+	for _, table := range []string{"agent_backtest_equity_preview", "agent_backtest_equity_chunks", "agent_backtest_equity_points", "agent_backtest_events", "agent_backtest_trades", "agent_backtest_runs", "agent_backtest_datasets", "market_data_import_batches", "market_funding_rates", "market_klines_1m_chunks", "market_klines_1m", "market_klines_1h", "strategy_templates", "market_condition_histories", "config"} {
 		if _, err := o.Raw("DELETE FROM " + table).Exec(); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if _, err := o.Insert(&models.Config{Version: 8, MarketCondition: 3}); err != nil {
+	if _, err := o.Insert(&models.Config{ID: 1, Version: 8, MarketCondition: 3}); err != nil {
 		t.Fatal(err)
 	}
 }

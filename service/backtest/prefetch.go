@@ -31,6 +31,13 @@ type PrefetchResult struct {
 	RemoteRows  int          `json:"remote_rows"`
 }
 
+type PrefetchProgress struct {
+	Stage     string
+	Detail    string
+	Completed int
+	Total     int
+}
+
 const defaultPrefetchChunkBars = 10000
 
 type prefetchKlineChunk struct {
@@ -165,6 +172,14 @@ func (builder DatasetBuilder) PrefetchPlan(request DatasetRequest) (PrefetchPlan
 	}, nil
 }
 func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetRequest, progress ProgressCallback) (PrefetchResult, error) {
+	return builder.PrefetchDetailed(ctx, request, func(item PrefetchProgress) {
+		if progress != nil {
+			progress(item.Completed, item.Total)
+		}
+	})
+}
+
+func (builder DatasetBuilder) PrefetchDetailed(ctx context.Context, request DatasetRequest, progress func(PrefetchProgress)) (PrefetchResult, error) {
 	plan, err := builder.PrefetchPlan(request)
 	if err != nil {
 		return PrefetchResult{}, err
@@ -183,15 +198,33 @@ func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetReque
 	const (
 		intervalProgressUnits = 1000
 		fundingProgressUnits  = 100
+		publicProgressUnits   = 400
 	)
 	total := len(plan.Intervals)*intervalProgressUnits + fundingProgressUnits
 	completed := 0
-	report := func(value int) {
+	lastReported := -1
+	report := func(stage, detail string, value int) {
+		if value < lastReported {
+			value = lastReported
+		}
+		if value > total {
+			value = total
+		}
+		lastReported = value
 		if progress != nil {
-			progress(value, total)
+			progress(PrefetchProgress{Stage: stage, Detail: detail, Completed: value, Total: total})
 		}
 	}
-	report(0)
+	report("checking", "", 0)
+
+	publicCalls, publicRows := 0, 0
+	var publicClient *historicalmarket.PublicDataClient
+	defer func() {
+		if publicClient != nil {
+			_ = publicClient.Close()
+		}
+	}()
+
 	for _, interval := range plan.Intervals {
 		start, err := subtractBars(plan.StartTime, interval, warmupBars)
 		if err != nil {
@@ -201,10 +234,68 @@ func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetReque
 		if err != nil {
 			return PrefetchResult{}, err
 		}
+		usePublicMonthly := interval == ReplayInterval && canUsePublicDataPrefetch(repo.Source)
+		if usePublicMonthly {
+			months := prefetchMonthRanges(start, plan.EndTime)
+			chunks = make([]prefetchKlineChunk, 0, len(months))
+			for _, month := range months {
+				chunks = append(chunks, prefetchKlineChunk{Start: month.Start, End: month.End})
+			}
+		}
 		base := completed
+		restBase := base
+		restUnits := intervalProgressUnits
+		completeMonths := map[int64]bool{}
+
+		if usePublicMonthly {
+			months := completedPrefetchMonths(start, plan.EndTime, time.Now())
+			if len(months) > 0 {
+				if publicClient == nil {
+					publicClient, _ = newPrefetchPublicDataClient()
+				}
+				if publicClient != nil {
+					stats, err := prefetchPublicMonthly1m(ctx, repo, publicClient, plan.Symbol, months,
+						func(index int, stage, detail string) {
+							units := index * publicProgressUnits / len(months)
+							report(stage, detail, base+units)
+						})
+					if err != nil {
+						return PrefetchResult{}, err
+					}
+					publicCalls += stats.Calls
+					publicRows += stats.Rows
+					completeMonths = stats.CompleteMonths
+					restBase = base + publicProgressUnits
+					restUnits = intervalProgressUnits - publicProgressUnits
+				} else {
+					report("rest_fallback", ReplayInterval, base)
+				}
+			}
+		}
+
 		for chunkIndex, chunk := range chunks {
 			if err := ctx.Err(); err != nil {
 				return PrefetchResult{}, err
+			}
+			if usePublicMonthly {
+				at := time.UnixMilli(chunk.Start).UTC()
+				monthKey := time.Date(at.Year(), at.Month(), 1, 0, 0, 0, 0, time.UTC).UnixMilli()
+				if completeMonths[monthKey] {
+					units := (chunkIndex + 1) * restUnits / maxInt(len(chunks), 1)
+					report("checking", fmt.Sprintf("%s %d/%d", interval, chunkIndex+1, len(chunks)), restBase+units)
+					continue
+				}
+			}
+			complete, _, err := fetchRepo.KlineRangeComplete(
+				ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, interval, chunk.Start, chunk.End,
+			)
+			if err != nil {
+				return PrefetchResult{}, fmt.Errorf("check %s %s chunk %d/%d: %w", plan.Symbol, interval, chunkIndex+1, len(chunks), err)
+			}
+			if complete {
+				units := (chunkIndex + 1) * restUnits / maxInt(len(chunks), 1)
+				report("checking", fmt.Sprintf("%s %d/%d", interval, chunkIndex+1, len(chunks)), restBase+units)
+				continue
 			}
 			if _, err := fetchRepo.LoadKlinesWithProgress(ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, interval, chunk.Start, chunk.End, func(done, chunkTotal int) {
 				if chunkTotal <= 0 || len(chunks) == 0 {
@@ -218,32 +309,29 @@ func (builder DatasetBuilder) Prefetch(ctx context.Context, request DatasetReque
 					chunkFraction = 1
 				}
 				intervalFraction := (float64(chunkIndex) + chunkFraction) / float64(len(chunks))
-				units := int(intervalFraction * float64(intervalProgressUnits))
-				if units >= intervalProgressUnits {
-					units = intervalProgressUnits - 1
+				units := int(intervalFraction * float64(restUnits))
+				if units >= restUnits {
+					units = restUnits - 1
 				}
-				report(base + units)
+				report("rest_fallback", fmt.Sprintf("%s %d/%d", interval, chunkIndex+1, len(chunks)), restBase+units)
 			}); err != nil {
 				return PrefetchResult{}, fmt.Errorf("prefetch %s %s chunk %d/%d: %w", plan.Symbol, interval, chunkIndex+1, len(chunks), err)
 			}
-			// A chunk is counted complete only after LoadKlinesWithProgress has re-read
-			// the cache and verified that no gaps remain. This keeps the UI moving
-			// during multi-year imports without pretending a download is complete
-			// before its rows have actually been persisted.
-			units := (chunkIndex + 1) * intervalProgressUnits / len(chunks)
-			if units >= intervalProgressUnits {
-				units = intervalProgressUnits - 1
-			}
-			report(base + units)
+			units := (chunkIndex + 1) * restUnits / maxInt(len(chunks), 1)
+			report("checking", fmt.Sprintf("%s %d/%d", interval, chunkIndex+1, len(chunks)), restBase+units)
 		}
 		completed += intervalProgressUnits
-		report(completed)
+		report("checking", interval, completed)
 	}
+
+	report("funding", plan.Symbol, completed)
 	if _, err := fetchRepo.LoadFunding(ctx, historicalmarket.MarketFuturesUSDT, plan.Symbol, plan.StartTime, plan.EndTime); err != nil {
 		return PrefetchResult{}, fmt.Errorf("prefetch funding %s: %w", plan.Symbol, err)
 	}
 	completed += fundingProgressUnits
-	report(completed)
+	report("completed", "", completed)
 	calls, rows := counter.stats()
-	return PrefetchResult{Plan: plan, RemoteCalls: calls, RemoteRows: rows}, nil
+	return PrefetchResult{
+		Plan: plan, RemoteCalls: calls + publicCalls, RemoteRows: rows + publicRows,
+	}, nil
 }
