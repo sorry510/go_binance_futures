@@ -93,6 +93,12 @@ func legacyKLinePriceForTest(bars []Bar) line.KLinePrice {
 		p.Close = append(p.Close, b.Close)
 		p.Open = append(p.Open, b.Open)
 		p.Amount = append(p.Amount, b.QuoteVolume)
+		p.TakerBuyAmount = append(p.TakerBuyAmount, b.TakerBuyQuoteVolume)
+		if b.QuoteVolume > 0 {
+			p.TakerBuyRatio = append(p.TakerBuyRatio, b.TakerBuyQuoteVolume/b.QuoteVolume)
+		} else {
+			p.TakerBuyRatio = append(p.TakerBuyRatio, 0)
+		}
 		seconds := klineQPSDurationSeconds(b)
 		if seconds > 0 {
 			p.Qps = append(p.Qps, b.QuoteVolume/seconds)

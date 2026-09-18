@@ -145,9 +145,17 @@ func buildSyntheticStrategyTemplateEnv(config technology.TechnologyConfig, ruleT
 	addItems("atr", config.ATR)
 	addItems("supertrend", config.Supertrend)
 	for interval := range intervals {
-		env["kline_"+interval] = line.KLinePrice{High: series, Low: series, Close: series, Open: series, Amount: series, Qps: series}
+		env["kline_"+interval] = line.KLinePrice{High: series, Low: series, Close: series, Open: series, Amount: series, Qps: series, TakerBuyAmount: series, TakerBuyRatio: syntheticTakerBuyRatioSeries()}
 	}
 	return env
+}
+
+func syntheticTakerBuyRatioSeries() []float64 {
+	values := make([]float64, 150)
+	for index := range values {
+		values[index] = 0.45 + float64(index%11)/100
+	}
+	return values
 }
 
 func syntheticStrategyTemplateSeries() []float64 {

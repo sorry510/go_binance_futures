@@ -2,6 +2,7 @@ package binance
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	agentevent "go_binance_futures/agent/event"
 	"go_binance_futures/binanceproxy"
@@ -18,6 +19,7 @@ import (
 	// Loads the global config before the package-level reads below run.
 	_ "go_binance_futures/bootstrap"
 
+	"github.com/adshao/go-binance/v2/common"
 	"github.com/adshao/go-binance/v2/delivery"
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/adapter/logs"
@@ -53,6 +55,64 @@ var deliveryClient *delivery.Client
 
 var historicalRESTMu sync.Mutex
 var historicalRESTLast time.Time
+
+const (
+	// Binance defaults recvWindow to 5s. Read-only signed requests get a little
+	// more room for local sleep/wake and proxy jitter; trading mutations stay
+	// at 5s so a stale request is never accepted merely because of this fix.
+	futuresSignedReadRecvWindow  int64 = 10_000
+	futuresSignedTradeRecvWindow int64 = 5_000
+)
+
+// go-binance stores TimeOffset directly on Client. Every signed request in
+// this package must hold this lock while the library reads that field so an
+// on-demand timestamp resync cannot race an in-flight signed request.
+var futuresSignedTimeMu sync.RWMutex
+
+func isFuturesTimestampError(err error) bool {
+	var apiErr *common.APIError
+	return errors.As(err, &apiErr) && apiErr.Code == -1021
+}
+
+func syncFuturesServerTime(ctx context.Context) (offsetMS, rttMS int64, err error) {
+	futuresSignedTimeMu.Lock()
+	defer futuresSignedTimeMu.Unlock()
+
+	started := time.Now().UnixMilli()
+	serverTime, err := futuresClient.NewServerTimeService().Do(ctx)
+	finished := time.Now().UnixMilli()
+	if err != nil {
+		return 0, finished - started, err
+	}
+
+	// Estimate local time at the server response midpoint instead of using the
+	// end of the HTTP request, which avoids baking the full network RTT into
+	// the offset. go-binance signs with localTimestamp - TimeOffset.
+	offsetMS = ((started + finished) / 2) - serverTime
+	rttMS = finished - started
+	futuresClient.TimeOffset = offsetMS
+	return offsetMS, rttMS, nil
+}
+
+func doFuturesSigned[T any](ctx context.Context, recvWindow int64, call func(*futures.Client, context.Context, ...futures.RequestOption) (T, error)) (T, error) {
+	futuresSignedTimeMu.RLock()
+	res, err := call(futuresClient, ctx, futures.WithRecvWindow(recvWindow))
+	futuresSignedTimeMu.RUnlock()
+	if err == nil || !isFuturesTimestampError(err) {
+		return res, err
+	}
+
+	offsetMS, rttMS, syncErr := syncFuturesServerTime(ctx)
+	if syncErr != nil {
+		return res, fmt.Errorf("binance futures timestamp resync after %w: %v", err, syncErr)
+	}
+	logs.Warning("binance futures timestamp resynced after -1021: offset_ms=", offsetMS, " rtt_ms=", rttMS)
+
+	futuresSignedTimeMu.RLock()
+	res, err = call(futuresClient, ctx, futures.WithRecvWindow(recvWindow))
+	futuresSignedTimeMu.RUnlock()
+	return res, err
+}
 
 func waitHistoricalREST(ctx context.Context) error {
 	historicalRESTMu.Lock()
@@ -114,11 +174,9 @@ type ListOrderParams struct {
 
 // @returns /doc/futuresAccount.js
 func GetFuturesAccount() (res *futures.Account, err error) {
-	res, err = futuresClient.NewGetAccountService().Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.Account, error) {
+		return client.NewGetAccountService().Do(ctx, opts...)
+	})
 }
 
 // func GetSymbolConfig() (res []*futures.ExchangeInfoSymbol, err error) {
@@ -135,31 +193,25 @@ type PositionParams struct {
 
 // @returns /doc/position.js
 func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, err error) {
-	query := futuresClient.NewGetPositionRiskService()
-	if positionParams.Symbol != "" {
-		query = query.Symbol(positionParams.Symbol)
-	}
-	res, err = query.Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	// logs.Info(utils.ToJson(res))
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.PositionRisk, error) {
+		query := client.NewGetPositionRiskService()
+		if positionParams.Symbol != "" {
+			query = query.Symbol(positionParams.Symbol)
+		}
+		return query.Do(ctx, opts...)
+	})
 }
 
 // @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3
 // 这个版本仅返回有持仓或挂单的交易对，但是缺少了 Leverage 字段
 func GetPositionV3(positionParams PositionParams) (res []*futures.PositionRiskV3, err error) {
-	query := futuresClient.NewGetPositionRiskV3Service()
-	if positionParams.Symbol != "" {
-		query = query.Symbol(positionParams.Symbol)
-	}
-	res, err = query.Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	// logs.Info(utils.ToJson(res))
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.PositionRiskV3, error) {
+		query := client.NewGetPositionRiskV3Service()
+		if positionParams.Symbol != "" {
+			query = query.Symbol(positionParams.Symbol)
+		}
+		return query.Do(ctx, opts...)
+	})
 }
 
 type IncomeParams struct {
@@ -172,28 +224,28 @@ type IncomeParams struct {
 
 // @returns /doc/income.js
 func GetIncome(incomeParams IncomeParams) (res []*futures.IncomeHistory, err error) {
-	query := futuresClient.NewGetIncomeHistoryService()
-	if incomeParams.Symbol != "" {
-		query = query.Symbol(incomeParams.Symbol)
-	}
-	if incomeParams.IncomeType != "" {
-		query = query.IncomeType(incomeParams.IncomeType)
-	}
-	if incomeParams.StartTime != 0 {
-		query = query.StartTime(incomeParams.StartTime)
-	}
-	if incomeParams.EndTime != 0 {
-		query = query.EndTime(incomeParams.EndTime)
-	}
-	if incomeParams.Limit != 0 {
-		query = query.Limit(incomeParams.Limit)
-	}
-	res, err = query.Do(context.Background())
+	res, err = doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.IncomeHistory, error) {
+		query := client.NewGetIncomeHistoryService()
+		if incomeParams.Symbol != "" {
+			query = query.Symbol(incomeParams.Symbol)
+		}
+		if incomeParams.IncomeType != "" {
+			query = query.IncomeType(incomeParams.IncomeType)
+		}
+		if incomeParams.StartTime != 0 {
+			query = query.StartTime(incomeParams.StartTime)
+		}
+		if incomeParams.EndTime != 0 {
+			query = query.EndTime(incomeParams.EndTime)
+		}
+		if incomeParams.Limit != 0 {
+			query = query.Limit(incomeParams.Limit)
+		}
+		return query.Do(ctx, opts...)
+	})
 	if err != nil {
 		logs.Error(err)
-		return nil, err
 	}
-	// logs.Info(utils.ToJson(res))
 	return res, err
 }
 
@@ -444,67 +496,77 @@ type OwnedOrderParams struct {
 // CreateOwnedOrder is the common order primitive for V3-5 ownership-aware execution.
 // Ownership must be persisted by the caller before this function is invoked.
 func CreateOwnedOrder(ctx context.Context, params OwnedOrderParams) (*futures.CreateOrderResponse, error) {
-	service := futuresClient.NewCreateOrderService().
-		Symbol(params.Symbol).
-		Side(params.Side).
-		PositionSide(params.PositionSide).
-		Type(params.OrderType).
-		Quantity(formatOwnedOrderDecimal(params.Quantity)).
-		NewClientOrderID(params.ClientOrderID)
-	if params.OrderType == futures.OrderTypeLimit {
-		service = service.TimeInForce(futures.TimeInForceTypeGTC).
-			Price(formatOwnedOrderDecimal(params.Price))
-	}
-	if params.StopPrice > 0 {
-		service = service.StopPrice(formatOwnedOrderDecimal(params.StopPrice))
-	}
-	return service.Do(ctx)
+	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CreateOrderResponse, error) {
+		service := client.NewCreateOrderService().
+			Symbol(params.Symbol).
+			Side(params.Side).
+			PositionSide(params.PositionSide).
+			Type(params.OrderType).
+			Quantity(formatOwnedOrderDecimal(params.Quantity)).
+			NewClientOrderID(params.ClientOrderID)
+		if params.OrderType == futures.OrderTypeLimit {
+			service = service.TimeInForce(futures.TimeInForceTypeGTC).
+				Price(formatOwnedOrderDecimal(params.Price))
+		}
+		if params.StopPrice > 0 {
+			service = service.StopPrice(formatOwnedOrderDecimal(params.StopPrice))
+		}
+		return service.Do(ctx, opts...)
+	})
 }
 
 func GetOrderByClientOrderID(ctx context.Context, symbol, clientOrderID string) (*futures.Order, error) {
-	return futuresClient.NewGetOrderService().Symbol(symbol).OrigClientOrderID(clientOrderID).Do(ctx)
+	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.Order, error) {
+		return client.NewGetOrderService().Symbol(symbol).OrigClientOrderID(clientOrderID).Do(ctx, opts...)
+	})
 }
 
 // CreateOwnedAlgoOrder submits Binance USD-M conditional orders through the
 // dedicated Algo Order API. Since 2026-08-17 STOP/TP families are rejected by
 // the normal /fapi/v1/order endpoint with -4120.
 func CreateOwnedAlgoOrder(ctx context.Context, params OwnedOrderParams) (*futures.CreateAlgoOrderResp, error) {
-	service := futuresClient.NewCreateAlgoOrderService().
-		Symbol(params.Symbol).
-		Side(params.Side).
-		PositionSide(params.PositionSide).
-		Type(futures.AlgoOrderType(strings.ToUpper(strings.TrimSpace(string(params.OrderType))))).
-		Quantity(formatOwnedOrderDecimal(params.Quantity)).
-		ClientAlgoId(params.ClientOrderID)
-	if params.StopPrice > 0 {
-		service = service.TriggerPrice(formatOwnedOrderDecimal(params.StopPrice))
-	}
-	if params.Price > 0 {
-		service = service.Price(formatOwnedOrderDecimal(params.Price))
-	}
-	return service.Do(ctx)
+	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CreateAlgoOrderResp, error) {
+		service := client.NewCreateAlgoOrderService().
+			Symbol(params.Symbol).
+			Side(params.Side).
+			PositionSide(params.PositionSide).
+			Type(futures.AlgoOrderType(strings.ToUpper(strings.TrimSpace(string(params.OrderType))))).
+			Quantity(formatOwnedOrderDecimal(params.Quantity)).
+			ClientAlgoId(params.ClientOrderID)
+		if params.StopPrice > 0 {
+			service = service.TriggerPrice(formatOwnedOrderDecimal(params.StopPrice))
+		}
+		if params.Price > 0 {
+			service = service.Price(formatOwnedOrderDecimal(params.Price))
+		}
+		return service.Do(ctx, opts...)
+	})
 }
 
 func GetAlgoOrderByClientOrderID(ctx context.Context, clientOrderID string) (*futures.GetAlgoOrderResp, error) {
-	return futuresClient.NewGetAlgoOrderService().ClientAlgoID(clientOrderID).Do(ctx)
+	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.GetAlgoOrderResp, error) {
+		return client.NewGetAlgoOrderService().ClientAlgoID(clientOrderID).Do(ctx, opts...)
+	})
 }
 
 func GetOrderByOrderID(ctx context.Context, symbol string, orderID int64) (*futures.Order, error) {
-	return futuresClient.NewGetOrderService().Symbol(symbol).OrderID(orderID).Do(ctx)
+	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.Order, error) {
+		return client.NewGetOrderService().Symbol(symbol).OrderID(orderID).Do(ctx, opts...)
+	})
 }
 
 func CancelAlgoOrder(ctx context.Context, algoID int64) (*futures.CancelAlgoOrderResp, error) {
-	return futuresClient.NewCancelAlgoOrderService().AlgoID(algoID).Do(ctx)
+	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CancelAlgoOrderResp, error) {
+		return client.NewCancelAlgoOrderService().AlgoID(algoID).Do(ctx, opts...)
+	})
 }
 
 // 撤销订单
 // @see https://binance-docs.github.io/apidocs/futures/cn/#trade-6
 func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse, err error) {
-	res, err = futuresClient.NewCancelOrderService().Symbol(symbol).OrderID(orderId).Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CancelOrderResponse, error) {
+		return client.NewCancelOrderService().Symbol(symbol).OrderID(orderId).Do(ctx, opts...)
+	})
 }
 
 // 交易合约倍数
@@ -512,89 +574,78 @@ func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse
 // @param Number 1-125
 // @see https://binance-docs.github.io/apidocs/futures/cn/#trade-10
 func SetLeverage(symbol string, leverage int) (res *futures.SymbolLeverage, err error) {
-	res, err = futuresClient.NewChangeLeverageService().Symbol(symbol).Leverage(leverage).Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.SymbolLeverage, error) {
+		return client.NewChangeLeverageService().Symbol(symbol).Leverage(leverage).Do(ctx, opts...)
+	})
 }
 
 // 合约模式 全仓与 逐仓
 // @param string symbol
 // @param futures.MarginType Isolated(逐仓), Crossed(全仓)
 func SetMarginType(symbol string, marginType futures.MarginType) (err error) {
-	err = futuresClient.NewChangeMarginTypeService().Symbol(symbol).MarginType(marginType).Do(context.Background())
-	if err != nil {
-		return err
-	}
+	_, err = doFuturesSigned(context.Background(), futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (struct{}, error) {
+		err := client.NewChangeMarginTypeService().Symbol(symbol).MarginType(marginType).Do(ctx, opts...)
+		return struct{}{}, err
+	})
 	return err
 }
 
 // 获取历史订单
 // @see https://binance-docs.github.io/apidocs/futures/cn/#user_data-7
 func GetOrders(listOrderParams ListOrderParams) (res []*futures.Order, err error) {
-	service := futuresClient.NewListOrdersService()
-	if listOrderParams.Symbol != "" {
-		service = service.Symbol(listOrderParams.Symbol)
-	}
-	if listOrderParams.OrderID != 0 {
-		service = service.OrderID(listOrderParams.OrderID)
-	}
-	if listOrderParams.StartTime != 0 {
-		service = service.StartTime(listOrderParams.StartTime)
-	}
-	if listOrderParams.EndTime != 0 {
-		service = service.EndTime(listOrderParams.EndTime)
-	}
-	if listOrderParams.Limit != 0 {
-		service = service.Limit(listOrderParams.Limit)
-	}
-	res, err = service.Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.Order, error) {
+		service := client.NewListOrdersService()
+		if listOrderParams.Symbol != "" {
+			service = service.Symbol(listOrderParams.Symbol)
+		}
+		if listOrderParams.OrderID != 0 {
+			service = service.OrderID(listOrderParams.OrderID)
+		}
+		if listOrderParams.StartTime != 0 {
+			service = service.StartTime(listOrderParams.StartTime)
+		}
+		if listOrderParams.EndTime != 0 {
+			service = service.EndTime(listOrderParams.EndTime)
+		}
+		if listOrderParams.Limit != 0 {
+			service = service.Limit(listOrderParams.Limit)
+		}
+		return service.Do(ctx, opts...)
+	})
 }
 
 // 获取某个订单
 func GetOrder(orderParams OrderParams) (res *futures.Order, err error) {
-	service := futuresClient.NewGetOrderService()
-	if orderParams.Symbol != "" {
-		service = service.Symbol(orderParams.Symbol)
-	}
-	if orderParams.OrderID != 0 {
-		service = service.OrderID(orderParams.OrderID)
-	}
-	res, err = service.Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.Order, error) {
+		service := client.NewGetOrderService()
+		if orderParams.Symbol != "" {
+			service = service.Symbol(orderParams.Symbol)
+		}
+		if orderParams.OrderID != 0 {
+			service = service.OrderID(orderParams.OrderID)
+		}
+		return service.Do(ctx, opts...)
+	})
 }
 
 // @param startTime ex:(time.Now().Unix() - 60 * 60 * 24) // 获取最近1天的交易订单
 // @see https://binance-docs.github.io/apidocs/futures/cn/#user_data-7
 func GetLimitStartTimeOrders(startTime int64) (res []*futures.Order, err error) {
-	service := futuresClient.NewListOrdersService()
-	res, err = service.StartTime(startTime).Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.Order, error) {
+		return client.NewListOrdersService().StartTime(startTime).Do(ctx, opts...)
+	})
 }
 
 // 查看当前全部挂单(权重40)
 // @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/trade/rest-api/Current-All-Open-Orders
 func GetOpenOrder(symbols ...string) (res []*futures.Order, err error) {
-	service := futuresClient.NewListOpenOrdersService()
-	if len(symbols) > 0 {
-		service = service.Symbol(symbols[0])
-	}
-	res, err = service.Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return res, err
+	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.Order, error) {
+		service := client.NewListOpenOrdersService()
+		if len(symbols) > 0 {
+			service = service.Symbol(symbols[0])
+		}
+		return service.Do(ctx, opts...)
+	})
 }
 
 // 获取交易规则和交易对
