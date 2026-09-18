@@ -114,7 +114,7 @@ func (*AgentBacktestEvent) TableIndex() [][]string {
 	return [][]string{{"RunID", "Sequence"}}
 }
 
-// AgentBacktestEquityPoint stores the replayable equity curve.
+// AgentBacktestEquityPoint is the legacy row-per-minute equity storage retained for old-run reads and deletion.
 type AgentBacktestEquityPoint struct {
 	ID            int64   `orm:"column(id);auto" json:"id"`
 	RunID         string  `orm:"column(run_id);size(64)" json:"run_id"`
@@ -131,3 +131,39 @@ func (*AgentBacktestEquityPoint) TableName() string { return "agent_backtest_equ
 func (*AgentBacktestEquityPoint) TableIndex() [][]string {
 	return [][]string{{"RunID", "Sequence"}}
 }
+
+// AgentBacktestEquityChunk stores the complete lossless equity curve in compressed chunks.
+type AgentBacktestEquityChunk struct {
+	ID            int64  `orm:"column(id);auto" json:"id"`
+	RunID         string `orm:"column(run_id);size(64)" json:"run_id"`
+	ChunkIndex    int    `orm:"column(chunk_index)" json:"chunk_index"`
+	StartSequence int    `orm:"column(start_sequence)" json:"start_sequence"`
+	EndSequence   int    `orm:"column(end_sequence)" json:"end_sequence"`
+	StartTime     int64  `orm:"column(start_time)" json:"start_time"`
+	EndTime       int64  `orm:"column(end_time)" json:"end_time"`
+	PointCount    int    `orm:"column(point_count)" json:"point_count"`
+	Encoding      string `orm:"column(encoding);size(32)" json:"encoding"`
+	Compression   string `orm:"column(compression);size(16)" json:"compression"`
+	Checksum      int64  `orm:"column(checksum)" json:"checksum"`
+	Payload       string `orm:"column(payload);type(text)" json:"-"`
+	CreatedAt     int64  `orm:"column(created_at)" json:"created_at"`
+}
+
+func (*AgentBacktestEquityChunk) TableName() string { return "agent_backtest_equity_chunks" }
+func (*AgentBacktestEquityChunk) TableUnique() [][]string {
+	return [][]string{{"RunID", "ChunkIndex"}}
+}
+
+// AgentBacktestEquityPreview stores the <=20k sampled points used by the detail chart.
+type AgentBacktestEquityPreview struct {
+	ID          int64  `orm:"column(id);auto" json:"id"`
+	RunID       string `orm:"column(run_id);size(64);unique" json:"run_id"`
+	PointCount  int    `orm:"column(point_count)" json:"point_count"`
+	Encoding    string `orm:"column(encoding);size(32)" json:"encoding"`
+	Compression string `orm:"column(compression);size(16)" json:"compression"`
+	Checksum    int64  `orm:"column(checksum)" json:"checksum"`
+	Payload     string `orm:"column(payload);type(text)" json:"-"`
+	CreatedAt   int64  `orm:"column(created_at)" json:"created_at"`
+}
+
+func (*AgentBacktestEquityPreview) TableName() string { return "agent_backtest_equity_preview" }
