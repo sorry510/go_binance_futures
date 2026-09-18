@@ -1,0 +1,57 @@
+{
+  "name": "1h 压缩假突破拒绝双向 v2",
+  "technology": {
+    "ma": [],
+    "ema": [],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "compression_rejection_long_v2",
+      "type": "long",
+      "code": "let atr = atr_1h_14.Data[2];\nlet range_high = max(kline_1h.High[3:11]);\nlet range_low = min(kline_1h.Low[3:11]);\nlet outer_high = max(kline_1h.High[3:27]);\nlet outer_low = min(kline_1h.Low[3:27]);\nlet width = range_high - range_low;\nlet outer_width = outer_high - outer_low;\nlet avg_qv = mean(kline_1h.Qps[3:11]);\nlet compressed = atr > 0 && width > 0 && outer_width > 0 && width <= atr * 3.0 && width <= outer_width * 0.55;\nlet breakout_range = kline_1h.High[2] - kline_1h.Low[2];\nlet breakout_body = kline_1h.Open[2] - kline_1h.Close[2];\nlet lower_wick = min(kline_1h.Open[2], kline_1h.Close[2]) - kline_1h.Low[2];\nlet extension = range_low - kline_1h.Low[2];\nlet downside_breakout = compressed && avg_qv > 0 && kline_1h.Close[2] < range_low && breakout_body >= atr * 0.10 && breakout_range >= atr * 0.70 && extension >= atr * 0.05 && extension <= atr * 0.75 && lower_wick >= breakout_range * 0.25 && lower_wick >= breakout_body * 0.60 && kline_1h.Qps[2] >= avg_qv * 1.10;\nlet reclaim_range = kline_1h.High[1] - kline_1h.Low[1];\nlet reclaim_body = kline_1h.Close[1] - kline_1h.Open[1];\nlet reclaimed = reclaim_range > 0 && reclaim_body >= atr * 0.15 && kline_1h.Close[1] >= range_low + width * 0.10 && kline_1h.Close[1] >= kline_1h.Low[1] + reclaim_range * 0.55 && kline_1h.Low[1] > kline_1h.Low[2] && kline_1h.Qps[1] >= avg_qv * 0.85;\nlet no_chase = kline_1h.Close[0] >= kline_1h.Close[1] - atr * 0.20 && kline_1h.Close[0] <= kline_1h.Close[1] + atr * 0.25;\ndownside_breakout && reclaimed && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "compression_rejection_short_v2",
+      "type": "short",
+      "code": "let atr = atr_1h_14.Data[2];\nlet range_high = max(kline_1h.High[3:11]);\nlet range_low = min(kline_1h.Low[3:11]);\nlet outer_high = max(kline_1h.High[3:27]);\nlet outer_low = min(kline_1h.Low[3:27]);\nlet width = range_high - range_low;\nlet outer_width = outer_high - outer_low;\nlet avg_qv = mean(kline_1h.Qps[3:11]);\nlet compressed = atr > 0 && width > 0 && outer_width > 0 && width <= atr * 3.0 && width <= outer_width * 0.55;\nlet breakout_range = kline_1h.High[2] - kline_1h.Low[2];\nlet breakout_body = kline_1h.Close[2] - kline_1h.Open[2];\nlet upper_wick = kline_1h.High[2] - max(kline_1h.Open[2], kline_1h.Close[2]);\nlet extension = kline_1h.High[2] - range_high;\nlet upside_breakout = compressed && avg_qv > 0 && kline_1h.Close[2] > range_high && breakout_body >= atr * 0.10 && breakout_range >= atr * 0.70 && extension >= atr * 0.05 && extension <= atr * 0.75 && upper_wick >= breakout_range * 0.25 && upper_wick >= breakout_body * 0.60 && kline_1h.Qps[2] >= avg_qv * 1.10;\nlet reclaim_range = kline_1h.High[1] - kline_1h.Low[1];\nlet reclaim_body = kline_1h.Open[1] - kline_1h.Close[1];\nlet reclaimed = reclaim_range > 0 && reclaim_body >= atr * 0.15 && kline_1h.Close[1] <= range_high - width * 0.10 && kline_1h.Close[1] <= kline_1h.High[1] - reclaim_range * 0.55 && kline_1h.High[1] < kline_1h.High[2] && kline_1h.Qps[1] >= avg_qv * 0.85;\nlet no_chase = kline_1h.Close[0] <= kline_1h.Close[1] + atr * 0.20 && kline_1h.Close[0] >= kline_1h.Close[1] - atr * 0.25;\nupside_breakout && reclaimed && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "compression_rejection_close_long_v2",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "compression_rejection_close_short_v2",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

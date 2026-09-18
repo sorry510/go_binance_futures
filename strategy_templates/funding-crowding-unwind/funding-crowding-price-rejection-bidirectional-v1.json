@@ -1,0 +1,57 @@
+{
+  "name": "1h 资金费率拥挤失效反转双向 v1",
+  "technology": {
+    "ma": [
+      {
+        "name": "ma_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      }
+    ],
+    "ema": [],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "funding_short_crowding_unwind_long_v1",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) >= 6;\nlet funding_now = funding_ready ? mean(FundingRate.Data[0:3]) : 0;\nlet funding_prev = funding_ready ? mean(FundingRate.Data[3:6]) : 0;\nlet short_crowded = funding_ready && funding_now <= -0.00003 && funding_now < funding_prev - 0.00002;\nlet return_24h = kline_1h.Close[1] / kline_1h.Close[25] - 1;\nlet return_4h = kline_1h.Close[1] / kline_1h.Close[5] - 1;\nlet prev_return_4h = kline_1h.Close[2] / kline_1h.Close[6] - 1;\nlet crowding_failed = return_24h >= -0.015;\nlet reversal_started = return_4h >= 0.004 && prev_return_4h < 0.004;\nshort_crowded && crowding_failed && reversal_started",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_long_crowding_unwind_short_v1",
+      "type": "short",
+      "code": "let funding_ready = len(FundingRate.Data) >= 6;\nlet funding_now = funding_ready ? mean(FundingRate.Data[0:3]) : 0;\nlet funding_prev = funding_ready ? mean(FundingRate.Data[3:6]) : 0;\nlet long_crowded = funding_ready && funding_now >= 0.00015 && funding_now > funding_prev + 0.00002;\nlet return_24h = kline_1h.Close[1] / kline_1h.Close[25] - 1;\nlet return_4h = kline_1h.Close[1] / kline_1h.Close[5] - 1;\nlet prev_return_4h = kline_1h.Close[2] / kline_1h.Close[6] - 1;\nlet crowding_failed = return_24h <= 0.015;\nlet reversal_started = return_4h <= -0.004 && prev_return_4h > -0.004;\nlong_crowded && crowding_failed && reversal_started",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_crowding_close_long_v1",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_crowding_close_short_v1",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
