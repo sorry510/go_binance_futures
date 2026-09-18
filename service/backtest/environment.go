@@ -19,19 +19,32 @@ import (
 var ErrInsufficientHistoricalBars = errors.New("insufficient historical bars")
 
 type historicalEnvironment struct {
-	dataset                 Dataset
-	technology              technology.TechnologyConfig
-	warmupBars              int
-	overlays                map[string]Bar
-	minuteCloseOverlays     map[string]Bar
-	minuteCloseLastOpenTime int64
-	standardOptimizations   bool
-	klinePriceCache         map[string]cachedKLinePrice
-	indicatorCache          map[string]cachedIndicatorValue
-	indicatorCacheable      map[string]bool
-	currentEMACache         map[string]cachedCurrentEMA
-	currentRSICache         map[string]cachedCurrentRSI
-	currentADXCache         map[string]cachedCurrentADX
+	dataset                  Dataset
+	technology               technology.TechnologyConfig
+	warmupBars               int
+	overlays                 map[string]Bar
+	minuteCloseOverlays      map[string]Bar
+	minuteCloseLastOpenTime  int64
+	minuteCloseCurrentBar    Bar
+	minuteCloseCurrentAsOf   int64
+	marketConditionIndex     int
+	marketConditionAsOf      int64
+	marketConditionReady     bool
+	intervalMillis           map[string]int64
+	standardOptimizations    bool
+	tickerStatsCache         *rollingTickerStats
+	klinePriceCache          map[string]cachedKLinePrice
+	indicatorCache           map[string]cachedIndicatorValue
+	indicatorCacheable       map[string]bool
+	currentEMACache          map[string]cachedCurrentEMA
+	currentRSICache          map[string]cachedCurrentRSI
+	currentADXCache          map[string]cachedCurrentADX
+	indicatorGroupsCache     []indicatorGroup
+	indicatorPricesScratch   map[string]line.KLinePrice
+	indicatorCachedScratch   map[string]interface{}
+	indicatorTasksScratch    []indicatorTask
+	indicatorResultsScratch  []indicatorTaskResult
+	indicatorParallelScratch []int
 }
 
 func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historicalEnvironment, error) {
@@ -48,7 +61,16 @@ func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historic
 	if required := line.TechnologyKlineLimit(config); required > warmupBars {
 		warmupBars = required
 	}
-	return &historicalEnvironment{dataset: dataset, technology: config, warmupBars: warmupBars}, nil
+	intervalMillis := make(map[string]int64, len(dataset.Intervals))
+	for _, interval := range dataset.Intervals {
+		if interval == "1w" || interval == "1M" {
+			continue
+		}
+		if duration, err := intervalDuration(interval, time.Unix(0, 0).UTC()); err == nil {
+			intervalMillis[interval] = duration.Milliseconds()
+		}
+	}
+	return &historicalEnvironment{dataset: dataset, technology: config, warmupBars: warmupBars, intervalMillis: intervalMillis}, nil
 }
 
 func (builder *historicalEnvironment) Build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
@@ -93,6 +115,9 @@ func (builder *historicalEnvironment) BuildMinuteClose(asOf int64, minute Bar, p
 	if builder.standardOptimizations {
 		previous := builder.overlays
 		builder.overlays = builder.minuteCloseOverlays
+		builder.minuteCloseCurrentBar = minute
+		builder.minuteCloseCurrentAsOf = asOf
+		builder.prepareRollingTickerStats(minute, asOf)
 		env, condition, err := builder.build(asOf, position, cash, config)
 		builder.overlays = previous
 		return env, condition, err
@@ -108,7 +133,7 @@ func (builder *historicalEnvironment) advanceMinuteCloseOverlays(minute Bar, asO
 		if interval == "1m" {
 			continue
 		}
-		windowStart, err := intervalWindowStart(interval, asOf)
+		windowStart, err := builder.cachedIntervalWindowStart(interval, asOf)
 		if err != nil {
 			return err
 		}
@@ -150,12 +175,22 @@ func (builder *historicalEnvironment) advanceMinuteCloseOverlays(minute Bar, asO
 }
 
 func (builder *historicalEnvironment) build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
-	currentBars := builder.series(builder.dataset.Symbol, builder.dataset.ExecutionInterval, asOf, 1)
-	if len(currentBars) == 0 {
-		return nil, 0, fmt.Errorf("%w: no execution bars visible at %d", ErrInsufficientHistoricalBars, asOf)
+	var current Bar
+	if builder.standardOptimizations && builder.minuteCloseCurrentAsOf == asOf {
+		current = builder.minuteCloseCurrentBar
+	} else {
+		currentBars := builder.series(builder.dataset.Symbol, builder.dataset.ExecutionInterval, asOf, 1)
+		if len(currentBars) == 0 {
+			return nil, 0, fmt.Errorf("%w: no execution bars visible at %d", ErrInsufficientHistoricalBars, asOf)
+		}
+		current = currentBars[0]
 	}
-	current := currentBars[0]
-	targetStats := builder.tickerStats(builder.dataset.Symbol, asOf)
+	var targetStats map[string]interface{}
+	if builder.standardOptimizations && builder.tickerStatsCache != nil && builder.tickerStatsCache.asOf == asOf {
+		targetStats = builder.tickerStatsCache.values()
+	} else {
+		targetStats = builder.tickerStats(builder.dataset.Symbol, asOf)
+	}
 	env := map[string]interface{}{
 		"SystemStartTime": builder.dataset.StartTime, "NowTime": asOf, "NowPrice": current.Close,
 		"NowSymbolPercentChange": targetStats["PercentChange"], "NowSymbolClose": targetStats["Close"], "NowSymbolOpen": targetStats["Open"], "NowSymbolLow": targetStats["Low"], "NowSymbolHigh": targetStats["High"],
@@ -163,7 +198,11 @@ func (builder *historicalEnvironment) build(asOf int64, position *Position, cash
 	}
 	condition := 0
 	if builder.dataset.MarketConditionRequired {
-		condition = builder.marketConditionAt(asOf)
+		if builder.standardOptimizations {
+			condition = builder.marketConditionAtSequential(asOf)
+		} else {
+			condition = builder.marketConditionAt(asOf)
+		}
 		if condition == 0 {
 			return nil, 0, fmt.Errorf("%w: no MarketCondition visible at %d", ErrInsufficientHistoricalBars, asOf)
 		}
@@ -189,6 +228,31 @@ func (builder *historicalEnvironment) build(asOf int64, position *Position, cash
 	env["ROI"], env["NetROI"], env["Fee"], env["NetProfit"], env["Position"] = roi, netROI, position.OpenFee+projectedCloseFee, net, p
 	env["Positions"] = []markettypes.FuturesPosition{{Symbol: builder.dataset.Symbol, Side: position.Side, Amount: strconv.FormatFloat(position.Quantity, 'f', -1, 64), Leverage: int64(config.Leverage), EntryPrice: strconv.FormatFloat(position.EntryPrice, 'f', -1, 64), MarkPrice: strconv.FormatFloat(current.Close, 'f', -1, 64), UnrealizedProfit: strconv.FormatFloat(gross, 'f', -1, 64), SourceType: "backtest", CreateTime: position.EntryTime}}
 	return env, condition, nil
+}
+
+func (builder *historicalEnvironment) marketConditionAtSequential(asOf int64) int {
+	points := builder.dataset.MarketConditions
+	if len(points) == 0 {
+		builder.marketConditionReady = true
+		builder.marketConditionIndex = -1
+		builder.marketConditionAsOf = asOf
+		return 0
+	}
+	if !builder.marketConditionReady || asOf < builder.marketConditionAsOf {
+		builder.marketConditionIndex = sort.Search(len(points), func(i int) bool { return points[i].Time > asOf }) - 1
+		builder.marketConditionReady = true
+	} else {
+		index := builder.marketConditionIndex
+		for index+1 < len(points) && points[index+1].Time <= asOf {
+			index++
+		}
+		builder.marketConditionIndex = index
+	}
+	builder.marketConditionAsOf = asOf
+	if builder.marketConditionIndex < 0 {
+		return 0
+	}
+	return points[builder.marketConditionIndex].Value
 }
 
 func (builder *historicalEnvironment) marketConditionAt(asOf int64) int {
@@ -394,6 +458,32 @@ func buildIntrabarOverlays(dataset Dataset, partialMinute Bar, asOf int64) (map[
 		overlays[BarSeriesKey(dataset.Symbol, interval)] = overlay
 	}
 	return overlays, nil
+}
+
+func (builder *historicalEnvironment) cachedIntervalWindowStart(interval string, asOf int64) (int64, error) {
+	if builder.standardOptimizations {
+		if ms := builder.intervalMillis[interval]; ms > 0 {
+			return asOf - positiveMillisMod(asOf, ms), nil
+		}
+	}
+	return intervalWindowStart(interval, asOf)
+}
+
+func (builder *historicalEnvironment) cachedKlineQPSDurationSeconds(bar Bar) float64 {
+	if builder.standardOptimizations {
+		if ms := builder.intervalMillis[bar.Interval]; ms > 0 {
+			durationMillis := bar.CloseTime - bar.OpenTime
+			nominalMillis := ms - 1
+			if nominalMillis > durationMillis {
+				durationMillis = nominalMillis
+			}
+			if durationMillis <= 0 {
+				return 0
+			}
+			return float64(durationMillis) / 1000
+		}
+	}
+	return klineQPSDurationSeconds(bar)
 }
 
 func intervalWindowStart(interval string, asOf int64) (int64, error) {

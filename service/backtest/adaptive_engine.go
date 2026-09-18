@@ -140,7 +140,7 @@ func hasMarketConditionInRange(points []MarketConditionPoint, start, end int64) 
 	return index < len(points) && points[index].Time <= end
 }
 
-func ruleCanPassForROIRange(rules []Rule, side string, env map[string]interface{}, compiled map[string]*vm.Program, profile closeRuleROIProfile, minROI, maxROI float64, config RunConfig) (bool, error) {
+func ruleCanPassForROIRange(rules []Rule, side string, env map[string]interface{}, compiled map[int]*vm.Program, profile closeRuleROIProfile, minROI, maxROI float64, config RunConfig) (bool, error) {
 	if !profile.Eligible || env == nil {
 		return true, nil
 	}
@@ -248,7 +248,7 @@ func (state *adaptiveRunState) evaluateROIClose(
 	cash float64,
 	config RunConfig,
 	rules []Rule,
-	compiled map[string]*vm.Program,
+	compiled map[int]*vm.Program,
 	advanceFunding func(int64, float64),
 ) (adaptiveCloseDecision, error) {
 	candidate := DetectROICandidate(position, bar, config)
@@ -406,7 +406,7 @@ func (state *adaptiveRunState) evaluateTradeROIClose(
 	cash float64,
 	config RunConfig,
 	rules []Rule,
-	compiled map[string]*vm.Program,
+	compiled map[int]*vm.Program,
 	advanceFunding func(int64, float64),
 	secondEvidence historicalmarket.ResolutionEvidence,
 	stableEnv map[string]interface{},
