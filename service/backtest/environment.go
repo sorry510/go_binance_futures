@@ -194,7 +194,8 @@ func (builder *historicalEnvironment) build(asOf int64, position *Position, cash
 	env := map[string]interface{}{
 		"SystemStartTime": builder.dataset.StartTime, "NowTime": asOf, "NowPrice": current.Close,
 		"NowSymbolPercentChange": targetStats["PercentChange"], "NowSymbolClose": targetStats["Close"], "NowSymbolOpen": targetStats["Open"], "NowSymbolLow": targetStats["Low"], "NowSymbolHigh": targetStats["High"],
-		"KdjSimple": line.KdjSimple, "IsAsc": utils.IsAsc, "IsDesc": utils.IsDesc,
+		"FundingRate": builder.fundingRateData(asOf, 16),
+		"KdjSimple":   line.KdjSimple, "IsAsc": utils.IsAsc, "IsDesc": utils.IsDesc,
 	}
 	condition := 0
 	if builder.dataset.MarketConditionRequired {
@@ -228,6 +229,27 @@ func (builder *historicalEnvironment) build(asOf int64, position *Position, cash
 	env["ROI"], env["NetROI"], env["Fee"], env["NetProfit"], env["Position"] = roi, netROI, position.OpenFee+projectedCloseFee, net, p
 	env["Positions"] = []markettypes.FuturesPosition{{Symbol: builder.dataset.Symbol, Side: position.Side, Amount: strconv.FormatFloat(position.Quantity, 'f', -1, 64), Leverage: int64(config.Leverage), EntryPrice: strconv.FormatFloat(position.EntryPrice, 'f', -1, 64), MarkPrice: strconv.FormatFloat(current.Close, 'f', -1, 64), UnrealizedProfit: strconv.FormatFloat(gross, 'f', -1, 64), SourceType: "backtest", CreateTime: position.EntryTime}}
 	return env, condition, nil
+}
+
+func (builder *historicalEnvironment) fundingRateData(asOf int64, limit int) line.FundingRateData {
+	if limit <= 0 {
+		return line.FundingRateData{}
+	}
+	rows := builder.dataset.Funding
+	end := sort.Search(len(rows), func(i int) bool { return rows[i].FundingTime > asOf })
+	start := end - limit
+	if start < 0 {
+		start = 0
+	}
+	result := line.FundingRateData{
+		Data: make([]float64, 0, end-start),
+		Time: make([]int64, 0, end-start),
+	}
+	for i := end - 1; i >= start; i-- {
+		result.Data = append(result.Data, rows[i].FundingRate)
+		result.Time = append(result.Time, rows[i].FundingTime)
+	}
+	return result
 }
 
 func (builder *historicalEnvironment) marketConditionAtSequential(asOf int64) int {
