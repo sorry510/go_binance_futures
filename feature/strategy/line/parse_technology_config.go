@@ -592,7 +592,7 @@ var supportedKlineIntervals = map[string]struct{}{
 var reservedIndicatorNames = map[string]struct{}{
 	"SystemStartTime": {}, "MarketCondition": {}, "NowTime": {}, "NowPrice": {},
 	"NowSymbolPercentChange": {}, "NowSymbolClose": {}, "NowSymbolOpen": {},
-	"NowSymbolLow": {}, "NowSymbolHigh": {},
+	"NowSymbolLow": {}, "NowSymbolHigh": {}, "FundingRate": {},
 	"KdjSimple": {}, "IsAsc": {}, "IsDesc": {}, "ROI": {}, "Position": {}, "Positions": {},
 }
 
@@ -772,6 +772,7 @@ func InitParseEnv(symbol string, strTechnology string) map[string]interface{} {
 		"SystemStartTime": systemStartTime,
 		"MarketCondition": marketConditionStr,
 		"NowTime":         time.Now().Unix() * 1000,
+		"FundingRate":     loadFundingRateEnv(symbol),
 		"KdjSimple":       KdjSimple,
 		"IsAsc":           utils.IsAsc,
 		"IsDesc":          utils.IsDesc,
