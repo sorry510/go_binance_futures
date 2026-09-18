@@ -167,3 +167,106 @@ func TestCurrentExecutionBarLimitOneMatchesLegacyWarmupHead(t *testing.T) {
 		}
 	}
 }
+
+func TestRollingTickerStatsMatchLegacyEveryMinute(t *testing.T) {
+	bars := optimizationFixtureBars(1800)
+	for i := range bars {
+		shift := float64((i*37)%101 - 50)
+		bars[i].Open = 200 + shift
+		bars[i].Close = bars[i].Open + float64((i%9)-4)*0.3
+		bars[i].High = maxFloat(bars[i].Open, bars[i].Close) + float64(i%13)*0.2 + 0.1
+		bars[i].Low = minFloat(bars[i].Open, bars[i].Close) - float64(i%11)*0.2 - 0.1
+	}
+	key := BarSeriesKey("BTCUSDT", "1m")
+	dataset := Dataset{Symbol: "BTCUSDT", ExecutionInterval: "1m", Intervals: []string{"1m"}, Bars: map[string][]Bar{key: bars}}
+	legacy := historicalEnvironment{dataset: dataset}
+	optimized := historicalEnvironment{dataset: dataset}
+	optimized.enableStandardOptimizations("[]")
+	fields := []string{"NowSymbolPercentChange", "NowSymbolClose", "NowSymbolOpen", "NowSymbolLow", "NowSymbolHigh"}
+	for i, bar := range bars {
+		left, _, leftErr := legacy.BuildMinuteClose(bar.CloseTime, bar, nil, 1000, zeroCosts())
+		right, _, rightErr := optimized.BuildMinuteClose(bar.CloseTime, bar, nil, 1000, zeroCosts())
+		if leftErr != nil || rightErr != nil {
+			t.Fatalf("minute=%d build error legacy=%v optimized=%v", i, leftErr, rightErr)
+		}
+		for _, field := range fields {
+			if !reflect.DeepEqual(left[field], right[field]) {
+				t.Fatalf("minute=%d field=%s mismatch legacy=%v optimized=%v", i, field, left[field], right[field])
+			}
+		}
+	}
+	if optimized.tickerStatsCache == nil || optimized.tickerStatsCache.asOf != bars[len(bars)-1].CloseTime {
+		t.Fatal("expected rolling ticker cache to track the latest replay minute")
+	}
+	jump := bars[900]
+	left, _, leftErr := legacy.BuildMinuteClose(jump.CloseTime, jump, nil, 1000, zeroCosts())
+	right, _, rightErr := optimized.BuildMinuteClose(jump.CloseTime, jump, nil, 1000, zeroCosts())
+	if leftErr != nil || rightErr != nil {
+		t.Fatalf("backward jump build error legacy=%v optimized=%v", leftErr, rightErr)
+	}
+	for _, field := range fields {
+		if !reflect.DeepEqual(left[field], right[field]) {
+			t.Fatalf("backward jump field=%s mismatch legacy=%v optimized=%v", field, left[field], right[field])
+		}
+	}
+}
+
+func minFloat(a, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func maxFloat(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func TestSequentialMarketConditionMatchesLegacy(t *testing.T) {
+	bars := optimizationFixtureBars(1800)
+	points := []MarketConditionPoint{
+		{Time: bars[0].CloseTime - 1, Value: 1},
+		{Time: bars[120].CloseTime, Value: 2},
+		{Time: bars[120].CloseTime, Value: 3},
+		{Time: bars[777].CloseTime, Value: 4},
+		{Time: bars[1500].CloseTime, Value: 5},
+	}
+	builder := historicalEnvironment{standardOptimizations: true, dataset: Dataset{MarketConditions: points}}
+	for i, bar := range bars {
+		got := builder.marketConditionAtSequential(bar.CloseTime)
+		want := builder.marketConditionAt(bar.CloseTime)
+		if got != want {
+			t.Fatalf("minute=%d market condition mismatch got=%d want=%d", i, got, want)
+		}
+	}
+	got := builder.marketConditionAtSequential(bars[300].CloseTime)
+	want := builder.marketConditionAt(bars[300].CloseTime)
+	if got != want {
+		t.Fatalf("backward seek mismatch got=%d want=%d", got, want)
+	}
+}
+
+func TestCachedIntervalMetadataMatchesLegacy(t *testing.T) {
+	dataset := Dataset{Intervals: []string{"1m", "5m", "1h", "4h", "1d", "1w", "1M"}}
+	builder, err := newHistoricalEnvironment(dataset, "{}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	builder.standardOptimizations = true
+	times := []int64{
+		time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(),
+		time.Date(2026, 6, 17, 13, 47, 59, 123000000, time.UTC).UnixMilli(),
+	}
+	for _, asOf := range times {
+		for _, interval := range dataset.Intervals {
+			got, gotErr := builder.cachedIntervalWindowStart(interval, asOf)
+			want, wantErr := intervalWindowStart(interval, asOf)
+			if (gotErr == nil) != (wantErr == nil) || got != want {
+				t.Fatalf("interval=%s asOf=%d got=%d err=%v want=%d err=%v", interval, asOf, got, gotErr, want, wantErr)
+			}
+		}
+	}
+}

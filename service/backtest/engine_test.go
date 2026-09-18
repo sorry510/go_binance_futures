@@ -735,7 +735,7 @@ func TestAdaptiveROIProofBuildFailureFallsBackToConservativeReplay(t *testing.T)
 	config.Leverage = 10
 	config.TakeProfitPct = 10
 	rules := []Rule{{Name: "close", Enable: true, Type: "close_long", Code: "ROI >= 10"}}
-	decision, err := state.evaluateROIClose(context.Background(), d, environment, bar, position, 1000, config, rules, map[string]*vm.Program{}, nil)
+	decision, err := state.evaluateROIClose(context.Background(), d, environment, bar, position, 1000, config, rules, map[int]*vm.Program{}, nil)
 	if err != nil {
 		t.Fatalf("ROI proof build failure must fall back instead of aborting run: %v", err)
 	}
