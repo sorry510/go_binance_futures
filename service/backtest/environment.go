@@ -358,6 +358,7 @@ func (builder *historicalEnvironment) klinePriceSeries(symbol, interval string, 
 		High: make([]float64, 0, count), Low: make([]float64, 0, count),
 		Close: make([]float64, 0, count), Open: make([]float64, 0, count),
 		Amount: make([]float64, 0, count), Qps: make([]float64, 0, count),
+		TakerBuyAmount: make([]float64, 0, count), TakerBuyRatio: make([]float64, 0, count),
 	}
 	appendBar := func(bar Bar) {
 		p.High = append(p.High, bar.High)
@@ -365,6 +366,12 @@ func (builder *historicalEnvironment) klinePriceSeries(symbol, interval string, 
 		p.Close = append(p.Close, bar.Close)
 		p.Open = append(p.Open, bar.Open)
 		p.Amount = append(p.Amount, bar.QuoteVolume)
+		p.TakerBuyAmount = append(p.TakerBuyAmount, bar.TakerBuyQuoteVolume)
+		if bar.QuoteVolume > 0 {
+			p.TakerBuyRatio = append(p.TakerBuyRatio, bar.TakerBuyQuoteVolume/bar.QuoteVolume)
+		} else {
+			p.TakerBuyRatio = append(p.TakerBuyRatio, 0)
+		}
 		seconds := klineQPSDurationSeconds(bar)
 		if seconds > 0 {
 			p.Qps = append(p.Qps, bar.QuoteVolume/seconds)
@@ -659,6 +666,7 @@ func toKLinePrice(bars []Bar) line.KLinePrice {
 		High: make([]float64, 0, len(bars)), Low: make([]float64, 0, len(bars)),
 		Close: make([]float64, 0, len(bars)), Open: make([]float64, 0, len(bars)),
 		Amount: make([]float64, 0, len(bars)), Qps: make([]float64, 0, len(bars)),
+		TakerBuyAmount: make([]float64, 0, len(bars)), TakerBuyRatio: make([]float64, 0, len(bars)),
 	}
 	for _, b := range bars {
 		p.High = append(p.High, b.High)
@@ -666,6 +674,12 @@ func toKLinePrice(bars []Bar) line.KLinePrice {
 		p.Close = append(p.Close, b.Close)
 		p.Open = append(p.Open, b.Open)
 		p.Amount = append(p.Amount, b.QuoteVolume)
+		p.TakerBuyAmount = append(p.TakerBuyAmount, b.TakerBuyQuoteVolume)
+		if b.QuoteVolume > 0 {
+			p.TakerBuyRatio = append(p.TakerBuyRatio, b.TakerBuyQuoteVolume/b.QuoteVolume)
+		} else {
+			p.TakerBuyRatio = append(p.TakerBuyRatio, 0)
+		}
 		seconds := klineQPSDurationSeconds(b)
 		if seconds > 0 {
 			p.Qps = append(p.Qps, b.QuoteVolume/seconds)

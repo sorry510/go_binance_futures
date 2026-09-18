@@ -483,6 +483,14 @@ NowSymbolLow = 2456.2 // 最低价
 NowSymbolHigh = 2840.3 // 最高价
 ```
 
+##### K 线主动成交方向
+
+所有 kline_<interval> 对象除了 OHLC、Amount、Qps 外，还提供：
+
+- TakerBuyAmount：主动买入成交额。
+- TakerBuyRatio：主动买入成交额 / 总成交额，通常为 0 到 1；低于 0.5 表示主动卖出成交额占优，高于 0.5 表示主动买入占优。
+- 回测直接使用历史 K 线已保存的 taker_buy_quote_volume，无需额外下载数据。
+
 ##### FundingRate
 
 ###### 类型: 对象
