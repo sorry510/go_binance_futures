@@ -23,6 +23,14 @@ func (repo *Repository) LoadReplayKlinesWithStats(ctx context.Context, market, s
 	if _, err := KlineTable(interval); err != nil {
 		return nil, stats, err
 	}
+	effectiveStart, hasData, err := repo.effectiveKlineStart(ctx, market, symbol, interval, start, end)
+	if err != nil {
+		return nil, stats, err
+	}
+	if !hasData {
+		return []ReplayKline{}, stats, nil
+	}
+	start = effectiveStart
 	rows, queryStats, err := repo.queryReplayKlines(market, symbol, interval, start, end)
 	stats.add(queryStats)
 	if err != nil {

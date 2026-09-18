@@ -54,6 +54,40 @@ func TestPrefetchPlanAlwaysIncludesOneMinuteReplayAndStrategyIntervals(t *testin
 	}
 }
 
+type listingTrackedHistorySource struct {
+	chunkTrackingHistorySource
+	earliest int64
+}
+
+func (source *listingTrackedHistorySource) EarliestKline(_ context.Context, market, symbol, interval string) (historicalmarket.Kline, error) {
+	return historicalmarket.Kline{
+		Market: market, Symbol: symbol, Interval: interval,
+		OpenTime: source.earliest, CloseTime: source.earliest + int64(time.Minute/time.Millisecond) - 1,
+	}, nil
+}
+
+func TestPrefetchClampsToListingBoundary(t *testing.T) {
+	setupBacktestStoreTest(t)
+	listed := time.Date(2026, 3, 2, 0, 0, 0, 0, time.UTC)
+	source := &listingTrackedHistorySource{earliest: listed.UnixMilli()}
+	builder := DatasetBuilder{Repository: historicalmarket.NewRepository(source), WarmupBars: 2, PrefetchChunkBars: 3}
+	request := DatasetRequest{
+		Symbol: "SUIUSDT", ExecutionInterval: ReplayInterval,
+		StartTime: listed.Add(-10 * time.Minute).UnixMilli(),
+		EndTime:   listed.Add(5 * time.Minute).UnixMilli(), TechnologyJSON: "{}",
+	}
+	if _, err := builder.Prefetch(context.Background(), request, nil); err != nil {
+		t.Fatal(err)
+	}
+	ranges := source.snapshotRanges()
+	if len(ranges) == 0 {
+		t.Fatal("expected at least one remote K-line fetch")
+	}
+	if ranges[0][0] != listed.UnixMilli() {
+		t.Fatalf("prefetch started before listing boundary: got=%d want=%d", ranges[0][0], listed.UnixMilli())
+	}
+}
+
 func TestPrefetchFillsDataSoImmediateBuildUsesLocalCache(t *testing.T) {
 	setupBacktestStoreTest(t)
 	start := time.Date(2026, 3, 2, 0, 0, 0, 0, time.UTC)

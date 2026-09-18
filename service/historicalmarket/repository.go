@@ -8,6 +8,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"go_binance_futures/models"
@@ -17,12 +18,92 @@ import (
 )
 
 type Repository struct {
-	Source Source
-	Now    func() time.Time
+	Source        Source
+	Now           func() time.Time
+	earliestCache *sync.Map
 }
 
-func NewRepository(source Source) *Repository { return &Repository{Source: source, Now: time.Now} }
-func DefaultRepository() *Repository          { return NewRepository(BinanceSource{}) }
+func NewRepository(source Source) *Repository {
+	return &Repository{Source: source, Now: time.Now, earliestCache: &sync.Map{}}
+}
+func DefaultRepository() *Repository { return NewRepository(BinanceSource{}) }
+
+func (repo *Repository) localEarliestKlineTime(market, symbol, interval string) (int64, bool, error) {
+	table, err := KlineTable(interval)
+	if err != nil {
+		return 0, false, err
+	}
+	var earliest int64
+	if err := orm.NewOrm().Raw(
+		"SELECT COALESCE(MIN(open_time),0) FROM "+table+" WHERE market=? AND symbol=?",
+		market, strings.ToUpper(strings.TrimSpace(symbol)),
+	).QueryRow(&earliest); err != nil {
+		return 0, false, err
+	}
+	if interval == "1m" {
+		var chunkEarliest int64
+		if err := orm.NewOrm().Raw(
+			"SELECT COALESCE(MIN(start_time),0) FROM market_klines_1m_chunks WHERE market=? AND symbol=?",
+			market, strings.ToUpper(strings.TrimSpace(symbol)),
+		).QueryRow(&chunkEarliest); err != nil {
+			return 0, false, err
+		}
+		if earliest == 0 || (chunkEarliest > 0 && chunkEarliest < earliest) {
+			earliest = chunkEarliest
+		}
+	}
+	return earliest, earliest > 0, nil
+}
+
+func (repo *Repository) EarliestAvailableKlineTime(ctx context.Context, market, symbol, interval string) (int64, bool, error) {
+	source, ok := repo.Source.(EarliestKlineSource)
+	if !ok || source == nil {
+		return 0, false, nil
+	}
+	key := market + "|" + strings.ToUpper(strings.TrimSpace(symbol)) + "|" + interval
+	if repo.earliestCache != nil {
+		if cached, found := repo.earliestCache.Load(key); found {
+			return cached.(int64), true, nil
+		}
+	}
+	row, err := source.EarliestKline(ctx, market, symbol, interval)
+	if err != nil {
+		return 0, false, err
+	}
+	if row.OpenTime <= 0 {
+		return 0, false, nil
+	}
+	if repo.earliestCache != nil {
+		repo.earliestCache.Store(key, row.OpenTime)
+	}
+	return row.OpenTime, true, nil
+}
+
+func (repo *Repository) effectiveKlineStart(ctx context.Context, market, symbol, interval string, start, end int64) (int64, bool, error) {
+	if localEarliest, ok, err := repo.localEarliestKlineTime(market, symbol, interval); err == nil && ok && localEarliest <= start {
+		return start, true, nil
+	}
+	earliest, ok, err := repo.EarliestAvailableKlineTime(ctx, market, symbol, interval)
+	if err != nil {
+		if ctx.Err() != nil {
+			return 0, false, ctx.Err()
+		}
+		// Availability discovery is an optimization/safety boundary. If it is
+		// temporarily unavailable, preserve the existing local-first path.
+		return start, true, nil
+	}
+	if !ok || start >= earliest {
+		return start, true, nil
+	}
+	if earliest > end {
+		return earliest, false, nil
+	}
+	return earliest, true, nil
+}
+
+func (repo *Repository) EffectiveKlineStart(ctx context.Context, market, symbol, interval string, start, end int64) (int64, bool, error) {
+	return repo.effectiveKlineStart(ctx, market, symbol, interval, start, end)
+}
 
 func (repo *Repository) LoadKlines(ctx context.Context, market, symbol, interval string, start, end int64) ([]Kline, error) {
 	return repo.LoadKlinesWithProgress(ctx, market, symbol, interval, start, end, nil)
@@ -35,6 +116,17 @@ func (repo *Repository) LoadKlinesWithProgress(ctx context.Context, market, symb
 	if _, err := KlineTable(interval); err != nil {
 		return nil, err
 	}
+	effectiveStart, hasData, err := repo.effectiveKlineStart(ctx, market, symbol, interval, start, end)
+	if err != nil {
+		return nil, err
+	}
+	if !hasData {
+		if progress != nil {
+			progress(1, 1)
+		}
+		return []Kline{}, nil
+	}
+	start = effectiveStart
 	rows, err := repo.queryKlines(market, symbol, interval, start, end)
 	if err != nil {
 		return nil, err
@@ -106,6 +198,14 @@ func (repo *Repository) LoadFunding(ctx context.Context, market, symbol string, 
 	if err := validateRange(market, symbol, start, end); err != nil {
 		return nil, err
 	}
+	effectiveStart, hasData, err := repo.effectiveKlineStart(ctx, market, symbol, "1m", start, end)
+	if err != nil {
+		return nil, err
+	}
+	if !hasData {
+		return []FundingRate{}, nil
+	}
+	start = effectiveStart
 	rows, err := repo.queryFunding(market, symbol, start, end)
 	if err != nil {
 		return nil, err
