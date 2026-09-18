@@ -74,7 +74,7 @@ func TestStandardCompletedIndicatorCacheMatchesLegacyStrategyResults(t *testing.
 	raw, _ := json.Marshal([]Rule{rule})
 	optimized.enableStandardOptimizations(string(raw))
 	bars := dataset.Bars[BarSeriesKey("BTCUSDT", "1m")]
-	legacyPrograms, optimizedPrograms := map[string]*vm.Program{}, map[string]*vm.Program{}
+	legacyPrograms, optimizedPrograms := map[int]*vm.Program{}, map[int]*vm.Program{}
 	for i := 420; i < 610; i++ {
 		left, _, leftErr := legacy.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
 		right, _, rightErr := optimized.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())

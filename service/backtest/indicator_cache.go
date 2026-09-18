@@ -91,6 +91,9 @@ func (builder *historicalEnvironment) enableStandardOptimizations(strategyJSON s
 	builder.currentEMACache = make(map[string]cachedCurrentEMA)
 	builder.currentRSICache = make(map[string]cachedCurrentRSI)
 	builder.currentADXCache = make(map[string]cachedCurrentADX)
+	builder.indicatorGroupsCache = builder.indicatorGroups()
+	builder.indicatorPricesScratch = make(map[string]line.KLinePrice)
+	builder.indicatorCachedScratch = make(map[string]interface{})
 	builder.indicatorCacheable = analyzeCompletedIndicatorCacheability(strategyJSON, builder.technology)
 }
 
@@ -288,7 +291,7 @@ func (builder *historicalEnvironment) cachedKlinePriceSeries(interval string, as
 	entry.value.Close[0] = overlay.Close
 	entry.value.Open[0] = overlay.Open
 	entry.value.Amount[0] = overlay.QuoteVolume
-	seconds := klineQPSDurationSeconds(overlay)
+	seconds := builder.cachedKlineQPSDurationSeconds(overlay)
 	if seconds > 0 {
 		entry.value.Qps[0] = overlay.QuoteVolume / seconds
 	} else {
@@ -299,10 +302,17 @@ func (builder *historicalEnvironment) cachedKlinePriceSeries(interval string, as
 }
 
 func (builder *historicalEnvironment) addIndicatorsOptimized(env map[string]interface{}, asOf int64) error {
-	prices := make(map[string]line.KLinePrice)
-	tasks := make([]indicatorTask, 0)
-	cachedValues := make(map[string]interface{})
-	for _, group := range builder.indicatorGroups() {
+	prices := builder.indicatorPricesScratch
+	for key := range prices {
+		delete(prices, key)
+	}
+	tasks := builder.indicatorTasksScratch[:0]
+	cachedValues := builder.indicatorCachedScratch
+	for key := range cachedValues {
+		delete(cachedValues, key)
+	}
+	groups := builder.indicatorGroupsCache
+	for _, group := range groups {
 		for _, item := range group.items {
 			if !item.Enable {
 				continue
@@ -327,9 +337,10 @@ func (builder *historicalEnvironment) addIndicatorsOptimized(env map[string]inte
 			tasks = append(tasks, indicatorTask{group: group.name, item: item, price: p, cacheable: cacheable, windowStart: windowStart})
 		}
 	}
+	builder.indicatorTasksScratch = tasks
 	results := builder.runIndicatorTasks(tasks)
 	resultIndex := 0
-	for _, group := range builder.indicatorGroups() {
+	for _, group := range groups {
 		for _, item := range group.items {
 			if !item.Enable {
 				continue
@@ -338,17 +349,15 @@ func (builder *historicalEnvironment) addIndicatorsOptimized(env map[string]inte
 				env[item.Name] = value
 				continue
 			}
+			task := tasks[resultIndex]
 			result := results[resultIndex]
 			resultIndex++
 			if result.err != nil {
 				return fmt.Errorf("%w: indicator %s warmup at %d: %v", ErrInsufficientHistoricalBars, item.Name, asOf, result.err)
 			}
 			env[item.Name] = result.value
-			for _, task := range tasks {
-				if task.item.Name == item.Name && task.cacheable {
-					builder.indicatorCache[item.Name] = cachedIndicatorValue{windowStart: task.windowStart, value: result.value}
-					break
-				}
+			if task.cacheable {
+				builder.indicatorCache[item.Name] = cachedIndicatorValue{windowStart: task.windowStart, value: result.value}
 			}
 		}
 	}
@@ -356,7 +365,13 @@ func (builder *historicalEnvironment) addIndicatorsOptimized(env map[string]inte
 }
 
 func (builder *historicalEnvironment) runIndicatorTasks(tasks []indicatorTask) []indicatorTaskResult {
-	results := make([]indicatorTaskResult, len(tasks))
+	if cap(builder.indicatorResultsScratch) < len(tasks) {
+		builder.indicatorResultsScratch = make([]indicatorTaskResult, len(tasks))
+	}
+	results := builder.indicatorResultsScratch[:len(tasks)]
+	for i := range results {
+		results[i] = indicatorTaskResult{}
+	}
 	if len(tasks) == 0 {
 		return results
 	}
@@ -366,7 +381,7 @@ func (builder *historicalEnvironment) runIndicatorTasks(tasks []indicatorTask) [
 	// worker pool every minute costs more than the indicator calculation itself.
 	// Keep them on the caller goroutine. Parallelism is reserved for completed-
 	// indicator cache misses, which only happen at higher-interval boundaries.
-	parallel := make([]int, 0, len(tasks))
+	parallel := builder.indicatorParallelScratch[:0]
 	for i := range tasks {
 		if !tasks[i].cacheable {
 			switch {
@@ -383,6 +398,7 @@ func (builder *historicalEnvironment) runIndicatorTasks(tasks []indicatorTask) [
 		}
 		parallel = append(parallel, i)
 	}
+	builder.indicatorParallelScratch = parallel
 	if len(parallel) == 0 {
 		return results
 	}

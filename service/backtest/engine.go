@@ -80,7 +80,7 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 	fundingIndex := 0
 	eventSeq := 0
 	equitySeq := 0
-	compiled := map[string]*vm.Program{}
+	compiled := map[int]*vm.Program{}
 	addEvent := func(at int64, typ, action, side string, price, qty float64, data any) {
 		eventSeq++
 		raw, _ := json.Marshal(data)
@@ -247,7 +247,7 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 	return result, nil
 }
 
-func evaluateRules(rules []Rule, side string, env map[string]interface{}, cache map[string]*vm.Program, closing bool) (Rule, bool, error) {
+func evaluateRules(rules []Rule, side string, env map[string]interface{}, cache map[int]*vm.Program, closing bool) (Rule, bool, error) {
 	for index, rule := range rules {
 		if !rule.Enable {
 			continue
@@ -263,15 +263,14 @@ func evaluateRules(rules []Rule, side string, env map[string]interface{}, cache 
 		} else if rule.Type != "long" && rule.Type != "short" {
 			continue
 		}
-		key := fmt.Sprintf("%t|%d|%s", closing, index, rule.Code)
-		program := cache[key]
+		program := cache[index]
 		if program == nil {
 			compiled, err := expr.Compile(rule.Code, expr.Env(env))
 			if err != nil {
 				return Rule{}, false, fmt.Errorf("compile strategy %s: %w", rule.Name, err)
 			}
 			program = compiled
-			cache[key] = program
+			cache[index] = program
 		}
 		value, err := expr.Run(program, env)
 		if err != nil {
