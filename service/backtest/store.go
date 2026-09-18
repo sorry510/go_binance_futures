@@ -487,7 +487,7 @@ func (manager *Manager) markInterrupted() error {
 	return err
 }
 
-func (manager *Manager) List(page, limit int) ([]RunSummary, int64, error) {
+func (manager *Manager) List(page, limit int, filters ...RunListFilter) ([]RunSummary, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -497,7 +497,37 @@ func (manager *Manager) List(page, limit int) ([]RunSummary, int64, error) {
 	if limit > 100 {
 		limit = 100
 	}
+	var filter RunListFilter
+	if len(filters) > 0 {
+		filter = filters[0]
+	}
+	filter.Symbol = strings.ToUpper(strings.TrimSpace(filter.Symbol))
+	filter.Status = strings.ToLower(strings.TrimSpace(filter.Status))
+	filter.ResolutionMode = strings.ToLower(strings.TrimSpace(filter.ResolutionMode))
+	if filter.CreatedFrom > 0 && filter.CreatedTo > 0 && filter.CreatedTo < filter.CreatedFrom {
+		return nil, 0, fmt.Errorf("created_to must be greater than or equal to created_from")
+	}
+
 	q := orm.NewOrm().QueryTable(new(models.AgentBacktestRun))
+	if filter.StrategyTemplateID > 0 {
+		q = q.Filter("strategy_template_id", filter.StrategyTemplateID)
+	}
+	if filter.Symbol != "" {
+		q = q.Filter("symbol", filter.Symbol)
+	}
+	if filter.Status != "" {
+		q = q.Filter("status", filter.Status)
+	}
+	if filter.ResolutionMode != "" {
+		q = q.Filter("resolution_mode", filter.ResolutionMode)
+	}
+	if filter.CreatedFrom > 0 {
+		q = q.Filter("created_at__gte", filter.CreatedFrom)
+	}
+	if filter.CreatedTo > 0 {
+		q = q.Filter("created_at__lte", filter.CreatedTo)
+	}
+
 	total, err := q.Count()
 	if err != nil {
 		return nil, 0, err

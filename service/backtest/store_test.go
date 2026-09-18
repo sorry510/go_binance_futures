@@ -73,6 +73,47 @@ func (fixtureHistorySource) Funding(context.Context, string, string, int64, int6
 	return []historicalmarket.FundingRate{}, nil
 }
 
+func TestManagerListFiltersBacktestHistory(t *testing.T) {
+	setupBacktestStoreTest(t)
+	o := orm.NewOrm()
+	rows := []models.AgentBacktestRun{
+		{RunID: "bt_list_1", StrategyTemplateID: 11, StrategyTemplateName: "Alpha", Symbol: "BTCUSDT", Status: "succeeded", ResolutionMode: ResolutionModeStandard, CreatedAt: 1000},
+		{RunID: "bt_list_2", StrategyTemplateID: 11, StrategyTemplateName: "Alpha", Symbol: "ETHUSDT", Status: "failed", ResolutionMode: ResolutionModeAdaptive, CreatedAt: 2000},
+		{RunID: "bt_list_3", StrategyTemplateID: 22, StrategyTemplateName: "Beta", Symbol: "BTCUSDT", Status: "succeeded", ResolutionMode: ResolutionModeAdaptive, CreatedAt: 3000},
+		{RunID: "bt_list_4", StrategyTemplateID: 22, StrategyTemplateName: "Beta", Symbol: "SOLUSDT", Status: "running", ResolutionMode: ResolutionModeStandard, CreatedAt: 4000},
+	}
+	for i := range rows {
+		if _, err := o.Insert(&rows[i]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	manager := NewManager(DatasetBuilder{})
+	assertIDs := func(filter RunListFilter, want ...string) {
+		t.Helper()
+		items, total, err := manager.List(1, 20, filter)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if total != int64(len(want)) || len(items) != len(want) {
+			t.Fatalf("filter=%+v total=%d len=%d want=%d", filter, total, len(items), len(want))
+		}
+		for i := range want {
+			if items[i].RunID != want[i] {
+				t.Fatalf("filter=%+v item[%d]=%s want=%s", filter, i, items[i].RunID, want[i])
+			}
+		}
+	}
+	assertIDs(RunListFilter{StrategyTemplateID: 11}, "bt_list_2", "bt_list_1")
+	assertIDs(RunListFilter{Symbol: "btcusdt"}, "bt_list_3", "bt_list_1")
+	assertIDs(RunListFilter{Status: "SUCCEEDED"}, "bt_list_3", "bt_list_1")
+	assertIDs(RunListFilter{ResolutionMode: ResolutionModeAdaptive}, "bt_list_3", "bt_list_2")
+	assertIDs(RunListFilter{CreatedFrom: 1500, CreatedTo: 3500}, "bt_list_3", "bt_list_2")
+	assertIDs(RunListFilter{StrategyTemplateID: 22, Symbol: "BTCUSDT", Status: "succeeded", ResolutionMode: ResolutionModeAdaptive}, "bt_list_3")
+	if _, _, err := manager.List(1, 20, RunListFilter{CreatedFrom: 3000, CreatedTo: 2000}); err == nil {
+		t.Fatal("invalid created range must fail")
+	}
+}
+
 func TestManagerPersistsDeterministicBacktestWithoutLegacyPaperTables(t *testing.T) {
 	setupBacktestStoreTest(t)
 	template := models.StrategyTemplates{Name: "fixture", Technology: "{}", Strategy: `[{"name":"open","enable":true,"code":"NowPrice > 0","type":"long"},{"name":"close","enable":true,"code":"ROI > 0.05","type":"close_long"}]`, CreateTime: time.Now().UnixMilli(), UpdateTime: time.Now().UnixMilli()}
