@@ -85,6 +85,13 @@ type KlineProgressSource interface {
 	KlinesWithProgress(context.Context, string, string, string, int64, int64, KlineProgressCallback) ([]Kline, error)
 }
 
+// EarliestKlineSource optionally exposes the first real exchange K-line.
+// Repositories use it to exclude pre-listing time without suppressing gaps
+// that occur after a contract has started trading.
+type EarliestKlineSource interface {
+	EarliestKline(context.Context, string, string, string) (Kline, error)
+}
+
 // ReplayKline is the minimal canonical K-line shape needed by deterministic backtests.
 // It intentionally omits source/audit strings and redundant market/symbol metadata.
 type ReplayKline struct {
