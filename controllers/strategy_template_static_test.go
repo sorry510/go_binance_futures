@@ -11,7 +11,16 @@ import (
 var deprecatedStrategyMarketGlobal = regexp.MustCompile(`(^|[^A-Za-z0-9_])(BasicTrend|BTCUSDT|ETHUSDT|SOLUSDT|BNBUSDT)([^A-Za-z0-9_]|$)`)
 
 func TestStaticStrategyTemplatesCompileWithoutDeprecatedMarketGlobals(t *testing.T) {
-	files, err := filepath.Glob("../strategy_templates/*.json")
+	var files []string
+	err := filepath.Walk("../strategy_templates", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.EqualFold(filepath.Ext(path), ".json") {
+			files = append(files, path)
+		}
+		return nil
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

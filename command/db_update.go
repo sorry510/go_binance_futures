@@ -251,14 +251,96 @@ func dropRedundantBacktestEquityIndexes(executor rawExecutor) error {
 	return nil
 }
 
+var redundantKline1mIndexes = []string{
+	"market_klines_1m_symbol",
+	"market_klines_1m_open_time",
+	"market_klines_1m_close_time",
+	"market_klines_1m_source",
+	"market_klines_1m_created_at",
+	"market_klines_1m_updated_at",
+}
+
+func dropRedundantKline1mIndexes(executor rawExecutor) error {
+	if defaultDatabaseIsMySQL() {
+		existing := make([]string, 0, len(redundantKline1mIndexes))
+		for _, indexName := range redundantKline1mIndexes {
+			var count int
+			if err := executor.Raw("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='market_klines_1m' AND index_name=?", indexName).QueryRow(&count); err != nil {
+				return fmt.Errorf("inspect 1m index %s: %w", indexName, err)
+			}
+			if count > 0 {
+				existing = append(existing, indexName)
+			}
+		}
+		if len(existing) == 0 {
+			return nil
+		}
+		parts := make([]string, 0, len(existing))
+		for _, indexName := range existing {
+			parts = append(parts, "DROP INDEX "+indexName)
+		}
+		query := "ALTER TABLE market_klines_1m " + strings.Join(parts, ", ") + ", ALGORITHM=INPLACE, LOCK=NONE"
+		if _, err := executor.Raw(query).Exec(); err != nil {
+			return fmt.Errorf("drop redundant 1m indexes: %w", err)
+		}
+		return nil
+	}
+	for _, indexName := range redundantKline1mIndexes {
+		if _, err := executor.Raw("DROP INDEX IF EXISTS " + indexName).Exec(); err != nil {
+			return fmt.Errorf("drop redundant 1m index %s: %w", indexName, err)
+		}
+	}
+	return nil
+}
+
+func ensureKline1mChunkTable(executor rawExecutor) error {
+	payloadType := "BLOB"
+	if defaultDatabaseIsMySQL() {
+		payloadType = "LONGBLOB"
+	} else if db, err := orm.GetDB("default"); err == nil {
+		driverType := strings.ToLower(fmt.Sprintf("%T", db.Driver()))
+		if strings.Contains(driverType, "postgres") || strings.Contains(driverType, "pq") {
+			payloadType = "BYTEA"
+		}
+	}
+	query := "CREATE TABLE IF NOT EXISTS market_klines_1m_chunks (" +
+		"market VARCHAR(32) NOT NULL," +
+		"symbol VARCHAR(32) NOT NULL," +
+		"month_start BIGINT NOT NULL," +
+		"start_time BIGINT NOT NULL," +
+		"end_time BIGINT NOT NULL," +
+		"point_count INTEGER NOT NULL," +
+		"encoding VARCHAR(32) NOT NULL," +
+		"compression VARCHAR(16) NOT NULL," +
+		"checksum BIGINT NOT NULL," +
+		"source_manifest TEXT NOT NULL," +
+		"payload " + payloadType + " NOT NULL," +
+		"created_at BIGINT NOT NULL," +
+		"updated_at BIGINT NOT NULL," +
+		"PRIMARY KEY (market, symbol, month_start)" +
+		")"
+	if _, err := executor.Raw(query).Exec(); err != nil {
+		return fmt.Errorf("create market_klines_1m_chunks: %w", err)
+	}
+	return nil
+}
+
 func UpdateDatabase(oldVersion int64, newVersion int64) error {
 	o := orm.NewOrm()
 	// MySQL online DDL is intentionally executed outside the transaction.
-	// ALTER TABLE implicitly commits on MySQL, while the migration itself is
-	// idempotent and the schema version is only advanced after it succeeds.
+	// ALTER/CREATE TABLE implicitly commit on MySQL, while these migrations
+	// are idempotent and the schema version advances only after they succeed.
 	if oldVersion < 15 && newVersion >= 15 {
 		if err := dropRedundantBacktestEquityIndexes(o); err != nil {
 			return fmt.Errorf("migrate database version 15 backtest equity indexes failed: %w", err)
+		}
+	}
+	if oldVersion < 17 && newVersion >= 17 {
+		if err := dropRedundantKline1mIndexes(o); err != nil {
+			return fmt.Errorf("migrate database version 17 1m indexes failed: %w", err)
+		}
+		if err := ensureKline1mChunkTable(o); err != nil {
+			return fmt.Errorf("migrate database version 17 1m chunk schema failed: %w", err)
 		}
 	}
 	to, err := o.Begin()

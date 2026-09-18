@@ -63,7 +63,7 @@ func (repo *Repository) LoadReplayKlinesWithStats(ctx context.Context, market, s
 
 func (repo *Repository) queryReplayKlines(market, symbol, interval string, start, end int64) ([]ReplayKline, ReplayKlineCacheStats, error) {
 	if interval == "1m" {
-		return repo.queryReplay1mCached(market, symbol, start, end)
+		return repo.queryReplay1mMemoryCached(market, symbol, start, end)
 	}
 	rows, err := repo.queryReplayKlinesDB(market, symbol, interval, start, end)
 	return rows, ReplayKlineCacheStats{}, err

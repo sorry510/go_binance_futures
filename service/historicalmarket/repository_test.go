@@ -37,11 +37,21 @@ func setupRepositoryTest(t *testing.T) {
 			return
 		}
 		repositoryTestErr = orm.RunSyncdb("default", true, false)
+		if repositoryTestErr == nil {
+			_, repositoryTestErr = orm.NewOrm().Raw(`CREATE TABLE IF NOT EXISTS market_klines_1m_chunks (
+				market VARCHAR(32) NOT NULL, symbol VARCHAR(32) NOT NULL, month_start BIGINT NOT NULL,
+				start_time BIGINT NOT NULL, end_time BIGINT NOT NULL, point_count INTEGER NOT NULL,
+				encoding VARCHAR(32) NOT NULL, compression VARCHAR(16) NOT NULL, checksum BIGINT NOT NULL,
+				source_manifest TEXT NOT NULL, payload LONGBLOB NOT NULL, created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL,
+				PRIMARY KEY (market, symbol, month_start)
+			)`).Exec()
+		}
 	})
 	if repositoryTestErr != nil {
 		t.Fatal(repositoryTestErr)
 	}
-	for _, table := range []string{"market_data_import_batches", "market_funding_rates", "market_trades", "market_klines_1s", "market_klines_1m", "market_klines_5m"} {
+	globalReplay1mMemoryCache = newReplay1mMemoryLRU(replay1mMemoryCacheCapacity)
+	for _, table := range []string{"market_data_import_batches", "market_funding_rates", "market_trades", "market_klines_1m_chunks", "market_klines_1s", "market_klines_1m", "market_klines_5m"} {
 		if _, err := orm.NewOrm().Raw("DELETE FROM " + table).Exec(); err != nil {
 			t.Fatal(err)
 		}
@@ -323,66 +333,112 @@ func TestReplayKlinesPreserveGapFill(t *testing.T) {
 	}
 }
 
-func TestReplay1mDiskCachePersistsAndInvalidatesByMonth(t *testing.T) {
+func TestReplay1mMemoryCacheHitsAndInvalidatesChunk(t *testing.T) {
 	setupRepositoryTest(t)
-	root := t.TempDir()
 	now := time.Date(2026, 3, 15, 12, 0, 0, 0, time.UTC)
 	repo := NewRepository(nil)
-	repo.Replay1mCacheRootDir = root
 	repo.Now = func() time.Time { return now }
 	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	bars := []Kline{minuteBar(start, 100), minuteBar(start.Add(time.Minute), 101), minuteBar(start.Add(2*time.Minute), 102)}
-	if _, err := repo.Import(context.Background(), ImportRequest{Source: "fixture", Klines: bars}); err != nil {
+	if _, err := repo.Import(context.Background(), ImportRequest{Source: SourceBinancePublicData, SourceRef: "monthly", Klines: bars}); err != nil {
 		t.Fatal(err)
 	}
+	var rowCount, chunkCount int
+	if err := orm.NewOrm().Raw("SELECT COUNT(*) FROM market_klines_1m").QueryRow(&rowCount); err != nil {
+		t.Fatal(err)
+	}
+	if err := orm.NewOrm().Raw("SELECT COUNT(*) FROM market_klines_1m_chunks").QueryRow(&chunkCount); err != nil {
+		t.Fatal(err)
+	}
+	if rowCount != 0 || chunkCount != 1 {
+		t.Fatalf("historical public-data month must be chunked rows=%d chunks=%d", rowCount, chunkCount)
+	}
+
 	end := bars[2].CloseTime
 	first, firstStats, err := repo.LoadReplayKlinesWithStats(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(first) != 3 || firstStats.FilesMiss != 1 || firstStats.FilesHit != 0 {
-		t.Fatalf("unexpected first cache load rows=%d stats=%+v", len(first), firstStats)
-	}
-	path, ok := replay1mCachePath(root, MarketFuturesUSDT, "BTCUSDT", replayMonthStart(start.UnixMilli()))
-	if !ok {
-		t.Fatal("cache path rejected valid symbol")
-	}
-	if _, err := os.Stat(path); err != nil {
-		t.Fatalf("expected persistent cache file: %v", err)
+		t.Fatalf("unexpected first memory-cache load rows=%d stats=%+v", len(first), firstStats)
 	}
 	second, secondStats, err := repo.LoadReplayKlinesWithStats(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(second) != 3 || secondStats.FilesHit != 1 || secondStats.FilesMiss != 0 {
-		t.Fatalf("unexpected second cache load rows=%d stats=%+v", len(second), secondStats)
+		t.Fatalf("unexpected second memory-cache load rows=%d stats=%+v", len(second), secondStats)
 	}
+
 	overwrite := minuteBar(start.Add(time.Minute), 777)
 	if _, err := repo.Import(context.Background(), ImportRequest{Source: "fixture-update", Klines: []Kline{overwrite}}); err != nil {
 		t.Fatal(err)
-	}
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Fatalf("1m import must invalidate affected monthly cache, err=%v", err)
 	}
 	third, thirdStats, err := repo.LoadReplayKlinesWithStats(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if thirdStats.FilesMiss != 1 || len(third) != 3 || third[1].Close != 777 {
-		t.Fatalf("stale cache reused after import rows=%+v stats=%+v", third, thirdStats)
+	if thirdStats.FilesMiss != 1 || thirdStats.FilesHit != 0 || len(third) != 3 || third[1].Close != 777 {
+		t.Fatalf("stale memory cache reused after chunk update rows=%+v stats=%+v", third, thirdStats)
 	}
 }
 
-func TestReplay1mDiskCacheSkipsCurrentMonth(t *testing.T) {
+func TestPartialHistoricalChunkMergesRowsOutsideChunk(t *testing.T) {
 	setupRepositoryTest(t)
-	root := t.TempDir()
 	now := time.Date(2026, 3, 15, 12, 0, 0, 0, time.UTC)
 	repo := NewRepository(nil)
-	repo.Replay1mCacheRootDir = root
+	repo.Now = func() time.Time { return now }
+	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	chunkBars := []Kline{
+		minuteBar(start.Add(time.Minute), 101),
+		minuteBar(start.Add(2*time.Minute), 102),
+	}
+	if _, err := repo.Import(context.Background(), ImportRequest{
+		Source: SourceBinancePublicData, SourceRef: "monthly-partial", Klines: chunkBars,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	rowBar := minuteBar(start, 100)
+	rowBar.Source = "row-side"
+	if _, err := repo.upsertKlinesRows("1m", []Kline{rowBar}); err != nil {
+		t.Fatal(err)
+	}
+
+	end := chunkBars[1].CloseTime
+	rows, err := repo.LoadKlines(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 3 || rows[0].OpenTime != rowBar.OpenTime || rows[1].OpenTime != chunkBars[0].OpenTime {
+		t.Fatalf("hybrid query lost row/chunk boundary data: %+v", rows)
+	}
+
+	replay, err := repo.LoadReplayKlines(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(replay) != 3 || replay[0].OpenTime != rowBar.OpenTime || replay[2].OpenTime != chunkBars[1].OpenTime {
+		t.Fatalf("replay hybrid query lost row/chunk boundary data: %+v", replay)
+	}
+
+	complete, count, err := repo.KlineRangeComplete(context.Background(), MarketFuturesUSDT, "BTCUSDT", "1m", start.UnixMilli(), end)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !complete || count != 3 {
+		t.Fatalf("hybrid completeness mismatch complete=%v count=%d", complete, count)
+	}
+}
+
+func TestReplay1mMemoryCacheSkipsCurrentMonth(t *testing.T) {
+	setupRepositoryTest(t)
+	now := time.Date(2026, 3, 15, 12, 0, 0, 0, time.UTC)
+	repo := NewRepository(nil)
 	repo.Now = func() time.Time { return now }
 	start := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
 	bars := []Kline{minuteBar(start, 100), minuteBar(start.Add(time.Minute), 101)}
-	if _, err := repo.Import(context.Background(), ImportRequest{Source: "fixture", Klines: bars}); err != nil {
+	if _, err := repo.Import(context.Background(), ImportRequest{Source: SourceBinancePublicData, Klines: bars}); err != nil {
 		t.Fatal(err)
 	}
 	for i := 0; i < 2; i++ {
@@ -391,7 +447,7 @@ func TestReplay1mDiskCacheSkipsCurrentMonth(t *testing.T) {
 			t.Fatal(err)
 		}
 		if len(rows) != 2 || stats.FilesHit != 0 || stats.FilesMiss != 0 {
-			t.Fatalf("current month must bypass disk cache rows=%d stats=%+v", len(rows), stats)
+			t.Fatalf("current month must bypass memory cache rows=%d stats=%+v", len(rows), stats)
 		}
 	}
 }
