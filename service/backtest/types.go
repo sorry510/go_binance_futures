@@ -258,6 +258,15 @@ type Result struct {
 	Equity               []EquityPoint   `json:"equity"`
 }
 
+type RunListFilter struct {
+	StrategyTemplateID int64
+	Symbol             string
+	Status             string
+	ResolutionMode     string
+	CreatedFrom        int64
+	CreatedTo          int64
+}
+
 type RunSummary struct {
 	RunID                string          `json:"run_id"`
 	DatasetID            string          `json:"dataset_id"`

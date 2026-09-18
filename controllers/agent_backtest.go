@@ -16,7 +16,41 @@ type AgentBacktestController struct{ web.Controller }
 func (ctrl *AgentBacktestController) List() {
 	page, _ := strconv.Atoi(ctrl.GetString("page", "1"))
 	limit, _ := strconv.Atoi(ctrl.GetString("limit", "20"))
-	items, total, err := backtestservice.DefaultManager().List(page, limit)
+	strategyTemplateID, err := strconv.ParseInt(ctrl.GetString("strategy_template_id", "0"), 10, 64)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "invalid strategy_template_id"))
+		return
+	}
+	createdFrom, err := strconv.ParseInt(ctrl.GetString("created_from", "0"), 10, 64)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "invalid created_from"))
+		return
+	}
+	createdTo, err := strconv.ParseInt(ctrl.GetString("created_to", "0"), 10, 64)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "invalid created_to"))
+		return
+	}
+	resolutionMode := strings.TrimSpace(ctrl.GetString("resolution_mode"))
+	if resolutionMode != "" {
+		resolutionMode, err = backtestservice.NormalizeResolutionMode(resolutionMode)
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+	}
+	if createdFrom > 0 && createdTo > 0 && createdTo < createdFrom {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "created_to must be greater than or equal to created_from"))
+		return
+	}
+	items, total, err := backtestservice.DefaultManager().List(page, limit, backtestservice.RunListFilter{
+		StrategyTemplateID: strategyTemplateID,
+		Symbol:             ctrl.GetString("symbol"),
+		Status:             ctrl.GetString("status"),
+		ResolutionMode:     resolutionMode,
+		CreatedFrom:        createdFrom,
+		CreatedTo:          createdTo,
+	})
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(500, nil, err.Error()))
 		return
