@@ -84,12 +84,14 @@ const (
 )
 
 type KLinePrice struct {
-	High   []float64 `json:"high"`   // 最高价
-	Low    []float64 `json:"low"`    // 最低价
-	Close  []float64 `json:"close"`  // 收盘价
-	Open   []float64 `json:"open"`   // 开盘价
-	Amount []float64 `json:"amount"` // 成交额(成交量 * 平均价格)
-	Qps    []float64 `json:"qps"`    // 每秒成交额
+	High           []float64 `json:"high"`
+	Low            []float64 `json:"low"`
+	Close          []float64 `json:"close"`
+	Open           []float64 `json:"open"`
+	Amount         []float64 `json:"amount"`
+	Qps            []float64 `json:"qps"`
+	TakerBuyAmount []float64 `json:"taker_buy_amount"`
+	TakerBuyRatio  []float64 `json:"taker_buy_ratio"`
 }
 
 func ParseTechnologyConfig(symbol string, strTechnology string) (config map[string]interface{}, klineMap map[string]KLinePrice) {
@@ -570,14 +572,10 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 }
 
 func newKLinePrice(kline []*futures.Kline) KLinePrice {
-	high, low, close, open, amount, qps := GetLineFloatValues(kline)
+	high, low, close, open, amount, qps, takerBuyAmount, takerBuyRatio := GetLineFloatValues(kline)
 	return KLinePrice{
-		High:   high,
-		Low:    low,
-		Close:  close,
-		Open:   open,
-		Amount: amount,
-		Qps:    qps,
+		High: high, Low: low, Close: close, Open: open, Amount: amount, Qps: qps,
+		TakerBuyAmount: takerBuyAmount, TakerBuyRatio: takerBuyRatio,
 	}
 }
 
