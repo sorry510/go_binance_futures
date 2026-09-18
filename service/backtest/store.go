@@ -349,7 +349,9 @@ type backtestDeleteTable struct {
 }
 
 var backtestDeleteTables = []backtestDeleteTable{
-	{name: "equity points", table: "agent_backtest_equity_points", stage: "deleting_equity"},
+	{name: "equity preview", table: "agent_backtest_equity_preview", stage: "deleting_equity"},
+	{name: "equity chunks", table: "agent_backtest_equity_chunks", stage: "deleting_equity"},
+	{name: "legacy equity points", table: "agent_backtest_equity_points", stage: "deleting_equity"},
 	{name: "events", table: "agent_backtest_events", stage: "deleting_events"},
 	{name: "trades", table: "agent_backtest_trades", stage: "deleting_trades"},
 }
@@ -583,7 +585,7 @@ func normalizePage(page, limit, defaultLimit, maxLimit int) (int, int) {
 	return page, limit
 }
 
-const maxEquityChartPoints = 20000
+const maxEquityChartPoints = equityPreviewPoints
 
 func (manager *Manager) Equity(runID string, limit int) ([]EquityPoint, error) {
 	if limit <= 0 || limit > maxEquityChartPoints {
@@ -593,6 +595,33 @@ func (manager *Manager) Equity(runID string, limit int) ([]EquityPoint, error) {
 	if runID == "" {
 		return nil, fmt.Errorf("run id is required")
 	}
+	preview, previewFound, previewErr := loadEquityPreview(runID)
+	if previewFound && previewErr == nil {
+		if len(preview) <= limit {
+			return preview, nil
+		}
+		if archive, archiveFound, archiveErr := loadEquityArchiveSample(runID, limit); archiveFound {
+			if archiveErr != nil {
+				return nil, archiveErr
+			}
+			return archive, nil
+		}
+		return sampleEquityPoints(preview, limit), nil
+	}
+	archive, archiveFound, archiveErr := loadEquityArchiveSample(runID, limit)
+	if archiveFound {
+		if archiveErr != nil {
+			return nil, archiveErr
+		}
+		return archive, nil
+	}
+	if previewErr != nil {
+		return nil, previewErr
+	}
+	return legacyEquity(runID, limit)
+}
+
+func legacyEquity(runID string, limit int) ([]EquityPoint, error) {
 	o := orm.NewOrm()
 	total, err := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).Count()
 	if err != nil {
@@ -726,26 +755,16 @@ func saveResult(ctx context.Context, runID string, result Result) error {
 }
 
 const (
-	backtestEventInsertBatchSizeMySQL       = 3000
-	backtestEquityInsertBatchSizeMySQL      = 6000
-	backtestTradeInsertBatchSizeMySQL       = 2000
-	backtestResultInsertBatchSizeGeneric    = 500
-	backtestEquityTransactionRowsMySQL      = 30000
-	backtestEquityTransactionBatchesGeneric = 10
+	backtestEventInsertBatchSizeMySQL    = 3000
+	backtestTradeInsertBatchSizeMySQL    = 2000
+	backtestResultInsertBatchSizeGeneric = 500
 )
 
-func backtestResultInsertBatchSizes() (trade, event, equity int) {
+func backtestResultInsertBatchSizes() (trade, event int) {
 	if backtestDeleteMySQL() {
-		return backtestTradeInsertBatchSizeMySQL, backtestEventInsertBatchSizeMySQL, backtestEquityInsertBatchSizeMySQL
+		return backtestTradeInsertBatchSizeMySQL, backtestEventInsertBatchSizeMySQL
 	}
-	return backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric
-}
-
-func backtestEquityTransactionRows(equityBatchSize int) int {
-	if backtestDeleteMySQL() {
-		return backtestEquityTransactionRowsMySQL
-	}
-	return equityBatchSize * backtestEquityTransactionBatchesGeneric
+	return backtestResultInsertBatchSizeGeneric, backtestResultInsertBatchSizeGeneric
 }
 
 type resultSaveTiming struct {
@@ -755,34 +774,6 @@ type resultSaveTiming struct {
 	EquityBuildMs  int64
 	EquityExecMs   int64
 	EquityCommitMs int64
-}
-
-const backtestEquityInsertColumnCount = 8
-
-func backtestEquityInsertSQLMySQL(rows int) string {
-	if rows <= 0 {
-		return ""
-	}
-	const prefix = "INSERT INTO `agent_backtest_equity_points` (`run_id`,`sequence`,`bar_time`,`equity`,`cash`,`unrealized_pnl`,`drawdown_pct`,`position_side`) VALUES "
-	const tuple = "(?,?,?,?,?,?,?,?)"
-	var builder strings.Builder
-	builder.Grow(len(prefix) + rows*(len(tuple)+1))
-	builder.WriteString(prefix)
-	for i := 0; i < rows; i++ {
-		if i > 0 {
-			builder.WriteByte(',')
-		}
-		builder.WriteString(tuple)
-	}
-	return builder.String()
-}
-
-func backtestEquityInsertArgs(runID string, points []EquityPoint) []interface{} {
-	args := make([]interface{}, 0, len(points)*backtestEquityInsertColumnCount)
-	for _, e := range points {
-		args = append(args, runID, e.Sequence, e.BarTime, e.Equity, e.Cash, e.UnrealizedPnL, e.DrawdownPct, e.PositionSide)
-	}
-	return args
 }
 
 func saveResultWithProgress(ctx context.Context, runID string, result Result, progress ProgressCallback) error {
@@ -795,140 +786,112 @@ func saveResultWithProgressTimed(ctx context.Context, runID string, result Resul
 	if err := ctx.Err(); err != nil {
 		return timing, err
 	}
+	equityBuildStarted := time.Now()
+	equityChunks, equityPreview, err := buildEquityStorage(runID, result.Equity, time.Now().UnixMilli())
+	timing.EquityBuildMs = time.Since(equityBuildStarted).Milliseconds()
+	if err != nil {
+		return timing, err
+	}
 	o := orm.NewOrm()
-	tradeBatchSize, eventBatchSize, equityBatchSize := backtestResultInsertBatchSizes()
+	tx, err := o.BeginWithCtx(ctx)
+	if err != nil {
+		return timing, err
+	}
+	rollback := func(cause error) (resultSaveTiming, error) {
+		_ = tx.Rollback()
+		return timing, cause
+	}
+
+	tradeBatchSize, eventBatchSize := backtestResultInsertBatchSizes()
 	totalRows := len(result.Trades) + len(result.Events) + len(result.Equity)
 	completedRows := 0
 	report := func() {
-		if progress != nil {
-			if totalRows == 0 {
-				progress(1, 1)
-				return
-			}
-			progress(completedRows, totalRows)
+		if progress == nil {
+			return
 		}
+		if totalRows == 0 {
+			progress(1, 1)
+			return
+		}
+		progress(completedRows, totalRows)
 	}
 	report()
 
 	tradeStarted := time.Now()
 	tradeRows := make([]models.AgentBacktestTrade, 0, len(result.Trades))
-	for _, t := range result.Trades {
-		tradeRows = append(tradeRows, models.AgentBacktestTrade{RunID: runID, Sequence: t.Sequence, Symbol: t.Symbol, Side: t.Side, EntryTime: t.EntryTime, ExitTime: t.ExitTime, EntryPrice: t.EntryPrice, ExitPrice: t.ExitPrice, Quantity: t.Quantity, GrossPnL: t.GrossPnL, Fees: t.Fees, FundingPnL: t.FundingPnL, NetPnL: t.NetPnL, HoldingMs: t.HoldingMs, ExitReason: t.ExitReason, OpenStrategyName: t.OpenStrategyName, OpenStrategyType: t.OpenStrategyType, OpenStrategyHash: t.OpenStrategyHash, CloseStrategyName: t.CloseStrategyName, CloseStrategyType: t.CloseStrategyType, CloseStrategyHash: t.CloseStrategyHash, MarketCondition: t.MarketCondition, EntryResolution: t.EntryResolution, ExitResolution: t.ExitResolution})
+	for _, item := range result.Trades {
+		tradeRows = append(tradeRows, models.AgentBacktestTrade{
+			RunID: runID, Sequence: item.Sequence, Symbol: item.Symbol, Side: item.Side,
+			EntryTime: item.EntryTime, ExitTime: item.ExitTime, EntryPrice: item.EntryPrice,
+			ExitPrice: item.ExitPrice, Quantity: item.Quantity, GrossPnL: item.GrossPnL,
+			Fees: item.Fees, FundingPnL: item.FundingPnL, NetPnL: item.NetPnL,
+			HoldingMs: item.HoldingMs, ExitReason: item.ExitReason,
+			OpenStrategyName: item.OpenStrategyName, OpenStrategyType: item.OpenStrategyType,
+			OpenStrategyHash: item.OpenStrategyHash, CloseStrategyName: item.CloseStrategyName,
+			CloseStrategyType: item.CloseStrategyType, CloseStrategyHash: item.CloseStrategyHash,
+			MarketCondition: item.MarketCondition, EntryResolution: item.EntryResolution,
+			ExitResolution: item.ExitResolution,
+		})
 	}
-	if len(tradeRows) > 0 {
-		for start := 0; start < len(tradeRows); start += tradeBatchSize {
-			if err := ctx.Err(); err != nil {
-				return timing, err
-			}
-			end := start + tradeBatchSize
-			if end > len(tradeRows) {
-				end = len(tradeRows)
-			}
-			chunk := tradeRows[start:end]
-			if _, err := o.InsertMulti(tradeBatchSize, &chunk); err != nil {
-				return timing, err
-			}
-			completedRows += len(chunk)
-			report()
+	for start := 0; start < len(tradeRows); start += tradeBatchSize {
+		if err := ctx.Err(); err != nil {
+			return rollback(err)
 		}
+		end := start + tradeBatchSize
+		if end > len(tradeRows) {
+			end = len(tradeRows)
+		}
+		batch := tradeRows[start:end]
+		if _, err := tx.InsertMultiWithCtx(ctx, tradeBatchSize, &batch); err != nil {
+			return rollback(err)
+		}
+		completedRows += len(batch)
 	}
 	timing.TradesMs = time.Since(tradeStarted).Milliseconds()
 
 	eventStarted := time.Now()
 	for start := 0; start < len(result.Events); start += eventBatchSize {
 		if err := ctx.Err(); err != nil {
-			return timing, err
+			return rollback(err)
 		}
 		end := start + eventBatchSize
 		if end > len(result.Events) {
 			end = len(result.Events)
 		}
 		eventRows := make([]models.AgentBacktestEvent, 0, end-start)
-		for _, e := range result.Events[start:end] {
-			eventRows = append(eventRows, models.AgentBacktestEvent{RunID: runID, Sequence: e.Sequence, EventTime: e.EventTime, Type: e.Type, Action: e.Action, Side: e.Side, Price: e.Price, Quantity: e.Quantity, DataJSON: string(e.Data)})
+		for _, item := range result.Events[start:end] {
+			eventRows = append(eventRows, models.AgentBacktestEvent{
+				RunID: runID, Sequence: item.Sequence, EventTime: item.EventTime, Type: item.Type,
+				Action: item.Action, Side: item.Side, Price: item.Price, Quantity: item.Quantity,
+				DataJSON: string(item.Data),
+			})
 		}
-		if _, err := o.InsertMulti(eventBatchSize, &eventRows); err != nil {
-			return timing, err
+		if _, err := tx.InsertMultiWithCtx(ctx, eventBatchSize, &eventRows); err != nil {
+			return rollback(err)
 		}
 		completedRows += len(eventRows)
-		report()
 	}
 	timing.EventsMs = time.Since(eventStarted).Milliseconds()
 
-	equityStarted := time.Now()
-	transactionRows := backtestEquityTransactionRows(equityBatchSize)
-	mysqlEquityBulkInsert := backtestDeleteMySQL()
-	fullEquityInsertSQL := ""
-	if mysqlEquityBulkInsert {
-		fullEquityInsertSQL = backtestEquityInsertSQLMySQL(equityBatchSize)
+	execMs, err := persistPreparedEquityStorage(ctx, tx, equityChunks, equityPreview, func(points int) {
+		completedRows += points
+	})
+	timing.EquityExecMs = execMs
+	if err != nil {
+		return rollback(err)
 	}
-	for groupStart := 0; groupStart < len(result.Equity); groupStart += transactionRows {
-		if err := ctx.Err(); err != nil {
-			return timing, err
-		}
-		groupEnd := groupStart + transactionRows
-		if groupEnd > len(result.Equity) {
-			groupEnd = len(result.Equity)
-		}
-		tx, err := o.BeginWithCtx(ctx)
-		if err != nil {
-			return timing, err
-		}
-		groupRows := 0
-		for start := groupStart; start < groupEnd; start += equityBatchSize {
-			if err := ctx.Err(); err != nil {
-				_ = tx.Rollback()
-				return timing, err
-			}
-			end := start + equityBatchSize
-			if end > groupEnd {
-				end = groupEnd
-			}
-			buildStarted := time.Now()
-			points := result.Equity[start:end]
-			if mysqlEquityBulkInsert {
-				query := fullEquityInsertSQL
-				if len(points) != equityBatchSize {
-					query = backtestEquityInsertSQLMySQL(len(points))
-				}
-				args := backtestEquityInsertArgs(runID, points)
-				timing.EquityBuildMs += time.Since(buildStarted).Milliseconds()
 
-				execStarted := time.Now()
-				if _, err := tx.Raw(query, args...).Exec(); err != nil {
-					_ = tx.Rollback()
-					return timing, err
-				}
-				timing.EquityExecMs += time.Since(execStarted).Milliseconds()
-			} else {
-				eqRows := make([]models.AgentBacktestEquityPoint, 0, len(points))
-				for _, e := range points {
-					eqRows = append(eqRows, models.AgentBacktestEquityPoint{RunID: runID, Sequence: e.Sequence, BarTime: e.BarTime, Equity: e.Equity, Cash: e.Cash, UnrealizedPnL: e.UnrealizedPnL, DrawdownPct: e.DrawdownPct, PositionSide: e.PositionSide})
-				}
-				timing.EquityBuildMs += time.Since(buildStarted).Milliseconds()
-
-				execStarted := time.Now()
-				if _, err := tx.InsertMultiWithCtx(ctx, equityBatchSize, &eqRows); err != nil {
-					_ = tx.Rollback()
-					return timing, err
-				}
-				timing.EquityExecMs += time.Since(execStarted).Milliseconds()
-			}
-			groupRows += len(points)
-		}
-		commitStarted := time.Now()
-		if err := tx.Commit(); err != nil {
-			_ = tx.Rollback()
-			return timing, err
-		}
-		timing.EquityCommitMs += time.Since(commitStarted).Milliseconds()
-		completedRows += groupRows
-		report()
+	commitStarted := time.Now()
+	if err := tx.Commit(); err != nil {
+		_ = tx.Rollback()
+		return timing, err
 	}
-	timing.EquityMs = time.Since(equityStarted).Milliseconds()
-	if totalRows == 0 {
-		report()
+	timing.EquityCommitMs = time.Since(commitStarted).Milliseconds()
+	timing.EquityMs = timing.EquityBuildMs + timing.EquityExecMs + timing.EquityCommitMs
+	if totalRows > 0 {
+		completedRows = totalRows
 	}
+	report()
 	return timing, nil
 }
 
