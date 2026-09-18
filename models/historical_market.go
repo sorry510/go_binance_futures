@@ -5,9 +5,9 @@ package models
 type MarketKline1m struct {
 	ID                  int64   `orm:"column(id);auto" json:"id"`
 	Market              string  `orm:"column(market);size(32)" json:"market"`
-	Symbol              string  `orm:"column(symbol);size(32);index" json:"symbol"`
-	OpenTime            int64   `orm:"column(open_time);index" json:"open_time"`
-	CloseTime           int64   `orm:"column(close_time);index" json:"close_time"`
+	Symbol              string  `orm:"column(symbol);size(32)" json:"symbol"`
+	OpenTime            int64   `orm:"column(open_time)" json:"open_time"`
+	CloseTime           int64   `orm:"column(close_time)" json:"close_time"`
 	Open                float64 `orm:"column(open_price);digits(30);decimals(12)" json:"open"`
 	High                float64 `orm:"column(high_price);digits(30);decimals(12)" json:"high"`
 	Low                 float64 `orm:"column(low_price);digits(30);decimals(12)" json:"low"`
@@ -17,10 +17,10 @@ type MarketKline1m struct {
 	TradeCount          int64   `orm:"column(trade_count)" json:"trade_count"`
 	TakerBuyBaseVolume  float64 `orm:"column(taker_buy_base_volume);digits(40);decimals(12)" json:"taker_buy_base_volume"`
 	TakerBuyQuoteVolume float64 `orm:"column(taker_buy_quote_volume);digits(40);decimals(12)" json:"taker_buy_quote_volume"`
-	Source              string  `orm:"column(source);size(64);index" json:"source"`
+	Source              string  `orm:"column(source);size(64)" json:"source"`
 	SourceRef           string  `orm:"column(source_ref);size(512);null" json:"source_ref,omitempty"`
-	CreatedAt           int64   `orm:"column(created_at);index" json:"created_at"`
-	UpdatedAt           int64   `orm:"column(updated_at);index" json:"updated_at"`
+	CreatedAt           int64   `orm:"column(created_at)" json:"created_at"`
+	UpdatedAt           int64   `orm:"column(updated_at)" json:"updated_at"`
 }
 
 func (*MarketKline1m) TableName() string       { return "market_klines_1m" }
@@ -73,7 +73,27 @@ func (*MarketKline1d) TableUnique() [][]string  { return marketKlineUnique() }
 func (*MarketKline3d) TableUnique() [][]string  { return marketKlineUnique() }
 func (*MarketKline1w) TableUnique() [][]string  { return marketKlineUnique() }
 func (*MarketKline1mo) TableUnique() [][]string { return marketKlineUnique() }
-func marketKlineUnique() [][]string             { return [][]string{{"Market", "Symbol", "OpenTime"}} }
+
+func marketKlineIndexes() [][]string {
+	return [][]string{{"Symbol"}, {"OpenTime"}, {"CloseTime"}, {"Source"}, {"CreatedAt"}, {"UpdatedAt"}}
+}
+func (*MarketKline1s) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline3m) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline5m) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline15m) TableIndex() [][]string { return marketKlineIndexes() }
+func (*MarketKline30m) TableIndex() [][]string { return marketKlineIndexes() }
+func (*MarketKline1h) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline2h) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline4h) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline6h) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline8h) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline12h) TableIndex() [][]string { return marketKlineIndexes() }
+func (*MarketKline1d) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline3d) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline1w) TableIndex() [][]string  { return marketKlineIndexes() }
+func (*MarketKline1mo) TableIndex() [][]string { return marketKlineIndexes() }
+
+func marketKlineUnique() [][]string { return [][]string{{"Market", "Symbol", "OpenTime"}} }
 
 // MarketTrade stores only sparse trade slices that were actually required by
 // adaptive backtest drill-down. It is intentionally not a full trade archive.

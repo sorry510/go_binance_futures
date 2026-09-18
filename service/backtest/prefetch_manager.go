@@ -16,6 +16,7 @@ type PrefetchSummary struct {
 	JobID                string   `json:"job_id"`
 	Status               string   `json:"status"`
 	Stage                string   `json:"stage"`
+	StageDetail          string   `json:"stage_detail,omitempty"`
 	Progress             int      `json:"progress"`
 	StrategyTemplateID   int64    `json:"strategy_template_id"`
 	StrategyTemplateName string   `json:"strategy_template_name"`
@@ -101,23 +102,25 @@ func (manager *Manager) GetPrefetch(jobID string) (PrefetchSummary, error) {
 func (manager *Manager) runPrefetch(jobID, technologyJSON, strategyJSON string) {
 	manager.updatePrefetch(jobID, func(job *PrefetchSummary) {
 		job.Status = "running"
-		job.Stage = "fetching"
+		job.Stage = "checking"
+		job.StageDetail = ""
 		job.Progress = 1
 	})
 	job, err := manager.GetPrefetch(jobID)
 	if err != nil {
 		return
 	}
-	result, err := manager.builder.Prefetch(context.Background(), DatasetRequest{
+	result, err := manager.builder.PrefetchDetailed(context.Background(), DatasetRequest{
 		Symbol: job.Symbol, ExecutionInterval: ReplayInterval,
 		StartTime: job.StartTime, EndTime: job.EndTime, TechnologyJSON: technologyJSON, StrategyJSON: strategyJSON,
-	}, func(completed, total int) {
+	}, func(item PrefetchProgress) {
 		progress := 1
-		if total > 0 {
-			progress = 1 + completed*98/total
+		if item.Total > 0 {
+			progress = 1 + item.Completed*98/item.Total
 		}
 		manager.updatePrefetch(jobID, func(job *PrefetchSummary) {
-			job.Stage = "fetching"
+			job.Stage = item.Stage
+			job.StageDetail = item.Detail
 			job.Progress = progress
 		})
 	})
@@ -125,6 +128,7 @@ func (manager *Manager) runPrefetch(jobID, technologyJSON, strategyJSON string) 
 		manager.updatePrefetch(jobID, func(job *PrefetchSummary) {
 			job.Status = "failed"
 			job.Stage = "failed"
+			job.StageDetail = ""
 			job.Progress = 100
 			job.Error = err.Error()
 			job.CompletedAt = time.Now().UnixMilli()
@@ -134,6 +138,7 @@ func (manager *Manager) runPrefetch(jobID, technologyJSON, strategyJSON string) 
 	manager.updatePrefetch(jobID, func(job *PrefetchSummary) {
 		job.Status = "succeeded"
 		job.Stage = "completed"
+		job.StageDetail = ""
 		job.Progress = 100
 		job.RemoteCalls = result.RemoteCalls
 		job.RemoteRows = result.RemoteRows

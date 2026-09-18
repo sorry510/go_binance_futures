@@ -17,18 +17,12 @@ import (
 )
 
 type Repository struct {
-	Source               Source
-	Now                  func() time.Time
-	Replay1mCacheEnabled bool
-	Replay1mCacheRootDir string
+	Source Source
+	Now    func() time.Time
 }
 
 func NewRepository(source Source) *Repository { return &Repository{Source: source, Now: time.Now} }
-func DefaultRepository() *Repository {
-	repo := NewRepository(BinanceSource{})
-	repo.Replay1mCacheEnabled = true
-	return repo
-}
+func DefaultRepository() *Repository          { return NewRepository(BinanceSource{}) }
 
 func (repo *Repository) LoadKlines(ctx context.Context, market, symbol, interval string, start, end int64) ([]Kline, error) {
 	return repo.LoadKlinesWithProgress(ctx, market, symbol, interval, start, end, nil)
@@ -198,9 +192,8 @@ func (repo *Repository) Import(ctx context.Context, request ImportRequest) (Impo
 		}
 	}
 	if len(request.Klines) > 0 {
-		written, err := repo.upsertKlines(request.Klines)
+		written, err := repo.upsertKlines(ctx, request.Klines)
 		result.WrittenRows += written
-		repo.invalidateReplay1mCache(request.Klines)
 		if err != nil {
 			finish("failed", err)
 			return result, err
@@ -219,6 +212,9 @@ func (repo *Repository) Import(ctx context.Context, request ImportRequest) (Impo
 }
 
 func (repo *Repository) queryKlines(market, symbol, interval string, start, end int64) ([]Kline, error) {
+	if strings.TrimSpace(interval) == "1m" {
+		return repo.queryKlines1mHybrid(market, symbol, start, end)
+	}
 	table, err := KlineTable(interval)
 	if err != nil {
 		return nil, err
@@ -249,6 +245,34 @@ func (repo *Repository) queryKlines(market, symbol, interval string, start, end 
 	return out, nil
 }
 
+func (repo *Repository) KlineRangeComplete(ctx context.Context, market, symbol, interval string, start, end int64) (bool, int, error) {
+	if strings.TrimSpace(interval) == "1m" {
+		return repo.kline1mRangeComplete(ctx, market, symbol, start, end)
+	}
+	table, err := KlineTable(interval)
+	if err != nil {
+		return false, 0, err
+	}
+	first, last, ok, err := expectedKlineBounds(interval, start, end)
+	if err != nil || !ok {
+		return ok, 0, err
+	}
+	expected, err := expectedKlineCount(interval, start, end)
+	if err != nil {
+		return false, 0, err
+	}
+	from := " FROM " + table
+	if repo.mysql() {
+		from += " FORCE INDEX (market)"
+	}
+	var count int
+	query := "SELECT COUNT(*)" + from + " WHERE market=? AND symbol=? AND open_time>=? AND open_time<=?"
+	if err := orm.NewOrm().Raw(query, market, strings.ToUpper(symbol), first, last).QueryRow(&count); err != nil {
+		return false, 0, err
+	}
+	return count == expected, count, nil
+}
+
 func (repo *Repository) queryFunding(market, symbol string, start, end int64) ([]FundingRate, error) {
 	from := " FROM market_funding_rates"
 	if repo.mysql() {
@@ -268,28 +292,46 @@ func (repo *Repository) queryFunding(market, symbol string, start, end int64) ([
 	return out, nil
 }
 
-func (repo *Repository) upsertKlines(rows []Kline) (int, error) {
+func (repo *Repository) upsertKlines(ctx context.Context, rows []Kline) (int, error) {
 	groups := map[string][]Kline{}
 	for _, row := range rows {
 		groups[row.Interval] = append(groups[row.Interval], row)
 	}
 	written := 0
 	for interval, group := range groups {
-		table, err := KlineTable(interval)
+		if interval == "1m" {
+			count, err := repo.upsertKline1mHybrid(ctx, group)
+			written += count
+			if err != nil {
+				return written, err
+			}
+			continue
+		}
+		count, err := repo.upsertKlinesRows(interval, group)
+		written += count
 		if err != nil {
 			return written, err
 		}
-		for start := 0; start < len(group); start += repo.chunkSize(17) {
-			end := start + repo.chunkSize(17)
-			if end > len(group) {
-				end = len(group)
-			}
-			query, args := buildKlineUpsert(table, group[start:end], repo.mysql(), repo.nowMillis())
-			if _, err := orm.NewOrm().Raw(query, args...).Exec(); err != nil {
-				return written, err
-			}
-			written += end - start
+	}
+	return written, nil
+}
+
+func (repo *Repository) upsertKlinesRows(interval string, rows []Kline) (int, error) {
+	table, err := KlineTable(interval)
+	if err != nil {
+		return 0, err
+	}
+	written := 0
+	for start := 0; start < len(rows); start += repo.chunkSize(17) {
+		end := start + repo.chunkSize(17)
+		if end > len(rows) {
+			end = len(rows)
 		}
+		query, args := buildKlineUpsert(table, rows[start:end], repo.mysql(), repo.nowMillis())
+		if _, err := orm.NewOrm().Raw(query, args...).Exec(); err != nil {
+			return written, err
+		}
+		written += end - start
 	}
 	return written, nil
 }

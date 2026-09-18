@@ -387,6 +387,40 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err := SyncDatabase(16); err != nil {
 		t.Fatalf("second version-16 sync should be idempotent: %v", err)
 	}
+	for _, statement := range []string{
+		"CREATE INDEX IF NOT EXISTS market_klines_1m_symbol ON market_klines_1m(symbol)",
+		"CREATE INDEX IF NOT EXISTS market_klines_1m_open_time ON market_klines_1m(open_time)",
+		"CREATE INDEX IF NOT EXISTS market_klines_1m_close_time ON market_klines_1m(close_time)",
+		"CREATE INDEX IF NOT EXISTS market_klines_1m_source ON market_klines_1m(source)",
+		"CREATE INDEX IF NOT EXISTS market_klines_1m_created_at ON market_klines_1m(created_at)",
+		"CREATE INDEX IF NOT EXISTS market_klines_1m_updated_at ON market_klines_1m(updated_at)",
+	} {
+		if _, err := o.Raw(statement).Exec(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := SyncDatabase(17); err != nil {
+		t.Fatal(err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 17 {
+		t.Fatalf("expected database version 17 after 1m chunk schema sync, config=%+v err=%v", config, err)
+	}
+	var chunkTableCount int
+	if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='market_klines_1m_chunks'").QueryRow(&chunkTableCount); err != nil || chunkTableCount != 1 {
+		t.Fatalf("expected market_klines_1m_chunks after version 17 sync, count=%d err=%v", chunkTableCount, err)
+	}
+	if !sqliteHasIndexColumns(t, o, "market_klines_1m_chunks", []string{"market", "symbol", "month_start"}) {
+		t.Fatal("expected market_klines_1m_chunks primary access path after version 17 sync")
+	}
+	for _, columns := range [][]string{{"symbol"}, {"open_time"}, {"close_time"}, {"source"}, {"created_at"}, {"updated_at"}} {
+		if sqliteHasIndexColumns(t, o, "market_klines_1m", columns) {
+			t.Fatalf("unexpected redundant market_klines_1m index on (%s) after version 17 sync", strings.Join(columns, ","))
+		}
+	}
+	if err := SyncDatabase(17); err != nil {
+		t.Fatalf("second version-17 sync should be idempotent: %v", err)
+	}
 }
 
 func sqliteHasIndexColumns(t *testing.T, o orm.Ormer, table string, want []string) bool {
