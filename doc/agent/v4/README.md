@@ -1,106 +1,161 @@
-# AI Agent V4 开发计划（精简个人版）
+# AI Agent V4 开发计划：Real Trading Lifecycle & Position Intelligence
 
 ## 1. V4 定位
 
-V4 不继续扩展 Agent 平台能力，而是解决一个核心问题：**怎样判断一个新策略真的比旧策略更稳定，而不是只对某个币、某段历史过拟合。**
+V4 不再扩展回测系统，也不继续堆叠 Agent 基础设施。V1～V3 已经完成 Runtime、Skill、Tool、Conversation、Memory、MCP、Workflow、Market Intelligence、Opportunity、受控交易、Ownership、Reconcile、Testnet、安全执行和交易复盘。
 
-V4 基于已经完成的 Historical Backtest、Outcome Review、Controlled Trade、Ownership、Task、Observability 和 Scheduler，只补策略验证闭环，不重做已有系统。
+V4 聚焦当前系统最明显的真实交易缺口：**系统已经能够发现机会并安全开仓，但开仓后的真实仓位管理仍然较初级。**
 
-最终闭环：
+V4 的目标是把现有链路从：
 
 ```text
-新 Strategy Template
-    ↓
-批量回测
-    ↓
-稳健性检查
-    ↓
-Shadow 前向验证
-    ↓
-Testnet 验证
-    ↓
-用户决定是否用于真实交易
-    ↓
-结果复盘 → AI 辅助下一次策略改进
+Opportunity
+  ↓
+Symbol Analysis
+  ↓
+Trade Proposal
+  ↓
+Risk
+  ↓
+Entry
+  ↓
+Stop + first TP
+  ↓
+Full Close
 ```
 
-## 2. 明确不做
+升级为：
 
-- 不做多 Agent 自主研究集群。
-- 不做遗传算法、贝叶斯优化或大规模参数搜索。
-- 不让 LLM 自动修改正式策略。
-- 不让 AI 自动批准或进入真实交易。
-- 不做复杂 Strategy Registry / Candidate / Approval 平台。
-- 不做机构级 Portfolio、VaR、风险预算。
-- 不新建第二套回测、复盘、任务或监控系统。
-- 不为了 V4 引入向量数据库、知识图谱或新的基础设施。
+```text
+Opportunity
+  ↓
+Symbol Analysis
+  ↓
+Trade Proposal
+  ↓
+Risk
+  ↓
+Entry
+  ↓
+Managed Position
+  ├─ Position Guardian
+  ├─ Live Trade Ledger
+  ├─ Partial Reduce / Multi-TP
+  └─ AI Position Review
+           ↓
+     HOLD / REDUCE / TIGHTEN_STOP / CLOSE
+           ↓
+   Deterministic Validation
+           ↓
+        用户确认
+           ↓
+   Ownership-safe Execution
+```
 
-## 3. V4 核心原则
+V4 的核心不是让 AI 获得更多交易自由，而是让真实仓位从建立到结束都具备更完整的保护、归因、管理和可解释性。
 
-- 旧策略不原地修改；新想法继续创建新的 Strategy Template。
-- 所有指标由 Go/SQL 确定性计算，LLM 只负责解释和提出下一步研究建议。
-- 优先复用现有 Backtest Run、Trade、Equity、Outcome Review 和 Task。
-- 回测结果不能只看收益，至少同时看回撤、交易次数、Profit Factor 和跨区间稳定性。
-- Shadow/Testnet 只验证候选策略，不改变现有真实交易安全边界。
-- 个人项目保持人工最终决策，不增加审批流。
+## 2. V1～V3 已有基础
 
-## 4. Phase
+V4 直接复用以下能力，不重新建设：
 
-| Phase | 目标 |
-| --- | --- |
-| [V4-0](./00-phase-v4-0-baseline.md) | 冻结 V3/V4 起点和回归基线 |
-| [V4-1](./01-phase-v4-1-batch-backtest.md) | 一次对多个币执行同一策略回测 |
-| [V4-2](./02-phase-v4-2-robustness.md) | 自动计算最必要的稳健性指标 |
-| [V4-3](./03-phase-v4-3-time-validation.md) | 多时间窗口验证，降低单一区间过拟合 |
-| [V4-4](./04-phase-v4-4-shadow-trading.md) | 实时 Shadow Trading，不下真实订单 |
-| [V4-5](./05-phase-v4-5-testnet-validation.md) | 候选策略 Testnet 前向验证 |
-| [V4-6](./06-phase-v4-6-ai-strategy-review.md) | AI 基于真实测试结果辅助策略迭代 |
-| [V4-7](./07-phase-v4-7-result-review.md) | 统一比较 Backtest / Shadow / Testnet / Live |
-| [V4-8](./08-phase-v4-8-finalization.md) | V4 收尾、文档、测试和长期运行检查 |
+- Agent Runtime / Task / Conversation / Memory。
+- Native Skill / Portable Skill / MCP Client / Tool Runtime。
+- Model Gateway、Trace、Observability、System Dashboard。
+- Market Intelligence、Opportunity Watch、Symbol Analysis、TradingPlanV1。
+- Trade Proposal、Deterministic Risk、人工 Approval。
+- Futures Ownership、Managed Position、Managed Order、Restart/Reconcile。
+- Binance Futures Hedge Mode、明确 `positionSide` 的下单模型。
+- Testnet E2E、Stop/TP、人工减仓后 managed quantity 收缩。
+- Outcome Review 与真实交易 Audit 链路。
 
-## 5. V4 最重要的输出
+## 3. 当前结构性缺口
 
-V4 完成后，对一个 Strategy Template，系统应能回答：
+### 3.1 仓位保护缺少统一 Guardian
 
-1. 在最近测试的多个币上是否稳定。
-2. 是否只在某一个时间段表现好。
-3. 交易频率是否因为不断优化而明显下降。
-4. 收益是否过度依赖少数几笔交易。
-5. Shadow/Testnet 与历史回测是否出现明显偏差。
-6. AI 下一次建议修改什么，以及为什么。
+当前 Ownership 会周期 Reconcile，但不同 owner 的 Protection 修复能力并不统一。Agent Trade 的 Stop/TP 主要在 Entry 后建立，缺少一个长期检查所有 managed position 的统一保护层。
 
-不计算“综合评分”，避免用一个数字掩盖不同指标的 trade-off。
+### 3.2 Live 真实收益归因不完整
+
+当前系统已经能拿到 Exchange Order、Commission、Realized PnL，并已有 Income API，但尚未完整归因到 `owner / source_ref / proposal / managed position`，因此 Live Outcome Review 无法可靠展示完整 Net PnL、Fee 和 Funding。
+
+### 3.3 仓位管理动作过少
+
+TradingPlanV1 支持多个 Take Profit，但真实 Agent 生命周期目前只使用第一个 TP；系统主要支持全量 Close，没有统一的 Partial Reduce、Multi-TP、Breakeven/Tighten Stop 管理路径。
+
+### 3.4 Position Conflict 规则分散
+
+Auto Strategy、Agent Risk、Ownership 分别有仓位冲突判断。目前为了安全，系统会阻止同币再开仓；这些规则应被整理成明确的 Position Policy，而不是继续散落在不同模块。
+
+## 4. 关于多空双开与加仓
+
+### 多空双开
+
+底层已经使用 Binance Hedge Mode，并按 `symbol + positionSide` 管理 LONG/SHORT。当前无法同币多空双开的主要原因是上层 Policy 主动禁止，而不是 Binance 或 Ownership 基础结构不支持。
+
+V4 不立即放开。它只在 V4-6 作为**默认关闭的可选能力**重新评估。
+
+### 同方向加仓
+
+V4 明确不做。
+
+虽然底层 Fill 能更新 `managed_qty` 和加权 `entry_price`，但当前一条 managed position 只有一个 `source_ref`，直接支持多次独立加仓会引入 Position Leg / Lot、Leg-level Stop/TP、风险预算和收益归因复杂度，不符合当前个人项目的收益/复杂度比例。
+
+## 5. Phase 索引
+
+| Phase | 优先级 | 目标 |
+| --- | --- | --- |
+| [V4-0](./00-phase-v4-0-real-trading-baseline.md) | P0 | 冻结真实交易、Ownership、Protection、Reconcile 基线 |
+| [V4-1](./01-phase-v4-1-position-guardian.md) | P0 | 建立统一 Managed Position Guardian，持续检查和修复仓位保护 |
+| [V4-2](./02-phase-v4-2-live-trade-ledger.md) | P0 | 建立 Live Trade Ledger，可靠归因 PnL / Fee / Funding |
+| [V4-3](./03-phase-v4-3-position-policy.md) | P1 | 统一 Position Conflict / Exposure Policy，不立即增加交易自由度 |
+| [V4-4](./04-phase-v4-4-partial-reduce-multi-tp.md) | P1 | 支持 Partial Reduce 与 Multi-TP，补齐真实仓位管理动作 |
+| [V4-5](./05-phase-v4-5-ai-position-manager.md) | P1 | 让 AI 在持仓阶段提出结构化仓位管理建议，但仍不能直接交易 |
+| [V4-6](./06-phase-v4-6-optional-hedge-position.md) | P2 / 可选 | 在前述能力稳定后，再评估同币 LONG/SHORT 双开 |
+| [V4-7](./07-phase-v4-7-finalization.md) | P2 | V4 收尾、长期运行检查、文档和最终 Testnet Gate |
 
 ## 6. 开发顺序
 
 ```text
-V4-0 Baseline
-   ↓
-V4-1 Batch Backtest
-   ↓
-V4-2 Robustness
-   ↓
-V4-3 Time Validation
-   ↓
-V4-4 Shadow Trading
-   ↓
-V4-5 Testnet Validation
-   ↓
-V4-6 AI Strategy Review
-   ↓
-V4-7 Result Review
-   ↓
-V4-8 Finalization
+V4-0 Real Trading Baseline
+  ↓
+V4-1 Position Guardian
+  ↓
+V4-2 Live Trade Ledger
+  ↓
+V4-3 Position Policy
+  ↓
+V4-4 Partial Reduce / Multi-TP
+  ↓
+V4-5 AI Position Manager
+  ↓
+V4-6 Optional Hedge Position（可选）
+  ↓
+V4-7 Finalization
 ```
 
-V4-1～V4-3 是第一优先级。只有离线验证稳定后，再进入 V4-4/V4-5。
+V4-6 不作为 V4 完成的强制条件。如果 V4-5 完成后仍没有明确实际需求，可直接保持关闭并进入 V4-7。
 
-## 7. Definition of Done
+## 7. V4 明确不做
 
-- 同一策略可以方便地批量测试多个 Symbol。
-- 系统能自动指出交易频率下降、跨币种不稳定、跨时间窗口不稳定和收益过度集中。
-- 候选策略可以在不下单的情况下进行实时 Shadow 验证。
-- Testnet 可以复用现有真实执行路径验证前向表现。
-- AI 可以读取结构化测试结果，给出有依据的改进建议，但不能自动修改策略或自动实盘。
-- Backtest、Shadow、Testnet、Live 的结果可以分开查看并进行简单比较。
-- V4 不破坏现有 V3 Backtest、Ownership、受控交易和运维能力。
+- 不做任何新的 Backtest 功能、批量回测、稳健性分析或自动参数搜索。
+- 不做 Portfolio Optimizer、VaR、复杂风险预算或自动调仓。
+- 不做同方向多次加仓 / Position Leg / Lot Accounting。
+- 不做 AI 自动反手。
+- 不做 AI 自动批准真实交易。
+- 不允许 LLM 绕过 Deterministic Risk / Position Policy / Ownership。
+- 不增加新的大型 Agent Runtime、Multi-Agent、Memory、MCP 或 LLM Provider 平台能力。
+- 不做多账户、Copy Trading、企业级审批或多租户。
+
+## 8. V4 Definition of Done
+
+V4 完成时应满足：
+
+- 每个 managed position 都能被统一 Guardian 持续检查保护状态。
+- Stop/TP 丢失、数量不匹配或 stale protection 可以被可靠发现并安全处理。
+- Live 交易可以可靠归因到 Owner / Source / Proposal，并计算 Realized PnL、Fee、Funding 和 Net PnL。
+- 系统支持安全的部分减仓和多个 Take Profit，不要求整仓一次性退出。
+- Position Conflict 规则集中、可测试，默认仍维持 V3 的保守行为。
+- AI 可以基于真实仓位 Context 提出 HOLD / REDUCE / TIGHTEN_STOP / CLOSE，但不能直接提交 Binance 订单。
+- 所有真实 Mutation 继续经过 Ownership-aware Executor。
+- V4 不引入同方向加仓复杂度。
+- V4 不修改或依赖回测系统。
