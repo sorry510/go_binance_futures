@@ -34,9 +34,7 @@ func syncStrategyExitPositions(accountPositions []types.FuturesPosition) ([]owne
 		return nil, err
 	}
 	result := make([]ownedTradePosition, 0, len(autoPositions))
-	for _, position := range autoPositions {
-		result = append(result, ownedTradePosition{Position: position, Owner: futuresownership.OwnerAutoStrategy, SourceRef: "auto_strategy:" + strings.ToUpper(position.Symbol)})
-	}
+	result = append(result, autoPositions...)
 
 	accountByKey := make(map[string]types.FuturesPosition, len(accountPositions))
 	for _, position := range accountPositions {
@@ -78,7 +76,7 @@ func syncStrategyExitPositions(accountPositions []types.FuturesPosition) ([]owne
 	return result, nil
 }
 
-func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]types.FuturesPosition, error) {
+func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]ownedTradePosition, error) {
 	ctx := context.Background()
 	managedOrders, err := sharedOwnership.ActiveOrders(ctx, futuresownership.OwnerAutoStrategy)
 	if err != nil {
@@ -118,13 +116,13 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]type
 		managedByKey[managedPositionKey(managed.Symbol, managed.PositionSide)] = managed
 	}
 
-	result := make([]types.FuturesPosition, 0, len(managedPositions))
+	result := make([]ownedTradePosition, 0, len(managedPositions))
 	for _, account := range accountPositions {
 		managed, ok := managedByKey[managedPositionKey(account.Symbol, account.Side)]
 		if !ok || managed.ManagedQty <= 0 {
 			continue
 		}
-		result = append(result, managedAccountPosition(account, managed))
+		result = append(result, ownedTradePosition{Position: managedAccountPosition(account, managed), Owner: futuresownership.OwnerAutoStrategy, SourceRef: managed.SourceRef})
 	}
 	return result, nil
 }
@@ -233,8 +231,28 @@ func ensureAccountOpenSlotAvailable(symbol string, positionSide futures.Position
 	return nil
 }
 
-func submitAutoStrategyOpen(symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType) (*futures.CreateOrderResponse, error) {
-	return submitOwnedFeatureOpen(futuresownership.OwnerAutoStrategy, "auto_strategy:"+strings.ToUpper(strings.TrimSpace(symbol)), symbol, quantity, price, side, positionSide, orderType)
+func autoStrategySourceRef(symbol, strategyHash string) string {
+	base := "auto_strategy:" + strings.ToUpper(strings.TrimSpace(symbol))
+	strategyHash = strings.TrimSpace(strategyHash)
+	if strategyHash == "" {
+		return base
+	}
+	return base + ":" + strategyHash
+}
+
+func autoStrategyOpenRuleHash(owner, sourceRef string) string {
+	if owner != futuresownership.OwnerAutoStrategy {
+		return ""
+	}
+	parts := strings.Split(strings.TrimSpace(sourceRef), ":")
+	if len(parts) != 3 || parts[0] != "auto_strategy" || len(parts[2]) != 64 {
+		return ""
+	}
+	return parts[2]
+}
+
+func submitAutoStrategyOpen(symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType, strategyHash string) (*futures.CreateOrderResponse, error) {
+	return submitOwnedFeatureOpen(futuresownership.OwnerAutoStrategy, autoStrategySourceRef(symbol, strategyHash), symbol, quantity, price, side, positionSide, orderType)
 }
 
 func submitNewCoinRushOpen(sourceRef, symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType) (*futures.CreateOrderResponse, error) {

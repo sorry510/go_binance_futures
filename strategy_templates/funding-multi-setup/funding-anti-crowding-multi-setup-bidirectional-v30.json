@@ -1,0 +1,200 @@
+{
+  "name": "Funding逆拥挤多Setup组合双向 v30",
+  "technology": {
+    "adx": [
+      {
+        "enable": true,
+        "kline_interval": "1d",
+        "name": "adx_1d_14",
+        "period": 14
+      },
+      {
+        "enable": true,
+        "kline_interval": "4h",
+        "name": "adx_4h_14",
+        "period": 14
+      }
+    ],
+    "atr": [
+      {
+        "enable": true,
+        "kline_interval": "1h",
+        "name": "atr_1h_14",
+        "period": 14
+      }
+    ],
+    "boll": [
+      {
+        "enable": true,
+        "kline_interval": "1h",
+        "name": "boll_1h_20_2",
+        "period": 20,
+        "std_dev_multiplier": 2
+      }
+    ],
+    "cci": [],
+    "donchian": [
+      {
+        "enable": true,
+        "kline_interval": "1h",
+        "name": "donchian_1h_24",
+        "period": 24
+      },
+      {
+        "enable": true,
+        "kline_interval": "1h",
+        "name": "donchian_1h_20",
+        "period": 20
+      }
+    ],
+    "ema": [
+      {
+        "enable": true,
+        "kline_interval": "1d",
+        "name": "ema_1d_20",
+        "period": 20
+      },
+      {
+        "enable": true,
+        "kline_interval": "1d",
+        "name": "ema_1d_50",
+        "period": 50
+      },
+      {
+        "enable": true,
+        "kline_interval": "4h",
+        "name": "ema_4h_20",
+        "period": 20
+      },
+      {
+        "enable": true,
+        "kline_interval": "4h",
+        "name": "ema_4h_50",
+        "period": 50
+      },
+      {
+        "enable": true,
+        "kline_interval": "1h",
+        "name": "ema_1h_20",
+        "period": 20
+      }
+    ],
+    "kc": [
+      {
+        "enable": true,
+        "kline_interval": "1h",
+        "multiplier": 1.5,
+        "name": "kc_1h_20_15",
+        "period": 20
+      }
+    ],
+    "kdj": [],
+    "ma": [],
+    "macd": [],
+    "mfi": [],
+    "obv": [],
+    "roc": [
+      {
+        "enable": true,
+        "kline_interval": "4h",
+        "name": "roc_4h_42",
+        "period": 42
+      },
+      {
+        "enable": true,
+        "kline_interval": "4h",
+        "name": "roc_4h_126",
+        "period": 126
+      }
+    ],
+    "rsi": [
+      {
+        "enable": true,
+        "kline_interval": "1h",
+        "name": "rsi_1h_14",
+        "period": 14
+      }
+    ],
+    "supertrend": [
+      {
+        "enable": true,
+        "kline_interval": "4h",
+        "multiplier": 3,
+        "name": "supertrend_4h_10_3",
+        "period": 10
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "funding_primary_breakout_long_v30",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) \u003e= 1;\nlet funding_not_positive = funding_ready \u0026\u0026 FundingRate.Data[0] \u003c= 0;\nlet atr = atr_1h_14.Data[1];\nlet atr_prev = atr_1h_14.Data[2];\nlet trend = kline_4h.Close[1] \u003e ema_4h_50.Data[1] \u0026\u0026 ema_4h_20.Data[1] \u003e ema_4h_50.Data[1] \u0026\u0026 ema_4h_20.Data[1] \u003e= ema_4h_20.Data[4];\nlet strength = adx_4h_14.ADX[1] \u003e= 20 \u0026\u0026 adx_4h_14.ADX[1] \u003e= adx_4h_14.ADX[3] \u0026\u0026 adx_4h_14.PlusDI[1] \u003e adx_4h_14.MinusDI[1];\nlet breakout = atr \u003e 0 \u0026\u0026 all(kline_1h.High[2:14], # + atr * 0.10 \u003c kline_1h.Close[1]);\nlet previous_breakout = atr_prev \u003e 0 \u0026\u0026 all(kline_1h.High[3:15], # + atr_prev * 0.10 \u003c kline_1h.Close[2]);\nlet fresh_breakout = breakout \u0026\u0026 !previous_breakout;\nlet body = kline_1h.Close[1] - kline_1h.Open[1];\nlet impulse = atr \u003e 0 \u0026\u0026 kline_1h.Close[1] \u003e kline_1h.Open[1] \u0026\u0026 rsi_1h_14.Data[1] \u003e= 55 \u0026\u0026 adx_4h_14.ADX[1] - adx_4h_14.ADX[3] \u003e= 2 \u0026\u0026 body \u003e= atr * 0.15 \u0026\u0026 body \u003c= atr * 2.0;\nlet no_chase = kline_1h.Close[0] \u003e= kline_1h.Close[1] - atr * 0.15 \u0026\u0026 kline_1h.Close[0] \u003c= kline_1h.Close[1] + atr * 0.35;\nfunding_not_positive \u0026\u0026 ema_1d_20.Data[1] \u003e= ema_1d_20.Data[4] \u0026\u0026 adx_1d_14.PlusDI[1] \u003e adx_1d_14.MinusDI[1] \u0026\u0026 trend \u0026\u0026 strength \u0026\u0026 fresh_breakout \u0026\u0026 impulse \u0026\u0026 no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_squeeze_release_long_v30",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) \u003e= 1;\nlet funding_not_positive = funding_ready \u0026\u0026 FundingRate.Data[0] \u003c= 0;\nlet squeeze = boll_1h_20_2.High[2] \u003c kc_1h_20_15.High[2] \u0026\u0026 boll_1h_20_2.Low[2] \u003e kc_1h_20_15.Low[2];\nlet release = boll_1h_20_2.High[1] \u003e= kc_1h_20_15.High[1] || boll_1h_20_2.Low[1] \u003c= kc_1h_20_15.Low[1];\nlet atr = atr_1h_14.Data[1];\nlet range = kline_1h.High[1] - kline_1h.Low[1];\nlet avg_qv = mean(kline_1h.Qps[2:10]);\nlet breakout = kline_1h.Close[1] \u003e boll_1h_20_2.High[1] \u0026\u0026 kline_1h.Close[1] \u003e kline_1h.Open[1];\nlet expansion = atr \u003e 0 \u0026\u0026 range \u003e= atr * 0.80 \u0026\u0026 avg_qv \u003e 0 \u0026\u0026 kline_1h.Qps[1] \u003e= avg_qv;\nlet no_chase = kline_1h.Close[0] \u003e= kline_1h.Close[1] - atr * 0.20 \u0026\u0026 kline_1h.Close[0] \u003c= kline_1h.Close[1] + atr * 0.35;\nfunding_not_positive \u0026\u0026 (squeeze \u0026\u0026 release \u0026\u0026 breakout \u0026\u0026 expansion \u0026\u0026 no_chase)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_wyckoff_spring_long_v30",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) \u003e= 1;\nlet funding_not_positive = funding_ready \u0026\u0026 FundingRate.Data[0] \u003c= 0;\nlet spring_atr = atr_1h_14.Data[2];\nlet entry_atr = atr_1h_14.Data[1];\nlet support = donchian_1h_24.Low[3];\nlet resistance = donchian_1h_24.High[3];\nlet width = resistance - support;\nlet avg_qv = mean(kline_1h.Qps[3:15]);\nlet spring = spring_atr \u003e 0 \u0026\u0026 width \u003e= spring_atr * 2.0 \u0026\u0026 kline_1h.Low[2] \u003c support \u0026\u0026 kline_1h.Close[2] \u003e support \u0026\u0026 kline_1h.Close[2] \u003c= support + width * 0.50;\nlet effort = avg_qv \u003e 0 \u0026\u0026 kline_1h.Qps[2] \u003e= avg_qv * 1.20;\nlet test = kline_1h.Low[1] \u003e kline_1h.Low[2] \u0026\u0026 kline_1h.Close[1] \u003e support \u0026\u0026 kline_1h.Qps[1] \u003c= kline_1h.Qps[2] * 0.85 \u0026\u0026 kline_1h.Close[1] \u003e= (kline_1h.High[1] + kline_1h.Low[1]) * 0.50;\nlet no_chase = entry_atr \u003e 0 \u0026\u0026 kline_1h.Close[0] \u003e= kline_1h.Close[1] - entry_atr * 0.20 \u0026\u0026 kline_1h.Close[0] \u003c= kline_1h.Close[1] + entry_atr * 0.35;\nfunding_not_positive \u0026\u0026 (spring \u0026\u0026 effort \u0026\u0026 test \u0026\u0026 no_chase)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_supertrend_setup_1_long_v30",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) \u003e= 1;\nlet funding_not_positive = funding_ready \u0026\u0026 FundingRate.Data[0] \u003c= 0;\nlet atr = atr_1h_14.Data[1];\nlet avg_qv = mean(kline_1h.Qps[2:10]);\nlet direction = supertrend_4h_10_3.Trend[1] == 1 \u0026\u0026 kline_4h.Close[1] \u003e supertrend_4h_10_3.Data[1];\nlet reclaim = kline_1h.Low[1] \u003c= ema_1h_20.Data[1] \u0026\u0026 kline_1h.Close[1] \u003e ema_1h_20.Data[1] \u0026\u0026 kline_1h.Close[2] \u003c= ema_1h_20.Data[2];\nlet momentum = rsi_1h_14.Data[1] \u003e= 50 \u0026\u0026 rsi_1h_14.Data[1] \u003e rsi_1h_14.Data[2];\nlet body = kline_1h.Close[1] - kline_1h.Open[1];\nlet quality = atr \u003e 0 \u0026\u0026 avg_qv \u003e 0 \u0026\u0026 body \u003e 0 \u0026\u0026 body \u003c= atr * 1.5 \u0026\u0026 kline_1h.Qps[1] \u003e= avg_qv * 0.80;\nlet no_chase = kline_1h.Close[0] \u003e= kline_1h.Close[1] - atr * 0.20 \u0026\u0026 kline_1h.Close[0] \u003c= kline_1h.Close[1] + atr * 0.30;\nfunding_not_positive \u0026\u0026 (direction \u0026\u0026 reclaim \u0026\u0026 momentum \u0026\u0026 quality \u0026\u0026 no_chase)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_supertrend_setup_2_long_v30",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) \u003e= 1;\nlet funding_not_positive = funding_ready \u0026\u0026 FundingRate.Data[0] \u003c= 0;\nlet atr = atr_1h_14.Data[1];\nlet avg_qv = mean(kline_1h.Qps[2:10]);\nlet direction = supertrend_4h_10_3.Trend[1] == 1 \u0026\u0026 kline_4h.Close[1] \u003e supertrend_4h_10_3.Data[1];\nlet range_high = max(kline_1h.High[2:8]);\nlet range_low = min(kline_1h.Low[2:8]);\nlet compressed = atr \u003e 0 \u0026\u0026 range_high \u003e range_low \u0026\u0026 (range_high - range_low) \u003c= atr * 2.5;\nlet breakout = kline_1h.Close[1] \u003e range_high;\nlet body = kline_1h.Close[1] - kline_1h.Open[1];\nlet impulse = avg_qv \u003e 0 \u0026\u0026 body \u003e= atr * 0.15 \u0026\u0026 body \u003c= atr * 1.5 \u0026\u0026 kline_1h.Qps[1] \u003e= avg_qv * 1.15 \u0026\u0026 rsi_1h_14.Data[1] \u003e= 54;\nlet no_chase = kline_1h.Close[0] \u003e= kline_1h.Close[1] - atr * 0.20 \u0026\u0026 kline_1h.Close[0] \u003c= kline_1h.Close[1] + atr * 0.30;\nfunding_not_positive \u0026\u0026 (direction \u0026\u0026 compressed \u0026\u0026 breakout \u0026\u0026 impulse \u0026\u0026 no_chase)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_supertrend_setup_3_long_v30",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) \u003e= 1;\nlet funding_not_positive = funding_ready \u0026\u0026 FundingRate.Data[0] \u003c= 0;\nlet atr = atr_1h_14.Data[1];\nlet avg_qv = mean(kline_1h.Qps[2:10]);\nlet direction = supertrend_4h_10_3.Trend[1] == 1 \u0026\u0026 kline_4h.Close[1] \u003e supertrend_4h_10_3.Data[1];\nlet trend = kline_1h.Close[1] \u003e ema_1h_20.Data[1] \u0026\u0026 ema_1h_20.Data[1] \u003e= ema_1h_20.Data[4];\nlet restart = rsi_1h_14.Data[1] \u003e= 55 \u0026\u0026 rsi_1h_14.Data[2] \u003c 55 \u0026\u0026 kline_1h.Close[1] \u003e kline_1h.Close[2];\nlet body = kline_1h.Close[1] - kline_1h.Open[1];\nlet quality = atr \u003e 0 \u0026\u0026 avg_qv \u003e 0 \u0026\u0026 body \u003e 0 \u0026\u0026 body \u003c= atr * 1.5 \u0026\u0026 kline_1h.Qps[1] \u003e= avg_qv * 0.90;\nlet no_chase = kline_1h.Close[0] \u003e= kline_1h.Close[1] - atr * 0.20 \u0026\u0026 kline_1h.Close[0] \u003c= kline_1h.Close[1] + atr * 0.30;\nfunding_not_positive \u0026\u0026 (direction \u0026\u0026 trend \u0026\u0026 restart \u0026\u0026 quality \u0026\u0026 no_chase)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_tsmom_breakout_long_v30",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) \u003e= 1;\nlet funding_not_positive = funding_ready \u0026\u0026 FundingRate.Data[0] \u003c= 0;\nlet atr = atr_1h_14.Data[1];\nlet trend = roc_4h_42.Data[1] \u003e 0 \u0026\u0026 roc_4h_126.Data[1] \u003e 0;\nlet breakout = kline_1h.Close[1] \u003e donchian_1h_20.High[2] \u0026\u0026 kline_1h.Close[2] \u003c= donchian_1h_20.High[3];\nlet no_chase = atr \u003e 0 \u0026\u0026 kline_1h.Close[0] \u003e= kline_1h.Close[1] - atr * 0.25 \u0026\u0026 kline_1h.Close[0] \u003c= kline_1h.Close[1] + atr * 0.40;\nfunding_not_positive \u0026\u0026 (trend \u0026\u0026 breakout \u0026\u0026 no_chase)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "funding_primary_breakdown_short_v30",
+      "type": "short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet daily_regime = ema_1d_20.Data[1] \u003c ema_1d_50.Data[1] \u0026\u0026 ema_1d_20.Data[1] \u003c= ema_1d_20.Data[4] \u0026\u0026 ema_1d_50.Data[1] \u003c= ema_1d_50.Data[4] \u0026\u0026 kline_1d.Close[1] \u003c ema_1d_20.Data[1] \u0026\u0026 kline_1d.Close[1] \u003c kline_1d.Open[1] \u0026\u0026 kline_1d.Close[1] \u003c= kline_1d.Close[2] \u0026\u0026 adx_1d_14.ADX[1] \u003e= 20 \u0026\u0026 adx_1d_14.ADX[1] \u003e= adx_1d_14.ADX[3] \u0026\u0026 adx_1d_14.MinusDI[1] \u003e adx_1d_14.PlusDI[1];\nlet trend = kline_4h.Close[1] \u003c ema_4h_20.Data[1] \u0026\u0026 kline_4h.Close[1] \u003c ema_4h_50.Data[1] \u0026\u0026 ema_4h_20.Data[1] \u003c ema_4h_50.Data[1] \u0026\u0026 ema_4h_20.Data[1] \u003c= ema_4h_20.Data[4];\nlet strength = adx_4h_14.ADX[1] \u003e= 20 \u0026\u0026 adx_4h_14.ADX[1] \u003e= adx_4h_14.ADX[3] \u0026\u0026 adx_4h_14.MinusDI[1] \u003e adx_4h_14.PlusDI[1];\nlet breakdown = all(kline_1h.Low[2:14], # \u003e kline_1h.Close[1]);\nlet previous_breakdown = all(kline_1h.Low[3:15], # \u003e kline_1h.Close[2]);\nlet fresh_breakdown = breakdown \u0026\u0026 !previous_breakdown;\nlet body = kline_1h.Open[1] - kline_1h.Close[1];\nlet impulse = atr \u003e 0 \u0026\u0026 kline_1h.Close[1] \u003c kline_1h.Open[1] \u0026\u0026 rsi_1h_14.Data[1] \u003c= 45 \u0026\u0026 adx_4h_14.ADX[1] - adx_4h_14.ADX[3] \u003e= 2 \u0026\u0026 body \u003e= atr * 0.15 \u0026\u0026 body \u003c= atr * 2.0;\nlet no_chase = kline_1h.Close[0] \u003c= kline_1h.Close[1] + atr * 0.15 \u0026\u0026 kline_1h.Close[0] \u003e= kline_1h.Close[1] - atr * 0.35;\ndaily_regime \u0026\u0026 trend \u0026\u0026 strength \u0026\u0026 fresh_breakdown \u0026\u0026 impulse \u0026\u0026 no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "setup_routed_close_long_v30",
+      "type": "close_long",
+      "code": "let setup_legacy = OpenStrategyHash == \"\";\nlet setup_v29 = OpenStrategyHash == \"63ad52d376b8f082e978d92b9673457d8ef1817284144559db22b5bf11f8a68d\";\nlet setup_squeeze = OpenStrategyHash == \"db6bb033c28706408f695e14399058d8c0f4f00bee0d179a5321ebf04e4dd3de\";\nlet setup_wyckoff = OpenStrategyHash == \"cb8f6f323be7da5de7336c3498565bdf326a51694609c7733fe9f7872e0e31e0\";\nlet setup_supertrend = OpenStrategyHash == \"26edec7d5d2e2c0e4b10154521a8ee725c38e528cf7afddc0e2bf88bd402b765\" || OpenStrategyHash == \"288a90097fa7895d51c65703f09aa3da4a8dd29b731c5102763224f4a2404f15\" || OpenStrategyHash == \"5e50bdc90dcde27c4ec10393f9facd0163a6373c7955513afb94f346e01e3daa\";\nlet setup_tsmom = OpenStrategyHash == \"6fbfb16ac50fc1de9adf3c53fd19487ec7abc8733dfd15b944e4403fe9f3ffe3\";\nlet catastrophic_stop = ROI \u003c= -10;\n\nlet v29_atr = atr_1h_14.Data[1];\nlet v29_avg_qv = mean(kline_1h.Qps[1:9]);\nlet v29_trend_fail = (ema_4h_20.Data[0] \u003c ema_4h_50.Data[0] \u0026\u0026 kline_4h.Close[0] \u003c ema_4h_20.Data[0]) || (adx_4h_14.MinusDI[0] \u003e adx_4h_14.PlusDI[0] \u0026\u0026 kline_4h.Close[0] \u003c ema_4h_20.Data[0]);\nlet v29_momentum_fail = kline_1h.Close[0] \u003c ema_1h_20.Data[0] \u0026\u0026 rsi_1h_14.Data[0] \u003c 48 \u0026\u0026 rsi_1h_14.Data[0] \u003c rsi_1h_14.Data[1];\nlet v29_bearish_impulse = v29_atr \u003e 0 \u0026\u0026 v29_avg_qv \u003e 0 \u0026\u0026 kline_1h.Close[0] \u003c kline_1h.Open[0] \u0026\u0026 kline_1h.Qps[0] \u003e= v29_avg_qv * 0.90 \u0026\u0026 (kline_1h.Open[0] - kline_1h.Close[0]) \u003e= v29_atr * 0.15;\nlet v29_close = (ROI \u003e= 8 \u0026\u0026 (v29_trend_fail || (v29_momentum_fail \u0026\u0026 v29_bearish_impulse))) || (ROI \u003c= -6 \u0026\u0026 (v29_trend_fail || v29_momentum_fail)) || (ROI \u003e= 14 \u0026\u0026 (v29_momentum_fail || v29_bearish_impulse));\n\nlet sq_squeeze_return = boll_1h_20_2.High[0] \u003c kc_1h_20_15.High[0] \u0026\u0026 boll_1h_20_2.Low[0] \u003e kc_1h_20_15.Low[0];\nlet sq_price_fail = kline_1h.Close[0] \u003c boll_1h_20_2.Mid[0] \u0026\u0026 kline_1h.Close[0] \u003c kline_1h.Close[1];\nlet sq_close = (ROI \u003e= 8 \u0026\u0026 (sq_price_fail || sq_squeeze_return)) || (ROI \u003c= -6 \u0026\u0026 sq_price_fail);\n\nlet wy_atr = atr_1h_14.Data[1];\nlet wy_avg_qv = mean(kline_1h.Qps[1:9]);\nlet wy_mid = donchian_1h_24.Mid[1];\nlet wy_structure_fail = kline_1h.Close[0] \u003c wy_mid \u0026\u0026 kline_1h.Close[0] \u003c kline_1h.Close[1];\nlet wy_supply_return = wy_atr \u003e 0 \u0026\u0026 wy_avg_qv \u003e 0 \u0026\u0026 kline_1h.Close[0] \u003c kline_1h.Open[0] \u0026\u0026 kline_1h.Qps[0] \u003e= wy_avg_qv * 1.20 \u0026\u0026 (kline_1h.Open[0] - kline_1h.Close[0]) \u003e= wy_atr * 0.20;\nlet wy_close = (ROI \u003e= 8 \u0026\u0026 (wy_structure_fail || wy_supply_return)) || (ROI \u003c= -6 \u0026\u0026 wy_structure_fail);\n\nlet st_atr = atr_1h_14.Data[1];\nlet st_avg_qv = mean(kline_1h.Qps[1:9]);\nlet st_trend_fail = supertrend_4h_10_3.Trend[0] == -1;\nlet st_momentum_fail = kline_1h.Close[0] \u003c ema_1h_20.Data[0] \u0026\u0026 rsi_1h_14.Data[0] \u003c 45 \u0026\u0026 rsi_1h_14.Data[0] \u003c rsi_1h_14.Data[1];\nlet st_bearish_impulse = st_atr \u003e 0 \u0026\u0026 st_avg_qv \u003e 0 \u0026\u0026 kline_1h.Close[0] \u003c kline_1h.Open[0] \u0026\u0026 kline_1h.Qps[0] \u003e= st_avg_qv * 0.90 \u0026\u0026 (kline_1h.Open[0] - kline_1h.Close[0]) \u003e= st_atr * 0.15;\nlet st_close = (ROI \u003e= 8 \u0026\u0026 (st_trend_fail || (st_momentum_fail \u0026\u0026 st_bearish_impulse))) || (ROI \u003c= -6 \u0026\u0026 (st_trend_fail || st_momentum_fail)) || (ROI \u003e= 14 \u0026\u0026 (st_momentum_fail || st_bearish_impulse));\n\nlet ts_trend_fail = roc_4h_42.Data[0] \u003c= 0;\nlet ts_structure_fail = kline_1h.Close[0] \u003c donchian_1h_20.Mid[0] \u0026\u0026 kline_1h.Close[0] \u003c kline_1h.Close[1];\nlet ts_close = (ROI \u003e= 8 \u0026\u0026 (ts_trend_fail || ts_structure_fail)) || (ROI \u003c= -6 \u0026\u0026 (ts_trend_fail || ts_structure_fail));\n\ncatastrophic_stop || ((setup_legacy || setup_v29) \u0026\u0026 v29_close) || (setup_squeeze \u0026\u0026 sq_close) || (setup_wyckoff \u0026\u0026 wy_close) || (setup_supertrend \u0026\u0026 st_close) || (setup_tsmom \u0026\u0026 ts_close)",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "routed_close_short_v30",
+      "type": "close_short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet avg_qv = mean(kline_1h.Qps[1:9]);\nlet trend_fail = (ema_4h_20.Data[0] \u003e ema_4h_50.Data[0] \u0026\u0026 kline_4h.Close[0] \u003e ema_4h_20.Data[0]) || (adx_4h_14.PlusDI[0] \u003e adx_4h_14.MinusDI[0] \u0026\u0026 kline_4h.Close[0] \u003e ema_4h_20.Data[0]);\nlet momentum_fail = kline_1h.Close[0] \u003e ema_1h_20.Data[0] \u0026\u0026 rsi_1h_14.Data[0] \u003e 52 \u0026\u0026 rsi_1h_14.Data[0] \u003e rsi_1h_14.Data[1];\nlet bullish_impulse = atr \u003e 0 \u0026\u0026 avg_qv \u003e 0 \u0026\u0026 kline_1h.Close[0] \u003e kline_1h.Open[0] \u0026\u0026 kline_1h.Qps[0] \u003e= avg_qv * 0.90 \u0026\u0026 (kline_1h.Close[0] - kline_1h.Open[0]) \u003e= atr * 0.15;\nlet profit_reversal = ROI \u003e= 8 \u0026\u0026 (trend_fail || (momentum_fail \u0026\u0026 bullish_impulse));\nlet loss_reversal = ROI \u003c= -6 \u0026\u0026 (trend_fail || momentum_fail);\nlet extended_profit_lock = ROI \u003e= 14 \u0026\u0026 (momentum_fail || bullish_impulse);\nlet catastrophic_stop = ROI \u003c= -10;\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

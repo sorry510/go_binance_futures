@@ -5,6 +5,7 @@ import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy"
 	"go_binance_futures/models"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
 	"math"
@@ -55,8 +56,10 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParam
 			if result, ok := output.(bool); ok && result {
 				if strategy.Type == "long" {
 					openResult.CanLong = true
+					openResult.LongStrategyHash = strategyservice.RuleHash(strategy.Code)
 				} else if strategy.Type == "short" {
 					openResult.CanShort = true
+					openResult.ShortStrategyHash = strategyservice.RuleHash(strategy.Code)
 				}
 				break
 			}
@@ -83,6 +86,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 	}
 	hasCloseStrategy := HasEnabledCloseStrategy(strategyConfig, position.Side)
 	env := InitParseEnv(coin.Symbol, normalizeCustomTechnology(coin.Technology))
+	env["OpenStrategyHash"] = closeParams.OpenStrategyHash
 	env["ROI"] = closeParams.NowProfit // 当前收益率
 	env["Position"] = types.FuturesPositionCode{
 		Symbol: coin.Symbol,
