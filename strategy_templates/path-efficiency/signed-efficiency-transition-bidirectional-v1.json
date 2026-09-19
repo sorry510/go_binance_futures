@@ -1,0 +1,57 @@
+{
+  "name": "1h 价格路径效率转趋势双向 v1",
+  "technology": {
+    "ma": [
+      {
+        "name": "ma_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      }
+    ],
+    "ema": [],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "signed_efficiency_transition_long_v1",
+      "type": "long",
+      "code": "let path_now = abs(kline_1h.Close[1]-kline_1h.Close[2]) + abs(kline_1h.Close[2]-kline_1h.Close[3]) + abs(kline_1h.Close[3]-kline_1h.Close[4]) + abs(kline_1h.Close[4]-kline_1h.Close[5]) + abs(kline_1h.Close[5]-kline_1h.Close[6]) + abs(kline_1h.Close[6]-kline_1h.Close[7]) + abs(kline_1h.Close[7]-kline_1h.Close[8]) + abs(kline_1h.Close[8]-kline_1h.Close[9]) + abs(kline_1h.Close[9]-kline_1h.Close[10]) + abs(kline_1h.Close[10]-kline_1h.Close[11]) + abs(kline_1h.Close[11]-kline_1h.Close[12]) + abs(kline_1h.Close[12]-kline_1h.Close[13]);\nlet path_prev = abs(kline_1h.Close[2]-kline_1h.Close[3]) + abs(kline_1h.Close[3]-kline_1h.Close[4]) + abs(kline_1h.Close[4]-kline_1h.Close[5]) + abs(kline_1h.Close[5]-kline_1h.Close[6]) + abs(kline_1h.Close[6]-kline_1h.Close[7]) + abs(kline_1h.Close[7]-kline_1h.Close[8]) + abs(kline_1h.Close[8]-kline_1h.Close[9]) + abs(kline_1h.Close[9]-kline_1h.Close[10]) + abs(kline_1h.Close[10]-kline_1h.Close[11]) + abs(kline_1h.Close[11]-kline_1h.Close[12]) + abs(kline_1h.Close[12]-kline_1h.Close[13]) + abs(kline_1h.Close[13]-kline_1h.Close[14]);\nlet signed_er_now = path_now > 0 ? (kline_1h.Close[1]-kline_1h.Close[13]) / path_now : 0;\nlet signed_er_prev = path_prev > 0 ? (kline_1h.Close[2]-kline_1h.Close[14]) / path_prev : 0;\nlet trend_48h = kline_1h.Close[1] > kline_1h.Close[49];\nsigned_er_now >= 0.50 && signed_er_prev < 0.50 && trend_48h",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "signed_efficiency_transition_short_v1",
+      "type": "short",
+      "code": "let path_now = abs(kline_1h.Close[1]-kline_1h.Close[2]) + abs(kline_1h.Close[2]-kline_1h.Close[3]) + abs(kline_1h.Close[3]-kline_1h.Close[4]) + abs(kline_1h.Close[4]-kline_1h.Close[5]) + abs(kline_1h.Close[5]-kline_1h.Close[6]) + abs(kline_1h.Close[6]-kline_1h.Close[7]) + abs(kline_1h.Close[7]-kline_1h.Close[8]) + abs(kline_1h.Close[8]-kline_1h.Close[9]) + abs(kline_1h.Close[9]-kline_1h.Close[10]) + abs(kline_1h.Close[10]-kline_1h.Close[11]) + abs(kline_1h.Close[11]-kline_1h.Close[12]) + abs(kline_1h.Close[12]-kline_1h.Close[13]);\nlet path_prev = abs(kline_1h.Close[2]-kline_1h.Close[3]) + abs(kline_1h.Close[3]-kline_1h.Close[4]) + abs(kline_1h.Close[4]-kline_1h.Close[5]) + abs(kline_1h.Close[5]-kline_1h.Close[6]) + abs(kline_1h.Close[6]-kline_1h.Close[7]) + abs(kline_1h.Close[7]-kline_1h.Close[8]) + abs(kline_1h.Close[8]-kline_1h.Close[9]) + abs(kline_1h.Close[9]-kline_1h.Close[10]) + abs(kline_1h.Close[10]-kline_1h.Close[11]) + abs(kline_1h.Close[11]-kline_1h.Close[12]) + abs(kline_1h.Close[12]-kline_1h.Close[13]) + abs(kline_1h.Close[13]-kline_1h.Close[14]);\nlet signed_er_now = path_now > 0 ? (kline_1h.Close[1]-kline_1h.Close[13]) / path_now : 0;\nlet signed_er_prev = path_prev > 0 ? (kline_1h.Close[2]-kline_1h.Close[14]) / path_prev : 0;\nlet trend_48h = kline_1h.Close[1] < kline_1h.Close[49];\nsigned_er_now <= -0.50 && signed_er_prev > -0.50 && trend_48h",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "signed_efficiency_close_long_v1",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "signed_efficiency_close_short_v1",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

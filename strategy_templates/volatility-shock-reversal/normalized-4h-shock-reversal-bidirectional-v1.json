@@ -1,0 +1,57 @@
+{
+  "name": "1h 波动标准化4h冲击反转双向 v1",
+  "technology": {
+    "ma": [
+      {
+        "name": "ma_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      }
+    ],
+    "ema": [],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "normalized_down_shock_reversal_long_v1",
+      "type": "long",
+      "code": "let baseline = (abs(kline_1h.Close[6]/kline_1h.Close[7]-1) + abs(kline_1h.Close[7]/kline_1h.Close[8]-1) + abs(kline_1h.Close[8]/kline_1h.Close[9]-1) + abs(kline_1h.Close[9]/kline_1h.Close[10]-1) + abs(kline_1h.Close[10]/kline_1h.Close[11]-1) + abs(kline_1h.Close[11]/kline_1h.Close[12]-1) + abs(kline_1h.Close[12]/kline_1h.Close[13]-1) + abs(kline_1h.Close[13]/kline_1h.Close[14]-1) + abs(kline_1h.Close[14]/kline_1h.Close[15]-1) + abs(kline_1h.Close[15]/kline_1h.Close[16]-1) + abs(kline_1h.Close[16]/kline_1h.Close[17]-1) + abs(kline_1h.Close[17]/kline_1h.Close[18]-1) + abs(kline_1h.Close[18]/kline_1h.Close[19]-1) + abs(kline_1h.Close[19]/kline_1h.Close[20]-1) + abs(kline_1h.Close[20]/kline_1h.Close[21]-1) + abs(kline_1h.Close[21]/kline_1h.Close[22]-1) + abs(kline_1h.Close[22]/kline_1h.Close[23]-1) + abs(kline_1h.Close[23]/kline_1h.Close[24]-1) + abs(kline_1h.Close[24]/kline_1h.Close[25]-1) + abs(kline_1h.Close[25]/kline_1h.Close[26]-1) + abs(kline_1h.Close[26]/kline_1h.Close[27]-1) + abs(kline_1h.Close[27]/kline_1h.Close[28]-1) + abs(kline_1h.Close[28]/kline_1h.Close[29]-1) + abs(kline_1h.Close[29]/kline_1h.Close[30]-1)) / 24;\nlet shock = baseline > 0 ? (kline_1h.Close[2]/kline_1h.Close[6]-1) / baseline : 0;\nlet confirmation = baseline > 0 ? (kline_1h.Close[1]/kline_1h.Close[2]-1) / baseline : 0;\nshock <= -7 && confirmation >= 1",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "normalized_up_shock_reversal_short_v1",
+      "type": "short",
+      "code": "let baseline = (abs(kline_1h.Close[6]/kline_1h.Close[7]-1) + abs(kline_1h.Close[7]/kline_1h.Close[8]-1) + abs(kline_1h.Close[8]/kline_1h.Close[9]-1) + abs(kline_1h.Close[9]/kline_1h.Close[10]-1) + abs(kline_1h.Close[10]/kline_1h.Close[11]-1) + abs(kline_1h.Close[11]/kline_1h.Close[12]-1) + abs(kline_1h.Close[12]/kline_1h.Close[13]-1) + abs(kline_1h.Close[13]/kline_1h.Close[14]-1) + abs(kline_1h.Close[14]/kline_1h.Close[15]-1) + abs(kline_1h.Close[15]/kline_1h.Close[16]-1) + abs(kline_1h.Close[16]/kline_1h.Close[17]-1) + abs(kline_1h.Close[17]/kline_1h.Close[18]-1) + abs(kline_1h.Close[18]/kline_1h.Close[19]-1) + abs(kline_1h.Close[19]/kline_1h.Close[20]-1) + abs(kline_1h.Close[20]/kline_1h.Close[21]-1) + abs(kline_1h.Close[21]/kline_1h.Close[22]-1) + abs(kline_1h.Close[22]/kline_1h.Close[23]-1) + abs(kline_1h.Close[23]/kline_1h.Close[24]-1) + abs(kline_1h.Close[24]/kline_1h.Close[25]-1) + abs(kline_1h.Close[25]/kline_1h.Close[26]-1) + abs(kline_1h.Close[26]/kline_1h.Close[27]-1) + abs(kline_1h.Close[27]/kline_1h.Close[28]-1) + abs(kline_1h.Close[28]/kline_1h.Close[29]-1) + abs(kline_1h.Close[29]/kline_1h.Close[30]-1)) / 24;\nlet shock = baseline > 0 ? (kline_1h.Close[2]/kline_1h.Close[6]-1) / baseline : 0;\nlet confirmation = baseline > 0 ? (kline_1h.Close[1]/kline_1h.Close[2]-1) / baseline : 0;\nshock >= 7 && confirmation <= -1",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "normalized_shock_close_long_v1",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "normalized_shock_close_short_v1",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
