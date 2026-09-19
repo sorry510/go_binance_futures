@@ -39,6 +39,11 @@ type historicalEnvironment struct {
 	currentEMACache          map[string]cachedCurrentEMA
 	currentRSICache          map[string]cachedCurrentRSI
 	currentADXCache          map[string]cachedCurrentADX
+	currentROCCache          map[string]cachedCurrentROC
+	currentBOLLCache         map[string]cachedCurrentBOLL
+	currentDonchianCache     map[string]cachedCurrentDonchian
+	currentKCCache           map[string]cachedCurrentKC
+	currentSupertrendCache   map[string]cachedCurrentSupertrend
 	indicatorGroupsCache     []indicatorGroup
 	indicatorPricesScratch   map[string]line.KLinePrice
 	indicatorCachedScratch   map[string]interface{}
