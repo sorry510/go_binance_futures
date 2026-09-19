@@ -1,6 +1,11 @@
 package feature
 
-import "testing"
+import (
+	"strings"
+	"testing"
+
+	futuresownership "go_binance_futures/service/futuresownership"
+)
 
 func TestShouldRefreshOwnershipAccountQuantities(t *testing.T) {
 	tests := []struct {
@@ -19,5 +24,19 @@ func TestShouldRefreshOwnershipAccountQuantities(t *testing.T) {
 				t.Fatalf("shouldRefreshOwnershipAccountQuantities(%d) = %v, want %v", tt.activeManagedOrders, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestAutoStrategySourceRefCarriesRuleHash(t *testing.T) {
+	hash := strings.Repeat("a", 64)
+	ref := autoStrategySourceRef("btcusdt", hash)
+	if ref != "auto_strategy:BTCUSDT:"+hash {
+		t.Fatalf("unexpected source ref: %s", ref)
+	}
+	if got := autoStrategyOpenRuleHash(futuresownership.OwnerAutoStrategy, ref); got != hash {
+		t.Fatalf("unexpected rule hash: %s", got)
+	}
+	if got := autoStrategySourceRef("btcusdt", ""); got != "auto_strategy:BTCUSDT" {
+		t.Fatalf("legacy source ref changed: %s", got)
 	}
 }

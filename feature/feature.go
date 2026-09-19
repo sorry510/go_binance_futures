@@ -128,9 +128,10 @@ func StartTrade(systemConfig *models.Config) {
 		nowProfit := utils.FuturesLeveragedROI(unRealizedProfit, positionAmtFloatAbs, markPrice_float64, position.Leverage) // 当前收益率(正为盈利，负为亏损)
 
 		closeResult := coin_line_strategy.AutoStopOrder(strategy.CloseParams{
-			Symbols:   findCoin,
-			Position:  position,
-			NowProfit: nowProfit,
+			Symbols:          findCoin,
+			Position:         position,
+			NowProfit:        nowProfit,
+			OpenStrategyHash: autoStrategyOpenRuleHash(managedPosition.Owner, managedPosition.SourceRef),
 		})
 		if closeResult.Complete { // 触发策略,风向改变,强制平仓
 			logs.Info("%s:auto_stop_start", position.Symbol)
@@ -208,9 +209,10 @@ func StartTrade(systemConfig *models.Config) {
 		if nowProfit <= -coin_loss_float64 { // 平仓(止损)
 			// position.Symbol, position.PositionSide
 			closeResult := coin_line_strategy.CanOrderComplete(strategy.CloseParams{
-				Symbols:   findCoin,
-				Position:  position,
-				NowProfit: nowProfit,
+				Symbols:          findCoin,
+				Position:         position,
+				NowProfit:        nowProfit,
+				OpenStrategyHash: autoStrategyOpenRuleHash(managedPosition.Owner, managedPosition.SourceRef),
 			})
 			if closeResult.Complete { //
 				if position.Side == "LONG" {
@@ -286,9 +288,10 @@ func StartTrade(systemConfig *models.Config) {
 		}
 		if nowProfit >= coin_profit_float64 { // 平仓(止盈)
 			closeResult := coin_line_strategy.CanOrderComplete(strategy.CloseParams{
-				Symbols:   findCoin,
-				Position:  position,
-				NowProfit: nowProfit,
+				Symbols:          findCoin,
+				Position:         position,
+				NowProfit:        nowProfit,
+				OpenStrategyHash: autoStrategyOpenRuleHash(managedPosition.Owner, managedPosition.SourceRef),
 			})
 			if closeResult.Complete {
 				if position.Side == "LONG" {
@@ -453,7 +456,7 @@ func StartTrade(systemConfig *models.Config) {
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 
 				if systemConfig.FutureOrderType == "MARKET" {
-					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket)
+					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
 					if err == nil {
 						// 数据库写入订单
 						buyPrice := utils.GetTradePrecision(buyPrice*1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
@@ -483,7 +486,7 @@ func StartTrade(systemConfig *models.Config) {
 						})
 					}
 				} else {
-					order, err := submitAutoStrategyOpen(symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit)
+					order, err := submitAutoStrategyOpen(symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, openResult.LongStrategyHash)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
@@ -525,7 +528,7 @@ func StartTrade(systemConfig *models.Config) {
 				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
 
 				if systemConfig.FutureOrderType == "MARKET" {
-					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket)
+					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
 					if err == nil {
 						// 数据库写入订单
 						sellPrice := utils.GetTradePrecision(sellPrice*0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
@@ -555,7 +558,7 @@ func StartTrade(systemConfig *models.Config) {
 						})
 					}
 				} else {
-					order, err := submitAutoStrategyOpen(symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit)
+					order, err := submitAutoStrategyOpen(symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit, openResult.ShortStrategyHash)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
