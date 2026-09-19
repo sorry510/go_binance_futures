@@ -12,30 +12,39 @@ MCP Server
 Skill + MCP Server
 ```
 
-并优先兼容 2026 年当前 ChatGPT / Codex Plugin Package 结构。
+并优先兼容 2026 年 OpenAI 当前可移植 Plugin Package 结构。
 
 ## 2. 当前标准方向
 
-当前 OpenAI Plugin Package 以根目录 `plugin.json` 为主要可移植 manifest，并兼容 `.codex-plugin/plugin.json`。
+当前 OpenAI 开发文档使用 `.codex-plugin/plugin.json` 作为 Plugin manifest，并通过相对路径引用 Skill 目录和可选 MCP 配置。
 
 典型结构：
 
 ```text
 my-plugin/
-├── plugin.json
-├── skills/
-│   ├── skill-a/SKILL.md
-│   └── skill-b/SKILL.md
-└── mcp.json              optional
+├── .codex-plugin/
+│   └── plugin.json
+├── .mcp.json              optional
+└── skills/
+    ├── skill-a/SKILL.md
+    └── skill-b/SKILL.md
 ```
 
-OpenAI 当前 Plugin 可以是：
+示意 manifest：
 
-- skills only。
-- MCP only。
-- skills + MCP。
+```json
+{
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "description": "...",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}
+```
 
-可选 UI / lifecycle hook 不作为本项目首版兼容目标。
+路径必须相对 Plugin 根目录解析，禁止 `..` 逃逸。
+
+OpenAI 当前 Plugin 可以把 Skill 与连接能力组合使用；ChatGPT 产品侧还存在 Connected Apps / Workspace 管理能力。本项目首版只兼容能够映射到现有 **Portable Skill + MCP Client** 的部分，不复制 OpenAI 私有 App Runtime、管理面或 UI 资源系统。
 
 ## 3. Plugin Domain
 
@@ -73,9 +82,9 @@ Plugin 只负责“打包和安装边界”，真正运行仍复用：
 
 ```text
 unpack staging
-→ validate plugin.json
+→ validate .codex-plugin/plugin.json
 → validate skills
-→ validate mcp.json
+→ validate .mcp.json
 → permissions preview
 → install
 → optional enable
@@ -94,7 +103,7 @@ unpack staging
 
 ## 6. MCP 安装
 
-插件中的 MCP 声明映射到现有 MCP Client Config。
+插件 manifest 引用的 `.mcp.json` 声明映射到现有 MCP Client Config。
 
 首版只支持本项目已经安全支持的 Transport / Auth 类型。
 
@@ -139,17 +148,19 @@ Uninstall 不允许破坏历史 Task / Conversation Audit。
 
 首版目标：
 
-- 兼容基础 `plugin.json` package。
-- 兼容 skills directory。
-- 兼容基础 MCP mapping。
-- 尽可能接受 `.codex-plugin/plugin.json` compatibility manifest。
+- 兼容 `.codex-plugin/plugin.json`。
+- 兼容 manifest 指向的 `skills/` directory。
+- 兼容 manifest 指向的 `.mcp.json` 基础 MCP mapping。
+- 对只包含 Skill、不包含 MCP 的 Plugin 正常支持。
+- 对只包含 MCP、不包含 Skill 的 Plugin 正常支持。
 
 首版不承诺：
 
+- ChatGPT Connected App 的完整授权/同步/Workspace Admin Runtime。
 - 完整 ChatGPT UI resource runtime。
 - Codex lifecycle hooks。
-- OpenAI Plugin Directory 自动安装协议。
-- OpenAI review/publish workflow。
+- OpenAI Plugin Directory / Marketplace 自动同步协议。
+- OpenAI review / verification / publish workflow。
 
 ## 10. Gate
 
@@ -158,7 +169,7 @@ Uninstall 不允许破坏历史 Task / Conversation Audit。
 - 导入 skill+MCP plugin。
 - Skill 可进入 Chat Workspace。
 - MCP Tool 继续遵守 Permission。
-- malformed manifest / path traversal / oversized package 被拒绝。
+- malformed `.codex-plugin/plugin.json` / `.mcp.json`、path traversal、oversized package 被拒绝。
 - disable plugin 后所属能力不能继续被新 Task 使用。
 - 历史 Task 仍可查看。
 

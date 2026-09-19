@@ -6,7 +6,8 @@
 
 - 一个 Conversation 可以添加多个 Skill。
 - 支持随时增删 Conversation 中的 Skill。
-- 每轮消息可选择实际执行 Skill。
+- 支持 `Auto` 模式从已挂载 Skill 中选择当前消息需要的 Skill，也支持用户显式指定。
+- 一条消息可以在受控范围内顺序使用多个相关 Skill，但不把所有 Skill 无条件并行执行。
 - 支持 Conversation 内切换模型。
 - Web 支持删除聊天。
 
@@ -26,18 +27,24 @@ Conversation
 
 ### 执行原则
 
-多个 Skill “挂载在同一个 Conversation”不等于每条消息并行运行所有 Skill。
+多个 Skill “挂载在同一个 Conversation”不等于把所有 Skill 的 System Prompt 拼接在一起，也不等于每条消息并行运行全部 Skill。
 
-每轮消息仍只有一个 Primary Execution Skill：
+V4-1 提供两种使用方式：
 
-- 用户可在输入框显式选择一个已挂载 Skill。
-- `general_chat` 作为默认。
-- Portable Skill 可作为 Primary Skill 使用现有 Portable Runtime。
+1. **Auto**：默认模式。Chat Router 只读取已挂载 Skill 的轻量 metadata（name / description / chat capability），根据当前用户消息决定使用 `general_chat`、一个 Skill，或在确有必要时顺序调用少量相关 Skill。
+2. **Explicit**：用户在输入框使用下拉或 `@skill` 明确指定一个已挂载 Skill，本轮直接使用该 Skill，不再自动路由到其它 Skill。
+
+约束：
+
+- `general_chat` 永远作为基础 fallback，不要求用户移除/添加。
+- Auto Router 只能选择该 Conversation 已挂载、enabled 且 chat-enabled 的 Skill。
+- Portable Skill 继续使用现有 Portable Runtime。
 - Native Skill 保持自己已有的 Validator / Tool / Output Contract。
+- 多 Skill 顺序使用时，每个 Skill 独立执行并保留 Task/Trace，不把多个互相冲突的 System Prompt 强行合并成一个 Prompt。
+- 第一版限制单条消息最多触发少量 Skill（建议 2～3 个），避免 Tool/Token 无界增长。
+- 涉及真实交易 Mutation 的 Skill 不允许仅凭 Auto Router 获得额外权限，仍受原 Risk/Permission 边界约束。
 
-这样既满足同一聊天添加多个 Skill，也避免把多个互相冲突的 System Prompt / Validator 强行合并。
-
-后续如果确实需要并行协作，继续使用 V3 已有 Team Runtime，不在 Chat Workspace 重新实现 Multi-Agent。
+如果需求属于已有 Team Runtime 的多 Agent 协作场景，继续复用 V3 Team Runtime；V4-1 不重新实现 Multi-Agent。
 
 ## 3. Conversation Skill 数据
 
@@ -108,8 +115,14 @@ Chat 顶部：
 输入框附近：
 
 ```text
-当前 Skill: [symbol_analysis ▼]
+Skill: [Auto ▼]
+       ├─ Auto
+       ├─ general_chat
+       ├─ symbol_analysis
+       └─ my-portable-skill
 ```
+
+也支持 `@skill-name` 快速显式指定。
 
 Skill 管理弹层：
 
@@ -133,6 +146,17 @@ PUT    /agents/chat/conversations/:id/model
 
 ```json
 {
+  "skill_mode": "auto",
+  "skill": "",
+  "model_id": "optional-message-override"
+}
+```
+
+显式模式：
+
+```json
+{
+  "skill_mode": "explicit",
   "skill": "symbol_analysis",
   "model_id": "optional-message-override"
 }
@@ -141,8 +165,10 @@ PUT    /agents/chat/conversations/:id/model
 ## 8. Gate
 
 - 同一 Chat 可挂载 3+ Skill。
-- 只能执行已挂载且 chat-enabled 的 Skill。
-- 删除已挂载 Skill 后不能继续通过旧请求调用。
+- Auto 只能从已挂载且 chat-enabled 的 Skill 中选择。
+- Explicit 可以稳定指定某个已挂载 Skill。
+- Auto 在确有需要时可顺序使用 2 个以上 Skill，并为每次执行保留独立 Task/Trace。
+- 删除已挂载 Skill 后不能继续通过 Auto 或旧请求调用。
 - Skill A / Skill B 在同一 Conversation 中共享聊天历史，但仍使用各自执行契约。
 - Model A → Model B 切换只影响新消息。
 - 实际 Task 能追踪最终 provider/model。
