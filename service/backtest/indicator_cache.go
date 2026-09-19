@@ -56,6 +56,51 @@ type cachedCurrentADX struct {
 	value           line.ADXConfigData
 }
 
+type cachedCurrentROC struct {
+	windowStart int64
+	interval    string
+	period      int
+	value       line.ConfigData
+}
+
+type cachedCurrentBOLL struct {
+	windowStart int64
+	interval    string
+	period      int
+	stdDev      float64
+	value       line.ConfigData
+}
+
+type cachedCurrentDonchian struct {
+	windowStart int64
+	interval    string
+	period      int
+	value       line.ConfigData
+}
+
+type cachedCurrentKC struct {
+	windowStart   int64
+	interval      string
+	period        int
+	multiplier    float64
+	previousClose float64
+	previousATR   float64
+	value         line.ConfigData
+}
+
+type cachedCurrentSupertrend struct {
+	windowStart        int64
+	interval           string
+	period             int
+	multiplier         float64
+	previousClose      float64
+	previousATR        float64
+	previousFinalUpper float64
+	previousFinalLower float64
+	previousTrend      float64
+	value              line.SupertrendConfigData
+}
+
 type indicatorTask struct {
 	group       string
 	item        technology.IndicatorConfig
@@ -91,6 +136,11 @@ func (builder *historicalEnvironment) enableStandardOptimizations(strategyJSON s
 	builder.currentEMACache = make(map[string]cachedCurrentEMA)
 	builder.currentRSICache = make(map[string]cachedCurrentRSI)
 	builder.currentADXCache = make(map[string]cachedCurrentADX)
+	builder.currentROCCache = make(map[string]cachedCurrentROC)
+	builder.currentBOLLCache = make(map[string]cachedCurrentBOLL)
+	builder.currentDonchianCache = make(map[string]cachedCurrentDonchian)
+	builder.currentKCCache = make(map[string]cachedCurrentKC)
+	builder.currentSupertrendCache = make(map[string]cachedCurrentSupertrend)
 	builder.indicatorGroupsCache = builder.indicatorGroups()
 	builder.indicatorPricesScratch = make(map[string]line.KLinePrice)
 	builder.indicatorCachedScratch = make(map[string]interface{})
@@ -391,6 +441,16 @@ func (builder *historicalEnvironment) runIndicatorTasks(tasks []indicatorTask) [
 				results[i].value, results[i].err = builder.calculateCurrentRSIValue(tasks[i])
 			case tasks[i].group == "adx" && tasks[i].windowStart > 0:
 				results[i].value, results[i].err = builder.calculateCurrentADXValue(tasks[i])
+			case tasks[i].group == "roc" && tasks[i].windowStart > 0:
+				results[i].value, results[i].err = builder.calculateCurrentROCValue(tasks[i])
+			case tasks[i].group == "boll" && tasks[i].windowStart > 0:
+				results[i].value, results[i].err = builder.calculateCurrentBOLLValue(tasks[i])
+			case tasks[i].group == "donchian" && tasks[i].windowStart > 0:
+				results[i].value, results[i].err = builder.calculateCurrentDonchianValue(tasks[i])
+			case tasks[i].group == "kc" && tasks[i].windowStart > 0:
+				results[i].value, results[i].err = builder.calculateCurrentKCValue(tasks[i])
+			case tasks[i].group == "supertrend" && tasks[i].windowStart > 0:
+				results[i].value, results[i].err = builder.calculateCurrentSupertrendValue(tasks[i])
 			default:
 				results[i].value, results[i].err = calculateIndicatorValue(tasks[i])
 			}
@@ -432,6 +492,255 @@ func (builder *historicalEnvironment) runIndicatorTasks(tasks []indicatorTask) [
 	close(jobs)
 	wg.Wait()
 	return results
+}
+
+func (builder *historicalEnvironment) calculateCurrentROCValue(task indicatorTask) (interface{}, error) {
+	item, p := task.item, task.price
+	if !builder.standardOptimizations || builder.currentROCCache == nil || item.Period <= 0 || len(p.Close) <= item.Period {
+		return calculateIndicatorValue(task)
+	}
+	entry, ok := builder.currentROCCache[item.Name]
+	if !ok || entry.windowStart != task.windowStart || entry.interval != item.KlineInterval || entry.period != item.Period || len(entry.value.Data) == 0 {
+		value, err := calculateIndicatorValue(task)
+		if err != nil {
+			return value, err
+		}
+		config, ok := value.(line.ConfigData)
+		if !ok || len(config.Data) == 0 {
+			return value, nil
+		}
+		builder.currentROCCache[item.Name] = cachedCurrentROC{windowStart: task.windowStart, interval: item.KlineInterval, period: item.Period, value: config}
+		return config, nil
+	}
+	previousClose := p.Close[item.Period]
+	if previousClose == 0 {
+		return calculateIndicatorValue(task)
+	}
+	entry.value.Data[0] = (p.Close[0] - previousClose) / previousClose * 100
+	builder.currentROCCache[item.Name] = entry
+	return entry.value, nil
+}
+
+func (builder *historicalEnvironment) calculateCurrentBOLLValue(task indicatorTask) (interface{}, error) {
+	item, p := task.item, task.price
+	if !builder.standardOptimizations || builder.currentBOLLCache == nil || item.Period <= 0 || len(p.Close) < item.Period {
+		return calculateIndicatorValue(task)
+	}
+	entry, ok := builder.currentBOLLCache[item.Name]
+	if !ok || entry.windowStart != task.windowStart || entry.interval != item.KlineInterval || entry.period != item.Period || entry.stdDev != item.StdDevMultiplier || len(entry.value.High) == 0 || len(entry.value.Mid) == 0 || len(entry.value.Low) == 0 {
+		value, err := calculateIndicatorValue(task)
+		if err != nil {
+			return value, err
+		}
+		config, ok := value.(line.ConfigData)
+		if !ok || len(config.High) == 0 || len(config.Mid) == 0 || len(config.Low) == 0 {
+			return value, nil
+		}
+		builder.currentBOLLCache[item.Name] = cachedCurrentBOLL{windowStart: task.windowStart, interval: item.KlineInterval, period: item.Period, stdDev: item.StdDevMultiplier, value: config}
+		return config, nil
+	}
+	sum := 0.0
+	for i := item.Period - 1; i >= 0; i-- {
+		sum += p.Close[i]
+	}
+	middle := sum / float64(item.Period)
+	sumOfSquares := 0.0
+	for i := item.Period - 1; i >= 0; i-- {
+		deviation := p.Close[i] - middle
+		sumOfSquares += deviation * deviation
+	}
+	standardDeviation := math.Sqrt(sumOfSquares / float64(item.Period))
+	entry.value.Mid[0] = middle
+	entry.value.High[0] = middle + item.StdDevMultiplier*standardDeviation
+	entry.value.Low[0] = middle - item.StdDevMultiplier*standardDeviation
+	builder.currentBOLLCache[item.Name] = entry
+	return entry.value, nil
+}
+
+func (builder *historicalEnvironment) calculateCurrentDonchianValue(task indicatorTask) (interface{}, error) {
+	item, p := task.item, task.price
+	if !builder.standardOptimizations || builder.currentDonchianCache == nil || item.Period <= 0 || len(p.High) < item.Period || len(p.Low) < item.Period {
+		return calculateIndicatorValue(task)
+	}
+	entry, ok := builder.currentDonchianCache[item.Name]
+	if !ok || entry.windowStart != task.windowStart || entry.interval != item.KlineInterval || entry.period != item.Period || len(entry.value.High) == 0 || len(entry.value.Mid) == 0 || len(entry.value.Low) == 0 {
+		value, err := calculateIndicatorValue(task)
+		if err != nil {
+			return value, err
+		}
+		config, ok := value.(line.ConfigData)
+		if !ok || len(config.High) == 0 || len(config.Mid) == 0 || len(config.Low) == 0 {
+			return value, nil
+		}
+		builder.currentDonchianCache[item.Name] = cachedCurrentDonchian{windowStart: task.windowStart, interval: item.KlineInterval, period: item.Period, value: config}
+		return config, nil
+	}
+	upper, lower := p.High[0], p.Low[0]
+	for i := 1; i < item.Period; i++ {
+		if p.High[i] > upper {
+			upper = p.High[i]
+		}
+		if p.Low[i] < lower {
+			lower = p.Low[i]
+		}
+	}
+	entry.value.High[0] = upper
+	entry.value.Low[0] = lower
+	entry.value.Mid[0] = (upper + lower) / 2
+	builder.currentDonchianCache[item.Name] = entry
+	return entry.value, nil
+}
+
+func (builder *historicalEnvironment) calculateCurrentKCValue(task indicatorTask) (interface{}, error) {
+	item, p := task.item, task.price
+	if !builder.standardOptimizations || builder.currentKCCache == nil || item.Period <= 0 || len(p.High) < 2 || len(p.Low) < 2 || len(p.Close) < 2 {
+		return calculateIndicatorValue(task)
+	}
+	entry, ok := builder.currentKCCache[item.Name]
+	if !ok || entry.windowStart != task.windowStart || entry.interval != item.KlineInterval || entry.period != item.Period || entry.multiplier != item.Multiplier || len(entry.value.High) < 2 || len(entry.value.Mid) < 2 || len(entry.value.Low) < 2 {
+		value, err := calculateIndicatorValue(task)
+		if err != nil {
+			return value, err
+		}
+		config, ok := value.(line.ConfigData)
+		if !ok || len(config.High) < 2 || len(config.Mid) < 2 || len(config.Low) < 2 {
+			return value, nil
+		}
+		completedATR, err := line.CalculateAtr(p.High[1:], p.Low[1:], p.Close[1:], item.Period)
+		if err != nil || len(completedATR) == 0 {
+			return value, nil
+		}
+		builder.currentKCCache[item.Name] = cachedCurrentKC{windowStart: task.windowStart, interval: item.KlineInterval, period: item.Period, multiplier: item.Multiplier, previousClose: p.Close[1], previousATR: completedATR[0], value: config}
+		return config, nil
+	}
+	alpha := 2.0 / (float64(item.Period) + 1.0)
+	middle := alpha*p.Close[0] + (1.0-alpha)*entry.value.Mid[1]
+	trueRange := math.Max(p.High[0]-p.Low[0], math.Max(math.Abs(p.High[0]-entry.previousClose), math.Abs(p.Low[0]-entry.previousClose)))
+	atr := (entry.previousATR*float64(item.Period-1) + trueRange) / float64(item.Period)
+	entry.value.Mid[0] = middle
+	entry.value.High[0] = middle + item.Multiplier*atr
+	entry.value.Low[0] = middle - item.Multiplier*atr
+	builder.currentKCCache[item.Name] = entry
+	return entry.value, nil
+}
+
+func (builder *historicalEnvironment) calculateCurrentSupertrendValue(task indicatorTask) (interface{}, error) {
+	item, p := task.item, task.price
+	if !builder.standardOptimizations || builder.currentSupertrendCache == nil || item.Period <= 0 || len(p.High) < 2 || len(p.Low) < 2 || len(p.Close) < 2 {
+		return calculateIndicatorValue(task)
+	}
+	entry, ok := builder.currentSupertrendCache[item.Name]
+	if !ok || entry.windowStart != task.windowStart || entry.interval != item.KlineInterval || entry.period != item.Period || entry.multiplier != item.Multiplier || len(entry.value.Data) < 2 || len(entry.value.Trend) < 2 {
+		value, err := calculateIndicatorValue(task)
+		if err != nil {
+			return value, err
+		}
+		config, ok := value.(line.SupertrendConfigData)
+		if !ok || len(config.Data) < 2 || len(config.Trend) < 2 {
+			return value, nil
+		}
+		previousATR, previousUpper, previousLower, previousTrend, stateErr := completedSupertrendState(p.High[1:], p.Low[1:], p.Close[1:], item.Period, item.Multiplier)
+		if stateErr != nil {
+			return value, nil
+		}
+		builder.currentSupertrendCache[item.Name] = cachedCurrentSupertrend{windowStart: task.windowStart, interval: item.KlineInterval, period: item.Period, multiplier: item.Multiplier, previousClose: p.Close[1], previousATR: previousATR, previousFinalUpper: previousUpper, previousFinalLower: previousLower, previousTrend: previousTrend, value: config}
+		return config, nil
+	}
+	trueRange := math.Max(p.High[0]-p.Low[0], math.Max(math.Abs(p.High[0]-entry.previousClose), math.Abs(p.Low[0]-entry.previousClose)))
+	atr := (entry.previousATR*float64(item.Period-1) + trueRange) / float64(item.Period)
+	midpoint := (p.High[0] + p.Low[0]) / 2
+	basicUpper := midpoint + item.Multiplier*atr
+	basicLower := midpoint - item.Multiplier*atr
+	finalUpper := entry.previousFinalUpper
+	if basicUpper < entry.previousFinalUpper || entry.previousClose > entry.previousFinalUpper {
+		finalUpper = basicUpper
+	}
+	finalLower := entry.previousFinalLower
+	if basicLower > entry.previousFinalLower || entry.previousClose < entry.previousFinalLower {
+		finalLower = basicLower
+	}
+	trend, data := entry.previousTrend, 0.0
+	if entry.previousTrend < 0 {
+		if p.Close[0] > finalUpper {
+			trend = 1
+			data = finalLower
+		} else {
+			trend = -1
+			data = finalUpper
+		}
+	} else if p.Close[0] < finalLower {
+		trend = -1
+		data = finalUpper
+	} else {
+		trend = 1
+		data = finalLower
+	}
+	entry.value.Data[0] = data
+	entry.value.Trend[0] = trend
+	builder.currentSupertrendCache[item.Name] = entry
+	return entry.value, nil
+}
+
+func completedSupertrendState(high, low, close []float64, period int, multiplier float64) (latestATR, finalUpper, finalLower, trend float64, err error) {
+	if len(high) == 0 || len(high) != len(low) || len(high) != len(close) {
+		return 0, 0, 0, 0, fmt.Errorf("invalid completed Supertrend price slices")
+	}
+	atrNewestFirst, err := line.CalculateAtr(high, low, close, period)
+	if err != nil || len(atrNewestFirst) == 0 {
+		return 0, 0, 0, 0, err
+	}
+	latestATR = atrNewestFirst[0]
+	reverse := func(values []float64) []float64 {
+		out := make([]float64, len(values))
+		for i, value := range values {
+			out[len(values)-1-i] = value
+		}
+		return out
+	}
+	chronologicalHigh := reverse(high)
+	chronologicalLow := reverse(low)
+	chronologicalClose := reverse(close)
+	chronologicalATR := reverse(atrNewestFirst)
+	for resultIndex := 0; resultIndex < len(chronologicalATR); resultIndex++ {
+		priceIndex := period - 1 + resultIndex
+		midpoint := (chronologicalHigh[priceIndex] + chronologicalLow[priceIndex]) / 2
+		basicUpper := midpoint + multiplier*chronologicalATR[resultIndex]
+		basicLower := midpoint - multiplier*chronologicalATR[resultIndex]
+		if resultIndex == 0 {
+			finalUpper = basicUpper
+			finalLower = basicLower
+			if chronologicalClose[priceIndex] >= midpoint {
+				trend = 1
+			} else {
+				trend = -1
+			}
+			continue
+		}
+		previousClose := chronologicalClose[priceIndex-1]
+		previousUpper, previousLower, previousTrend := finalUpper, finalLower, trend
+		if basicUpper < previousUpper || previousClose > previousUpper {
+			finalUpper = basicUpper
+		} else {
+			finalUpper = previousUpper
+		}
+		if basicLower > previousLower || previousClose < previousLower {
+			finalLower = basicLower
+		} else {
+			finalLower = previousLower
+		}
+		if previousTrend < 0 {
+			if chronologicalClose[priceIndex] > finalUpper {
+				trend = 1
+			} else {
+				trend = -1
+			}
+		} else if chronologicalClose[priceIndex] < finalLower {
+			trend = -1
+		} else {
+			trend = 1
+		}
+	}
+	return latestATR, finalUpper, finalLower, trend, nil
 }
 
 func (builder *historicalEnvironment) calculateCurrentEMAValue(task indicatorTask) (interface{}, error) {

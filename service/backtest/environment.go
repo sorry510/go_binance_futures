@@ -39,6 +39,11 @@ type historicalEnvironment struct {
 	currentEMACache          map[string]cachedCurrentEMA
 	currentRSICache          map[string]cachedCurrentRSI
 	currentADXCache          map[string]cachedCurrentADX
+	currentROCCache          map[string]cachedCurrentROC
+	currentBOLLCache         map[string]cachedCurrentBOLL
+	currentDonchianCache     map[string]cachedCurrentDonchian
+	currentKCCache           map[string]cachedCurrentKC
+	currentSupertrendCache   map[string]cachedCurrentSupertrend
 	indicatorGroupsCache     []indicatorGroup
 	indicatorPricesScratch   map[string]line.KLinePrice
 	indicatorCachedScratch   map[string]interface{}
@@ -194,8 +199,9 @@ func (builder *historicalEnvironment) build(asOf int64, position *Position, cash
 	env := map[string]interface{}{
 		"SystemStartTime": builder.dataset.StartTime, "NowTime": asOf, "NowPrice": current.Close,
 		"NowSymbolPercentChange": targetStats["PercentChange"], "NowSymbolClose": targetStats["Close"], "NowSymbolOpen": targetStats["Open"], "NowSymbolLow": targetStats["Low"], "NowSymbolHigh": targetStats["High"],
-		"FundingRate": builder.fundingRateData(asOf, 16),
-		"KdjSimple":   line.KdjSimple, "IsAsc": utils.IsAsc, "IsDesc": utils.IsDesc,
+		"FundingRate":      builder.fundingRateData(asOf, 16),
+		"OpenStrategyHash": "",
+		"KdjSimple":        line.KdjSimple, "IsAsc": utils.IsAsc, "IsDesc": utils.IsDesc,
 	}
 	condition := 0
 	if builder.dataset.MarketConditionRequired {
@@ -226,6 +232,7 @@ func (builder *historicalEnvironment) build(asOf int64, position *Position, cash
 		netROI = net / notional * float64(config.Leverage) * 100
 	}
 	p := markettypes.FuturesPositionCode{Symbol: builder.dataset.Symbol, Side: position.Side, Amount: position.Quantity, Leverage: int64(config.Leverage), EntryPrice: position.EntryPrice, MarkPrice: current.Close, UnrealizedProfit: gross, Mock: true, CreateTime: position.EntryTime, SourceType: "backtest"}
+	env["OpenStrategyHash"] = position.OpenStrategyHash
 	env["ROI"], env["NetROI"], env["Fee"], env["NetProfit"], env["Position"] = roi, netROI, position.OpenFee+projectedCloseFee, net, p
 	env["Positions"] = []markettypes.FuturesPosition{{Symbol: builder.dataset.Symbol, Side: position.Side, Amount: strconv.FormatFloat(position.Quantity, 'f', -1, 64), Leverage: int64(config.Leverage), EntryPrice: strconv.FormatFloat(position.EntryPrice, 'f', -1, 64), MarkPrice: strconv.FormatFloat(current.Close, 'f', -1, 64), UnrealizedProfit: strconv.FormatFloat(gross, 'f', -1, 64), SourceType: "backtest", CreateTime: position.EntryTime}}
 	return env, condition, nil
