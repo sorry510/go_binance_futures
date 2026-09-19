@@ -55,6 +55,7 @@ type TaskManager interface {
 
 type StartOptions struct {
 	ConversationID string
+	ModelConfigID  int64
 }
 
 type Config struct {

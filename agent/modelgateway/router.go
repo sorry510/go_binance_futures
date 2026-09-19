@@ -206,6 +206,12 @@ type gatewayClient struct {
 
 func (client *gatewayClient) Provider() llm.Provider { return client.provider }
 func (client *gatewayClient) ConfigID() int64        { return client.initialConfigID }
+func (client *gatewayClient) ModelName() string {
+	if len(client.candidates) == 0 {
+		return ""
+	}
+	return client.candidates[0].route.Model
+}
 func (client *gatewayClient) RouteDecision() llm.RouteDecision {
 	routes := make([]llm.RouteCandidate, len(client.candidates))
 	for index := range client.candidates {
