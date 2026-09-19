@@ -61,18 +61,29 @@ V4-7 Finalization
 
 文档编号保留业务分组；实际开发建议把 V4-4/V4-5 提前到 V4-3 前面，因为 API 超限属于真实运行风险。
 
-## 5. ChatGPT Plugin 兼容范围
+## 5. ChatGPT / Codex Plugin 兼容范围
 
-截至 2026 年，ChatGPT / Codex 当前 Plugin 体系已经不是旧版 `ai-plugin.json + OpenAPI` 模式。当前插件是可安装 Package，可以组合：
+截至 2026 年，OpenAI 当前 Plugin 体系已经不是旧版 `ai-plugin.json + OpenAPI` 模式。当前插件用于把可复用能力打包在一起，核心可包含：
 
 - Skills。
-- MCP Server。
-- Skills + MCP Server。
-- 可选 UI / lifecycle hooks（不同客户端支持程度不同）。
+- MCP 配置。
+- Skills + MCP。
+- ChatGPT 侧还可以关联 Connected Apps；本项目首版不复制 OpenAI 私有 App Runtime。
 
-OpenAI 当前可移植插件包使用根目录 `plugin.json`，兼容 `.codex-plugin/plugin.json`，并可引用 `skills/`、`mcp.json` 等内容。
+当前 OpenAI 开发文档给出的可移植包结构以 `.codex-plugin/plugin.json` 为 manifest，并可引用 `skills/` 与 `.mcp.json`：
 
-因此 V4-6 优先兼容**当前 Plugin Package + Agent Skills + MCP**，不投入开发成本兼容历史旧版 ChatGPT Plugins API。
+```text
+plugin-root/
+├── .codex-plugin/
+│   └── plugin.json
+├── .mcp.json            optional
+└── skills/
+    └── example/SKILL.md
+```
+
+因此 V4-6 优先兼容 **`.codex-plugin/plugin.json` + Agent Skills + `.mcp.json`**。对于 ChatGPT 中依赖 Connected App / Workspace 管理能力的插件，只兼容本项目现有 MCP/Permission 能映射的部分，不投入开发成本复制 OpenAI 私有 App、Directory、Admin 或 UI Runtime。
+
+历史 `ai-plugin.json + OpenAPI` 插件体系不作为 V4 兼容目标。
 
 ## 6. V4 明确不做
 
@@ -89,7 +100,7 @@ OpenAI 当前可移植插件包使用根目录 `plugin.json`，兼容 `.codex-pl
 
 ## 7. V4 Definition of Done
 
-- 一个 Chat Conversation 可挂载多个 Skill，并可在同一对话中选择/切换实际执行 Skill。
+- 一个 Chat Conversation 可挂载多个 Skill；支持 `Auto` 从已挂载 Skill 中选择适合当前消息的能力，也支持用户显式指定 Skill。
 - Conversation 支持 Web 删除；正在运行的任务不能被不安全删除。
 - 用户可在 Chat 中选择启用的模型，并在后续消息中切换；每个 Task 记录实际 provider/model。
 - 用户可在 Web 创建、编辑、校验、预览和发布标准 `SKILL.md` Skill Package。
