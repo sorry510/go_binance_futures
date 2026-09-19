@@ -52,7 +52,8 @@ func (client *openAIClient) Provider() Provider {
 	return client.cfg.Provider
 }
 
-func (client *openAIClient) ConfigID() int64 { return client.cfg.ID }
+func (client *openAIClient) ConfigID() int64   { return client.cfg.ID }
+func (client *openAIClient) ModelName() string { return client.cfg.Model }
 
 func (client *openAIClient) ProxyDiagnostics() ProxyDiagnostics {
 	return client.transport.ProxyDiagnostics()

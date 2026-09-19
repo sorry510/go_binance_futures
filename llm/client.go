@@ -55,6 +55,14 @@ func ConfigID(client Client) int64 {
 	return 0
 }
 
+func ModelName(client Client) string {
+	type modelIdentified interface{ ModelName() string }
+	if identified, ok := client.(modelIdentified); ok {
+		return identified.ModelName()
+	}
+	return ""
+}
+
 func ClientProxyDiagnostics(client Client) ProxyDiagnostics {
 	type proxyDiagnosable interface {
 		ProxyDiagnostics() ProxyDiagnostics

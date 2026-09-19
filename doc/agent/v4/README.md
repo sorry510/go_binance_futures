@@ -31,7 +31,7 @@ V4 的原则是：**先复用现有能力，再补用户真正能感知的入口
 | Phase | 优先级 | 目标 |
 | --- | --- | --- |
 | [V4-0](./00-phase-v4-0-baseline.md) | P0 | 冻结当前 Chat / Skill / Selector / Binance API 行为基线 |
-| [V4-1](./01-phase-v4-1-chat-workspace.md) | P0 | Chat 支持多个 Skill、删除聊天、对话内切换模型 |
+| [V4-1](./01-phase-v4-1-chat-workspace.md) | P0 ✅ | Chat 支持多个 Skill、删除聊天、对话内切换模型 |
 | [V4-2](./02-phase-v4-2-skill-studio.md) | P0 | Web 端创建、编辑、校验和发布标准 Agent Skills |
 | [V4-3](./03-phase-v4-3-local-selector-v2.md) | P1 | 重构本地选币：确定性、多因子、复用 scanner，不新增 REST 压力 |
 | [V4-4](./04-phase-v4-4-binance-api-observability.md) | P0 | 统一观测 Binance API endpoint、权重、延迟、429/418 和 Order Count |
@@ -44,7 +44,7 @@ V4 的原则是：**先复用现有能力，再补用户真正能感知的入口
 ```text
 V4-0 Baseline
   ↓
-V4-1 Chat Workspace
+V4-1 Chat Workspace ✅
   ↓
 V4-2 Skill Studio
   ↓

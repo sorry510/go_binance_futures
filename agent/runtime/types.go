@@ -19,6 +19,7 @@ type Request struct {
 	Skill             string             `json:"skill"`
 	Input             string             `json:"input"`
 	ConversationID    string             `json:"conversation_id,omitempty"`
+	ModelConfigID     int64              `json:"model_config_id,omitempty"`
 	Metadata          map[string]any     `json:"metadata,omitempty"`
 	ExecutionSnapshot *ExecutionSnapshot `json:"-"`
 }
