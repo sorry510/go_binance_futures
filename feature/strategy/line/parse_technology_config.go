@@ -591,7 +591,7 @@ var reservedIndicatorNames = map[string]struct{}{
 	"SystemStartTime": {}, "MarketCondition": {}, "NowTime": {}, "NowPrice": {},
 	"NowSymbolPercentChange": {}, "NowSymbolClose": {}, "NowSymbolOpen": {},
 	"NowSymbolLow": {}, "NowSymbolHigh": {}, "FundingRate": {},
-	"KdjSimple": {}, "IsAsc": {}, "IsDesc": {}, "ROI": {}, "Position": {}, "Positions": {},
+	"KdjSimple": {}, "IsAsc": {}, "IsDesc": {}, "ROI": {}, "Position": {}, "Positions": {}, "OpenStrategyHash": {},
 }
 
 func indicatorRequiredKlines(indicatorType string, item technology.IndicatorConfig) int {
@@ -767,13 +767,14 @@ func InitParseEnv(symbol string, strTechnology string) map[string]interface{} {
 	systemStartTime, _ := strconv.ParseInt(systemStartTimeText, 10, 64)
 	tConfig, klineMap := ParseTechnologyConfig(symbol, strTechnology)
 	env := map[string]interface{}{
-		"SystemStartTime": systemStartTime,
-		"MarketCondition": marketConditionStr,
-		"NowTime":         time.Now().Unix() * 1000,
-		"FundingRate":     loadFundingRateEnv(symbol),
-		"KdjSimple":       KdjSimple,
-		"IsAsc":           utils.IsAsc,
-		"IsDesc":          utils.IsDesc,
+		"SystemStartTime":  systemStartTime,
+		"MarketCondition":  marketConditionStr,
+		"NowTime":          time.Now().Unix() * 1000,
+		"FundingRate":      loadFundingRateEnv(symbol),
+		"OpenStrategyHash": "",
+		"KdjSimple":        KdjSimple,
+		"IsAsc":            utils.IsAsc,
+		"IsDesc":           utils.IsDesc,
 	}
 
 	for _, v := range symbols {
