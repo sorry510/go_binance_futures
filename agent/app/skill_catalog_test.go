@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"go_binance_futures/agent/skill"
+	generalchat "go_binance_futures/agent/skills/generalchat"
 	workflowSkills "go_binance_futures/agent/skills/workflows"
 )
 
@@ -33,6 +34,13 @@ func TestDefaultChatEnabledWorkflowSkillsImplementChatAdapter(t *testing.T) {
 		if !ok || !adapter.ChatEnabled() {
 			t.Fatalf("workflow %s must support ChatAdapter", definition.Name())
 		}
+	}
+}
+
+func TestGeneralChatImplementsChatAdapter(t *testing.T) {
+	adapter, ok := any(generalchat.New()).(skill.ChatAdapter)
+	if !ok || !adapter.ChatEnabled() {
+		t.Fatal("general_chat must be available to explicit chat selection")
 	}
 }
 

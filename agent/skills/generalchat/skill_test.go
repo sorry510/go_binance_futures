@@ -13,8 +13,16 @@ func TestGeneralChatIsPlainTextNoToolSkill(t *testing.T) {
 	if definition.Name() != Name || len(definition.Tools()) != 0 || definition.MaxRounds() != 1 || !definition.PlainTextFinalAllowed() || !definition.DirectTextFinalAllowed() {
 		t.Fatalf("unexpected general chat definition")
 	}
-	if _, ok := any(definition).(skill.ChatAdapter); ok {
-		t.Fatal("general chat must stay hidden from the explicit Skill selector")
+	adapter, ok := any(definition).(skill.ChatAdapter)
+	if !ok || !adapter.ChatEnabled() {
+		t.Fatal("general chat must be available in the explicit Skill selector")
+	}
+	input, err := adapter.BuildChatInput(context.Background(), "  hello  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if input != "hello" {
+		t.Fatalf("unexpected chat input: %q", input)
 	}
 	messages, err := definition.BuildInput(context.Background(), skill.Request{Input: "  hello  "})
 	if err != nil {

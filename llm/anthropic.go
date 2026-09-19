@@ -50,7 +50,8 @@ func (client *anthropicClient) Provider() Provider {
 	return ProviderAnthropic
 }
 
-func (client *anthropicClient) ConfigID() int64 { return client.cfg.ID }
+func (client *anthropicClient) ConfigID() int64   { return client.cfg.ID }
+func (client *anthropicClient) ModelName() string { return client.cfg.Model }
 
 func (client *anthropicClient) ProxyDiagnostics() ProxyDiagnostics {
 	return client.transport.ProxyDiagnostics()
