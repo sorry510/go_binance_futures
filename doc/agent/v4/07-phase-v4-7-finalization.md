@@ -2,72 +2,82 @@
 
 ## 1. 目标
 
-完成 V4 收尾，确保真实交易生命周期能力适合长期个人运行，不把系统演变成复杂机构交易平台。
+完成 V4 收尾，确认新 Chat/Skill/Selector/API/Plugin 能力适合长期个人运行，没有引入重复平台或新的交易风险。
 
-## 2. 最终检查
-
-### Position Safety
+## 2. Chat / Skill 检查
 
 确认：
 
-- 所有真实 Futures Mutation 仍经过 Ownership-aware Executor。
-- Position Guardian 不认领 unmanaged position。
-- Protection Repair 不会 over-protect。
-- Reduce / Multi-TP 不会超过 managed qty。
-- `reconcile_required` 一律 fail-closed。
+- Conversation 多 Skill 行为稳定。
+- Model 切换可追踪实际模型。
+- Chat 删除不会留下不可访问的 UI 状态。
+- Skill Draft / Published Version 边界清晰。
+- Skill Studio 发布结果与上传 Import 结果一致。
+- scripts 仍不会被执行。
 
-### Live Ledger
-
-确认：
-
-- PnL / Fee / Funding 可重复对账。
-- 重启/Reconcile 不重复记账。
-- manual/unmanaged 不污染 managed trade。
-
-### AI Position Manager
+## 3. Selector 检查
 
 确认：
 
-- AI 只能提出结构化 Action Proposal。
-- Deterministic Validation 与用户确认仍然存在。
-- AI/LLM 故障不会影响 Stop、Guardian、Reconcile。
+- smart local selector 确定性。
+- 不调用 LLM。
+- 不新增逐 Symbol Binance REST。
+- 旧 selector 配置仍兼容。
 
-### Optional Hedge
+## 4. Binance API 检查
 
-如果 V4-6 未实施，文档明确记录为“保留关闭”。
+确认：
 
-如果实施，则完成双向 Testnet E2E。
+- System Dashboard 可查看真实 API 用量。
+- Top endpoint 和权重来源清晰。
+- StartTrade 多币开仓不再线性重复高权重账户查询。
+- Background/Historical 会在预算紧张时让路。
+- 429/418 不形成 retry storm。
+- Mutation timeout/429 不会导致 duplicate order。
+- User Data WS/local snapshot 有 freshness/fallback。
 
-## 3. System Dashboard
+## 5. Plugin 检查
 
-复用现有系统看板，只增加必要摘要：
+确认：
 
-- Unprotected Managed Position。
-- Protection Degraded。
-- `reconcile_required`。
-- Ledger Reconcile Error。
-- Position Action Pending / Failed。
+- Plugin 只是 Packaging / Capability Group，不形成第二套 Runtime。
+- Skill 继续走 Portable Skill Runtime。
+- MCP 继续走现有 MCP Client。
+- Permission / RiskTrade 边界不被 Plugin 绕过。
 
-不新建第二套监控系统。
+## 6. System Dashboard
 
-## 4. 数据清理
+最终增加必要摘要：
 
-现有 `cleanup logs` 不能删除：
+```text
+Chat / Model errors
+Skill validation errors
+Binance Used Weight
+Binance Order Count
+429 / 418
+Deferred / Coalesced API calls
+Plugin health
+```
 
-- Managed Trade Ledger。
-- Managed Position / Order。
-- Agent Trade Proposal / Execution / Audit。
-- Position Action Proposal / Audit。
+不做新的 Prometheus/Grafana 强依赖。
 
-真实交易生命周期数据属于长期交易记录，不按普通日志清理。
+## 7. 文档
 
-## 5. 最终自动验证
+同步：
 
-后端至少执行：
+- 项目 README 多语言。
+- V4 implementation reports。
+- Skill Studio 使用说明。
+- Binance API Budget 说明。
+- Plugin compatibility 说明。
+
+## 8. 最终 Gate
+
+后端：
 
 ```bash
 go test ./...
-go test -race ./service/futuresownership ./service/agenttrade <V4新增真实交易包>
+go test -race <V4相关包>
 go vet ./...
 go build ./...
 git diff --check
@@ -80,60 +90,44 @@ pnpm typecheck
 pnpm build
 ```
 
-然后按既有约定同步 `dist` 到后端 `static`。
+并按既有方式同步 `dist → backend/static`。
 
-数据库升级仍只能通过：
+数据库 Schema 如果变化仍只能使用：
 
 ```bash
 ./go_binance_futures sync db
 ```
 
-## 6. 最终 Testnet Gate
-
-至少覆盖：
-
-- Open/Close LONG。
-- Open/Close SHORT。
-- Stop / TP。
-- Guardian Repair。
-- Manual Partial Reduce 后 Protection Resize。
-- System Partial Reduce。
-- Multi-TP。
-- Restart/Reconcile。
-- Ledger PnL/Fee 可对账。
-- 如果启用 V4-6，再覆盖 LONG/SHORT 同币双开。
-
-## 7. 项目约束
+## 9. 项目约束
 
 - 不修改 `app.conf`。
-- 测试后不留下测试进程。
-- 不回滚无关工作区修改。
-- ARM 环境必须可运行。
-- 个人使用优先，不增加企业级审批和治理复杂度。
+- 测试结束后不留下进程。
+- 不回滚其它未提交修改。
+- ARM 环境保持兼容。
+- 个人使用优先，不增加企业级治理复杂度。
 
-## 8. V4 完成标准
+## 10. V4 最终完成状态
 
-V4 完成后，系统应具备完整的真实交易生命周期：
+V4 完成后，项目应从“Agent 平台已经很完整，但日常使用和 API 资源治理不足”升级为：
 
 ```text
-发现机会
-→ 分析
-→ Proposal
-→ Risk
-→ Approval
-→ Entry
-→ Guardian
-→ Ledger
-→ Partial/Multi-TP 管理
-→ AI Position Review
-→ Deterministic Action Validation
-→ Exit
-→ 最终真实 PnL 复盘
+Chat Workspace
+  ├─ Multi Skill
+  ├─ Model Switch
+  └─ Conversation Management
+
+Skill Studio
+  └─ Standard Agent Skills Authoring
+
+Local Smart Selector
+  └─ Deterministic / No extra REST
+
+Binance API Governance
+  ├─ Usage Observability
+  ├─ Weight Budget
+  ├─ Request Reuse
+  └─ Priority Scheduling
+
+Plugin Package
+  └─ Skill + MCP compatibility
 ```
-
-同时保持：
-
-- AI 不直接交易。
-- Ownership 不越权。
-- 不做同方向加仓。
-- 不依赖任何新的 Backtest 功能。
