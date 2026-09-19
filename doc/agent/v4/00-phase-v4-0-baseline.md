@@ -69,9 +69,11 @@ Background Maintenance
 
 ## 6. 输出
 
-- `v4-0-baseline-report.md`。
-- `v4-0-binance-api-inventory.md`。
-- 关键 Fixture / Gate 清单。
+V4-0 已完成以下产物：
+
+- [v4-0-baseline-report.md](./v4-0-baseline-report.md)：Chat / Skill / Selector / API 行为基线与 Gate 结果。
+- [v4-0-binance-api-inventory.md](./v4-0-binance-api-inventory.md)：Futures / Spot / Delivery REST inventory、调用放大链路与 V4-5 优先级。
+- 关键 Fixture / Gate 清单已记录在 baseline report。
 
 ## 7. Gate
 
@@ -88,3 +90,9 @@ Background Maintenance
 - 不改选币结果。
 - 不加 API limiter。
 - 不修改 `app.conf`。
+
+## 9. 完成状态
+
+**V4-0 已完成（2026-09-19）。**
+
+本阶段只新增/更新 V4 文档，没有修改 Go/Vue 业务代码、数据库 Schema 或 `app.conf`。后端全量测试、关键 race、build、前端 typecheck/build 和 diff check 均通过。
