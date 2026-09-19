@@ -352,3 +352,122 @@ func TestStandardOptimizedEngineResultIsByteIdenticalToLegacy(t *testing.T) {
 		t.Fatal("equivalence fixture must exercise trades and events")
 	}
 }
+
+func TestAdditionalCurrentIndicatorFastPathsMatchLegacyWithProductionPeriods(t *testing.T) {
+	dataset := cacheFixtureDataset(5400)
+	technologyJSON := `{"roc":[{"name":"roc_1h_42","enable":true,"kline_interval":"1h","period":42}],"boll":[{"name":"boll_1h_20_2","enable":true,"kline_interval":"1h","period":20,"std_dev_multiplier":2}],"donchian":[{"name":"donchian_1h_20","enable":true,"kline_interval":"1h","period":20}],"kc":[{"name":"kc_1h_20_15","enable":true,"kline_interval":"1h","period":20,"multiplier":1.5}],"supertrend":[{"name":"supertrend_1h_10_3","enable":true,"kline_interval":"1h","period":10,"multiplier":3}]}`
+	legacy, err := newHistoricalEnvironment(dataset, technologyJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	optimized, err := newHistoricalEnvironment(dataset, technologyJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rule := Rule{Name: "production-period-extra-current", Type: "long", Enable: true, Code: `roc_1h_42.Data[0] > -10000 && boll_1h_20_2.High[0] >= boll_1h_20_2.Low[0] && donchian_1h_20.High[0] >= donchian_1h_20.Low[0] && kc_1h_20_15.High[0] >= kc_1h_20_15.Low[0] && supertrend_1h_10_3.Trend[0] != 0`}
+	raw, _ := json.Marshal([]Rule{rule})
+	optimized.enableStandardOptimizations(string(raw))
+	bars := dataset.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	for i := 3600; i < 4200; i++ {
+		left, _, leftErr := legacy.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
+		right, _, rightErr := optimized.BuildMinuteClose(bars[i].CloseTime, bars[i], nil, 1000, zeroCosts())
+		if (leftErr == nil) != (rightErr == nil) {
+			t.Fatalf("minute=%d error mismatch legacy=%v optimized=%v", i, leftErr, rightErr)
+		}
+		if leftErr != nil {
+			continue
+		}
+		for _, name := range []string{"roc_1h_42", "boll_1h_20_2", "donchian_1h_20", "kc_1h_20_15", "supertrend_1h_10_3"} {
+			if !reflect.DeepEqual(left[name], right[name]) {
+				t.Fatalf("minute=%d indicator=%s fast-path output differs from legacy\nlegacy=%#v\noptimized=%#v", i, name, left[name], right[name])
+			}
+		}
+	}
+	if len(optimized.currentROCCache) == 0 || len(optimized.currentBOLLCache) == 0 || len(optimized.currentDonchianCache) == 0 || len(optimized.currentKCCache) == 0 || len(optimized.currentSupertrendCache) == 0 {
+		t.Fatalf("expected all additional current-indicator fast-path caches to be populated: roc=%d boll=%d donchian=%d kc=%d supertrend=%d", len(optimized.currentROCCache), len(optimized.currentBOLLCache), len(optimized.currentDonchianCache), len(optimized.currentKCCache), len(optimized.currentSupertrendCache))
+	}
+}
+
+func TestAdditionalCurrentIndicatorFastPathsKeepEngineResultByteIdentical(t *testing.T) {
+	dataset := cacheFixtureDataset(5400)
+	bars := dataset.Bars[BarSeriesKey("BTCUSDT", "1m")]
+	dataset.StartTime = bars[3600].CloseTime
+	dataset.EndTime = bars[4800].CloseTime
+	dataset.DatasetSpecHash = DatasetSpecHash(dataset)
+	dataset.DatasetID = "ds_" + dataset.DatasetSpecHash[:24]
+	dataset.DataHash = DatasetDataHash(dataset)
+	technologyJSON := `{"roc":[{"name":"roc_1h_42","enable":true,"kline_interval":"1h","period":42}],"boll":[{"name":"boll_1h_20_2","enable":true,"kline_interval":"1h","period":20,"std_dev_multiplier":2}],"donchian":[{"name":"donchian_1h_20","enable":true,"kline_interval":"1h","period":20}],"kc":[{"name":"kc_1h_20_15","enable":true,"kline_interval":"1h","period":20,"multiplier":1.5}],"supertrend":[{"name":"supertrend_1h_10_3","enable":true,"kline_interval":"1h","period":10,"multiplier":3}]}`
+	rules := []Rule{
+		{Name: "open", Type: "long", Enable: true, Code: `roc_1h_42.Data[0] > -10000 && boll_1h_20_2.High[0] >= boll_1h_20_2.Low[0] && donchian_1h_20.High[0] >= donchian_1h_20.Low[0] && kc_1h_20_15.High[0] >= kc_1h_20_15.Low[0] && supertrend_1h_10_3.Trend[0] != 0`},
+		{Name: "close", Type: "close_long", Enable: true, Code: `roc_1h_42.Data[0] > -10000 && boll_1h_20_2.High[0] >= boll_1h_20_2.Low[0] && donchian_1h_20.High[0] >= donchian_1h_20.Low[0] && kc_1h_20_15.High[0] >= kc_1h_20_15.Low[0] && supertrend_1h_10_3.Trend[0] != 0`},
+	}
+	rawRules, _ := json.Marshal(rules)
+	strategy := StrategySnapshot{TemplateID: 2, TemplateName: "extra-fast-path-equivalence", TechnologyJSON: technologyJSON, StrategyJSON: string(rawRules), Version: "extra-fast-path-equivalence"}
+	config := RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 1, TakeProfitPct: 0.05, StopLossPct: 0.05}
+	legacy, err := (Engine{disableStandardOptimizations: true}).RunWithResolution(context.Background(), dataset, strategy, config, ResolutionModeStandard, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	optimized, err := (Engine{}).RunWithResolution(context.Background(), dataset, strategy, config, ResolutionModeStandard, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	left, _ := json.Marshal(legacy)
+	right, _ := json.Marshal(optimized)
+	if !reflect.DeepEqual(left, right) {
+		t.Fatalf("additional current-indicator fast paths changed engine result: legacy trades=%d events=%d equity=%d optimized trades=%d events=%d equity=%d", len(legacy.Trades), len(legacy.Events), len(legacy.Equity), len(optimized.Trades), len(optimized.Events), len(optimized.Equity))
+	}
+	if len(optimized.Trades) == 0 || len(optimized.Events) == 0 {
+		t.Fatal("equivalence fixture must exercise trades and events")
+	}
+}
+
+func TestCurrentFourHourROCAndSupertrendFastPathsMatchLegacy(t *testing.T) {
+	minuteBars := optimizationFixtureBars(15000)
+	hourBars := make([]Bar, 0, len(minuteBars)/60)
+	fourHourBars := make([]Bar, 0, len(minuteBars)/240)
+	for start := 0; start+60 <= len(minuteBars); start += 60 {
+		parts := minuteBars[start : start+60]
+		hourBars = append(hourBars, aggregatePartialBars("BTCUSDT", "1h", parts[0].OpenTime, parts[len(parts)-1].CloseTime, parts))
+	}
+	for start := 0; start+240 <= len(minuteBars); start += 240 {
+		parts := minuteBars[start : start+240]
+		fourHourBars = append(fourHourBars, aggregatePartialBars("BTCUSDT", "4h", parts[0].OpenTime, parts[len(parts)-1].CloseTime, parts))
+	}
+	dataset := Dataset{
+		Market: "futures_usdt", Symbol: "BTCUSDT", ExecutionInterval: "1m", Intervals: []string{"1m", "1h", "4h"},
+		StartTime: minuteBars[0].CloseTime, EndTime: minuteBars[len(minuteBars)-1].CloseTime,
+		Bars: map[string][]Bar{
+			BarSeriesKey("BTCUSDT", "1m"): minuteBars,
+			BarSeriesKey("BTCUSDT", "1h"): hourBars,
+			BarSeriesKey("BTCUSDT", "4h"): fourHourBars,
+		},
+	}
+	technologyJSON := `{"roc":[{"name":"roc_4h_42","enable":true,"kline_interval":"4h","period":42}],"supertrend":[{"name":"supertrend_4h_10_3","enable":true,"kline_interval":"4h","period":10,"multiplier":3}]}`
+	legacy, err := newHistoricalEnvironment(dataset, technologyJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	optimized, err := newHistoricalEnvironment(dataset, technologyJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rule := Rule{Name: "4h-current", Type: "long", Enable: true, Code: `roc_4h_42.Data[0] > -10000 && supertrend_4h_10_3.Trend[0] != 0`}
+	raw, _ := json.Marshal([]Rule{rule})
+	optimized.enableStandardOptimizations(string(raw))
+	for i := 12000; i < 13200; i++ {
+		left, _, leftErr := legacy.BuildMinuteClose(minuteBars[i].CloseTime, minuteBars[i], nil, 1000, zeroCosts())
+		right, _, rightErr := optimized.BuildMinuteClose(minuteBars[i].CloseTime, minuteBars[i], nil, 1000, zeroCosts())
+		if (leftErr == nil) != (rightErr == nil) {
+			t.Fatalf("minute=%d error mismatch legacy=%v optimized=%v", i, leftErr, rightErr)
+		}
+		if leftErr != nil {
+			continue
+		}
+		for _, name := range []string{"roc_4h_42", "supertrend_4h_10_3"} {
+			if !reflect.DeepEqual(left[name], right[name]) {
+				t.Fatalf("minute=%d indicator=%s 4h fast-path output differs from legacy", i, name)
+			}
+		}
+	}
+}

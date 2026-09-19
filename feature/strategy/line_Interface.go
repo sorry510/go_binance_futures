@@ -5,32 +5,33 @@ import (
 	"go_binance_futures/types"
 )
 
-
 type OpenParams struct {
-    Symbols *models.Symbols
+	Symbols *models.Symbols
 }
 
 type OpenResult struct {
-    CanLong bool
-    CanShort bool
+	CanLong           bool
+	CanShort          bool
+	LongStrategyHash  string
+	ShortStrategyHash string
 }
 
 type CloseParams struct {
-    Symbols *models.Symbols
-    Position types.FuturesPosition
-    NowProfit float64 // 当前收益率%
+	Symbols          *models.Symbols
+	Position         types.FuturesPosition
+	NowProfit        float64 // 当前收益率%
+	OpenStrategyHash string
 }
 
 type CloseResult struct {
-    Complete bool
+	Complete bool
 }
 
 type LineStrategy interface {
-    // 是否可以买多或者买空
-    GetCanLongOrShort(openParams OpenParams) (openResult OpenResult)
-    // 达到止盈或止损点后判断是否可以平仓
-    CanOrderComplete(closeParams CloseParams) (closeResult CloseResult)
-    // 达到止盈或止损前判定是否可以平仓
-    AutoStopOrder(closeParams CloseParams) (closeResult CloseResult)
+	// 是否可以买多或者买空
+	GetCanLongOrShort(openParams OpenParams) (openResult OpenResult)
+	// 达到止盈或止损点后判断是否可以平仓
+	CanOrderComplete(closeParams CloseParams) (closeResult CloseResult)
+	// 达到止盈或止损前判定是否可以平仓
+	AutoStopOrder(closeParams CloseParams) (closeResult CloseResult)
 }
-
