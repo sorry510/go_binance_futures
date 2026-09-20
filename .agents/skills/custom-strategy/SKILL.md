@@ -83,7 +83,15 @@ Do not reduce `close_long` or `close_short` to reaching a profit or loss number.
 
 Before finalizing close rules, compare every internal ROI trigger with the target symbols' outer `profit` and `loss` settings. The evaluator does not run the close expression while ROI is inside `(-loss, profit)`. Therefore a profit-protection trigger below `profit`, a setup-failure trigger near zero, or a stop whose magnitude is smaller than `loss` cannot fire at its intended level. Align the operational settings or redesign the thresholds, and report the required `profit/loss` values with the strategy.
 
-Do not claim that a rule is profitable or effective merely because it compiles. This project supports current-snapshot testing and forward simulation, not historical backtesting.
+Do not claim that a rule is profitable or effective merely because it compiles. The project supports current-snapshot testing, forward simulation, and historical replay through `service/backtest.DatasetBuilder` and `Engine.RunWithResolution`; select the evidence source that matches the user's request.
+
+For historical strategy research:
+
+- Read the current replay engine and dataset builder. Record exact dates, engine/resolution version, data hash, full strategy snapshots, leverage, sizing, both-side fee/slippage assumptions, and actual historical funding. The standard engine evaluates observed minute-close data and fills pending orders at the next minute open. Preserve the outer close gates and validate signal-confirmed exits before releasing a strategy; ROI-only programs may be labeled diagnostic controls, never silently substituted for the final contract.
+- Verify enabled rules, indicator parameter names, required intervals, warmup, execution-bar continuity, and funding coverage before interpreting zero trades or returns. A comparison harness must prepare the union of every candidate's intervals and maximum warmup, or build each candidate separately. Missing data must not masquerade as a strategy with no signals.
+- Cache immutable datasets locally with source/request identity and verified data hashes when iterating. Report measured replay progress; a live process alone does not reveal its stage or prove that database writes did not occur. Historical repository loaders may populate caches, so inspect their actual behavior before calling an entire run read-only.
+- Apply the user's frequency gate separately to every coin using the full requested calendar exposure, not just active weeks. Report net and gross PnL, fees, funding, profit factor, drawdown, and yearly/side/symbol concentration. Opposite-direction strategies can both lose after costs; do not infer a tradable inverse edge from net losses alone.
+- Keep a trial ledger and freeze candidate parameters before validation. A period inspected during earlier optimization is no longer an untouched holdout. Expand promising candidates to the full requested duration and predeclared cross-coin universe; 44 months cannot establish four-year stability. Retain failed candidates as research evidence, not validated releases.
 
 ## Create the portable JSON
 
