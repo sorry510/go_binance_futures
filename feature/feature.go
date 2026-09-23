@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/scanner"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
 	"math"
@@ -46,8 +47,7 @@ func StartTrade(systemConfig *models.Config) {
 		return
 	}
 
-	globalCoinStrategy := GetCoinStrategy(systemConfig.FutureStrategyCoin)  // 交易策略
-	globalLineStrategy := GetLineStrategy(systemConfig.FutureStrategyTrade) // 选币策略
+	globalLineStrategy := GetLineStrategy(systemConfig.FutureStrategyTrade) // 交易策略
 
 	/************************************************寻找交易币种 start******************************************************************* */
 	allCoins, err := GetAllSymbols()
@@ -55,7 +55,7 @@ func StartTrade(systemConfig *models.Config) {
 		logs.Error("GetAllSymbols err:", err)
 		return
 	}
-	coins := globalCoinStrategy.SelectCoins(allCoins)
+	coins := selectConfiguredCoins(systemConfig, allCoins, scanner.SmartLocalV2ModeTrade)
 	if coins == nil {
 		logs.Error("coins SelectCoins is nil")
 		return
@@ -1037,6 +1037,8 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 		coinStrategy = coin.TradeCoin5{}
 	case "coin6":
 		coinStrategy = coin.TradeCoin6{}
+	case "smart_local_v2":
+		coinStrategy = coin.SmartLocalV2{}
 	default:
 		coinStrategy = coin.TradeCoin1{}
 	}

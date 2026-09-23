@@ -20,9 +20,14 @@ const (
 )
 
 type PrefilterOptions struct {
-	Limit          int     `json:"limit"`
-	MinQuoteVolume float64 `json:"min_quote_volume"`
-	MaxDataAgeMs   int64   `json:"max_data_age_ms"`
+	Limit                  int     `json:"limit"`
+	MaxLimit               int     `json:"max_limit"`
+	MinQuoteVolume         float64 `json:"min_quote_volume"`
+	MaxDataAgeMs           int64   `json:"max_data_age_ms"`
+	IncludeBenchmarks      bool    `json:"include_benchmarks"`
+	UseTradeCountScore     bool    `json:"use_trade_count_score"`
+	StableSymbolTieBreak   bool    `json:"stable_symbol_tie_break"`
+	SymmetricChangeScoring bool    `json:"symmetric_change_scoring"`
 }
 
 type PrefilterResult struct {
@@ -48,7 +53,9 @@ type PrefilterCandidate struct {
 	Open24h            float64  `json:"open_24h"`
 	CenterOffsetPct    float64  `json:"center_offset_pct"`
 	UpperWickRatio     float64  `json:"upper_wick_ratio"`
+	LowerWickRatio     float64  `json:"lower_wick_ratio"`
 	RetraceFromHighPct float64  `json:"retrace_from_high_pct"`
+	ReboundFromLowPct  float64  `json:"rebound_from_low_pct"`
 	LocalMomentumPct   float64  `json:"local_momentum_pct"`
 	NotChase           bool     `json:"not_chase"`
 	Reasons            []string `json:"reasons"`
@@ -69,7 +76,9 @@ type symbolMetrics struct {
 	high             float64
 	centerOffsetPct  float64
 	upperWickRatio   float64
+	lowerWickRatio   float64
 	retraceFromHigh  float64
+	reboundFromLow   float64
 	localMomentumPct float64
 	hasLocalMomentum bool
 }
@@ -89,9 +98,13 @@ func ScanTop30(ctx context.Context, opts PrefilterOptions) (*PrefilterResult, er
 }
 
 func PrefilterTop30FromSymbols(symbols []*models.Symbols, opts PrefilterOptions) PrefilterResult {
+	maxLimit := opts.MaxLimit
+	if maxLimit <= 0 {
+		maxLimit = defaultTop30Limit
+	}
 	limit := opts.Limit
-	if limit <= 0 || limit > defaultTop30Limit {
-		limit = defaultTop30Limit
+	if limit <= 0 || limit > maxLimit {
+		limit = maxLimit
 	}
 	minQuoteVolume := opts.MinQuoteVolume
 	if minQuoteVolume <= 0 {
@@ -127,7 +140,7 @@ func PrefilterTop30FromSymbols(symbols []*models.Symbols, opts PrefilterOptions)
 			result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "非 USDT 本位合约"})
 			continue
 		}
-		if item.Symbol == "BTCUSDT" || item.Symbol == "ETHUSDT" {
+		if !opts.IncludeBenchmarks && (item.Symbol == "BTCUSDT" || item.Symbol == "ETHUSDT") {
 			result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "BTC/ETH 仅用于市场环境，不作为山寨候选"})
 			continue
 		}
@@ -139,28 +152,52 @@ func PrefilterTop30FromSymbols(symbols []*models.Symbols, opts PrefilterOptions)
 			result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "本地行情数据过旧"})
 			continue
 		}
-		if item.PercentChange > 60 {
-			result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "24h 涨幅超过 60%，默认剔除"})
-			continue
-		}
-		if item.PercentChange > 40 && (metrics.upperWickRatio >= 0.35 || metrics.retraceFromHigh >= 18) {
-			result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "24h 涨幅超过 40% 且长上影/冲高回落明显"})
-			continue
+		if opts.SymmetricChangeScoring {
+			changeAbs := math.Abs(item.PercentChange)
+			if changeAbs > 60 {
+				result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "24h 涨跌变化绝对值超过 60%，默认剔除"})
+				continue
+			}
+			if changeAbs > 40 {
+				if item.PercentChange >= 0 && (metrics.upperWickRatio >= 0.35 || metrics.retraceFromHigh >= 18) {
+					result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "24h 上涨变化超过 40% 且长上影/冲高回落明显"})
+					continue
+				}
+				if item.PercentChange < 0 && (metrics.lowerWickRatio >= 0.35 || metrics.reboundFromLow >= 18) {
+					result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "24h 下跌变化超过 40% 且长下影/低位反弹明显"})
+					continue
+				}
+			}
+		} else {
+			if item.PercentChange > 60 {
+				result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "24h 涨幅超过 60%，默认剔除"})
+				continue
+			}
+			if item.PercentChange > 40 && (metrics.upperWickRatio >= 0.35 || metrics.retraceFromHigh >= 18) {
+				result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "24h 涨幅超过 40% 且长上影/冲高回落明显"})
+				continue
+			}
 		}
 		if metrics.centerOffsetPct > defaultMaxCenterOffset*100 {
 			result.Excluded = append(result.Excluded, PrefilterExclusion{Symbol: item.Symbol, Reason: "价格远离 24h 中枢"})
 			continue
 		}
 
-		candidate := buildCandidate(item, metrics, minQuoteVolume)
+		candidate := buildCandidate(item, metrics, minQuoteVolume, opts.UseTradeCountScore, opts.SymmetricChangeScoring)
 		result.Candidates = append(result.Candidates, candidate)
 	}
 
 	sort.SliceStable(result.Candidates, func(i, j int) bool {
-		if result.Candidates[i].Score == result.Candidates[j].Score {
+		if result.Candidates[i].Score != result.Candidates[j].Score {
+			return result.Candidates[i].Score > result.Candidates[j].Score
+		}
+		if result.Candidates[i].QuoteVolume24h != result.Candidates[j].QuoteVolume24h {
 			return result.Candidates[i].QuoteVolume24h > result.Candidates[j].QuoteVolume24h
 		}
-		return result.Candidates[i].Score > result.Candidates[j].Score
+		if opts.StableSymbolTieBreak {
+			return result.Candidates[i].Symbol < result.Candidates[j].Symbol
+		}
+		return false
 	})
 	if len(result.Candidates) > limit {
 		result.Candidates = result.Candidates[:limit]
@@ -198,6 +235,10 @@ func localSymbolMetrics(item *models.Symbols) (symbolMetrics, bool, string) {
 	if upperWick < 0 {
 		upperWick = 0
 	}
+	lowerWick := math.Min(open, price) - low
+	if lowerWick < 0 {
+		lowerWick = 0
+	}
 	m := symbolMetrics{
 		price:            price,
 		open:             open,
@@ -205,7 +246,9 @@ func localSymbolMetrics(item *models.Symbols) (symbolMetrics, bool, string) {
 		high:             high,
 		centerOffsetPct:  math.Abs(price-center) / price * 100,
 		upperWickRatio:   upperWick / (high - low),
+		lowerWickRatio:   lowerWick / (high - low),
 		retraceFromHigh:  (high - price) / price * 100,
+		reboundFromLow:   (price - low) / price * 100,
 		localMomentumPct: 0,
 	}
 	lastClose, hasLastClose := parsePositive(item.LastClose)
@@ -216,7 +259,7 @@ func localSymbolMetrics(item *models.Symbols) (symbolMetrics, bool, string) {
 	return m, true, ""
 }
 
-func buildCandidate(item *models.Symbols, metrics symbolMetrics, minQuoteVolume float64) PrefilterCandidate {
+func buildCandidate(item *models.Symbols, metrics symbolMetrics, minQuoteVolume float64, useTradeCountScore, symmetricChangeScoring bool) PrefilterCandidate {
 	score := 35.0
 	reasons := make([]string, 0, 5)
 	risks := make([]string, 0, 4)
@@ -230,15 +273,43 @@ func buildCandidate(item *models.Symbols, metrics symbolMetrics, minQuoteVolume 
 		score += clamp(math.Log10(item.QuoteVolume/minQuoteVolume+1)*18, 0, 24)
 		reasons = append(reasons, "24h 成交额满足流动性阈值")
 	}
-	if item.PercentChange >= -5 && item.PercentChange <= 35 {
-		score += 20
-		reasons = append(reasons, "24h 涨幅处于初筛理想区间")
-	} else if item.PercentChange > 35 {
-		score += 5
-		risks = append(risks, "24h 涨幅偏高，需要等待回踩确认")
+	if useTradeCountScore {
+		if item.TradeCount >= 200_000 {
+			score += 8
+			reasons = append(reasons, "24h 成交笔数活跃")
+		} else if item.TradeCount >= 50_000 {
+			score += 4
+			reasons = append(reasons, "24h 成交活跃度良好")
+		} else if item.TradeCount > 0 && item.TradeCount < 10_000 {
+			score -= 4
+			risks = append(risks, "24h 成交笔数偏低")
+		}
+	}
+
+	if symmetricChangeScoring {
+		changeAbs := math.Abs(item.PercentChange)
+		switch {
+		case changeAbs <= 5:
+			score += 12
+			reasons = append(reasons, "24h 涨跌变化较小")
+		case changeAbs <= 35:
+			score += 20
+			reasons = append(reasons, "24h 涨跌变化活跃且不过度")
+		default:
+			score += 5
+			risks = append(risks, "24h 涨跌变化幅度偏大，需要等待结构确认")
+		}
 	} else {
-		score += 4
-		risks = append(risks, "24h 表现偏弱")
+		if item.PercentChange >= -5 && item.PercentChange <= 35 {
+			score += 20
+			reasons = append(reasons, "24h 涨幅处于初筛理想区间")
+		} else if item.PercentChange > 35 {
+			score += 5
+			risks = append(risks, "24h 涨幅偏高，需要等待回踩确认")
+		} else {
+			score += 4
+			risks = append(risks, "24h 表现偏弱")
+		}
 	}
 
 	centerScore := 18 - metrics.centerOffsetPct
@@ -249,16 +320,37 @@ func buildCandidate(item *models.Symbols, metrics symbolMetrics, minQuoteVolume 
 		risks = append(risks, "价格距离 24h 中枢偏远")
 	}
 
-	wickScore := 14 - metrics.upperWickRatio*28
+	directionalWickRatio := metrics.upperWickRatio
+	directionalReversalPct := metrics.retraceFromHigh
+	if symmetricChangeScoring && item.PercentChange < 0 {
+		directionalWickRatio = metrics.lowerWickRatio
+		directionalReversalPct = metrics.reboundFromLow
+	}
+	wickScore := 14 - directionalWickRatio*28
 	score += clamp(wickScore, -8, 14)
-	if metrics.upperWickRatio <= 0.25 && metrics.retraceFromHigh <= 8 {
+	if symmetricChangeScoring {
+		if directionalWickRatio <= 0.25 && directionalReversalPct <= 8 {
+			reasons = append(reasons, "24h 主方向未出现明显反转影线")
+		} else {
+			risks = append(risks, "24h 主方向存在明显反转影线/回撤风险")
+		}
+	} else if metrics.upperWickRatio <= 0.25 && metrics.retraceFromHigh <= 8 {
 		reasons = append(reasons, "未出现明显长上影或冲高回落")
 	} else {
 		risks = append(risks, "存在上影线或冲高回落风险")
 	}
 
 	if metrics.hasLocalMomentum {
-		if metrics.localMomentumPct > 0 {
+		if symmetricChangeScoring {
+			if math.Abs(metrics.localMomentumPct) > 0 {
+				score += clamp(math.Abs(metrics.localMomentumPct)*3, 0, 8)
+				if metrics.localMomentumPct > 0 {
+					reasons = append(reasons, "本地最近一次价格更新继续向上")
+				} else {
+					reasons = append(reasons, "本地最近一次价格更新继续向下")
+				}
+			}
+		} else if metrics.localMomentumPct > 0 {
 			score += clamp(metrics.localMomentumPct*3, 0, 8)
 			reasons = append(reasons, "本地最近一次价格更新呈转强")
 		} else {
@@ -270,8 +362,15 @@ func buildCandidate(item *models.Symbols, metrics symbolMetrics, minQuoteVolume 
 	}
 
 	notChase := item.PercentChange > 35 || metrics.upperWickRatio > 0.30 || metrics.retraceFromHigh > 12
+	if symmetricChangeScoring {
+		notChase = math.Abs(item.PercentChange) > 35 || directionalWickRatio > 0.30 || directionalReversalPct > 12
+	}
 	if notChase {
-		risks = append(risks, "当前不适合追高，只适合作为观察候选")
+		if symmetricChangeScoring {
+			risks = append(risks, "当前变化幅度或反转风险较高，只适合作为观察候选")
+		} else {
+			risks = append(risks, "当前不适合追高，只适合作为观察候选")
+		}
 	}
 
 	score = clamp(score, 0, 100)
@@ -288,7 +387,9 @@ func buildCandidate(item *models.Symbols, metrics symbolMetrics, minQuoteVolume 
 		Open24h:            metrics.open,
 		CenterOffsetPct:    round(metrics.centerOffsetPct, 4),
 		UpperWickRatio:     round(metrics.upperWickRatio, 4),
+		LowerWickRatio:     round(metrics.lowerWickRatio, 4),
 		RetraceFromHighPct: round(metrics.retraceFromHigh, 4),
+		ReboundFromLowPct:  round(metrics.reboundFromLow, 4),
 		LocalMomentumPct:   round(metrics.localMomentumPct, 4),
 		NotChase:           notChase,
 		Reasons:            reasons,
