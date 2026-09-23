@@ -3,6 +3,7 @@ package controllers
 import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
@@ -17,16 +18,17 @@ type AccountController struct {
 }
 
 func (ctrl *AccountController) GetBinanceFuturesAccount() {
-	account, err := binance.GetFuturesAccount()
-	
+	ctx := binanceapiusage.WithSource(ctrl.Ctx.Request.Context(), "manual_api")
+	account, err := binance.GetFuturesAccountContext(ctx)
+
 	if err != nil {
-		ctrl.Ctx.Resp(map[string]interface{} {
+		ctrl.Ctx.Resp(map[string]interface{}{
 			"code": 400,
-			"msg": err.Error(),
+			"msg":  err.Error(),
 		})
 		return
 	}
-	
+
 	var assets = make([]*futures.AccountAsset, len(account.Assets))
 	for _, asset := range account.Assets {
 		walletBalance, _ := strconv.ParseFloat(asset.WalletBalance, 64)
@@ -35,10 +37,10 @@ func (ctrl *AccountController) GetBinanceFuturesAccount() {
 		}
 		assets = append(assets, asset)
 	}
-	
-	ctrl.Ctx.Resp(map[string]interface{} {
+
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"data": map[string]interface{} {
+		"data": map[string]interface{}{
 			"assets": assets,
 		},
 		"msg": "success",
@@ -46,14 +48,15 @@ func (ctrl *AccountController) GetBinanceFuturesAccount() {
 }
 
 func (ctrl *AccountController) GetBinanceFuturesPositions() {
-	allPositions, err := binance.GetPosition(binance.PositionParams{})
+	ctx := binanceapiusage.WithSource(ctrl.Ctx.Request.Context(), "manual_api")
+	allPositions, err := binance.GetPositionContext(ctx, binance.PositionParams{})
 	if err != nil {
-		ctrl.Ctx.Resp(map[string]interface{} {
+		ctrl.Ctx.Resp(map[string]interface{}{
 			"code": 400,
-			"msg": err.Error(),
+			"msg":  err.Error(),
 		})
 	}
-	
+
 	var positions []*futures.PositionRisk
 	for _, position := range allPositions {
 		positionAmt, _ := strconv.ParseFloat(position.PositionAmt, 64)
@@ -64,9 +67,9 @@ func (ctrl *AccountController) GetBinanceFuturesPositions() {
 		positions = append(positions, position)
 	}
 
-	ctrl.Ctx.Resp(map[string]interface{} {
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"data": map[string]interface{} {
+		"data": map[string]interface{}{
 			"positions": positions,
 		},
 		"msg": "success",
@@ -74,18 +77,19 @@ func (ctrl *AccountController) GetBinanceFuturesPositions() {
 }
 
 func (ctrl *AccountController) GetBinanceFuturesOpenOrders() {
-	allOpenOrders, err := binance.GetOpenOrder()
-	
+	ctx := binanceapiusage.WithSource(ctrl.Ctx.Request.Context(), "manual_api")
+	allOpenOrders, err := binance.GetOpenOrderContext(ctx)
+
 	if err != nil {
-		ctrl.Ctx.Resp(map[string]interface{} {
+		ctrl.Ctx.Resp(map[string]interface{}{
 			"code": 400,
-			"msg": err.Error(),
+			"msg":  err.Error(),
 		})
 	}
 
-	ctrl.Ctx.Resp(map[string]interface{} {
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"data": map[string]interface{} {
+		"data": map[string]interface{}{
 			"openOrders": allOpenOrders,
 		},
 		"msg": "success",
@@ -101,7 +105,7 @@ func (ctrl *AccountController) GetLocalFuturesPositions() {
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 	}
-	
+
 	var usePositions []models.FuturesPosition
 	for _, position := range positions {
 		positionAmt, _ := strconv.ParseFloat(position.Amount, 64)
@@ -113,13 +117,13 @@ func (ctrl *AccountController) GetLocalFuturesPositions() {
 		markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
 		unRealizedProfit := (markPrice_float64 - enterPrice_float64) * positionAmt // 未实现盈亏
 		position.UnrealizedProfit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
-		
+
 		usePositions = append(usePositions, position)
 	}
-	
-	ctrl.Ctx.Resp(map[string]interface{} {
+
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"data": map[string]interface{} {
+		"data": map[string]interface{}{
 			"positions": usePositions,
 		},
 		"msg": "success",
@@ -135,10 +139,10 @@ func (ctrl *AccountController) GetLocalFuturesOpenOrders() {
 	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 	}
-	
-	ctrl.Ctx.Resp(map[string]interface{} {
+
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"data": map[string]interface{} {
+		"data": map[string]interface{}{
 			"openOrders": orders,
 		},
 		"msg": "success",
@@ -150,19 +154,19 @@ func (ctrl *AccountController) EditLocalFuturesPositions() {
 	var position models.FuturesPosition
 	o := orm.NewOrm()
 	o.QueryTable(position.TableName()).Filter("Id", id).One(&position)
-	
+
 	ctrl.BindJSON(&position)
-	
+
 	_, err := o.Update(&position) // _ 是受影响的条数
-    if err != nil {
-        // 处理错误
+	if err != nil {
+		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
-    }
-	ctrl.Ctx.Resp(map[string]interface{} {
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": position,
-		"msg": "success",
+		"msg":  "success",
 	})
 }
 
@@ -171,16 +175,16 @@ func (ctrl *AccountController) DelLocalFuturesPositions() {
 	var position models.FuturesPosition
 	o := orm.NewOrm()
 	o.QueryTable(position.TableName()).Filter("Id", id).One(&position)
-	
+
 	_, err := o.Delete(&position)
 	if err != nil {
 		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
-	ctrl.Ctx.Resp(map[string]interface{} {
+	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
 		"data": nil,
-		"msg": "success",
+		"msg":  "success",
 	})
 }

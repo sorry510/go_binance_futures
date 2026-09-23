@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 
@@ -191,7 +192,8 @@ func (ctrl *ListenCoinController) GetKcLineChart() {
 	interval1 := symbols.KlineInterval
 	multiplier1 := 2.75 // 窄通道
 	multiplier2 := 3.75 // 宽通道
-	kline_1, err := binance.GetKlineData(symbol, interval1, limit)
+	ctx := binanceapiusage.WithSource(ctrl.Ctx.Request.Context(), "manual_api")
+	kline_1, err := binance.GetKlineDataContext(ctx, symbol, interval1, limit)
 	if err != nil {
 		ctrl.Ctx.Resp(map[string]interface{}{
 			"code": 500,
@@ -292,7 +294,8 @@ func (ctrl *ListenCoinController) EditFundingRates() {
 func (ctrl *ListenCoinController) GetFundingRateHistory() {
 	symbol := ctrl.GetString("symbol")
 
-	histories, err := binance.GetFundingRateHistory(binance.FundingRateParams{
+	ctx := binanceapiusage.WithSource(ctrl.Ctx.Request.Context(), "manual_api")
+	histories, err := binance.GetFundingRateHistoryContext(ctx, binance.FundingRateParams{
 		Symbol: symbol,
 		Limit:  200,
 	})
