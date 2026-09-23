@@ -12,6 +12,7 @@ import (
 
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 
 	"github.com/adshao/go-binance/v2/common"
 	"github.com/adshao/go-binance/v2/futures"
@@ -121,6 +122,7 @@ func (e Executor) Execute(ctx context.Context, request OrderRequest) (ExchangeOr
 	if err := validateOrderRequest(request); err != nil {
 		return ExchangeOrder{}, err
 	}
+	ctx = binanceapiusage.WithSource(ctx, ownerAPISource(request.Owner))
 	if e.Broker == nil {
 		return ExchangeOrder{}, fmt.Errorf("managed order broker is required")
 	}
@@ -241,6 +243,23 @@ func (e Executor) Cancel(ctx context.Context, owner string, order models.Futures
 	return e.Ownership.SetOrderStatus(ctx, order.ClientOrderID, OrderCanceled)
 }
 
+func ownerAPISource(owner string) string {
+	switch strings.TrimSpace(owner) {
+	case OwnerAutoStrategy:
+		return "start_trade"
+	case OwnerNewCoinRush:
+		return "new_coin_rush"
+	case OwnerNoticeAutoOrder:
+		return "notice_auto_order"
+	case OwnerFundingRate:
+		return "funding_rate"
+	case OwnerAgentTrade:
+		return "agent_trade"
+	default:
+		return "managed_trade"
+	}
+}
+
 func newOwnedClientOrderID(owner string) (string, error) {
 	owner, err := normalizeOwner(owner)
 	if err != nil {
@@ -317,7 +336,7 @@ func (BinanceOrderBroker) Cancel(ctx context.Context, symbol string, orderID int
 		_, err := binance.CancelAlgoOrder(ctx, orderID)
 		return err
 	}
-	_, err := binance.CancelOrder(symbol, orderID)
+	_, err := binance.CancelOrderContext(ctx, symbol, orderID)
 	return err
 }
 

@@ -71,6 +71,7 @@ func init() {
 	web.Router("/agents/observability/traces", &controllers.AgentObservabilityController{}, "get:Traces")   // V2-10 持久化节点 Trace
 	web.Router("/agents/observability/changes", &controllers.AgentObservabilityController{}, "get:Changes")
 	web.Router("/system/health", &controllers.SystemDashboardController{}, "get:Health")                                                        // V3-8 系统看板只读健康摘要
+	web.Router("/system/binance-api-usage", &controllers.SystemDashboardController{}, "get:BinanceAPIUsage")                                    // V4-4 Binance REST 用量观测
 	web.Router("/agents/skills/implementations", &controllers.AgentSkillController{}, "get:GetImplementations")                                 // 可用 Skill implementation
 	web.Router("/agents/skills", &controllers.AgentSkillController{}, "get:Get;post:Post")                                                      // Agent Skill 配置
 	web.Router("/agents/skills/:id", &controllers.AgentSkillController{}, "put:Put;delete:Delete")                                              // Agent Skill 更新/删除

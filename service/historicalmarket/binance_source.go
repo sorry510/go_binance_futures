@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	binanceapi "go_binance_futures/feature/api/binance"
+	"go_binance_futures/service/binanceapiusage"
 
 	"github.com/adshao/go-binance/v2/futures"
 )
@@ -18,6 +19,7 @@ func (source BinanceSource) Klines(ctx context.Context, market, symbol, interval
 }
 
 func (BinanceSource) KlinesWithProgress(ctx context.Context, market, symbol, interval string, start, end int64, progress KlineProgressCallback) ([]Kline, error) {
+	ctx = binanceapiusage.WithSource(ctx, "historical_market")
 	if market != MarketFuturesUSDT {
 		return nil, fmt.Errorf("binance historical source does not support market %q", market)
 	}
@@ -48,6 +50,7 @@ func (BinanceSource) KlinesWithProgress(ctx context.Context, market, symbol, int
 }
 
 func (BinanceSource) EarliestKline(ctx context.Context, market, symbol, interval string) (Kline, error) {
+	ctx = binanceapiusage.WithSource(ctx, "historical_market")
 	if market != MarketFuturesUSDT {
 		return Kline{}, fmt.Errorf("binance historical source does not support market %q", market)
 	}
@@ -99,6 +102,7 @@ func convertBinanceKline(market, symbol, interval string, row *futures.Kline) (K
 }
 
 func (BinanceSource) Funding(ctx context.Context, market, symbol string, start, end int64) ([]FundingRate, error) {
+	ctx = binanceapiusage.WithSource(ctx, "historical_market")
 	if market != MarketFuturesUSDT {
 		return nil, fmt.Errorf("binance historical source does not support market %q", market)
 	}
