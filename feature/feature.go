@@ -1,6 +1,7 @@
 package feature
 
 import (
+	"context"
 	"fmt"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/feature/strategy"
@@ -10,6 +11,7 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/scanner"
+	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
 	"math"
@@ -47,6 +49,7 @@ func StartTrade(systemConfig *models.Config) {
 		return
 	}
 
+	ctx := binanceapiusage.WithSource(context.Background(), "start_trade")
 	globalLineStrategy := GetLineStrategy(systemConfig.FutureStrategyTrade) // 交易策略
 
 	/************************************************寻找交易币种 start******************************************************************* */
@@ -63,14 +66,14 @@ func StartTrade(systemConfig *models.Config) {
 	/************************************************寻找交易币种 end******************************************************************* */
 
 	/************************************************获取账户信息 start******************************************************************* */
-	positions, err := GetTransformPositions()
+	positions, err := GetTransformPositionsContext(ctx)
 	if err != nil {
 		logs.Info("Sleep 30s for limit")
 		time.Sleep(30 * time.Second)
 		return
 	}
 
-	allOpenOrders, err := getTransformOpenOrders()
+	allOpenOrders, err := getTransformOpenOrdersContext(ctx)
 	// allOpenOrders, err := binance.GetOpenOrder()
 	if err != nil {
 		logs.Info("Sleep 30s for limit")
@@ -453,7 +456,7 @@ func StartTrade(systemConfig *models.Config) {
 				quantity := (usdt_float64 / buyPrice) * leverage_float64 // 购买数量
 				quantity = utils.GetTradePrecision(quantity, stepSize)   // 合理精度的价格
 
-				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
+				UpdateSymbolTradeInfoContext(ctx, coin) // 更新倍率和仓位模式
 
 				if systemConfig.FutureOrderType == "MARKET" {
 					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
@@ -525,7 +528,7 @@ func StartTrade(systemConfig *models.Config) {
 				quantity := (usdt_float64 / sellPrice) * leverage_float64 // 购买数量
 				quantity = utils.GetTradePrecision(quantity, stepSize)    // 合理精度的价格
 
-				UpdateSymbolTradeInfo(coin) // 更新倍率和仓位模式
+				UpdateSymbolTradeInfoContext(ctx, coin) // 更新倍率和仓位模式
 
 				if systemConfig.FutureOrderType == "MARKET" {
 					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
@@ -977,12 +980,16 @@ func buildBatchInsertFuturesSymbolsSQL(items []futuresSymbolInsert) (string, []i
 
 // 更新币种信息
 func UpdateSymbolTradeInfo(symbols *models.Symbols) {
+	UpdateSymbolTradeInfoContext(context.Background(), symbols)
+}
+
+func UpdateSymbolTradeInfoContext(ctx context.Context, symbols *models.Symbols) {
 	marginType := futures.MarginTypeIsolated
 	if symbols.MarginType == "CROSSED" {
 		marginType = futures.MarginTypeCrossed
 	}
-	binance.SetLeverage(symbols.Symbol, int(symbols.Leverage)) // 修改合约倍数
-	binance.SetMarginType(symbols.Symbol, marginType)          // 修改仓位模式
+	_, _ = binance.SetLeverageContext(ctx, symbols.Symbol, int(symbols.Leverage)) // 修改合约倍数
+	_ = binance.SetMarginTypeContext(ctx, symbols.Symbol, marginType)             // 修改仓位模式
 }
 
 // 更新所有币种的资金费率信息
@@ -990,7 +997,8 @@ func UpdateSymbolsFundingRates(systemConfig models.Config) {
 	if systemConfig.ListenFundingRateEnable == 0 {
 		return
 	}
-	res, err := binance.GetFundingRate(binance.FundingRateParams{})
+	ctx := binanceapiusage.WithSource(context.Background(), "funding_rate")
+	res, err := binance.GetFundingRateContext(ctx, binance.FundingRateParams{})
 	if err == nil {
 		o := orm.NewOrm()
 		for _, symbol := range res {
@@ -1072,6 +1080,10 @@ func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
 
 // 转换为统一格式的 positions
 func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
+	return GetTransformPositionsContext(context.Background())
+}
+
+func GetTransformPositionsContext(ctx context.Context) (usePositions []types.FuturesPosition, err error) {
 	if wsFuturesUserData == "1" {
 		var positions []models.FuturesPosition
 		o := orm.NewOrm()
@@ -1108,7 +1120,7 @@ func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
 			})
 		}
 	} else {
-		positions, err := binance.GetPosition(binance.PositionParams{})
+		positions, err := binance.GetPositionContext(ctx, binance.PositionParams{})
 		if err != nil {
 			logs.Error("GetApiPosition err in StartTrade:", err.Error())
 			return usePositions, err
@@ -1143,6 +1155,10 @@ func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
 
 // 转换为统一格式的 orders
 func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
+	return getTransformOpenOrdersContext(context.Background())
+}
+
+func getTransformOpenOrdersContext(ctx context.Context) (useOrders []types.FuturesOrder, err error) {
 	if wsFuturesUserData == "1" {
 		var orders []models.FuturesOrder
 		o := orm.NewOrm()
@@ -1170,7 +1186,7 @@ func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
 			})
 		}
 	} else {
-		allOpenOrders, err := binance.GetOpenOrder()
+		allOpenOrders, err := binance.GetOpenOrderContext(ctx)
 		if err != nil {
 			logs.Error("GetOpenOrder err in StartTrade:", err.Error())
 			return useOrders, err

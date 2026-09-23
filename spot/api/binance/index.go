@@ -2,8 +2,11 @@ package binance
 
 import (
 	"context"
+	"strings"
+
 	"go_binance_futures/binanceproxy"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/utils"
 	"sort"
 	"strconv"
@@ -17,7 +20,6 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
 )
-
 
 var api_key, _ = config.String("binance::api_key")
 var api_secret, _ = config.String("binance::api_secret")
@@ -35,9 +37,9 @@ func init() {
 	}
 
 	client = binance.NewClient(api_key, api_secret)
-	if proxyPool.Enabled() {
-		client.HTTPClient = proxyPool.HTTPClient()
-	}
+	client.HTTPClient = binanceapiusage.WrapClient(proxyPool.HTTPClient(), binanceapiusage.TransportConfig{
+		Product: "spot", Environment: "mainnet", Source: "go_binance",
+	})
 }
 
 func GetFuturesAccount() (res *binance.Account, err error) {
@@ -51,11 +53,20 @@ func GetFuturesAccount() (res *binance.Account, err error) {
 }
 
 // @see https://binance-docs.github.io/apidocs/futures/cn/#0f3f2d5ee7
-func GetExchangeInfo(symbols ...string)(res *binance.ExchangeInfo, err error) {
+func GetExchangeInfo(symbols ...string) (res *binance.ExchangeInfo, err error) {
 	res, err = client.NewExchangeInfoService().Symbols(symbols...).Do(context.Background())
 	if err != nil {
 		logs.Error(err)
 		return nil, err
+	}
+	for _, rateLimit := range res.RateLimits {
+		if strings.EqualFold(string(rateLimit.RateLimitType), "REQUEST_WEIGHT") &&
+			strings.EqualFold(string(rateLimit.Interval), "MINUTE") &&
+			rateLimit.IntervalNum == 1 &&
+			rateLimit.Limit > 0 {
+			binanceapiusage.Default().SetWeightLimit("spot", "mainnet", rateLimit.Limit, "exchange_info")
+			break
+		}
 	}
 	// logs.Info(utils.ToJson(res))
 	return res, err
@@ -91,7 +102,7 @@ func GetTickerPrice(symbol string) (res []*binance.SymbolPrice, err error) {
 func BuyLimit(symbol string, quantity float64, price float64) (res *binance.CreateOrderResponse, err error) {
 	res, err = client.NewCreateOrderService().
 		Symbol(symbol).
-        Side(binance.SideTypeBuy).
+		Side(binance.SideTypeBuy).
 		Type(binance.OrderTypeLimit).
 		TimeInForce(binance.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
@@ -107,7 +118,7 @@ func BuyLimit(symbol string, quantity float64, price float64) (res *binance.Crea
 func BuyMarket(symbol string, quantity float64) (res *binance.CreateOrderResponse, err error) {
 	res, err = client.NewCreateOrderService().
 		Symbol(symbol).
-        Side(binance.SideTypeBuy).
+		Side(binance.SideTypeBuy).
 		Type(binance.OrderTypeMarket).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
@@ -121,7 +132,7 @@ func BuyMarket(symbol string, quantity float64) (res *binance.CreateOrderRespons
 func SellLimit(symbol string, quantity float64, price float64) (res *binance.CreateOrderResponse, err error) {
 	res, err = client.NewCreateOrderService().
 		Symbol(symbol).
-        Side(binance.SideTypeSell).
+		Side(binance.SideTypeSell).
 		Type(binance.OrderTypeLimit).
 		TimeInForce(binance.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
@@ -137,7 +148,7 @@ func SellLimit(symbol string, quantity float64, price float64) (res *binance.Cre
 func SellMarket(symbol string, quantity float64) (res *binance.CreateOrderResponse, err error) {
 	res, err = client.NewCreateOrderService().
 		Symbol(symbol).
-        Side(binance.SideTypeSell).
+		Side(binance.SideTypeSell).
 		Type(binance.OrderTypeMarket).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		Do(context.Background())
@@ -154,8 +165,8 @@ func SellMarket(symbol string, quantity float64) (res *binance.CreateOrderRespon
 func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order *binance.CreateOrderResponse, err error) {
 	order, err = client.NewCreateOrderService().
 		Symbol(symbol).
-		Side(binance.SideTypeSell). // 止盈单是卖出
-		Type(binance.OrderTypeTakeProfit). // 类型是止盈
+		Side(binance.SideTypeSell).                             // 止盈单是卖出
+		Type(binance.OrderTypeTakeProfit).                      // 类型是止盈
 		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 当触发stopPrice时，STOP_LOSS和TAKE_PROFIT将执行MARKET订单。
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		// TimeInForce(binance.TimeInForceTypeGTC).
@@ -164,7 +175,7 @@ func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order 
 		logs.Error(err)
 		return nil, err
 	}
-		
+
 	return order, err
 }
 
@@ -174,8 +185,8 @@ func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order 
 func OrderStopLoss(symbol string, quantity float64, stopPrice float64) (order *binance.CreateOrderResponse, err error) {
 	order, err = client.NewCreateOrderService().
 		Symbol(symbol).
-		Side(binance.SideTypeSell). // 止损单是卖出
-		Type(binance.OrderTypeStopLoss). // 类型是止损
+		Side(binance.SideTypeSell).                             // 止损单是卖出
+		Type(binance.OrderTypeStopLoss).                        // 类型是止损
 		StopPrice(strconv.FormatFloat(stopPrice, 'f', -1, 64)). // 当触发stopPrice时，STOP_LOSS和TAKE_PROFIT将执行MARKET订单。
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
 		// TimeInForce(binance.TimeInForceTypeGTC).
@@ -184,13 +195,13 @@ func OrderStopLoss(symbol string, quantity float64, stopPrice float64) (order *b
 		logs.Error(err)
 		return nil, err
 	}
-		
+
 	return order, err
 }
 
 type OrderParams struct {
-	Symbol    string
-	OrderID   int64
+	Symbol  string
+	OrderID int64
 }
 
 type ListOrderParams struct {
@@ -247,6 +258,7 @@ func GetOrder(orderParams OrderParams) (res *binance.Order, err error) {
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
 // @doc https://developers.binance.com/docs/zh-CN/binance-spot-api-docs/web-socket-streams#%E6%8C%89symbol%E7%9A%84%E5%AE%8C%E6%95%B4ticker
 var flagWsSpot = 0
+
 func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 	for {
 		if retryNum > 0 {
@@ -282,10 +294,10 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 						ticker.LowPrice,
 						ticker.HighPrice,
 						ticker.Time,
-						ticker.BaseVolume, // 成交量
+						ticker.BaseVolume,  // 成交量
 						ticker.QuoteVolume, // 成交额
-						ticker.CloseQty, // 最新成交价格上的成交量
-						ticker.Count, // 成交数
+						ticker.CloseQty,    // 最新成交价格上的成交量
+						ticker.Count,       // 成交数
 
 						ticker.Symbol,
 					).Exec()

@@ -10,6 +10,7 @@ import (
 
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 	futuresownership "go_binance_futures/service/futuresownership"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
@@ -77,7 +78,7 @@ func syncStrategyExitPositions(accountPositions []types.FuturesPosition) ([]owne
 }
 
 func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]ownedTradePosition, error) {
-	ctx := context.Background()
+	ctx := binanceapiusage.WithSource(context.Background(), "start_trade")
 	managedOrders, err := sharedOwnership.ActiveOrders(ctx, futuresownership.OwnerAutoStrategy)
 	if err != nil {
 		return nil, err
@@ -206,8 +207,9 @@ func findManagedOrder(clientOrderID string) (models.FuturesManagedOrder, error) 
 	return row, err
 }
 
-func ensureAccountOpenSlotAvailable(symbol string, positionSide futures.PositionSideType) error {
-	positions, err := GetTransformPositions()
+func ensureAccountOpenSlotAvailable(owner, symbol string, positionSide futures.PositionSideType) error {
+	ctx := binanceapiusage.WithSource(context.Background(), featureOwnerAPISource(owner))
+	positions, err := GetTransformPositionsContext(ctx)
 	if err != nil {
 		return fmt.Errorf("verify account positions before managed open: %w", err)
 	}
@@ -217,7 +219,7 @@ func ensureAccountOpenSlotAvailable(symbol string, positionSide futures.Position
 			return fmt.Errorf("%s %s already exists in account; ownership is not safe to merge", strings.ToUpper(symbol), positionSide)
 		}
 	}
-	orders, err := getTransformOpenOrders()
+	orders, err := getTransformOpenOrdersContext(ctx)
 	if err != nil {
 		return fmt.Errorf("verify account open orders before managed open: %w", err)
 	}
@@ -363,14 +365,14 @@ func submitFundingRateOpen(sourceRef, symbol string, quantity float64, side futu
 }
 
 func submitOwnedFeatureOpen(owner, sourceRef, symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType) (*futures.CreateOrderResponse, error) {
-	if err := ensureAccountOpenSlotAvailable(symbol, positionSide); err != nil {
+	if err := ensureAccountOpenSlotAvailable(owner, symbol, positionSide); err != nil {
 		return nil, err
 	}
 	return submitOwnedFeatureOrder(owner, sourceRef, symbol, quantity, price, 0, side, positionSide, orderType, futuresownership.IntentOpen)
 }
 
 func submitManagedStrategyClose(owner, sourceRef, symbol string, quantity float64, positionSide futures.PositionSideType) (*futures.CreateOrderResponse, error) {
-	accountQty, err := currentAccountPositionQty(symbol, positionSide)
+	accountQty, err := currentAccountPositionQty(owner, symbol, positionSide)
 	if err != nil {
 		return nil, err
 	}
@@ -393,8 +395,9 @@ func submitAutoStrategyClose(symbol string, quantity float64, positionSide futur
 	return submitManagedStrategyClose(futuresownership.OwnerAutoStrategy, "auto_strategy:"+strings.ToUpper(strings.TrimSpace(symbol)), symbol, quantity, positionSide)
 }
 
-func currentAccountPositionQty(symbol string, positionSide futures.PositionSideType) (float64, error) {
-	positions, err := binance.GetPosition(binance.PositionParams{Symbol: strings.ToUpper(strings.TrimSpace(symbol))})
+func currentAccountPositionQty(owner, symbol string, positionSide futures.PositionSideType) (float64, error) {
+	ctx := binanceapiusage.WithSource(context.Background(), featureOwnerAPISource(owner))
+	positions, err := binance.GetPositionContext(ctx, binance.PositionParams{Symbol: strings.ToUpper(strings.TrimSpace(symbol))})
 	if err != nil {
 		return 0, fmt.Errorf("verify Binance account position before managed close: %w", err)
 	}
@@ -422,7 +425,8 @@ func ownershipAccountQuantities(accountPositions []types.FuturesPosition, refres
 		}
 		return out, nil
 	}
-	rows, err := binance.GetPosition(binance.PositionParams{})
+	ctx := binanceapiusage.WithSource(context.Background(), "start_trade")
+	rows, err := binance.GetPositionContext(ctx, binance.PositionParams{})
 	if err != nil {
 		return nil, fmt.Errorf("refresh Binance positions for ownership reconcile: %w", err)
 	}
@@ -434,6 +438,23 @@ func ownershipAccountQuantities(accountPositions []types.FuturesPosition, refres
 		out[managedPositionKey(position.Symbol, string(position.PositionSide))] = math.Abs(qty)
 	}
 	return out, nil
+}
+
+func featureOwnerAPISource(owner string) string {
+	switch owner {
+	case futuresownership.OwnerAutoStrategy:
+		return "start_trade"
+	case futuresownership.OwnerNewCoinRush:
+		return "new_coin_rush"
+	case futuresownership.OwnerNoticeAutoOrder:
+		return "notice_auto_order"
+	case futuresownership.OwnerFundingRate:
+		return "funding_rate"
+	case futuresownership.OwnerAgentTrade:
+		return "agent_trade"
+	default:
+		return "managed_trade"
+	}
 }
 
 func submitAutoStrategyOrder(symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType, intent string) (*futures.CreateOrderResponse, error) {

@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"time"
+
 	agentapp "go_binance_futures/agent/app"
+	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/service/systemhealth"
 	"go_binance_futures/utils"
 
@@ -9,6 +12,11 @@ import (
 )
 
 type SystemDashboardController struct{ web.Controller }
+
+func (ctrl *SystemDashboardController) BinanceAPIUsage() {
+	snapshot := binanceapiusage.Default().Snapshot(time.Now())
+	ctrl.Ctx.Resp(map[string]any{"code": 200, "data": snapshot, "msg": "success"})
+}
 
 func (ctrl *SystemDashboardController) Health() {
 	report, err := (systemhealth.Service{}).Report(ctrl.Ctx.Request.Context(), systemhealth.Options{
