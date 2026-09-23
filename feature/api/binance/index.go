@@ -38,12 +38,11 @@ var proxyPool *binanceproxy.Pool
 var pusher = notify.GetNotifyChannel()
 
 const (
-	futuresWsFlushInterval    = time.Second
-	historicalRESTMinInterval = 300 * time.Millisecond
-	futuresWsBatchSize        = 500
-	wsNoDataAlertThreshold    = 3 * time.Minute
-	wsNoDataAlertInterval     = 10 * time.Minute
-	wsNoDataCheckInterval     = 30 * time.Second
+	futuresWsFlushInterval = time.Second
+	futuresWsBatchSize     = 500
+	wsNoDataAlertThreshold = 3 * time.Minute
+	wsNoDataAlertInterval  = 10 * time.Minute
+	wsNoDataCheckInterval  = 30 * time.Second
 )
 
 var wsLatestTickerMap = make(map[string]futures.WsMarketTickerEvent)
@@ -52,9 +51,6 @@ var futuresWsFlushOnce sync.Once
 
 var futuresClient *futures.Client
 var deliveryClient *delivery.Client
-
-var historicalRESTMu sync.Mutex
-var historicalRESTLast time.Time
 
 const (
 	// Binance defaults recvWindow to 5s. Read-only signed requests get a little
@@ -82,6 +78,7 @@ func syncFuturesServerTime(ctx context.Context) (offsetMS, rttMS int64, err erro
 	serverTime, err := futuresClient.NewServerTimeService().Do(ctx)
 	finished := time.Now().UnixMilli()
 	if err != nil {
+		noteFuturesAPIError(err)
 		return 0, finished - started, err
 	}
 
@@ -99,11 +96,15 @@ func doFuturesSigned[T any](ctx context.Context, recvWindow int64, call func(*fu
 	res, err := call(futuresClient, ctx, futures.WithRecvWindow(recvWindow))
 	futuresSignedTimeMu.RUnlock()
 	if err == nil || !isFuturesTimestampError(err) {
+		if err != nil {
+			noteFuturesAPIError(err)
+		}
 		return res, err
 	}
 
 	offsetMS, rttMS, syncErr := syncFuturesServerTime(ctx)
 	if syncErr != nil {
+		noteFuturesAPIError(syncErr)
 		return res, fmt.Errorf("binance futures timestamp resync after %w: %v", err, syncErr)
 	}
 	logs.Warning("binance futures timestamp resynced after -1021: offset_ms=", offsetMS, " rtt_ms=", rttMS)
@@ -111,26 +112,10 @@ func doFuturesSigned[T any](ctx context.Context, recvWindow int64, call func(*fu
 	futuresSignedTimeMu.RLock()
 	res, err = call(futuresClient, ctx, futures.WithRecvWindow(recvWindow))
 	futuresSignedTimeMu.RUnlock()
-	return res, err
-}
-
-func waitHistoricalREST(ctx context.Context) error {
-	historicalRESTMu.Lock()
-	defer historicalRESTMu.Unlock()
-	if !historicalRESTLast.IsZero() {
-		wait := historicalRESTMinInterval - time.Since(historicalRESTLast)
-		if wait > 0 {
-			timer := time.NewTimer(wait)
-			defer timer.Stop()
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-timer.C:
-			}
-		}
+	if err != nil {
+		noteFuturesAPIError(err)
 	}
-	historicalRESTLast = time.Now()
-	return nil
+	return res, err
 }
 
 func init() {
@@ -256,6 +241,7 @@ func GetDepth(symbol string, limits ...int) (res *futures.DepthResponse, err err
 	}
 	res, err = futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(context.Background())
 	if err != nil {
+		noteFuturesAPIError(err)
 		logs.Error(err)
 		return nil, err
 	}
@@ -266,6 +252,7 @@ func GetDepth(symbol string, limits ...int) (res *futures.DepthResponse, err err
 func GetTickerPrice(symbol string) (res []*futures.SymbolPrice, err error) {
 	res, err = futuresClient.NewListPricesService().Symbol(symbol).Do(context.Background())
 	if err != nil {
+		noteFuturesAPIError(err)
 		logs.Error(err)
 		return nil, err
 	}
@@ -281,6 +268,7 @@ func GetDepthAvgPrice(symbol string, limits ...int) (buyPrice float64, sellPrice
 	}
 	res, err := futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(context.Background())
 	if err != nil {
+		noteFuturesAPIError(err)
 		logs.Error(err)
 		return 0.0, 0.0, err
 	}
@@ -316,15 +304,7 @@ func avgPrice(data *futures.DepthResponse) (buyPrice float64, sellPrice float64)
 // @param limit 返回的K线数据条数
 // @returns /doc/kine.js
 func GetKlineData(symbol string, interval string, limit int) (klines []*futures.Kline, err error) {
-	klines, err = futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).Limit(limit).Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	sort.Slice(klines, func(i, j int) bool {
-		return klines[i].OpenTime > klines[j].OpenTime // 按照时间降序()
-	})
-	// logs.Info(utils.ToJson(klines))
-	return klines, err
+	return getLiveKlineData(context.Background(), symbol, interval, limit)
 }
 
 // GetEarliestHistoricalKline returns the first available futures K-line for a symbol/interval.
@@ -338,11 +318,12 @@ func GetEarliestHistoricalKline(ctx context.Context, symbol, interval string) (*
 	if symbol == "" || interval == "" {
 		return nil, fmt.Errorf("earliest historical K-line requires symbol and interval")
 	}
-	if err := waitHistoricalREST(ctx); err != nil {
+	if err := waitFuturesMarketDataREST(ctx, futuresKlineRequestWeight(1)); err != nil {
 		return nil, err
 	}
 	rows, err := futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).StartTime(1).Limit(1).Do(ctx)
 	if err != nil {
+		noteFuturesAPIError(err)
 		return nil, fmt.Errorf("get earliest historical K-line %s %s: %w", symbol, interval, err)
 	}
 	if len(rows) == 0 || rows[0] == nil {
@@ -430,7 +411,7 @@ func GetHistoricalKlinesWithProgress(ctx context.Context, symbol, interval strin
 	seen := map[int64]bool{}
 	result := make([]*futures.Kline, 0)
 	for cursor <= endTime {
-		if err := waitHistoricalREST(ctx); err != nil {
+		if err := waitFuturesMarketDataREST(ctx, futuresKlineRequestWeight(historicalKlinePageLimit)); err != nil {
 			return nil, err
 		}
 		pageEnd := historicalKlinePageEnd(cursor, endTime, interval)
@@ -439,6 +420,7 @@ func GetHistoricalKlinesWithProgress(ctx context.Context, symbol, interval strin
 		}
 		page, err := futuresClient.NewKlinesService().Symbol(symbol).Interval(interval).StartTime(cursor).EndTime(pageEnd).Limit(historicalKlinePageLimit).Do(ctx)
 		if err != nil {
+			noteFuturesAPIError(err)
 			return nil, fmt.Errorf("get historical K-lines %s %s: %w", symbol, interval, err)
 		}
 		if len(page) == 0 {
@@ -653,6 +635,7 @@ func GetOpenOrder(symbols ...string) (res []*futures.Order, err error) {
 func GetExchangeInfo() (res *futures.ExchangeInfo, err error) {
 	res, err = futuresClient.NewExchangeInfoService().Do(context.Background())
 	if err != nil {
+		noteFuturesAPIError(err)
 		return nil, err
 	}
 	// logs.Info(utils.ToJson(res))
@@ -675,19 +658,34 @@ func GetFundingRate(params FundingRateParams) (res []*futures.PremiumIndex, err 
 		service = service.Symbol(params.Symbol)
 	}
 	res, err = service.Do(context.Background())
+	if err != nil {
+		noteFuturesAPIError(err)
+	}
 	return res, err
 }
 
-func GetOpenInterest(symbol string) (*futures.OpenInterest, error) {
-	return futuresClient.NewGetOpenInterestService().Symbol(symbol).Do(context.Background())
+func GetOpenInterest(symbol string) (res *futures.OpenInterest, err error) {
+	res, err = futuresClient.NewGetOpenInterestService().Symbol(symbol).Do(context.Background())
+	if err != nil {
+		noteFuturesAPIError(err)
+	}
+	return res, err
 }
 
-func GetOpenInterestStatistics(symbol, period string, limit int) ([]*futures.OpenInterestStatistic, error) {
-	return futuresClient.NewOpenInterestStatisticsService().Symbol(symbol).Period(period).Limit(limit).Do(context.Background())
+func GetOpenInterestStatistics(symbol, period string, limit int) (res []*futures.OpenInterestStatistic, err error) {
+	res, err = futuresClient.NewOpenInterestStatisticsService().Symbol(symbol).Period(period).Limit(limit).Do(context.Background())
+	if err != nil {
+		noteFuturesAPIError(err)
+	}
+	return res, err
 }
 
-func GetTakerLongShortRatio(symbol, period string, limit uint32) ([]*futures.TakerLongShortRatio, error) {
-	return futuresClient.NewTakerLongShortRatioService().Symbol(symbol).Period(period).Limit(limit).Do(context.Background())
+func GetTakerLongShortRatio(symbol, period string, limit uint32) (res []*futures.TakerLongShortRatio, err error) {
+	res, err = futuresClient.NewTakerLongShortRatioService().Symbol(symbol).Period(period).Limit(limit).Do(context.Background())
+	if err != nil {
+		noteFuturesAPIError(err)
+	}
+	return res, err
 }
 
 // 资金费率历史记录(整点时刻4或8h的历史记录) 限制 500/5min/IP
@@ -709,6 +707,9 @@ func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate
 		service = service.Limit(params.Limit)
 	}
 	res, err = service.Do(context.Background())
+	if err != nil {
+		noteFuturesAPIError(err)
+	}
 	return res, err
 }
 
@@ -725,11 +726,12 @@ func GetHistoricalFundingRates(ctx context.Context, symbol string, startTime, en
 	seen := map[int64]bool{}
 	result := make([]*futures.FundingRate, 0)
 	for cursor <= endTime {
-		if err := waitHistoricalREST(ctx); err != nil {
+		if err := waitFuturesMarketDataREST(ctx, 1); err != nil {
 			return nil, err
 		}
 		page, err := futuresClient.NewFundingRateService().Symbol(symbol).StartTime(cursor).EndTime(endTime).Limit(1000).Do(ctx)
 		if err != nil {
+			noteFuturesAPIError(err)
 			return nil, fmt.Errorf("get historical funding %s: %w", symbol, err)
 		}
 		if len(page) == 0 {
@@ -1080,11 +1082,19 @@ func sendFuturesWsNoDataAlert(noDataMinutes float64) {
 
 // websocket user data 使用
 func GetListenKey() (listenKey string, err error) {
-	return futuresClient.NewStartUserStreamService().Do(context.Background())
+	listenKey, err = futuresClient.NewStartUserStreamService().Do(context.Background())
+	if err != nil {
+		noteFuturesAPIError(err)
+	}
+	return listenKey, err
 }
 
 func UpdateListenKey(listenKey string) (err error) {
-	return futuresClient.NewKeepaliveUserStreamService().ListenKey(listenKey).Do(context.Background())
+	err = futuresClient.NewKeepaliveUserStreamService().ListenKey(listenKey).Do(context.Background())
+	if err != nil {
+		noteFuturesAPIError(err)
+	}
+	return err
 }
 
 // @see https://binance-docs.github.io/apidocs/futures/cn/#listenkey-user_stream
