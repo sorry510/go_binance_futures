@@ -6,6 +6,7 @@ import (
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/scanner"
 	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
@@ -24,7 +25,6 @@ import (
 
 var coinNoticeLastTimeMap = make(map[string]int64) // limit 通知一次
 var FuturesTestNotice = 0
-var offsetId = 0
 var testStrategyOpenMu sync.Mutex
 
 func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
@@ -56,23 +56,15 @@ func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 	// 	return
 	// }
 
-	logs.Info("offsetId: ", offsetId)
-	var coins []*models.Symbols
-	limit := 5                               // 不设置太大，如果开仓太多，加上这里会导致接口请求超过限制
-	coins, err = getSymbols(offsetId, limit) // 按照顺序 limit 个币
+	allCoins, err := GetAllSymbols()
 	if err != nil {
-		logs.Error("NoticeAllSymbolByStrategy:", err.Error())
+		logs.Error("NoticeAllSymbolByStrategy GetAllSymbols:", err)
 		return
 	}
-
-	if len(coins) == 0 {
-		offsetId = 0
-		coins, _ = getSymbols(offsetId, limit)
-	}
-	if len(coins) > 0 {
-		offsetId = int(coins[len(coins)-1].ID)
-	} else {
-		offsetId += limit // 避免无限处于循环
+	coins := selectConfiguredCoins(systemConfig, allCoins, scanner.SmartLocalV2ModeTest)
+	if coins == nil {
+		logs.Error("NoticeAllSymbolByStrategy SelectCoins returned nil")
+		return
 	}
 
 	for _, coin := range coins {
@@ -348,17 +340,6 @@ func CheckTestResults(systemConfig *models.Config) {
 			autoTestToTrade(systemConfig, profitUsdt >= 0)
 		}
 	}
-}
-
-func getSymbols(offsetId int, limit int) (coins []*models.Symbols, err error) {
-	_, err = orm.NewOrm().
-		QueryTable("symbols").
-		Filter("enable", 1).
-		Filter("ID__gt", offsetId).
-		OrderBy("ID").
-		Limit(limit).
-		All(&coins) // 按照顺序 10个币
-	return coins, err
 }
 
 // 生成测试的开仓数据

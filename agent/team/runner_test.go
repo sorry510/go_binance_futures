@@ -25,11 +25,12 @@ func (fixture *fixtureSharedContext) Execute(context.Context, string, string, in
 }
 
 type fixtureManager struct {
-	store    *task.MemoryStore
-	mu       sync.Mutex
-	sequence int
-	failRole string
-	started  []task.Linkage
+	store        *task.MemoryStore
+	mu           sync.Mutex
+	sequence     int
+	failRole     string
+	started      []task.Linkage
+	modelConfigs []int64
 }
 
 func (manager *fixtureManager) StartLinked(req agentruntime.Request, linkage task.Linkage) (*task.Task, error) {
@@ -37,6 +38,7 @@ func (manager *fixtureManager) StartLinked(req agentruntime.Request, linkage tas
 	manager.sequence++
 	id := fmt.Sprintf("child_%d", manager.sequence)
 	manager.started = append(manager.started, linkage)
+	manager.modelConfigs = append(manager.modelConfigs, req.ModelConfigID)
 	manager.mu.Unlock()
 	now := time.Now().UTC()
 	item := &task.Task{ID: id, Skill: req.Skill, ParentTaskID: linkage.ParentTaskID, TeamRunID: linkage.TeamRunID, TeamName: linkage.TeamName, TeamRole: linkage.TeamRole, Status: task.StatusQueued, Stage: "queued", Input: req.Input, CreatedAt: now, UpdatedAt: now}
@@ -311,13 +313,24 @@ func TestTeamStartWithOptionsPersistsConversationAndCallsCompletionHook(t *testi
 	if err != nil {
 		t.Fatal(err)
 	}
-	started, err := runner.StartWithOptions(Input{Symbol: "BTCUSDT"}, StartOptions{ConversationID: "conv-team"})
+	started, err := runner.StartWithOptions(Input{Symbol: "BTCUSDT"}, StartOptions{ConversationID: "conv-team", ModelConfigID: 77})
 	if err != nil {
 		t.Fatal(err)
 	}
 	finished := waitTeam(t, store, started.ID)
 	if finished.ConversationID != "conv-team" {
 		t.Fatalf("conversation_id=%q", finished.ConversationID)
+	}
+	manager.mu.Lock()
+	models := append([]int64(nil), manager.modelConfigs...)
+	manager.mu.Unlock()
+	if len(models) != 4 {
+		t.Fatalf("team child model configs = %+v", models)
+	}
+	for _, modelConfigID := range models {
+		if modelConfigID != 77 {
+			t.Fatalf("team child model_config_id=%d want=77", modelConfigID)
+		}
 	}
 	select {
 	case item := <-completed:

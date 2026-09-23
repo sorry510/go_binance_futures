@@ -139,6 +139,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.AgentBacktestEquityChunk))
 	orm.RegisterModel(new(models.AgentBacktestEquityPreview))
 	orm.RegisterModel(new(models.AgentConversation))
+	orm.RegisterModel(new(models.AgentConversationSkill))
 	orm.RegisterModel(new(models.AgentConversationMessage))
 	orm.RegisterModel(new(models.AgentMemory))
 	orm.RegisterModel(new(models.AgentWorkflowRun))

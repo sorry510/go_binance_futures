@@ -6,8 +6,8 @@
 
 - 一个 Conversation 可以添加多个 Skill。
 - 支持随时增删 Conversation 中的 Skill。
-- 支持 `Auto` 模式从已挂载 Skill 中选择当前消息需要的 Skill，也支持用户显式指定。
-- 一条消息可以在受控范围内顺序使用多个相关 Skill，但不把所有 Skill 无条件并行执行。
+- 默认始终使用 `Auto` 模式，从当前 Conversation 已加入的 Skill 集合中选择当前消息的 Primary Skill。
+- 一个 Conversation 可以通过 `/` 持续加入多个 Skill；加入新 Skill 不覆盖已有 Skill。单条消息仍只执行一个 Primary Skill，需要多 Agent 协作时继续复用现有 Team Runtime。
 - 支持 Conversation 内切换模型。
 - Web 支持删除聊天。
 
@@ -31,8 +31,8 @@ Conversation
 
 V4-1 提供两种使用方式：
 
-1. **Auto**：默认模式。Chat Router 只读取已挂载 Skill 的轻量 metadata（name / description / chat capability），根据当前用户消息决定使用 `general_chat`、一个 Skill，或在确有必要时顺序调用少量相关 Skill。
-2. **Explicit**：用户在输入框使用下拉或 `@skill` 明确指定一个已挂载 Skill，本轮直接使用该 Skill，不再自动路由到其它 Skill。
+1. **Auto**：Web 默认且常态模式。Chat Router 只在已加入、enabled、chat-enabled 的 Skill 中确定一个 Primary Skill；无法可靠匹配时回退 `general_chat`。
+2. **Add Skill**：用户输入 `/` 从全部 chat-enabled Skill 中选择，含义是把该 Skill 加入当前 Conversation 的 Skill 集合；再次选择其它 Skill 会继续累积，不覆盖已有 Skill。后端 `explicit` 请求模式仅为 API/兼容用途保留，不作为 Web 常规交互。
 
 约束：
 
@@ -40,8 +40,7 @@ V4-1 提供两种使用方式：
 - Auto Router 只能选择该 Conversation 已挂载、enabled 且 chat-enabled 的 Skill。
 - Portable Skill 继续使用现有 Portable Runtime。
 - Native Skill 保持自己已有的 Validator / Tool / Output Contract。
-- 多 Skill 顺序使用时，每个 Skill 独立执行并保留 Task/Trace，不把多个互相冲突的 System Prompt 强行合并成一个 Prompt。
-- 第一版限制单条消息最多触发少量 Skill（建议 2～3 个），避免 Tool/Token 无界增长。
+- 第一版不把多个 Skill 的 System Prompt 合并，也不在单条消息内自动串联多个 Skill，避免 Tool/Token 无界增长。
 - 涉及真实交易 Mutation 的 Skill 不允许仅凭 Auto Router 获得额外权限，仍受原 Risk/Permission 边界约束。
 
 如果需求属于已有 Team Runtime 的多 Agent 协作场景，继续复用 V3 Team Runtime；V4-1 不重新实现 Multi-Agent。
@@ -72,18 +71,18 @@ agent_conversation_skills
 Conversation 增加可选：
 
 ```text
-model_preference
+model_config_id
 ```
 
 更推荐保存 Model Gateway 中稳定的 model config ID，而不是只保存自由字符串。
 
 UI 提供模型下拉：
 
-- 只显示 enabled model。
-- 切换后仅影响后续 Task。
-- 历史消息保持原模型事实。
-- Task / Observation 继续记录实际 provider/model。
-- Model 不健康时仍可按现有 Gateway fallback policy 处理，并在 Task 中显示实际最终模型。
+- 显示 enabled model 和 Router Candidate model。
+- `Auto · 模型路由`（ID=0）继续使用现有 Model Gateway 与 fallback policy。
+- 用户显式选择某个 model config 时严格使用该配置，不静默切换到其它模型；失败会明确报错。
+- 切换后仅影响后续 Task，历史消息保持原模型事实。
+- Task / Observation 继续记录实际 provider/model/model_config_id。
 
 允许发送消息时临时 override；如果用户选择“设为当前对话模型”，再更新 Conversation preference。
 
@@ -106,30 +105,25 @@ UI 提供模型下拉：
 
 ## 6. UI
 
-Chat 顶部：
+V4-1 最终采用接近 ChatGPT 的聊天交互，不在页面顶部或输入区常驻暴露 Skill 管理控件。
 
 ```text
-[Model ▼]   [Skills: general_chat, symbol_analysis, xxx +]
+┌──────────────────────────────────────────────┐
+│ 输入消息……                                  │
+│                                              │
+│ 输入 / 选择 Skill     [合约]   [Model ▼] [发送] │
+└──────────────────────────────────────────────┘
 ```
 
-输入框附近：
-
-```text
-Skill: [Auto ▼]
-       ├─ Auto
-       ├─ general_chat
-       ├─ symbol_analysis
-       └─ my-portable-skill
-```
-
-也支持 `@skill-name` 快速显式指定。
-
-Skill 管理弹层：
-
-- 搜索 chat-capable Skill。
-- 添加。
-- 移除。
-- 禁用/删除的 Skill 明确显示 unavailable。
+- 不显式选择 Skill 时天然就是 Auto，无需 Auto/Explicit 下拉。
+- 输入 `/` 才显示 Skill 菜单。
+- `/` 菜单展示全部 enabled、chat-enabled Skill，而不是只展示已挂载 Skill。
+- 选择 Skill 的语义是**加入当前 Conversation 的 Skill 集合**，不会覆盖之前已经加入的 Skill。
+- 已加入的业务 Skill 以多个可关闭标签同时显示；关闭标签才会从 Conversation 移除。
+- 消息发送始终默认走 Auto，由 Router 在当前 Conversation 已加入的多个 Skill 中选择 Primary Skill；Web 不维护单值 `selectedSkill`。
+- 合约选择会作为 Auto Router 的显式路由信号；如果最终回退 `general_chat`，所选合约仍会作为强制上下文传入，禁止被历史币种替换。
+- Model 选择放在 composer 下方右侧，不占用 Chat 顶部。
+- 禁用/删除的 Skill 不进入可选菜单。
 
 ## 7. API
 
@@ -166,8 +160,8 @@ PUT    /agents/chat/conversations/:id/model
 
 - 同一 Chat 可挂载 3+ Skill。
 - Auto 只能从已挂载且 chat-enabled 的 Skill 中选择。
-- Explicit 可以稳定指定某个已挂载 Skill。
-- Auto 在确有需要时可顺序使用 2 个以上 Skill，并为每次执行保留独立 Task/Trace。
+- `/` 连续加入多个 Skill 后，所有 Skill 都保留在当前 Conversation，Web 发送仍保持 Auto。
+- 单条消息只产生一个 Primary Skill Task；需要多 Agent 协作时继续复用已有 Team Runtime。
 - 删除已挂载 Skill 后不能继续通过 Auto 或旧请求调用。
 - Skill A / Skill B 在同一 Conversation 中共享聊天历史，但仍使用各自执行契约。
 - Model A → Model B 切换只影响新消息。
@@ -181,3 +175,9 @@ PUT    /agents/chat/conversations/:id/model
 - 不自动让 LLM 决定交易类 Skill 权限。
 - 不新增 Model Provider。
 - 不修改 Tool Permission 安全模型。
+
+## 10. 实现结果
+
+**V4-1 已完成（2026-09-19）。**
+
+实现、API、Schema、安全边界、自动测试与人工测试步骤见 [v4-1-implementation-report.md](./v4-1-implementation-report.md)。

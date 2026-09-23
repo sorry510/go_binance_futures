@@ -1,16 +1,30 @@
 package models
 
 type AgentConversation struct {
-	ID        string `orm:"column(id);pk;size(64)" json:"id"`
-	Skill     string `orm:"column(skill);size(64);index" json:"skill"`
-	Title     string `orm:"column(title);size(255);null" json:"title"`
-	Status    string `orm:"column(status);size(32);index" json:"status"`
-	CreatedAt int64  `orm:"column(created_at);index" json:"created_at"`
-	UpdatedAt int64  `orm:"column(updated_at);index" json:"updated_at"`
-	ClosedAt  int64  `orm:"column(closed_at);index" json:"closed_at"`
+	ID            string `orm:"column(id);pk;size(64)" json:"id"`
+	Skill         string `orm:"column(skill);size(64);index" json:"skill"`
+	Title         string `orm:"column(title);size(255);null" json:"title"`
+	ModelConfigID int64  `orm:"column(model_config_id);default(0);index" json:"model_config_id"`
+	Status        string `orm:"column(status);size(32);index" json:"status"`
+	CreatedAt     int64  `orm:"column(created_at);index" json:"created_at"`
+	UpdatedAt     int64  `orm:"column(updated_at);index" json:"updated_at"`
+	ClosedAt      int64  `orm:"column(closed_at);index" json:"closed_at"`
 }
 
 func (*AgentConversation) TableName() string { return "agent_conversations" }
+
+type AgentConversationSkill struct {
+	ID             int64  `orm:"column(id);auto" json:"id"`
+	ConversationID string `orm:"column(conversation_id);size(64);index" json:"conversation_id"`
+	SkillName      string `orm:"column(skill_name);size(96);index" json:"skill_name"`
+	Sort           int    `orm:"column(sort);default(0);index" json:"sort"`
+	CreatedAt      int64  `orm:"column(created_at);index" json:"created_at"`
+}
+
+func (*AgentConversationSkill) TableName() string { return "agent_conversation_skills" }
+func (*AgentConversationSkill) TableUnique() [][]string {
+	return [][]string{{"ConversationID", "SkillName"}}
+}
 
 type AgentConversationMessage struct {
 	ID             int64  `orm:"column(id);auto" json:"id"`

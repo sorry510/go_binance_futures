@@ -9,44 +9,48 @@ import (
 func init() {
 	web.Router("/login", &controllers.LoginController{}, "post:Post") // 登录
 
-	web.Router("/service/config", &controllers.IndexController{}, "get:GetServiceConfig;put:EditServiceConfig")                          // 服务配置信息
-	web.Router("/test-pusher", &controllers.IndexController{}, "post:TestPusher")                                                        // 测试推送
-	web.Router("/update-market-condition", &controllers.IndexController{}, "post:UpdateMarketCondition")                                 // 手动触发更新市场状态
-	web.Router("/update-market-condition/:taskId", &controllers.IndexController{}, "get:GetMarketConditionUpdateTask")                   // 查询市场状态更新进度
-	web.Router("/agents/chat/conversations", &controllers.AgentChatController{}, "get:ListConversations;post:CreateConversation")        // Chat 对话列表/新建
-	web.Router("/agents/chat/conversations/:id", &controllers.AgentChatController{}, "put:UpdateConversation;delete:DeleteConversation") // Chat 对话标题更新/删除
-	web.Router("/agents/chat/conversations/:id/messages", &controllers.AgentChatController{}, "get:Messages;post:SendMessage")           // Chat 消息/发送
-	web.Router("/agents/chat/skills", &controllers.AgentChatController{}, "get:Skills")                                                  // Chat-capable Skill 列表
-	web.Router("/agents/tasks", &controllers.AgentController{}, "get:ListTasks;post:StartTask")                                          // 创建/查询统一 Agent 任务
-	web.Router("/agents/workflows", &controllers.AgentWorkflowController{}, "get:List;post:Start")                                       // V2-11 业务 Workflow
-	web.Router("/agents/workflows/:id", &controllers.AgentWorkflowController{}, "get:Get")                                               // Workflow 详情
-	web.Router("/agents/trade/ownership", &controllers.AgentTradeController{}, "get:Ownership")                                          // V3-5 合约 ownership 视图
-	web.Router("/agents/trade/ownership/reconcile", &controllers.AgentTradeController{}, "post:ReconcileOwnership")                      // V3-5 手动 ownership 对账
-	web.Router("/agents/outcomes/backtest", &controllers.AgentOutcomeController{}, "get:Backtest")                                       // V3-7 交易复盘：历史回测
-	web.Router("/agents/outcomes/paper", &controllers.AgentOutcomeController{}, "get:Paper")                                             // V3-7 交易复盘：模拟盘
-	web.Router("/agents/outcomes/live", &controllers.AgentOutcomeController{}, "get:Live")                                               // V3-7 交易复盘：真实受控交易
-	web.Router("/agents/opportunities", &controllers.AgentOpportunityController{}, "get:List")                                           // V3-6 Opportunity 列表
-	web.Router("/agents/opportunities/:opportunityId", &controllers.AgentOpportunityController{}, "get:Get")                             // V3-6 Opportunity 详情
-	web.Router("/agents/opportunities/:opportunityId/review", &controllers.AgentOpportunityController{}, "post:Review")                  // V3-6 标记已查看
-	web.Router("/agents/opportunities/:opportunityId/proposal", &controllers.AgentOpportunityController{}, "post:CreateProposal")        // V3-6 创建现有受控交易 Proposal
-	web.Router("/agents/trade/proposals", &controllers.AgentTradeController{}, "get:List;post:Create")                                   // V2-12 受控交易 Proposal
-	web.Router("/agents/trade/proposals/:proposalId", &controllers.AgentTradeController{}, "get:Get")                                    // V2-12 Proposal 详情/审计
-	web.Router("/agents/trade/proposals/:proposalId/risk", &controllers.AgentTradeController{}, "post:Risk")                             // V2-12 重新执行确定性 Risk
-	web.Router("/agents/trade/proposals/:proposalId/approve", &controllers.AgentTradeController{}, "post:Approve")                       // V2-12 人工批准
-	web.Router("/agents/trade/proposals/:proposalId/reject", &controllers.AgentTradeController{}, "post:Reject")                         // V2-12 人工拒绝
-	web.Router("/agents/trade/proposals/:proposalId/execute", &controllers.AgentTradeController{}, "post:Execute")                       // V2-12 受控执行
-	web.Router("/agents/trade/proposals/:proposalId/reconcile", &controllers.AgentTradeController{}, "post:Reconcile")                   // V2-12 不确定订单对账
-	web.Router("/agents/trade/proposals/:proposalId/close", &controllers.AgentTradeController{}, "post:Close")                           // V3-5 关闭 agent_trade managed position
-	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask")                                                   // 查询统一 Agent 任务
-	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                                        // 取消运行中的 Agent 任务
-	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                                        // 从安全 Checkpoint 恢复 Agent 任务
-	web.Router("/agents/memories", &controllers.AgentMemoryController{}, "get:List;post:Create")                                         // 长期 Memory 列表/新增
-	web.Router("/agents/memories/:id", &controllers.AgentMemoryController{}, "put:Update;delete:Delete")                                 // 长期 Memory 更新/删除
-	web.Router("/agents/memories/:id/disable", &controllers.AgentMemoryController{}, "post:Disable")                                     // 禁用 Memory
-	web.Router("/agents/memories/:id/enable", &controllers.AgentMemoryController{}, "post:Enable")                                       // 启用 Memory
-	web.Router("/agents/memories/:id/approve", &controllers.AgentMemoryController{}, "post:Approve")                                     // 审批 candidate Memory
-	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory")                        // 查询单币分析历史
-	web.Router("/agents/market-intelligence", &controllers.AgentMarketIntelligenceController{}, "get:Get")                               // V3-2 unified Market Intelligence query/replay
+	web.Router("/service/config", &controllers.IndexController{}, "get:GetServiceConfig;put:EditServiceConfig")                                 // 服务配置信息
+	web.Router("/futures/selectors/smart-local-v2", &controllers.LocalSelectorController{}, "get:SmartLocalV2")                                 // V4-3 本地确定性选币预览
+	web.Router("/test-pusher", &controllers.IndexController{}, "post:TestPusher")                                                               // 测试推送
+	web.Router("/update-market-condition", &controllers.IndexController{}, "post:UpdateMarketCondition")                                        // 手动触发更新市场状态
+	web.Router("/update-market-condition/:taskId", &controllers.IndexController{}, "get:GetMarketConditionUpdateTask")                          // 查询市场状态更新进度
+	web.Router("/agents/chat/conversations", &controllers.AgentChatController{}, "get:ListConversations;post:CreateConversation")               // Chat 对话列表/新建
+	web.Router("/agents/chat/conversations/:id", &controllers.AgentChatController{}, "put:UpdateConversation;delete:DeleteConversation")        // Chat 对话标题更新/删除
+	web.Router("/agents/chat/conversations/:id/messages", &controllers.AgentChatController{}, "get:Messages;post:SendMessage")                  // Chat 消息/发送
+	web.Router("/agents/chat/conversations/:id/skills", &controllers.AgentChatController{}, "get:ConversationSkills;post:AddConversationSkill") // Chat 已挂载 Skill
+	web.Router("/agents/chat/conversations/:id/skills/:skillName", &controllers.AgentChatController{}, "delete:RemoveConversationSkill")        // Chat 移除 Skill
+	web.Router("/agents/chat/conversations/:id/model", &controllers.AgentChatController{}, "put:UpdateConversationModel")                       // Chat 模型偏好
+	web.Router("/agents/chat/skills", &controllers.AgentChatController{}, "get:Skills")                                                         // Chat-capable Skill 列表
+	web.Router("/agents/tasks", &controllers.AgentController{}, "get:ListTasks;post:StartTask")                                                 // 创建/查询统一 Agent 任务
+	web.Router("/agents/workflows", &controllers.AgentWorkflowController{}, "get:List;post:Start")                                              // V2-11 业务 Workflow
+	web.Router("/agents/workflows/:id", &controllers.AgentWorkflowController{}, "get:Get")                                                      // Workflow 详情
+	web.Router("/agents/trade/ownership", &controllers.AgentTradeController{}, "get:Ownership")                                                 // V3-5 合约 ownership 视图
+	web.Router("/agents/trade/ownership/reconcile", &controllers.AgentTradeController{}, "post:ReconcileOwnership")                             // V3-5 手动 ownership 对账
+	web.Router("/agents/outcomes/backtest", &controllers.AgentOutcomeController{}, "get:Backtest")                                              // V3-7 交易复盘：历史回测
+	web.Router("/agents/outcomes/paper", &controllers.AgentOutcomeController{}, "get:Paper")                                                    // V3-7 交易复盘：模拟盘
+	web.Router("/agents/outcomes/live", &controllers.AgentOutcomeController{}, "get:Live")                                                      // V3-7 交易复盘：真实受控交易
+	web.Router("/agents/opportunities", &controllers.AgentOpportunityController{}, "get:List")                                                  // V3-6 Opportunity 列表
+	web.Router("/agents/opportunities/:opportunityId", &controllers.AgentOpportunityController{}, "get:Get")                                    // V3-6 Opportunity 详情
+	web.Router("/agents/opportunities/:opportunityId/review", &controllers.AgentOpportunityController{}, "post:Review")                         // V3-6 标记已查看
+	web.Router("/agents/opportunities/:opportunityId/proposal", &controllers.AgentOpportunityController{}, "post:CreateProposal")               // V3-6 创建现有受控交易 Proposal
+	web.Router("/agents/trade/proposals", &controllers.AgentTradeController{}, "get:List;post:Create")                                          // V2-12 受控交易 Proposal
+	web.Router("/agents/trade/proposals/:proposalId", &controllers.AgentTradeController{}, "get:Get")                                           // V2-12 Proposal 详情/审计
+	web.Router("/agents/trade/proposals/:proposalId/risk", &controllers.AgentTradeController{}, "post:Risk")                                    // V2-12 重新执行确定性 Risk
+	web.Router("/agents/trade/proposals/:proposalId/approve", &controllers.AgentTradeController{}, "post:Approve")                              // V2-12 人工批准
+	web.Router("/agents/trade/proposals/:proposalId/reject", &controllers.AgentTradeController{}, "post:Reject")                                // V2-12 人工拒绝
+	web.Router("/agents/trade/proposals/:proposalId/execute", &controllers.AgentTradeController{}, "post:Execute")                              // V2-12 受控执行
+	web.Router("/agents/trade/proposals/:proposalId/reconcile", &controllers.AgentTradeController{}, "post:Reconcile")                          // V2-12 不确定订单对账
+	web.Router("/agents/trade/proposals/:proposalId/close", &controllers.AgentTradeController{}, "post:Close")                                  // V3-5 关闭 agent_trade managed position
+	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask")                                                          // 查询统一 Agent 任务
+	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                                               // 取消运行中的 Agent 任务
+	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                                               // 从安全 Checkpoint 恢复 Agent 任务
+	web.Router("/agents/memories", &controllers.AgentMemoryController{}, "get:List;post:Create")                                                // 长期 Memory 列表/新增
+	web.Router("/agents/memories/:id", &controllers.AgentMemoryController{}, "put:Update;delete:Delete")                                        // 长期 Memory 更新/删除
+	web.Router("/agents/memories/:id/disable", &controllers.AgentMemoryController{}, "post:Disable")                                            // 禁用 Memory
+	web.Router("/agents/memories/:id/enable", &controllers.AgentMemoryController{}, "post:Enable")                                              // 启用 Memory
+	web.Router("/agents/memories/:id/approve", &controllers.AgentMemoryController{}, "post:Approve")                                            // 审批 candidate Memory
+	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory")                               // 查询单币分析历史
+	web.Router("/agents/market-intelligence", &controllers.AgentMarketIntelligenceController{}, "get:Get")                                      // V3-2 unified Market Intelligence query/replay
 	web.Router("/agents/market-intelligence/events", &controllers.AgentMarketIntelligenceController{}, "post:IngestEvents")
 	web.Router("/agents/historical-market/import", &controllers.AgentHistoricalMarketController{}, "post:Import")
 	web.Router("/agents/backtests/prefetch", &controllers.AgentBacktestController{}, "post:Prefetch")
@@ -66,40 +70,46 @@ func init() {
 	web.Router("/agents/observability/summary", &controllers.AgentObservabilityController{}, "get:Summary") // V2-10 长期运营指标
 	web.Router("/agents/observability/traces", &controllers.AgentObservabilityController{}, "get:Traces")   // V2-10 持久化节点 Trace
 	web.Router("/agents/observability/changes", &controllers.AgentObservabilityController{}, "get:Changes")
-	web.Router("/system/health", &controllers.SystemDashboardController{}, "get:Health")                                      // V3-8 系统看板只读健康摘要
-	web.Router("/agents/skills/implementations", &controllers.AgentSkillController{}, "get:GetImplementations")               // 可用 Skill implementation
-	web.Router("/agents/skills", &controllers.AgentSkillController{}, "get:Get;post:Post")                                    // Agent Skill 配置
-	web.Router("/agents/skills/:id", &controllers.AgentSkillController{}, "put:Put;delete:Delete")                            // Agent Skill 更新/删除
-	web.Router("/agents/skills/import", &controllers.AgentPortableSkillController{}, "post:Import")                           // 导入标准 Agent Skill ZIP/SKILL.md
-	web.Router("/agents/skills/import-directory", &controllers.AgentPortableSkillController{}, "post:ImportDirectory")        // 从受限服务器目录导入标准 Agent Skill
-	web.Router("/agents/skills/:id/versions", &controllers.AgentPortableSkillController{}, "get:Versions")                    // Portable Skill 版本历史
-	web.Router("/agents/skills/versions/:versionId", &controllers.AgentPortableSkillController{}, "get:VersionDetail")        // Portable Skill revision 详情
-	web.Router("/agents/skills/versions/:versionId/file", &controllers.AgentPortableSkillController{}, "get:ReadVersionFile") // 浏览 revision 文本文件
-	web.Router("/agents/skills/versions/:versionId/activate", &controllers.AgentPortableSkillController{}, "post:Activate")   // 激活/回滚 Portable Skill revision
-	web.Router("/agents/skills/permissions/:id", &controllers.AgentPortableSkillController{}, "put:UpdatePermission")         // Portable Skill requested/granted Tool 审批
-	web.Router("/agents/mcp/servers", &controllers.AgentMCPController{}, "get:ListServers;post:CreateServer")                 // 第三方 MCP Server 列表/新增
-	web.Router("/agents/mcp/servers/:id", &controllers.AgentMCPController{}, "put:UpdateServer;delete:DeleteServer")          // 第三方 MCP Server 更新/删除
-	web.Router("/agents/mcp/servers/:id/catalog", &controllers.AgentMCPController{}, "get:GetCatalog")                        // MCP Catalog
-	web.Router("/agents/mcp/servers/:id/test", &controllers.AgentMCPController{}, "post:TestConnection")                      // MCP 连接测试
-	web.Router("/agents/mcp/servers/:id/refresh", &controllers.AgentMCPController{}, "post:RefreshCatalog")                   // MCP Catalog 刷新
-	web.Router("/agents/mcp/servers/:id/oauth/start", &controllers.AgentMCPController{}, "post:StartOAuth")                   // MCP OAuth 授权开始
-	web.Router("/agents/mcp/oauth/client-metadata", &controllers.AgentMCPController{}, "get:OAuthClientMetadata")             // MCP OAuth Client ID Metadata Document
-	web.Router("/agents/mcp/oauth/callback", &controllers.AgentMCPController{}, "get:OAuthCallback")                          // MCP OAuth callback
-	web.Router("/agents/mcp/tools/:id", &controllers.AgentMCPController{}, "put:UpdateTool")                                  // MCP Tool 分类/治理
-	web.Router("/agents/mcp/permissions", &controllers.AgentMCPController{}, "post:SavePermission")                           // Skill -> MCP capability 授权
-	web.Router("/llm/router", &controllers.LLMRouterController{}, "get:Get;put:Put")                                          // Model Gateway Router 设置/健康
-	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                                  // LLM Provider 预设
-	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                          // 测试 LLM 配置
-	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                                       // LLM 配置列表/新增
-	web.Router("/llm/configs/:id/api-key", &controllers.LLMConfigController{}, "get:GetAPIKey")                               // 显式查看单个 LLM API Key
-	web.Router("/llm/configs/:id", &controllers.LLMConfigController{}, "put:Put;delete:Delete")                               // LLM 配置更新/删除
-	web.Router("/agents/scheduler/jobs/:name/trigger", &controllers.AgentController{}, "post:TriggerSchedulerJob")            // 手动触发 Scheduler Job
-	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post")                                  // 列表查询和新增
-	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit")                         // 更新和删除
-	web.Router("/notifications", &controllers.NotificationController{}, "get:Get")                                            // 网页通知列表
-	web.Router("/notifications/read-all", &controllers.NotificationController{}, "put:ReadAll")                               // 全部标记为已读
-	web.Router("/notifications/:id/read", &controllers.NotificationController{}, "put:Read")                                  // 标记单条通知为已读
-	web.Router("/ws/notifications", &controllers.NotificationWebSocketController{}, "get:Get")                                // 网页通知 WebSocket
+	web.Router("/system/health", &controllers.SystemDashboardController{}, "get:Health")                                                        // V3-8 系统看板只读健康摘要
+	web.Router("/agents/skills/implementations", &controllers.AgentSkillController{}, "get:GetImplementations")                                 // 可用 Skill implementation
+	web.Router("/agents/skills", &controllers.AgentSkillController{}, "get:Get;post:Post")                                                      // Agent Skill 配置
+	web.Router("/agents/skills/:id", &controllers.AgentSkillController{}, "put:Put;delete:Delete")                                              // Agent Skill 更新/删除
+	web.Router("/agents/skills/import", &controllers.AgentPortableSkillController{}, "post:Import")                                             // 导入标准 Agent Skill ZIP/SKILL.md
+	web.Router("/agents/skills/import-directory", &controllers.AgentPortableSkillController{}, "post:ImportDirectory")                          // 从受限服务器目录导入标准 Agent Skill
+	web.Router("/agents/skills/drafts", &controllers.AgentSkillDraftController{}, "get:List;post:Create")                                       // Skill Studio Draft 列表/创建
+	web.Router("/agents/skills/drafts/:draftId", &controllers.AgentSkillDraftController{}, "get:Detail;delete:Delete")                          // Skill Studio Draft 详情/删除
+	web.Router("/agents/skills/drafts/:draftId/file", &controllers.AgentSkillDraftController{}, "get:ReadFile;put:WriteFile;delete:DeleteFile") // Draft 文本文件
+	web.Router("/agents/skills/drafts/:draftId/upload", &controllers.AgentSkillDraftController{}, "post:UploadFile")                            // Draft 二进制/文本文件上传
+	web.Router("/agents/skills/drafts/:draftId/validate", &controllers.AgentSkillDraftController{}, "post:Validate")                            // Draft 标准校验
+	web.Router("/agents/skills/drafts/:draftId/publish", &controllers.AgentSkillDraftController{}, "post:Publish")                              // Draft 发布新 immutable version
+	web.Router("/agents/skills/:id/versions", &controllers.AgentPortableSkillController{}, "get:Versions")                                      // Portable Skill 版本历史
+	web.Router("/agents/skills/versions/:versionId", &controllers.AgentPortableSkillController{}, "get:VersionDetail")                          // Portable Skill revision 详情
+	web.Router("/agents/skills/versions/:versionId/file", &controllers.AgentPortableSkillController{}, "get:ReadVersionFile")                   // 浏览 revision 文本文件
+	web.Router("/agents/skills/versions/:versionId/activate", &controllers.AgentPortableSkillController{}, "post:Activate")                     // 激活/回滚 Portable Skill revision
+	web.Router("/agents/skills/permissions/:id", &controllers.AgentPortableSkillController{}, "put:UpdatePermission")                           // Portable Skill requested/granted Tool 审批
+	web.Router("/agents/mcp/servers", &controllers.AgentMCPController{}, "get:ListServers;post:CreateServer")                                   // 第三方 MCP Server 列表/新增
+	web.Router("/agents/mcp/servers/:id", &controllers.AgentMCPController{}, "put:UpdateServer;delete:DeleteServer")                            // 第三方 MCP Server 更新/删除
+	web.Router("/agents/mcp/servers/:id/catalog", &controllers.AgentMCPController{}, "get:GetCatalog")                                          // MCP Catalog
+	web.Router("/agents/mcp/servers/:id/test", &controllers.AgentMCPController{}, "post:TestConnection")                                        // MCP 连接测试
+	web.Router("/agents/mcp/servers/:id/refresh", &controllers.AgentMCPController{}, "post:RefreshCatalog")                                     // MCP Catalog 刷新
+	web.Router("/agents/mcp/servers/:id/oauth/start", &controllers.AgentMCPController{}, "post:StartOAuth")                                     // MCP OAuth 授权开始
+	web.Router("/agents/mcp/oauth/client-metadata", &controllers.AgentMCPController{}, "get:OAuthClientMetadata")                               // MCP OAuth Client ID Metadata Document
+	web.Router("/agents/mcp/oauth/callback", &controllers.AgentMCPController{}, "get:OAuthCallback")                                            // MCP OAuth callback
+	web.Router("/agents/mcp/tools/:id", &controllers.AgentMCPController{}, "put:UpdateTool")                                                    // MCP Tool 分类/治理
+	web.Router("/agents/mcp/permissions", &controllers.AgentMCPController{}, "post:SavePermission")                                             // Skill -> MCP capability 授权
+	web.Router("/llm/router", &controllers.LLMRouterController{}, "get:Get;put:Put")                                                            // Model Gateway Router 设置/健康
+	web.Router("/llm/configs/presets", &controllers.LLMConfigController{}, "get:GetPresets")                                                    // LLM Provider 预设
+	web.Router("/llm/configs/test", &controllers.LLMConfigController{}, "post:Test")                                                            // 测试 LLM 配置
+	web.Router("/llm/configs", &controllers.LLMConfigController{}, "get:Get;post:Post")                                                         // LLM 配置列表/新增
+	web.Router("/llm/configs/:id/api-key", &controllers.LLMConfigController{}, "get:GetAPIKey")                                                 // 显式查看单个 LLM API Key
+	web.Router("/llm/configs/:id", &controllers.LLMConfigController{}, "put:Put;delete:Delete")                                                 // LLM 配置更新/删除
+	web.Router("/agents/scheduler/jobs/:name/trigger", &controllers.AgentController{}, "post:TriggerSchedulerJob")                              // 手动触发 Scheduler Job
+	web.Router("/notify-config", &controllers.NotifyConfigController{}, "get:Get;post:Post")                                                    // 列表查询和新增
+	web.Router("/notify-config/:id", &controllers.NotifyConfigController{}, "delete:Delete;put:Edit")                                           // 更新和删除
+	web.Router("/notifications", &controllers.NotificationController{}, "get:Get")                                                              // 网页通知列表
+	web.Router("/notifications/read-all", &controllers.NotificationController{}, "put:ReadAll")                                                 // 全部标记为已读
+	web.Router("/notifications/:id/read", &controllers.NotificationController{}, "put:Read")                                                    // 标记单条通知为已读
+	web.Router("/ws/notifications", &controllers.NotificationWebSocketController{}, "get:Get")                                                  // 网页通知 WebSocket
 
 	web.Router("/features", &controllers.FeatureController{}, "get:Get;post:Post")                            // 列表查询和新增
 	web.Router("/features-options", &controllers.FeatureController{}, "get:GetOptions")                       // 列表查询

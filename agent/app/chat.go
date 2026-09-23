@@ -70,6 +70,21 @@ func ChatSkills(ctx context.Context) ([]ChatSkill, error) {
 }
 
 func StartChatMessage(ctx context.Context, conversationID, skillName, content, symbol string) (*task.Task, error) {
+	skillName = strings.TrimSpace(skillName)
+	if skillName == "" {
+		skillName = generalchat.Name
+	}
+	modelConfigID := int64(0)
+	return StartChatMessageWithOptions(ctx, conversationID, ChatMessageOptions{
+		SkillMode:     ChatSkillModeExplicit,
+		Skill:         skillName,
+		Content:       content,
+		Symbol:        symbol,
+		ModelConfigID: &modelConfigID,
+	})
+}
+
+func startChatMessage(ctx context.Context, conversationID, skillName, content, symbol string, modelConfigID int64) (*task.Task, error) {
 	conversationID = strings.TrimSpace(conversationID)
 	requestedSkill := strings.TrimSpace(skillName)
 	effectiveSkill := requestedSkill
@@ -129,7 +144,7 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content, s
 		if err != nil {
 			return nil, err
 		}
-		item, err := runner.StartWithOptions(input, agentteam.StartOptions{ConversationID: conversationID})
+		item, err := runner.StartWithOptions(input, agentteam.StartOptions{ConversationID: conversationID, ModelConfigID: modelConfigID})
 		if err != nil {
 			return nil, err
 		}
@@ -155,7 +170,7 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content, s
 	}
 	var input string
 	if effectiveSkill == generalchat.Name {
-		input = content
+		input = generalChatInput(content, symbol)
 	} else {
 		adapter, ok := selected.(skill.ChatAdapter)
 		if !ok || !adapter.ChatEnabled() {
@@ -172,7 +187,7 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content, s
 			return nil, err
 		}
 	}
-	item, err := manager.Start(agentruntime.Request{Skill: effectiveSkill, Input: input, ConversationID: conversationID, Metadata: map[string]any{"chat_symbol": symbol}})
+	item, err := manager.Start(agentruntime.Request{Skill: effectiveSkill, Input: input, ConversationID: conversationID, ModelConfigID: modelConfigID, Metadata: map[string]any{"chat_symbol": symbol, "chat_model_config_id": modelConfigID}})
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +199,15 @@ func StartChatMessage(ctx context.Context, conversationID, skillName, content, s
 		return nil, err
 	}
 	return item, nil
+}
+
+func generalChatInput(content, symbol string) string {
+	content = strings.TrimSpace(content)
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	if symbol == "" {
+		return content
+	}
+	return fmt.Sprintf("[CHAT_SELECTED_SYMBOL]\nSelected Binance USDT futures symbol: %s\nUser message: %s\nUse the selected symbol as the current subject when relevant. Do not substitute a different symbol from conversation history.", symbol, content)
 }
 
 func llmMessageUser(content string) llm.Message {
