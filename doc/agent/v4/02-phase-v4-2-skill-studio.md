@@ -100,6 +100,7 @@ Publish 时：
 - `scripts/` 首版仍然**不执行**。
 - Web Editor 不能访问 Skill Draft 根目录以外的服务器文件。
 - `allowed-tools` 仍然只是权限请求，不能自授 Tool Grant。
+- **发布/激活 Skill 属于管理员级配置变更**：`SKILL.md` 正文会进入 Agent 的 System Prompt，等价于修改 Agent 行为。当前项目为单用户自用部署，由现有 JWT 保护即可；如果未来支持多用户，Draft Publish / Activate 必须增加管理员角色权限，不能仅依赖“已登录”。
 
 ## 7. UI
 
@@ -132,3 +133,11 @@ Publish 时：
 - 不做 Git IDE。
 - 不做多人协同编辑。
 - 不自动让 LLM 无审查修改已激活 Skill。
+
+## 10. 实现结果
+
+**V4-2 已完成。**
+
+实现继续复用 V2 Portable Skill Parser / Importer / Store，没有新增数据库 Schema，也没有新增 `app.conf` 配置。Draft 仅存储在 `data/agent-skill-drafts/<draft-id>/`，正式发布仍生成 immutable Portable Skill revision。
+
+完整实现、API、安全边界、自动测试和人工测试步骤见 [v4-2-implementation-report.md](./v4-2-implementation-report.md)。

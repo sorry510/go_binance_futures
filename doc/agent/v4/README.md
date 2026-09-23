@@ -14,6 +14,8 @@ V4 聚焦五个实际缺口：
 
 V4 的原则是：**先复用现有能力，再补用户真正能感知的入口和系统级约束。**
 
+Skill Studio 的发布/激活属于管理员级 Agent 配置变更，因为 `SKILL.md` 会进入 Agent System Prompt。当前项目是单用户自用部署；如果未来引入多用户，必须为 Skill Publish / Activate 增加管理员角色权限。
+
 ## 2. 当前已经存在、V4 不重复建设的能力
 
 - Chat Conversation 持久化、历史上下文、标题。
@@ -32,7 +34,7 @@ V4 的原则是：**先复用现有能力，再补用户真正能感知的入口
 | --- | --- | --- |
 | [V4-0](./00-phase-v4-0-baseline.md) | P0 | 冻结当前 Chat / Skill / Selector / Binance API 行为基线 |
 | [V4-1](./01-phase-v4-1-chat-workspace.md) | P0 ✅ | Chat 支持多个 Skill、删除聊天、对话内切换模型 |
-| [V4-2](./02-phase-v4-2-skill-studio.md) | P0 | Web 端创建、编辑、校验和发布标准 Agent Skills |
+| [V4-2](./02-phase-v4-2-skill-studio.md) | P0 ✅ | Web 端创建、编辑、校验和发布标准 Agent Skills |
 | [V4-3](./03-phase-v4-3-local-selector-v2.md) | P1 | 重构本地选币：确定性、多因子、复用 scanner，不新增 REST 压力 |
 | [V4-4](./04-phase-v4-4-binance-api-observability.md) | P0 | 统一观测 Binance API endpoint、权重、延迟、429/418 和 Order Count |
 | [V4-5](./05-phase-v4-5-binance-api-budget.md) | P0 | 全局 API Budget / 请求合并 / 快照复用 / 优先级调度，解决多单 API 超限 |
@@ -46,7 +48,7 @@ V4-0 Baseline
   ↓
 V4-1 Chat Workspace ✅
   ↓
-V4-2 Skill Studio
+V4-2 Skill Studio ✅
   ↓
 V4-4 Binance API Observability
   ↓
