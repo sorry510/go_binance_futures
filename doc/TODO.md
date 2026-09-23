@@ -30,3 +30,8 @@
 - [ ] 支持插件模式接入系统
 - [ ] skill 要能在 web 端编写，格式要兼容标准格式
 
+
+## BUG
+- 选币策略 的预览有问题
+- ai 的报警，经常发生 context deadline exceeded
+

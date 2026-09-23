@@ -154,3 +154,29 @@ doc/agent/v4/v4-4-binance-api-usage-report.md
 - 不自动 sleep 所有请求。
 - 不自动 retry Trade Mutation。
 - 不修改 Binance 业务逻辑。
+
+## 11. 实现状态
+
+当前代码实现、数据结构、source attribution、安全边界和测试说明见：
+
+- [v4-4-implementation-report.md](./v4-4-implementation-report.md)
+
+真实运行数据报告见：
+
+- [v4-4-binance-api-usage-report.md](./v4-4-binance-api-usage-report.md)
+
+当前状态：
+
+- 统一 Transport 观测：完成。
+- Futures / Spot / Delivery / Futures Testnet 区分：完成。
+- 10s / 1m / 5m rolling window：完成。
+- Binance response header Used Weight / Order Count：完成。
+- exchangeInfo 动态限额分母 + reference fallback：完成。
+- 429 / 418 / Retry-After：完成。
+- Source Attribution：完成。
+- Read / Trade 类型区分：完成。
+- System Dashboard：完成。
+- signed query / secret 防泄漏测试：完成。
+- 真实运行 Top20 / 1m 峰值：等待用户重启最新 backend binary 后采集至少一个正常 5 分钟窗口。
+
+在真实运行采样完成前，不根据静态代码猜测“实际最高 endpoint”或“实际峰值”。

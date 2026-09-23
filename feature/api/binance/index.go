@@ -8,6 +8,7 @@ import (
 	"go_binance_futures/binanceproxy"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/utils"
 	"sort"
 	"strconv"
@@ -139,10 +140,17 @@ func init() {
 		logs.Warning("Binance USD-M Futures TESTNET mode enabled; REST endpoint:", futuresClient.BaseURL)
 	}
 	deliveryClient = delivery.NewClient(api_key, api_secret)
-	if proxyPool.Enabled() {
-		futuresClient.HTTPClient = proxyPool.HTTPClient()
-		deliveryClient.HTTPClient = proxyPool.HTTPClient()
+
+	futuresEnvironment := "mainnet"
+	if testnet {
+		futuresEnvironment = "testnet"
 	}
+	futuresClient.HTTPClient = binanceapiusage.WrapClient(proxyPool.HTTPClient(), binanceapiusage.TransportConfig{
+		Product: "futures", Environment: futuresEnvironment, Source: "go_binance",
+	})
+	deliveryClient.HTTPClient = binanceapiusage.WrapClient(proxyPool.HTTPClient(), binanceapiusage.TransportConfig{
+		Product: "delivery", Environment: "mainnet", Source: "go_binance",
+	})
 }
 
 type OrderParams struct {
@@ -159,7 +167,11 @@ type ListOrderParams struct {
 
 // @returns /doc/futuresAccount.js
 func GetFuturesAccount() (res *futures.Account, err error) {
-	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.Account, error) {
+	return GetFuturesAccountContext(context.Background())
+}
+
+func GetFuturesAccountContext(ctx context.Context) (res *futures.Account, err error) {
+	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.Account, error) {
 		return client.NewGetAccountService().Do(ctx, opts...)
 	})
 }
@@ -178,7 +190,11 @@ type PositionParams struct {
 
 // @returns /doc/position.js
 func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, err error) {
-	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.PositionRisk, error) {
+	return GetPositionContext(context.Background(), positionParams)
+}
+
+func GetPositionContext(ctx context.Context, positionParams PositionParams) (res []*futures.PositionRisk, err error) {
+	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.PositionRisk, error) {
 		query := client.NewGetPositionRiskService()
 		if positionParams.Symbol != "" {
 			query = query.Symbol(positionParams.Symbol)
@@ -235,11 +251,15 @@ func GetIncome(incomeParams IncomeParams) (res []*futures.IncomeHistory, err err
 }
 
 func GetDepth(symbol string, limits ...int) (res *futures.DepthResponse, err error) {
+	return GetDepthContext(context.Background(), symbol, limits...)
+}
+
+func GetDepthContext(ctx context.Context, symbol string, limits ...int) (res *futures.DepthResponse, err error) {
 	limit := 100 // 默认值
 	if len(limits) != 0 {
 		limit = limits[0]
 	}
-	res, err = futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(context.Background())
+	res, err = futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(ctx)
 	if err != nil {
 		noteFuturesAPIError(err)
 		logs.Error(err)
@@ -262,11 +282,15 @@ func GetTickerPrice(symbol string) (res []*futures.SymbolPrice, err error) {
 // limit 5, 10, 20, 50, 100, 500, 1000
 // @see https://binance-docs.github.io/apidocs/futures/cn/#38a975b802
 func GetDepthAvgPrice(symbol string, limits ...int) (buyPrice float64, sellPrice float64, err error) {
+	return GetDepthAvgPriceContext(context.Background(), symbol, limits...)
+}
+
+func GetDepthAvgPriceContext(ctx context.Context, symbol string, limits ...int) (buyPrice float64, sellPrice float64, err error) {
 	limit := 50 // 默认值
 	if len(limits) != 0 {
 		limit = limits[0]
 	}
-	res, err := futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(context.Background())
+	res, err := futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(ctx)
 	if err != nil {
 		noteFuturesAPIError(err)
 		logs.Error(err)
@@ -304,7 +328,11 @@ func avgPrice(data *futures.DepthResponse) (buyPrice float64, sellPrice float64)
 // @param limit 返回的K线数据条数
 // @returns /doc/kine.js
 func GetKlineData(symbol string, interval string, limit int) (klines []*futures.Kline, err error) {
-	return getLiveKlineData(context.Background(), symbol, interval, limit)
+	return GetKlineDataContext(context.Background(), symbol, interval, limit)
+}
+
+func GetKlineDataContext(ctx context.Context, symbol string, interval string, limit int) (klines []*futures.Kline, err error) {
+	return getLiveKlineData(ctx, symbol, interval, limit)
 }
 
 // GetEarliestHistoricalKline returns the first available futures K-line for a symbol/interval.
@@ -546,7 +574,11 @@ func CancelAlgoOrder(ctx context.Context, algoID int64) (*futures.CancelAlgoOrde
 // 撤销订单
 // @see https://binance-docs.github.io/apidocs/futures/cn/#trade-6
 func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse, err error) {
-	return doFuturesSigned(context.Background(), futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CancelOrderResponse, error) {
+	return CancelOrderContext(context.Background(), symbol, orderId)
+}
+
+func CancelOrderContext(ctx context.Context, symbol string, orderId int64) (res *futures.CancelOrderResponse, err error) {
+	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CancelOrderResponse, error) {
 		return client.NewCancelOrderService().Symbol(symbol).OrderID(orderId).Do(ctx, opts...)
 	})
 }
@@ -556,7 +588,11 @@ func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse
 // @param Number 1-125
 // @see https://binance-docs.github.io/apidocs/futures/cn/#trade-10
 func SetLeverage(symbol string, leverage int) (res *futures.SymbolLeverage, err error) {
-	return doFuturesSigned(context.Background(), futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.SymbolLeverage, error) {
+	return SetLeverageContext(context.Background(), symbol, leverage)
+}
+
+func SetLeverageContext(ctx context.Context, symbol string, leverage int) (res *futures.SymbolLeverage, err error) {
+	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.SymbolLeverage, error) {
 		return client.NewChangeLeverageService().Symbol(symbol).Leverage(leverage).Do(ctx, opts...)
 	})
 }
@@ -565,7 +601,11 @@ func SetLeverage(symbol string, leverage int) (res *futures.SymbolLeverage, err 
 // @param string symbol
 // @param futures.MarginType Isolated(逐仓), Crossed(全仓)
 func SetMarginType(symbol string, marginType futures.MarginType) (err error) {
-	_, err = doFuturesSigned(context.Background(), futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (struct{}, error) {
+	return SetMarginTypeContext(context.Background(), symbol, marginType)
+}
+
+func SetMarginTypeContext(ctx context.Context, symbol string, marginType futures.MarginType) (err error) {
+	_, err = doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (struct{}, error) {
 		err := client.NewChangeMarginTypeService().Symbol(symbol).MarginType(marginType).Do(ctx, opts...)
 		return struct{}{}, err
 	})
@@ -621,7 +661,11 @@ func GetLimitStartTimeOrders(startTime int64) (res []*futures.Order, err error) 
 // 查看当前全部挂单(权重40)
 // @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/trade/rest-api/Current-All-Open-Orders
 func GetOpenOrder(symbols ...string) (res []*futures.Order, err error) {
-	return doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.Order, error) {
+	return GetOpenOrderContext(context.Background(), symbols...)
+}
+
+func GetOpenOrderContext(ctx context.Context, symbols ...string) (res []*futures.Order, err error) {
+	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.Order, error) {
 		service := client.NewListOpenOrdersService()
 		if len(symbols) > 0 {
 			service = service.Symbol(symbols[0])
@@ -638,6 +682,19 @@ func GetExchangeInfo() (res *futures.ExchangeInfo, err error) {
 		noteFuturesAPIError(err)
 		return nil, err
 	}
+	environment := "mainnet"
+	if testnet {
+		environment = "testnet"
+	}
+	for _, rateLimit := range res.RateLimits {
+		if strings.EqualFold(rateLimit.RateLimitType, "REQUEST_WEIGHT") &&
+			strings.EqualFold(rateLimit.Interval, "MINUTE") &&
+			rateLimit.IntervalNum == 1 &&
+			rateLimit.Limit > 0 {
+			binanceapiusage.Default().SetWeightLimit("futures", environment, rateLimit.Limit, "exchange_info")
+			break
+		}
+	}
 	// logs.Info(utils.ToJson(res))
 	return res, err
 }
@@ -653,11 +710,15 @@ type FundingRateParams struct {
 // @see https://binance-docs.github.io/apidocs/futures/cn/#69f9b0b2f3
 // @returns /doc/fundingRate.js
 func GetFundingRate(params FundingRateParams) (res []*futures.PremiumIndex, err error) {
+	return GetFundingRateContext(context.Background(), params)
+}
+
+func GetFundingRateContext(ctx context.Context, params FundingRateParams) (res []*futures.PremiumIndex, err error) {
 	service := futuresClient.NewPremiumIndexService()
 	if params.Symbol != "" {
 		service = service.Symbol(params.Symbol)
 	}
-	res, err = service.Do(context.Background())
+	res, err = service.Do(ctx)
 	if err != nil {
 		noteFuturesAPIError(err)
 	}
@@ -665,7 +726,11 @@ func GetFundingRate(params FundingRateParams) (res []*futures.PremiumIndex, err 
 }
 
 func GetOpenInterest(symbol string) (res *futures.OpenInterest, err error) {
-	res, err = futuresClient.NewGetOpenInterestService().Symbol(symbol).Do(context.Background())
+	return GetOpenInterestContext(context.Background(), symbol)
+}
+
+func GetOpenInterestContext(ctx context.Context, symbol string) (res *futures.OpenInterest, err error) {
+	res, err = futuresClient.NewGetOpenInterestService().Symbol(symbol).Do(ctx)
 	if err != nil {
 		noteFuturesAPIError(err)
 	}
@@ -673,7 +738,11 @@ func GetOpenInterest(symbol string) (res *futures.OpenInterest, err error) {
 }
 
 func GetOpenInterestStatistics(symbol, period string, limit int) (res []*futures.OpenInterestStatistic, err error) {
-	res, err = futuresClient.NewOpenInterestStatisticsService().Symbol(symbol).Period(period).Limit(limit).Do(context.Background())
+	return GetOpenInterestStatisticsContext(context.Background(), symbol, period, limit)
+}
+
+func GetOpenInterestStatisticsContext(ctx context.Context, symbol, period string, limit int) (res []*futures.OpenInterestStatistic, err error) {
+	res, err = futuresClient.NewOpenInterestStatisticsService().Symbol(symbol).Period(period).Limit(limit).Do(ctx)
 	if err != nil {
 		noteFuturesAPIError(err)
 	}
@@ -681,7 +750,11 @@ func GetOpenInterestStatistics(symbol, period string, limit int) (res []*futures
 }
 
 func GetTakerLongShortRatio(symbol, period string, limit uint32) (res []*futures.TakerLongShortRatio, err error) {
-	res, err = futuresClient.NewTakerLongShortRatioService().Symbol(symbol).Period(period).Limit(limit).Do(context.Background())
+	return GetTakerLongShortRatioContext(context.Background(), symbol, period, limit)
+}
+
+func GetTakerLongShortRatioContext(ctx context.Context, symbol, period string, limit uint32) (res []*futures.TakerLongShortRatio, err error) {
+	res, err = futuresClient.NewTakerLongShortRatioService().Symbol(symbol).Period(period).Limit(limit).Do(ctx)
 	if err != nil {
 		noteFuturesAPIError(err)
 	}
@@ -693,6 +766,10 @@ func GetTakerLongShortRatio(symbol, period string, limit uint32) (res []*futures
 // @returns /doc/fundingRateHistory.js
 // 根据时间变化而来的数据，交易对可能不唯一有多条，数据顺序是时间由旧到新
 func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate, err error) {
+	return GetFundingRateHistoryContext(context.Background(), params)
+}
+
+func GetFundingRateHistoryContext(ctx context.Context, params FundingRateParams) (res []*futures.FundingRate, err error) {
 	service := futuresClient.NewFundingRateService()
 	if params.Symbol != "" {
 		service = service.Symbol(params.Symbol)
@@ -706,7 +783,7 @@ func GetFundingRateHistory(params FundingRateParams) (res []*futures.FundingRate
 	if params.Limit != 0 {
 		service = service.Limit(params.Limit)
 	}
-	res, err = service.Do(context.Background())
+	res, err = service.Do(ctx)
 	if err != nil {
 		noteFuturesAPIError(err)
 	}
