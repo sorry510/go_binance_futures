@@ -97,7 +97,11 @@ For historical strategy research:
 
 If the user requests design or review only, keep the proposal in the response and do not create a file. Create or edit an artifact only when the request authorizes repository changes.
 
-Write the artifact under `strategy_templates/<descriptive-name>.json`:
+During iterative research, save every generated candidate and diagnostic control immediately under `temp_strategy/<cycle-or-version>/<descriptive-name>.json`. Do not keep the only copy in `/tmp`. Keep this directory limited to portable strategy JSON objects with `name`, `technology`, and all four enabled `strategy` rules; store manifests, large replay results, feature tables, and helper programs outside it. Preserve failed candidates there as trial-ledger evidence instead of overwriting them.
+
+Only after a candidate passes the declared full-duration, real-cost, per-coin frequency, stability, and cross-coin validation gates should the release artifact be copied to `strategy_templates/<descriptive-name>.json`. A file in `temp_strategy` is an experiment, not proof that the strategy is usable.
+
+Use this portable shape in both locations:
 
 ```json
 {
