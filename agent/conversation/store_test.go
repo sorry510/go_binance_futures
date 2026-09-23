@@ -23,7 +23,7 @@ func setupConversationStoreTest(t *testing.T) *ORMStore {
 		if conversationStoreTestErr != nil {
 			return
 		}
-		orm.RegisterModel(new(models.AgentConversation), new(models.AgentConversationMessage), new(models.AgentTask))
+		orm.RegisterModel(new(models.AgentConversation), new(models.AgentConversationSkill), new(models.AgentConversationMessage), new(models.AgentTask))
 		conversationStoreTestErr = orm.RegisterDataBase("agent_conversation_test", "sqlite3", "file:agent_conversation_test?mode=memory&cache=shared")
 		if conversationStoreTestErr != nil {
 			return
@@ -173,6 +173,51 @@ func TestDeleteChatRemovesConversationAndMessagesButKeepsTaskHistory(t *testing.
 	}
 	if !o.QueryTable(new(models.AgentTask)).Filter("id", taskRow.ID).Exist() {
 		t.Fatal("task history should be preserved when deleting a chat")
+	}
+}
+
+func TestChatWorkspaceSkillBindingsAndModelPreference(t *testing.T) {
+	store := setupConversationStoreTest(t)
+	ctx := context.Background()
+	conv, err := store.Create(ctx, ChatSkill)
+	if err != nil {
+		t.Fatal(err)
+	}
+	skills, err := store.ChatSkillNames(ctx, conv.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(skills) != 1 || skills[0] != DefaultChatAttachedSkill {
+		t.Fatalf("default chat skills = %+v", skills)
+	}
+	if err := store.AttachChatSkill(ctx, conv.ID, "symbol_analysis"); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AttachChatSkill(ctx, conv.ID, "symbol_analysis"); err != nil {
+		t.Fatal(err)
+	}
+	skills, err = store.ChatSkillNames(ctx, conv.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(skills) != 2 || skills[0] != DefaultChatAttachedSkill || skills[1] != "symbol_analysis" {
+		t.Fatalf("attached chat skills = %+v", skills)
+	}
+	if err := store.SetModelConfigID(ctx, conv.ID, 42); err != nil {
+		t.Fatal(err)
+	}
+	reloaded, err := store.Get(ctx, conv.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reloaded.ModelConfigID != 42 {
+		t.Fatalf("model_config_id=%d want=42", reloaded.ModelConfigID)
+	}
+	if err := store.RemoveChatSkill(ctx, conv.ID, "symbol_analysis"); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.RemoveChatSkill(ctx, conv.ID, DefaultChatAttachedSkill); err == nil {
+		t.Fatal("general_chat binding must not be removable")
 	}
 }
 

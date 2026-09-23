@@ -22,13 +22,14 @@ const (
 )
 
 type Conversation struct {
-	ID        string    `json:"id"`
-	Skill     string    `json:"skill"`
-	Title     string    `json:"title"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	ClosedAt  time.Time `json:"closed_at,omitempty"`
+	ID            string    `json:"id"`
+	Skill         string    `json:"skill"`
+	Title         string    `json:"title"`
+	ModelConfigID int64     `json:"model_config_id"`
+	Status        string    `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	ClosedAt      time.Time `json:"closed_at,omitempty"`
 }
 
 type Store interface {
@@ -57,8 +58,16 @@ func (store *ORMStore) Create(ctx context.Context, skill string) (Conversation, 
 		title = DefaultTitle
 	}
 	row := models.AgentConversation{ID: newID(), Skill: skill, Title: title, Status: StatusActive, CreatedAt: now.UnixMilli(), UpdatedAt: now.UnixMilli()}
-	if _, err := store.orm().Insert(&row); err != nil {
+	o := store.orm()
+	if _, err := o.Insert(&row); err != nil {
 		return Conversation{}, fmt.Errorf("insert agent conversation: %w", err)
+	}
+	if skill == ChatSkill {
+		binding := models.AgentConversationSkill{ConversationID: row.ID, SkillName: DefaultChatAttachedSkill, Sort: 0, CreatedAt: now.UnixMilli()}
+		if _, err := o.Insert(&binding); err != nil {
+			_, _ = o.QueryTable(new(models.AgentConversation)).Filter("id", row.ID).Delete()
+			return Conversation{}, fmt.Errorf("insert default chat skill binding: %w", err)
+		}
 	}
 	return fromModel(row), nil
 }
@@ -230,7 +239,7 @@ func (store *MemoryStore) Close(ctx context.Context, id string) error {
 }
 
 func fromModel(row models.AgentConversation) Conversation {
-	item := Conversation{ID: row.ID, Skill: row.Skill, Title: row.Title, Status: row.Status, CreatedAt: time.UnixMilli(row.CreatedAt).UTC(), UpdatedAt: time.UnixMilli(row.UpdatedAt).UTC()}
+	item := Conversation{ID: row.ID, Skill: row.Skill, Title: row.Title, ModelConfigID: row.ModelConfigID, Status: row.Status, CreatedAt: time.UnixMilli(row.CreatedAt).UTC(), UpdatedAt: time.UnixMilli(row.UpdatedAt).UTC()}
 	if row.ClosedAt > 0 {
 		item.ClosedAt = time.UnixMilli(row.ClosedAt).UTC()
 	}

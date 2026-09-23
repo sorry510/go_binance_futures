@@ -37,7 +37,8 @@ func (client *bridgeClient) Provider() Provider {
 	return client.cfg.Provider
 }
 
-func (client *bridgeClient) ConfigID() int64 { return client.cfg.ID }
+func (client *bridgeClient) ConfigID() int64   { return client.cfg.ID }
+func (client *bridgeClient) ModelName() string { return client.cfg.Model }
 
 func (client *bridgeClient) Generate(ctx context.Context, request Request) (*Response, error) {
 	if len(request.Messages) == 0 {

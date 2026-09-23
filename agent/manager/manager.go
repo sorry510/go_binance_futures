@@ -79,7 +79,13 @@ func (manager *Manager) start(req agentruntime.Request, linkage task.Linkage) (*
 	var client llm.Client
 	var routeDecision llm.RouteDecision
 	var err error
-	if manager.cfg.ModelRouter != nil {
+	if req.ModelConfigID > 0 {
+		client, err = manager.cfg.NewClientByID(req.ModelConfigID)
+		if err == nil {
+			selected := llm.RouteCandidate{ConfigID: req.ModelConfigID, Provider: client.Provider(), Model: llm.ModelName(client), Primary: false, Score: 0}
+			routeDecision = llm.RouteDecision{Enabled: false, Reason: fmt.Sprintf("explicit model config id %d", req.ModelConfigID), Candidates: []llm.RouteCandidate{selected}, Selected: selected}
+		}
+	} else if manager.cfg.ModelRouter != nil {
 		requirements := llm.ModelRequirements{}
 		if provider, ok := selectedSkill.(skill.ModelRequirementProvider); ok {
 			requirements = provider.ModelRequirements()
