@@ -35,7 +35,7 @@ Skill Studio 的发布/激活属于管理员级 Agent 配置变更，因为 `SKI
 | [V4-0](./00-phase-v4-0-baseline.md) | P0 | 冻结当前 Chat / Skill / Selector / Binance API 行为基线 |
 | [V4-1](./01-phase-v4-1-chat-workspace.md) | P0 ✅ | Chat 支持多个 Skill、删除聊天、对话内切换模型 |
 | [V4-2](./02-phase-v4-2-skill-studio.md) | P0 ✅ | Web 端创建、编辑、校验和发布标准 Agent Skills |
-| [V4-3](./03-phase-v4-3-local-selector-v2.md) | P1 | 重构本地选币：确定性、多因子、复用 scanner，不新增 REST 压力 |
+| [V4-3](./03-phase-v4-3-local-selector-v2.md) | P1 ✅ | 重构本地选币：确定性、多因子、复用 scanner，不新增 REST 压力 |
 | [V4-4](./04-phase-v4-4-binance-api-observability.md) | P0 | 统一观测 Binance API endpoint、权重、延迟、429/418 和 Order Count |
 | [V4-5](./05-phase-v4-5-binance-api-budget.md) | P0 | 全局 API Budget / 请求合并 / 快照复用 / 优先级调度，解决多单 API 超限 |
 | [V4-6](./06-phase-v4-6-plugin-system.md) | P2 | 建立 Plugin Package，兼容当前 ChatGPT/Codex Plugin 的 Skill + MCP 模型 |
@@ -50,18 +50,18 @@ V4-1 Chat Workspace ✅
   ↓
 V4-2 Skill Studio ✅
   ↓
+V4-3 Local Selector V2 ✅
+  ↓
 V4-4 Binance API Observability
   ↓
 V4-5 Binance API Budget & Optimization
-  ↓
-V4-3 Local Selector V2
   ↓
 V4-6 Plugin System
   ↓
 V4-7 Finalization
 ```
 
-文档编号保留业务分组；实际开发建议把 V4-4/V4-5 提前到 V4-3 前面，因为 API 超限属于真实运行风险。
+文档编号保留业务分组。原计划曾建议把 V4-4/V4-5 提前，因为 API 超限属于真实运行风险；当前 V4-3 已按实际开发顺序完成，下一步继续 V4-4 → V4-5。
 
 ## 5. ChatGPT / Codex Plugin 兼容范围
 

@@ -34,9 +34,9 @@ V4-3 不再新写一套评分器。
 - PercentChange 24h。
 - 24h High / Low / Open / Close。
 - Center Offset。
-- Upper Wick Ratio。
-- Retrace From High。
-- LastClose local momentum。
+- 上涨方向：Upper Wick Ratio / Retrace From High。
+- 下跌方向：Lower Wick Ratio / Rebound From Low。
+- LastClose local momentum（方向对称）。
 - freshness。
 
 ## 4. 两阶段 Selector
@@ -48,7 +48,7 @@ V4-3 不再新写一套评分器。
 - enabled。
 - USDT perpetual / 支持的 futures type。
 - 数据 freshness。
-- 最低 QuoteVolume。
+- 最低 QuoteVolume：5,000,000 USDT / 24h。
 - 最近交易 cooldown。
 - 异常极端涨跌过滤。
 
@@ -56,15 +56,15 @@ V4-3 不再新写一套评分器。
 
 对通过候选计算综合 score / reason，按分数稳定排序。
 
-可在已有 Prefilter 基础上补充：
+在已有 Prefilter 基础上，`smart_local_v2` 通过 opt-in 选项启用额外候选质量因子：
 
 - 流动性分位。
 - TradeCount 活跃度。
 - 24h range / volatility quality。
-- 追高风险惩罚。
-- 本地短周期 momentum（只在已有本地数据足够时使用）。
+- 极端涨跌变化与方向性反转风险惩罚（上涨看长上影/冲高回落，下跌看长下影/低位反弹）。
+- 本地短周期 momentum（上涨/下跌方向对称处理，只在已有本地数据足够时使用）。
 
-同分时使用 QuoteVolume、Symbol 做稳定 tie-break，不再随机。
+`smart_local_v2` 同分时使用 QuoteVolume、Symbol 做稳定 tie-break，不再随机。Generic Scanner 默认不启用 V4-3 的 TradeCount 加分和 Symbol 末级 tie-break，因此不会改变既有 market_scan / Opportunity / scan_symbols 的评分与同分顺序。
 
 ## 5. 与 Auto Strategy 的整合
 
@@ -74,7 +74,7 @@ V4-3 不再新写一套评分器。
 smart_local_v2
 ```
 
-`StartTrade()` 使用 Candidate Service 返回 Top K，再交给现有 Line Strategy 判断 long/short。
+真实交易 `StartTrade()` 与测试交易 `NoticeAllSymbolByStrategy()` 现在共用同一个 `selectConfiguredCoins(...)` 入口。`smart_local_v2` 使用同一个 Candidate Service 构建 **Top60 候选池**，再由进程内 Round-Robin 每轮取 5 个交给现有 Line Strategy 判断 long/short。真实与测试分别维护独立 Round-Robin 状态，互不推进游标；只要某个 Symbol 持续留在 Top60，就会持续获得轮询机会。
 
 职责保持：
 
@@ -113,6 +113,9 @@ Momentum
 Reasons
 Risks
 Excluded Reason
+Top60 Pool Size
+Round-Robin Batch Size
+Next Batch
 ```
 
 可以复用现有 Scanner/Opportunity 调试入口，不新建大型策略实验平台。
@@ -125,12 +128,15 @@ Excluded Reason
 
 ## 9. Gate
 
-- 相同本地数据重复执行结果完全一致。
+- 同一份本地数据下 Top60 候选池完全一致；每轮 Batch 由 Round-Robin 状态决定，同一调用序列下可预测且确定。
 - 不出现随机抽样。
 - disabled / stale / low-liquidity Symbol 不进入候选。
 - Selector 本身不产生 Binance REST 请求。
-- Top K 有明确 reason/risk。
-- StartTrade 继续只把结果交给 Line Strategy，不绕过策略开仓条件。
+- Top60 候选池有明确 reason/risk。
+- 每轮只返回 5 个给 Line Strategy；稳定池下 12 轮覆盖全部 60 个。
+- Preview 只能查看下一批，不能推进真实或测试 Round-Robin 状态。
+- 真实/测试交易共用同一评分、Top60 与 Batch=5 算法；测试始终跟随当前 `FutureStrategyCoin`，不再按 ID 顺序轮询所有 Enable 币。若配置旧 `coin1～6`，测试也会继承对应旧 selector 的随机/窄覆盖行为，这是“测试与真实一致”的兼容语义。
+- StartTrade / TestTrade 都继续只把结果交给 Line Strategy，不绕过策略开仓条件。
 
 ## 10. 本阶段不做
 
@@ -138,3 +144,11 @@ Excluded Reason
 - 不做 ML ranking。
 - 不做回测优化。
 - 不新增大规模历史指标计算。
+
+## 11. 实现结果
+
+**V4-3 已完成（2026-09-23）。**
+
+新增 selector：`smart_local_v2`。旧 `coin1～6` 完整保留，不改变现有配置语义；只有显式选择 `smart_local_v2` 才启用新 Candidate Service。V4-3 的 TradeCount 加分和 Symbol tie-break 也只由该 selector opt-in，不改变现有 Generic Scanner/Opportunity 的评分行为。
+
+实现、默认阈值、Preview API、自动测试与人工测试步骤见 [v4-3-implementation-report.md](./v4-3-implementation-report.md)。当前 Pool Size=60、Batch Size=5、Cooldown=5m、Freshness=30s、Min QuoteVolume=5M USDT 为代码固定阈值；24h Change 对上涨/下跌对称处理。共享 Generic Scanner 的默认上限仍为 Top30，只有 `smart_local_v2` 显式放宽到 60。
