@@ -11,6 +11,7 @@ import (
 	"go_binance_futures/appversion"
 	"go_binance_futures/binanceproxy"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 	marketintelligence "go_binance_futures/service/marketintelligence"
 	"go_binance_futures/utils"
 
@@ -180,7 +181,15 @@ func checkBinanceREST(ctx context.Context, options Options) Check {
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	client := &http.Client{Transport: transport, Timeout: 5 * time.Second}
+	environment := "mainnet"
+	testnet, _ := config.Bool("binance::testnet")
+	if testnet {
+		environment = "testnet"
+	}
+	client := binanceapiusage.WrapClient(
+		&http.Client{Transport: transport, Timeout: 5 * time.Second},
+		binanceapiusage.TransportConfig{Product: "futures", Environment: environment, Source: "system_health"},
+	)
 	start := time.Now()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/fapi/v1/time", nil)
 	if err != nil {

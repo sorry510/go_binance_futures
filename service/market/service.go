@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/service/binanceapiusage"
 	markettypes "go_binance_futures/types"
 	"go_binance_futures/utils"
 
@@ -37,7 +38,8 @@ func (Service) Klines(ctx context.Context, symbol, interval string, limit int) (
 	if limit > 1000 {
 		limit = 1000
 	}
-	result, err := binance.GetKlineData(symbol, interval, limit)
+	ctx = binanceapiusage.WithSource(ctx, "market_intelligence")
+	result, err := binance.GetKlineDataContext(ctx, symbol, interval, limit)
 	if err != nil {
 		return nil, fmt.Errorf("get klines: %w", err)
 	}
@@ -55,7 +57,8 @@ func (Service) FundingRate(ctx context.Context, symbol string) ([]*futures.Premi
 	if symbol == "" {
 		return nil, fmt.Errorf("symbol is required")
 	}
-	result, err := binance.GetFundingRate(binance.FundingRateParams{Symbol: symbol})
+	ctx = binanceapiusage.WithSource(ctx, "market_intelligence")
+	result, err := binance.GetFundingRateContext(ctx, binance.FundingRateParams{Symbol: symbol})
 	if err != nil {
 		return nil, fmt.Errorf("get funding rate: %w", err)
 	}
@@ -70,7 +73,8 @@ func (Service) OpenInterest(ctx context.Context, symbol string) (*futures.OpenIn
 	if symbol == "" {
 		return nil, fmt.Errorf("symbol is required")
 	}
-	result, err := binance.GetOpenInterest(symbol)
+	ctx = binanceapiusage.WithSource(ctx, "market_intelligence")
+	result, err := binance.GetOpenInterestContext(ctx, symbol)
 	if err != nil {
 		return nil, fmt.Errorf("get open interest: %w", err)
 	}
@@ -78,7 +82,8 @@ func (Service) OpenInterest(ctx context.Context, symbol string) (*futures.OpenIn
 }
 
 func (Service) OpenInterestStatistics(ctx context.Context, symbol, period string, limit int) ([]*futures.OpenInterestStatistic, error) {
-	result, err := binance.GetOpenInterestStatistics(strings.ToUpper(strings.TrimSpace(symbol)), period, limit)
+	ctx = binanceapiusage.WithSource(ctx, "market_intelligence")
+	result, err := binance.GetOpenInterestStatisticsContext(ctx, strings.ToUpper(strings.TrimSpace(symbol)), period, limit)
 	if err != nil {
 		return nil, fmt.Errorf("get open interest statistics: %w", err)
 	}
@@ -86,7 +91,8 @@ func (Service) OpenInterestStatistics(ctx context.Context, symbol, period string
 }
 
 func (Service) TakerLongShortRatio(ctx context.Context, symbol, period string, limit int) ([]*futures.TakerLongShortRatio, error) {
-	result, err := binance.GetTakerLongShortRatio(strings.ToUpper(strings.TrimSpace(symbol)), period, uint32(limit))
+	ctx = binanceapiusage.WithSource(ctx, "market_intelligence")
+	result, err := binance.GetTakerLongShortRatioContext(ctx, strings.ToUpper(strings.TrimSpace(symbol)), period, uint32(limit))
 	if err != nil {
 		return nil, fmt.Errorf("get taker buy/sell ratio: %w", err)
 	}
@@ -94,7 +100,8 @@ func (Service) TakerLongShortRatio(ctx context.Context, symbol, period string, l
 }
 
 func (Service) Depth(ctx context.Context, symbol string, limit int) (*futures.DepthResponse, error) {
-	result, err := binance.GetDepth(strings.ToUpper(strings.TrimSpace(symbol)), limit)
+	ctx = binanceapiusage.WithSource(ctx, "market_intelligence")
+	result, err := binance.GetDepthContext(ctx, strings.ToUpper(strings.TrimSpace(symbol)), limit)
 	if err != nil {
 		return nil, fmt.Errorf("get depth: %w", err)
 	}

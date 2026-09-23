@@ -8,6 +8,7 @@ import (
 
 	binanceapi "go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 	futuresownership "go_binance_futures/service/futuresownership"
 	"go_binance_futures/utils"
 
@@ -37,7 +38,8 @@ func (DefaultRiskDataSource) Positions(ctx context.Context) ([]PositionSnapshot,
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	rows, err := binanceapi.GetPosition(binanceapi.PositionParams{})
+	ctx = binanceapiusage.WithSource(ctx, "agent_trade")
+	rows, err := binanceapi.GetPositionContext(ctx, binanceapi.PositionParams{})
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +59,8 @@ func (DefaultRiskDataSource) OpenOrders(ctx context.Context) ([]OpenOrderSnapsho
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	rows, err := binanceapi.GetOpenOrder()
+	ctx = binanceapiusage.WithSource(ctx, "agent_trade")
+	rows, err := binanceapi.GetOpenOrderContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +83,8 @@ func (DefaultRiskDataSource) EstimatedFillPrice(ctx context.Context, symbol, sid
 	if err := ctx.Err(); err != nil {
 		return 0, err
 	}
-	bidAverage, askAverage, err := binanceapi.GetDepthAvgPrice(strings.ToUpper(strings.TrimSpace(symbol)), 5)
+	ctx = binanceapiusage.WithSource(ctx, "agent_trade")
+	bidAverage, askAverage, err := binanceapi.GetDepthAvgPriceContext(ctx, strings.ToUpper(strings.TrimSpace(symbol)), 5)
 	if err != nil {
 		return 0, err
 	}
@@ -99,7 +103,8 @@ func (BinanceBroker) SubmitMarket(ctx context.Context, request BrokerOrderReques
 	if request.Leverage <= 0 {
 		return BrokerOrderResult{}, fmt.Errorf("invalid leverage")
 	}
-	if _, err := binanceapi.SetLeverage(request.Symbol, request.Leverage); err != nil {
+	ctx = binanceapiusage.WithSource(ctx, "agent_trade")
+	if _, err := binanceapi.SetLeverageContext(ctx, request.Symbol, request.Leverage); err != nil {
 		return BrokerOrderResult{}, fmt.Errorf("set leverage: %w", err)
 	}
 	var side futures.SideType
