@@ -1,0 +1,108 @@
+{
+  "name": "日线DMI方向确认+Funding非拥挤4h趋势加速1h有效突破双向 v29",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1d_20",
+        "enable": true,
+        "kline_interval": "1d",
+        "period": 20
+      },
+      {
+        "name": "ema_1d_50",
+        "enable": true,
+        "kline_interval": "1d",
+        "period": 50
+      },
+      {
+        "name": "ema_4h_20",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 20
+      },
+      {
+        "name": "ema_4h_50",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 50
+      },
+      {
+        "name": "ema_1h_20",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 20
+      }
+    ],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_1d_14",
+        "enable": true,
+        "kline_interval": "1d",
+        "period": 14
+      },
+      {
+        "name": "adx_4h_14",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 14
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [
+      {
+        "name": "rsi_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "fresh_adx_acceleration_funding_noncrowded_breakout_long_v29",
+      "type": "long",
+      "code": "let funding_ready = len(FundingRate.Data) >= 1;\nlet funding_not_positive = funding_ready && FundingRate.Data[0] <= 0;\nlet atr = atr_1h_14.Data[1];\nlet atr_prev = atr_1h_14.Data[2];\nlet trend = kline_4h.Close[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] >= ema_4h_20.Data[4];\nlet strength = adx_4h_14.ADX[1] >= 20 && adx_4h_14.ADX[1] >= adx_4h_14.ADX[3] && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1];\nlet breakout = atr > 0 && all(kline_1h.High[2:14], # + atr * 0.10 < kline_1h.Close[1]);\nlet previous_breakout = atr_prev > 0 && all(kline_1h.High[3:15], # + atr_prev * 0.10 < kline_1h.Close[2]);\nlet fresh_breakout = breakout && !previous_breakout;\nlet body = kline_1h.Close[1] - kline_1h.Open[1];\nlet impulse = atr > 0 && kline_1h.Close[1] > kline_1h.Open[1] && rsi_1h_14.Data[1] >= 55 && adx_4h_14.ADX[1] - adx_4h_14.ADX[3] >= 2 && body >= atr * 0.15 && body <= atr * 2.0;\nlet no_chase = kline_1h.Close[0] >= kline_1h.Close[1] - atr * 0.15 && kline_1h.Close[0] <= kline_1h.Close[1] + atr * 0.35;\nfunding_not_positive && ema_1d_20.Data[1] >= ema_1d_20.Data[4] && adx_1d_14.PlusDI[1] > adx_1d_14.MinusDI[1] && trend && strength && fresh_breakout && impulse && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "daily_regime_adx_acceleration_breakdown_short_v29",
+      "type": "short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet daily_regime = ema_1d_20.Data[1] < ema_1d_50.Data[1] && ema_1d_20.Data[1] <= ema_1d_20.Data[4] && ema_1d_50.Data[1] <= ema_1d_50.Data[4] && kline_1d.Close[1] < ema_1d_20.Data[1] && kline_1d.Close[1] < kline_1d.Open[1] && kline_1d.Close[1] <= kline_1d.Close[2] && adx_1d_14.ADX[1] >= 20 && adx_1d_14.ADX[1] >= adx_1d_14.ADX[3] && adx_1d_14.MinusDI[1] > adx_1d_14.PlusDI[1];\nlet trend = kline_4h.Close[1] < ema_4h_20.Data[1] && kline_4h.Close[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] <= ema_4h_20.Data[4];\nlet strength = adx_4h_14.ADX[1] >= 20 && adx_4h_14.ADX[1] >= adx_4h_14.ADX[3] && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1];\nlet breakdown = all(kline_1h.Low[2:14], # > kline_1h.Close[1]);\nlet previous_breakdown = all(kline_1h.Low[3:15], # > kline_1h.Close[2]);\nlet fresh_breakdown = breakdown && !previous_breakdown;\nlet body = kline_1h.Open[1] - kline_1h.Close[1];\nlet impulse = atr > 0 && kline_1h.Close[1] < kline_1h.Open[1] && rsi_1h_14.Data[1] <= 45 && adx_4h_14.ADX[1] - adx_4h_14.ADX[3] >= 2 && body >= atr * 0.15 && body <= atr * 2.0;\nlet no_chase = kline_1h.Close[0] <= kline_1h.Close[1] + atr * 0.15 && kline_1h.Close[0] >= kline_1h.Close[1] - atr * 0.35;\ndaily_regime && trend && strength && fresh_breakdown && impulse && no_chase",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "realtime_close_long_v29",
+      "type": "close_long",
+      "code": "let atr = atr_1h_14.Data[1];\nlet avg_qv = mean(kline_1h.Qps[1:9]);\nlet trend_fail = (ema_4h_20.Data[0] < ema_4h_50.Data[0] && kline_4h.Close[0] < ema_4h_20.Data[0]) || (adx_4h_14.MinusDI[0] > adx_4h_14.PlusDI[0] && kline_4h.Close[0] < ema_4h_20.Data[0]);\nlet momentum_fail = kline_1h.Close[0] < ema_1h_20.Data[0] && rsi_1h_14.Data[0] < 48 && rsi_1h_14.Data[0] < rsi_1h_14.Data[1];\nlet bearish_impulse = atr > 0 && avg_qv > 0 && kline_1h.Close[0] < kline_1h.Open[0] && kline_1h.Qps[0] >= avg_qv * 0.90 && (kline_1h.Open[0] - kline_1h.Close[0]) >= atr * 0.15;\nlet profit_reversal = ROI >= 8 && (trend_fail || (momentum_fail && bearish_impulse));\nlet loss_reversal = ROI <= -6 && (trend_fail || momentum_fail);\nlet extended_profit_lock = ROI >= 14 && (momentum_fail || bearish_impulse);\nlet catastrophic_stop = ROI <= -10;\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "realtime_close_short_v29",
+      "type": "close_short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet avg_qv = mean(kline_1h.Qps[1:9]);\nlet trend_fail = (ema_4h_20.Data[0] > ema_4h_50.Data[0] && kline_4h.Close[0] > ema_4h_20.Data[0]) || (adx_4h_14.PlusDI[0] > adx_4h_14.MinusDI[0] && kline_4h.Close[0] > ema_4h_20.Data[0]);\nlet momentum_fail = kline_1h.Close[0] > ema_1h_20.Data[0] && rsi_1h_14.Data[0] > 52 && rsi_1h_14.Data[0] > rsi_1h_14.Data[1];\nlet bullish_impulse = atr > 0 && avg_qv > 0 && kline_1h.Close[0] > kline_1h.Open[0] && kline_1h.Qps[0] >= avg_qv * 0.90 && (kline_1h.Close[0] - kline_1h.Open[0]) >= atr * 0.15;\nlet profit_reversal = ROI >= 8 && (trend_fail || (momentum_fail && bullish_impulse));\nlet loss_reversal = ROI <= -6 && (trend_fail || momentum_fail);\nlet extended_profit_lock = ROI >= 14 && (momentum_fail || bullish_impulse);\nlet catastrophic_stop = ROI <= -10;\ncatastrophic_stop || extended_profit_lock || profit_reversal || loss_reversal",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

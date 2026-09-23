@@ -18,10 +18,12 @@ import (
 )
 
 var appendOnceMu sync.Mutex
+var chatSettingsMu sync.Mutex
 
 const (
-	ChatSkill    = "chat"
-	DefaultTitle = "新对话"
+	ChatSkill                = "chat"
+	DefaultTitle             = "新对话"
+	DefaultChatAttachedSkill = "general_chat"
 )
 
 type ListOptions struct {
@@ -84,6 +86,105 @@ func (store *ORMStore) SetTitle(ctx context.Context, id, title string) error {
 	return err
 }
 
+func (store *ORMStore) ChatSkillNames(ctx context.Context, id string) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	id = strings.TrimSpace(id)
+	conv, err := store.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if conv.Skill != ChatSkill {
+		return nil, fmt.Errorf("conversation %q is not a chat conversation", id)
+	}
+	var rows []models.AgentConversationSkill
+	if _, err := store.orm().QueryTable(new(models.AgentConversationSkill)).Filter("conversation_id", id).OrderBy("sort", "id").All(&rows); err != nil {
+		return nil, err
+	}
+	result := make([]string, 0, len(rows)+1)
+	seen := map[string]bool{}
+	for _, row := range rows {
+		name := strings.TrimSpace(row.SkillName)
+		if name == "" || seen[name] {
+			continue
+		}
+		seen[name] = true
+		result = append(result, name)
+	}
+	if !seen[DefaultChatAttachedSkill] {
+		result = append([]string{DefaultChatAttachedSkill}, result...)
+	}
+	return result, nil
+}
+
+func (store *ORMStore) AttachChatSkill(ctx context.Context, id, skillName string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	id, skillName = strings.TrimSpace(id), strings.TrimSpace(skillName)
+	if id == "" || skillName == "" {
+		return fmt.Errorf("conversation_id and skill_name are required")
+	}
+	conv, err := store.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	if conv.Skill != ChatSkill || conv.Status != StatusActive {
+		return fmt.Errorf("conversation %q is not an active chat conversation", id)
+	}
+	chatSettingsMu.Lock()
+	defer chatSettingsMu.Unlock()
+	o := store.orm()
+	if o.QueryTable(new(models.AgentConversationSkill)).Filter("conversation_id", id).Filter("skill_name", skillName).Exist() {
+		return nil
+	}
+	count, err := o.QueryTable(new(models.AgentConversationSkill)).Filter("conversation_id", id).Count()
+	if err != nil {
+		return err
+	}
+	_, err = o.Insert(&models.AgentConversationSkill{ConversationID: id, SkillName: skillName, Sort: int(count), CreatedAt: time.Now().UTC().UnixMilli()})
+	return err
+}
+
+func (store *ORMStore) RemoveChatSkill(ctx context.Context, id, skillName string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	id, skillName = strings.TrimSpace(id), strings.TrimSpace(skillName)
+	if skillName == DefaultChatAttachedSkill {
+		return fmt.Errorf("%s is the chat fallback and cannot be removed", DefaultChatAttachedSkill)
+	}
+	conv, err := store.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	if conv.Skill != ChatSkill || conv.Status != StatusActive {
+		return fmt.Errorf("conversation %q is not an active chat conversation", id)
+	}
+	_, err = store.orm().QueryTable(new(models.AgentConversationSkill)).Filter("conversation_id", id).Filter("skill_name", skillName).Delete()
+	return err
+}
+
+func (store *ORMStore) SetModelConfigID(ctx context.Context, id string, modelConfigID int64) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	id = strings.TrimSpace(id)
+	if modelConfigID < 0 {
+		return fmt.Errorf("model_config_id must be >= 0")
+	}
+	conv, err := store.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	if conv.Skill != ChatSkill || conv.Status != StatusActive {
+		return fmt.Errorf("conversation %q is not an active chat conversation", id)
+	}
+	_, err = store.orm().QueryTable(new(models.AgentConversation)).Filter("id", id).Update(orm.Params{"model_config_id": modelConfigID, "updated_at": time.Now().UTC().UnixMilli()})
+	return err
+}
+
 func (store *ORMStore) DeleteChat(ctx context.Context, id string) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -117,6 +218,10 @@ func (store *ORMStore) DeleteChat(ctx context.Context, id string) error {
 	if _, err := tx.QueryTable(new(models.AgentConversationMessage)).Filter("conversation_id", id).Delete(); err != nil {
 		_ = tx.Rollback()
 		return fmt.Errorf("delete chat conversation messages: %w", err)
+	}
+	if _, err := tx.QueryTable(new(models.AgentConversationSkill)).Filter("conversation_id", id).Delete(); err != nil {
+		_ = tx.Rollback()
+		return fmt.Errorf("delete chat conversation skills: %w", err)
 	}
 	deleted, err := tx.QueryTable(new(models.AgentConversation)).Filter("id", id).Filter("skill", ChatSkill).Delete()
 	if err != nil {

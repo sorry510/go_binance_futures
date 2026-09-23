@@ -76,7 +76,7 @@ func (runner *Runner) StartWithOptions(input Input, options StartOptions) (*task
 	id := task.NewID()
 	item := &task.Task{
 		ID: id, Skill: SymbolAnalysisTeam, ConversationID: strings.TrimSpace(options.ConversationID), TeamRunID: id, TeamName: SymbolAnalysisTeam, TeamRole: "team",
-		Status: task.StatusQueued, Stage: "team_queued", Progress: 0, Input: string(rawInput), ExecutionMode: "team",
+		Status: task.StatusQueued, Stage: "team_queued", Progress: 0, Input: string(rawInput), ExecutionMode: "team", ModelConfigID: options.ModelConfigID,
 		RuntimeVersion: agentruntime.CurrentVersion, SkillVersion: "1.1.0", PromptVersion: "1.0.0",
 		InputContractVersion: "symbol_analysis_team_input_v1", OutputContractVersion: "symbol_analysis_team_v1",
 		SkillSource: skill.DefaultSource, SkillSourceVersion: "v3-2", CreatedAt: now, UpdatedAt: now,
@@ -94,7 +94,7 @@ func (runner *Runner) StartWithOptions(input Input, options StartOptions) (*task
 	runner.mu.Lock()
 	runner.runs[id] = &runState{cancel: cancel, children: map[string]bool{}}
 	runner.mu.Unlock()
-	go runner.run(ctx, id, input)
+	go runner.run(ctx, id, input, options.ModelConfigID)
 	copyItem := *item
 	copyItem.Events = append([]task.Event(nil), item.Events...)
 	return &copyItem, nil
@@ -124,7 +124,7 @@ func (runner *Runner) Cancel(ctx context.Context, taskID string) error {
 	return nil
 }
 
-func (runner *Runner) run(ctx context.Context, taskID string, input Input) {
+func (runner *Runner) run(ctx context.Context, taskID string, input Input, modelConfigID int64) {
 	defer runner.finishRun(taskID)
 	if err := runner.updateParent(taskID, func(item *task.Task) {
 		now := time.Now().UTC()
@@ -157,7 +157,7 @@ func (runner *Runner) run(ctx context.Context, taskID string, input Input) {
 	sharedInput := symbolteam.SharedInput{Symbol: input.Symbol, Prompt: input.Prompt, SharedContext: shared.Raw, SharedContextHash: shared.ContentHash}
 	childRaw, _ := json.Marshal(sharedInput)
 	specs := []childSpec{{role: symbolteam.RoleTechnical, skill: symbolteam.TechnicalSkillName}, {role: symbolteam.RoleFlow, skill: symbolteam.FlowSkillName}, {role: symbolteam.RoleNews, skill: symbolteam.NewsSkillName}}
-	outcomes := runner.runChildren(ctx, taskID, string(childRaw), specs)
+	outcomes := runner.runChildren(ctx, taskID, string(childRaw), specs, modelConfigID)
 	if err := ctx.Err(); err != nil {
 		runner.cancelParent(taskID)
 		return
@@ -187,7 +187,7 @@ func (runner *Runner) run(ctx context.Context, taskID string, input Input) {
 		item.Stage, item.Progress, item.UpdatedAt = "team_supervisor", 70, time.Now().UTC()
 		item.Events = append(item.Events, teamEvent(item, item.Stage, item.Progress, "supervisor synthesis started", "running"))
 	})
-	started, err := runner.cfg.Manager.StartLinked(agentruntime.Request{Skill: symbolteam.SupervisorSkillName, Input: string(supervisorRaw)}, task.Linkage{
+	started, err := runner.cfg.Manager.StartLinked(agentruntime.Request{Skill: symbolteam.SupervisorSkillName, Input: string(supervisorRaw), ModelConfigID: modelConfigID}, task.Linkage{
 		ParentTaskID: taskID, TeamRunID: taskID, TeamName: SymbolAnalysisTeam, TeamRole: symbolteam.RoleSupervisor,
 		MaxToolCalls: 1, MaxTotalTokens: remaining,
 	})
@@ -247,6 +247,7 @@ func (runner *Runner) run(ctx context.Context, taskID string, input Input) {
 		item.Usage = usage
 		item.Provider = supervisorTask.Provider
 		item.Model = supervisorTask.Model
+		item.ModelConfigID = supervisorTask.ModelConfigID
 		item.FinalModelConfigID = supervisorTask.FinalModelConfigID
 		item.CompletedAt = &now
 		item.UpdatedAt = now
@@ -257,7 +258,7 @@ func (runner *Runner) run(ctx context.Context, taskID string, input Input) {
 	runner.notifyCompletion(taskID)
 }
 
-func (runner *Runner) runChildren(ctx context.Context, parentID, input string, specs []childSpec) []childOutcome {
+func (runner *Runner) runChildren(ctx context.Context, parentID, input string, specs []childSpec, modelConfigID int64) []childOutcome {
 	sem := make(chan struct{}, runner.cfg.MaxConcurrency)
 	out := make(chan childOutcome, len(specs))
 	var wg sync.WaitGroup
@@ -274,7 +275,7 @@ func (runner *Runner) runChildren(ctx context.Context, parentID, input string, s
 				return
 			}
 			defer func() { <-sem }()
-			started, err := runner.cfg.Manager.StartLinked(agentruntime.Request{Skill: spec.skill, Input: input}, task.Linkage{
+			started, err := runner.cfg.Manager.StartLinked(agentruntime.Request{Skill: spec.skill, Input: input, ModelConfigID: modelConfigID}, task.Linkage{
 				ParentTaskID: parentID, TeamRunID: parentID, TeamName: SymbolAnalysisTeam, TeamRole: spec.role,
 				MaxToolCalls: 1, MaxTotalTokens: perChildTokens,
 			})

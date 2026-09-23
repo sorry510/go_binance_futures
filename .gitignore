@@ -7,4 +7,5 @@ db/coin.db
 .vscode/
 /data/agent-skills/
 /data/agent-skill-imports/
+/data/agent-skill-drafts/
 /cache/tmp/
