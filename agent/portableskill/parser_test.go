@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -118,12 +120,17 @@ func TestZIPSecurityRejectsTooManyEntries(t *testing.T) {
 	}
 }
 
+var portableTestModelOnce sync.Once
+var portableTestDBSequence atomic.Int64
+
 func setupPortableDB(t *testing.T) Store {
 	t.Helper()
-	alias := "default"
+	alias := fmt.Sprintf("portable_test_%d", portableTestDBSequence.Add(1))
 	_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
-	orm.RegisterModel(new(models.AgentSkill), new(models.AgentSkillVersion), new(models.AgentSkillPermission))
-	if err := orm.RegisterDataBase(alias, "sqlite3", "file:portable_test?mode=memory&cache=shared"); err != nil {
+	portableTestModelOnce.Do(func() {
+		orm.RegisterModel(new(models.AgentSkill), new(models.AgentSkillVersion), new(models.AgentSkillPermission))
+	})
+	if err := orm.RegisterDataBase(alias, "sqlite3", fmt.Sprintf("file:%s?mode=memory&cache=shared", alias)); err != nil {
 		t.Fatal(err)
 	}
 	if err := orm.RunSyncdb(alias, true, false); err != nil {
