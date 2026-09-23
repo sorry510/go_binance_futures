@@ -9,6 +9,7 @@ import (
 
 	binanceapi "go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 )
 
 type AccountPosition struct {
@@ -42,6 +43,7 @@ func DefaultReconciler() Reconciler {
 }
 
 func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (ReconcileSummary, error) {
+	ctx = binanceapiusage.WithSource(ctx, "ownership_reconcile")
 	owner, err := normalizeOwner(owner)
 	if err != nil {
 		return ReconcileSummary{}, err
@@ -141,7 +143,7 @@ func (BinanceAccountPositionSource) Positions(ctx context.Context) ([]AccountPos
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	rows, err := binanceapi.GetPosition(binanceapi.PositionParams{})
+	rows, err := binanceapi.GetPositionContext(ctx, binanceapi.PositionParams{})
 	if err != nil {
 		return nil, err
 	}
