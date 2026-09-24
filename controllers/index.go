@@ -51,9 +51,6 @@ func (ctrl *IndexController) GetServiceConfig() {
 		"data": map[string]interface{}{
 			"debug": debug,
 
-			"wsFuturesEnable":              systemConfig.WsFuturesEnable,
-			"wsSpotEnable":                 systemConfig.WsSpotEnable,
-			"wsDeliveryEnable":             systemConfig.WsDeliveryEnable,
 			"futuresPositionConvertEnable": systemConfig.FuturesPositionConvertEnable,
 
 			"coinMaxCount":   coinMaxCount,

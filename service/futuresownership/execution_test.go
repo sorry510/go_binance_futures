@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 
 	"github.com/adshao/go-binance/v2/common"
 	"github.com/beego/beego/v2/client/orm"
@@ -97,6 +98,26 @@ func TestExecutorMarksDeterministicExchangeRejectionFailedAndReleasesSlot(t *tes
 	}
 }
 
+func TestExecutorBudgetDeferredIsPreSendFailureWithoutLookup(t *testing.T) {
+	prepareOwnershipDB(t)
+	broker := &fakeOrderBroker{submitErr: binanceapiusage.ErrBudgetDeferred}
+	executor := Executor{Ownership: testService(), Broker: broker}
+	_, err := executor.Execute(context.Background(), OrderRequest{
+		Owner: OwnerAutoStrategy, Symbol: "ADAUSDT", PositionSide: "LONG", Intent: IntentOpen,
+		Side: "BUY", OrderType: "MARKET", Quantity: 1, ClientOrderID: "aut_budget_deferred",
+	})
+	if !errors.Is(err, binanceapiusage.ErrBudgetDeferred) {
+		t.Fatalf("budget defer err=%v want ErrBudgetDeferred", err)
+	}
+	row, loadErr := findTestOrder("aut_budget_deferred")
+	if loadErr != nil || row.Status != OrderFailed {
+		t.Fatalf("pre-send deferred order must become failed: %+v err=%v", row, loadErr)
+	}
+	if broker.submitCalls != 1 || broker.lookupCalls != 0 {
+		t.Fatalf("pre-send defer must not reconcile: submit=%d lookup=%d", broker.submitCalls, broker.lookupCalls)
+	}
+}
+
 func TestExecutorKeepsBinanceUnknownResultFailClosed(t *testing.T) {
 	prepareOwnershipDB(t)
 	broker := &fakeOrderBroker{submitErr: &common.APIError{Code: -1007, Message: "Timeout waiting for response"}, lookupErr: errors.New("not found")}
@@ -129,6 +150,10 @@ func TestExecutorPersistsOwnershipBeforeAndAfterFill(t *testing.T) {
 	}
 	if result.ExchangeOrderID != "123" || broker.submitCalls != 1 {
 		t.Fatalf("unexpected execution result: %+v calls=%d", result, broker.submitCalls)
+	}
+	managedOrder, loadErr := findTestOrder("aut_test")
+	if loadErr != nil || managedOrder.LastReconciledAt <= 0 {
+		t.Fatalf("successful exchange observation must stamp last_reconciled_at: %+v err=%v", managedOrder, loadErr)
 	}
 	position, err := executor.Ownership.GetPosition(context.Background(), OwnerAutoStrategy, "BTCUSDT", "LONG")
 	if err != nil || position.ManagedQty != 2 {

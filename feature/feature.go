@@ -29,7 +29,6 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
-var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var pusher = notify.GetNotifyChannel()
 
 var flagFutures = 0
@@ -80,6 +79,7 @@ func StartTrade(systemConfig *models.Config) {
 		time.Sleep(30 * time.Second)
 		return
 	}
+	cycleAccount := newTradeCycleAccountSnapshot(positions, allOpenOrders)
 	managedPositions, err := syncStrategyExitPositions(positions)
 	if err != nil {
 		logs.Error("sync strategy-exit ownership:", err)
@@ -95,7 +95,7 @@ func StartTrade(systemConfig *models.Config) {
 	/*************************************************挂单已经超过设置的超时时间，撤销挂单 end************************************************************ */
 
 	/*************************************************平仓(止盈或止损)只处理 Ownership 允许的 managed 持仓 start************************************************************ */
-	positionCount, lossCount := accountTradeRiskCounts(positions) // 风险统计继续观察全账户
+	_, lossCount := accountTradeRiskCounts(positions) // 风险统计继续观察全账户
 	for _, managedPosition := range managedPositions {
 		position := managedPosition.Position
 		positionAmtFloat, _ := strconv.ParseFloat(position.Amount, 64)
@@ -379,7 +379,7 @@ func StartTrade(systemConfig *models.Config) {
 		return
 	}
 
-	allMyCount := positionCount + len(allOpenOrders)
+	allMyCount := cycleAccount.AccountSlotCount()
 	if allMyCount >= systemConfig.FutureMaxCount {
 		logs.Info("position + open order: %d, is over max %d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
 		return
@@ -395,11 +395,13 @@ func StartTrade(systemConfig *models.Config) {
 	isOpen := false
 
 	for _, coin := range coins {
+		if cycleAccount.AccountSlotCount() >= systemConfig.FutureMaxCount {
+			logs.Info("position + open order reached max during current cycle: %d/%d", cycleAccount.AccountSlotCount(), systemConfig.FutureMaxCount)
+			break
+		}
 		if _, exist := openBlockedSymbols[coin.Symbol]; exist { // 已有 managed 持仓
 			continue
 		}
-		positionSideLong := "LONG"
-		positionSideShort := "SHORT"
 		symbol := coin.Symbol
 		tickSize := coin.TickSize                            // 交易金额精度
 		stepSize := coin.StepSize                            // 交易数量精度
@@ -417,40 +419,13 @@ func StartTrade(systemConfig *models.Config) {
 			logs.Info("%s:no trading strategy conditions passed", symbol)
 			continue
 		}
-		hasBuyOrderLong := false  // 此币种开多的单
-		hasBuyOrderShort := false // 此币种开空的单
-		for _, item := range allOpenOrders {
-			if item.Symbol == symbol && item.Side == "BUY" && item.PositionSide == "LONG" {
-				hasBuyOrderLong = true
-			}
-			if item.Symbol == symbol && item.Side == "SELL" && item.PositionSide == "SHORT" {
-				hasBuyOrderShort = true
-			}
-			if hasBuyOrderLong && hasBuyOrderShort {
-				break
-			}
-		}
-		hasPositionLong := false  // 此币种的多仓
-		hasPositionShort := false // 此币种的空仓
-		for _, item := range positions {
-			positionAmtFloat, _ := strconv.ParseFloat(item.Amount, 64)
-			positionAmtFloatAbs := math.Abs(positionAmtFloat) // 空单为负数,纠正为绝对值
-			if positionAmtFloatAbs < 0.00000000001 {          // 没有持仓的
-				continue
-			}
-			if item.Symbol == symbol && item.Side == positionSideLong {
-				hasPositionLong = true
-			}
-			if item.Symbol == symbol && item.Side == positionSideShort {
-				hasPositionShort = true
-			}
-			if hasPositionLong && hasPositionShort {
-				break
-			}
-		}
+		hasBuyOrderLong := cycleAccount.HasOpeningOrder(symbol, futures.PositionSideTypeLong)
+		hasBuyOrderShort := cycleAccount.HasOpeningOrder(symbol, futures.PositionSideTypeShort)
+		hasPositionLong := cycleAccount.HasPosition(symbol, futures.PositionSideTypeLong)
+		hasPositionShort := cycleAccount.HasPosition(symbol, futures.PositionSideTypeShort)
 
 		if systemConfig.FutureAllowLong == 1 && hasPositionLong == false && hasBuyOrderLong == false && openResult.CanLong {
-			buyPrice, _, err := binance.GetDepthAvgPrice(symbol, 5) // 平均买价
+			buyPrice, _, err := binance.GetDepthAvgPriceContext(ctx, symbol, 5) // 平均买价
 			if err == nil {
 				buyPrice = utils.GetTradePrecision(buyPrice, tickSize)   // 合理精度的价格
 				quantity := (usdt_float64 / buyPrice) * leverage_float64 // 购买数量
@@ -459,7 +434,7 @@ func StartTrade(systemConfig *models.Config) {
 				UpdateSymbolTradeInfoContext(ctx, coin) // 更新倍率和仓位模式
 
 				if systemConfig.FutureOrderType == "MARKET" {
-					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
+					order, err := submitAutoStrategyOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
 					if err == nil {
 						// 数据库写入订单
 						buyPrice := utils.GetTradePrecision(buyPrice*1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
@@ -489,7 +464,7 @@ func StartTrade(systemConfig *models.Config) {
 						})
 					}
 				} else {
-					order, err := submitAutoStrategyOpen(symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, openResult.LongStrategyHash)
+					order, err := submitAutoStrategyOpen(cycleAccount, symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, openResult.LongStrategyHash)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
@@ -520,9 +495,9 @@ func StartTrade(systemConfig *models.Config) {
 				}
 			}
 		}
-		if systemConfig.FutureAllowShort == 1 && hasPositionShort == false && hasBuyOrderShort == false && openResult.CanShort {
+		if cycleAccount.AccountSlotCount() < systemConfig.FutureMaxCount && systemConfig.FutureAllowShort == 1 && hasPositionShort == false && hasBuyOrderShort == false && openResult.CanShort {
 
-			_, sellPrice, err := binance.GetDepthAvgPrice(symbol, 5) // 平均卖价
+			_, sellPrice, err := binance.GetDepthAvgPriceContext(ctx, symbol, 5) // 平均卖价
 			if err == nil {
 				sellPrice = utils.GetTradePrecision(sellPrice, tickSize)  // 合理精度的价格
 				quantity := (usdt_float64 / sellPrice) * leverage_float64 // 购买数量
@@ -531,7 +506,7 @@ func StartTrade(systemConfig *models.Config) {
 				UpdateSymbolTradeInfoContext(ctx, coin) // 更新倍率和仓位模式
 
 				if systemConfig.FutureOrderType == "MARKET" {
-					order, err := submitAutoStrategyOpen(symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
+					order, err := submitAutoStrategyOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
 					if err == nil {
 						// 数据库写入订单
 						sellPrice := utils.GetTradePrecision(sellPrice*0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
@@ -561,7 +536,7 @@ func StartTrade(systemConfig *models.Config) {
 						})
 					}
 				} else {
-					order, err := submitAutoStrategyOpen(symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit, openResult.ShortStrategyHash)
+					order, err := submitAutoStrategyOpen(cycleAccount, symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit, openResult.ShortStrategyHash)
 					if err == nil {
 						// 数据库写入订单(可能没有买入)
 						insertOpenOrder(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
@@ -988,8 +963,7 @@ func UpdateSymbolTradeInfoContext(ctx context.Context, symbols *models.Symbols) 
 	if symbols.MarginType == "CROSSED" {
 		marginType = futures.MarginTypeCrossed
 	}
-	_, _ = binance.SetLeverageContext(ctx, symbols.Symbol, int(symbols.Leverage)) // 修改合约倍数
-	_ = binance.SetMarginTypeContext(ctx, symbols.Symbol, marginType)             // 修改仓位模式
+	_ = binance.EnsureTradeConfigContext(ctx, symbols.Symbol, marginType, int(symbols.Leverage))
 }
 
 // 更新所有币种的资金费率信息
@@ -1084,7 +1058,8 @@ func GetTransformPositions() (usePositions []types.FuturesPosition, err error) {
 }
 
 func GetTransformPositionsContext(ctx context.Context) (usePositions []types.FuturesPosition, err error) {
-	if wsFuturesUserData == "1" {
+	if futuresUserDataMirrorUsable() {
+		binanceapiusage.RecordOptimization(binanceapiusage.SourceFromContext(ctx), "local_ws_hit", 1)
 		var positions []models.FuturesPosition
 		o := orm.NewOrm()
 		sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where 1 = 1"
@@ -1099,6 +1074,9 @@ func GetTransformPositionsContext(ctx context.Context) (usePositions []types.Fut
 			positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
 			if positionAmtFloatAbs < 0.0000001 {
 				continue
+			}
+			if markPrice, ok := binance.GetFreshFuturesMarkPrice(position.Symbol); ok {
+				position.MarkPrice = markPrice
 			}
 			enterPrice_float64, _ := strconv.ParseFloat(position.EntryPrice, 64)
 			markPrice_float64, _ := strconv.ParseFloat(position.MarkPrice, 64)
@@ -1159,7 +1137,8 @@ func getTransformOpenOrders() (useOrders []types.FuturesOrder, err error) {
 }
 
 func getTransformOpenOrdersContext(ctx context.Context) (useOrders []types.FuturesOrder, err error) {
-	if wsFuturesUserData == "1" {
+	if futuresUserDataMirrorUsable() {
+		binanceapiusage.RecordOptimization(binanceapiusage.SourceFromContext(ctx), "local_ws_hit", 1)
 		var orders []models.FuturesOrder
 		o := orm.NewOrm()
 		sql := "SELECT * FROM `futures_orders` as f where 1 = 1"

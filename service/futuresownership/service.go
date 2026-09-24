@@ -187,6 +187,10 @@ func (s Service) SetOrderStatus(ctx context.Context, clientOrderID, status strin
 	return s.updateOrder(ctx, clientOrderID, orm.Params{"status": status})
 }
 
+func (s Service) MarkOrderReconciled(ctx context.Context, clientOrderID string) error {
+	return s.updateOrder(ctx, clientOrderID, orm.Params{"last_reconciled_at": s.nowMillis()})
+}
+
 func (s Service) updateOrder(ctx context.Context, clientOrderID string, params orm.Params) error {
 	if err := ctx.Err(); err != nil {
 		return err

@@ -1,11 +1,13 @@
 package feature
 
 import (
+	"context"
 	"fmt"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/service/binanceapiusage"
 	futuresownership "go_binance_futures/service/futuresownership"
 	"go_binance_futures/utils"
 	"math"
@@ -40,7 +42,8 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 
 	for _, coin := range coins {
 		logs.Info("notice_futures: ", coin.Symbol)
-		resPrice, errPrice := binance.GetTickerPrice(coin.Symbol)
+		priceCtx := binanceapiusage.WithSource(context.Background(), "notice_auto_order")
+		resPrice, errPrice := binance.GetTickerPriceContext(priceCtx, coin.Symbol)
 		if errPrice != nil {
 			logs.Info("无法进行通知, 还未上线此币种: ", coin.Symbol)
 			continue
@@ -82,13 +85,16 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 			orm.NewOrm().Update(&coin)
 		}
 		if coin.AutoOrder == 1 && canOrder {
-			// 修改仓位模式
+			// Reuse a recently confirmed identical trade configuration. Notice
+			// itself is one-shot, but this also coalesces with Rush/StartTrade.
+			marginType := futures.MarginTypeCrossed
 			if coin.MarginType == "ISOLATED" {
-				binance.SetMarginType(coin.Symbol, futures.MarginTypeIsolated)
-			} else {
-				binance.SetMarginType(coin.Symbol, futures.MarginTypeCrossed)
+				marginType = futures.MarginTypeIsolated
 			}
-			binance.SetLeverage(coin.Symbol, int(coin.Leverage)) // 修改合约倍数
+			configCtx := binanceapiusage.WithSource(context.Background(), "notice_auto_order")
+			if configErr := binance.EnsureTradeConfigContext(configCtx, coin.Symbol, marginType, int(coin.Leverage)); configErr != nil {
+				logs.Warning("notice trade config refresh:", coin.Symbol, configErr)
+			}
 
 			usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64)        // 交易金额
 			leverage_float64 := float64(coin.Leverage)                  // 合约倍数
