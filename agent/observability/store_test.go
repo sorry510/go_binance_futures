@@ -56,8 +56,17 @@ func TestPersistentTraceAndSummary(t *testing.T) {
 	if err := store.InsertObservation(ctx, agentruntime.Observation{Type: "tool_call", TaskID: "task-observe", Skill: "symbol_analysis", StepID: "step-2", StepType: "tool", Tool: "mcp.test", ToolSource: "mcp", ProviderRef: "mcp-server:7", Status: "success", DurationMs: 80, CacheHit: true, EvidenceCount: 2}); err != nil {
 		t.Fatal(err)
 	}
+	if err := store.InsertObservation(ctx, agentruntime.Observation{Type: "chat_message_start", ConversationID: "chat-1", Skill: "symbol_analysis", Status: "error", ErrorType: "chat_start_error", Error: "skill unavailable"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.InsertObservation(ctx, agentruntime.Observation{Type: "llm_call", TaskID: "task-observe", Skill: "symbol_analysis", Provider: "gemini", Model: "gemini-test", Status: "error", ErrorType: "provider_error", Error: "boom"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.InsertObservation(ctx, agentruntime.Observation{Type: "skill_validation", Skill: "draft-skill", Status: "error", ErrorType: "skill_validation_error", Error: "invalid frontmatter"}); err != nil {
+		t.Fatal(err)
+	}
 	traces, err := store.ListTraces(ctx, TraceListOptions{TaskID: "task-observe", Page: 1, Limit: 20})
-	if err != nil || traces.Total != 2 {
+	if err != nil || traces.Total != 3 {
 		t.Fatalf("traces=%+v err=%v", traces, err)
 	}
 	summary, err := store.Summary(ctx, now-5000, now+1000)
@@ -72,6 +81,9 @@ func TestPersistentTraceAndSummary(t *testing.T) {
 	}
 	if len(summary.Tools) != 1 || summary.Tools[0].CacheHitRate != 1 {
 		t.Fatalf("tools=%+v", summary.Tools)
+	}
+	if summary.ChatStartErrors != 1 || summary.LLMErrors != 1 || summary.SkillValidationErrors != 1 {
+		t.Fatalf("finalization errors chat=%d llm=%d skill_validation=%d", summary.ChatStartErrors, summary.LLMErrors, summary.SkillValidationErrors)
 	}
 }
 

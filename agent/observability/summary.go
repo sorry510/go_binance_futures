@@ -92,21 +92,24 @@ type EvidenceAggregate struct {
 }
 
 type Summary struct {
-	StartTime       int64                `json:"start_time"`
-	EndTime         int64                `json:"end_time"`
-	Global          TaskAggregate        `json:"global"`
-	BySkill         []DimensionAggregate `json:"by_skill"`
-	ByModel         []DimensionAggregate `json:"by_model"`
-	ByPrompt        []DimensionAggregate `json:"by_prompt"`
-	BySkillRevision []DimensionAggregate `json:"by_skill_revision"`
-	Context         ContextAggregate     `json:"context"`
-	Tools           []ToolAggregate      `json:"tools"`
-	MCPServers      []MCPServerAggregate `json:"mcp_servers"`
-	Repairs         []NamedCount         `json:"repairs"`
-	Errors          []NamedCount         `json:"errors"`
-	Evidence        EvidenceAggregate    `json:"evidence"`
-	Eval            EvalAggregate        `json:"eval"`
-	ChangeEvents    int64                `json:"change_events"`
+	StartTime             int64                `json:"start_time"`
+	EndTime               int64                `json:"end_time"`
+	Global                TaskAggregate        `json:"global"`
+	BySkill               []DimensionAggregate `json:"by_skill"`
+	ByModel               []DimensionAggregate `json:"by_model"`
+	ByPrompt              []DimensionAggregate `json:"by_prompt"`
+	BySkillRevision       []DimensionAggregate `json:"by_skill_revision"`
+	Context               ContextAggregate     `json:"context"`
+	Tools                 []ToolAggregate      `json:"tools"`
+	MCPServers            []MCPServerAggregate `json:"mcp_servers"`
+	Repairs               []NamedCount         `json:"repairs"`
+	Errors                []NamedCount         `json:"errors"`
+	Evidence              EvidenceAggregate    `json:"evidence"`
+	Eval                  EvalAggregate        `json:"eval"`
+	ChatStartErrors       int64                `json:"chat_start_errors"`
+	LLMErrors             int64                `json:"llm_errors"`
+	SkillValidationErrors int64                `json:"skill_validation_errors"`
+	ChangeEvents          int64                `json:"change_events"`
 }
 
 type taskAccumulator struct {
@@ -207,8 +210,18 @@ func (s Store) Summary(ctx context.Context, start, end int64) (Summary, error) {
 	mcpCalls := map[int64]*toolAccumulator{}
 	validations, withEvidence, evidenceTotal := int64(0), int64(0), int64(0)
 	evalRuns, evalPassed := int64(0), int64(0)
+	chatStartErrors, llmErrors, skillValidationErrors := int64(0), int64(0), int64(0)
 	evalScoreTotal := float64(0)
 	for _, obs := range observations {
+		if obs.Type == "chat_message_start" && obs.Status == "error" {
+			chatStartErrors++
+		}
+		if obs.Type == "llm_call" && obs.Status == "error" {
+			llmErrors++
+		}
+		if obs.Type == "skill_validation" && obs.Status == "error" {
+			skillValidationErrors++
+		}
 		if obs.ErrorType != "" {
 			errorsByType[obs.ErrorType]++
 		}
@@ -268,6 +281,9 @@ func (s Store) Summary(ctx context.Context, start, end int64) (Summary, error) {
 	sort.Slice(result.Tools, func(i, j int) bool { return result.Tools[i].Calls > result.Tools[j].Calls })
 	result.Repairs = finishCounts(repairs)
 	result.Errors = finishCounts(errorsByType)
+	result.ChatStartErrors = chatStartErrors
+	result.LLMErrors = llmErrors
+	result.SkillValidationErrors = skillValidationErrors
 	result.Evidence = EvidenceAggregate{Validations: validations, WithEvidence: withEvidence, CoverageRate: safeRatio(withEvidence, validations)}
 	if validations > 0 {
 		result.Evidence.AverageEvidence = float64(evidenceTotal) / float64(validations)
