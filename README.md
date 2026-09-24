@@ -240,7 +240,7 @@ Skill 注册与治理配置保存在数据库中。Native 与 Portable Skill 分
 ### 任务中心、系统看板与报警历史
 
 - **任务中心**：查看 Agent 治理状态、Runtime 直接交易权限与受控执行开关、Scheduler、Task 历史、模型和 Token 等运行信息。
-- **系统看板**：原“AI → 可观测性”已提升为最上方顶级菜单。在保留长期 Trace、Skill/模型/Tool 指标和变更历史的基础上，增加 Database、Binance REST/Futures WS、Announcement、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime 和 Trade Safety 的只读健康摘要。
+- **系统看板**：原“AI → 可观测性”已提升为最上方顶级菜单。在保留长期 Trace、Skill/模型/Tool 指标和变更历史的基础上，增加 Database、Binance REST/Futures WS、Announcement、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime 和 Trade Safety 的只读健康摘要；同时集中展示 Chat 启动错误、LLM 错误、Skill Studio 校验错误、Binance Used Weight / Order Count、429/418、API Budget 以及 Deferred / Coalesced / Cache / WS 本地命中。
 - **报警链路历史**：查看 Signal 从 Event Bus、Signal Engine、AI 分析/归并到 Notification 或 fallback 的完整处理历史。
 
 ### 系统诊断与日志清理
