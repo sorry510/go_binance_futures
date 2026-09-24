@@ -243,7 +243,7 @@ These settings have been moved out of **Configuration Center**, which now contai
 ### Task Center, System Dashboard, and Alert History
 
 - **Task Center:** governance state, direct Runtime trade permission vs controlled execution state, Scheduler jobs, Task history, model identity, tokens, and task details.
-- **System Dashboard:** the former **AI → Observability** page is now the first top-level menu. It retains long-term traces, per-Skill/model/Tool metrics, and change history, and adds read-only health for Database, Binance REST/Futures WS, Announcement, Market Intelligence, MCP, LLM, Scheduler, Agent Runtime, and Trade Safety.
+- **System Dashboard:** the former **AI → Observability** page is now the first top-level menu. It retains long-term traces, per-Skill/model/Tool metrics, and change history, and adds read-only health for Database, Binance REST/Futures WS, Announcement, Market Intelligence, MCP, LLM, Scheduler, Agent Runtime, and Trade Safety. It also surfaces Chat start errors, LLM errors, Skill Studio validation errors, Binance Used Weight / Order Count, 429/418, the global API Budget, and Deferred / Coalesced / Cache / local-WS optimization hits.
 - **Alert Pipeline History:** the end-to-end Signal path from Event Bus and Signal Engine through AI analysis/triage to Notification or deterministic fallback.
 
 ### System diagnosis and log cleanup

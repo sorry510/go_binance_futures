@@ -302,6 +302,31 @@ unknown execution
 
 ---
 
+### Spot 对齐范围
+
+Spot 侧与 Futures 的高频读路径按适用范围做了对齐，而不是只改 Futures：
+
+- all-market ticker WS 内存快照，stale 时走 1 秒 REST fallback + singleflight；
+- Kline 使用 REST bootstrap + canonical cache + combined Kline WS 增量更新，gap 时失效并重新 bootstrap；
+- ExchangeInfo 使用 12 小时 cache + singleflight；Spot Rush 仅在 ticker WS 已确认新 Symbol 后 force refresh，WS 故障 fallback probe 最快 10 秒一次；
+- Spot SDK HTTP 同样进入统一 Binance API Usage / Budget Transport。
+
+Spot 没有 Futures 的 Position/OpenOrders/User Data/Funding 等账户与衍生品语义，因此不机械复制这些 cache。
+
+---
+
+### 市场数据节流权移交
+
+旧 `market_data_guard` 中固定 **1000 weight/min** 的市场数据节流已删除，只保留 Binance `-1003` 封禁冷却。Kline / 历史数据等正常请求的限速职责统一交给 Global API Budget：
+
+- Normal（<70%）不再叠加旧固定 sleep/1000-weight 阈值；
+- Warning / Critical 时按 P2/P3 优先级主动延后或拒绝；
+- 429/418 / Retry-After 进入 exchange throttle，阻止 retry storm。
+
+这属于“节流权移交”，不是取消限流保护。
+
+---
+
 ## 12. Account / Market cache
 
 当前主要 TTL：
@@ -403,7 +428,9 @@ V4-5 最终验证必须覆盖：
 
 ## 17. 数据库与配置影响
 
-- 无数据库 schema 变更；
-- 不需要执行 `./go_binance_futures sync db`；
+- 无数据库 schema migration，不需要执行 `./go_binance_futures sync db`；
+- `WsFuturesEnable` / `WsSpotEnable` / `WsDeliveryEnable` 已从 Go `Config` 模型和新库初始化 INSERT 删除，基础市场 WS 强制启用；
+- **已有数据库可能继续物理保留** `ws_futures_enable` / `ws_spot_enable` / `ws_delivery_enable` 三个旧列，这是非破坏性升级留下的 orphan columns。运行时不再读取或写入它们，也不要求为此执行 DROP COLUMN；
+- 新数据库不会创建/初始化这三个字段。若对一个保留旧列定义的异常旧库手工删除唯一 `config` 行后再复用初始化流程，应先确认旧列是否允许省略/有默认值；这不是正常升级路径；
 - 不修改 `app.conf`；
 - 新增优化均使用程序内存状态、现有 WS、现有 local tables 与现有 V4-4 observability。

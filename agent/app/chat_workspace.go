@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"go_binance_futures/agent/conversation"
+	"go_binance_futures/agent/observability"
+	agentruntime "go_binance_futures/agent/runtime"
 	generalchat "go_binance_futures/agent/skills/generalchat"
 	"go_binance_futures/agent/task"
 	"go_binance_futures/llm"
@@ -57,8 +59,22 @@ func UpdateConversationChatModel(ctx context.Context, conversationID string, mod
 	}
 	return defaultConversationStore.SetModelConfigID(ctx, conversationID, modelConfigID)
 }
-func StartChatMessageWithOptions(ctx context.Context, conversationID string, options ChatMessageOptions) (*task.Task, error) {
+func StartChatMessageWithOptions(ctx context.Context, conversationID string, options ChatMessageOptions) (item *task.Task, err error) {
 	conversationID = strings.TrimSpace(conversationID)
+	observedSkill := strings.TrimSpace(options.Skill)
+	defer func() {
+		if err == nil {
+			return
+		}
+		observability.Default().Observe(agentruntime.Observation{
+			Type:           "chat_message_start",
+			ConversationID: conversationID,
+			Skill:          observedSkill,
+			Status:         "error",
+			ErrorType:      "chat_start_error",
+			Error:          err.Error(),
+		})
+	}()
 	conv, err := defaultConversationStore.Get(ctx, conversationID)
 	if err != nil {
 		return nil, err
@@ -83,6 +99,7 @@ func StartChatMessageWithOptions(ctx context.Context, conversationID string, opt
 	if err != nil {
 		return nil, err
 	}
+	observedSkill = selectedSkill
 	modelConfigID := conv.ModelConfigID
 	if options.ModelConfigID != nil {
 		modelConfigID = *options.ModelConfigID
