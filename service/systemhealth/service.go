@@ -139,7 +139,7 @@ func (Service) Report(ctx context.Context, options Options) (Report, error) {
 	} else {
 		report.BinanceREST = Check{Status: StatusUnknown, Message: "network check not requested"}
 	}
-	report.FuturesWS = checkFuturesWS(o, cfg, now)
+	report.FuturesWS = checkFuturesWS(o, now)
 	marketSources, sourceErr := (marketintelligence.Service{}).SourceStatuses(ctx)
 	if sourceErr != nil {
 		report.MarketIntelligence = Check{Status: StatusError, Message: "read market intelligence source status failed", LastError: sourceErr.Error()}
@@ -206,10 +206,7 @@ func checkBinanceREST(ctx context.Context, options Options) Check {
 	return Check{Status: StatusHealthy, Message: fmt.Sprintf("reachable in %d ms", time.Since(start).Milliseconds()), LastSuccessAt: time.Now().UnixMilli()}
 }
 
-func checkFuturesWS(o orm.Ormer, cfg models.Config, now time.Time) Check {
-	if cfg.WsFuturesEnable != 1 {
-		return Check{Status: StatusDisabled, Message: "futures market websocket is disabled"}
-	}
+func checkFuturesWS(o orm.Ormer, now time.Time) Check {
 	var latest int64
 	if err := o.Raw("SELECT COALESCE(MAX(updateTime), 0) FROM symbols").QueryRow(&latest); err != nil {
 		return Check{Status: StatusError, Message: "read futures websocket freshness failed", LastError: err.Error()}

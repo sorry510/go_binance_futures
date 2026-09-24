@@ -49,6 +49,8 @@ type ExchangeLimitState struct {
 	UsedWeight1m      int64   `json:"used_weight_1m"`
 	OrderCount10s     int64   `json:"order_count_10s"`
 	OrderCount1m      int64   `json:"order_count_1m"`
+	OrderLimit10s     int64   `json:"order_limit_10s"`
+	OrderLimit1m      int64   `json:"order_limit_1m"`
 	WeightLimit1m     int64   `json:"weight_limit_1m"`
 	WeightPercent1m   float64 `json:"weight_percent_1m"`
 	LimitSource       string  `json:"limit_source"`
@@ -105,6 +107,8 @@ type Snapshot struct {
 	TopEndpointsByWeight []EndpointStat       `json:"top_endpoints_by_weight"`
 	Sources5m            []SourceStat         `json:"sources_5m"`
 	RecentRateLimits     []RateLimitEvent     `json:"recent_rate_limits"`
+	Optimizations        []OptimizationStat   `json:"optimizations"`
+	Budgets              []BudgetSnapshot     `json:"budgets"`
 	RetainedEvents       int                  `json:"retained_events"`
 	DroppedEvents        uint64               `json:"dropped_events"`
 	LastDroppedAt        int64                `json:"last_dropped_at,omitempty"`
@@ -208,6 +212,37 @@ func (c *Collector) SetWeightLimit(product, environment string, limit int64, sou
 	c.limits[key] = state
 }
 
+func (c *Collector) SetOrderLimits(product, environment string, limit10s, limit1m int64) {
+	if limit10s <= 0 && limit1m <= 0 {
+		return
+	}
+	product = normalizeLabel(product, "unknown")
+	environment = normalizeLabel(environment, "mainnet")
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	key := product + "|" + environment
+	state := c.limits[key]
+	state.Product = product
+	state.Environment = environment
+	if limit10s > 0 {
+		state.OrderLimit10s = limit10s
+	}
+	if limit1m > 0 {
+		state.OrderLimit1m = limit1m
+	}
+	c.limits[key] = state
+}
+
+func (c *Collector) limitState(product, environment string) ExchangeLimitState {
+	product = normalizeLabel(product, "unknown")
+	environment = normalizeLabel(environment, "mainnet")
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.limits[product+"|"+environment]
+}
+
 func (c *Collector) Snapshot(now time.Time) Snapshot {
 	if now.IsZero() {
 		now = time.Now()
@@ -221,6 +256,12 @@ func (c *Collector) Snapshot(now time.Time) Snapshot {
 	lastDroppedAt := c.lastDroppedAt
 	limits := make([]ExchangeLimitState, 0, len(c.limits))
 	for _, state := range c.limits {
+		if state.LastResponseAt > 0 && now.Sub(time.UnixMilli(state.LastResponseAt)) > budgetStaleAfter {
+			state.UsedWeight1m = 0
+			state.WeightPercent1m = 0
+			state.OrderCount10s = 0
+			state.OrderCount1m = 0
+		}
 		limits = append(limits, state)
 	}
 	rateLimits := append([]RateLimitEvent(nil), c.rateLimits...)
@@ -233,6 +274,10 @@ func (c *Collector) Snapshot(now time.Time) Snapshot {
 		return limits[i].Product < limits[j].Product
 	})
 	sort.Slice(rateLimits, func(i, j int) bool { return rateLimits[i].At > rateLimits[j].At })
+	budgets := make([]BudgetSnapshot, 0, len(limits))
+	for _, state := range limits {
+		budgets = append(budgets, DefaultBudget().Snapshot(state.Product, state.Environment))
+	}
 
 	return Snapshot{
 		GeneratedAt:          nowMs,
@@ -244,6 +289,8 @@ func (c *Collector) Snapshot(now time.Time) Snapshot {
 		TopEndpointsByWeight: endpointStats(events, nowMs-maxWindow.Milliseconds(), "weight", 20),
 		Sources5m:            sourceStats(events, nowMs-maxWindow.Milliseconds()),
 		RecentRateLimits:     rateLimits,
+		Optimizations:        optimizationSnapshot(),
+		Budgets:              budgets,
 		RetainedEvents:       retainedEvents,
 		DroppedEvents:        droppedEvents,
 		LastDroppedAt:        lastDroppedAt,
@@ -260,6 +307,10 @@ func (c *Collector) ResetForTest() {
 	c.lastDroppedAt = 0
 	c.limits = map[string]ExchangeLimitState{}
 	c.rateLimits = nil
+	resetOptimizationForTest()
+	if c == defaultCollector {
+		defaultBudget.resetForTest()
+	}
 }
 
 func (c *Collector) appendEventLocked(event RequestEvent) {

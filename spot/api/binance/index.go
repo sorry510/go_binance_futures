@@ -5,10 +5,8 @@ import (
 	"strings"
 
 	"go_binance_futures/binanceproxy"
-	"go_binance_futures/models"
 	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/utils"
-	"sort"
 	"strconv"
 	"time"
 
@@ -52,24 +50,53 @@ func GetFuturesAccount() (res *binance.Account, err error) {
 	return res, err
 }
 
-// @see https://binance-docs.github.io/apidocs/futures/cn/#0f3f2d5ee7
+// ExchangeInfo 属于低频静态元数据。全量请求使用长 TTL；新币 Rush 可在
+// ticker WS 已确认 Symbol 出现后调用 GetExchangeInfoFreshContext 强制刷新。
 func GetExchangeInfo(symbols ...string) (res *binance.ExchangeInfo, err error) {
-	res, err = client.NewExchangeInfoService().Symbols(symbols...).Do(context.Background())
+	ctx := binanceapiusage.WithSource(context.Background(), "spot_exchange_info")
+	if len(symbols) > 0 {
+		return loadSpotExchangeInfo(ctx, symbols...)
+	}
+	return getSpotExchangeInfoCached(ctx, func(loadCtx context.Context) (*binance.ExchangeInfo, error) {
+		return loadSpotExchangeInfo(loadCtx)
+	})
+}
+
+func GetExchangeInfoFreshContext(ctx context.Context) (*binance.ExchangeInfo, error) {
+	data, err := loadSpotExchangeInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	storeSpotExchangeInfoCache(data)
+	return data, nil
+}
+
+func loadSpotExchangeInfo(ctx context.Context, symbols ...string) (*binance.ExchangeInfo, error) {
+	res, err := client.NewExchangeInfoService().Symbols(symbols...).Do(ctx)
 	if err != nil {
 		logs.Error(err)
 		return nil, err
 	}
+	var orderLimit10s, orderLimit1m int64
 	for _, rateLimit := range res.RateLimits {
-		if strings.EqualFold(string(rateLimit.RateLimitType), "REQUEST_WEIGHT") &&
+		switch {
+		case strings.EqualFold(string(rateLimit.RateLimitType), "REQUEST_WEIGHT") &&
 			strings.EqualFold(string(rateLimit.Interval), "MINUTE") &&
 			rateLimit.IntervalNum == 1 &&
-			rateLimit.Limit > 0 {
+			rateLimit.Limit > 0:
 			binanceapiusage.Default().SetWeightLimit("spot", "mainnet", rateLimit.Limit, "exchange_info")
-			break
+		case strings.EqualFold(string(rateLimit.RateLimitType), "ORDERS") &&
+			strings.EqualFold(string(rateLimit.Interval), "SECOND") &&
+			rateLimit.IntervalNum == 10:
+			orderLimit10s = rateLimit.Limit
+		case strings.EqualFold(string(rateLimit.RateLimitType), "ORDERS") &&
+			strings.EqualFold(string(rateLimit.Interval), "MINUTE") &&
+			rateLimit.IntervalNum == 1:
+			orderLimit1m = rateLimit.Limit
 		}
 	}
-	// logs.Info(utils.ToJson(res))
-	return res, err
+	binanceapiusage.Default().SetOrderLimits("spot", "mainnet", orderLimit10s, orderLimit1m)
+	return res, nil
 }
 
 // @param symbol 交易对名称，例如：BTCUSDT
@@ -77,25 +104,33 @@ func GetExchangeInfo(symbols ...string) (res *binance.ExchangeInfo, err error) {
 // @param limit 返回的K线数据条数
 // @returns /doc/kine.js
 func GetKlineData(symbol string, interval string, limit int) (klines []*binance.Kline, err error) {
-	klines, err = client.NewKlinesService().Symbol(symbol).Interval(interval).Limit(limit).Do(context.Background())
-	if err != nil {
-		logs.Error(err)
-		return nil, err
-	}
-	sort.Slice(klines, func(i, j int) bool {
-		return klines[i].OpenTime > klines[j].OpenTime // 按照时间降序()
-	})
-	// logs.Info(utils.ToJson(klines))
-	return klines, err
+	return GetKlineDataContext(context.Background(), symbol, interval, limit)
 }
 
-// 获取交易价格
+func GetKlineDataContext(ctx context.Context, symbol string, interval string, limit int) (klines []*binance.Kline, err error) {
+	return getSpotLiveKlineData(ctx, symbol, interval, limit)
+}
+
+// 获取交易价格。全市场 Spot ticker WS fresh 时直接使用本地快照。
 func GetTickerPrice(symbol string) (res []*binance.SymbolPrice, err error) {
-	res, err = client.NewListPricesService().Symbol(symbol).Do(context.Background())
-	if err != nil {
-		logs.Error(err)
-		return nil, err
+	return GetTickerPriceContext(binanceapiusage.WithSource(context.Background(), "spot_runtime"), symbol)
+}
+
+func GetTickerPriceContext(ctx context.Context, symbol string) (res []*binance.SymbolPrice, err error) {
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	source := binanceapiusage.SourceFromContext(ctx)
+	if price, ok := GetFreshSpotTickerPrice(symbol); ok {
+		binanceapiusage.RecordOptimization(source, "local_ws_hit", 1)
+		binanceapiusage.RecordOptimization(source, "prevented_duplicate", 1)
+		return []*binance.SymbolPrice{{Symbol: symbol, Price: price}}, nil
 	}
+	res, err = getSpotTickerRESTCached(ctx, symbol, func(loadCtx context.Context) ([]*binance.SymbolPrice, error) {
+		rows, loadErr := client.NewListPricesService().Symbol(symbol).Do(loadCtx)
+		if loadErr != nil {
+			logs.Error(loadErr)
+		}
+		return rows, loadErr
+	})
 	return res, err
 }
 
@@ -259,7 +294,7 @@ func GetOrder(orderParams OrderParams) (res *binance.Order, err error) {
 // @doc https://developers.binance.com/docs/zh-CN/binance-spot-api-docs/web-socket-streams#%E6%8C%89symbol%E7%9A%84%E5%AE%8C%E6%95%B4ticker
 var flagWsSpot = 0
 
-func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
+func UpdateCoinByWs(retryNum int64) {
 	for {
 		if retryNum > 0 {
 			logs.Info("spot ws restart num:", retryNum)
@@ -270,22 +305,21 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		var o = orm.NewOrm()
 		runErrCh := make(chan error, 1)
 		doneC, _, err := wsSpotAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
-			if systemConfig.WsSpotEnable == 1 {
-				if flagWsSpot == 0 {
-					logs.Info("spot ws start")
-					flagWsSpot = 1
-				}
-			} else {
-				if flagWsSpot == 1 {
-					logs.Info("spot ws stop")
-					flagWsSpot = 0
-				}
-				lock = false
-				return
+			receivedAt := time.Now()
+			// Spot market WebSocket is mandatory infrastructure for runtime prices
+			// and the local spot_symbols market snapshot.
+			storeSpotTickerEvents(event, receivedAt)
+
+			if flagWsSpot == 0 {
+				logs.Info("spot ws start")
+				flagWsSpot = 1
 			}
 			if !lock {
 				lock = true
 				for _, ticker := range event {
+					if ticker == nil {
+						continue
+					}
 					o.Raw(
 						"UPDATE `spot_symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
 						ticker.PriceChangePercent,

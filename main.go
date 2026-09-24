@@ -19,6 +19,7 @@ import (
 	marketintelligence "go_binance_futures/service/marketintelligence"
 	opportunityservice "go_binance_futures/service/opportunity"
 	"go_binance_futures/spot"
+	spotbinance "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"go_binance_futures/webnotification"
 	"os"
@@ -51,7 +52,6 @@ var host, _ = config.String("database::host")
 var port, _ = config.String("database::port")
 var dbname, _ = config.String("database::dbname")
 var dbCollation, _ = config.String("database::collation")
-var wsFuturesUserData, _ = config.String("ws::futures_user_data")
 var tradeKey, _ = config.String("binance::api_key")
 var tradeSecret, _ = config.String("binance::api_secret")
 var binanceTestnet, _ = config.Bool("binance::testnet")
@@ -372,7 +372,11 @@ func main() {
 	// debug
 	if debug == "1" {
 		updateSystemConfig()
-		go binance.UpdateCoinByWs(&SystemConfig, 0)
+		if futuresTradingConfigured() {
+			feature.SyncUserData()
+		}
+		go binance.UpdateCoinByWs(0)
+		go spotbinance.UpdateCoinByWs(0)
 		// web
 		logs.Info("server web index:", "http://localhost:"+webPort+"/"+webIndex+"/index.html")
 		web.Run(":" + webPort)
@@ -380,10 +384,10 @@ func main() {
 	}
 
 	/*******************************************更新基本信息 start****************************************************/
-	// ws 订阅用户数据信息(仓位,当前挂单)
-	// 如果开启，则使用本地数据库管理仓位信息，不再每次请求查询 api 接口，可以有效降低请求频率(openOrders, getPosition)
-	// 但是需要注意，这里面的仓位信息推送，只有仓位发生变化时才会推送数据(当前仓位的盈利多少变化不会推送，需要根据 symbols 表的 close 价格计算)
-	if wsFuturesUserData == "1" && futuresTradingConfigured() {
+	// Futures User Data WS is mandatory whenever Futures credentials are configured.
+	// Position/OpenOrders mirror, reconnect generation gating, and several V4-5 API
+	// optimizations depend on this stream, so it is no longer user-configurable.
+	if futuresTradingConfigured() {
 		feature.SyncUserData()
 	}
 
@@ -405,7 +409,8 @@ func main() {
 	}()
 
 	// websocket 订阅更新币种价格
-	go binance.UpdateCoinByWs(&SystemConfig, 0)
+	go binance.UpdateCoinByWs(0)
+	go spotbinance.UpdateCoinByWs(0)
 	// websocket 订阅全市场强平订单
 	go binance.CollectFuturesLiquidationOrders(&SystemConfig)
 

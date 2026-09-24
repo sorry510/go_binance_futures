@@ -1,12 +1,17 @@
 package feature
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"sync/atomic"
+	"time"
+
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/utils"
 	"math"
 	"strconv"
@@ -18,6 +23,13 @@ import (
 )
 
 var flagFuturesRush = 0
+
+const (
+	futuresRushExchangeInfoRefreshInterval = 2 * time.Second
+	futuresRushFallbackProbeInterval       = 5 * time.Second
+)
+
+var futuresRushExchangeInfoLastRefreshAt atomic.Int64
 
 func TryRush(systemConfig models.Config) {
 	if systemConfig.FutureNewEnable == 1 {
@@ -54,7 +66,32 @@ func TryRush(systemConfig models.Config) {
 		return
 	}
 
-	res, err := binance.GetExchangeInfo()
+	// Do not poll ExchangeInfo every 100ms while a contract is not listed.
+	// The all-market ticker WS is the listing signal; only after at least one
+	// target symbol is visible do we force-refresh ExchangeInfo for lot size.
+	hasFreshListedSymbol := false
+	for _, symbol := range notHasSizeSymbols {
+		if _, ok := binance.GetFreshFuturesTickerPrice(symbol); ok {
+			hasFreshListedSymbol = true
+			break
+		}
+	}
+	probeInterval := futuresRushExchangeInfoRefreshInterval
+	if binance.FuturesTickerWSFresh() {
+		if !hasFreshListedSymbol {
+			return
+		}
+	} else {
+		// WS is disabled/stale: retain Rush functionality, but never return to
+		// the legacy 100ms ExchangeInfo polling loop.
+		probeInterval = futuresRushFallbackProbeInterval
+	}
+	if !reserveFuturesRushExchangeInfoRefresh(probeInterval) {
+		return
+	}
+
+	ctx := binanceapiusage.WithSource(context.Background(), "new_coin_rush")
+	res, err := binance.GetExchangeInfoFreshContext(ctx)
 	if err != nil {
 		logs.Error("GetExchangeInfoError:", err)
 		return
@@ -99,7 +136,8 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		buyPrice, _ = strconv.ParseFloat(coin.ExpectPrice, 64) // 挂单价格
 	} else {
 		// 获取最新的交易价格
-		resPrice, err1 := binance.GetTickerPrice(symbol)
+		priceCtx := binanceapiusage.WithSource(context.Background(), "new_coin_rush")
+		resPrice, err1 := binance.GetTickerPriceContext(priceCtx, symbol)
 		if err1 != nil {
 			logs.Info("还未上线此合约币种,未确定交易价格symbol:", symbol)
 			return nil, err1
@@ -115,14 +153,17 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 	}
 	logs.Info("尝试开始合约抢币symbol:", symbol)
 	logs.Info("预计交易价格为:", buyPrice)
-	// 修改仓位模式
+	// Rush runs every 100ms. Reuse a recently confirmed identical margin/leverage
+	// configuration so failed order attempts do not resend both mutations every tick.
+	marginType := futures.MarginTypeCrossed
 	if coin.MarginType == "ISOLATED" {
-		binance.SetMarginType(symbol, futures.MarginTypeIsolated)
-	} else {
-		binance.SetMarginType(symbol, futures.MarginTypeCrossed)
+		marginType = futures.MarginTypeIsolated
+	}
+	configCtx := binanceapiusage.WithSource(context.Background(), "new_coin_rush")
+	if configErr := binance.EnsureTradeConfigContext(configCtx, symbol, marginType, int(coin.Leverage)); configErr != nil {
+		logs.Warning("rush trade config refresh:", symbol, configErr)
 	}
 
-	binance.SetLeverage(symbol, int(coin.Leverage))          // 修改合约倍数
 	leverage_float64 := float64(coin.Leverage)               // 合约倍数
 	quantity := (usdt_float64 / buyPrice) * leverage_float64 // 购买数量
 	quantity = utils.GetTradePrecision(quantity, stepSize)   // 合理精度的数量
@@ -166,4 +207,20 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *futures.CreateO
 		})
 	}
 	return res, err
+}
+
+func reserveFuturesRushExchangeInfoRefresh(interval time.Duration) bool {
+	if interval <= 0 {
+		interval = futuresRushExchangeInfoRefreshInterval
+	}
+	now := time.Now().UnixMilli()
+	for {
+		last := futuresRushExchangeInfoLastRefreshAt.Load()
+		if last > 0 && now-last < interval.Milliseconds() {
+			return false
+		}
+		if futuresRushExchangeInfoLastRefreshAt.CompareAndSwap(last, now) {
+			return true
+		}
+	}
 }
