@@ -22,7 +22,6 @@ type Config struct {
 	ListenFundingRateEnable                    int     `orm:"column(listen_funding_rate_enable)" json:"listen_funding_rate_enable"`
 	FutureTest                                 int     `orm:"column(future_test)" json:"future_test"`
 	FutureTestNoticeLimitMin                   int     `orm:"column(future_test_notice_limit_min)" json:"future_test_notice_limit_min"`
-	WsFuturesEnable                            int     `orm:"column(ws_futures_enable)" json:"ws_futures_enable"`
 	WsFuturesPriceChangeLimit                  int     `orm:"column(ws_futures_price_change_limit)" json:"ws_futures_price_change_limit"`                                                                             // websocket 价格变动通知的百分比阈值，为0则不启用，超过这个阈值就发送价格变动通知
 	WsFuturesFastMoveEnable                    int     `orm:"column(ws_futures_fast_move_enable)" json:"ws_futures_fast_move_enable"`                                                                                 // websocket 短周期快速波动通知开关
 	WsFuturesFastMoveThreshold                 int     `orm:"column(ws_futures_fast_move_threshold)" json:"ws_futures_fast_move_threshold"`                                                                           // websocket 短周期快速波动阈值(百分比)
@@ -61,8 +60,6 @@ type Config struct {
 	AgentTradeMaxSlippageBps                   int     `orm:"column(agent_trade_max_slippage_bps);default(30)" json:"agent_trade_max_slippage_bps"`
 	AgentTradeCooldownSec                      int     `orm:"column(agent_trade_cooldown_sec);default(900)" json:"agent_trade_cooldown_sec"`
 	AgentTradeProposalTTLMin                   int     `orm:"column(agent_trade_proposal_ttl_min);default(15)" json:"agent_trade_proposal_ttl_min"`
-	WsSpotEnable                               int     `orm:"column(ws_spot_enable)" json:"ws_spot_enable"`
-	WsDeliveryEnable                           int     `orm:"column(ws_delivery_enable)" json:"ws_delivery_enable"`
 	LossMaxCount                               int     `orm:"column(loss_max_count)" json:"loss_max_count"`                                                    // 允许开仓的最大亏损仓位临界值
 	LossAutoScale                              int     `orm:"column(loss_auto_scale)" json:"loss_auto_scale"`                                                  // 是否自动缩放 loss_max_count
 	MarketCondition                            int     `orm:"column(market_condition)" json:"market_condition"`                                                // Market condition code; see types/market_condition.go.

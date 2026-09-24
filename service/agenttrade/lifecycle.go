@@ -10,6 +10,7 @@ import (
 
 	binanceapi "go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 	futuresownership "go_binance_futures/service/futuresownership"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -258,7 +259,8 @@ func currentAgentAccountQty(ctx context.Context, symbol, side string) (float64, 
 	if err := ctx.Err(); err != nil {
 		return 0, err
 	}
-	rows, err := binanceapi.GetPosition(binanceapi.PositionParams{Symbol: strings.ToUpper(strings.TrimSpace(symbol))})
+	ctx = binanceapiusage.WithSource(ctx, "agent_trade")
+	rows, err := binanceapi.GetPositionContext(ctx, binanceapi.PositionParams{Symbol: strings.ToUpper(strings.TrimSpace(symbol))})
 	if err != nil {
 		return 0, fmt.Errorf("load Binance position before agent close: %w", err)
 	}
