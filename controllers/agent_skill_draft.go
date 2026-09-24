@@ -8,7 +8,9 @@ import (
 	"strings"
 
 	agentapp "go_binance_futures/agent/app"
+	"go_binance_futures/agent/observability"
 	"go_binance_futures/agent/portableskill"
+	agentruntime "go_binance_futures/agent/runtime"
 	"go_binance_futures/utils"
 
 	"github.com/beego/beego/v2/server/web"
@@ -152,6 +154,7 @@ func (ctrl *AgentSkillDraftController) UploadFile() {
 
 func (ctrl *AgentSkillDraftController) Validate() {
 	result, err := (portableskill.DraftStore{}).Validate(ctrl.Ctx.Request.Context(), ctrl.draftID())
+	recordSkillDraftValidation(result.Name, err)
 	if err != nil {
 		result.Valid = false
 		if result.Error == "" {
@@ -178,7 +181,9 @@ func (ctrl *AgentSkillDraftController) Publish() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
-	if _, err := drafts.Validate(ctx, ctrl.draftID()); err != nil {
+	validation, err := drafts.Validate(ctx, ctrl.draftID())
+	recordSkillDraftValidation(validation.Name, err)
+	if err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "Draft 校验失败: "+err.Error()))
 		return
 	}
@@ -234,4 +239,22 @@ func draftUploadDefaultPath(filename string) (string, error) {
 
 func (ctrl *AgentSkillDraftController) draftID() string {
 	return strings.TrimSpace(ctrl.Ctx.Input.Param(":draftId"))
+}
+
+func recordSkillDraftValidation(skillName string, err error) {
+	status := "success"
+	errorType := ""
+	errorMessage := ""
+	if err != nil {
+		status = "error"
+		errorType = "skill_validation_error"
+		errorMessage = err.Error()
+	}
+	if strings.TrimSpace(skillName) == "" {
+		skillName = "skill-studio"
+	}
+	observability.Default().Observe(agentruntime.Observation{
+		Type: "skill_validation", Skill: skillName, Status: status,
+		ErrorType: errorType, Error: errorMessage,
+	})
 }
