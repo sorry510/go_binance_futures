@@ -28,7 +28,7 @@ submitOwnedFeatureOpen
 
 可能再次读取相同账户数据。
 
-在 `ws::futures_user_data != 1` 时，这会落到 REST；而当前无 Symbol 的 `GetOpenOrder()` 全账户请求代码标注权重 40。
+当 Futures User Data WS 尚未建立健康 mirror（例如启动/bootstrap、重连后等待 full sync）时，这会落到 REST；而当前无 Symbol 的 `GetOpenOrder()` 全账户请求代码标注权重 40。User Data WS 已改为基础设施，只要 Futures API Key 已配置就强制启动，不再提供开关。
 
 同一轮同时开多个币，会把这个安全检查重复 N 次，是首个必须消除的调用放大点。
 
@@ -84,7 +84,7 @@ Trade Mutation 不缓存：
 
 ## 5. User Data WS 优先
 
-当 `ws::futures_user_data=1` 且数据 freshness 合格时：
+当强制启用的 Futures User Data WS 已完成当前 generation full sync 且数据 freshness 合格时：
 
 ```text
 Positions / Open Orders
@@ -202,3 +202,29 @@ V4-5 后增加：
 - 不降低 Ownership 安全检查。
 - 不把 Trade Mutation 自动 retry 化。
 - 不依赖用户手工计算 API 权重。
+
+## 13. 实施状态
+
+V4-5 已按“静态全仓调用审计 + V4-4 运行数据验证”的方式实施，不只处理当前已开启功能。
+
+已完成的核心项：
+
+- StartTrade 单轮 Account Snapshot 与 target-symbol 最终安全确认；
+- Position / OpenOrders 短 TTL + singleflight + mutation invalidation；
+- generation-aware User Data WS mirror；
+- Futures / Spot ticker WS + 1 秒 REST fallback；
+- Futures / Spot Kline REST bootstrap + WS 增量缓存；
+- Mark Price / Premium Index WS；
+- ExchangeInfo 长 TTL 与 Rush listing-gated refresh；
+- Depth / OI / OI Statistics / Taker Ratio cache；
+- MarginType / Leverage 相同目标状态短时去重；
+- auto_strategy active order 的 User Data WS 本地 reconcile 与 REST 降频；
+- Global P0-P3 Budget Coordinator；
+- 429 / 418、Used Weight、Order Count、Retry-After feedback；
+- System Dashboard 的 Budget 与 Optimization Hits 展示；
+- Funding history DB-first；
+- 历史任务统一归入低优先级 budget。
+
+完整静态调用矩阵、安全边界与保留 REST 的原因见：
+
+`doc/agent/v4/v4-5-implementation-report.md`

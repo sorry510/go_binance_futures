@@ -4,26 +4,33 @@ import (
 	"strings"
 	"testing"
 
+	"go_binance_futures/models"
 	futuresownership "go_binance_futures/service/futuresownership"
 )
 
 func TestShouldRefreshOwnershipAccountQuantities(t *testing.T) {
-	tests := []struct {
-		name                string
-		activeManagedOrders int
-		want                bool
-	}{
-		{name: "stable ownership uses existing snapshot", activeManagedOrders: 0, want: false},
-		{name: "active order refreshes after reconcile", activeManagedOrders: 1, want: true},
-		{name: "multiple active orders still require one refresh", activeManagedOrders: 5, want: true},
+	if shouldRefreshOwnershipAccountQuantities(false) {
+		t.Fatal("stable active order must reuse the current account snapshot")
 	}
+	if !shouldRefreshOwnershipAccountQuantities(true) {
+		t.Fatal("a newly observed fill must refresh account quantities once")
+	}
+}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := shouldRefreshOwnershipAccountQuantities(tt.activeManagedOrders); got != tt.want {
-				t.Fatalf("shouldRefreshOwnershipAccountQuantities(%d) = %v, want %v", tt.activeManagedOrders, got, tt.want)
-			}
-		})
+func TestFuturesOrderObservation(t *testing.T) {
+	observed, err := futuresOrderObservation(models.FuturesOrder{
+		ClientOrderId: "aut_local",
+		OrderId:       "12345",
+		Status:        "PARTIALLY_FILLED",
+		ExecutedQty:   "1.25",
+		AveragePrice:  "99.5",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if observed.ExchangeOrderID != "12345" || observed.ClientOrderID != "aut_local" ||
+		observed.Status != "PARTIALLY_FILLED" || observed.FilledQty != 1.25 || observed.AveragePrice != 99.5 {
+		t.Fatalf("unexpected observed order: %+v", observed)
 	}
 }
 

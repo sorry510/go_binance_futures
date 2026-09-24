@@ -149,6 +149,36 @@ func TestExchangeInfoWeightLimitOverridesReferenceAndPersists(t *testing.T) {
 	}
 }
 
+func TestExchangeLimitsSnapshotClearsStaleResponseCounters(t *testing.T) {
+	collector := &Collector{limits: map[string]ExchangeLimitState{}}
+	now := time.Now()
+	lastResponseAt := now.Add(-budgetStaleAfter - time.Second)
+	collector.Record(RequestEvent{
+		At: lastResponseAt.UnixMilli(), Product: "futures", Environment: "mainnet",
+		Source: "test", RequestType: "read", Method: http.MethodGet,
+		Path: "/fapi/v1/time", StatusCode: 200, EstimatedWeight: 1,
+	}, map[string]string{
+		"used_weight_1m":  "541",
+		"order_count_10s": "7",
+		"order_count_1m":  "12",
+	}, "")
+
+	snapshot := collector.Snapshot(now)
+	if len(snapshot.ExchangeLimits) != 1 {
+		t.Fatalf("limits=%+v", snapshot.ExchangeLimits)
+	}
+	got := snapshot.ExchangeLimits[0]
+	if got.UsedWeight1m != 0 || got.WeightPercent1m != 0 || got.OrderCount10s != 0 || got.OrderCount1m != 0 {
+		t.Fatalf("stale counters were not cleared: %+v", got)
+	}
+	if got.WeightLimit1m <= 0 {
+		t.Fatalf("weight limit should remain available: %+v", got)
+	}
+	if got.LastResponseAt != lastResponseAt.UnixMilli() {
+		t.Fatalf("last response timestamp changed: got=%d want=%d", got.LastResponseAt, lastResponseAt.UnixMilli())
+	}
+}
+
 func TestRequestTypeDistinguishesTradeFromRead(t *testing.T) {
 	cases := []struct {
 		product string

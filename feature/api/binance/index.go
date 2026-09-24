@@ -50,6 +50,39 @@ var wsLatestTickerMap = make(map[string]futures.WsMarketTickerEvent)
 var wsLatestTickerMu sync.Mutex
 var futuresWsFlushOnce sync.Once
 
+type futuresTickerSnapshotEntry struct {
+	Price      string
+	EventTime  int64
+	ReceivedAt int64
+}
+
+var futuresTickerSnapshot = struct {
+	sync.RWMutex
+	Items map[string]futuresTickerSnapshotEntry
+}{Items: make(map[string]futuresTickerSnapshotEntry)}
+var futuresTickerLastFullAt atomic.Int64
+
+const futuresTickerSnapshotMaxAge = 3 * time.Second
+
+func FuturesTickerWSFresh() bool {
+	last := futuresTickerLastFullAt.Load()
+	return last > 0 && time.Since(time.UnixMilli(last)) <= 5*time.Second
+}
+
+var futuresUserDataWSGeneration atomic.Uint64
+var futuresUserDataWSActiveGeneration atomic.Uint64
+
+func FuturesUserDataWSActive() bool {
+	return futuresUserDataWSActiveGeneration.Load() != 0
+}
+
+// FuturesUserDataWSGeneration identifies the currently active User Data stream.
+// It changes after every reconnect so callers can reject a local account mirror
+// that was synchronized against an older stream generation.
+func FuturesUserDataWSGeneration() uint64 {
+	return futuresUserDataWSActiveGeneration.Load()
+}
+
 var futuresClient *futures.Client
 var deliveryClient *delivery.Client
 
@@ -194,13 +227,32 @@ func GetPosition(positionParams PositionParams) (res []*futures.PositionRisk, er
 }
 
 func GetPositionContext(ctx context.Context, positionParams PositionParams) (res []*futures.PositionRisk, err error) {
-	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.PositionRisk, error) {
-		query := client.NewGetPositionRiskService()
-		if positionParams.Symbol != "" {
-			query = query.Symbol(positionParams.Symbol)
+	return getPositionContext(ctx, positionParams, false)
+}
+
+// GetPositionFreshContext bypasses the short all-account cache. Use it only
+// when the caller explicitly needs an authoritative post-reconcile snapshot.
+func GetPositionFreshContext(ctx context.Context, positionParams PositionParams) (res []*futures.PositionRisk, err error) {
+	return getPositionContext(ctx, positionParams, true)
+}
+
+func getPositionContext(ctx context.Context, positionParams PositionParams, fresh bool) ([]*futures.PositionRisk, error) {
+	loader := func(loadCtx context.Context) ([]*futures.PositionRisk, error) {
+		return doFuturesSigned(loadCtx, futuresSignedReadRecvWindow, func(client *futures.Client, callCtx context.Context, opts ...futures.RequestOption) ([]*futures.PositionRisk, error) {
+			query := client.NewGetPositionRiskService()
+			if positionParams.Symbol != "" {
+				query = query.Symbol(positionParams.Symbol)
+			}
+			return query.Do(callCtx, opts...)
+		})
+	}
+	if isAllAccountPositionRequest(positionParams) {
+		if fresh {
+			return getAllPositionsFresh(ctx, loader)
 		}
-		return query.Do(ctx, opts...)
-	})
+		return getAllPositionsCached(ctx, loader)
+	}
+	return loader(ctx)
 }
 
 // @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3
@@ -259,24 +311,80 @@ func GetDepthContext(ctx context.Context, symbol string, limits ...int) (res *fu
 	if len(limits) != 0 {
 		limit = limits[0]
 	}
-	res, err = futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(ctx)
-	if err != nil {
-		noteFuturesAPIError(err)
-		logs.Error(err)
-		return nil, err
-	}
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	res, err = getDepthCached(ctx, symbol, limit, func(loadCtx context.Context) (*futures.DepthResponse, error) {
+		data, loadErr := futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(loadCtx)
+		if loadErr != nil {
+			noteFuturesAPIError(loadErr)
+			logs.Error(loadErr)
+		}
+		return data, loadErr
+	})
 	return res, err
 }
 
 // 获取交易价格
 func GetTickerPrice(symbol string) (res []*futures.SymbolPrice, err error) {
-	res, err = futuresClient.NewListPricesService().Symbol(symbol).Do(context.Background())
-	if err != nil {
-		noteFuturesAPIError(err)
-		logs.Error(err)
-		return nil, err
+	return GetTickerPriceContext(context.Background(), symbol)
+}
+
+func GetTickerPriceContext(ctx context.Context, symbol string) (res []*futures.SymbolPrice, err error) {
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	if price, ok := loadFreshFuturesTickerPrice(symbol, futuresTickerSnapshotMaxAge); ok {
+		source := binanceapiusage.SourceFromContext(ctx)
+		binanceapiusage.RecordOptimization(source, "local_ws_hit", 1)
+		binanceapiusage.RecordOptimization(source, "prevented_duplicate", 1)
+		return []*futures.SymbolPrice{{Symbol: symbol, Price: price}}, nil
 	}
+	res, err = getFuturesTickerRESTCached(ctx, symbol, func(loadCtx context.Context) ([]*futures.SymbolPrice, error) {
+		rows, loadErr := futuresClient.NewListPricesService().Symbol(symbol).Do(loadCtx)
+		if loadErr != nil {
+			noteFuturesAPIError(loadErr)
+			logs.Error(loadErr)
+		}
+		return rows, loadErr
+	})
 	return res, err
+}
+
+func GetFreshFuturesTickerPrice(symbol string) (string, bool) {
+	return loadFreshFuturesTickerPrice(symbol, futuresTickerSnapshotMaxAge)
+}
+
+func storeFuturesTickerEvents(events futures.WsAllMarketTickerEvent, receivedAt time.Time) {
+	if len(events) == 0 {
+		return
+	}
+	receivedMS := receivedAt.UnixMilli()
+	stored := 0
+	futuresTickerSnapshot.Lock()
+	for _, ticker := range events {
+		if ticker == nil || strings.TrimSpace(ticker.Symbol) == "" || strings.TrimSpace(ticker.ClosePrice) == "" {
+			continue
+		}
+		futuresTickerSnapshot.Items[ticker.Symbol] = futuresTickerSnapshotEntry{
+			Price: ticker.ClosePrice, EventTime: ticker.Time, ReceivedAt: receivedMS,
+		}
+		stored++
+	}
+	futuresTickerSnapshot.Unlock()
+	if stored > 0 {
+		futuresTickerLastFullAt.Store(receivedMS)
+	}
+}
+
+func loadFreshFuturesTickerPrice(symbol string, maxAge time.Duration) (string, bool) {
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	futuresTickerSnapshot.RLock()
+	entry, ok := futuresTickerSnapshot.Items[symbol]
+	futuresTickerSnapshot.RUnlock()
+	if !ok || strings.TrimSpace(entry.Price) == "" || entry.ReceivedAt <= 0 {
+		return "", false
+	}
+	if maxAge > 0 && time.Since(time.UnixMilli(entry.ReceivedAt)) > maxAge {
+		return "", false
+	}
+	return entry.Price, true
 }
 
 // limit 5, 10, 20, 50, 100, 500, 1000
@@ -290,10 +398,8 @@ func GetDepthAvgPriceContext(ctx context.Context, symbol string, limits ...int) 
 	if len(limits) != 0 {
 		limit = limits[0]
 	}
-	res, err := futuresClient.NewDepthService().Symbol(symbol).Limit(limit).Do(ctx)
+	res, err := GetDepthContext(ctx, symbol, limit)
 	if err != nil {
-		noteFuturesAPIError(err)
-		logs.Error(err)
 		return 0.0, 0.0, err
 	}
 	buyPrice, sellPrice = avgPrice(res)
@@ -506,7 +612,7 @@ type OwnedOrderParams struct {
 // CreateOwnedOrder is the common order primitive for V3-5 ownership-aware execution.
 // Ownership must be persisted by the caller before this function is invoked.
 func CreateOwnedOrder(ctx context.Context, params OwnedOrderParams) (*futures.CreateOrderResponse, error) {
-	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CreateOrderResponse, error) {
+	res, err := doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CreateOrderResponse, error) {
 		service := client.NewCreateOrderService().
 			Symbol(params.Symbol).
 			Side(params.Side).
@@ -523,6 +629,10 @@ func CreateOwnedOrder(ctx context.Context, params OwnedOrderParams) (*futures.Cr
 		}
 		return service.Do(ctx, opts...)
 	})
+	// The mutation may have reached Binance even when the caller receives an
+	// uncertain transport error, so never serve a pre-mutation account snapshot.
+	InvalidateAccountReadCache()
+	return res, err
 }
 
 func GetOrderByClientOrderID(ctx context.Context, symbol, clientOrderID string) (*futures.Order, error) {
@@ -535,7 +645,7 @@ func GetOrderByClientOrderID(ctx context.Context, symbol, clientOrderID string) 
 // dedicated Algo Order API. Since 2026-08-17 STOP/TP families are rejected by
 // the normal /fapi/v1/order endpoint with -4120.
 func CreateOwnedAlgoOrder(ctx context.Context, params OwnedOrderParams) (*futures.CreateAlgoOrderResp, error) {
-	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CreateAlgoOrderResp, error) {
+	res, err := doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CreateAlgoOrderResp, error) {
 		service := client.NewCreateAlgoOrderService().
 			Symbol(params.Symbol).
 			Side(params.Side).
@@ -551,6 +661,8 @@ func CreateOwnedAlgoOrder(ctx context.Context, params OwnedOrderParams) (*future
 		}
 		return service.Do(ctx, opts...)
 	})
+	InvalidateAccountReadCache()
+	return res, err
 }
 
 func GetAlgoOrderByClientOrderID(ctx context.Context, clientOrderID string) (*futures.GetAlgoOrderResp, error) {
@@ -566,9 +678,11 @@ func GetOrderByOrderID(ctx context.Context, symbol string, orderID int64) (*futu
 }
 
 func CancelAlgoOrder(ctx context.Context, algoID int64) (*futures.CancelAlgoOrderResp, error) {
-	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CancelAlgoOrderResp, error) {
+	res, err := doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CancelAlgoOrderResp, error) {
 		return client.NewCancelAlgoOrderService().AlgoID(algoID).Do(ctx, opts...)
 	})
+	InvalidateAccountReadCache()
+	return res, err
 }
 
 // 撤销订单
@@ -578,9 +692,11 @@ func CancelOrder(symbol string, orderId int64) (res *futures.CancelOrderResponse
 }
 
 func CancelOrderContext(ctx context.Context, symbol string, orderId int64) (res *futures.CancelOrderResponse, err error) {
-	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CancelOrderResponse, error) {
+	res, err = doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.CancelOrderResponse, error) {
 		return client.NewCancelOrderService().Symbol(symbol).OrderID(orderId).Do(ctx, opts...)
 	})
+	InvalidateAccountReadCache()
+	return res, err
 }
 
 // 交易合约倍数
@@ -592,9 +708,14 @@ func SetLeverage(symbol string, leverage int) (res *futures.SymbolLeverage, err 
 }
 
 func SetLeverageContext(ctx context.Context, symbol string, leverage int) (res *futures.SymbolLeverage, err error) {
-	return doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.SymbolLeverage, error) {
+	res, err = doFuturesSigned(ctx, futuresSignedTradeRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.SymbolLeverage, error) {
 		return client.NewChangeLeverageService().Symbol(symbol).Leverage(leverage).Do(ctx, opts...)
 	})
+	if err == nil {
+		InvalidateAccountReadCache()
+		InvalidateTradeConfig(symbol)
+	}
+	return res, err
 }
 
 // 合约模式 全仓与 逐仓
@@ -609,6 +730,10 @@ func SetMarginTypeContext(ctx context.Context, symbol string, marginType futures
 		err := client.NewChangeMarginTypeService().Symbol(symbol).MarginType(marginType).Do(ctx, opts...)
 		return struct{}{}, err
 	})
+	if err == nil {
+		InvalidateAccountReadCache()
+		InvalidateTradeConfig(symbol)
+	}
 	return err
 }
 
@@ -665,38 +790,88 @@ func GetOpenOrder(symbols ...string) (res []*futures.Order, err error) {
 }
 
 func GetOpenOrderContext(ctx context.Context, symbols ...string) (res []*futures.Order, err error) {
-	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.Order, error) {
-		service := client.NewListOpenOrdersService()
-		if len(symbols) > 0 {
-			service = service.Symbol(symbols[0])
-		}
-		return service.Do(ctx, opts...)
-	})
+	return getOpenOrderContext(ctx, false, symbols...)
 }
 
-// 获取交易规则和交易对
-// @see https://binance-docs.github.io/apidocs/futures/cn/#0f3f2d5ee7
+// GetOpenOrderFreshContext bypasses the short all-account cache. Symbol-specific
+// reads are already uncached and therefore naturally authoritative.
+func GetOpenOrderFreshContext(ctx context.Context, symbols ...string) (res []*futures.Order, err error) {
+	return getOpenOrderContext(ctx, true, symbols...)
+}
+
+func getOpenOrderContext(ctx context.Context, fresh bool, symbols ...string) ([]*futures.Order, error) {
+	loader := func(loadCtx context.Context) ([]*futures.Order, error) {
+		return doFuturesSigned(loadCtx, futuresSignedReadRecvWindow, func(client *futures.Client, callCtx context.Context, opts ...futures.RequestOption) ([]*futures.Order, error) {
+			service := client.NewListOpenOrdersService()
+			if len(symbols) > 0 && strings.TrimSpace(symbols[0]) != "" {
+				service = service.Symbol(strings.ToUpper(strings.TrimSpace(symbols[0])))
+			}
+			return service.Do(callCtx, opts...)
+		})
+	}
+	if len(symbols) == 0 || strings.TrimSpace(symbols[0]) == "" {
+		if fresh {
+			return getAllOpenOrdersFresh(ctx, loader)
+		}
+		return getAllOpenOrdersCached(ctx, loader)
+	}
+	return loader(ctx)
+}
+
+// 获取交易规则和交易对。ExchangeInfo 属于低频静态元数据，常规调用使用长 TTL。
+// 新币 Rush 在 ticker WS 已确认 Symbol 出现后，可显式调用 GetExchangeInfoFreshContext
+// 绕过缓存完成一次精度刷新。
 func GetExchangeInfo() (res *futures.ExchangeInfo, err error) {
-	res, err = futuresClient.NewExchangeInfoService().Do(context.Background())
+	ctx := binanceapiusage.WithSource(context.Background(), "exchange_info")
+	return getFuturesExchangeInfoCached(ctx, loadFuturesExchangeInfo)
+}
+
+func GetExchangeInfoFreshContext(ctx context.Context) (*futures.ExchangeInfo, error) {
+	data, err := loadFuturesExchangeInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	storeFuturesExchangeInfoCache(data)
+	return data, nil
+}
+
+func loadFuturesExchangeInfo(ctx context.Context) (*futures.ExchangeInfo, error) {
+	res, err := futuresClient.NewExchangeInfoService().Do(ctx)
 	if err != nil {
 		noteFuturesAPIError(err)
 		return nil, err
+	}
+	applyFuturesExchangeInfoLimit(res)
+	return res, nil
+}
+
+func applyFuturesExchangeInfoLimit(res *futures.ExchangeInfo) {
+	if res == nil {
+		return
 	}
 	environment := "mainnet"
 	if testnet {
 		environment = "testnet"
 	}
+	var orderLimit10s, orderLimit1m int64
 	for _, rateLimit := range res.RateLimits {
-		if strings.EqualFold(rateLimit.RateLimitType, "REQUEST_WEIGHT") &&
+		switch {
+		case strings.EqualFold(rateLimit.RateLimitType, "REQUEST_WEIGHT") &&
 			strings.EqualFold(rateLimit.Interval, "MINUTE") &&
 			rateLimit.IntervalNum == 1 &&
-			rateLimit.Limit > 0 {
+			rateLimit.Limit > 0:
 			binanceapiusage.Default().SetWeightLimit("futures", environment, rateLimit.Limit, "exchange_info")
-			break
+		case strings.EqualFold(rateLimit.RateLimitType, "ORDERS") &&
+			strings.EqualFold(rateLimit.Interval, "SECOND") &&
+			rateLimit.IntervalNum == 10:
+			orderLimit10s = rateLimit.Limit
+		case strings.EqualFold(rateLimit.RateLimitType, "ORDERS") &&
+			strings.EqualFold(rateLimit.Interval, "MINUTE") &&
+			rateLimit.IntervalNum == 1:
+			orderLimit1m = rateLimit.Limit
 		}
 	}
-	// logs.Info(utils.ToJson(res))
-	return res, err
+	binanceapiusage.Default().SetOrderLimits("futures", environment, orderLimit10s, orderLimit1m)
 }
 
 type FundingRateParams struct {
@@ -714,9 +889,15 @@ func GetFundingRate(params FundingRateParams) (res []*futures.PremiumIndex, err 
 }
 
 func GetFundingRateContext(ctx context.Context, params FundingRateParams) (res []*futures.PremiumIndex, err error) {
+	symbol := strings.ToUpper(strings.TrimSpace(params.Symbol))
+	if rows, ok := loadFreshFuturesPremiumIndex(symbol, futuresMarkPriceMaxAge); ok {
+		recordMarkPriceWSHit(binanceapiusage.SourceFromContext(ctx))
+		return rows, nil
+	}
+
 	service := futuresClient.NewPremiumIndexService()
-	if params.Symbol != "" {
-		service = service.Symbol(params.Symbol)
+	if symbol != "" {
+		service = service.Symbol(symbol)
 	}
 	res, err = service.Do(ctx)
 	if err != nil {
@@ -730,11 +911,14 @@ func GetOpenInterest(symbol string) (res *futures.OpenInterest, err error) {
 }
 
 func GetOpenInterestContext(ctx context.Context, symbol string) (res *futures.OpenInterest, err error) {
-	res, err = futuresClient.NewGetOpenInterestService().Symbol(symbol).Do(ctx)
-	if err != nil {
-		noteFuturesAPIError(err)
-	}
-	return res, err
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	return getOpenInterestCached(ctx, symbol, func(loadCtx context.Context) (*futures.OpenInterest, error) {
+		data, loadErr := futuresClient.NewGetOpenInterestService().Symbol(symbol).Do(loadCtx)
+		if loadErr != nil {
+			noteFuturesAPIError(loadErr)
+		}
+		return data, loadErr
+	})
 }
 
 func GetOpenInterestStatistics(symbol, period string, limit int) (res []*futures.OpenInterestStatistic, err error) {
@@ -742,11 +926,15 @@ func GetOpenInterestStatistics(symbol, period string, limit int) (res []*futures
 }
 
 func GetOpenInterestStatisticsContext(ctx context.Context, symbol, period string, limit int) (res []*futures.OpenInterestStatistic, err error) {
-	res, err = futuresClient.NewOpenInterestStatisticsService().Symbol(symbol).Period(period).Limit(limit).Do(ctx)
-	if err != nil {
-		noteFuturesAPIError(err)
-	}
-	return res, err
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	period = strings.TrimSpace(period)
+	return getOpenInterestStatsCached(ctx, symbol, period, limit, func(loadCtx context.Context) ([]*futures.OpenInterestStatistic, error) {
+		data, loadErr := futuresClient.NewOpenInterestStatisticsService().Symbol(symbol).Period(period).Limit(limit).Do(loadCtx)
+		if loadErr != nil {
+			noteFuturesAPIError(loadErr)
+		}
+		return data, loadErr
+	})
 }
 
 func GetTakerLongShortRatio(symbol, period string, limit uint32) (res []*futures.TakerLongShortRatio, err error) {
@@ -754,11 +942,15 @@ func GetTakerLongShortRatio(symbol, period string, limit uint32) (res []*futures
 }
 
 func GetTakerLongShortRatioContext(ctx context.Context, symbol, period string, limit uint32) (res []*futures.TakerLongShortRatio, err error) {
-	res, err = futuresClient.NewTakerLongShortRatioService().Symbol(symbol).Period(period).Limit(limit).Do(ctx)
-	if err != nil {
-		noteFuturesAPIError(err)
-	}
-	return res, err
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	period = strings.TrimSpace(period)
+	return getTakerRatioCached(ctx, symbol, period, limit, func(loadCtx context.Context) ([]*futures.TakerLongShortRatio, error) {
+		data, loadErr := futuresClient.NewTakerLongShortRatioService().Symbol(symbol).Period(period).Limit(limit).Do(loadCtx)
+		if loadErr != nil {
+			noteFuturesAPIError(loadErr)
+		}
+		return data, loadErr
+	})
 }
 
 // 资金费率历史记录(整点时刻4或8h的历史记录) 限制 500/5min/IP
@@ -841,20 +1033,20 @@ func GetHistoricalFundingRates(ctx context.Context, symbol string, startTime, en
 // websocket 订阅全市场最新价格变化，只有币价格变化才会推送(24小时变化)
 var flagWsFutures = 0
 
-func startFuturesWsFlushTask(systemConfig *models.Config) {
+func startFuturesWsFlushTask() {
 	futuresWsFlushOnce.Do(func() {
 		go func() {
 			ticker := time.NewTicker(futuresWsFlushInterval)
 			defer ticker.Stop()
 
 			for range ticker.C {
-				flushLatestWsTickers(systemConfig)
+				flushLatestWsTickers()
 			}
 		}()
 	})
 }
 
-func flushLatestWsTickers(systemConfig *models.Config) {
+func flushLatestWsTickers() {
 	wsLatestTickerMu.Lock()
 	if len(wsLatestTickerMap) == 0 {
 		wsLatestTickerMu.Unlock()
@@ -994,10 +1186,10 @@ func batchUpdateSymbolsUpsertClause() string {
 		"`type` = excluded.`type`"
 }
 
-func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
+func UpdateCoinByWs(retryNum int64) {
 	logs.Info("futures websocket start: auto update symbols price")
 
-	startFuturesWsFlushTask(systemConfig)
+	startFuturesWsFlushTask()
 
 	for {
 		if retryNum > 0 {
@@ -1011,21 +1203,22 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		// futures.WebsocketKeepalive = true
 
 		doneC, _, err := wsFuturesAllMarketTickerServe(func(event futures.WsAllMarketTickerEvent) {
-			lastRecvAt.Store(time.Now().UnixMilli())
+			nowMs := time.Now().UnixMilli()
+			lastRecvAt.Store(nowMs)
 			lastAlertAt.Store(0)
-			if systemConfig.WsFuturesEnable == 1 {
-				if flagWsFutures == 0 {
-					logs.Info("futures ws start")
-					flagWsFutures = 1
-				}
-			} else {
-				if flagWsFutures == 1 {
-					logs.Info("futures ws stop")
-					flagWsFutures = 0
-				}
-				return
+
+			// Futures market WebSocket is mandatory infrastructure. Runtime ticker
+			// reads, DB market state and the event bus all depend on this stream.
+			storeFuturesTickerEvents(event, time.UnixMilli(nowMs))
+
+			if flagWsFutures == 0 {
+				logs.Info("futures ws start")
+				flagWsFutures = 1
 			}
 			for _, ticker := range event {
+				if ticker == nil {
+					continue
+				}
 				wsLatestTickerMu.Lock()
 				wsLatestTickerMap[ticker.Symbol] = *ticker
 				wsLatestTickerMu.Unlock()
@@ -1058,7 +1251,7 @@ func UpdateCoinByWs(systemConfig *models.Config, retryNum int64) {
 		}
 
 		lastRecvAt.Store(time.Now().UnixMilli())
-		go watchFuturesWsNoData(systemConfig, &lastRecvAt, &lastAlertAt, monitorStopC)
+		go watchFuturesWsNoData(&lastRecvAt, &lastAlertAt, monitorStopC)
 
 		<-doneC
 		close(monitorStopC)
@@ -1094,7 +1287,7 @@ func publishFuturesPriceTick(ticker *futures.WsMarketTickerEvent) {
 	))
 }
 
-func watchFuturesWsNoData(systemConfig *models.Config, lastRecvAt *atomic.Int64, lastAlertAt *atomic.Int64, stopC <-chan struct{}) {
+func watchFuturesWsNoData(lastRecvAt *atomic.Int64, lastAlertAt *atomic.Int64, stopC <-chan struct{}) {
 	ticker := time.NewTicker(wsNoDataCheckInterval)
 	defer ticker.Stop()
 
@@ -1103,10 +1296,6 @@ func watchFuturesWsNoData(systemConfig *models.Config, lastRecvAt *atomic.Int64,
 		case <-stopC:
 			return
 		case <-ticker.C:
-			if systemConfig.WsFuturesEnable != 1 {
-				continue
-			}
-
 			nowMs := time.Now().UnixMilli()
 			lastRecvMs := lastRecvAt.Load()
 			if lastRecvMs <= 0 || nowMs-lastRecvMs < wsNoDataAlertThreshold.Milliseconds() {
@@ -1177,6 +1366,7 @@ func UpdateListenKey(listenKey string) (err error) {
 // @see https://binance-docs.github.io/apidocs/futures/cn/#listenkey-user_stream
 // 不能实时推送仓位信息，只有仓位变化才会推送, 结合查询接口联合使用
 func WsUserData() {
+	generation := futuresUserDataWSGeneration.Add(1)
 	listenKey, err := GetListenKey()
 	if err != nil {
 		logs.Error("GetListenKey:", err.Error())
@@ -1187,6 +1377,7 @@ func WsUserData() {
 	doneC, _, err := wsFuturesUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
 		if event.Event == "ACCOUNT_UPDATE" {
 			for _, v := range event.AccountUpdate.Positions {
+				InvalidateTradeConfig(v.Symbol)
 				floatAmount, _ := strconv.ParseFloat(v.Amount, 64)
 				var position models.FuturesPosition
 				var symbols models.Symbols
@@ -1240,6 +1431,7 @@ func WsUserData() {
 			}
 		} else if event.Event == "ACCOUNT_CONFIG_UPDATE" {
 			config := event.AccountConfigUpdate
+			InvalidateTradeConfig(config.Symbol)
 			if config.Leverage == 0 {
 				// 其它推送不处理
 				return
@@ -1256,24 +1448,40 @@ func WsUserData() {
 			UpdateListenKey(listenKey)
 		}
 	}, func(err error) {
+		futuresUserDataWSActiveGeneration.CompareAndSwap(generation, 0)
 		logs.Error("futures_user_data ws run error:", err)
-		time.Sleep(time.Second * 3) // 3 秒间隔
-		WsUserData()
 	})
+
+	if err != nil {
+		futuresUserDataWSActiveGeneration.CompareAndSwap(generation, 0)
+		logs.Error("futures_user_data ws start error:", err)
+		time.Sleep(time.Second * 30) // 30 秒间隔
+		go WsUserData()
+		return
+	}
+
+	keepaliveDone := make(chan struct{})
 	go func() {
+		ticker := time.NewTicker(time.Minute * 20) // key 1小时过期，20分钟续期一次
+		defer ticker.Stop()
 		for {
-			time.Sleep(time.Minute * 20) // key 1小时过期， 20 分钟更新一次
-			UpdateListenKey(listenKey)
+			select {
+			case <-ticker.C:
+				if keepaliveErr := UpdateListenKey(listenKey); keepaliveErr != nil {
+					logs.Warning("futures_user_data listenKey keepalive:", keepaliveErr)
+				}
+			case <-keepaliveDone:
+				return
+			}
 		}
 	}()
 
-	if err != nil {
-		logs.Error("futures_user_data ws start error:", err)
-		time.Sleep(time.Second * 30) // 30 秒间隔
-		WsUserData()
-		return
-	}
+	futuresUserDataWSActiveGeneration.Store(generation)
 	<-doneC
+	close(keepaliveDone)
+	futuresUserDataWSActiveGeneration.CompareAndSwap(generation, 0)
+	time.Sleep(3 * time.Second)
+	go WsUserData()
 }
 
 // @see https://developers.binance.com/docs/zh-CN/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams

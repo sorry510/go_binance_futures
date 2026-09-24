@@ -11,6 +11,7 @@ import (
 
 	fu "go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 	futuresownership "go_binance_futures/service/futuresownership"
 	spot "go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
@@ -311,7 +312,9 @@ func validateEatRateFuturesOpenSlot(ctx context.Context, row models.EatRateSymbo
 	// This legacy controller used to bypass V3-5. Preserve the same SHORT
 	// strategy but refuse to merge with an unmanaged/account position or open
 	// order, otherwise ownership could no longer distinguish the quantities.
-	positions, err := fu.GetPosition(fu.PositionParams{Symbol: strings.ToUpper(strings.TrimSpace(row.FuturesSymbol))})
+	ctx = binanceapiusage.WithSource(ctx, "funding_rate")
+	symbol := strings.ToUpper(strings.TrimSpace(row.FuturesSymbol))
+	positions, err := fu.GetPositionContext(ctx, fu.PositionParams{Symbol: symbol})
 	if err != nil {
 		return err
 	}
@@ -321,7 +324,9 @@ func validateEatRateFuturesOpenSlot(ctx context.Context, row models.EatRateSymbo
 			return fmt.Errorf("%s SHORT already exists in account; funding-rate ownership will not merge it", row.FuturesSymbol)
 		}
 	}
-	openOrders, err := fu.GetOpenOrder()
+	// Symbol-specific openOrders preserves the ownership safety check without
+	// paying the high account-wide openOrders weight for every EatRate attempt.
+	openOrders, err := fu.GetOpenOrderContext(ctx, symbol)
 	if err != nil {
 		return err
 	}
@@ -398,7 +403,8 @@ func submitEatRateFuturesClose(ctx context.Context, row models.EatRateSymbols, r
 
 // 现货价格
 func getSpotPrice(symbol string) (float64, error) {
-	spotPrice, err := spot.GetTickerPrice(symbol)
+	ctx := binanceapiusage.WithSource(context.Background(), "funding_rate")
+	spotPrice, err := spot.GetTickerPriceContext(ctx, symbol)
 	if err != nil {
 		return 0.0, err
 	}
@@ -408,7 +414,8 @@ func getSpotPrice(symbol string) (float64, error) {
 
 // 合约价格
 func getFuturesPrice(symbol string) (float64, error) {
-	futuresPrice, err := fu.GetTickerPrice(symbol)
+	ctx := binanceapiusage.WithSource(context.Background(), "funding_rate")
+	futuresPrice, err := fu.GetTickerPriceContext(ctx, symbol)
 	if err != nil {
 		return 0.0, err
 	}

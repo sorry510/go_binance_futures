@@ -34,7 +34,7 @@ func setupHealthDB(t *testing.T, now time.Time) orm.Ormer {
 		t.Fatal(err)
 	}
 	o := orm.NewOrm()
-	cfg := models.Config{ID: 1, Version: appversion.DatabaseSchemaVersion, WsFuturesEnable: 1, AgentOpportunityWatchEnable: 1, AgentOpportunityScanIntervalMin: 60}
+	cfg := models.Config{ID: 1, Version: appversion.DatabaseSchemaVersion, AgentOpportunityWatchEnable: 1, AgentOpportunityScanIntervalMin: 60}
 	if _, err := o.Insert(&cfg); err != nil {
 		t.Fatal(err)
 	}
