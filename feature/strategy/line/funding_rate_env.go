@@ -6,8 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"context"
+
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
+	"go_binance_futures/service/binanceapiusage"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -43,14 +46,16 @@ func loadFundingRateEnv(symbol string) FundingRateData {
 		return cached.Data
 	}
 
-	data, err := fetchSettledFundingRateEnv(symbol, now)
+	data := loadFundingRateEnvFromDB(symbol, now.UnixMilli())
 	expiry := now.Add(30 * time.Minute)
-	if err != nil || len(data.Data) == 0 {
+	if !localFundingRateEnvUsable(data, now) {
+		remote, err := fetchSettledFundingRateEnv(symbol, now)
 		if err != nil {
 			logs.Warn("load settled funding history failed for %s: %v", symbol, err)
+			expiry = now.Add(5 * time.Minute)
+		} else if len(remote.Data) > 0 {
+			data = remote
 		}
-		data = loadFundingRateEnvFromDB(symbol, now.UnixMilli())
-		expiry = now.Add(5 * time.Minute)
 	}
 
 	fundingRateEnvCache.Lock()
@@ -59,8 +64,17 @@ func loadFundingRateEnv(symbol string) FundingRateData {
 	return data
 }
 
+func localFundingRateEnvUsable(data FundingRateData, now time.Time) bool {
+	if len(data.Data) < fundingRateEnvLimit || len(data.Time) == 0 {
+		return false
+	}
+	latest := data.Time[0]
+	return latest > 0 && now.Sub(time.UnixMilli(latest)) <= 12*time.Hour
+}
+
 func fetchSettledFundingRateEnv(symbol string, now time.Time) (FundingRateData, error) {
-	rows, err := binance.GetFundingRateHistory(binance.FundingRateParams{
+	ctx := binanceapiusage.WithSource(context.Background(), "funding_rate_history")
+	rows, err := binance.GetFundingRateHistoryContext(ctx, binance.FundingRateParams{
 		Symbol:    symbol,
 		StartTime: now.Add(-14 * 24 * time.Hour).UnixMilli(),
 		EndTime:   now.UnixMilli(),

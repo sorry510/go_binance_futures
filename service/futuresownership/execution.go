@@ -148,6 +148,13 @@ func (e Executor) Execute(ctx context.Context, request OrderRequest) (ExchangeOr
 	}
 	result, submitErr := e.Broker.Submit(ctx, request, clientID)
 	if submitErr != nil {
+		// The global V4-5 budget rejects before the base HTTP RoundTripper is
+		// invoked. Therefore Binance definitely did not receive this mutation;
+		// do not enter the uncertain-submit lookup/reconcile path.
+		if errors.Is(submitErr, binanceapiusage.ErrBudgetDeferred) {
+			_ = e.Ownership.SetOrderStatus(ctx, clientID, OrderFailed)
+			return ExchangeOrder{}, fmt.Errorf("managed order deferred before exchange submission: %w", submitErr)
+		}
 		if deterministicSubmitRejection(submitErr) {
 			_ = e.Ownership.SetOrderStatus(ctx, clientID, OrderFailed)
 			return ExchangeOrder{}, fmt.Errorf("managed order rejected by exchange: %w", submitErr)
@@ -193,6 +200,10 @@ func (e Executor) Reconcile(ctx context.Context, symbol, clientOrderID string) (
 	return e.applyExchange(ctx, clientOrderID, result)
 }
 
+func (e Executor) ApplyObservedExchange(ctx context.Context, clientOrderID string, result ExchangeOrder) (ExchangeOrder, error) {
+	return e.applyExchange(ctx, clientOrderID, result)
+}
+
 func (e Executor) applyExchange(ctx context.Context, clientOrderID string, result ExchangeOrder) (ExchangeOrder, error) {
 	if strings.TrimSpace(result.ExchangeOrderID) != "" {
 		if err := e.Ownership.MarkOrderSubmitted(ctx, clientOrderID, result.ExchangeOrderID); err != nil {
@@ -221,6 +232,9 @@ func (e Executor) applyExchange(ctx context.Context, clientOrderID string, resul
 		if err := e.Ownership.SetOrderStatus(ctx, clientOrderID, OrderFailed); err != nil {
 			return result, err
 		}
+	}
+	if err := e.Ownership.MarkOrderReconciled(ctx, clientOrderID); err != nil {
+		return result, err
 	}
 	return result, nil
 }

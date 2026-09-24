@@ -7,3 +7,9 @@ func wsSpotAllMarketsStatServe(handler binance.WsAllMarketsStatHandler, errHandl
 		return binance.WsAllMarketsStatServe(handler, errHandler)
 	})
 }
+
+func wsSpotCombinedKlineServeMultiInterval(symbolIntervals map[string][]string, handler binance.WsKlineHandler, errHandler binance.ErrHandler) (chan struct{}, chan struct{}, error) {
+	return proxyPool.WithSpotWS(func() (chan struct{}, chan struct{}, error) {
+		return binance.WsCombinedKlineServeMultiInterval(symbolIntervals, handler, errHandler)
+	})
+}

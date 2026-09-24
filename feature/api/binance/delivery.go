@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"go_binance_futures/models"
 	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/utils"
 
@@ -31,38 +30,39 @@ func GetDeliveryExchangeInfo() (res *delivery.ExchangeInfo, err error) {
 		logs.Error(err)
 		return nil, err
 	}
+	var orderLimit10s, orderLimit1m int64
 	for _, rateLimit := range res.RateLimits {
-		if strings.EqualFold(rateLimit.RateLimitType, "REQUEST_WEIGHT") &&
+		switch {
+		case strings.EqualFold(rateLimit.RateLimitType, "REQUEST_WEIGHT") &&
 			strings.EqualFold(rateLimit.Interval, "MINUTE") &&
 			rateLimit.IntervalNum == 1 &&
-			rateLimit.Limit > 0 {
+			rateLimit.Limit > 0:
 			binanceapiusage.Default().SetWeightLimit("delivery", "mainnet", rateLimit.Limit, "exchange_info")
-			break
+		case strings.EqualFold(rateLimit.RateLimitType, "ORDERS") &&
+			strings.EqualFold(rateLimit.Interval, "SECOND") &&
+			rateLimit.IntervalNum == 10:
+			orderLimit10s = rateLimit.Limit
+		case strings.EqualFold(rateLimit.RateLimitType, "ORDERS") &&
+			strings.EqualFold(rateLimit.Interval, "MINUTE") &&
+			rateLimit.IntervalNum == 1:
+			orderLimit1m = rateLimit.Limit
 		}
 	}
+	binanceapiusage.Default().SetOrderLimits("delivery", "mainnet", orderLimit10s, orderLimit1m)
 	// logs.Info(utils.ToJson(res))
 	return res, err
 }
 
 var flagWsDelivery = 0
 
-func UpdateDeliveryCoinByWs(systemConfig *models.Config) {
+func UpdateDeliveryCoinByWs() {
 	// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
 	var lock = false
 	var o = orm.NewOrm()
 	_, _, err := wsDeliveryAllMarketTickerServe(func(event delivery.WsAllMarketTickerEvent) {
-		if systemConfig.WsDeliveryEnable == 1 {
-			if flagWsDelivery == 0 {
-				logs.Info("delivery ws start")
-				flagWsDelivery = 1
-			}
-		} else {
-			if flagWsDelivery == 1 {
-				logs.Info("delivery ws stop")
-				flagWsDelivery = 0
-			}
-			lock = false
-			return
+		if flagWsDelivery == 0 {
+			logs.Info("delivery ws start")
+			flagWsDelivery = 1
 		}
 		if !lock {
 			lock = true

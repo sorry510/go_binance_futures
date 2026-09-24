@@ -12,6 +12,7 @@ type TransportConfig struct {
 	Environment string
 	Source      string
 	Collector   *Collector
+	Budget      *BudgetCoordinator
 }
 
 type transport struct {
@@ -52,11 +53,35 @@ func WrapClient(client *http.Client, config TransportConfig) *http.Client {
 	if config.Collector == nil {
 		config.Collector = Default()
 	}
+	if config.Budget == nil {
+		config.Budget = DefaultBudget()
+	}
 	cloned.Transport = &transport{base: base, config: config}
 	return &cloned
 }
 
 func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
+	source := SourceFromContext(req.Context())
+	if source == "" {
+		source = t.config.Source
+	}
+	requestType := RequestType(t.config.Product, req.Method, req.URL.Path)
+	weight := EstimateWeight(t.config.Product, req.Method, req.URL.Path, req.URL.Query())
+	reservation, budgetErr := t.config.Budget.Reserve(
+		req.Context(),
+		t.config.Product,
+		t.config.Environment,
+		source,
+		requestType,
+		req.Method,
+		req.URL.Path,
+		weight,
+	)
+	if budgetErr != nil {
+		return nil, budgetErr
+	}
+	defer reservation.Release()
+
 	started := time.Now()
 	resp, err := t.base.RoundTrip(req)
 	finished := time.Now()
@@ -72,21 +97,17 @@ func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		retryAfter = resp.Header.Get("Retry-After")
 	}
 
-	source := SourceFromContext(req.Context())
-	if source == "" {
-		source = t.config.Source
-	}
 	event := RequestEvent{
 		At:              finished.UnixMilli(),
 		Product:         t.config.Product,
 		Environment:     t.config.Environment,
 		Source:          source,
-		RequestType:     RequestType(t.config.Product, req.Method, req.URL.Path),
+		RequestType:     requestType,
 		Method:          req.Method,
 		Path:            req.URL.Path,
 		StatusCode:      status,
 		LatencyMs:       finished.Sub(started).Milliseconds(),
-		EstimatedWeight: EstimateWeight(t.config.Product, req.Method, req.URL.Path, req.URL.Query()),
+		EstimatedWeight: weight,
 		Is429:           status == http.StatusTooManyRequests,
 		Is418:           status == http.StatusTeapot,
 	}
