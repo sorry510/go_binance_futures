@@ -23,6 +23,8 @@ import (
 var sharedOwnership = futuresownership.DefaultService()
 var sharedOwnershipExecutor = futuresownership.DefaultExecutor()
 
+const autoStrategyOrderRESTReconcileInterval = 5 * time.Second
+
 type ownedTradePosition struct {
 	Position  types.FuturesPosition
 	Owner     string
@@ -83,9 +85,15 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]owne
 	if err != nil {
 		return nil, err
 	}
+	positionRefreshRequired := false
 	for _, order := range managedOrders {
-		if _, err := sharedOwnershipExecutor.Reconcile(ctx, order.Symbol, order.ClientOrderID); err != nil {
+		_, fillAdvanced, err := reconcileAutoStrategyManagedOrder(ctx, order)
+		if err != nil {
 			logs.Warning("reconcile auto_strategy managed order:", order.ClientOrderID, err)
+			continue
+		}
+		if fillAdvanced {
+			positionRefreshRequired = true
 		}
 	}
 
@@ -97,7 +105,7 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]owne
 	// the User Data WS/local tables when enabled, or directly from Binance REST
 	// otherwise. Only refresh from Binance after reconciling active managed orders,
 	// because a just-confirmed fill can make the pre-reconcile snapshot stale.
-	accountQtyByKey, err := ownershipAccountQuantities(accountPositions, shouldRefreshOwnershipAccountQuantities(len(managedOrders)))
+	accountQtyByKey, err := ownershipAccountQuantities(accountPositions, shouldRefreshOwnershipAccountQuantities(positionRefreshRequired))
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +136,81 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]owne
 	return result, nil
 }
 
-func shouldRefreshOwnershipAccountQuantities(activeManagedOrders int) bool {
-	return activeManagedOrders > 0
+func shouldRefreshOwnershipAccountQuantities(fillAdvanced bool) bool {
+	return fillAdvanced
+}
+
+func reconcileAutoStrategyManagedOrder(ctx context.Context, order models.FuturesManagedOrder) (futuresownership.ExchangeOrder, bool, error) {
+	// A generation-matched User Data mirror is authoritative for regular order
+	// updates and is cheaper/faster than polling GET /order every StartTrade tick.
+	if futuresUserDataMirrorUsable() {
+		var local models.FuturesOrder
+		err := orm.NewOrm().QueryTable(new(models.FuturesOrder)).
+			Filter("client_order_id", order.ClientOrderID).
+			One(&local)
+		if err == nil && local.UpdateTime > order.LastReconciledAt {
+			observed, parseErr := futuresOrderObservation(local)
+			if parseErr != nil {
+				return futuresownership.ExchangeOrder{}, false, parseErr
+			}
+			applied, applyErr := sharedOwnershipExecutor.ApplyObservedExchange(ctx, order.ClientOrderID, observed)
+			return applied, applied.FilledQty > order.FilledQty+1e-12, applyErr
+		}
+		if err != nil && err != orm.ErrNoRows {
+			return futuresownership.ExchangeOrder{}, false, err
+		}
+	}
+
+	// Successful submit/reconcile writes last_reconciled_at. Stable live orders
+	// therefore use at most one REST status lookup per five seconds. Uncertain
+	// submissions and orders without an exchange id bypass this throttle.
+	if order.Status != futuresownership.OrderReconcile &&
+		strings.TrimSpace(order.ExchangeOrderID) != "" &&
+		order.LastReconciledAt > 0 &&
+		time.Since(time.UnixMilli(order.LastReconciledAt)) < autoStrategyOrderRESTReconcileInterval {
+		binanceapiusage.RecordOptimization("start_trade", "cache_hit", 1)
+		binanceapiusage.RecordOptimization("start_trade", "prevented_duplicate", 1)
+		return futuresownership.ExchangeOrder{}, false, nil
+	}
+
+	reconciled, err := sharedOwnershipExecutor.Reconcile(ctx, order.Symbol, order.ClientOrderID)
+	if err != nil {
+		return reconciled, false, err
+	}
+	return reconciled, reconciled.FilledQty > order.FilledQty+1e-12, nil
+}
+
+func futuresOrderObservation(order models.FuturesOrder) (futuresownership.ExchangeOrder, error) {
+	exchangeOrderID := strings.TrimSpace(order.OrderId)
+	if exchangeOrderID == "" {
+		return futuresownership.ExchangeOrder{}, fmt.Errorf("local futures order %s has empty exchange order id", order.ClientOrderId)
+	}
+	if _, err := strconv.ParseInt(exchangeOrderID, 10, 64); err != nil {
+		return futuresownership.ExchangeOrder{}, fmt.Errorf("parse local futures order id %q: %w", exchangeOrderID, err)
+	}
+	filled := 0.0
+	if strings.TrimSpace(order.ExecutedQty) != "" {
+		value, err := strconv.ParseFloat(order.ExecutedQty, 64)
+		if err != nil {
+			return futuresownership.ExchangeOrder{}, fmt.Errorf("parse local executed quantity for %s: %w", order.ClientOrderId, err)
+		}
+		filled = value
+	}
+	averagePrice := 0.0
+	if strings.TrimSpace(order.AveragePrice) != "" {
+		value, err := strconv.ParseFloat(order.AveragePrice, 64)
+		if err != nil {
+			return futuresownership.ExchangeOrder{}, fmt.Errorf("parse local average price for %s: %w", order.ClientOrderId, err)
+		}
+		averagePrice = value
+	}
+	return futuresownership.ExchangeOrder{
+		ExchangeOrderID: exchangeOrderID,
+		ClientOrderID:   order.ClientOrderId,
+		Status:          order.Status,
+		FilledQty:       filled,
+		AveragePrice:    averagePrice,
+	}, nil
 }
 
 func managedAccountPosition(account types.FuturesPosition, managed models.FuturesManagedPosition) types.FuturesPosition {
@@ -209,27 +290,62 @@ func findManagedOrder(clientOrderID string) (models.FuturesManagedOrder, error) 
 
 func ensureAccountOpenSlotAvailable(owner, symbol string, positionSide futures.PositionSideType) error {
 	ctx := binanceapiusage.WithSource(context.Background(), featureOwnerAPISource(owner))
-	positions, err := GetTransformPositionsContext(ctx)
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+
+	if futuresUserDataMirrorUsable() {
+		positions, err := GetTransformPositionsContext(ctx)
+		if err != nil {
+			return fmt.Errorf("verify local account positions before managed open: %w", err)
+		}
+		for _, position := range positions {
+			qty, _ := strconv.ParseFloat(position.Amount, 64)
+			if strings.EqualFold(position.Symbol, symbol) && strings.EqualFold(position.Side, string(positionSide)) && math.Abs(qty) > 1e-12 {
+				return fmt.Errorf("%s %s already exists in account; ownership is not safe to merge", symbol, positionSide)
+			}
+		}
+		orders, err := getTransformOpenOrdersContext(ctx)
+		if err != nil {
+			return fmt.Errorf("verify local account open orders before managed open: %w", err)
+		}
+		for _, order := range orders {
+			isOpening := (positionSide == futures.PositionSideTypeLong && strings.EqualFold(order.Side, "BUY")) ||
+				(positionSide == futures.PositionSideTypeShort && strings.EqualFold(order.Side, "SELL"))
+			if isOpening && strings.EqualFold(order.Symbol, symbol) && strings.EqualFold(order.PositionSide, string(positionSide)) {
+				return fmt.Errorf("%s %s already has an account open order; ownership is not safe to merge", symbol, positionSide)
+			}
+		}
+		return nil
+	}
+
+	// Without a healthy User Data mirror, revalidate only the target symbol.
+	// This preserves the final pre-mutation safety check while avoiding the
+	// weight-40 account-wide openOrders request for every candidate.
+	positions, err := binance.GetPositionContext(ctx, binance.PositionParams{Symbol: symbol})
 	if err != nil {
-		return fmt.Errorf("verify account positions before managed open: %w", err)
+		return fmt.Errorf("verify Binance account position before managed open: %w", err)
 	}
 	for _, position := range positions {
-		qty, _ := strconv.ParseFloat(position.Amount, 64)
-		if strings.EqualFold(position.Symbol, symbol) && strings.EqualFold(position.Side, string(positionSide)) && math.Abs(qty) > 1e-12 {
-			return fmt.Errorf("%s %s already exists in account; ownership is not safe to merge", strings.ToUpper(symbol), positionSide)
+		qty, _ := strconv.ParseFloat(position.PositionAmt, 64)
+		if strings.EqualFold(position.Symbol, symbol) &&
+			strings.EqualFold(string(position.PositionSide), string(positionSide)) &&
+			math.Abs(qty) > 1e-12 {
+			return fmt.Errorf("%s %s already exists in account; ownership is not safe to merge", symbol, positionSide)
 		}
 	}
-	orders, err := getTransformOpenOrdersContext(ctx)
+
+	orders, err := binance.GetOpenOrderContext(ctx, symbol)
 	if err != nil {
-		return fmt.Errorf("verify account open orders before managed open: %w", err)
+		return fmt.Errorf("verify Binance symbol open orders before managed open: %w", err)
 	}
 	for _, order := range orders {
-		isOpening := (positionSide == futures.PositionSideTypeLong && strings.EqualFold(order.Side, "BUY")) ||
-			(positionSide == futures.PositionSideTypeShort && strings.EqualFold(order.Side, "SELL"))
-		if isOpening && strings.EqualFold(order.Symbol, symbol) && strings.EqualFold(order.PositionSide, string(positionSide)) {
-			return fmt.Errorf("%s %s already has an account open order; ownership is not safe to merge", strings.ToUpper(symbol), positionSide)
+		isOpening := (positionSide == futures.PositionSideTypeLong && order.Side == futures.SideTypeBuy) ||
+			(positionSide == futures.PositionSideTypeShort && order.Side == futures.SideTypeSell)
+		if isOpening && strings.EqualFold(order.Symbol, symbol) &&
+			strings.EqualFold(string(order.PositionSide), string(positionSide)) {
+			return fmt.Errorf("%s %s already has an account open order; ownership is not safe to merge", symbol, positionSide)
 		}
 	}
+	binanceapiusage.RecordOptimization(featureOwnerAPISource(owner), "prevented_duplicate", 1)
 	return nil
 }
 
@@ -253,8 +369,8 @@ func autoStrategyOpenRuleHash(owner, sourceRef string) string {
 	return parts[2]
 }
 
-func submitAutoStrategyOpen(symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType, strategyHash string) (*futures.CreateOrderResponse, error) {
-	return submitOwnedFeatureOpen(futuresownership.OwnerAutoStrategy, autoStrategySourceRef(symbol, strategyHash), symbol, quantity, price, side, positionSide, orderType)
+func submitAutoStrategyOpen(snapshot *tradeCycleAccountSnapshot, symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType, strategyHash string) (*futures.CreateOrderResponse, error) {
+	return submitOwnedFeatureOpenWithSnapshot(snapshot, futuresownership.OwnerAutoStrategy, autoStrategySourceRef(symbol, strategyHash), symbol, quantity, price, side, positionSide, orderType)
 }
 
 func submitNewCoinRushOpen(sourceRef, symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType) (*futures.CreateOrderResponse, error) {
@@ -365,10 +481,26 @@ func submitFundingRateOpen(sourceRef, symbol string, quantity float64, side futu
 }
 
 func submitOwnedFeatureOpen(owner, sourceRef, symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType) (*futures.CreateOrderResponse, error) {
+	return submitOwnedFeatureOpenWithSnapshot(nil, owner, sourceRef, symbol, quantity, price, side, positionSide, orderType)
+}
+
+func submitOwnedFeatureOpenWithSnapshot(snapshot *tradeCycleAccountSnapshot, owner, sourceRef, symbol string, quantity, price float64, side futures.SideType, positionSide futures.PositionSideType, orderType futures.OrderType) (*futures.CreateOrderResponse, error) {
+	if snapshot != nil {
+		if snapshot.HasPosition(symbol, positionSide) {
+			return nil, fmt.Errorf("%s %s already exists in current account snapshot", strings.ToUpper(symbol), positionSide)
+		}
+		if snapshot.HasOpeningOrder(symbol, positionSide) {
+			return nil, fmt.Errorf("%s %s already has an opening order in current account snapshot", strings.ToUpper(symbol), positionSide)
+		}
+	}
 	if err := ensureAccountOpenSlotAvailable(owner, symbol, positionSide); err != nil {
 		return nil, err
 	}
-	return submitOwnedFeatureOrder(owner, sourceRef, symbol, quantity, price, 0, side, positionSide, orderType, futuresownership.IntentOpen)
+	order, err := submitOwnedFeatureOrder(owner, sourceRef, symbol, quantity, price, 0, side, positionSide, orderType, futuresownership.IntentOpen)
+	if err == nil && snapshot != nil {
+		snapshot.RecordPendingOpen(symbol, side, positionSide, order.OrderID)
+	}
+	return order, err
 }
 
 func submitManagedStrategyClose(owner, sourceRef, symbol string, quantity float64, positionSide futures.PositionSideType) (*futures.CreateOrderResponse, error) {
@@ -397,7 +529,26 @@ func submitAutoStrategyClose(symbol string, quantity float64, positionSide futur
 
 func currentAccountPositionQty(owner, symbol string, positionSide futures.PositionSideType) (float64, error) {
 	ctx := binanceapiusage.WithSource(context.Background(), featureOwnerAPISource(owner))
-	positions, err := binance.GetPositionContext(ctx, binance.PositionParams{Symbol: strings.ToUpper(strings.TrimSpace(symbol))})
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+
+	if futuresUserDataMirrorUsable() {
+		positions, err := GetTransformPositionsContext(ctx)
+		if err != nil {
+			return 0, fmt.Errorf("verify local account position before managed close: %w", err)
+		}
+		for _, position := range positions {
+			if strings.EqualFold(position.Symbol, symbol) && strings.EqualFold(position.Side, string(positionSide)) {
+				qty, parseErr := strconv.ParseFloat(position.Amount, 64)
+				if parseErr != nil {
+					return 0, fmt.Errorf("parse local account quantity for %s %s: %w", symbol, positionSide, parseErr)
+				}
+				return math.Abs(qty), nil
+			}
+		}
+		return 0, nil
+	}
+
+	positions, err := binance.GetPositionContext(ctx, binance.PositionParams{Symbol: symbol})
 	if err != nil {
 		return 0, fmt.Errorf("verify Binance account position before managed close: %w", err)
 	}
@@ -426,7 +577,7 @@ func ownershipAccountQuantities(accountPositions []types.FuturesPosition, refres
 		return out, nil
 	}
 	ctx := binanceapiusage.WithSource(context.Background(), "start_trade")
-	rows, err := binance.GetPositionContext(ctx, binance.PositionParams{})
+	rows, err := binance.GetPositionFreshContext(ctx, binance.PositionParams{})
 	if err != nil {
 		return nil, fmt.Errorf("refresh Binance positions for ownership reconcile: %w", err)
 	}

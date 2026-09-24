@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"go_binance_futures/notify"
+	"go_binance_futures/service/binanceapiusage"
 
 	"github.com/adshao/go-binance/v2/common"
 	"github.com/adshao/go-binance/v2/futures"
@@ -19,14 +20,11 @@ import (
 	"golang.org/x/sync/singleflight"
 )
 
-// Keep public market-data traffic well below Binance's IP-wide REQUEST_WEIGHT
-// ceiling. Trading requests are intentionally not delayed by this guard.
-//
-// The configured budget is conservative because the same public IP is also
-// used by depth/ticker/OI/account endpoints elsewhere in the application.
+// The global V4-5 Budget Coordinator now owns normal request pacing across
+// Futures/Spot/Delivery. This legacy guard only keeps the explicit exchange-ban
+// cooldown parsed from Binance -1003 errors; it no longer applies an unrelated
+// fixed 1000-weight/minute throttle to K-line/history requests.
 const (
-	futuresMarketDataWeightPerMinute = 1000
-
 	// A single rate-limit incident sends exactly three notifications:
 	// immediately, after two minutes, and after four minutes.
 	futuresRateLimitAlertCount    = 3
@@ -35,7 +33,6 @@ const (
 
 var (
 	futuresMarketDataMu            sync.Mutex
-	futuresMarketDataNextRequestAt time.Time
 	futuresMarketDataCooldownUntil time.Time
 
 	liveKlineCacheMu sync.Mutex
@@ -47,9 +44,11 @@ var (
 )
 
 type liveKlineCacheEntry struct {
-	rows      []*futures.Kline
-	err       error
-	expiresAt time.Time
+	rows        []*futures.Kline
+	err         error
+	expiresAt   time.Time
+	wsUpdatedAt int64
+	maxLimit    int
 }
 
 const (
@@ -72,50 +71,27 @@ func futuresKlineRequestWeight(limit int) int {
 	}
 }
 
-func futuresMarketDataSpacing(weight int) time.Duration {
-	if weight < 1 {
-		weight = 1
-	}
-	return time.Minute * time.Duration(weight) / futuresMarketDataWeightPerMinute
-}
-
-// waitFuturesMarketDataREST reserves REQUEST_WEIGHT before a public market-data
-// request. Reservations are process-wide so live strategy evaluation and
-// historical prefetch cannot independently consume the same IP budget.
+// waitFuturesMarketDataREST keeps only an explicit Binance ban/cooldown.
 func waitFuturesMarketDataREST(ctx context.Context, weight int) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	if weight < 1 {
-		weight = 1
-	}
+	_ = weight
 
 	futuresMarketDataMu.Lock()
-	defer futuresMarketDataMu.Unlock()
+	readyAt := futuresMarketDataCooldownUntil
+	futuresMarketDataMu.Unlock()
+	if !readyAt.After(time.Now()) {
+		return nil
+	}
 
-	for {
-		now := time.Now()
-		readyAt := futuresMarketDataNextRequestAt
-		if futuresMarketDataCooldownUntil.After(readyAt) {
-			readyAt = futuresMarketDataCooldownUntil
-		}
-		if !readyAt.After(now) {
-			futuresMarketDataNextRequestAt = now.Add(futuresMarketDataSpacing(weight))
-			return nil
-		}
-
-		timer := time.NewTimer(time.Until(readyAt))
-		select {
-		case <-ctx.Done():
-			if !timer.Stop() {
-				select {
-				case <-timer.C:
-				default:
-				}
-			}
-			return ctx.Err()
-		case <-timer.C:
-		}
+	timer := time.NewTimer(time.Until(readyAt))
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
 	}
 }
 
@@ -233,7 +209,8 @@ func liveKlineCacheTTL(interval string) time.Duration {
 }
 
 func liveKlineCacheKey(symbol, interval string, limit int) string {
-	return strings.ToUpper(strings.TrimSpace(symbol)) + "|" + strings.TrimSpace(interval) + "|" + strconv.Itoa(limit)
+	_ = limit // one canonical cache per symbol+interval; maxLimit lives in the entry.
+	return strings.ToUpper(strings.TrimSpace(symbol)) + "|" + strings.TrimSpace(interval)
 }
 
 func cloneKlines(rows []*futures.Kline) []*futures.Kline {
@@ -243,23 +220,31 @@ func cloneKlines(rows []*futures.Kline) []*futures.Kline {
 	return append([]*futures.Kline(nil), rows...)
 }
 
-func loadLiveKlineCache(key string) ([]*futures.Kline, error, bool) {
+func loadLiveKlineCache(key string, limit int) ([]*futures.Kline, error, bool, bool) {
 	now := time.Now()
 	liveKlineCacheMu.Lock()
 	defer liveKlineCacheMu.Unlock()
 
 	entry, ok := liveKlineCache[key]
 	if !ok {
-		return nil, nil, false
+		return nil, nil, false, false
 	}
 	if !entry.expiresAt.After(now) {
 		delete(liveKlineCache, key)
-		return nil, nil, false
+		return nil, nil, false, false
 	}
-	return cloneKlines(entry.rows), entry.err, true
+	if entry.err == nil && entry.maxLimit < limit {
+		return nil, nil, false, false
+	}
+	rows := cloneKlines(entry.rows)
+	if limit > 0 && len(rows) > limit {
+		rows = rows[:limit]
+	}
+	wsFresh := entry.wsUpdatedAt > 0 && now.Sub(time.UnixMilli(entry.wsUpdatedAt)) <= liveKlineWSFreshTTL
+	return rows, entry.err, true, wsFresh
 }
 
-func storeLiveKlineCache(key string, rows []*futures.Kline, err error, ttl time.Duration) {
+func storeLiveKlineCache(key string, rows []*futures.Kline, err error, ttl time.Duration, limit int) {
 	if ttl <= 0 {
 		return
 	}
@@ -287,10 +272,18 @@ func storeLiveKlineCache(key string, rows []*futures.Kline, err error, ttl time.
 		}
 	}
 
+	if existing, ok := liveKlineCache[key]; ok && err == nil && existing.err == nil && existing.maxLimit > limit {
+		merged := cloneKlines(existing.rows)
+		for i := 0; i < len(rows) && i < len(merged); i++ {
+			merged[i] = rows[i]
+		}
+		liveKlineCache[key] = liveKlineCacheEntry{
+			rows: merged, expiresAt: now.Add(ttl), maxLimit: existing.maxLimit,
+		}
+		return
+	}
 	liveKlineCache[key] = liveKlineCacheEntry{
-		rows:      cloneKlines(rows),
-		err:       err,
-		expiresAt: now.Add(ttl),
+		rows: cloneKlines(rows), err: err, expiresAt: now.Add(ttl), maxLimit: limit,
 	}
 }
 
@@ -301,13 +294,17 @@ func getLiveKlineData(ctx context.Context, symbol, interval string, limit int) (
 		return nil, fmt.Errorf("K-line requires symbol, interval and positive limit")
 	}
 
+	ensureLiveKlineWS(symbol, interval)
 	key := liveKlineCacheKey(symbol, interval, limit)
-	if rows, err, ok := loadLiveKlineCache(key); ok {
+	source := binanceapiusage.SourceFromContext(ctx)
+	if rows, err, ok, wsFresh := loadLiveKlineCache(key, limit); ok {
+		recordLiveKlineCacheHit(source, wsFresh)
 		return rows, err
 	}
 
-	value, err, _ := liveKlineGroup.Do(key, func() (interface{}, error) {
-		if rows, cachedErr, ok := loadLiveKlineCache(key); ok {
+	value, err, shared := liveKlineGroup.Do(key, func() (interface{}, error) {
+		if rows, cachedErr, ok, wsFresh := loadLiveKlineCache(key, limit); ok {
+			recordLiveKlineCacheHit(source, wsFresh)
 			return rows, cachedErr
 		}
 
@@ -321,15 +318,19 @@ func getLiveKlineData(ctx context.Context, symbol, interval string, limit int) (
 			Do(ctx)
 		if requestErr != nil {
 			noteFuturesAPIError(requestErr)
-			storeLiveKlineCache(key, nil, requestErr, liveKlineNegativeCacheTTL)
+			storeLiveKlineCache(key, nil, requestErr, liveKlineNegativeCacheTTL, limit)
 			return nil, requestErr
 		}
 		sort.Slice(rows, func(i, j int) bool {
 			return rows[i].OpenTime > rows[j].OpenTime
 		})
-		storeLiveKlineCache(key, rows, nil, liveKlineCacheTTL(interval))
+		storeLiveKlineCache(key, rows, nil, liveKlineCacheTTL(interval), limit)
 		return cloneKlines(rows), nil
 	})
+	if shared {
+		binanceapiusage.RecordOptimization(source, "coalesced", 1)
+		binanceapiusage.RecordOptimization(source, "prevented_duplicate", 1)
+	}
 	if err != nil {
 		return nil, err
 	}

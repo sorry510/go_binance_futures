@@ -77,7 +77,7 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 
 | Menu | Pages and purpose |
 | --- | --- |
-| Configuration Center (`配置中心`) | Non-AI global settings for futures trading, WebSocket, new-coin rush, price alerts, market monitoring, funding-rate monitoring, notifications, debug push, and external links |
+| Configuration Center (`配置中心`) | Non-AI global settings for futures trading, new-coin rush, price alerts, market monitoring, funding-rate monitoring, notifications, debug push, and external links. Core WebSocket streams are mandatory infrastructure and have no disable switch. |
 | AI → Chat (`AI → 对话`) | Unified Agent chat entry; choose chat-enabled Native/Portable Skills and optionally select a real futures Symbol from the contract list so natural-language aliases cannot select the wrong market |
 | AI → Symbol Analysis (`AI → 单币分析`) | Select a real USDT perpetual contract, start structured AI analysis, and review historical TradingPlans, direction, confidence, market regime, and subsequent price movement |
 | AI → Model Configuration (`AI → 模型配置`) | Add, edit, test, and switch database-backed LLM configurations; new tasks use the current model without a restart |
@@ -272,7 +272,7 @@ The **Futures Trade → Futures Trade** page supports per-symbol settings for st
 
 ### Enabling futures trading
 
-1. Under **Configuration Center → Futures Trade** (`配置中心 → 合约交易`), enable the futures master switch and `WebSocket`. The futures master switch is saved immediately and no longer shows a second confirmation dialog.
+1. Under **Configuration Center → Futures Trade** (`配置中心 → 合约交易`), enable the futures master switch. Futures/Spot market WebSockets and Futures User Data WebSocket start automatically and have no disable switch. The futures master switch is saved immediately and no longer shows a second confirmation dialog.
 2. Enable `Allow Long` and/or `Allow Short`, then configure the global strategies, position limits, and order type.
 3. Open **Futures Trade → Futures Trade** and verify the target symbol's parameters and enabled status.
 
@@ -335,7 +335,7 @@ The UI shows live stages for dataset building, normal replay, high-resolution ca
 
 ## real-time custom-strategy paper trading (separate from historical backtesting)
 
-Enable `WebSocket` and `Test Strategy` under **Configuration Center → Futures Trade**. Simulation follows the same strategies and limits as real automatic trading but does not operate the real futures account. Open the result from the `View Test Results` button or **Futures Trade → Test Results**.
+Enable `Test Strategy` under **Configuration Center → Futures Trade**. Core WebSocket streams start automatically. Simulation follows the same strategies and limits as real automatic trading but does not operate the real futures account. Open the result from the `View Test Results` button or **Futures Trade → Test Results**.
 
 When the `Test Auto-Conversion Count Limit` is non-zero, consecutive simulated wins can switch to real trading; consecutive real-trading losses can switch back to test mode.
 
@@ -403,7 +403,7 @@ Enable the master switch under **Configuration Center → Funding Rate Monitorin
 The System Configuration page contains sensitive values such as API keys, database passwords, and notification tokens. Never include it in screenshots, issues, or Git commits.
 
 ## important
-- The network must be located outside the mainland (as the Binance interface cannot be accessed normally in mainland China). The proxy configuration for Binance API has been added (websocket has no proxy configuration due to component usage issues, and is only used to update the latest contract currency prices in the background). If there are available proxies, they can also be used normally
+- The network must be able to reach Binance. Binance HTTP and WebSocket traffic share the configured proxy pool. Core market/User Data WebSockets start automatically and reconnect continuously; unstable network or proxy connectivity may trigger REST fallbacks and health warnings.
 -Apply for api_key address: [Binance API Management Page]（ https://www.binance.com/cn/usercenter/settings/api-management )
 - Automatic futures trading uses Ownership isolation and only manages positions/orders created and registered by the corresponding owner. Existing manual or unknown positions are not automatically claimed by the bot
 - After modifying `conf/app.conf`, restart the application before expecting startup-time settings to take effect
@@ -416,10 +416,10 @@ The System Configuration page contains sensitive values such as API keys, databa
 
 ### FAQ (new UI)
 
-1. **Where do I enable automatic trading?** Open **Configuration Center → Futures Trade** and verify the futures master switch, `WebSocket`, and `Allow Long/Allow Short`. Then verify the symbol's enabled status under **Futures Trade → Futures Trade**.
+1. **Where do I enable automatic trading?** Open **Configuration Center → Futures Trade** and verify the futures master switch and `Allow Long/Allow Short`. Then verify the symbol's enabled status under **Futures Trade → Futures Trade**. Core WebSocket streams run automatically.
 2. **Where can I view simulated trades?** Enable `Test Strategy`, then use `View Test Results` or open **Futures Trade → Test Results**.
 3. **Why did a configuration change not take effect?** Configuration Center updates runtime settings. System Configuration edits `conf/app.conf`; after `Save`, startup-time settings still require an application restart.
-4. **Why are futures prices delayed?** Prices are updated through WebSocket. Check the `WebSocket` switch, network quality, and proxy stability.
+4. **Why are futures prices delayed?** Prices are updated through mandatory WebSocket streams. Check WebSocket freshness/error state on the System Dashboard, network quality, and proxy stability.
 5. **Why can the account not open a position?** Check direction switches, maximum-position limits, maximum losing positions, symbol enabled status, available USDT, and whether the same Symbol/side already has a managed position or active controlled order. Binance may also restrict some IP regions.
 6. **Why is the UI slow?** For larger datasets, use MySQL; SQLite is better suited to smaller deployments.
 7. **What should I do after an API rate-limit error?** Reduce enabled symbols, monitoring rules, and high-frequency notifications, then wait for Binance's restriction to clear.

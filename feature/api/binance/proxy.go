@@ -1,6 +1,8 @@
 package binance
 
 import (
+	"time"
+
 	"github.com/adshao/go-binance/v2/delivery"
 	"github.com/adshao/go-binance/v2/futures"
 )
@@ -32,5 +34,17 @@ func wsFuturesAllLiquidationOrderServe(handler futures.WsLiquidationOrderHandler
 func wsDeliveryAllMarketTickerServe(handler delivery.WsAllMarketTickerHandler, errHandler delivery.ErrHandler) (chan struct{}, chan struct{}, error) {
 	return proxyPool.WithDeliveryWS(func() (chan struct{}, chan struct{}, error) {
 		return delivery.WsAllMarketTickerServe(handler, errHandler)
+	})
+}
+
+func wsFuturesAllMarkPriceServeWithRate(rate time.Duration, handler futures.WsAllMarkPriceHandler, errHandler futures.ErrHandler) (chan struct{}, chan struct{}, error) {
+	return proxyPool.WithFuturesWS(func() (chan struct{}, chan struct{}, error) {
+		return futures.WsAllMarkPriceServeWithRate(rate, handler, errHandler)
+	})
+}
+
+func wsFuturesCombinedKlineServeMultiInterval(symbolIntervals map[string][]string, handler futures.WsKlineHandler, errHandler futures.ErrHandler) (chan struct{}, chan struct{}, error) {
+	return proxyPool.WithFuturesWS(func() (chan struct{}, chan struct{}, error) {
+		return futures.WsCombinedKlineServeMultiInterval(symbolIntervals, handler, errHandler)
 	})
 }
