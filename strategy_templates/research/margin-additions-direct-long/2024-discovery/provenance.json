@@ -1,0 +1,32 @@
+{
+  "archived_at": "2026-09-26T15:51:00+08:00",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "git_head_at_archive": "e65ebbff0ca11bac8b5e0e7f8e694975469cf749",
+  "result_index": "strategy_templates/result.md#2026-09-26-binance-margin-additions-direct-long2024-discovery",
+  "public_sources": {
+    "binance_cms_list": "https://www.binance.com/bapi/composite/v1/public/cms/article/list/query",
+    "binance_cms_detail": "https://www.binance.com/bapi/composite/v1/public/cms/article/detail/query",
+    "binance_vision_usdm_monthly": "https://data.binance.vision/data/futures/um/monthly"
+  },
+  "source_path_rules": {
+    "klines_1m": "klines/{SYMBOL}/1m/{SYMBOL}-1m-{YYYY-MM}.zip",
+    "funding_rate": "fundingRate/{SYMBOL}/{SYMBOL}-fundingRate-{YYYY-MM}.zip"
+  },
+  "canonical_files": [
+    "inputs/articles.json",
+    "inputs/article_details.json",
+    "inputs/events.json",
+    "inputs/eligibility.json",
+    "inputs/eligible.tsv",
+    "results/trades.json",
+    "results/trades.tsv",
+    "results/skipped.json",
+    "results/summary.json",
+    "replay.py"
+  ],
+  "noncanonical_files": {
+    "legacy/superseded_run.log": "Pre parser-fix run. It reports 149 events / 47 eligible and is retained only to explain the audit correction."
+  },
+  "large_market_data_archived": false,
+  "reproduction_note": "Re-fetch Binance CMS and Vision data using replay.py. The audit bundle preserves the event universe, eligibility decisions, and final per-trade outputs so later reviews can detect source drift."
+}

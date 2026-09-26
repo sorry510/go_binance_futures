@@ -1,0 +1,37 @@
+{
+  "validation_status": "historical metrics preserved; corrected funding parser replay pending",
+  "2024_discovery": {
+    "eligible_events": 9,
+    "wins": 5,
+    "losses": 4,
+    "historical_pf": 1.374,
+    "historical_normalized_net_pct": 10.84,
+    "status": "historical_unrevalidated_due_funding_parser"
+  },
+  "2025_oos": {
+    "eligible_events": 9,
+    "wins": 5,
+    "losses": 4,
+    "historical_pf": 1.107,
+    "historical_normalized_net_pct": 7.77,
+    "status": "historical_unrevalidated_due_funding_parser"
+  },
+  "2026_second_oos": {
+    "eligible_events": 17,
+    "wins": 8,
+    "losses": 9,
+    "historical_pf": 0.910,
+    "historical_normalized_net_pct": -8.13,
+    "status": "historical_unrevalidated_due_funding_parser"
+  },
+  "combined_historical": {
+    "eligible_events": 35,
+    "wins": 18,
+    "losses": 17,
+    "historical_pf_approx": 1.054,
+    "historical_normalized_net_pct_approx": 10.49,
+    "status": "historical_unrevalidated_due_funding_parser"
+  },
+  "decision": "family frozen / no DB import / not a formal candidate",
+  "known_issue": "historical replay helpers silently skip funding rows because they require a nonexistent fourth MarkPrice CSV column"
+}

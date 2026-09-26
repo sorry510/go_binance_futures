@@ -1,0 +1,34 @@
+LIST_PAGE 1 range 2026-07-31 2026-09-24 target 0
+LIST_PAGE 2 range 2026-06-08 2026-07-29 target 0
+LIST_PAGE 3 range 2026-03-30 2026-06-04 target 0
+LIST_PAGE 4 range 2026-01-30 2026-03-30 target 0
+LIST_PAGE 5 range 2025-12-02 2026-01-30 target 0
+LIST_PAGE 6 range 2025-10-17 2025-11-27 target 0
+LIST_PAGE 7 range 2025-09-22 2025-10-17 target 0
+LIST_PAGE 8 range 2025-08-25 2025-09-22 target 0
+LIST_PAGE 9 range 2025-06-26 2025-08-25 target 0
+LIST_PAGE 10 range 2025-05-13 2025-06-25 target 0
+LIST_PAGE 11 range 2025-04-01 2025-05-13 target 0
+LIST_PAGE 12 range 2025-02-11 2025-03-31 target 0
+LIST_PAGE 13 range 2024-12-13 2025-02-09 target 0
+LIST_PAGE 14 range 2024-10-22 2024-12-13 target 2
+LIST_PAGE 15 range 2024-08-28 2024-10-21 target 4
+LIST_PAGE 16 range 2024-06-11 2024-08-27 target 10
+LIST_PAGE 17 range 2024-04-02 2024-06-11 target 13
+LIST_PAGE 18 range 2024-02-06 2024-04-02 target 16
+LIST_PAGE 19 range 2023-12-12 2024-02-06 target 21
+ARTICLES 21
+DETAIL 10 / 21 
+DETAIL 20 / 21 
+TOKEN_EVENTS 149 UNIQUE_BASES 108
+ELIG 20 / 149
+ELIG 40 / 149
+ELIG 60 / 149
+ELIG 80 / 149
+ELIG 100 / 149
+ELIG 120 / 149
+ELIG 140 / 149
+ELIGIBLE 47 UNIQUE 31 INELIGIBLE_REASONS {"no_24m_month": 102}
+REPLAY 20 / 47 LTCUSDT SL 
+REPLAY 40 / 47 NEARUSDT SL 
+SUMMARY {"articles": 21, "token_events": 149, "unique_bases": 108, "eligible_events": 47, "eligible_unique_bases": 31, "trades": 47, "skipped": 0, "wins": 14, "losses": 33, "pf": 0.5526425136855567, "net_pct_sum": -97.32451351771338, "avg_net_pct": -2.070734330164115, "median_net_pct": -6.578203481679338, "min_net_pct": -7.509943166271145, "max_net_pct": 18.075702947611518, "gross_profit": 120.22971658922384, "gross_loss": 217.55423010693727, "funding_pct_sum": -1.6018584453942841, "fees_pct_sum": 18.761519432179924, "triggers": {"TP": 14, "SL": 32, "TIME": 1, "EOF": 0}, "months": {"2024-01": {"n": 8, "net": -13.824394323218048, "wins": 2}, "2024-02": {"n": 15, "net": 0.301005838595124, "wins": 7}, "2024-03": {"n": 2, "net": -13.30467310339316, "wins": 0}, "2024-04": {"n": 7, "net": -33.00570200500751, "wins": 1}, "2024-06": {"n": 1, "net": 7.967494480097462, "wins": 1}, "2024-07": {"n": 10, "net": -38.47667368055156, "wins": 2}, "2024-08": {"n": 1, "net": 7.637153830604506, "wins": 1}, "2024-09": {"n": 1, "net": -6.562202534437929, "wins": 0}, "2024-11": {"n": 2, "net": -8.056522020402305, "wins": 0}}, "repeated_symbols": {"BCHUSDT": {"n": 3, "net": -5.137697953452193}, "DOTUSDT": {"n": 2, "net": 15.20607777670671}, "DYDXUSDT": {"n": 2, "net": 1.2543706862449886}, "ETCUSDT": {"n": 2, "net": -13.341735821663677}, "FILUSDT": {"n": 3, "net": -20.140509881743665}, "FTMUSDT": {"n": 3, "net": -20.974239374605794}, "GALAUSDT": {"n": 2, "net": 1.2845528824064516}, "LTCUSDT": {"n": 4, "net": -13.250328536285657}, "NEARUSDT": {"n": 3, "net": -4.727520263696398}, "PEOPLEUSDT": {"n": 2, "net": 1.3857517532770274}}, "ineligible_reasons": {"no_24m_month": 102}, "single_position_overlap_skips": 0}

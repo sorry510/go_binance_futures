@@ -1,0 +1,43 @@
+{
+  "2024_discovery": [
+    {"symbol": "ANTUSDT", "announcement_utc": "2024-01-04T07:00:00Z"},
+    {"symbol": "REEFUSDT", "announcement_utc": "2024-01-04T07:00:00Z"},
+    {"symbol": "XMRUSDT", "announcement_utc": "2024-01-04T07:00:00Z"},
+    {"symbol": "ZECUSDT", "announcement_utc": "2024-01-04T07:00:00Z"},
+    {"symbol": "ZENUSDT", "announcement_utc": "2024-01-04T07:00:00Z"},
+    {"symbol": "UNFIUSDT", "announcement_utc": "2024-04-03T06:00:00Z"},
+    {"symbol": "WAVESUSDT", "announcement_utc": "2024-04-03T06:00:00Z"},
+    {"symbol": "BALUSDT", "announcement_utc": "2024-07-01T07:00:00Z"},
+    {"symbol": "BLZUSDT", "announcement_utc": "2024-10-03T07:00:00Z"}
+  ],
+  "2025_oos": [
+    {"symbol": "FLMUSDT", "announcement_utc": "2025-04-03T07:00:00Z"},
+    {"symbol": "NKNUSDT", "announcement_utc": "2025-04-03T07:00:00Z"},
+    {"symbol": "PERPUSDT", "announcement_utc": "2025-04-03T07:00:00Z"},
+    {"symbol": "LEVERUSDT", "announcement_utc": "2025-05-07T08:00:00Z"},
+    {"symbol": "MDTUSDT", "announcement_utc": "2025-06-05T05:00:00Z"},
+    {"symbol": "BAKEUSDT", "announcement_utc": "2025-07-07T03:29:00Z"},
+    {"symbol": "IDEXUSDT", "announcement_utc": "2025-07-07T03:29:00Z"},
+    {"symbol": "DENTUSDT", "announcement_utc": "2025-12-01T04:30:00Z"},
+    {"symbol": "SXPUSDT", "announcement_utc": "2025-12-01T04:30:00Z"}
+  ],
+  "2026_second_oos": [
+    {"symbol": "FLOWUSDT", "announcement_utc": "2026-01-02T10:59:00Z"},
+    {"symbol": "ATAUSDT", "announcement_utc": "2026-03-13T09:00:00Z"},
+    {"symbol": "GTCUSDT", "announcement_utc": "2026-03-13T09:00:00Z"},
+    {"symbol": "NTRNUSDT", "announcement_utc": "2026-03-13T09:00:00Z"},
+    {"symbol": "PHBUSDT", "announcement_utc": "2026-03-13T09:00:00Z"},
+    {"symbol": "RDNTUSDT", "announcement_utc": "2026-03-13T09:00:00Z"},
+    {"symbol": "NFPUSDT", "announcement_utc": "2026-04-30T07:00:00Z"},
+    {"symbol": "HFTUSDT", "announcement_utc": "2026-05-22T08:00:00Z"},
+    {"symbol": "STORJUSDT", "announcement_utc": "2026-05-22T08:00:00Z"},
+    {"symbol": "TLMUSDT", "announcement_utc": "2026-05-22T08:00:00Z"},
+    {"symbol": "VANRYUSDT", "announcement_utc": "2026-07-03T06:00:00Z"},
+    {"symbol": "LSKUSDT", "announcement_utc": "2026-07-24T03:00:00Z"},
+    {"symbol": "STXUSDT", "announcement_utc": "2026-07-24T03:00:00Z"},
+    {"symbol": "GLMRUSDT", "announcement_utc": "2026-08-11T09:00:00Z"},
+    {"symbol": "ICXUSDT", "announcement_utc": "2026-08-11T09:00:00Z"},
+    {"symbol": "MOVRUSDT", "announcement_utc": "2026-08-11T09:00:00Z"},
+    {"symbol": "RAREUSDT", "announcement_utc": "2026-08-11T09:00:00Z"}
+  ]
+}

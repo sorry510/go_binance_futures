@@ -1,0 +1,45 @@
+{
+  "family": "margin-additions-direct-long",
+  "dataset": "2024-discovery",
+  "direction": "LONG",
+  "capital_normalization": 1.0,
+  "leverage": 4,
+  "take_profit_roi_pct": 8,
+  "stop_loss_roi_pct": -6,
+  "fee_rate_per_side": 0.0005,
+  "slippage_bps_per_side": 5,
+  "max_hold_hours": 72,
+  "single_position_per_symbol": true,
+  "event_source": {
+    "catalog_id": 48,
+    "title_prefix": "Binance Margin Adds",
+    "include": [
+      "new borrowable asset",
+      "new Cross Margin trading pair",
+      "new Isolated Margin trading pair"
+    ]
+  },
+  "eligibility": {
+    "contract": "BASEUSDT USD-M perpetual represented by Binance Vision monthly futures 1m data",
+    "minimum_history_years": 2,
+    "require_event_month": true,
+    "require_trading_at_announcement": true,
+    "maximum_next_bar_gap_minutes": 5,
+    "network_errors_are_exclusions": false
+  },
+  "entry": {
+    "time_rule": "((publish_ms // 60000) + 1) * 60000",
+    "price": "next qualifying 1m open with entry slippage"
+  },
+  "exit": {
+    "roi_observation": "1m close",
+    "tp_sl_execution": "next 1m open after ROI gate with exit slippage",
+    "time_exit": "1m open at the 72h horizon",
+    "roi_formula": "(price - entry) / price * leverage * 100"
+  },
+  "funding": {
+    "source": "Binance Vision USD-M monthly fundingRate",
+    "long_pays_positive_rate": true,
+    "mark_price_fallback": "current 1m close when funding file has no mark price"
+  }
+}

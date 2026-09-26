@@ -1,0 +1,79 @@
+{
+  "raw_engine": {
+    "source": "strategy_templates/result.md strict same-start Engine sections",
+    "ID121": {
+      "trades": 519,
+      "pf": 1.395080,
+      "net_pnl": 17015.9,
+      "positive_symbols": 10,
+      "symbol_count": 15,
+      "median_symbol_pf": 1.084,
+      "trades_per_symbol_week": 0.358,
+      "annual_pf": {"2024": 1.494, "2025": 1.157, "2026": 1.647}
+    },
+    "V54": {
+      "trades": 563,
+      "pf": 1.395847,
+      "net_pnl": 18131.7,
+      "positive_symbols": 11,
+      "symbol_count": 15,
+      "median_symbol_pf": 1.146,
+      "trades_per_symbol_week": 0.388,
+      "annual_pf": {"2024": 1.444, "2025": 1.063, "2026": 1.792}
+    },
+    "paired_attribution": {
+      "COMMON": {"trades": 509, "pf": 1.410, "net_pnl": 17275.5},
+      "ID121_ONLY": {"trades": 10, "pf": 0.724, "net_pnl": -259.5},
+      "V54_ONLY": {
+        "trades": 54,
+        "pf": 0.972,
+        "net_pnl": -142.1,
+        "annual_pf": {"2024": 0.862, "2025": 0.638, "2026": 1.591}
+      }
+    }
+  },
+  "fixed_notional_normalized": {
+    "source": "results/paired_normalized.csv",
+    "formula": "NetPnL / (EntryPrice * Quantity)",
+    "ID121": {
+      "trades": 519,
+      "pf": 1.385786430782432,
+      "net": 2.9435523305879987,
+      "positive_symbols": 13,
+      "symbol_count": 15,
+      "median_symbol_pf": 1.3070051106782263,
+      "long_trades": 271,
+      "short_trades": 248,
+      "annual_pf": {
+        "2024": 1.5389631318519261,
+        "2025": 1.2398394292549837,
+        "2026": 1.5363917705388148
+      }
+    },
+    "V54": {
+      "trades": 563,
+      "pf": 1.3835154361218378,
+      "net": 3.1936493259250005,
+      "positive_symbols": 13,
+      "symbol_count": 15,
+      "median_symbol_pf": 1.3477793319630034,
+      "long_trades": 315,
+      "short_trades": 248,
+      "annual_pf": {
+        "2024": 1.4845017308742516,
+        "2025": 1.1593935597982632,
+        "2026": 1.6747581150221023
+      }
+    },
+    "paired_attribution": {
+      "COMMON": {"trades": 509, "pf": 1.4047773125062462, "net": 3.0217436710999994},
+      "ID121_ONLY": {"trades": 10, "pf": 0.525551337158849, "net": -0.078191340512},
+      "V54_ONLY": {"trades": 54, "pf": 1.1994026808654008, "net": 0.17190565482499987}
+    }
+  },
+  "decision": {
+    "ID121": "main benchmark",
+    "V54": "parallel frequency candidate; same trend-alpha family; does not replace ID121",
+    "threshold_tuning": "frozen"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "family": "id121-v54-strict-production",
+  "run_date": "2026-09-24",
+  "database": "go_bn_test",
+  "execution": {
+    "initial_equity": 1000,
+    "position_size_pct": 1,
+    "leverage": 4,
+    "take_profit_pct": 8,
+    "stop_loss_pct": 6,
+    "fee_rate_per_side": 0.0005,
+    "slippage_bps_per_side": 5,
+    "single_position": true
+  },
+  "eligibility": {
+    "rule": "USD-M perpetual contract history >= 2 years before inclusion",
+    "symbols": [
+      "ADAUSDT",
+      "AVAXUSDT",
+      "BNBUSDT",
+      "BTCUSDT",
+      "DOGEUSDT",
+      "ETHUSDT",
+      "LTCUSDT",
+      "NEARUSDT",
+      "SOLUSDT",
+      "UNIUSDT",
+      "XRPUSDT",
+      "ZECUSDT",
+      "1000PEPEUSDT",
+      "SUIUSDT",
+      "ONDOUSDT"
+    ],
+    "start_times_utc": {
+      "ADAUSDT": "2024-08-15T00:00:00Z",
+      "AVAXUSDT": "2024-08-15T00:00:00Z",
+      "BNBUSDT": "2024-08-15T00:00:00Z",
+      "BTCUSDT": "2024-08-15T00:00:00Z",
+      "DOGEUSDT": "2024-08-15T00:00:00Z",
+      "ETHUSDT": "2024-08-15T00:00:00Z",
+      "LTCUSDT": "2024-08-15T00:00:00Z",
+      "NEARUSDT": "2024-08-15T00:00:00Z",
+      "SOLUSDT": "2024-08-15T00:00:00Z",
+      "UNIUSDT": "2024-08-15T00:00:00Z",
+      "XRPUSDT": "2024-08-15T00:00:00Z",
+      "ZECUSDT": "2024-08-15T00:00:00Z",
+      "1000PEPEUSDT": "2025-05-05T00:00:00Z",
+      "SUIUSDT": "2025-05-03T00:00:00Z",
+      "ONDOUSDT": "2026-01-20T00:00:00Z"
+    },
+    "end_time_utc": "2026-09-01T00:00:00Z"
+  },
+  "strategy_identity": {
+    "id121_template_id": 121,
+    "id121_template_name": "v33 LONG + relaxed daily-ADX SHORT 正式候选",
+    "id121_snapshot": "strategy/id121-db-template-121.json",
+    "v33_source": "strategy/v33-source.json",
+    "v54_snapshot": "strategy/v54.json"
+  },
+  "normalized_return": "NetPnL / (EntryPrice * Quantity)",
+  "paired_key": "symbol + side + entry_time"
+}

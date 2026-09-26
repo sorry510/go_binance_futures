@@ -1,0 +1,37 @@
+{
+  "archived_on": "2026-09-26",
+  "research_date": "2026-09-24",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "git_head_at_archive": "e65ebbff0ca11bac8b5e0e7f8e694975469cf749",
+  "experiment_database": "go_bn_test",
+  "database_access": "read-only snapshot of strategy_templates.id=121; no writes",
+  "strategy_sources": {
+    "id121": "go_bn_test.strategy_templates.id=121 captured to strategy/id121-db-template-121.json",
+    "v33_source": "strategy_templates/daily-regime-breakout/daily-dmi-bidirectional-funding-relief-strongtrend-override-4h-adx-acceleration-1h-effective-breakout-v33.json",
+    "v54": "temp_strategy/v54/01-precompression-funding-bypass-long.json"
+  },
+  "strategy_sha256_at_archive": {
+    "v33_source_file": "f0d7596f2496dbbdd089705a4b53f261c8150a653b551c6d7433bb2c31c795c9",
+    "v54_source_file": "f40b7ea3ad0ab97651f3b8018ae2938e3261d4f4f73f493c92cea91639bc5f0b",
+    "id121_db_snapshot_file": "5dd21dca486fefe90be671326efa6947220c2c7bfafce312fd157d0dced6b2a8"
+  },
+  "id121_v33_identity_check": {
+    "technology_equal": true,
+    "technology_canonical_sha256": "0ae3b681d78d49884c11165fc70684ca8db52c1db28a4bd6eb77d554f06bfa00",
+    "strategy_equal": false,
+    "v33_strategy_canonical_sha256": "eec9ebf7c7d8e7bb03d6c15823b6b7701f7a54e2fffb8027dadd6e28d5571e4a",
+    "id121_strategy_canonical_sha256": "c23533c9a94fa61991f5713816258fd9541b95d3f92e620845f17dc2440c3ccc",
+    "difference": "Only SHORT rule index 1 differs; ID121 removes daily ADX-rising and 4h ADX acceleration gates."
+  },
+  "result_index_sections": [
+    "2026-09-24 — 生产 Benchmark 严格同起点校正",
+    "2026-09-24 — ID121 vs v54 严格同起点 Fixed-Notional 标准化比较",
+    "2026-09-24 — v54 vs ID121 严格 Paired Attribution"
+  ],
+  "known_limitations": [
+    "paired_normalized.csv stores normalized returns only, so raw-dollar per-trade attribution cannot be reconstructed from this CSV",
+    "raw-dollar paired attribution is preserved from strategy_templates/result.md rather than a raw trade export",
+    "original replay helper reads ID121 from strategy_templates.id=121; the exact archive-time DB snapshot is stored separately to prevent identity drift"
+  ],
+  "large_market_data_archived": false
+}

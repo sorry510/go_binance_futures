@@ -1,0 +1,1346 @@
+[
+  {
+    "publish_ms": 1704258903096,
+    "publish": "2024-01-03 05:15:03",
+    "base": "BNB",
+    "pairs": "BNB/USDC",
+    "code": "96e0b5370c9a49fbb5d66613b0d7ddf1",
+    "title": "Binance Margin Adds NFP, MLN & More Pairs"
+  },
+  {
+    "publish_ms": 1704258903096,
+    "publish": "2024-01-03 05:15:03",
+    "base": "MLN",
+    "pairs": "MLN/USDT,borrowable_asset",
+    "code": "96e0b5370c9a49fbb5d66613b0d7ddf1",
+    "title": "Binance Margin Adds NFP, MLN & More Pairs"
+  },
+  {
+    "publish_ms": 1704258903096,
+    "publish": "2024-01-03 05:15:03",
+    "base": "NFP",
+    "pairs": "NFP/USDT,borrowable_asset",
+    "code": "96e0b5370c9a49fbb5d66613b0d7ddf1",
+    "title": "Binance Margin Adds NFP, MLN & More Pairs"
+  },
+  {
+    "publish_ms": 1704258903096,
+    "publish": "2024-01-03 05:15:03",
+    "base": "SEI",
+    "pairs": "SEI/TUSD",
+    "code": "96e0b5370c9a49fbb5d66613b0d7ddf1",
+    "title": "Binance Margin Adds NFP, MLN & More Pairs"
+  },
+  {
+    "publish_ms": 1704258903096,
+    "publish": "2024-01-03 05:15:03",
+    "base": "SOL",
+    "pairs": "SOL/ETH",
+    "code": "96e0b5370c9a49fbb5d66613b0d7ddf1",
+    "title": "Binance Margin Adds NFP, MLN & More Pairs"
+  },
+  {
+    "publish_ms": 1705039819669,
+    "publish": "2024-01-12 06:10:19",
+    "base": "ARB",
+    "pairs": "ARB/FDUSD",
+    "code": "b03d6f33cd7e40a3bef774112306e645",
+    "title": "Binance Margin Adds DOCK & More ARB, OP and SOL Pairs"
+  },
+  {
+    "publish_ms": 1705039819669,
+    "publish": "2024-01-12 06:10:19",
+    "base": "DOCK",
+    "pairs": "DOCK/USDT",
+    "code": "b03d6f33cd7e40a3bef774112306e645",
+    "title": "Binance Margin Adds DOCK & More ARB, OP and SOL Pairs"
+  },
+  {
+    "publish_ms": 1705039819669,
+    "publish": "2024-01-12 06:10:19",
+    "base": "OP",
+    "pairs": "OP/FDUSD",
+    "code": "b03d6f33cd7e40a3bef774112306e645",
+    "title": "Binance Margin Adds DOCK & More ARB, OP and SOL Pairs"
+  },
+  {
+    "publish_ms": 1705039819669,
+    "publish": "2024-01-12 06:10:19",
+    "base": "SOL",
+    "pairs": "SOL/USDC",
+    "code": "b03d6f33cd7e40a3bef774112306e645",
+    "title": "Binance Margin Adds DOCK & More ARB, OP and SOL Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "ALPINE",
+    "pairs": "ALPINE/USDT,borrowable_asset",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "BAR",
+    "pairs": "BAR/USDT,borrowable_asset",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "CITY",
+    "pairs": "CITY/USDT,borrowable_asset",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "ORDI",
+    "pairs": "ORDI/FDUSD",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "PROS",
+    "pairs": "PROS/USDT",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "PSG",
+    "pairs": "PSG/USDT,borrowable_asset",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "SUI",
+    "pairs": "SUI/BTC",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "WIN",
+    "pairs": "WIN/USDT",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "base": "XAI",
+    "pairs": "XAI/FDUSD",
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "BCH",
+    "pairs": "BCH/FDUSD",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "CVP",
+    "pairs": "CVP/USDT",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "DCR",
+    "pairs": "DCR/USDT",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "DYDX",
+    "pairs": "DYDX/FDUSD",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "ETC",
+    "pairs": "ETC/FDUSD",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "FIL",
+    "pairs": "FIL/FDUSD",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "FORTH",
+    "pairs": "FORTH/USDT",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "FTM",
+    "pairs": "FTM/FDUSD",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "INJ",
+    "pairs": "INJ/FDUSD",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "LTC",
+    "pairs": "LTC/FDUSD",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "PROM",
+    "pairs": "PROM/USDT",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "base": "SUI",
+    "pairs": "SUI/FDUSD",
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "ARB",
+    "pairs": "ARB/USDC",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "ATOM",
+    "pairs": "ATOM/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "BCH",
+    "pairs": "BCH/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "CHZ",
+    "pairs": "CHZ/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "CREAM",
+    "pairs": "CREAM/USDT,borrowable_asset",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "DOT",
+    "pairs": "DOT/USDC",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "DYDX",
+    "pairs": "DYDX/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "ETC",
+    "pairs": "ETC/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "FIL",
+    "pairs": "FIL/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "FTM",
+    "pairs": "FTM/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "GALA",
+    "pairs": "GALA/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "INJ",
+    "pairs": "INJ/FDUSD,INJ/USDC",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "IRIS",
+    "pairs": "IRIS/USDT,borrowable_asset",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "LTC",
+    "pairs": "LTC/FDUSD",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "OP",
+    "pairs": "OP/USDC",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "ORDI",
+    "pairs": "ORDI/USDC",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "TKO",
+    "pairs": "TKO/USDT",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "base": "WRX",
+    "pairs": "WRX/USDT",
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "ACM",
+    "pairs": "ACM/USDT,borrowable_asset",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "ADA",
+    "pairs": "ADA/USDC",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "AVAX",
+    "pairs": "AVAX/USDC",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "FIO",
+    "pairs": "FIO/USDT,borrowable_asset",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "IQ",
+    "pairs": "IQ/USDT,borrowable_asset",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "MATIC",
+    "pairs": "MATIC/USDC",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "NEXO",
+    "pairs": "NEXO/USDT",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "QKC",
+    "pairs": "QKC/USDT",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "base": "XRP",
+    "pairs": "XRP/USDC",
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs"
+  },
+  {
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "base": "ADX",
+    "pairs": "ADX/USDT",
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "base": "DOT",
+    "pairs": "DOT/FDUSD",
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "base": "IQ",
+    "pairs": "IQ/USDT",
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "base": "LDO",
+    "pairs": "LDO/FDUSD",
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "base": "NEAR",
+    "pairs": "NEAR/FDUSD",
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "base": "SHIB",
+    "pairs": "SHIB/FDUSD",
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "base": "TIA",
+    "pairs": "TIA/FDUSD",
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "base": "WLD",
+    "pairs": "WLD/FDUSD",
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "BOME",
+    "pairs": "BOME/FDUSD",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "DCR",
+    "pairs": "DCR/USDT",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "DOGE",
+    "pairs": "DOGE/USDC",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "LINK",
+    "pairs": "LINK/USDC",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "LTO",
+    "pairs": "LTO/USDT",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "MLN",
+    "pairs": "MLN/USDT",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "PEPE",
+    "pairs": "PEPE/FDUSD,PEPE/USDC",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "SHIB",
+    "pairs": "SHIB/USDC",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "SUI",
+    "pairs": "SUI/USDC",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "WBTC",
+    "pairs": "WBTC/BTC,WBTC/USDT",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "base": "WLD",
+    "pairs": "WLD/USDC",
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs"
+  },
+  {
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "base": "ASR",
+    "pairs": "ASR/USDT",
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "base": "ATM",
+    "pairs": "ATM/USDT",
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "base": "ENA",
+    "pairs": "ENA/BTC,ENA/FDUSD",
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "base": "FIO",
+    "pairs": "FIO/USDT",
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "base": "JUV",
+    "pairs": "JUV/USDT",
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "base": "LTC",
+    "pairs": "LTC/USDC",
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "base": "NEAR",
+    "pairs": "NEAR/USDC",
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "base": "WAN",
+    "pairs": "WAN/USDT",
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs"
+  },
+  {
+    "publish_ms": 1713409218694,
+    "publish": "2024-04-18 03:00:18",
+    "base": "ALT",
+    "pairs": "ALT/USDC",
+    "code": "faabbc275a5f4dd9b3182df915432fbb",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-04-18"
+  },
+  {
+    "publish_ms": 1713409218694,
+    "publish": "2024-04-18 03:00:18",
+    "base": "BCH",
+    "pairs": "BCH/USDC",
+    "code": "faabbc275a5f4dd9b3182df915432fbb",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-04-18"
+  },
+  {
+    "publish_ms": 1713409218694,
+    "publish": "2024-04-18 03:00:18",
+    "base": "FIL",
+    "pairs": "FIL/USDC",
+    "code": "faabbc275a5f4dd9b3182df915432fbb",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-04-18"
+  },
+  {
+    "publish_ms": 1713409218694,
+    "publish": "2024-04-18 03:00:18",
+    "base": "LTC",
+    "pairs": "LTC/USDC",
+    "code": "faabbc275a5f4dd9b3182df915432fbb",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-04-18"
+  },
+  {
+    "publish_ms": 1713409218694,
+    "publish": "2024-04-18 03:00:18",
+    "base": "NEAR",
+    "pairs": "NEAR/USDC",
+    "code": "faabbc275a5f4dd9b3182df915432fbb",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-04-18"
+  },
+  {
+    "publish_ms": 1713409218694,
+    "publish": "2024-04-18 03:00:18",
+    "base": "PENDLE",
+    "pairs": "PENDLE/USDC",
+    "code": "faabbc275a5f4dd9b3182df915432fbb",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-04-18"
+  },
+  {
+    "publish_ms": 1713841238631,
+    "publish": "2024-04-23 03:00:38",
+    "base": "ALPINE",
+    "pairs": "ALPINE/USDT",
+    "code": "620f56a1c05840c6b2c5de54ea29443e",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY & More FDUSD, USDC and BTC Pairs"
+  },
+  {
+    "publish_ms": 1713841238631,
+    "publish": "2024-04-23 03:00:38",
+    "base": "BAR",
+    "pairs": "BAR/USDT",
+    "code": "620f56a1c05840c6b2c5de54ea29443e",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY & More FDUSD, USDC and BTC Pairs"
+  },
+  {
+    "publish_ms": 1713841238631,
+    "publish": "2024-04-23 03:00:38",
+    "base": "CITY",
+    "pairs": "CITY/USDT",
+    "code": "620f56a1c05840c6b2c5de54ea29443e",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY & More FDUSD, USDC and BTC Pairs"
+  },
+  {
+    "publish_ms": 1713841238631,
+    "publish": "2024-04-23 03:00:38",
+    "base": "NEO",
+    "pairs": "NEO/USDC",
+    "code": "620f56a1c05840c6b2c5de54ea29443e",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY & More FDUSD, USDC and BTC Pairs"
+  },
+  {
+    "publish_ms": 1713841238631,
+    "publish": "2024-04-23 03:00:38",
+    "base": "SAGA",
+    "pairs": "SAGA/BTC,SAGA/FDUSD",
+    "code": "620f56a1c05840c6b2c5de54ea29443e",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY & More FDUSD, USDC and BTC Pairs"
+  },
+  {
+    "publish_ms": 1713841238631,
+    "publish": "2024-04-23 03:00:38",
+    "base": "WIF",
+    "pairs": "WIF/USDC",
+    "code": "620f56a1c05840c6b2c5de54ea29443e",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY & More FDUSD, USDC and BTC Pairs"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "1000SATS",
+    "pairs": "1000SATS/FDUSD",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "BB",
+    "pairs": "BB/FDUSD",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "BONK",
+    "pairs": "BONK/FDUSD",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "ETHFI",
+    "pairs": "ETHFI/USDC",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "FIRO",
+    "pairs": "FIRO/USDT",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "FLOKI",
+    "pairs": "FLOKI/FDUSD",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "NOT",
+    "pairs": "NOT/FDUSD",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "PEOPLE",
+    "pairs": "PEOPLE/FDUSD",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "WIF",
+    "pairs": "WIF/FDUSD",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "base": "ZK",
+    "pairs": "ZK/FDUSD,ZK/USDT",
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18"
+  },
+  {
+    "publish_ms": 1719540001487,
+    "publish": "2024-06-28 02:00:01",
+    "base": "ALT",
+    "pairs": "ALT/FDUSD",
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28"
+  },
+  {
+    "publish_ms": 1719540001487,
+    "publish": "2024-06-28 02:00:01",
+    "base": "ETHFI",
+    "pairs": "ETHFI/FDUSD",
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28"
+  },
+  {
+    "publish_ms": 1719540001487,
+    "publish": "2024-06-28 02:00:01",
+    "base": "IO",
+    "pairs": "IO/FDUSD",
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28"
+  },
+  {
+    "publish_ms": 1719540001487,
+    "publish": "2024-06-28 02:00:01",
+    "base": "MEME",
+    "pairs": "MEME/FDUSD",
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28"
+  },
+  {
+    "publish_ms": 1719540001487,
+    "publish": "2024-06-28 02:00:01",
+    "base": "PYTH",
+    "pairs": "PYTH/FDUSD",
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28"
+  },
+  {
+    "publish_ms": 1719540001487,
+    "publish": "2024-06-28 02:00:01",
+    "base": "TAO",
+    "pairs": "TAO/FDUSD",
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28"
+  },
+  {
+    "publish_ms": 1719540001487,
+    "publish": "2024-06-28 02:00:01",
+    "base": "TNSR",
+    "pairs": "TNSR/FDUSD",
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28"
+  },
+  {
+    "publish_ms": 1720494002020,
+    "publish": "2024-07-09 03:00:02",
+    "base": "FET",
+    "pairs": "FET/USDC",
+    "code": "f3a9ec262a2843d1932104bffd1454e9",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-09"
+  },
+  {
+    "publish_ms": 1720494002020,
+    "publish": "2024-07-09 03:00:02",
+    "base": "FLOKI",
+    "pairs": "FLOKI/USDC",
+    "code": "f3a9ec262a2843d1932104bffd1454e9",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-09"
+  },
+  {
+    "publish_ms": 1720494002020,
+    "publish": "2024-07-09 03:00:02",
+    "base": "NOT",
+    "pairs": "NOT/USDC",
+    "code": "f3a9ec262a2843d1932104bffd1454e9",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-09"
+  },
+  {
+    "publish_ms": 1720494002020,
+    "publish": "2024-07-09 03:00:02",
+    "base": "ZRO",
+    "pairs": "ZRO/USDC",
+    "code": "f3a9ec262a2843d1932104bffd1454e9",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-09"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "ATOM",
+    "pairs": "ATOM/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "BB",
+    "pairs": "BB/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "CFX",
+    "pairs": "CFX/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "ENS",
+    "pairs": "ENS/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "FTM",
+    "pairs": "FTM/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "ICP",
+    "pairs": "ICP/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "SAGA",
+    "pairs": "SAGA/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "SEI",
+    "pairs": "SEI/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "base": "YGG",
+    "pairs": "YGG/USDC",
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "1000SATS",
+    "pairs": "1000SATS/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "AR",
+    "pairs": "AR/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "GALA",
+    "pairs": "GALA/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "PEOPLE",
+    "pairs": "PEOPLE/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "RUNE",
+    "pairs": "RUNE/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "STRK",
+    "pairs": "STRK/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "TRB",
+    "pairs": "TRB/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "UNI",
+    "pairs": "UNI/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "base": "ZK",
+    "pairs": "ZK/USDC",
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "CKB",
+    "pairs": "CKB/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "EOS",
+    "pairs": "EOS/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "IO",
+    "pairs": "IO/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "JTO",
+    "pairs": "JTO/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "LDO",
+    "pairs": "LDO/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "MANTA",
+    "pairs": "MANTA/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "OMNI",
+    "pairs": "OMNI/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "PIXEL",
+    "pairs": "PIXEL/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "base": "STX",
+    "pairs": "STX/USDC",
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "ALGO",
+    "pairs": "ALGO/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "APT",
+    "pairs": "APT/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "ARKM",
+    "pairs": "ARKM/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "BLUR",
+    "pairs": "BLUR/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "DOGS",
+    "pairs": "DOGS/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "JUP",
+    "pairs": "JUP/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "ONT",
+    "pairs": "ONT/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "RARE",
+    "pairs": "RARE/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "REZ",
+    "pairs": "REZ/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "TNSR",
+    "pairs": "TNSR/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "base": "TON",
+    "pairs": "TON/USDC",
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30"
+  },
+  {
+    "publish_ms": 1725609608250,
+    "publish": "2024-09-06 08:00:08",
+    "base": "AAVE",
+    "pairs": "AAVE/USDC",
+    "code": "834fdaa57a6846dc8e6ee87a61c6316a",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-09-06"
+  },
+  {
+    "publish_ms": 1725609608250,
+    "publish": "2024-09-06 08:00:08",
+    "base": "EURI",
+    "pairs": "EURI/USDT",
+    "code": "834fdaa57a6846dc8e6ee87a61c6316a",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-09-06"
+  },
+  {
+    "publish_ms": 1725609608250,
+    "publish": "2024-09-06 08:00:08",
+    "base": "SLF",
+    "pairs": "SLF/USDC,SLF/USDT",
+    "code": "834fdaa57a6846dc8e6ee87a61c6316a",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-09-06"
+  },
+  {
+    "publish_ms": 1725609608250,
+    "publish": "2024-09-06 08:00:08",
+    "base": "TRX",
+    "pairs": "TRX/USDC",
+    "code": "834fdaa57a6846dc8e6ee87a61c6316a",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-09-06"
+  },
+  {
+    "publish_ms": 1731906001533,
+    "publish": "2024-11-18 05:00:01",
+    "base": "ACT",
+    "pairs": "ACT/USDC",
+    "code": "8061c9b481244c88be73a68980db5761",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-18"
+  },
+  {
+    "publish_ms": 1731906001533,
+    "publish": "2024-11-18 05:00:01",
+    "base": "NEIRO",
+    "pairs": "NEIRO/USDC",
+    "code": "8061c9b481244c88be73a68980db5761",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-18"
+  },
+  {
+    "publish_ms": 1731906001533,
+    "publish": "2024-11-18 05:00:01",
+    "base": "PNUT",
+    "pairs": "PNUT/USDC",
+    "code": "8061c9b481244c88be73a68980db5761",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-18"
+  },
+  {
+    "publish_ms": 1732501821187,
+    "publish": "2024-11-25 02:30:21",
+    "base": "CATI",
+    "pairs": "CATI/USDC",
+    "code": "cb5e509a881640938eaa1eca26b4b413",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-25"
+  },
+  {
+    "publish_ms": 1732501821187,
+    "publish": "2024-11-25 02:30:21",
+    "base": "FDUSD",
+    "pairs": "FDUSD/USDC",
+    "code": "cb5e509a881640938eaa1eca26b4b413",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-25"
+  },
+  {
+    "publish_ms": 1732501821187,
+    "publish": "2024-11-25 02:30:21",
+    "base": "HBAR",
+    "pairs": "HBAR/USDC",
+    "code": "cb5e509a881640938eaa1eca26b4b413",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-25"
+  },
+  {
+    "publish_ms": 1732501821187,
+    "publish": "2024-11-25 02:30:21",
+    "base": "OM",
+    "pairs": "OM/USDC",
+    "code": "cb5e509a881640938eaa1eca26b4b413",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-25"
+  },
+  {
+    "publish_ms": 1732501821187,
+    "publish": "2024-11-25 02:30:21",
+    "base": "RAY",
+    "pairs": "RAY/USDC",
+    "code": "cb5e509a881640938eaa1eca26b4b413",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-25"
+  },
+  {
+    "publish_ms": 1732501821187,
+    "publish": "2024-11-25 02:30:21",
+    "base": "TAO",
+    "pairs": "TAO/USDC",
+    "code": "cb5e509a881640938eaa1eca26b4b413",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-25"
+  }
+]

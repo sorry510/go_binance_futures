@@ -1,0 +1,33 @@
+{
+  "family": "monitoring-tag-addition-direct-short",
+  "direction": "SHORT",
+  "execution": {
+    "leverage": 4,
+    "take_profit_pct": 8,
+    "stop_loss_pct": 6,
+    "fee_rate_per_side": 0.0005,
+    "slippage_bps_per_side": 5,
+    "max_hold_hours": 72,
+    "single_position": true,
+    "entry": "next 1m open after the official announcement timestamp",
+    "tp_sl_gate": "first minute close reaching leveraged ROI threshold",
+    "tp_sl_execution": "next 1m open after the gate"
+  },
+  "eligibility": {
+    "event": "Binance official addition to Monitoring Tag only",
+    "exclude": "Monitoring Tag removals and Seed Tag changes",
+    "contract": "BASEUSDT USD-M perpetual",
+    "require_event_month_1m_history": true,
+    "require_24m_prior_month_1m_history": true,
+    "require_post_announcement_trading_window": true
+  },
+  "funding_production_semantics": {
+    "source": "Binance Vision USD-M monthly fundingRate",
+    "short_receives_positive_rate": true,
+    "mark_price_fallback": "corresponding 1m bar.Close when MarkPrice is absent"
+  },
+  "archived_replay_funding_semantics": {
+    "status": "known_bug",
+    "problem": "historical helpers require a nonexistent fourth mark_price CSV column and silently skip funding rows"
+  }
+}

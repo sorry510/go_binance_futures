@@ -1,0 +1,149 @@
+[
+  {
+    "id": 218065,
+    "code": "cb5e509a881640938eaa1eca26b4b413",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-25",
+    "type": 1,
+    "releaseDate": 1732501821187
+  },
+  {
+    "id": 217573,
+    "code": "8061c9b481244c88be73a68980db5761",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-18",
+    "type": 1,
+    "releaseDate": 1731906001533
+  },
+  {
+    "id": 210555,
+    "code": "834fdaa57a6846dc8e6ee87a61c6316a",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-09-06",
+    "type": 1,
+    "releaseDate": 1725609608250
+  },
+  {
+    "id": 209576,
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30",
+    "type": 1,
+    "releaseDate": 1724983202100
+  },
+  {
+    "id": 206789,
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31",
+    "type": 1,
+    "releaseDate": 1722391202937
+  },
+  {
+    "id": 206452,
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24",
+    "type": 1,
+    "releaseDate": 1721793607759
+  },
+  {
+    "id": 206015,
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18",
+    "type": 1,
+    "releaseDate": 1721271602678
+  },
+  {
+    "id": 204954,
+    "code": "f3a9ec262a2843d1932104bffd1454e9",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-09",
+    "type": 1,
+    "releaseDate": 1720494002020
+  },
+  {
+    "id": 204172,
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28",
+    "type": 1,
+    "releaseDate": 1719540001487
+  },
+  {
+    "id": 203163,
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18",
+    "type": 1,
+    "releaseDate": 1718679607875
+  },
+  {
+    "id": 198653,
+    "code": "620f56a1c05840c6b2c5de54ea29443e",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY & More FDUSD, USDC and BTC Pairs",
+    "type": 1,
+    "releaseDate": 1713841238631
+  },
+  {
+    "id": 198184,
+    "code": "faabbc275a5f4dd9b3182df915432fbb",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-04-18",
+    "type": 1,
+    "releaseDate": 1713409218694
+  },
+  {
+    "id": 197268,
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs",
+    "type": 1,
+    "releaseDate": 1712721426021
+  },
+  {
+    "id": 195749,
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs",
+    "type": 1,
+    "releaseDate": 1711509004008
+  },
+  {
+    "id": 192814,
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs",
+    "type": 1,
+    "releaseDate": 1709087134343
+  },
+  {
+    "id": 192382,
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs",
+    "type": 1,
+    "releaseDate": 1708571418267
+  },
+  {
+    "id": 190559,
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs",
+    "type": 1,
+    "releaseDate": 1706857203654
+  },
+  {
+    "id": 190111,
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs",
+    "type": 1,
+    "releaseDate": 1706670625137
+  },
+  {
+    "id": 189333,
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs",
+    "type": 1,
+    "releaseDate": 1705635003514
+  },
+  {
+    "id": 188646,
+    "code": "b03d6f33cd7e40a3bef774112306e645",
+    "title": "Binance Margin Adds DOCK & More ARB, OP and SOL Pairs",
+    "type": 1,
+    "releaseDate": 1705039819669
+  },
+  {
+    "id": 187661,
+    "code": "96e0b5370c9a49fbb5d66613b0d7ddf1",
+    "title": "Binance Margin Adds NFP, MLN & More Pairs",
+    "type": 1,
+    "releaseDate": 1704258903096
+  }
+]

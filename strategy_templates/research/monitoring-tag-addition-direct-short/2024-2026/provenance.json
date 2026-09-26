@@ -1,0 +1,25 @@
+{
+  "archived_on": "2026-09-26",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "git_head_at_archive": "e65ebbff0ca11bac8b5e0e7f8e694975469cf749",
+  "result_index_sections": [
+    "2026-09-26 — Binance Monitoring Tag Addition Direct-Short：2024 Discovery",
+    "2026-09-26 — Binance Monitoring Tag Addition Direct-Short：2025 OOS",
+    "2026-09-26 — Binance Monitoring Tag Addition Direct-Short：2026 Second OOS & Final",
+    "2026-09-26 — Event Replay Funding Parser Audit"
+  ],
+  "replay_sha256": {
+    "replay/2024-discovery.py": "5ef27b915de779dc2e9c79cd4a700c172bca8e2b360a14ed3bea0e3337db5c6c",
+    "replay/2025-oos.py": "be628d1227e6c9a45548f79d5f65b56da05fa6aaa27906c563536cd9868d70f0",
+    "replay/2026-oos.py": "37e4f4dbda22daf1626dcbf5842d35dad40325759691639f3cfbce4d0c495eea"
+  },
+  "public_data_source": "https://data.binance.vision/data/futures/um",
+  "source_path_rules": {
+    "daily_klines_1m": "daily/klines/{SYMBOL}/1m/{SYMBOL}-1m-{YYYY-MM-DD}.zip",
+    "monthly_funding_rate": "monthly/fundingRate/{SYMBOL}/{SYMBOL}-fundingRate-{YYYY-MM}.zip"
+  },
+  "historical_metrics_validation": "pending corrected funding parser replay",
+  "known_issue": "Archived helpers assume fundingRate CSV has a fourth MarkPrice column; actual archive is three columns and production Engine falls back to 1m bar.Close.",
+  "missing_evidence": "The complete pre-eligibility event universe and exclusion rows were not found in surviving /tmp artifacts; only eligible event lists and historical replay helpers are archived.",
+  "large_market_data_archived": false
+}

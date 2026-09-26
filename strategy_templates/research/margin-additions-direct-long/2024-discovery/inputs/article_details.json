@@ -1,0 +1,713 @@
+[
+  {
+    "code": "96e0b5370c9a49fbb5d66613b0d7ddf1",
+    "title": "Binance Margin Adds NFP, MLN & More Pairs",
+    "publish_ms": 1704258903096,
+    "publish": "2024-01-03 05:15:03",
+    "opening": " Fellow Binancians,  Binance Margin has added NFPrompt (NFP) and Enzyme (MLN) as new borrowable assets on Cross and Isolated Margin, as well as new trading pairs on Cross and Isolated Margin.&nbsp;  New Cross Margin Pairs: BNB/USDC, NFP/USDT, SOL/ETH  New Isolated Margin Pairs: BNB/USDC, MLN/USDT, NFP/USDT, SEI/TUSD ",
+    "bases": {
+      "BNB": [
+        "BNB/USDC"
+      ],
+      "NFP": [
+        "NFP/USDT",
+        "borrowable_asset"
+      ],
+      "SOL": [
+        "SOL/ETH"
+      ],
+      "MLN": [
+        "MLN/USDT",
+        "borrowable_asset"
+      ],
+      "SEI": [
+        "SEI/TUSD"
+      ]
+    }
+  },
+  {
+    "code": "b03d6f33cd7e40a3bef774112306e645",
+    "title": "Binance Margin Adds DOCK & More ARB, OP and SOL Pairs",
+    "publish_ms": 1705039819669,
+    "publish": "2024-01-12 06:10:19",
+    "opening": " Fellow Binancians,  Binance Margin has added Dock (DOCK) as a new borrowable asset on Cross Margin, as well as new trading pairs on Cross and Isolated Margin.&nbsp;  New Cross Margin Pairs: ARB/FDUSD, DOCK/USDT, SOL/USDC  New Isolated Margin Pairs: ARB/FDUSD, OP/FDUSD, SOL/USDC ",
+    "bases": {
+      "ARB": [
+        "ARB/FDUSD"
+      ],
+      "DOCK": [
+        "DOCK/USDT"
+      ],
+      "SOL": [
+        "SOL/USDC"
+      ],
+      "OP": [
+        "OP/FDUSD"
+      ]
+    }
+  },
+  {
+    "code": "3fc2f02aef2d4d3fbac2524f301027a2",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY, PSG & More Pairs",
+    "publish_ms": 1705635003514,
+    "publish": "2024-01-19 03:30:03",
+    "opening": " Fellow Binancians,  Binance Margin has added Alpine F1 Team Fan Token (ALPINE), FC Barcelona Fan Token (BAR), Manchester City Fan Token (CITY) and Paris Saint-Germain Fan Token (PSG) as new borrowable assets on Isolated Margin, as well as new trading pairs on Cross and Isolated Margin.&nbsp;  New Cross Margin Pairs: PROS/USDT, WIN/USDT  New Isolated Margin Pairs: ALPINE/USDT, BAR/USDT, CITY/USDT, ORDI/FDUSD, PSG/USDT, SUI/BTC, XAI/FDUSD ",
+    "bases": {
+      "PROS": [
+        "PROS/USDT"
+      ],
+      "WIN": [
+        "WIN/USDT"
+      ],
+      "ALPINE": [
+        "ALPINE/USDT",
+        "borrowable_asset"
+      ],
+      "BAR": [
+        "BAR/USDT",
+        "borrowable_asset"
+      ],
+      "CITY": [
+        "CITY/USDT",
+        "borrowable_asset"
+      ],
+      "ORDI": [
+        "ORDI/FDUSD"
+      ],
+      "PSG": [
+        "PSG/USDT",
+        "borrowable_asset"
+      ],
+      "SUI": [
+        "SUI/BTC"
+      ],
+      "XAI": [
+        "XAI/FDUSD"
+      ]
+    }
+  },
+  {
+    "code": "07d0c50b9bff4e92a8035d158aa94dd4",
+    "title": "Binance Margin Adds DCR & More FDUSD and USDT Pairs",
+    "publish_ms": 1706670625137,
+    "publish": "2024-01-31 03:10:25",
+    "opening": " Fellow Binancians,  Binance Margin has added Decred (DCR) as a new borrowable asset on Isolated Margin, as well as new trading pairs on Cross and Isolated Margin.&nbsp;  New Cross Margin Pairs: CVP/USDT, FORTH/USDT, PROM/USDT  New Isolated Margin Pairs: BCH/FDUSD, DCR/USDT, DYDX/FDUSD, ETC/FDUSD, FIL/FDUSD, FTM/FDUSD, INJ/FDUSD, LTC/FDUSD, SUI/FDUSD ",
+    "bases": {
+      "CVP": [
+        "CVP/USDT"
+      ],
+      "FORTH": [
+        "FORTH/USDT"
+      ],
+      "PROM": [
+        "PROM/USDT"
+      ],
+      "BCH": [
+        "BCH/FDUSD"
+      ],
+      "DCR": [
+        "DCR/USDT"
+      ],
+      "DYDX": [
+        "DYDX/FDUSD"
+      ],
+      "ETC": [
+        "ETC/FDUSD"
+      ],
+      "FIL": [
+        "FIL/FDUSD"
+      ],
+      "FTM": [
+        "FTM/FDUSD"
+      ],
+      "INJ": [
+        "INJ/FDUSD"
+      ],
+      "LTC": [
+        "LTC/FDUSD"
+      ],
+      "SUI": [
+        "SUI/FDUSD"
+      ]
+    }
+  },
+  {
+    "code": "5df2fbaa6747450b943dfa1361fbe19f",
+    "title": "Binance Margin Adds CREAM, IRIS & More FDUSD and USDC Pairs",
+    "publish_ms": 1706857203654,
+    "publish": "2024-02-02 07:00:03",
+    "opening": " Fellow Binancians,  Binance Margin has added Cream Finance (CREAM) and IRISnet (IRIS) as new borrowable assets on Cross and Isolated Margin, as well as new trading pairs on Cross and Isolated Margin.&nbsp;  New Cross Margin Pairs: ARB/USDC, ATOM/FDUSD, BCH/FDUSD, CHZ/FDUSD, CREAM/USDT, DOT/USDC, DYDX/FDUSD, ETC/FDUSD, FIL/FDUSD, FTM/FDUSD, GALA/FDUSD, INJ/FDUSD, INJ/USDC, IRIS/USDT, LTC/FDUSD, OP/USDC, ORDI/USDC, TKO/USDT, WRX/USDT  New Isolated Margin Pairs: ARB/USDC, ATOM/FDUSD, CHZ/FDUSD, CREAM/USDT, DOT/USDC, GALA/FDUSD, INJ/USDC, IRIS/USDT, OP/USDC, ORDI/USDC ",
+    "bases": {
+      "ARB": [
+        "ARB/USDC"
+      ],
+      "ATOM": [
+        "ATOM/FDUSD"
+      ],
+      "BCH": [
+        "BCH/FDUSD"
+      ],
+      "CHZ": [
+        "CHZ/FDUSD"
+      ],
+      "CREAM": [
+        "CREAM/USDT",
+        "borrowable_asset"
+      ],
+      "DOT": [
+        "DOT/USDC"
+      ],
+      "DYDX": [
+        "DYDX/FDUSD"
+      ],
+      "ETC": [
+        "ETC/FDUSD"
+      ],
+      "FIL": [
+        "FIL/FDUSD"
+      ],
+      "FTM": [
+        "FTM/FDUSD"
+      ],
+      "GALA": [
+        "GALA/FDUSD"
+      ],
+      "INJ": [
+        "INJ/FDUSD",
+        "INJ/USDC"
+      ],
+      "IRIS": [
+        "IRIS/USDT",
+        "borrowable_asset"
+      ],
+      "LTC": [
+        "LTC/FDUSD"
+      ],
+      "OP": [
+        "OP/USDC"
+      ],
+      "ORDI": [
+        "ORDI/USDC"
+      ],
+      "TKO": [
+        "TKO/USDT"
+      ],
+      "WRX": [
+        "WRX/USDT"
+      ]
+    }
+  },
+  {
+    "code": "32cce2a500ef4af5be01c8edf02977f3",
+    "title": "Binance Margin Adds ACM, FIO, IQ & More USDT and USDC Pairs",
+    "publish_ms": 1708571418267,
+    "publish": "2024-02-22 03:10:18",
+    "opening": " Fellow Binancians,  Binance Margin has added AC Milan Fan Token (ACM), FIO Protocol (FIO), IQ (IQ) and more as new borrowable assets on Cross and Isolated Margin, as well as new trading pairs on Cross and Isolated Margin.&nbsp;  New Cross Margin Pairs: ADA/USDC, AVAX/USDC, MATIC/USDC, XRP/USDC  New Isolated Margin Pairs: ACM/USDT, AVAX/USDC, FIO/USDT, IQ/USDT, NEXO/USDT, QKC/USDT ",
+    "bases": {
+      "ADA": [
+        "ADA/USDC"
+      ],
+      "AVAX": [
+        "AVAX/USDC"
+      ],
+      "MATIC": [
+        "MATIC/USDC"
+      ],
+      "XRP": [
+        "XRP/USDC"
+      ],
+      "ACM": [
+        "ACM/USDT",
+        "borrowable_asset"
+      ],
+      "FIO": [
+        "FIO/USDT",
+        "borrowable_asset"
+      ],
+      "IQ": [
+        "IQ/USDT",
+        "borrowable_asset"
+      ],
+      "NEXO": [
+        "NEXO/USDT"
+      ],
+      "QKC": [
+        "QKC/USDT"
+      ]
+    }
+  },
+  {
+    "code": "cc897d1544a341c2ae598f594dd9835c",
+    "title": "Binance Margin Adds More FDUSD and USDT Pairs",
+    "publish_ms": 1709087134343,
+    "publish": "2024-02-28 02:25:34",
+    "opening": " Fellow Binancians,  Binance Margin has added new FDUSD and USDT trading pairs on Cross and Isolated Margin.&nbsp;  New Cross Margin Pairs: ADX/USDT, IQ/USDT  New Isolated Margin Pairs: DOT/FDUSD, LDO/FDUSD, NEAR/FDUSD, SHIB/FDUSD, TIA/FDUSD, WLD/FDUSD ",
+    "bases": {
+      "ADX": [
+        "ADX/USDT"
+      ],
+      "IQ": [
+        "IQ/USDT"
+      ],
+      "DOT": [
+        "DOT/FDUSD"
+      ],
+      "LDO": [
+        "LDO/FDUSD"
+      ],
+      "NEAR": [
+        "NEAR/FDUSD"
+      ],
+      "SHIB": [
+        "SHIB/FDUSD"
+      ],
+      "TIA": [
+        "TIA/FDUSD"
+      ],
+      "WLD": [
+        "WLD/FDUSD"
+      ]
+    }
+  },
+  {
+    "code": "6674719e209641bda688729852d35fb5",
+    "title": "Binance Margin Adds DCR, LTO, MLN, WBTC & More FDUSD, USDC and USDT Pairs",
+    "publish_ms": 1711509004008,
+    "publish": "2024-03-27 03:10:04",
+    "opening": " Fellow Binancians,  Binance Margin has added Decred (DCR), LTO Network (LTO), Enzyme (MLN) and Wrapped Bitcoin (WBTC) as new borrowable and collateral assets on Cross Margin, as well as new trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    BOME/FDUSD, DCR/USDT, DOGE/USDC, LINK/USDC, LTO/USDT, MLN/USDT, PEPE/FDUSD, PEPE/USDC, SHIB/USDC, SUI/USDC, WBTC/BTC, WBTC/USDT, WLD/USDC&nbsp;    BOME/FDUSD, DOGE/USDC, LINK/USDC, PEPE/FDUSD, PEPE/USDC, SHIB/USDC, SUI/USDC, WLD/USDC      New Borrowable Assets    DCR, LTO, MLN    -      New Collateral Assets    DCR, LTO, MLN, WBTC    -    ",
+    "bases": {
+      "BOME": [
+        "BOME/FDUSD"
+      ],
+      "DCR": [
+        "DCR/USDT"
+      ],
+      "DOGE": [
+        "DOGE/USDC"
+      ],
+      "LINK": [
+        "LINK/USDC"
+      ],
+      "LTO": [
+        "LTO/USDT"
+      ],
+      "MLN": [
+        "MLN/USDT"
+      ],
+      "PEPE": [
+        "PEPE/FDUSD",
+        "PEPE/USDC"
+      ],
+      "SHIB": [
+        "SHIB/USDC"
+      ],
+      "SUI": [
+        "SUI/USDC"
+      ],
+      "WBTC": [
+        "WBTC/BTC",
+        "WBTC/USDT"
+      ],
+      "WLD": [
+        "WLD/USDC"
+      ]
+    }
+  },
+  {
+    "code": "f16274ce06dc4884a291751e040b337e",
+    "title": "Binance Margin Adds ASR, ATM, FIO, JUV, WAN & More BTC, FDUSD and USDC Pairs",
+    "publish_ms": 1712721426021,
+    "publish": "2024-04-10 03:57:06",
+    "opening": " Fellow Binancians,  Binance Margin has added AS Roma Fan Token (ASR), Atletico de Madrid Fan Token (ATM), FIO Protocol (FIO), Juventus Fan Token (JUV) and Wanchain (WAN) as new borrowable and collateral assets on Cross and Isolated Margin, as well as new BTC, FDUSD and USDC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    ASR/USDT, ATM/USDT, ENA/BTC, ENA/FDUSD, FIO/USDT, JUV/USDT, LTC/USDC, NEAR/USDC, WAN/USDT    ASR/USDT, ATM/USDT, ENA/BTC, ENA/FDUSD, JUV/USDT      New Borrowable Assets    ASR, ATM, FIO, JUV, WAN    ASR, ATM, JUV      New Collateral Assets    ",
+    "bases": {
+      "ASR": [
+        "ASR/USDT"
+      ],
+      "ATM": [
+        "ATM/USDT"
+      ],
+      "ENA": [
+        "ENA/BTC",
+        "ENA/FDUSD"
+      ],
+      "FIO": [
+        "FIO/USDT"
+      ],
+      "JUV": [
+        "JUV/USDT"
+      ],
+      "LTC": [
+        "LTC/USDC"
+      ],
+      "NEAR": [
+        "NEAR/USDC"
+      ],
+      "WAN": [
+        "WAN/USDT"
+      ]
+    }
+  },
+  {
+    "code": "faabbc275a5f4dd9b3182df915432fbb",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-04-18",
+    "publish_ms": 1713409218694,
+    "publish": "2024-04-18 03:00:18",
+    "opening": " Fellow Binancians,  Binance Margin has added new USDC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    ALT/USDC, BCH/USDC, FIL/USDC, PENDLE/USDC    ALT/USDC, BCH/USDC, FIL/USDC, LTC/USDC, NEAR/USDC, PENDLE/USDC    ",
+    "bases": {
+      "ALT": [
+        "ALT/USDC"
+      ],
+      "BCH": [
+        "BCH/USDC"
+      ],
+      "FIL": [
+        "FIL/USDC"
+      ],
+      "PENDLE": [
+        "PENDLE/USDC"
+      ],
+      "LTC": [
+        "LTC/USDC"
+      ],
+      "NEAR": [
+        "NEAR/USDC"
+      ]
+    }
+  },
+  {
+    "code": "620f56a1c05840c6b2c5de54ea29443e",
+    "title": "Binance Margin Adds ALPINE, BAR, CITY & More FDUSD, USDC and BTC Pairs",
+    "publish_ms": 1713841238631,
+    "publish": "2024-04-23 03:00:38",
+    "opening": " Fellow Binancians,  Binance Margin has added Alpine F1 Team Fan Token (ALPINE), FC Barcelona Fan Token (BAR) and Manchester City Fan Token (CITY) as new borrowable and collateral assets on Cross Margin, as well as new FDUSD, USDC and BTC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    ALPINE/USDT, BAR/USDT, CITY/USDT, NEO/USDC, SAGA/BTC, SAGA/FDUSD, WIF/USDC    NEO/USDC, SAGA/BTC, SAGA/FDUSD, WIF/USDC      New Borrowable Assets    ALPINE, BAR, CITY    -      New Collateral Assets    ",
+    "bases": {
+      "ALPINE": [
+        "ALPINE/USDT"
+      ],
+      "BAR": [
+        "BAR/USDT"
+      ],
+      "CITY": [
+        "CITY/USDT"
+      ],
+      "NEO": [
+        "NEO/USDC"
+      ],
+      "SAGA": [
+        "SAGA/BTC",
+        "SAGA/FDUSD"
+      ],
+      "WIF": [
+        "WIF/USDC"
+      ]
+    }
+  },
+  {
+    "code": "d9aba607bf2f4d41ac97d1c22ea41dea",
+    "title": "Binance Margin Adds New FDUSD, USDC, and USDT Pairs - 2024-06-18",
+    "publish_ms": 1718679607875,
+    "publish": "2024-06-18 03:00:07",
+    "opening": " Fellow Binancians,  Binance Margin has added new FDUSD, USDC, and USDT trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    1000SATS/FDUSD, BB/FDUSD, BONK/FDUSD, ETHFI/USDC, FIRO/USDT, FLOKI/FDUSD, NOT/FDUSD, PEOPLE/FDUSD, W/FDUSD, WIF/FDUSD, ZK/FDUSD    1000SATS/FDUSD, BB/FDUSD, BONK/FDUSD, ETHFI/USDC, FLOKI/FDUSD, NOT/FDUSD, PEOPLE/FDUSD, W/FDUSD, WIF/FDUSD, ZK/USDT    ",
+    "bases": {
+      "1000SATS": [
+        "1000SATS/FDUSD"
+      ],
+      "BB": [
+        "BB/FDUSD"
+      ],
+      "BONK": [
+        "BONK/FDUSD"
+      ],
+      "ETHFI": [
+        "ETHFI/USDC"
+      ],
+      "FIRO": [
+        "FIRO/USDT"
+      ],
+      "FLOKI": [
+        "FLOKI/FDUSD"
+      ],
+      "NOT": [
+        "NOT/FDUSD"
+      ],
+      "PEOPLE": [
+        "PEOPLE/FDUSD"
+      ],
+      "WIF": [
+        "WIF/FDUSD"
+      ],
+      "ZK": [
+        "ZK/FDUSD",
+        "ZK/USDT"
+      ]
+    }
+  },
+  {
+    "code": "8cc00ce19059474c8f41bd00c04da22e",
+    "title": "Binance Margin Adds New FDUSD Pairs - 2024-06-28",
+    "publish_ms": 1719540001487,
+    "publish": "2024-06-28 02:00:01",
+    "opening": " This is a general announcement. Products and services referred to here may not be available in your region.  Fellow Binancians,  Binance Margin has added new FDUSD trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    ALT/FDUSD, ETHFI/FDUSD, IO/FDUSD, MEME/FDUSD, PYTH/FDUSD, TNSR/FDUSD, TAO/FDUSD    ALT/FDUSD, ETHFI/FDUSD, IO/FDUSD, MEME/FDUSD, PYTH/FDUSD, TNSR/FDUSD, TAO/FDUSD    ",
+    "bases": {
+      "ALT": [
+        "ALT/FDUSD"
+      ],
+      "ETHFI": [
+        "ETHFI/FDUSD"
+      ],
+      "IO": [
+        "IO/FDUSD"
+      ],
+      "MEME": [
+        "MEME/FDUSD"
+      ],
+      "PYTH": [
+        "PYTH/FDUSD"
+      ],
+      "TNSR": [
+        "TNSR/FDUSD"
+      ],
+      "TAO": [
+        "TAO/FDUSD"
+      ]
+    }
+  },
+  {
+    "code": "f3a9ec262a2843d1932104bffd1454e9",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-09",
+    "publish_ms": 1720494002020,
+    "publish": "2024-07-09 03:00:02",
+    "opening": " This is a general announcement. Products and services referred to here may not be available in your region.  Fellow Binancians,  Binance Margin has added new USDC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    FET/USDC, FLOKI/USDC, NOT/USDC, ZRO/USDC    FET/USDC, FLOKI/USDC, NOT/USDC, ZRO/USDC    ",
+    "bases": {
+      "FET": [
+        "FET/USDC"
+      ],
+      "FLOKI": [
+        "FLOKI/USDC"
+      ],
+      "NOT": [
+        "NOT/USDC"
+      ],
+      "ZRO": [
+        "ZRO/USDC"
+      ]
+    }
+  },
+  {
+    "code": "8d1fb50cdcf04e5881c194e8113e002f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-18",
+    "publish_ms": 1721271602678,
+    "publish": "2024-07-18 03:00:02",
+    "opening": " This is a general announcement. Products and services referred to here may not be available in your region.  Fellow Binancians,  Binance Margin has added new USDC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    ATOM/USDC, BB/USDC, CFX/USDC, ENS/USDC, FTM/USDC,&nbsp; ICP/USDC, SAGA/USDC, SEI/USDC, YGG/USDC    ATOM/USDC, BB/USDC, CFX/USDC , ENS/USDC, FTM/USDC, ICP/USDC, SAGA/USDC, SEI/USDC, YGG/USDC    ",
+    "bases": {
+      "ATOM": [
+        "ATOM/USDC"
+      ],
+      "BB": [
+        "BB/USDC"
+      ],
+      "CFX": [
+        "CFX/USDC"
+      ],
+      "ENS": [
+        "ENS/USDC"
+      ],
+      "FTM": [
+        "FTM/USDC"
+      ],
+      "ICP": [
+        "ICP/USDC"
+      ],
+      "SAGA": [
+        "SAGA/USDC"
+      ],
+      "SEI": [
+        "SEI/USDC"
+      ],
+      "YGG": [
+        "YGG/USDC"
+      ]
+    }
+  },
+  {
+    "code": "6c5b18de5a434337ab52d80d5fb6c03f",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-24",
+    "publish_ms": 1721793607759,
+    "publish": "2024-07-24 04:00:07",
+    "opening": " This is a general announcement. Products and services referred to here may not be available in your region.  Fellow Binancians,  Binance Margin has added new USDC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    1000SATS/USDC, AR/USDC, GALA/USDC, PEOPLE/USDC, RUNE/USDC,&nbsp; STRK/USDC, TRB/USDC, UNI/USDC, ZK/USDC    1000SATS/USDC, AR/USDC, GALA/USDC , PEOPLE/USDC, RUNE/USDC, STRK/USDC, TRB/USDC, UNI/USDC, ZK/USDC    ",
+    "bases": {
+      "1000SATS": [
+        "1000SATS/USDC"
+      ],
+      "AR": [
+        "AR/USDC"
+      ],
+      "GALA": [
+        "GALA/USDC"
+      ],
+      "PEOPLE": [
+        "PEOPLE/USDC"
+      ],
+      "RUNE": [
+        "RUNE/USDC"
+      ],
+      "STRK": [
+        "STRK/USDC"
+      ],
+      "TRB": [
+        "TRB/USDC"
+      ],
+      "UNI": [
+        "UNI/USDC"
+      ],
+      "ZK": [
+        "ZK/USDC"
+      ]
+    }
+  },
+  {
+    "code": "38d1ffe3bdc34e3fac7ce611bbd5d989",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-07-31",
+    "publish_ms": 1722391202937,
+    "publish": "2024-07-31 02:00:02",
+    "opening": " This is a general announcement. Products and services referred to here may not be available in your region.  Fellow Binancians,  Binance Margin has added new USDC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    CKB/USDC, EOS/USDC, IO/USDC, JTO/USDC, LDO/USDC,&nbsp; MANTA/USDC, OMNI/USDC, PIXEL/USDC, STX/USDC    CKB/USDC, EOS/USDC, IO/USDC , JTO/USDC, LDO/USDC, MANTA/USDC, OMNI/USDC, PIXEL/USDC, STX/USDC    ",
+    "bases": {
+      "CKB": [
+        "CKB/USDC"
+      ],
+      "EOS": [
+        "EOS/USDC"
+      ],
+      "IO": [
+        "IO/USDC"
+      ],
+      "JTO": [
+        "JTO/USDC"
+      ],
+      "LDO": [
+        "LDO/USDC"
+      ],
+      "MANTA": [
+        "MANTA/USDC"
+      ],
+      "OMNI": [
+        "OMNI/USDC"
+      ],
+      "PIXEL": [
+        "PIXEL/USDC"
+      ],
+      "STX": [
+        "STX/USDC"
+      ]
+    }
+  },
+  {
+    "code": "6d101ebc8ec44e079eff3708e5275ddf",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-08-30",
+    "publish_ms": 1724983202100,
+    "publish": "2024-08-30 02:00:02",
+    "opening": " This is a general announcement. Products and services referred to here may not be available in your region.  Fellow Binancians,  Binance Margin has added new trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    ALGO/USDC, APT/USDC, ARKM/USDC, BLUR/USDC, DOGS/USDC,&nbsp; JUP/USDC, ONT/USDC, RARE/USDC, REZ/USDC, TNSR/USDC, TON/USDC    ALGO/USDC, APT/USDC, ARKM/USDC , BLUR/USDC, DOGS/USDC, JUP/USDC, ONT/USDC, RARE/USDC, REZ/USDC, TNSR/USDC, TON/USDC      ",
+    "bases": {
+      "ALGO": [
+        "ALGO/USDC"
+      ],
+      "APT": [
+        "APT/USDC"
+      ],
+      "ARKM": [
+        "ARKM/USDC"
+      ],
+      "BLUR": [
+        "BLUR/USDC"
+      ],
+      "DOGS": [
+        "DOGS/USDC"
+      ],
+      "JUP": [
+        "JUP/USDC"
+      ],
+      "ONT": [
+        "ONT/USDC"
+      ],
+      "RARE": [
+        "RARE/USDC"
+      ],
+      "REZ": [
+        "REZ/USDC"
+      ],
+      "TNSR": [
+        "TNSR/USDC"
+      ],
+      "TON": [
+        "TON/USDC"
+      ]
+    }
+  },
+  {
+    "code": "834fdaa57a6846dc8e6ee87a61c6316a",
+    "title": "Binance Margin Adds New Trading Pairs - 2024-09-06",
+    "publish_ms": 1725609608250,
+    "publish": "2024-09-06 08:00:08",
+    "opening": " This is a general announcement. Products and services referred to here may not be available in your region.  Disclaimer: In compliance with MiCA requirements, unauthorized stablecoins are subject to certain restrictions for EEA users. For more information, please click here.&nbsp;  Fellow Binancians,  Binance Margin has added new trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    AAVE/USDC, EURI/USDT, SLF/USDT, SLF/USDC, TRX/USDC    AAVE/USDC, EURI/USDT, SLF/USDT , SLF/USDC, TRX/USDC      ",
+    "bases": {
+      "AAVE": [
+        "AAVE/USDC"
+      ],
+      "EURI": [
+        "EURI/USDT"
+      ],
+      "SLF": [
+        "SLF/USDC",
+        "SLF/USDT"
+      ],
+      "TRX": [
+        "TRX/USDC"
+      ]
+    }
+  },
+  {
+    "code": "8061c9b481244c88be73a68980db5761",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-18",
+    "publish_ms": 1731906001533,
+    "publish": "2024-11-18 05:00:01",
+    "opening": " This is a general announcement and marketing communication. Products and services referred to here may not be available in your region.&nbsp;  Fellow Binancians,  Binance Margin has added new USDC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    ACT/USDC, NEIRO/USDC, PNUT/USDC    ACT/USDC, NEIRO/USDC, PNUT/USDC      ",
+    "bases": {
+      "ACT": [
+        "ACT/USDC"
+      ],
+      "NEIRO": [
+        "NEIRO/USDC"
+      ],
+      "PNUT": [
+        "PNUT/USDC"
+      ]
+    }
+  },
+  {
+    "code": "cb5e509a881640938eaa1eca26b4b413",
+    "title": "Binance Margin Adds New USDC Pairs - 2024-11-25",
+    "publish_ms": 1732501821187,
+    "publish": "2024-11-25 02:30:21",
+    "opening": " This is a general announcement and marketing communication. Products and services referred to here may not be available in your region.&nbsp;  Fellow Binancians,  Binance Margin has added new USDC trading pairs on Cross and Isolated Margin.&nbsp;         Cross Margin    Isolated Margin      New Trading Pairs    CATI/USDC, FDUSD/USDC, HBAR/USDC, OM/USDC, RAY/USDC, TAO/USDC    CATI/USDC, FDUSD/USDC, HBAR/USDC, OM/USDC, RAY/USDC, TAO/USDC,&nbsp;    ",
+    "bases": {
+      "CATI": [
+        "CATI/USDC"
+      ],
+      "FDUSD": [
+        "FDUSD/USDC"
+      ],
+      "HBAR": [
+        "HBAR/USDC"
+      ],
+      "OM": [
+        "OM/USDC"
+      ],
+      "RAY": [
+        "RAY/USDC"
+      ],
+      "TAO": [
+        "TAO/USDC"
+      ]
+    }
+  }
+]
