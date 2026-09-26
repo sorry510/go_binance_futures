@@ -20,6 +20,48 @@ func TestEffectiveWarmupBarsExpandsForEMA200(t *testing.T) {
 	}
 }
 
+func TestStrategyWarmupReadyAtWaitsForLateListedIndicatorSeries(t *testing.T) {
+	const ema50TechnologyJSON = `{"ema":[{"name":"ema_1d_50","enable":true,"kline_interval":"1d","period":50}]}`
+	dataset, _ := emaWarmupDataset(DefaultWarmupBars)
+	daily := dataset.Bars[BarSeriesKey(dataset.Symbol, "1d")]
+	day := 24 * time.Hour
+	dataset.StartTime = daily[0].OpenTime - 10*day.Milliseconds()
+	dataset.WarmupStartTime = dataset.StartTime - (time.Duration(DefaultWarmupBars) * day).Milliseconds()
+	environment, err := newHistoricalEnvironment(dataset, ema50TechnologyJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	readyAt, available, err := environment.strategyWarmupReadyAt()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !available {
+		t.Fatal("late-listed series should become warm after enough bars")
+	}
+	want := daily[DefaultWarmupBars-1].CloseTime
+	if readyAt != want {
+		t.Fatalf("readyAt=%s want=%s", time.UnixMilli(readyAt).UTC(), time.UnixMilli(want).UTC())
+	}
+}
+
+func TestStrategyWarmupReadyAtKeepsManualFixtureSemantics(t *testing.T) {
+	const ma3TechnologyJSON = `{"ma":[{"name":"ma3","enable":true,"kline_interval":"1d","period":3}]}`
+	dataset, _ := emaWarmupDataset(5)
+	daily := dataset.Bars[BarSeriesKey(dataset.Symbol, "1d")]
+	dataset.WarmupStartTime = daily[0].OpenTime
+	environment, err := newHistoricalEnvironment(dataset, ma3TechnologyJSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	readyAt, available, err := environment.strategyWarmupReadyAt()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !available || readyAt != dataset.StartTime {
+		t.Fatalf("manual fixture readiness=(%d,%v), want start=%d", readyAt, available, dataset.StartTime)
+	}
+}
+
 func TestHistoricalEnvironmentEMAHistoryIsSafeForStrategyIndexes(t *testing.T) {
 	dataset, asOf := emaWarmupDataset(231)
 	environment, err := newHistoricalEnvironment(dataset, ema200TechnologyJSON)
