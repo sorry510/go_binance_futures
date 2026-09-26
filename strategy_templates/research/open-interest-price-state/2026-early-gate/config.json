@@ -1,0 +1,33 @@
+{
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "sample_days": [
+    "2026-01-05",
+    "2026-01-06",
+    "2026-01-07",
+    "2026-04-06",
+    "2026-04-07",
+    "2026-04-08",
+    "2026-07-06",
+    "2026-07-07",
+    "2026-07-08"
+  ],
+  "lookback_hours": 4,
+  "future_horizons_hours": [
+    1,
+    4,
+    12
+  ],
+  "max_asof_gap_minutes": 30,
+  "data_source": "Binance Vision USD-M daily metrics",
+  "price_proxy": "sum_open_interest_value / sum_open_interest",
+  "signals": {
+    "oi_expansion_continuation": "4h OI change crosses <=0 to >0; trade sign(4h price return)",
+    "oi_contraction_reversal": "4h OI change crosses >=0 to <0; trade -sign(4h price return)"
+  },
+  "early_gate": "Proceed only if a family has overall 4h signed mean >= 0.10% and >=3/4 symbols positive. No threshold/window tuning."
+}

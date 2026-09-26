@@ -1,0 +1,14 @@
+{
+  "event_source": "Upbit official trade announcements",
+  "event_types": ["신규 거래지원 안내", "마켓 디지털 자산 추가"],
+  "direction": "LONG",
+  "production_history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "entry": "next 1m open after first_listed_at",
+  "leverage": 4,
+  "take_profit_roi_pct": 8,
+  "stop_loss_roi_pct": 6,
+  "fee": 0.0005,
+  "slippage_bps": 5,
+  "max_hold_hours": 72
+}

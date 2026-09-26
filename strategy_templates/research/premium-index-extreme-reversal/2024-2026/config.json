@@ -1,0 +1,13 @@
+{
+  "symbols": ["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT","SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "premium_interval": "5m",
+  "baseline_bars": 288,
+  "entry_z_threshold": 3.0,
+  "rearm_z_threshold": 1.0,
+  "direction": "positive premium -> SHORT; negative premium -> LONG",
+  "entry_timing": "next full 1h open after completed 5m premium bar",
+  "forward_horizons_hours": [1,4,12],
+  "discovery_year": 2024,
+  "oos_years": [2025,2026],
+  "engine_parameters_if_promoted": {"leverage":4,"profit":8,"loss":6,"fee":0.0005,"slippage_bps":5}
+}

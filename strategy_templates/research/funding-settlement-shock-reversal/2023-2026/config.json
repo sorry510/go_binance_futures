@@ -1,0 +1,12 @@
+{
+  "symbols": ["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT","SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "funding_history_window": 30,
+  "entry_z_threshold": 2.0,
+  "rearm_z_threshold": 1.0,
+  "direction": "positive funding -> SHORT; negative funding -> LONG",
+  "entry_timing": "next completed 1h bar open after funding timestamp",
+  "forward_horizons_hours": [1,4,12],
+  "discovery_years": [2023,2024],
+  "oos_years": [2025,2026],
+  "engine_parameters_if_promoted": {"leverage":4,"profit":8,"loss":6,"fee":0.0005,"slippage_bps":5}
+}

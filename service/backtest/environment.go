@@ -78,6 +78,43 @@ func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historic
 	return &historicalEnvironment{dataset: dataset, technology: config, warmupBars: warmupBars, intervalMillis: intervalMillis}, nil
 }
 
+func (builder *historicalEnvironment) strategyWarmupReadyAt() (int64, bool, error) {
+	if builder.dataset.WarmupStartTime <= 0 || builder.dataset.WarmupStartTime >= builder.dataset.StartTime {
+		return builder.dataset.StartTime, true, nil
+	}
+	readyAt := builder.dataset.StartTime
+	seen := make(map[string]bool)
+	for _, group := range builder.indicatorGroups() {
+		for _, item := range group.items {
+			if !item.Enable || seen[item.KlineInterval] {
+				continue
+			}
+			seen[item.KlineInterval] = true
+			expectedStart, err := subtractBars(builder.dataset.StartTime, item.KlineInterval, builder.warmupBars)
+			if err != nil {
+				return 0, false, err
+			}
+			if builder.dataset.WarmupStartTime > expectedStart {
+				continue
+			}
+			bars := builder.dataset.Bars[BarSeriesKey(builder.dataset.Symbol, item.KlineInterval)]
+			if len(bars) == 0 {
+				return 0, false, nil
+			}
+			if bars[0].OpenTime <= expectedStart {
+				continue
+			}
+			if len(bars) < builder.warmupBars {
+				return 0, false, nil
+			}
+			if candidate := bars[builder.warmupBars-1].CloseTime; candidate > readyAt {
+				readyAt = candidate
+			}
+		}
+	}
+	return readyAt, true, nil
+}
+
 func (builder *historicalEnvironment) Build(asOf int64, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
 	return builder.build(asOf, position, cash, config)
 }

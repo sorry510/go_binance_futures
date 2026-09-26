@@ -1,0 +1,11 @@
+{
+  "research_date": "2026-09-26",
+  "repository_revision": "cbc54a66e3c13d46e53ad86ae283ebb18f8ccbd8",
+  "premium_source": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/{SYMBOL}/5m/{SYMBOL}-5m-{YYYY-MM}.zip",
+  "price_source": "go_bn_test.market_klines_1h, market=futures_usdt",
+  "known_limitations": [
+    "First-stage diagnostic enters at the next full hourly open rather than exact next-minute open.",
+    "Premium Index calculation/funding formula changed in 2025, so later-regime improvement must not be backfit into earlier years.",
+    "No exact 1m Engine replay was justified because discovery edge was economically negligible and cross-symbol weak."
+  ]
+}

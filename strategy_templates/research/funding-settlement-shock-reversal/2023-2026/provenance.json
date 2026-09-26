@@ -1,0 +1,14 @@
+{
+  "research_date": "2026-09-26",
+  "repository_revision": "cbc54a66e3c13d46e53ad86ae283ebb18f8ccbd8",
+  "database": "go_bn_test",
+  "sources": [
+    "market_funding_rates",
+    "market_klines_1h"
+  ],
+  "market": "futures_usdt",
+  "known_limitations": [
+    "First-stage diagnostic enters at the next 1h open rather than exact next-minute open.",
+    "Because OOS expectation is near zero/negative, no exact 1m Engine replay was justified."
+  ]
+}

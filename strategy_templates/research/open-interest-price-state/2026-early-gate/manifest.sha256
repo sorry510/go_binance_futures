@@ -1,0 +1,11 @@
+ec9e5cdf9a5757b310bf39dbf4bdaa253bba0c13b8ab6a48f7b5f90343e39b70  strategy_templates/research/open-interest-price-state/2026-early-gate/README.md
+4c8cebd23e44d95f3a3bc0d8bc5ff1cc8d411f8c2464003be4bc96de4dff15fc  strategy_templates/research/open-interest-price-state/2026-early-gate/config.json
+853e6c6a9fa1577f249f734afc7b3afb79e48db115ee78130ef6b2a0e417a037  strategy_templates/research/open-interest-price-state/2026-early-gate/inputs/README.md
+4382da5ec8eadbfe5d562356c09e932743ee659556c6c06897499eec0bc84d70  strategy_templates/research/open-interest-price-state/2026-early-gate/protocol.md
+1291d5e98f08ff0f3eead08ae30f8b8fa3ccf60171de5c193ed4760f52713252  strategy_templates/research/open-interest-price-state/2026-early-gate/provenance.json
+90356d8778b34f6edd504e7e35e89b08afc8eef54196544ed3bde097a8c0c494  strategy_templates/research/open-interest-price-state/2026-early-gate/replay.py
+51a2f9a488f134ddd4f8ce68077b48499d2fed0417025f279ad96ff81091b1e7  strategy_templates/research/open-interest-price-state/2026-early-gate/results/events.csv
+1d0cf0c753fac3cbdab27b8d068a31c1f5f03ee8d46acb38fdd8f4103735f783  strategy_templates/research/open-interest-price-state/2026-early-gate/results/events_2025.csv
+a1f1fd937552a9051bd408d216f2ce69655a135913c99dfc0af14caccbf64532  strategy_templates/research/open-interest-price-state/2026-early-gate/results/summary.json
+0f3b8d211b22378feda761eaab93b83cbffe17d921bc220b5706ea83d75d36a8  strategy_templates/research/open-interest-price-state/2026-early-gate/results/summary_2025.json
+119ba2efc90d86cf389d09738f3576240ebd062baeb078f74084609c620a996a  strategy_templates/research/open-interest-price-state/2026-early-gate/validate_2025.py

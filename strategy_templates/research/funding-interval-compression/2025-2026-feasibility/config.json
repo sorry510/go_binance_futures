@@ -1,0 +1,10 @@
+{
+  "target_family": "funding interval compression",
+  "target_transition_primary": "8h/4h -> 1h",
+  "fallback_transition": "8h -> 4h",
+  "direction": "against previous funding sign",
+  "production_history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "database": "go_bn_test",
+  "market": "futures_usdt"
+}

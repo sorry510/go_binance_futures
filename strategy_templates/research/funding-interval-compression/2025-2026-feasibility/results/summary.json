@@ -1,0 +1,19 @@
+{
+  "post_2025_05_02_gap_counts": {
+    "8h": {"observations": 26936, "symbols": 23},
+    "4h": {"observations": 10997, "symbols": 5},
+    "1h": {"observations": 0, "symbols": 0}
+  },
+  "eight_to_four_transitions": {
+    "all_events": 1,
+    "production_eligible_events": 0,
+    "only_event": {
+      "symbol": "SOLUSDT",
+      "time_utc": "2022-11-09T20:00:00Z",
+      "previous_funding_rate": -0.015,
+      "history_age_days": -43.5,
+      "eligible": false
+    }
+  },
+  "decision": "insufficient/verifiability failure; no return backtest"
+}

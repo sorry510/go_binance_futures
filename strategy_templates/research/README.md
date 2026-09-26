@@ -22,3 +22,11 @@ Archived bundles currently include:
 - `margin-additions-direct-long/2024-discovery/`: complete event universe, eligibility, replay, and failed 2024 discovery evidence.
 - `id121-v54-strict-production/2026-09-24/`: strict same-start ID121/v54 benchmark, exact ID121 DB snapshot, normalized trade export, and raw-vs-normalized attribution separation.
 - `monitoring-tag-addition-direct-short/2024-2026/`: preserved three-year historical replay evidence with the funding-parser defect explicitly marked; exact PF/net remains pending corrected-parser replay.
+
+- `open-interest-price-state/2026-early-gate/`: pre-registered 2026 early gate plus full-2025 historical OOS; the apparent OI-contraction reversal edge failed OOS and the family is frozen.
+
+- `funding-settlement-shock-reversal/2023-2026/`: extreme-funding crowding reversal with 2023–2024 discovery and 2025–2026 OOS; OOS edge vanished/reversed, so the family is frozen.
+
+- `funding-interval-compression/2025-2026-feasibility/`: local archive has no 1h funding observations and no production-eligible 8h->4h transition; frozen as currently unverifiable rather than a failed alpha.
+- `premium-index-extreme-reversal/2024-2026/`: fixed 24h/3σ Premium Index crowding-reversal study; 2024/2025 edge was economically negligible, so later 2026 strengthening was not backfit and the family is frozen.
+- `upbit-new-market-direct-long/2024-discovery/`: official Upbit new-market event universe, Binance production eligibility, and exact 1m direct-LONG replay; 12 trades produced PF 0.096 and the family is frozen.

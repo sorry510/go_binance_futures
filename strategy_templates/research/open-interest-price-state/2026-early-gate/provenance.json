@@ -1,0 +1,9 @@
+{
+  "research_date": "2026-09-26",
+  "repository_revision": "working tree; research files currently untracked",
+  "public_source": "https://data.binance.vision/data/futures/um/daily/metrics/",
+  "known_limitations": [
+    "Historical publication latency of daily metrics not independently verified.",
+    "Early gate is raw forward-return screening, not exact TP/SL Engine replay."
+  ]
+}

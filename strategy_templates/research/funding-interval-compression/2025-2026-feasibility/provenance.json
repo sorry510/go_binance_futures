@@ -1,0 +1,8 @@
+{
+  "research_date": "2026-09-26",
+  "repository_revision": "cbc54a66e3c13d46e53ad86ae283ebb18f8ccbd8",
+  "database": "go_bn_test",
+  "tables": ["market_funding_rates","market_klines_1h"],
+  "finding": "local funding history contains only 8h and 4h gaps after 2025-05-02; no 1h observations",
+  "known_limitation": "primary 1h-transition mechanism cannot be tested from the current local archive"
+}

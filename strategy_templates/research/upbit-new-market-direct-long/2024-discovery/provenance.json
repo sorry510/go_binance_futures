@@ -1,0 +1,12 @@
+{
+  "research_date": "2026-09-26",
+  "repository_revision": "cbc54a66e3c13d46e53ad86ae283ebb18f8ccbd8",
+  "upbit_list_endpoint": "https://api-manager.upbit.com/api/v1/announcements?os=web&page={page}&per_page=30&category=trade",
+  "binance_market_source": "https://data.binance.vision/data/futures/um/monthly",
+  "eligibility_market_data": "Binance Vision USD-M 1h klines",
+  "replay_market_data": "Binance Vision USD-M 1m klines and fundingRate",
+  "known_limitations": [
+    "Current Upbit titles can include later update suffixes; first_listed_at is retained as the event timestamp.",
+    "The study tests the announcement reaction only; it does not wait for Upbit trading to open."
+  ]
+}

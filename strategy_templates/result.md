@@ -1401,3 +1401,55 @@
 - 结论：Margin 新增交易入口/可借资产公告没有形成可用的公告后 LONG alpha；样本量足够且 PF 明显低于 1、净期望为负。
 - 状态：**Margin additions direct-long family 冻结 / 不进入 2025 OOS / 不入库**。不反向改做 SHORT，不按 USDC/FDUSD/USDT、币种、月份、borrowable-vs-pair、首分钟反应或流动性做后验优化；ID121/v54 仍为正式候选。
 - 审计归档：`strategy_templates/research/margin-additions-direct-long/2024-discovery/`；包含完整事件集、eligibility、逐笔结果、固定参数、protocol、provenance、replay 脚本与 SHA-256 manifest。旧的 149 events / 47 eligible 运行日志仅作为 parser 修复历史保留在 `legacy/`，不属于最终结果证据。
+
+## 2026-09-26 — Open Interest / Price State Transition：2026 Early Gate → 2025 OOS
+
+- 新机制：不再使用 Top Trader positioning ratio，而直接研究 Binance USD-M metrics 的 sum_open_interest 与价格状态；价格用同期 sum_open_interest_value / sum_open_interest 作为 mark proxy。
+- 预注册定义不调参：4h OI change 从 <=0 穿到 >0 时，按过去4h价格方向做 continuation；4h OI change 从 >=0 穿到 <0 时，逆过去4h价格方向做 liquidation-exhaustion reversal。只用自然零点，不设 OI/return 幅度阈值。
+- 2026 early gate：Expansion-continuation 132事件，4h signed mean **-0.0653%**，仅2/4币为正，失败。Contraction-reversal 129事件：1h **+0.0359%**、4h **+0.1765%**、12h **+0.5865%**，3/4币4h为正，达到事前门槛，因此保持完全相同定义进入 2025 全年历史 OOS。
+- 2025 OOS 共 **7,989** 事件：1h **-0.0064%**、4h **-0.0267%**、12h **-0.0094%**；BTC/ETH/BNB/XRP 的4h mean分别约 **-0.0009% / -0.0551% / -0.0265% / -0.0211%**，**0/4币为正**。
+- 结论：2026 小样本的 OI contraction reversal 是明显 regime/sample 假象，独立 2025 大样本完全不复现；没有理由进入 1m TP8/SL6 Engine。
+- 状态：**整个 OI-price-state transition family 冻结 / 不进 Engine / 不入库**。不搜索 2h/6h/12h lookback、不加 OI magnitude/price-return threshold、不改变 zero-cross 定义、不反向挽救，也不为此新增生产 OI indicator。
+- 数据注意：Binance Vision metrics 可重建，但历史 observation 的 point-in-time publication latency 未独立验证；由于 OOS 已失败，无需继续为该路线做 availability 审计。
+- 审计归档：strategy_templates/research/open-interest-price-state/2026-early-gate/。
+
+## 2026-09-26 — Extreme Funding Settlement Reversal：2023–2024 Discovery → 2025–2026 OOS
+
+- 假设：极端 funding settlement 代表永续合约一侧拥挤；结算后拥挤侧应出现再平衡。规则完全独立于 v33/v54：过去30次已完成 funding 计算均值/std，首次 `|z|>=2` 触发；正 funding 做 SHORT、负 funding 做 LONG；`|z|<1` 才 re-arm。
+- 为避免 contemporaneous look-ahead，第一阶段采用保守执行：funding timestamp 后**下一完整 1h bar open** 入场，只观察1h/4h/12h signed forward return。固定10个老币，不使用 symbol-specific 条件。
+- 2023–2024 discovery：**1,173**事件；1h mean **+0.0677%**，4h **+0.0553%**，12h **+0.2748%**；7/10币4h为正。但年度已经翻转：2023 4h **+0.1721%**，2024 **-0.0613%**。
+- 2025–2026 OOS：**969**事件；1h mean **+0.0030%**，4h **-0.0081%**，12h **-0.1255%**；仅5/10币4h为正。2025 4h **+0.0894%**，2026 **-0.1593%**。
+- 结论：discovery 幅度本身就远低于当前双边 fee+slippage 所需经济位移，而且跨年方向不稳定；OOS 后 4h/12h 直接转负，不值得进入精确 1m TP8/SL6 Engine。
+- 状态：**整个 extreme-funding-settlement reversal family 冻结 / 不进 Engine / 不入库**。不调30次窗口、2σ、1σ re-arm、入场延迟，也不反向做 continuation 挽救。
+- 审计归档：`strategy_templates/research/funding-settlement-shock-reversal/2023-2026/`。
+
+## 2026-09-26 — Funding Interval Compression：数据可行性审计
+
+- 目标：研究 Binance funding settlement frequency 收紧是否代表极端拥挤/去杠杆压力；原计划识别 8h/4h -> 1h，再按触发前 funding 符号反向交易。
+- 本地 `market_funding_rates` 在 2025-05-02 后的间隔分布：8h 共 **26,936** 条 / 23币；4h 共 **10,997** 条 / 5币；**1h 为 0 条**。因此当前本地归档无法重建 Binance 2025-05 后自动 1h funding transition。
+- 退一步只检查 8h -> 4h：严格要求切换前连续两个约8h间隔，整个本地历史仅找到 **1 个事件**（SOLUSDT，2022-11-09 20:00 UTC），且按本地历史事件时合约年龄不足2年，production-eligible = **0**。
+- 结论：该路线不是“alpha 回测失败”，而是当前数据与生产资格下 **不可验证 / 样本不足**。
+- 状态：**冻结可行性研究**。不放宽 >=2年门槛、不降低流动性条件、不把无关 funding-frequency 事件混入凑样本；只有未来获得完整 point-in-time 1h funding 历史后再重启。
+- 审计归档：`strategy_templates/research/funding-interval-compression/2025-2026-feasibility/`。
+
+## 2026-09-26 — Premium Index Extreme Reversal：2024 Discovery → 2025/2026 OOS
+
+- 假设：Binance Premium Index 直接反映永续 impact bid/ask 相对现货指数的压力；过去24h（288根5m）z-score 首次 `|z|>=3` 时，正 premium 做 SHORT、负 premium 做 LONG，`|z|<1` re-arm。
+- 执行诊断固定为 5m 信号完成后下一完整 1h open 入场；10老币，同参数；2024 discovery、2025 OOS1、2026 OOS2；不使用 symbol-specific 条件。
+- 2024 discovery：**8,434**事件；1h mean **+0.0031%**，4h **+0.0057%**，12h **+0.0756%**；仅 **2/10** 币4h为正。
+- 2025 OOS1：**9,603**事件；4h mean **+0.0063%**，12h **+0.0898%**；6/10币4h为正，经济幅度仍接近0。
+- 2026 OOS2：**5,894**事件；1h **+0.0375%**，4h **+0.0806%**，12h **+0.0489%**；9/10币4h为正。虽后期变强，但这是后出现的 regime，且4h幅度仍低于当前双边 fee+slippage 所需位移，不能反向据此调早期规则。
+- 结论：discovery 本身没有可交易 edge，2025 也没有确认；2026 局部改善不能把弱机制升级为策略。
+- 状态：**Premium Index extreme-reversal family 冻结 / 不进 1m Engine / 不入库**。不搜索 2σ/4σ、12h/48h baseline、re-arm、symbol filter 或 continuation。
+- 审计归档：`strategy_templates/research/premium-index-extreme-reversal/2024-2026/`。
+
+## 2026-09-26 — Upbit New-Market Announcement Direct-LONG：2024 Discovery
+
+- 假设：Upbit 新增交易支持/新增市场公告会带来韩国现货新增需求，因此公告后立即 LONG 已在 Binance USD-M 交易至少2年的同币合约。
+- 官方事件宇宙：2024 共 **44 篇** Upbit Trade-category 新交易支持/新增市场公告；完整 ticker 解析得到 **66 token-events / 61 unique tokens**。
+- Production eligibility 使用 Binance Vision：事件时 USD-M 历史 >=730天、公告前24h QuoteVolume >=500万 USDT、公告后仍有可交易数据。最终 **12个 eligible / 12币**：JASMY、ARPA、EGLD、FIL、NEAR、XLM、UNI、INJ、GAL、ENS、NEO、SOL。
+- 固定执行：Upbit `first_listed_at` 后下一根1m open LONG；4x；TP8/SL6 minute-close trigger + next-minute-open exit；双边 fee=0.0005、双边5bps slippage；funding；最长72h。
+- 2024 exact 1m discovery：**12笔，1 TP / 11 SL；PF 0.0961；normalized net -92.89%；avg -7.74%/事件**。仅 ENS +9.88%；INJ 约 -19.99%，公告型 gap/slippage 风险明显。
+- 结论：Upbit listing direct-LONG 在 discovery 被强烈否定。
+- 状态：**整条 Upbit new-market direct-LONG family 冻结 / 不进入2025 OOS / 不入库**。尤其不因 11/12 亏损而事后反向改做 SHORT，也不按 KRW/USDT市场、币种、公告时刻、首分钟走势或后续更新筛选。
+- 审计归档：`strategy_templates/research/upbit-new-market-direct-long/2024-discovery/`。
