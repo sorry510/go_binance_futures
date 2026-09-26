@@ -57,6 +57,10 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 	if err != nil {
 		return Result{}, err
 	}
+	warmupReadyAt, warmupAvailable, err := environment.strategyWarmupReadyAt()
+	if err != nil {
+		return Result{}, err
+	}
 	if mode == ResolutionModeStandard && !engine.disableStandardOptimizations {
 		environment.enableStandardOptimizations(strategy.StrategyJSON)
 	}
@@ -166,38 +170,40 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 		// Evaluate minute-close strategy rules with the same K-line time semantics as live
 		// InitParseEnv: [0] is the currently forming interval reconstructed only from
 		// 1m data observed through this minute, while [1] is the latest completed bar.
-		env, condition, envErr := environment.BuildMinuteClose(bar.CloseTime, bar, position, cash, config)
-		if envErr == nil {
-			if position != nil {
-				roi, _ := env["ROI"].(float64)
-				gateReason := closeGateReason(roi, config)
-				if gateReason != "" {
-					rule, ok, evalErr := evaluateRules(rules, position.Side, env, compiled, true)
+		if warmupAvailable && bar.CloseTime >= warmupReadyAt {
+			env, condition, envErr := environment.BuildMinuteClose(bar.CloseTime, bar, position, cash, config)
+			if envErr == nil {
+				if position != nil {
+					roi, _ := env["ROI"].(float64)
+					gateReason := closeGateReason(roi, config)
+					if gateReason != "" {
+						rule, ok, evalErr := evaluateRules(rules, position.Side, env, compiled, true)
+						if evalErr != nil {
+							return Result{}, evalErr
+						}
+						if ok {
+							pending = &PendingAction{Action: "close", Side: position.Side, StrategyName: rule.Name, StrategyType: rule.Type, StrategyHash: strategyservice.RuleHash(rule.Code), ExitReason: gateReason, SignalTime: bar.CloseTime, MarketCondition: condition}
+							addEvent(bar.CloseTime, "signal", rule.Type, position.Side, bar.Close, position.Quantity, map[string]any{"strategy_name": rule.Name, "roi": roi, "gate_reason": gateReason})
+						}
+					}
+				}
+				if position == nil && pending == nil {
+					rule, ok, evalErr := evaluateRules(rules, "", env, compiled, false)
 					if evalErr != nil {
 						return Result{}, evalErr
 					}
 					if ok {
-						pending = &PendingAction{Action: "close", Side: position.Side, StrategyName: rule.Name, StrategyType: rule.Type, StrategyHash: strategyservice.RuleHash(rule.Code), ExitReason: gateReason, SignalTime: bar.CloseTime, MarketCondition: condition}
-						addEvent(bar.CloseTime, "signal", rule.Type, position.Side, bar.Close, position.Quantity, map[string]any{"strategy_name": rule.Name, "roi": roi, "gate_reason": gateReason})
+						side := "LONG"
+						if rule.Type == "short" {
+							side = "SHORT"
+						}
+						pending = &PendingAction{Action: "open", Side: side, StrategyName: rule.Name, StrategyType: rule.Type, StrategyHash: strategyservice.RuleHash(rule.Code), SignalTime: bar.CloseTime, MarketCondition: condition}
+						addEvent(bar.CloseTime, "signal", rule.Type, side, bar.Close, 0, map[string]any{"strategy_name": rule.Name, "market_condition": condition})
 					}
 				}
+			} else if !errors.Is(envErr, ErrInsufficientHistoricalBars) {
+				return Result{}, envErr
 			}
-			if position == nil && pending == nil {
-				rule, ok, evalErr := evaluateRules(rules, "", env, compiled, false)
-				if evalErr != nil {
-					return Result{}, evalErr
-				}
-				if ok {
-					side := "LONG"
-					if rule.Type == "short" {
-						side = "SHORT"
-					}
-					pending = &PendingAction{Action: "open", Side: side, StrategyName: rule.Name, StrategyType: rule.Type, StrategyHash: strategyservice.RuleHash(rule.Code), SignalTime: bar.CloseTime, MarketCondition: condition}
-					addEvent(bar.CloseTime, "signal", rule.Type, side, bar.Close, 0, map[string]any{"strategy_name": rule.Name, "market_condition": condition})
-				}
-			}
-		} else if !errors.Is(envErr, ErrInsufficientHistoricalBars) {
-			return Result{}, envErr
 		}
 		unrealized := unrealizedPnL(position, bar.Close)
 		equity := cash + unrealized
