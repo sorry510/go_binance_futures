@@ -1,0 +1,8 @@
+{
+  "candidate_families": ["spot listing LONG", "perpetual listing LONG", "spot delisting SHORT", "perpetual delisting SHORT"],
+  "returns_inspected": false,
+  "official_help_center_history_present": true,
+  "stable_complete_enumeration_available": false,
+  "direct_api_from_research_host": false,
+  "decision": "archive-consistency/data-access blocked before returns"
+}

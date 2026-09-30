@@ -73,3 +73,8 @@ Archived bundles currently include:
 - `binance-futures-minimum-notional-adjustment/feasibility/`: only 2 official articles / 6 contracts; frozen before returns for insufficient coverage.
 - `binance-margin-dynamic-interest-rate/feasibility/`: only a generic dynamic-rate rule announcement, no asset-level historical event series; frozen before returns.
 - `defillama-chain-bluechip-stablecoin-share/2023-2026/`: 754-event USDT+USDC share discovery narrowly passed economic magnitude but failed breadth (5/10); OOS untouched and family frozen.
+
+- `defillama-chain-stablecoin-concentration-hhi/2023-2026/`: complete same-source stablecoin-composition reconstruction; 823-event discovery failed economic gate despite 7/11 breadth, OOS untouched.
+- `binance-usdm-liquidation-history/feasibility/`: Binance Vision USD-M has no historical liquidationSnapshot/forceOrders archive; blocked before returns.
+
+- `okx-announcement-event-archive/feasibility/`: deep official history exists, but Help Center pagination is not snapshot-stable and direct OKX API validation is TLS-blocked from the research host; frozen before returns.

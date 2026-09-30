@@ -1,0 +1,122 @@
+{
+  "Bitcoin": {
+    "valid_days": 0,
+    "discovery_ratio_min": null,
+    "discovery_ratio_median": null,
+    "discovery_ratio_max": null,
+    "discovery_active_assets_median": null,
+    "discovery_active_assets_min": null
+  },
+  "Ethereum": {
+    "valid_days": 1734,
+    "discovery_ratio_min": 0.9999999999234233,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000000754665,
+    "discovery_active_assets_median": 63,
+    "discovery_active_assets_min": 37
+  },
+  "BSC": {
+    "valid_days": 1734,
+    "discovery_ratio_min": 0.9999999988601259,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000007544145,
+    "discovery_active_assets_median": 28,
+    "discovery_active_assets_min": 4
+  },
+  "Solana": {
+    "valid_days": 1603,
+    "discovery_ratio_min": 0.9999999980008101,
+    "discovery_ratio_median": 0.9999999997285027,
+    "discovery_ratio_max": 1.0000000013467711,
+    "discovery_active_assets_median": 13,
+    "discovery_active_assets_min": 11
+  },
+  "Avalanche": {
+    "valid_days": 1734,
+    "discovery_ratio_min": 0.9999999976894415,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000018103916,
+    "discovery_active_assets_median": 18,
+    "discovery_active_assets_min": 14
+  },
+  "Cardano": {
+    "valid_days": 1313,
+    "discovery_ratio_min": 0.9999996400640399,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000001758184878,
+    "discovery_active_assets_median": 4,
+    "discovery_active_assets_min": 2
+  },
+  "Near": {
+    "valid_days": 1494,
+    "discovery_ratio_min": 0.9999999821153032,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000191196672,
+    "discovery_active_assets_median": 6,
+    "discovery_active_assets_min": 1
+  },
+  "Tron": {
+    "valid_days": 1602,
+    "discovery_ratio_min": 0.9999999999423341,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000000549567,
+    "discovery_active_assets_median": 6,
+    "discovery_active_assets_min": 2
+  },
+  "Polygon": {
+    "valid_days": 1734,
+    "discovery_ratio_min": 0.9999999963463523,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000033861272,
+    "discovery_active_assets_median": 24,
+    "discovery_active_assets_min": 17
+  },
+  "Fantom": {
+    "valid_days": 1734,
+    "discovery_ratio_min": 0.9999999869979291,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000130016942,
+    "discovery_active_assets_median": 16,
+    "discovery_active_assets_min": 13
+  },
+  "OP Mainnet": {
+    "valid_days": 1734,
+    "discovery_ratio_min": 0.9999999934378632,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000053110252,
+    "discovery_active_assets_median": 20,
+    "discovery_active_assets_min": 12
+  },
+  "Aptos": {
+    "valid_days": 860,
+    "discovery_ratio_min": 0.9999999687845847,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.000000031179751,
+    "discovery_active_assets_median": 2,
+    "discovery_active_assets_min": 2
+  },
+  "Arbitrum": {
+    "valid_days": 1733,
+    "discovery_ratio_min": 0.9999999984584985,
+    "discovery_ratio_median": 1.0000000002486806,
+    "discovery_ratio_max": 1.0000000032707657,
+    "discovery_active_assets_median": 29,
+    "discovery_active_assets_min": 14
+  },
+  "Sui": {
+    "valid_days": 958,
+    "discovery_ratio_min": 0.9999999964692932,
+    "discovery_ratio_median": 1.0,
+    "discovery_ratio_max": 1.0000000040514387,
+    "discovery_active_assets_median": 4.0,
+    "discovery_active_assets_min": 1
+  },
+  "XRPL": {
+    "valid_days": 313,
+    "discovery_ratio_min": null,
+    "discovery_ratio_median": null,
+    "discovery_ratio_max": null,
+    "discovery_active_assets_median": null,
+    "discovery_active_assets_min": null
+  }
+}

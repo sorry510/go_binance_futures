@@ -1,0 +1,2036 @@
+[
+  {
+    "id": "1",
+    "symbol": "USDT",
+    "name": "Tether",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "2",
+    "symbol": "USDC",
+    "name": "USD Coin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "209",
+    "symbol": "USDS",
+    "name": "Sky Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "146",
+    "symbol": "USDe",
+    "name": "Ethena USDe",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "5",
+    "symbol": "DAI",
+    "name": "Dai",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "262",
+    "symbol": "USD1",
+    "name": "World Liberty Financial USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "286",
+    "symbol": "USDG",
+    "name": "Global Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "120",
+    "symbol": "PYUSD",
+    "name": "PayPal USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "250",
+    "symbol": "RLUSD",
+    "name": "Ripple USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "237",
+    "symbol": "USYC",
+    "name": "Circle USYC",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "173",
+    "symbol": "BUIDL",
+    "name": "BlackRock USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "129",
+    "symbol": "USDY",
+    "name": "Ondo US Dollar Yield",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "14",
+    "symbol": "USDD",
+    "name": "USDD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "336",
+    "symbol": "U",
+    "name": "United Stables",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "246",
+    "symbol": "USDf",
+    "name": "Falcon USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "347",
+    "symbol": "USDGO",
+    "name": "USDGO",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "118",
+    "symbol": "GHO",
+    "name": "GHO",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "214",
+    "symbol": "USDX",
+    "name": "USDX Money USDX",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "195",
+    "symbol": "USD0",
+    "name": "Usual USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "221",
+    "symbol": "USDTB",
+    "name": "Ethena USDtb",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "272",
+    "symbol": "YLDS",
+    "name": "YLDS",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "406",
+    "symbol": "pUSD",
+    "name": "Polymarket USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "340",
+    "symbol": "rwaUSDi",
+    "name": "Multipli rwaUSDi",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "7",
+    "symbol": "TUSD",
+    "name": "TrueUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "12",
+    "symbol": "USDN",
+    "name": "Neutrino USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "430",
+    "symbol": "SOFID",
+    "name": "SoFiUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "119",
+    "symbol": "FDUSD",
+    "name": "First Digital USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "306",
+    "symbol": "GUSD",
+    "name": "Gate USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "354",
+    "symbol": "apxUSD",
+    "name": "apxUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "339",
+    "symbol": "reUSD",
+    "name": "Re Protocol reUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "205",
+    "symbol": "AUSD",
+    "name": "Agora Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "110",
+    "symbol": "crvUSD",
+    "name": "crvUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "309",
+    "symbol": "USDai",
+    "name": "USD.AI",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "153",
+    "symbol": "BUSD",
+    "name": "Binance Peg BUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "310",
+    "symbol": "USX",
+    "name": "Solstice USX",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "213",
+    "symbol": "M",
+    "name": "M by M0",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "17",
+    "symbol": "HUSD",
+    "name": "HUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "343",
+    "symbol": "USAT",
+    "name": "USAT",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "21",
+    "symbol": "FLEXUSD",
+    "name": "flexUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "328",
+    "symbol": "MUST",
+    "name": "Mustang Finance",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "6",
+    "symbol": "FRAX",
+    "name": "Frax",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "220",
+    "symbol": "USDA",
+    "name": "Avalon USDa",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "218",
+    "symbol": "satUSD",
+    "name": "River Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "316",
+    "symbol": "CASH",
+    "name": "CASH",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "271",
+    "symbol": "avUSD",
+    "name": "Avant USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "389",
+    "symbol": "MOVEUSD",
+    "name": "CFX MoveUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "219",
+    "symbol": "USDF",
+    "name": "Astherus",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "15",
+    "symbol": "DOLA",
+    "name": "Dola",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "235",
+    "symbol": "FRXUSD",
+    "name": "Frax USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "398",
+    "symbol": "USDV",
+    "name": "Valtorum USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "315",
+    "symbol": "USPD",
+    "name": "US Permissionless Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "79",
+    "symbol": "LISUSD",
+    "name": "Lista USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "168",
+    "symbol": "fxUSD",
+    "name": "fxUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "296",
+    "symbol": "CUSD",
+    "name": "Cap cUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "400",
+    "symbol": "USDAT",
+    "name": "Saturn Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "439",
+    "symbol": "USDB",
+    "name": "USDBridge",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "401",
+    "symbol": "trUSD",
+    "name": "Tori trUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "405",
+    "symbol": "USDA",
+    "name": "AP USDA",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "373",
+    "symbol": "USDSUI",
+    "name": "Sui Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "166",
+    "symbol": "cgUSD",
+    "name": "Cygnus Finance Global USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "22",
+    "symbol": "SUSD",
+    "name": "sUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "408",
+    "symbol": "USDon",
+    "name": "Ondo U.S. Dollar Token",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "97",
+    "symbol": "USP",
+    "name": "USP Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "344",
+    "symbol": "YZUSD",
+    "name": "Yuzu USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "442",
+    "symbol": "USDx",
+    "name": "Axis USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "385",
+    "symbol": "pathUSD",
+    "name": "PathUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "252",
+    "symbol": "DUSD",
+    "name": "StandX DUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "348",
+    "symbol": "FIDD",
+    "name": "Fidelity Digital Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "409",
+    "symbol": "USDKG",
+    "name": "USDKG",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "284",
+    "symbol": "MNEE",
+    "name": "MNEE USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "256",
+    "symbol": "REUSD",
+    "name": "Resupply USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "283",
+    "symbol": "USDU",
+    "name": "Unitas",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "326",
+    "symbol": "MSUSD",
+    "name": "Metronome Synth USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "297",
+    "symbol": "MSUSD",
+    "name": "Main Street USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "298",
+    "symbol": "IUSD",
+    "name": "infiniFi USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "335",
+    "symbol": "JUPUSD",
+    "name": "JupUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "332",
+    "symbol": "pmUSD",
+    "name": "pmUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "290",
+    "symbol": "XUSD",
+    "name": "StraitsX XUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "346",
+    "symbol": "NUSD",
+    "name": "Neutrl USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "230",
+    "symbol": "USN",
+    "name": "Noon USN",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "19",
+    "symbol": "GUSD",
+    "name": "Gemini Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "269",
+    "symbol": "BOLD",
+    "name": "Liquity BOLD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "413",
+    "symbol": "SPUSD",
+    "name": "SoulPeg USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "407",
+    "symbol": "UUSD",
+    "name": "Unity USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "255",
+    "symbol": "YUSD",
+    "name": "Aegis YUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "4",
+    "symbol": "BUSD",
+    "name": "Binance USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "313",
+    "symbol": "MUSD",
+    "name": "Metamask USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "67",
+    "symbol": "BEAN",
+    "name": "Bean",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "410",
+    "symbol": "USDU",
+    "name": "Universal USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "225",
+    "symbol": "ZeUSD",
+    "name": "Zoth ZeUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "185",
+    "symbol": "GYD",
+    "name": "Gyroscope GYD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "8",
+    "symbol": "LUSD",
+    "name": "Liquity USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "11",
+    "symbol": "USDP",
+    "name": "Pax Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "154",
+    "symbol": "BUCK",
+    "name": "Bucket Protocol BUCK Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "302",
+    "symbol": "HYUSD",
+    "name": "Hylo HYUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "106",
+    "symbol": "EUSD",
+    "name": "Electronic USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "263",
+    "symbol": "USDX",
+    "name": "Hex Trust USDX",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "305",
+    "symbol": "UTY",
+    "name": "XSY UTY",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "44",
+    "symbol": "USX",
+    "name": "dForce USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "303",
+    "symbol": "MUSD",
+    "name": "Mezo USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "85",
+    "symbol": "USDR",
+    "name": "Real USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "324",
+    "symbol": "SBC",
+    "name": "Stable Coin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "63",
+    "symbol": "FUSD",
+    "name": "Fantom USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "353",
+    "symbol": "AID",
+    "name": "GAIB AID",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "31",
+    "symbol": "USDS",
+    "name": "SpiceUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "342",
+    "symbol": "USDM",
+    "name": "MegaUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "29",
+    "symbol": "TOR",
+    "name": "TOR",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "386",
+    "symbol": "USDPT",
+    "name": "Western Union USDPT",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "24",
+    "symbol": "USDm",
+    "name": "Mento Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "327",
+    "symbol": "AZND",
+    "name": "Mu Digital AZND",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "241",
+    "symbol": "USDO",
+    "name": "OpenDollar USDO",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "417",
+    "symbol": "MONEY",
+    "name": "Defi.money",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "312",
+    "symbol": "HOLLAR",
+    "name": "Hydrated Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "215",
+    "symbol": "USDM",
+    "name": "Moneta",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "411",
+    "symbol": "USDSM",
+    "name": "Stable Mint USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "307",
+    "symbol": "USDCV",
+    "name": "USD CoinVertible",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "376",
+    "symbol": "suiUSDe",
+    "name": "eSui Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "13",
+    "symbol": "YUSD",
+    "name": "YUSD Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "172",
+    "symbol": "USDB",
+    "name": "USDB Blast",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "115",
+    "symbol": "R",
+    "name": "R",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "232",
+    "symbol": "PINTO",
+    "name": "Pinto",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "308",
+    "symbol": "D",
+    "name": "Saga Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "42",
+    "symbol": "USDX",
+    "name": "USDX",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "416",
+    "symbol": "eUSD",
+    "name": "Telcoin eUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "20",
+    "symbol": "ALUSD",
+    "name": "Alchemix USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "251",
+    "symbol": "FEUSD",
+    "name": "Felix feUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "244",
+    "symbol": "USDL",
+    "name": "Lift Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "415",
+    "symbol": "RUSD",
+    "name": "Royal Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "275",
+    "symbol": "USDQ",
+    "name": "Quantoz USDQ",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "231",
+    "symbol": "BUSD",
+    "name": "Bera USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "103",
+    "symbol": "NXUSD",
+    "name": "NXUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "321",
+    "symbol": "USDH",
+    "name": "USDH Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "253",
+    "symbol": "USBD",
+    "name": "USBD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "202",
+    "symbol": "USDz",
+    "name": "Anzen USDz",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "261",
+    "symbol": "USDV",
+    "name": "Solomon USDv",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "240",
+    "symbol": "USDR",
+    "name": "StablR USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "23",
+    "symbol": "OUSD",
+    "name": "Origin Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "60",
+    "symbol": "HOME",
+    "name": "HomeCoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "331",
+    "symbol": "USP",
+    "name": "USP",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "183",
+    "symbol": "BtcUSD",
+    "name": "Bitcoin USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "391",
+    "symbol": "USDST",
+    "name": "USDST",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "89",
+    "symbol": "XAI",
+    "name": "XAI",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "420",
+    "symbol": "USDSC",
+    "name": "Startale USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "16",
+    "symbol": "PAI",
+    "name": "Parrot USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "350",
+    "symbol": "ctUSD",
+    "name": "Citrea USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "435",
+    "symbol": "USDR",
+    "name": "USDR",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "245",
+    "symbol": "USDA",
+    "name": "Anzens USDA",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "421",
+    "symbol": "ftUSD",
+    "name": "Flying Tulip USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "9",
+    "symbol": "FEI",
+    "name": "Fei USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "314",
+    "symbol": "PUSD",
+    "name": "Palm USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "440",
+    "symbol": "DLUSD",
+    "name": "Deel USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "378",
+    "symbol": "USDso",
+    "name": "USD Somnia",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "26",
+    "symbol": "MUSD",
+    "name": "mStable USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "404",
+    "symbol": "USDM",
+    "name": "Monetrix USDM",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "70",
+    "symbol": "DUSD",
+    "name": "DigitalDollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "30",
+    "symbol": "DOC",
+    "name": "Dollar on Chain",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "45",
+    "symbol": "aSEED",
+    "name": "aUSD Seed",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "33",
+    "symbol": "USDP",
+    "name": "USDP Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "266",
+    "symbol": "pUSD",
+    "name": "Plume USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "159",
+    "symbol": "USDRIF",
+    "name": "RIF US Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "236",
+    "symbol": "syUSD",
+    "name": "Synnax Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "242",
+    "symbol": "USDH",
+    "name": "Hermetica USDh",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "18",
+    "symbol": "NUSD",
+    "name": "Nexus USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "162",
+    "symbol": "XUSD",
+    "name": "XUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "390",
+    "symbol": "FUSD",
+    "name": "FinChain Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "178",
+    "symbol": "USD3",
+    "name": "Web 3 Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "397",
+    "symbol": "beatUSD",
+    "name": "Hyperbeat USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "388",
+    "symbol": "iUSD",
+    "name": "Initia iUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "282",
+    "symbol": "USDN",
+    "name": "Noble Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "160",
+    "symbol": "DLLR",
+    "name": "Sovryn Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "425",
+    "symbol": "FUSD",
+    "name": "The Fedz FUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "76",
+    "symbol": "USDI",
+    "name": "Interest Protocol",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "426",
+    "symbol": "USD+",
+    "name": "Streamflow USD+",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "377",
+    "symbol": "USDnr",
+    "name": "Nerona USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "93",
+    "symbol": "DJED",
+    "name": "Djed StableCoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "83",
+    "symbol": "USDW",
+    "name": "USDW",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "54",
+    "symbol": "USN",
+    "name": "USN",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "132",
+    "symbol": "USDM",
+    "name": "USDM",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "224",
+    "symbol": "dUSD",
+    "name": "dTRINITY USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "88",
+    "symbol": "IUSD",
+    "name": "iUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "418",
+    "symbol": "cdxUSD",
+    "name": "Cod3x USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "366",
+    "symbol": "DUSD",
+    "name": "Alto DUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "28",
+    "symbol": "VAI",
+    "name": "Vai",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "152",
+    "symbol": "USDL",
+    "name": "Liquid Loans USDL",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "78",
+    "symbol": "NOTE",
+    "name": "Note",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "151",
+    "symbol": "zkUSD",
+    "name": "zkUSD Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "65",
+    "symbol": "USDH",
+    "name": "USDH",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "75",
+    "symbol": "UUSD",
+    "name": "Youves uUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "432",
+    "symbol": "rwaUSD",
+    "name": "Multipli rwaUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "356",
+    "symbol": "USSD",
+    "name": "US Sonic Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "441",
+    "symbol": "FRNT",
+    "name": "Frontier Stable Token",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "107",
+    "symbol": "CZUSD",
+    "name": "Czodiac USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "92",
+    "symbol": "PINA",
+    "name": "Meme Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "155",
+    "symbol": "USDGLO",
+    "name": "Glo Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "192",
+    "symbol": "USDA",
+    "name": "Angle USDA",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "10",
+    "symbol": "MIM",
+    "name": "Magic Internet Money",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "216",
+    "symbol": "sUSD",
+    "name": "Solayer USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "277",
+    "symbol": "USDN",
+    "name": "SMARDEX USDN",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "349",
+    "symbol": "USP",
+    "name": "Pareto USP",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "291",
+    "symbol": "USDp",
+    "name": "Parallel USDp",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "293",
+    "symbol": "BNBUSD",
+    "name": "Sigma Money bnbUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "72",
+    "symbol": "KUSD",
+    "name": "Kolibri USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "176",
+    "symbol": "FXD",
+    "name": "Fathom Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "204",
+    "symbol": "BNUSD",
+    "name": "Balanced Dollars",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "238",
+    "symbol": "SCUSD",
+    "name": "Rings scUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "341",
+    "symbol": "PUSD",
+    "name": "Pleasing USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "125",
+    "symbol": "eUSD(v2)",
+    "name": "eUSD (V2)",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "234",
+    "symbol": "WUSD",
+    "name": "Worldwide USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "211",
+    "symbol": "THUSD",
+    "name": "Threshold USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "37",
+    "symbol": "USDJ",
+    "name": "USDJ",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "175",
+    "symbol": "PXDC",
+    "name": "PXDC Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "285",
+    "symbol": "GGUSD",
+    "name": "Good Game US Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "197",
+    "symbol": "USR",
+    "name": "Resolv USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "46",
+    "symbol": "USD+",
+    "name": "Overnight USD+",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "32",
+    "symbol": "USDS",
+    "name": "Sperax USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "278",
+    "symbol": "WEUSD",
+    "name": "WEUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "27",
+    "symbol": "USDK",
+    "name": "USDK",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "143",
+    "symbol": "USDV",
+    "name": "Verified USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "333",
+    "symbol": "mantraUSD",
+    "name": "mantraUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "431",
+    "symbol": "USDV",
+    "name": "Delpho USDV",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "229",
+    "symbol": "LVLUSD",
+    "name": "Level USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "180",
+    "symbol": "BREAD",
+    "name": "Bread",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "171",
+    "symbol": "HAI",
+    "name": "Lets Get HAI",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "323",
+    "symbol": "KEI",
+    "name": "KEI Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "198",
+    "symbol": "aUSD",
+    "name": "Stable Jack aUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "116",
+    "symbol": "GRAI",
+    "name": "GRAI",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "419",
+    "symbol": "elUSD",
+    "name": "Elara USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "181",
+    "symbol": "zunUSD",
+    "name": "Zunami USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "64",
+    "symbol": "UXD",
+    "name": "UXD Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "329",
+    "symbol": "NECT",
+    "name": "Nectar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "206",
+    "symbol": "CASH",
+    "name": "Opus CASH",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "48",
+    "symbol": "BAI",
+    "name": "BAI Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "174",
+    "symbol": "rUSD",
+    "name": "rUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "191",
+    "symbol": "bitUSD",
+    "name": "bitSmiley USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "126",
+    "symbol": "mkUSD",
+    "name": "mkUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "112",
+    "symbol": "USDT+",
+    "name": "USDT+",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "295",
+    "symbol": "USDaf",
+    "name": "Asymmetry USDaf V2",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "217",
+    "symbol": "rUSD",
+    "name": "Reservoir Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "164",
+    "symbol": "USDCB",
+    "name": "USDCB",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "73",
+    "symbol": "USDTZ",
+    "name": "USDtez",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "135",
+    "symbol": "IST",
+    "name": "Inter Stable Token",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "268",
+    "symbol": "YU",
+    "name": "YU",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "25",
+    "symbol": "RSV",
+    "name": "Reserve",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "227",
+    "symbol": "BOLD",
+    "name": "Legacy BOLD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "38",
+    "symbol": "STBL",
+    "name": "STBL",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "248",
+    "symbol": "USDFC",
+    "name": "USDFC",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "68",
+    "symbol": "USDL",
+    "name": "USDLemma",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "130",
+    "symbol": "SVUSD",
+    "name": "Savvy USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "59",
+    "symbol": "SIGUSD",
+    "name": "SigmaUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "34",
+    "symbol": "USDB",
+    "name": "USD Balance",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "337",
+    "symbol": "USE",
+    "name": "USE",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "104",
+    "symbol": "DUSD",
+    "name": "Davos Protocol",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "434",
+    "symbol": "BD",
+    "name": "Base Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "43",
+    "symbol": "ZUSD",
+    "name": "ZUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "228",
+    "symbol": "USDQ",
+    "name": "Quill USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "322",
+    "symbol": "USDXL",
+    "name": "Last USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "144",
+    "symbol": "HYUSD",
+    "name": "High Yield USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "124",
+    "symbol": "peUSD",
+    "name": "peg-eUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "233",
+    "symbol": "USDS",
+    "name": "TheStandard USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "311",
+    "symbol": "IAUSD",
+    "name": "iAUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "374",
+    "symbol": "phUSD",
+    "name": "Phoenix USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "109",
+    "symbol": "EUSD",
+    "name": "eUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "149",
+    "symbol": "USDS",
+    "name": "Sable Coin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "142",
+    "symbol": "HYDT",
+    "name": "HYDT",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "184",
+    "symbol": "WEN",
+    "name": "Magma Wen",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "438",
+    "symbol": "UST1",
+    "name": "UST1",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "82",
+    "symbol": "ARUSD",
+    "name": "arUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "71",
+    "symbol": "VST",
+    "name": "Vesta Stable",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "148",
+    "symbol": "MyUSD",
+    "name": "Mynth MyUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "99",
+    "symbol": "CASH",
+    "name": "Stabl.fi Cash",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "123",
+    "symbol": "STAR",
+    "name": "STAR",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "394",
+    "symbol": "invUSD",
+    "name": "invUSD Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "304",
+    "symbol": "USDU",
+    "name": "USDU Finance",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "188",
+    "symbol": "USC",
+    "name": "Orby USC",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "260",
+    "symbol": "VUSD",
+    "name": "VDollar Finance",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "201",
+    "symbol": "HEXDC",
+    "name": "HEX Dollar Coin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "117",
+    "symbol": "ERN",
+    "name": "Ethos Reserve Note",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "264",
+    "symbol": "USDE",
+    "name": "XBANKING USDE",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "294",
+    "symbol": "USDA+",
+    "name": "NonDollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "357",
+    "symbol": "BYC",
+    "name": "Bytecash",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "364",
+    "symbol": "WAD",
+    "name": "Whale Asset Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "90",
+    "symbol": "RUSD",
+    "name": "Redeemable USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "57",
+    "symbol": "USH",
+    "name": "Hedge USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "96",
+    "symbol": "CUSD",
+    "name": "Coin98 Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "243",
+    "symbol": "csUSDL",
+    "name": "Coinshift",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "287",
+    "symbol": "USND",
+    "name": "Nerite USND",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "433",
+    "symbol": "HRUSD",
+    "name": "HRUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "212",
+    "symbol": "MOD",
+    "name": "Move Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "207",
+    "symbol": "DYAD",
+    "name": "Dyad",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "74",
+    "symbol": "MONEY",
+    "name": "Moremoney USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "138",
+    "symbol": "eUSD",
+    "name": "ARYZE eUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "94",
+    "symbol": "BAOUSD",
+    "name": "BaoUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "58",
+    "symbol": "3USD",
+    "name": "3USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "114",
+    "symbol": "clevUSD",
+    "name": "CLever USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "100",
+    "symbol": "DSU",
+    "name": "Digital Standard Unit",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "222",
+    "symbol": "PAUSD",
+    "name": "Parallel USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "84",
+    "symbol": "BOB",
+    "name": "BOB",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "288",
+    "symbol": "EBUSD",
+    "name": "EBUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "177",
+    "symbol": "UNO",
+    "name": "UNO",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "111",
+    "symbol": "DAI+",
+    "name": "DAI+",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "276",
+    "symbol": "USH",
+    "name": "Hyperstable USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "338",
+    "symbol": "FUSD",
+    "name": "Fuse Dollar V3",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "169",
+    "symbol": "GAI",
+    "name": "GAI Stablecoin",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "196",
+    "symbol": "USC",
+    "name": "Classic USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "189",
+    "symbol": "btcUSD",
+    "name": "btcUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "163",
+    "symbol": "ULTRA",
+    "name": "PrismaLRT Ultra",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "267",
+    "symbol": "MEAD",
+    "name": "Mead",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "208",
+    "symbol": "DCKUSD",
+    "name": "Dackie USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "190",
+    "symbol": "rgUSD",
+    "name": "Revenue Generating USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "259",
+    "symbol": "MSD",
+    "name": "Arche Protocol MSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "102",
+    "symbol": "ANONUSD",
+    "name": "Offshift anonUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "193",
+    "symbol": "USC",
+    "name": "Chi USC",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "62",
+    "symbol": "PUSD",
+    "name": "PUSd",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "301",
+    "symbol": "JUSD",
+    "name": "Jigsaw USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "128",
+    "symbol": "NEX",
+    "name": "Nexus",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "81",
+    "symbol": "USK",
+    "name": "USK",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "223",
+    "symbol": "XY",
+    "name": "TREN Debt Token",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "61",
+    "symbol": "FIAT",
+    "name": "Fixed Income Asset Token",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "87",
+    "symbol": "USDI",
+    "name": "USDi",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "187",
+    "symbol": "KNOX",
+    "name": "KNOX Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "273",
+    "symbol": "USDaf",
+    "name": "Asymmetry USDaf",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "403",
+    "symbol": "BPD",
+    "name": "Money Protocol",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "265",
+    "symbol": "USDK",
+    "name": "Orki USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "279",
+    "symbol": "paraUSD",
+    "name": "Parabol USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "396",
+    "symbol": "USDeAD",
+    "name": "Deaderal Reserve Note",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "330",
+    "symbol": "xpUSD",
+    "name": "Gaming XP USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "402",
+    "symbol": "kUSD",
+    "name": "Kerne USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "345",
+    "symbol": "USDU",
+    "name": "Uncap USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "150",
+    "symbol": "SCB",
+    "name": "USD Stable Colb",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "318",
+    "symbol": "litUSD",
+    "name": "litUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "121",
+    "symbol": "sLSD",
+    "name": "PSY",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "108",
+    "symbol": "d2O",
+    "name": "Deuterium",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "134",
+    "symbol": "CASH",
+    "name": "Phase Dollar",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "395",
+    "symbol": "FUSD",
+    "name": "fUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "203",
+    "symbol": "cUSD",
+    "name": "Chad USD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "320",
+    "symbol": "USDR",
+    "name": "Rocky USDr",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "375",
+    "symbol": "USDMO",
+    "name": "Monet USDmo",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "210",
+    "symbol": "DEUSD",
+    "name": "Elixir deUSD",
+    "pegType": "peggedUSD"
+  },
+  {
+    "id": "3",
+    "symbol": "USTC",
+    "name": "TerraClassicUSD",
+    "pegType": "peggedUSD"
+  }
+]

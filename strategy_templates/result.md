@@ -2495,3 +2495,23 @@
 - 年度：2023 7d **-0.2338%**，2024 **+0.7371%**；symbol-equal 7d +0.4906%。经济幅度门槛刚过，但 breadth=50% 未过，且跨年符号不稳定。
 - 结论：**discovery breadth gate失败 / 2025-2026 OOS保持未读 / 不删弱币、不调7d、不反向、不进exact / 不入库**。
 - 归档：strategy_templates/research/defillama-chain-bluechip-stablecoin-share/2023-2026/。
+
+## 2026-09-30 — DeFiLlama Chain Stablecoin Concentration (HHI)
+- 新机制：按链重建全部 DeFiLlama `peggedUSD` 稳定币日度份额，`HHI=sum(share_i^2)`；7日 HHI change 零上穿代表集中度上升→SHORT，零下穿代表多样化上升→LONG。信号日前至少3个活跃USD稳定币，逐币合计/官方aggregate必须在[0.98,1.02]。
+- 数据审计：339个USD稳定币历史；事件 coverage ratio **0.99999986~1.00000009**，无重复，LONG/SHORT=412/411。
+- discovery 2023-2024：**823事件 / 11币**；1d **-0.0518%**、3d **+0.0305%**、7d **-0.1168%**，win7 51.28%；**7/11币正**。
+- 年度：2023 7d **+0.3663%**，2024 **-0.5692%**；symbol-equal 7d -0.0292%。breadth 过门但经济幅度失败且跨年翻转。
+- 结论：**discovery失败 / 2025-2026 OOS未读 / 不反向、不做entropy/effective-N变体、不调7d、不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-concentration-hhi/2023-2026/。
+
+## 2026-09-30 — Binance USD-M Liquidation History：Feasibility
+- 官方 Binance Vision `data/futures/um/daily/` 目录只含 aggTrades/bookDepth/bookTicker/indexPriceKlines/klines/markPriceKlines/metrics/premiumIndexKlines/trades，**没有 USD-M liquidationSnapshot/forceOrders 历史档案**。
+- COIN-M liquidationSnapshot 已另做 family；近期 REST forced-order 保留窗口不能替代2023-2024历史。
+- 结论：**historical-data blocked / 未看收益 / 不拼第三方清算历史 / 不入库**。
+- 归档：strategy_templates/research/binance-usdm-liquidation-history/feasibility/。
+
+## 2026-09-30 — OKX Listing / Delisting Archive：Feasibility
+- 官方全球 Help Center 能看到 2023-2024 深历史，但分页快照不稳定：相邻/同页缓存出现不同总文章数和时间位置，无法证明 outcome-independent 事件全集完整。
+- 本研究主机对 `us.okx.com/app.okx.com/eea.okx.com/www.okx.com` 官方API域名均 TLS EOF，当前无法用API直接校验完整分页；这是当前环境访问限制，不代表OKX API普遍不可用。
+- 结论：**archive-consistency/data-access blocked / 未看收益 / 不用搜索引擎结果补事件 / 不入库**。只有拿到稳定官方API或可重放完整Help Center快照后再重开。
+- 归档：strategy_templates/research/okx-announcement-event-archive/feasibility/。
