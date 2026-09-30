@@ -1,0 +1,36 @@
+{
+  "name": "v60b 放量耗尽形态过滤+临界突破",
+  "rule_suffix": "_v60b",
+  "replacements": [
+    {
+      "type": "long",
+      "find": "let breakout = price > donchian_1h_14.High[2] && price > kline_1h.Open[1];",
+      "replace": "let breakout = atr > 0 && price > donchian_1h_14.High[2] - atr * 0.20 && price > kline_1h.Open[1] && price > kline_1h.Close[2];"
+    },
+    {
+      "type": "short",
+      "find": "let breakdown = price < donchian_1h_14.Low[2] && price < kline_1h.Open[1];",
+      "replace": "let breakdown = atr > 0 && price < donchian_1h_14.Low[2] + atr * 0.20 && price < kline_1h.Open[1] && price < kline_1h.Close[2];"
+    },
+    {
+      "type": "long",
+      "find": "let volume_confirm = avg_qps > 0 && kline_1h.Qps[1] >= avg_qps * 0.90 && kline_1h.Qps[1] <= avg_qps * 3.0;",
+      "replace": "let candle_position = kline_1h.High[1] > kline_1h.Low[1] ? (price - kline_1h.Low[1]) / (kline_1h.High[1] - kline_1h.Low[1]) : 1;\nlet volume_confirm = avg_qps > 0 && kline_1h.Qps[1] >= avg_qps * 0.90 && kline_1h.Qps[1] <= avg_qps * 3.0 && (kline_1h.Qps[1] <= avg_qps * 2.0 || candle_position <= 0.75);"
+    },
+    {
+      "type": "short",
+      "find": "let volume_confirm = avg_qps > 0 && kline_1h.Qps[1] >= avg_qps * 0.90 && kline_1h.Qps[1] <= avg_qps * 3.0;",
+      "replace": "let candle_position = kline_1h.High[1] > kline_1h.Low[1] ? (kline_1h.High[1] - price) / (kline_1h.High[1] - kline_1h.Low[1]) : 1;\nlet volume_confirm = avg_qps > 0 && kline_1h.Qps[1] >= avg_qps * 0.90 && kline_1h.Qps[1] <= avg_qps * 3.0 && (kline_1h.Qps[1] <= avg_qps * 2.0 || candle_position <= 0.75);"
+    },
+    {
+      "type": "long",
+      "find": "kline_1h.Close[0] >= donchian_1h_14.High[2] - atr * 0.15",
+      "replace": "kline_1h.Close[0] >= donchian_1h_14.High[2] - atr * 0.20"
+    },
+    {
+      "type": "short",
+      "find": "kline_1h.Close[0] <= donchian_1h_14.Low[2] + atr * 0.15",
+      "replace": "kline_1h.Close[0] <= donchian_1h_14.Low[2] + atr * 0.20"
+    }
+  ]
+}
