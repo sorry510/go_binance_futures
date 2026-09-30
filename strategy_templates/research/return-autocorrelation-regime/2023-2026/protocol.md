@@ -1,0 +1,1 @@
+The zero crossing, 24h window, lag-1 statistic, trailing-4h direction and continuation/reversal interpretation were fixed before returns. Do not retain only one autocorrelation sign or tune windows/thresholds after results.

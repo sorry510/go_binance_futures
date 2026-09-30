@@ -1,0 +1,1 @@
+Enumerate Binance Maintenance Updates catalog 157 for 2023-2024 and scan full article bodies for attack/exploit/incident/instability/network issue/abnormal/recent situation/security issue/compromise/vulnerability/congestion/disruption/outage/halt. Exclude scheduled upgrades and wallet maintenance. No return analysis if mechanically auditable sample is below 8.

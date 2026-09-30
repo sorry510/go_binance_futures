@@ -1,0 +1,7 @@
+{
+  "event": "new asset support on Binance Simple Earn Locked/Flexible Products",
+  "direction": "LONG",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_events": 8
+}

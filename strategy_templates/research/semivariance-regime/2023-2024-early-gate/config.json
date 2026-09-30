@@ -1,0 +1,9 @@
+{
+  "interval": "1h",
+  "window_hours": 48,
+  "feature": "sum positive r^2 / sum negative r^2",
+  "natural_threshold": 1,
+  "cross_above": "LONG",
+  "cross_below": "SHORT",
+  "entry": "next 1h open"
+}

@@ -1,0 +1,19 @@
+{
+  "initial_event_family": [
+    "CPI",
+    "Employment Situation",
+    "PPI",
+    "FOMC"
+  ],
+  "event_times": "official BLS/Federal Reserve ET schedules converted to UTC",
+  "reaction_window_minutes": 60,
+  "direction": "own-symbol first-hour return sign",
+  "entry": "next 5m open after reaction window",
+  "diagnostic_horizons_hours": [
+    1,
+    4,
+    12
+  ],
+  "liquidity_min_quote_volume_24h": 5000000,
+  "fomc_generated_hypothesis": "same frozen rule, tested only on unseen 2025/2026 FOMC"
+}

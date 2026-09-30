@@ -1,0 +1,10 @@
+e22b1afc0bbac260870712320171b6545965aac6e6da5203b38697dd2b40aae7  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/README.md
+a9d1af66de47434965bfdedb71e5ba6449cca06286203d70407c36f3d99afec4  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/config.json
+e4d9f46d62b293c79050299905207ffa8b961fbeb45850b302e6faf4f1b4b6a4  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/eligibility.py
+ba2a8203f61f595b193ea8b5b69ee4e0d827a3f29ac4bbfbadeb82b1dbcc4d14  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/inputs/eligibility.json
+cad86dcd4d648116cb6bed3bcfa91b66161f2aa08975af14775e82009d5efcc5  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/inputs/event_universe.json
+ab7b53fa0c813e06738352fe5874e95aade43342cf4d4a686c66af8059fc6e46  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/protocol.md
+f6ddc5c82b0e4100c04e973da799fc336ceec1001076a77957408a9219e2becd  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/provenance.json
+a29d4f5d7e1b234695a1cf9623528ce10d2a74ed3732e83476ba229188a11913  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/replay.py
+41f6c2b37e861080b24717722838c7a731e3293a486c2eb176dae2a7a591c9a6  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/results/summary.json
+0e1ec596794067906cf94a86fcd7a7aaf114361ac642acaa6d4d7e704d2072e0  strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/results/trades.json

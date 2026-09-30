@@ -1,0 +1,27 @@
+{
+  "discovery_2023_2024": {
+    "n": 45,
+    "mean_1h": -0.000258707,
+    "mean_4h": 0.0014835818,
+    "mean_12h": 0.0020251293,
+    "positive_symbols_12h": 3,
+    "symbols": 6
+  },
+  "oos1_2025": {
+    "n": 210,
+    "mean_1h": 0.0003999635,
+    "mean_4h": 0.0032567109,
+    "mean_12h": 0.0019747983,
+    "positive_symbols_12h": 6,
+    "symbols": 10
+  },
+  "oos2_2026": {
+    "n": 172,
+    "mean_1h": 0.0004972747,
+    "mean_4h": -0.0002403071,
+    "mean_12h": -0.0002580294,
+    "positive_symbols_12h": 4,
+    "symbols": 10
+  },
+  "decision": "freeze: weak discovery breadth and 2026 regime failure"
+}

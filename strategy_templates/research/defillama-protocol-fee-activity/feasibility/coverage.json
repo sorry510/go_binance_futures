@@ -1,0 +1,106 @@
+[
+  {
+    "asset": "ANKR",
+    "protocol_slug": "ankr",
+    "category": "Liquid Staking",
+    "fee_slug": "ankr-lst",
+    "http": "400",
+    "n": 0
+  },
+  {
+    "asset": "RSR",
+    "protocol_slug": "reserve-protocol",
+    "category": "Indexes",
+    "fee_slug": "reserve",
+    "http": "400",
+    "n": 0
+  },
+  {
+    "asset": "CVX",
+    "protocol_slug": "convex-finance",
+    "category": "Yield",
+    "fee_slug": "convex",
+    "http": "400",
+    "n": 0
+  },
+  {
+    "asset": "EOS",
+    "protocol_slug": "vaulta-rex",
+    "category": "Lending",
+    "fee_slug": "vaulta-rex",
+    "http": "200",
+    "n": 288,
+    "first": "2025-12-14",
+    "last": "2026-09-27"
+  },
+  {
+    "asset": "SPELL",
+    "protocol_slug": "abracadabra-spell",
+    "category": "CDP",
+    "fee_slug": "abracadabra",
+    "http": "200",
+    "n": 1676,
+    "first": "2021-09-02",
+    "last": "2026-09-28"
+  },
+  {
+    "asset": "API3",
+    "protocol_slug": "api3",
+    "category": "Risk Curators",
+    "fee_slug": "api3",
+    "http": "200",
+    "n": 273,
+    "first": "2025-12-30",
+    "last": "2026-09-28"
+  },
+  {
+    "asset": "GRT",
+    "protocol_slug": "the-graph",
+    "category": "Developer Tools",
+    "fee_slug": "thegraph",
+    "http": "200",
+    "n": 1384,
+    "first": "2022-12-15",
+    "last": "2026-09-28"
+  },
+  {
+    "asset": "ENS",
+    "protocol_slug": "ens",
+    "category": "Domains",
+    "fee_slug": "ens",
+    "http": "200",
+    "n": 2464,
+    "first": "2019-12-31",
+    "last": "2026-09-28"
+  },
+  {
+    "asset": "AXS",
+    "protocol_slug": "axie-infinity",
+    "category": "Gaming",
+    "fee_slug": "axie-infinity",
+    "http": "200",
+    "n": 3108,
+    "first": "2018-03-26",
+    "last": "2026-09-27"
+  },
+  {
+    "asset": "LPT",
+    "protocol_slug": "livepeer",
+    "category": "Video Infrastructure",
+    "fee_slug": "livepeer",
+    "http": "200",
+    "n": 775,
+    "first": "2024-08-14",
+    "last": "2026-09-28"
+  },
+  {
+    "asset": "LDO",
+    "protocol_slug": "lido",
+    "category": "Liquid Staking",
+    "fee_slug": "lido",
+    "http": "200",
+    "n": 1977,
+    "first": "2021-04-30",
+    "last": "2026-09-27"
+  }
+]

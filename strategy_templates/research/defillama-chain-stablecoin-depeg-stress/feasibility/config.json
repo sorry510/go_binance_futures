@@ -1,0 +1,12 @@
+{
+  "discovery": "2023-2024",
+  "peg_ratio": "totalCirculatingUSD.peggedUSD / totalCirculating.peggedUSD",
+  "trigger": "first ratio <= 0.995",
+  "rearm": "ratio >= 0.999",
+  "direction": "SHORT",
+  "min_chain_pegged_usd": 50000000,
+  "min_futures_history_years": 2,
+  "min_symbols": 8,
+  "min_distinct_dates": 8,
+  "decision": "coverage blocked before returns"
+}

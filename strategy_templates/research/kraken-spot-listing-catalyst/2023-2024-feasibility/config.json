@@ -1,0 +1,9 @@
+{
+  "source": "Kraken official WordPress Asset Listings category 1789",
+  "window": "2023-2024",
+  "event_time": "official WordPress date_gmt",
+  "event_filter": "first global spot trading availability; regional/margin/OTC/network posts excluded",
+  "direction": "LONG if feasibility passed",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000
+}

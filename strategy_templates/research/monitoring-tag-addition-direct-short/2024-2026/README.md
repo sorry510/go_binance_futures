@@ -37,3 +37,15 @@ For this reason, the PF/net figures above are retained as **historical values pe
 - `provenance.json`: file hashes, source references, and known limitations.
 
 The complete pre-eligibility event universe and exclusion rows were not preserved in `/tmp`; `strategy_templates/result.md` remains the canonical narrative source for the official batch counts and eligible sets. This limitation is explicit so future audits do not mistake the archived eligible list for the complete event universe.
+
+## Corrected funding replay — 2026-09-28
+
+The original historical helpers remain unchanged. Corrected copies are stored under replay_corrected. The only semantic change is parsing the actual three-column Binance Vision fundingRate archive and falling back to the current 1m close when MarkPrice is absent.
+
+Corrected results:
+- 2024 discovery: PF 1.377461, normalized net +10.9102%.
+- 2025 OOS: PF 1.112074, normalized net +8.1333%.
+- 2026 second OOS: PF 0.906943, normalized net -8.4354%.
+- Combined 35 events: PF 1.055215, normalized net +10.6080%.
+
+The correction does not change the research decision. The larger 2026 OOS remains negative and the three-year aggregate remains near breakeven with severe announcement-gap tail risk. The family remains frozen and is not a formal candidate.

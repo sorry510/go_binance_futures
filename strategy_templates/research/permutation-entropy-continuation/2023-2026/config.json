@@ -1,0 +1,17 @@
+{
+  "interval": "1h",
+  "return_window": 48,
+  "permutation_order": 3,
+  "trigger_entropy_lte": 0.85,
+  "rearm_entropy_gte": 0.9,
+  "direction": "sign of trailing 12h return",
+  "history_min_days": 730,
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "oos_years": [
+    2025,
+    2026
+  ]
+}

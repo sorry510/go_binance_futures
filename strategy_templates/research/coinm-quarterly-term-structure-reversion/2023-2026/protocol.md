@@ -1,0 +1,1 @@
+COIN-M nearest-quarter versus COIN-M perpetual term basis, then trade matching USD-M perpetual. Pre-registered mean reversion. Discovery 2023-2024, OOS1 2025, OOS2 2026. No continuation rescue or threshold search.

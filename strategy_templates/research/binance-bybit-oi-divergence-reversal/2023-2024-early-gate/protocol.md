@@ -1,0 +1,1 @@
+Early gate on four core old symbols. Binance OI comes from Vision daily metrics sampled hourly; Bybit OI from public V5 history. Use log OI ratio, prior-720h causal z-score, first |z|>=3 trigger and |z|<1 re-arm. Pre-registered reversal direction: Binance dominance SHORT, Bybit dominance LONG. Do not lower threshold or flip direction after results.

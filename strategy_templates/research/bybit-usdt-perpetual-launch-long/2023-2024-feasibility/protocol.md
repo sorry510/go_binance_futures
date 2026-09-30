@@ -1,0 +1,1 @@
+Enumerate Bybit official New Listings pages through server-side __NEXT_DATA__. Keep only titles explicitly announcing standard USDT perpetual launch. Pre-register LONG Binance USD-M. Require event-time Binance USD-M age >=730 days and prior-24h QuoteVolume >=5M USDT. Minimum eight eligible events before any return analysis.

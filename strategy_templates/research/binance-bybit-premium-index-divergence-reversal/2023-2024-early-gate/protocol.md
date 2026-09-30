@@ -1,0 +1,1 @@
+Align Bybit V5 linear premium-index 1h close with Binance Vision USD-M premium-index 1h close. Normalize their difference against the prior 720 completed hours. First absolute z>=3 triggers and absolute z<1 rearms. Positive divergence is pre-registered SHORT Binance; negative divergence LONG. Enter next Binance 1h open. Four-core-symbol 2023-2024 early gate only.

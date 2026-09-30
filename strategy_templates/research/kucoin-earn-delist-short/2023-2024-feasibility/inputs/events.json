@@ -1,0 +1,342 @@
+[
+  {
+    "ticker": "APE",
+    "symbol": "APEUSDT",
+    "publish_utc": "2024-11-21T03:08:02+00:00",
+    "publish_ms": 1732158482000,
+    "article_id": 134155,
+    "title": "KuCoin Earn Will Delist the APE Products",
+    "path": "/en-kucoin-earn-will-delist-the-ape-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "UTXO",
+    "symbol": "UTXOUSDT",
+    "publish_utc": "2024-09-25T03:42:09+00:00",
+    "publish_ms": 1727235729000,
+    "article_id": 125035,
+    "title": "KuCoin Earn Will Delist The UTXO Flexible Savings",
+    "path": "/kucoin-earn-will-delist-the-utxo-flexible-savings",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "HYDRA",
+    "symbol": "HYDRAUSDT",
+    "publish_utc": "2024-09-10T06:51:42+00:00",
+    "publish_ms": 1725951102000,
+    "article_id": 122883,
+    "title": "KuCoin Earn Will Delist the HYDRA Products",
+    "path": "/en-kucoin-earn-will-delist-the-hydra-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "OGV",
+    "symbol": "OGVUSDT",
+    "publish_utc": "2024-09-03T10:00:38+00:00",
+    "publish_ms": 1725357638000,
+    "article_id": 122048,
+    "title": "KuCoin Earn Will Delist the OGV Flexible Savings",
+    "path": "/kucoin-earn-will-delist-the-ogv-flexible-savings",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "DFI",
+    "symbol": "DFIUSDT",
+    "publish_utc": "2024-08-15T02:05:38+00:00",
+    "publish_ms": 1723687538000,
+    "article_id": 118862,
+    "title": "KuCoin Earn Will Delist the DFI Products",
+    "path": "/en-kucoin-earn-will-delist-the-dfi-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "GRT",
+    "symbol": "GRTUSDT",
+    "publish_utc": "2024-07-31T03:40:57+00:00",
+    "publish_ms": 1722397257000,
+    "article_id": 117099,
+    "title": "KuCoin Earn Will Delist the GRT Staking Product",
+    "path": "/en-kucoin-earn-will-delist-the-grt-staking-product",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "HON",
+    "symbol": "HONUSDT",
+    "publish_utc": "2024-07-25T09:06:04+00:00",
+    "publish_ms": 1721898364000,
+    "article_id": 116494,
+    "title": "KuCoin Earn Will Delist HON",
+    "path": "/kucoin-earn-will-delist-hon",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "POLS",
+    "symbol": "POLSUSDT",
+    "publish_utc": "2024-07-18T05:06:56+00:00",
+    "publish_ms": 1721279216000,
+    "article_id": 115772,
+    "title": "KuCoin Earn Will Delist POLS",
+    "path": "/kucoin-earn-will-delist-pols",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "RNDR",
+    "symbol": "RNDRUSDT",
+    "publish_utc": "2024-07-11T09:07:34+00:00",
+    "publish_ms": 1720688854000,
+    "article_id": 115290,
+    "title": "KuCoin Earn Will Delist RNDR",
+    "path": "/kucoin-earn-will-delist-rndr",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "GAL",
+    "symbol": "GALUSDT",
+    "publish_utc": "2024-07-08T08:10:17+00:00",
+    "publish_ms": 1720426217000,
+    "article_id": 114816,
+    "title": "KuCoin Earn Will Delist GAL",
+    "path": "/kucoin-earn-will-delist-gal",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "DAR",
+    "symbol": "DARUSDT",
+    "publish_utc": "2024-07-08T02:10:46+00:00",
+    "publish_ms": 1720404646000,
+    "article_id": 114684,
+    "title": "KuCoin Earn Will Be Delisting 2 Products",
+    "path": "/kucoin-earn-will-be-delisting-2-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "ACS",
+    "symbol": "ACSUSDT",
+    "publish_utc": "2024-07-08T02:10:46+00:00",
+    "publish_ms": 1720404646000,
+    "article_id": 114684,
+    "title": "KuCoin Earn Will Be Delisting 2 Products",
+    "path": "/kucoin-earn-will-be-delisting-2-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "FET",
+    "symbol": "FETUSDT",
+    "publish_utc": "2024-06-05T08:10:31+00:00",
+    "publish_ms": 1717575031000,
+    "article_id": 111004,
+    "title": "KuCoin Earn Will Delist 2 Products",
+    "path": "/kucoin-earn-will-delist-2-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "AGIX",
+    "symbol": "AGIXUSDT",
+    "publish_utc": "2024-06-05T08:10:31+00:00",
+    "publish_ms": 1717575031000,
+    "article_id": 111004,
+    "title": "KuCoin Earn Will Delist 2 Products",
+    "path": "/kucoin-earn-will-delist-2-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "BAND",
+    "symbol": "BANDUSDT",
+    "publish_utc": "2024-05-29T03:35:18+00:00",
+    "publish_ms": 1716953718000,
+    "article_id": 110134,
+    "title": "KuCoin Earn Will Delist the BAND Products",
+    "path": "/en-kucoin-earn-will-delist-the-band-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "ACH",
+    "symbol": "ACHUSDT",
+    "publish_utc": "2024-05-21T08:38:51+00:00",
+    "publish_ms": 1716280731000,
+    "article_id": 109295,
+    "title": "KuCoin Earn Will Delist 3 Products",
+    "path": "/kucoin-earn-will-delist-3-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "JST",
+    "symbol": "JSTUSDT",
+    "publish_utc": "2024-05-21T08:38:51+00:00",
+    "publish_ms": 1716280731000,
+    "article_id": 109295,
+    "title": "KuCoin Earn Will Delist 3 Products",
+    "path": "/kucoin-earn-will-delist-3-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "SPA",
+    "symbol": "SPAUSDT",
+    "publish_utc": "2024-05-21T08:38:51+00:00",
+    "publish_ms": 1716280731000,
+    "article_id": 109295,
+    "title": "KuCoin Earn Will Delist 3 Products",
+    "path": "/kucoin-earn-will-delist-3-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "LQTY",
+    "symbol": "LQTYUSDT",
+    "publish_utc": "2024-04-24T07:17:20+00:00",
+    "publish_ms": 1713943040000,
+    "article_id": 106758,
+    "title": "KuCoin Earn Will Delist 4 Products",
+    "path": "/kucoin-earn-will-delist-4-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "KLV",
+    "symbol": "KLVUSDT",
+    "publish_utc": "2024-04-24T07:17:20+00:00",
+    "publish_ms": 1713943040000,
+    "article_id": 106758,
+    "title": "KuCoin Earn Will Delist 4 Products",
+    "path": "/kucoin-earn-will-delist-4-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "ASTRA",
+    "symbol": "ASTRAUSDT",
+    "publish_utc": "2024-04-24T07:17:20+00:00",
+    "publish_ms": 1713943040000,
+    "article_id": 106758,
+    "title": "KuCoin Earn Will Delist 4 Products",
+    "path": "/kucoin-earn-will-delist-4-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "BOSON",
+    "symbol": "BOSONUSDT",
+    "publish_utc": "2024-04-24T07:17:20+00:00",
+    "publish_ms": 1713943040000,
+    "article_id": 106758,
+    "title": "KuCoin Earn Will Delist 4 Products",
+    "path": "/kucoin-earn-will-delist-4-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "USDD",
+    "symbol": "USDDUSDT",
+    "publish_utc": "2024-02-05T14:04:48+00:00",
+    "publish_ms": 1707141888000,
+    "article_id": 98387,
+    "title": "KuCoin Earn Will Delist USDD Products",
+    "path": "/kucoin-earn-will-delist-usdd-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "OLT",
+    "symbol": "OLTUSDT",
+    "publish_utc": "2024-01-19T06:56:10+00:00",
+    "publish_ms": 1705647370000,
+    "article_id": 96710,
+    "title": "KuCoin Earn Will Delist the OLT, DIVI, VSYS, and IOST Products",
+    "path": "/en-kucoin-earn-will-delist-the-olt-divi-vsys-and-iost-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "DIVI",
+    "symbol": "DIVIUSDT",
+    "publish_utc": "2024-01-19T06:56:10+00:00",
+    "publish_ms": 1705647370000,
+    "article_id": 96710,
+    "title": "KuCoin Earn Will Delist the OLT, DIVI, VSYS, and IOST Products",
+    "path": "/en-kucoin-earn-will-delist-the-olt-divi-vsys-and-iost-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "VSYS",
+    "symbol": "VSYSUSDT",
+    "publish_utc": "2024-01-19T06:56:10+00:00",
+    "publish_ms": 1705647370000,
+    "article_id": 96710,
+    "title": "KuCoin Earn Will Delist the OLT, DIVI, VSYS, and IOST Products",
+    "path": "/en-kucoin-earn-will-delist-the-olt-divi-vsys-and-iost-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "IOST",
+    "symbol": "IOSTUSDT",
+    "publish_utc": "2024-01-19T06:56:10+00:00",
+    "publish_ms": 1705647370000,
+    "article_id": 96710,
+    "title": "KuCoin Earn Will Delist the OLT, DIVI, VSYS, and IOST Products",
+    "path": "/en-kucoin-earn-will-delist-the-olt-divi-vsys-and-iost-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "WEST",
+    "symbol": "WESTUSDT",
+    "publish_utc": "2023-12-20T02:23:41+00:00",
+    "publish_ms": 1703039021000,
+    "article_id": 93771,
+    "title": "KuCoin Earn Will Delist Waves Enterprise(WEST) Product",
+    "path": "/en-kucoin-earn-will-delist-waves-enterprise-west-product",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "RLTM",
+    "symbol": "RLTMUSDT",
+    "publish_utc": "2023-11-03T07:18:15+00:00",
+    "publish_ms": 1698995895000,
+    "article_id": 89713,
+    "title": "KuCoin Earn Will Delist Reality Metaverse(RLTM) Product",
+    "path": "/en-kucoin-earn-will-delist-reality-metaverse-rltm-product",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "MJT",
+    "symbol": "MJTUSDT",
+    "publish_utc": "2023-10-17T06:31:19+00:00",
+    "publish_ms": 1697524279000,
+    "article_id": 88249,
+    "title": "KuCoin Earn Will Delist Mojito Swap",
+    "path": "/en-kucoin-earn-will-delist-mojito-swap",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "ALGO",
+    "symbol": "ALGOUSDT",
+    "publish_utc": "2023-08-18T07:56:22+00:00",
+    "publish_ms": 1692345382000,
+    "article_id": 85040,
+    "title": "KuCoin Earn Will Delist ALGO Products",
+    "path": "/en-kucoin-earn-will-delist-algo-products",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "POL",
+    "symbol": "POLUSDT",
+    "publish_utc": "2023-08-14T09:59:19+00:00",
+    "publish_ms": 1692007159000,
+    "article_id": 84852,
+    "title": "POL Will Be Delisted From KuCoin Earn",
+    "path": "/en-pol-will-be-delisted-from-kucoin-earn",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "QUARTZ",
+    "symbol": "QUARTZUSDT",
+    "publish_utc": "2023-07-24T09:06:07+00:00",
+    "publish_ms": 1690189567000,
+    "article_id": 82993,
+    "title": "Delisting of QUARTZ and OXEN Products from KuCoin Earn",
+    "path": "/en-delisting-of-quartz-and-oxen-products-from-kucoin-earn",
+    "direction": "SHORT"
+  },
+  {
+    "ticker": "OXEN",
+    "symbol": "OXENUSDT",
+    "publish_utc": "2023-07-24T09:06:07+00:00",
+    "publish_ms": 1690189567000,
+    "article_id": 82993,
+    "title": "Delisting of QUARTZ and OXEN Products from KuCoin Earn",
+    "path": "/en-delisting-of-quartz-and-oxen-products-from-kucoin-earn",
+    "direction": "SHORT"
+  }
+]

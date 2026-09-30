@@ -1,0 +1,20 @@
+{
+  "signal": "1h log(USDC-perp close / USDT-perp close), z-score vs prior720 completed hours",
+  "trigger": "first abs(z)>=3; abs(z)<1 re-arm",
+  "direction": "z>0 LONG target USDT; z<0 SHORT target USDT",
+  "entry": "next full 1h open",
+  "eligibility": "target USD-M history >=2y",
+  "discovery": "2024-2025",
+  "oos": "2026-01 through 2026-08",
+  "exact": {
+    "entry": "same next full 1h open using target USDT 1m",
+    "leverage": 4,
+    "tp_pct": 8,
+    "sl_pct": 6,
+    "fee_per_side": 0.0005,
+    "slippage_bps_per_side": 5,
+    "funding": true,
+    "timeout_hours": 12,
+    "single_position_per_symbol": true
+  }
+}

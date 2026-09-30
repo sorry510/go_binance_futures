@@ -1,12 +1,14 @@
 {
-  "validation_status": "historical metrics preserved; corrected funding parser replay pending",
+  "validation_status": "corrected funding parser replay completed; production fallback semantics revalidated",
   "2024_discovery": {
     "eligible_events": 9,
     "wins": 5,
     "losses": 4,
     "historical_pf": 1.374,
     "historical_normalized_net_pct": 10.84,
-    "status": "historical_unrevalidated_due_funding_parser"
+    "status": "corrected_funding_parser_revalidated",
+    "corrected_pf": 1.3774610587805765,
+    "corrected_normalized_net_pct": 10.910194791399155
   },
   "2025_oos": {
     "eligible_events": 9,
@@ -14,15 +16,19 @@
     "losses": 4,
     "historical_pf": 1.107,
     "historical_normalized_net_pct": 7.77,
-    "status": "historical_unrevalidated_due_funding_parser"
+    "status": "corrected_funding_parser_revalidated",
+    "corrected_pf": 1.112073969634648,
+    "corrected_normalized_net_pct": 8.133256490873352
   },
   "2026_second_oos": {
     "eligible_events": 17,
     "wins": 8,
     "losses": 9,
-    "historical_pf": 0.910,
+    "historical_pf": 0.91,
     "historical_normalized_net_pct": -8.13,
-    "status": "historical_unrevalidated_due_funding_parser"
+    "status": "corrected_funding_parser_revalidated",
+    "corrected_pf": 0.906942801391561,
+    "corrected_normalized_net_pct": -8.435423960461815
   },
   "combined_historical": {
     "eligible_events": 35,
@@ -32,6 +38,16 @@
     "historical_normalized_net_pct_approx": 10.49,
     "status": "historical_unrevalidated_due_funding_parser"
   },
-  "decision": "family frozen / no DB import / not a formal candidate",
-  "known_issue": "historical replay helpers silently skip funding rows because they require a nonexistent fourth MarkPrice CSV column"
+  "decision": "family frozen / no DB import / not a formal candidate; corrected funding does not change the decision",
+  "known_issue": "original replay helpers preserve the historical four-column funding parser bug; replay_corrected uses three-column fundingRate plus current 1m close fallback",
+  "combined_corrected": {
+    "eligible_events": 35,
+    "wins": 18,
+    "losses": 17,
+    "corrected_pf": 1.0552149645214537,
+    "corrected_normalized_net_pct": 10.608027321810681,
+    "gross_profit_pct": 202.73035165453675,
+    "gross_loss_pct": 192.12232433272607,
+    "status": "corrected_funding_parser_revalidated"
+  }
 }

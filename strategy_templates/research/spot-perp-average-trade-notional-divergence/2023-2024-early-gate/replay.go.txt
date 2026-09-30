@@ -1,0 +1,36 @@
+package main
+import("database/sql";"encoding/json";"fmt";"math";"os";"strconv";_ "go_binance_futures/bootstrap";"github.com/beego/beego/v2/core/config";_ "github.com/go-sql-driver/mysql")
+type B struct{T int64;O,C,Q,N float64}
+type Ev struct{S string; Z,R1,R4,R12 float64}
+func meanSD(a []float64)(float64,float64){m:=0.0;for _,x:=range a{m+=x};m/=float64(len(a));v:=0.0;for _,x:=range a{d:=x-m;v+=d*d};v/=float64(len(a));return m,math.Sqrt(v)}
+func main(){
+ raw,err:=os.ReadFile("/tmp/spot_avgtrade_compact.json");if err!=nil{panic(err)}
+ var js map[string]map[string]float64;if err=json.Unmarshal(raw,&js);err!=nil{panic(err)}
+ spot:=map[string]map[int64]float64{}
+ for s,m:=range js{z:=map[int64]float64{};for k,v:=range m{t,_:=strconv.ParseInt(k,10,64);z[t]=v};spot[s]=z}
+ syms:=[]string{"BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT"}
+ u,_:=config.String("database::username");pw,_:=config.String("database::password");h,_:=config.String("database::host");pt,_:=config.String("database::port");dbn,_:=config.String("database::dbname");if dbn!="go_bn_test"{panic(dbn)}
+ db,e:=sql.Open("mysql",fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4",u,pw,h,pt,dbn));if e!=nil{panic(e)};defer db.Close()
+ all:=[]Ev{}
+ for _,s:=range syms{
+  rows,e:=db.Query("SELECT open_time,open_price,close_price,quote_volume,trade_count FROM market_klines_1h WHERE market='futures_usdt' AND symbol=? AND open_time>=? AND open_time<? ORDER BY open_time",s,int64(1672444800000),int64(1735689600000));if e!=nil{panic(e)}
+  b:=[]B{};for rows.Next(){var x B;if e:=rows.Scan(&x.T,&x.O,&x.C,&x.Q,&x.N);e!=nil{panic(e)};b=append(b,x)};rows.Close()
+  d:=make([]float64,len(b));valid:=make([]bool,len(b))
+  for i:=range b{sv,ok:=spot[s][b[i].T];if ok&&sv>0&&b[i].Q>0&&b[i].N>0{fv:=b[i].Q/b[i].N;d[i]=math.Log(fv/sv);valid[i]=true}}
+  armed:=true;n:=0;sum:=0.0;w:=0
+  for i:=721;i+12<len(b);i++{
+   if b[i].T<1672531200000 || b[i].T>=1735689600000 || !valid[i]||!valid[i-1]{continue}
+   hist:=make([]float64,0,720);ok:=true
+   for j:=i-720;j<i;j++{if !valid[j]{ok=false;break};hist=append(hist,d[j])};if !ok{continue}
+   mu,sd:=meanSD(hist);if sd<=0{continue};z:=(d[i]-mu)/sd
+   if math.Abs(z)<1{armed=true}
+   if !armed||math.Abs(z)<3{continue}
+   mom:=b[i].C-b[i-1].C;if mom==0{continue};dir:=1.0;if mom<0{dir=-1}
+   entry:=b[i+1].O;if entry<=0{continue}
+   r1:=dir*math.Log(b[i+1].C/entry);r4:=dir*math.Log(b[i+4].C/entry);r12:=dir*math.Log(b[i+12].C/entry)
+   all=append(all,Ev{s,z,r1,r4,r12});n++;sum+=r12;if r12>0{w++};armed=false
+  }
+  fmt.Printf("%s n=%d mean12=%.6f win12=%.3f\n",s,n,func()float64{if n==0{return 0};return sum/float64(n)}(),func()float64{if n==0{return 0};return float64(w)/float64(n)}())
+ }
+ for _,k:=range []int{1,4,12}{sum:=0.0;w:=0;for _,x:=range all{v:=x.R1;if k==4{v=x.R4};if k==12{v=x.R12};sum+=v;if v>0{w++}};fmt.Printf("ALL r%d n=%d mean=%.6f win=%.3f\n",k,len(all),sum/float64(len(all)),float64(w)/float64(len(all)))}
+}

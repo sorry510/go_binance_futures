@@ -1,0 +1,7 @@
+{
+  "event": "first Binance Vision COIN-M perpetual bar",
+  "direction": "LONG existing USD-M",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_n": 8
+}

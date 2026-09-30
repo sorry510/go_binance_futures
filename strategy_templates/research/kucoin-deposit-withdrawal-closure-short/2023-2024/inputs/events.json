@@ -1,0 +1,345 @@
+[
+  {
+    "time": "2023-01-02T14:04:58+00:00",
+    "article_id": 54144,
+    "title": "Deposit and Withdrawal Services of HYDRA (HYDRA) Temporarily Closed",
+    "ticker": "HYDRA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-01-08T12:48:39+00:00",
+    "article_id": 54489,
+    "title": "Deposit and Withdrawal Services of Mainnet Waves (WAVES) Tokens Temporarily Closed",
+    "ticker": "WAVES",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-01-11T04:00:03+00:00",
+    "article_id": 54853,
+    "title": "Deposit and Withdrawal Services of Hedera Hashgraph (HBAR) Temporarily Closed",
+    "ticker": "HBAR",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-01-16T06:37:30+00:00",
+    "article_id": 55179,
+    "title": "Deposit and Withdrawal Services of Mainnet METIS (METIS) Tokens Temporarily Closed",
+    "ticker": "METIS",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-01-21T13:28:21+00:00",
+    "article_id": 55635,
+    "title": "Deposit and Withdrawal Services of ICON (ICX) Temporarily Closed ",
+    "ticker": "ICX",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-01-26T03:38:42+00:00",
+    "article_id": 55679,
+    "title": "Deposit and Withdrawal Services of Digibyte (DGB) Temporarily Closed",
+    "ticker": "DGB",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-01-28T05:32:00+00:00",
+    "article_id": 55709,
+    "title": "Deposit and Withdrawal Services of Mainnet WAXP (WAXP) Tokens Temporarily Closed",
+    "ticker": "WAXP",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-01-30T09:07:17+00:00",
+    "article_id": 55922,
+    "title": "Deposit and Withdrawal Services of Mainnet NEAR Protocol (NEAR) Tokens Temporarily Closed",
+    "ticker": "NEAR",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-02-01T22:42:01+00:00",
+    "article_id": 56191,
+    "title": "Deposit and Withdrawal Services of AllianceBlock (ALBT) Temporarily Closed",
+    "ticker": "ALBT",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-02-02T15:32:44+00:00",
+    "article_id": 56318,
+    "title": "Deposit and Withdrawal Services of Cardano Chain (ADA) Temporarily Closed",
+    "ticker": "ADA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-02-03T04:30:58+00:00",
+    "article_id": 56365,
+    "title": "Deposit and Withdrawal Services of Helium (HNT) Temporarily Closed",
+    "ticker": "HNT",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-02-14T12:12:10+00:00",
+    "article_id": 57827,
+    "title": "Deposit and Withdrawal Services of Position Exchange (POSI) Temporarily Closed",
+    "ticker": "POSI",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-02-26T03:30:16+00:00",
+    "article_id": 59787,
+    "title": "Deposit and Withdrawal Services of Mainnet Solana (SOL) Tokens Temporarily Closed",
+    "ticker": "SOL",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-03-07T11:15:20+00:00",
+    "article_id": 61010,
+    "title": "Deposit and Withdrawal Services of LABS Group (LABS) Temporarily Closed",
+    "ticker": "LABS",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-03-10T11:47:36+00:00",
+    "article_id": 61537,
+    "title": "Deposit and Withdrawal Services of Stargate Finance (STG) Temporarily Closed",
+    "ticker": "STG",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-03-15T08:28:37+00:00",
+    "article_id": 62202,
+    "title": "Deposit and Withdrawal Services of DEROHE Chain of Dero (DERO) Temporarily Closed",
+    "ticker": "DERO",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-03-16T10:13:15+00:00",
+    "article_id": 62356,
+    "title": "Deposit and Withdrawal Services of Radiant (RDNT) Temporarily Closed",
+    "ticker": "RDNT",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-03-24T09:51:09+00:00",
+    "article_id": 63507,
+    "title": "Deposit and Withdrawal Services of Phantasma（SOUL）Temporarily Closed",
+    "ticker": "SOUL",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-04-17T10:49:27+00:00",
+    "article_id": 67208,
+    "title": "Deposit and Withdrawal Services of Findora (FRA) Temporarily Closed",
+    "ticker": "FRA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-04-17T10:49:41+00:00",
+    "article_id": 67254,
+    "title": "Deposit and Withdrawal Services of Elastos (ELA) Temporarily Closed",
+    "ticker": "ELA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-04-19T04:23:03+00:00",
+    "article_id": 67705,
+    "title": "Deposit and Withdrawal Services of Meter Meter (MTRG)  Temporarily Closed",
+    "ticker": "MTRG",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-04-26T03:10:01+00:00",
+    "article_id": 69005,
+    "title": "Deposit and Withdrawal Services of AVAX Avalanche (AVAX) Temporarily Closed",
+    "ticker": "AVAX",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-05-04T08:49:02+00:00",
+    "article_id": 70353,
+    "title": "Deposit and Withdrawal Services of Hathor(HTR) Temporarily Closed ",
+    "ticker": "HTR",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-05-05T09:23:18+00:00",
+    "article_id": 70623,
+    "title": "Deposit and Withdrawal Services of Symbol (XYM) Temporarily Closed ",
+    "ticker": "XYM",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-05-11T04:15:26+00:00",
+    "article_id": 72145,
+    "title": "Deposit and Withdrawal Services of Cosmos (ATOM) Temporarily Closed",
+    "ticker": "ATOM",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-05-23T07:40:15+00:00",
+    "article_id": 74494,
+    "title": "Deposit and Withdrawal Services of KAVA (KAVA) Temporarily Closed",
+    "ticker": "KAVA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-05-30T16:42:12+00:00",
+    "article_id": 76094,
+    "title": "Deposit and Withdrawal Services of Monero (XMR) Temporarily Closed",
+    "ticker": "XMR",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-05-31T10:40:51+00:00",
+    "article_id": 76259,
+    "title": "Deposit and Withdrawal Services of Pika Protocol (PIKA) Temporarily Closed",
+    "ticker": "PIKA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-06-01T04:09:34+00:00",
+    "article_id": 76378,
+    "title": "Deposit and Withdrawal Services of KMA Calamari (KMA) Temporarily Closed",
+    "ticker": "KMA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-06-01T08:12:47+00:00",
+    "article_id": 76447,
+    "title": "Deposit and Withdrawal Services of Efinity (EFI) Temporarily Closed",
+    "ticker": "EFI",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-06-02T10:23:17+00:00",
+    "article_id": 76933,
+    "title": "Deposit and Withdrawal Services of Kadena (KDA) Temporarily Closed",
+    "ticker": "KDA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-06-03T08:43:33+00:00",
+    "article_id": 77024,
+    "title": "Deposit and Withdrawal Services of Secret (SCRT) Temporarily Closed",
+    "ticker": "SCRT",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-06-25T04:11:25+00:00",
+    "article_id": 79517,
+    "title": "Deposit and Withdrawal Services of ICON (ICX) Temporarily Closed",
+    "ticker": "ICX",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-07-07T07:18:55+00:00",
+    "article_id": 81168,
+    "title": "Deposit and Withdrawal Services of Mainnet Hydra (HYDRA) Temporarily Closed",
+    "ticker": "HYDRA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-07-08T07:58:59+00:00",
+    "article_id": 81283,
+    "title": "Deposit and Withdrawal Services of EOSForce (EOSC) Tokens Temporarily Closed",
+    "ticker": "EOSC",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-07-09T08:06:38+00:00",
+    "article_id": 81306,
+    "title": " Deposit and Withdrawal Services of Mainnet DigitalBits (XDB) Tokens Temporarily Closed",
+    "ticker": "XDB",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-07-25T09:31:07+00:00",
+    "article_id": 83242,
+    "title": "Deposit and Withdrawal Services of Chia Network (XCH) Temporarily Closed",
+    "ticker": "XCH",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-07-25T10:04:10+00:00",
+    "article_id": 83264,
+    "title": "Deposit and Withdrawal Services of Swingby (SWINGBY) Tokens Temporarily Closed",
+    "ticker": "SWINGBY",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-08-10T14:23:10+00:00",
+    "article_id": 84607,
+    "title": "Deposit and Withdrawal Services of Kadena (KDA) Temporarily Closed",
+    "ticker": "KDA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-09-27T02:59:00+00:00",
+    "article_id": 87521,
+    "title": "Deposit and Withdrawal Services of Mainnet KASPA (KAS) Tokens Temporarily Closed",
+    "ticker": "KAS",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-10-24T09:52:52+00:00",
+    "article_id": 88759,
+    "title": "Deposit and Withdrawal Services of Mainnet Hedera Hashgraph (HBAR) Tokens Will be Temporarily Closed",
+    "ticker": "HBAR",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-10-24T13:54:35+00:00",
+    "article_id": 88827,
+    "title": "Deposit and Withdrawal Services of Mainnet MINA (MINA) Tokens Have been Temporarily Closed",
+    "ticker": "MINA",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-10-28T07:40:51+00:00",
+    "article_id": 89186,
+    "title": "Deposit and Withdrawal Services of Mainnet Caduceus (CMP) Tokens Temporarily Closed",
+    "ticker": "CMP",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2023-11-10T02:32:25+00:00",
+    "article_id": 90286,
+    "title": "Deposit and Withdrawal Services of CLearDAO (CLH) Temporarily Closed",
+    "ticker": "CLH",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2024-09-02T06:39:02+00:00",
+    "article_id": 121762,
+    "title": "KuCoin Has Temporarily Closed the Deposit and Withdrawal Services of Woonkly Power (WOOP) ",
+    "ticker": "WOOP",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2024-09-16T03:49:58+00:00",
+    "article_id": 123624,
+    "title": "Deposit and Withdrawal Services of Mainnet Kaspa (KAS) Tokens Have been Temporarily Closed",
+    "ticker": "KAS",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2024-10-17T00:54:47+00:00",
+    "article_id": 128209,
+    "title": "Deposit and Withdrawal Services of Radiant Capital (RDNT) Have Been Temporarily Closed",
+    "ticker": "RDNT",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2024-10-29T11:20:50+00:00",
+    "article_id": 130903,
+    "title": "Deposit and Withdrawal Services of Realio Network (RIO) Have Been Temporarily Closed",
+    "ticker": "RIO",
+    "direction": "SHORT"
+  },
+  {
+    "time": "2024-10-31T09:51:02+00:00",
+    "article_id": 130431,
+    "title": "Deposit and Withdrawal Services of VEMP (VEMP) Have Been Temporarily Closed",
+    "ticker": "VEMP",
+    "direction": "SHORT"
+  }
+]

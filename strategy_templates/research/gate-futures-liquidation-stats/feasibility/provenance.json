@@ -1,0 +1,6 @@
+{
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "source": "Gate API v4 official public contract_stats endpoint",
+  "probes": ["BTC_USDT from 2023-01-01", "BTC_USDT from 2024-01-01", "ETH_USDT from 2023-01-01"],
+  "response": "from time exceeds 180-day limit"
+}

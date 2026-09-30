@@ -1,0 +1,162 @@
+{
+  "eligible": [
+    {
+      "base": "BTC",
+      "usdt_symbol": "BTCUSDT",
+      "usdc_symbol": "BTCUSDC",
+      "launch_ms": 1704369600000,
+      "launch_utc": "2024-01-04T12:00:00+00:00",
+      "quote_volume_24h": 22660932279.831726
+    },
+    {
+      "base": "ETH",
+      "usdt_symbol": "ETHUSDT",
+      "usdc_symbol": "ETHUSDC",
+      "launch_ms": 1704369600000,
+      "launch_utc": "2024-01-04T12:00:00+00:00",
+      "quote_volume_24h": 10084002048.602257
+    },
+    {
+      "base": "SOL",
+      "usdt_symbol": "SOLUSDT",
+      "usdc_symbol": "SOLUSDC",
+      "launch_ms": 1704369600000,
+      "launch_utc": "2024-01-04T12:00:00+00:00",
+      "quote_volume_24h": 4902535046.514001
+    },
+    {
+      "base": "XRP",
+      "usdt_symbol": "XRPUSDT",
+      "usdc_symbol": "XRPUSDC",
+      "launch_ms": 1704369600000,
+      "launch_utc": "2024-01-04T12:00:00+00:00",
+      "quote_volume_24h": 1359056814.5147502
+    },
+    {
+      "base": "DOGE",
+      "usdt_symbol": "DOGEUSDT",
+      "usdc_symbol": "DOGEUSDC",
+      "launch_ms": 1705572000000,
+      "launch_utc": "2024-01-18T10:00:00+00:00",
+      "quote_volume_24h": 193011477.19668
+    },
+    {
+      "base": "LINK",
+      "usdt_symbol": "LINKUSDT",
+      "usdc_symbol": "LINKUSDC",
+      "launch_ms": 1708070400000,
+      "launch_utc": "2024-02-16T08:00:00+00:00",
+      "quote_volume_24h": 412293058.6876699
+    },
+    {
+      "base": "AVAX",
+      "usdt_symbol": "AVAXUSDT",
+      "usdc_symbol": "AVAXUSDC",
+      "launch_ms": 1710918000000,
+      "launch_utc": "2024-03-20T07:00:00+00:00",
+      "quote_volume_24h": 2098311434.0159998
+    },
+    {
+      "base": "1000SHIB",
+      "usdt_symbol": "1000SHIBUSDT",
+      "usdc_symbol": "1000SHIBUSDC",
+      "launch_ms": 1711609200000,
+      "launch_utc": "2024-03-28T07:00:00+00:00",
+      "quote_volume_24h": 948479304.604215
+    },
+    {
+      "base": "LTC",
+      "usdt_symbol": "LTCUSDT",
+      "usdc_symbol": "LTCUSDC",
+      "launch_ms": 1712818800000,
+      "launch_utc": "2024-04-11T07:00:00+00:00",
+      "quote_volume_24h": 272786711.10282
+    },
+    {
+      "base": "NEAR",
+      "usdt_symbol": "NEARUSDT",
+      "usdc_symbol": "NEARUSDC",
+      "launch_ms": 1712818800000,
+      "launch_utc": "2024-04-11T07:00:00+00:00",
+      "quote_volume_24h": 321694021.14900005
+    },
+    {
+      "base": "NEO",
+      "usdt_symbol": "NEOUSDT",
+      "usdc_symbol": "NEOUSDC",
+      "launch_ms": 1713423600000,
+      "launch_utc": "2024-04-18T07:00:00+00:00",
+      "quote_volume_24h": 316709180.07009006
+    },
+    {
+      "base": "FIL",
+      "usdt_symbol": "FILUSDT",
+      "usdc_symbol": "FILUSDC",
+      "launch_ms": 1713423600000,
+      "launch_utc": "2024-04-18T07:00:00+00:00",
+      "quote_volume_24h": 382416959.93870014
+    },
+    {
+      "base": "MATIC",
+      "usdt_symbol": "MATICUSDT",
+      "usdc_symbol": "MATICUSDC",
+      "launch_ms": 1714028400000,
+      "launch_utc": "2024-04-25T07:00:00+00:00",
+      "quote_volume_24h": 314587888.62409997
+    },
+    {
+      "base": "CRV",
+      "usdt_symbol": "CRVUSDT",
+      "usdc_symbol": "CRVUSDC",
+      "launch_ms": 1720076400000,
+      "launch_utc": "2024-07-04T07:00:00+00:00",
+      "quote_volume_24h": 199552718.03460002
+    }
+  ],
+  "drops": [
+    [
+      "BNB",
+      "missing_24h"
+    ],
+    [
+      "SUI",
+      "history_lt_2y_or_missing"
+    ],
+    [
+      "ORDI",
+      "history_lt_2y_or_missing"
+    ],
+    [
+      "BCH",
+      "missing_24h"
+    ],
+    [
+      "WIF",
+      "history_lt_2y_or_missing"
+    ],
+    [
+      "ARB",
+      "history_lt_2y_or_missing"
+    ],
+    [
+      "BOME",
+      "history_lt_2y_or_missing"
+    ],
+    [
+      "TIA",
+      "history_lt_2y_or_missing"
+    ],
+    [
+      "ENA",
+      "history_lt_2y_or_missing"
+    ],
+    [
+      "ETHFI",
+      "history_lt_2y_or_missing"
+    ],
+    [
+      "1000BONK",
+      "history_lt_2y_or_missing"
+    ]
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "source": "existing complete 326-event Binance leverage/margin-tier census",
+  "event_filter": "first-tier max leverage unchanged; first-tier notional cap changed",
+  "direction": "cap expansion LONG; contraction SHORT",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "entry": "next full 1h open after effective time"
+}

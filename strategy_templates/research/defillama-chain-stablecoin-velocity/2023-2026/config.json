@@ -1,0 +1,19 @@
+{
+  "feature": "chain stablecoin velocity",
+  "velocity": "sum_7d_dex_volume / mean_7d_stablecoin_supply",
+  "flow": "log(recent_7d_velocity / prior_7d_velocity)",
+  "trigger": "zero_cross",
+  "positive_cross": "LONG",
+  "negative_cross": "SHORT",
+  "entry": "next_utc_day_open",
+  "lookback_days": 14,
+  "eligibility": {
+    "usd_m_history_years": 2,
+    "signal_day_quote_volume_min_usdt": 5000000
+  },
+  "discovery_years": [2023, 2024],
+  "discovery_gate": {
+    "mean_signed_7d_min": 0.0025,
+    "positive_symbol_fraction_min": 0.60
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "interval": "1h",
+  "efficiency_ratio_window": 24,
+  "baseline": "rolling 720h median ER",
+  "trigger": "ER crosses from <= median to > median",
+  "direction": "trailing 24h return sign",
+  "entry": "next 1h open",
+  "gate": "12h mean >=0.10% and >=3/4 core symbols positive"
+}

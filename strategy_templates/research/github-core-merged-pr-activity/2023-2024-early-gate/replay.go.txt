@@ -1,0 +1,52 @@
+package main
+import(
+ "database/sql";"encoding/json";"fmt";"math";"os";"time";
+ _ "go_binance_futures/bootstrap";"github.com/beego/beego/v2/core/config";_ "github.com/go-sql-driver/mysql"
+)
+type Row struct{ Month string; Count int }
+type Event struct{ Symbol,SignalMonth,Entry string; Count int; Activity,R1,R3,R7 float64; Dir string }
+func main(){
+ raw,err:=os.ReadFile("/tmp/github_core_pr_monthly_counts.json");if err!=nil{panic(err)}
+ var src map[string][][]interface{};if err=json.Unmarshal(raw,&src);err!=nil{panic(err)}
+ u,_:=config.String("database::username");pw,_:=config.String("database::password");h,_:=config.String("database::host");pt,_:=config.String("database::port");dbn,_:=config.String("database::dbname");if dbn!="go_bn_test"{panic("unexpected db "+dbn)}
+ db,err:=sql.Open("mysql",fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4",u,pw,h,pt,dbn));if err!=nil{panic(err)};defer db.Close()
+ symmap:=map[string]string{"BTC":"BTCUSDT","ETH":"ETHUSDT","BNB":"BNBUSDT","XRP":"XRPUSDT"}
+ all:=[]Event{}
+ for asset,arr:=range src{
+  sym:=symmap[asset]; if sym==""{continue}
+  counts:=make([]int,len(arr)); months:=make([]string,len(arr))
+  for i,x:=range arr{months[i]=x[0].(string);counts[i]=int(x[1].(float64))}
+  for i:=3;i<len(arr);i++{
+   if months[i]>="2024-12-01"{continue}
+   curT,_:=time.Parse("2006-01-02",months[i]); if curT.Year()<2023{continue}
+   logs:=0.0;for j:=i-3;j<i;j++{logs+=math.Log1p(float64(counts[j]))};base:=logs/3
+   activity:=math.Log1p(float64(counts[i]))-base
+   if activity==0{continue};dir:=1.0;ds:="LONG";if activity<0{dir=-1;ds="SHORT"}
+   entry:=curT.AddDate(0,1,0); entryMs:=entry.UnixMilli()
+   var qv float64
+   if err:=db.QueryRow("SELECT COALESCE(SUM(quote_volume),0) FROM market_klines_1h WHERE market='futures_usdt' AND symbol=? AND open_time>=? AND open_time<?",sym,entryMs-24*3600000,entryMs).Scan(&qv);err!=nil{panic(err)}
+   if qv<5000000{continue}
+   var op,c1,c3,c7 float64
+   if err:=db.QueryRow("SELECT open_price FROM market_klines_1h WHERE market='futures_usdt' AND symbol=? AND open_time=?",sym,entryMs).Scan(&op);err!=nil{continue}
+   ok:=true
+   for _,z:=range []struct{off int64;dst *float64}{{23,&c1},{71,&c3},{167,&c7}}{
+    if err:=db.QueryRow("SELECT close_price FROM market_klines_1h WHERE market='futures_usdt' AND symbol=? AND open_time=?",sym,entryMs+z.off*3600000).Scan(z.dst);err!=nil{ok=false;break}
+   }
+   if !ok||op<=0||c1<=0||c3<=0||c7<=0{continue}
+   all=append(all,Event{sym,months[i],entry.Format("2006-01-02"),counts[i],activity,dir*math.Log(c1/op),dir*math.Log(c3/op),dir*math.Log(c7/op),ds})
+  }
+ }
+ _=all
+ by:=map[string][]Event{};yr:=map[int][]Event{}
+ for _,e:=range all{by[e.Symbol]=append(by[e.Symbol],e);t,_:=time.Parse("2006-01-02",e.SignalMonth);yr[t.Year()]=append(yr[t.Year()],e)}
+ mean:=func(es []Event,which int)float64{if len(es)==0{return 0};s:=0.0;for _,e:=range es{if which==1{s+=e.R1}else if which==3{s+=e.R3}else{s+=e.R7}};return s/float64(len(es))}
+ win:=func(es []Event)float64{if len(es)==0{return 0};w:=0;for _,e:=range es{if e.R7>0{w++}};return float64(w)/float64(len(es))}
+ pos:=0
+ for _,sym:=range []string{"BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT"}{
+  es:=by[sym];m7:=mean(es,7);if m7>0{pos++}
+  fmt.Printf("%s n=%d mean1=%.6f mean3=%.6f mean7=%.6f win7=%.3f\n",sym,len(es),mean(es,1),mean(es,3),m7,win(es))
+ }
+ fmt.Printf("ALL n=%d mean1=%.6f mean3=%.6f mean7=%.6f win7=%.3f pos=%d/4 y2023=%.6f y2024=%.6f\n",len(all),mean(all,1),mean(all,3),mean(all,7),win(all),pos,mean(yr[2023],7),mean(yr[2024],7))
+ enc,_:=json.MarshalIndent(map[string]interface{}{"events":all,"summary":map[string]interface{}{"n":len(all),"mean1":mean(all,1),"mean3":mean(all,3),"mean7":mean(all,7),"win7":win(all),"positive_symbols7":pos,"mean7_2023":mean(yr[2023],7),"mean7_2024":mean(yr[2024],7)}}, "", "  ")
+ os.WriteFile("/tmp/github_core_pr_activity_gate_result.json",enc,0644)
+}

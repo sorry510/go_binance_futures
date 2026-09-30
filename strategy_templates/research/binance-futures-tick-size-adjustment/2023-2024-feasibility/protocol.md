@@ -1,0 +1,1 @@
+Official Binance USD-M tick-size adjustment batches were screened before returns. Finer tick was pre-registered LONG; coarser tick SHORT. Production eligibility requires >=730 days contract history and >=5M USDT prior-24h QuoteVolume. Minimum useful discovery sample is 8; no later years are consumed if feasibility is below this gate.

@@ -1,0 +1,18 @@
+{
+  "direction": "LONG",
+  "source": "Bybit official announcements New Listings",
+  "strict_title_markers": [
+    "New Listing",
+    "Coming Soon",
+    "\ud83d\udd25New",
+    "Bybit Will Launch"
+  ],
+  "exclude": [
+    "Pre-Market",
+    "Converting",
+    "Adjustment"
+  ],
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_events": 8
+}

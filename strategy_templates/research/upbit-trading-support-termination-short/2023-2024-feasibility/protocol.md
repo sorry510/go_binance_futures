@@ -1,0 +1,1 @@
+Enumerate 2023-2024 Upbit official trading-support-termination notices before looking at returns. Parse symbol tickers mechanically from titles. Map to Binance USD-M symbols, require contract history >=730 days and prior-24h QuoteVolume >=5M USDT. Proceed to discovery only if at least eight eligible events. Direction is pre-registered SHORT.

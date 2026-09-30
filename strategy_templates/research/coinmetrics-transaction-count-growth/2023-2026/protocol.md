@@ -1,0 +1,1 @@
+Use the same fixed zero-cross construction as the previously tested active-address family: latest 7-day mean versus prior 7-day mean, signal only after the metric day completes, and enter the next UTC-day open. Positive cross is LONG and negative cross SHORT. No window/direction/horizon search after results.

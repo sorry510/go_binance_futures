@@ -1,0 +1,68 @@
+{
+  "n": 20,
+  "symbols": 20,
+  "batches": 12,
+  "mean1": 0.023269639322160106,
+  "mean4": 0.026438988054529943,
+  "mean12": 0.049582952691771175,
+  "win12": 0.3,
+  "symbol_positive": 6,
+  "symbol_positive_fraction": 0.3,
+  "batch_equal_mean12": 0.09063214583161484,
+  "batch_positive": 4,
+  "batch_positive_fraction": 0.3333333333333333,
+  "by_symbol": {
+    "BLZUSDT": -0.018655655592765365,
+    "YFIUSDT": -0.0006015037775341097,
+    "TRBUSDT": -0.034668046571393905,
+    "CTSIUSDT": -0.016954193361688144,
+    "ALICEUSDT": -0.0130379943381298,
+    "RENUSDT": -0.019041477993871448,
+    "RLCUSDT": -0.007559846782761992,
+    "LINAUSDT": -0.006600684031352093,
+    "DUSKUSDT": -0.05435378116549314,
+    "ANTUSDT": 0.00744656657727957,
+    "REEFUSDT": 0.001427551991185446,
+    "XMRUSDT": -0.021095047238352076,
+    "ZECUSDT": -0.01297267130403827,
+    "ZENUSDT": -0.00011700696204783214,
+    "DASHUSDT": -0.0010314596066622124,
+    "ALPHAUSDT": -0.01592918257761323,
+    "AUDIOUSDT": 0.0138681752331605,
+    "OMGUSDT": 0.34381104839739113,
+    "WAVESUSDT": 0.34526688884463635,
+    "UNFIUSDT": 0.5024573740954741
+  },
+  "by_batch": {
+    "https://www.bitget.com/support/articles/12560603797497": -0.018655655592765365,
+    "https://www.bitget.com/support/articles/12560603801128": -0.0006015037775341097,
+    "https://www.bitget.com/support/articles/12560603803531": -0.034668046571393905,
+    "https://www.bitget.com/support/articles/12560603804054": -0.016344555231229796,
+    "https://www.bitget.com/support/articles/12560603804391": -0.022838103993202408,
+    "https://www.bitget.com/support/articles/12560603804838": -0.0040736428899623535,
+    "https://www.bitget.com/support/articles/12560603804841": -0.004707045957582771,
+    "https://www.bitget.com/support/articles/12560603808667": -0.01592918257761323,
+    "https://www.bitget.com/support/articles/12560603809335": 0.0138681752331605,
+    "https://www.bitget.com/support/articles/12560603810673": 0.34381104839739113,
+    "https://www.bitget.com/support/articles/12560603810657": 0.34526688884463635,
+    "https://www.bitget.com/support/articles/12560603817152": 0.5024573740954741
+  },
+  "by_year": {
+    "2023": {
+      "n": 2,
+      "mean1": -0.003261731020811991,
+      "mean4": -0.017105120582935035,
+      "mean12": -0.009628579685149737,
+      "win12": 0.0
+    },
+    "2024": {
+      "n": 18,
+      "mean1": 0.02621756936026812,
+      "mean4": 0.0312772223475816,
+      "mean12": 0.05616201184476239,
+      "win12": 0.3333333333333333
+    }
+  },
+  "gate_pass": false,
+  "gate": "n>=8, symbols>=8, batches>=8, event mean12>=0.50%, batch-equal mean12>=0.50%, symbol breadth>=60%, batch breadth>=60%"
+}

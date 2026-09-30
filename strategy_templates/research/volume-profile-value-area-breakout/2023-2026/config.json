@@ -1,0 +1,13 @@
+{
+  "interval": "1h",
+  "profile_window_hours": 24,
+  "bar_price": "(high+low+close)/3",
+  "weight": "quote_volume",
+  "value_area": "weighted price quantiles 15%-85% (central 70%)",
+  "entry_direction": "close > VAH LONG; close < VAL SHORT",
+  "rearm": "close returns inside value area",
+  "entry": "next 1h open",
+  "diagnostic_horizons_hours": [1,4,12],
+  "discovery_years": [2023,2024],
+  "oos_years": [2025,2026]
+}

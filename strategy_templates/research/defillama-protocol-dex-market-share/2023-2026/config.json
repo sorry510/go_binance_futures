@@ -1,0 +1,26 @@
+{
+  "leverage": 4,
+  "take_profit_pct": 8,
+  "stop_loss_pct": 6,
+  "fee_per_side": 0.0005,
+  "slippage_bps_per_side": 5,
+  "position_mode": "single",
+  "max_lookback_days": 14,
+  "eligibility": {
+    "usd_m_history_years": 2,
+    "prior_24h_quote_volume_min_usdt": 5000000
+  },
+  "signal": {
+    "metric": "protocol_dex_market_share",
+    "recent_days": 7,
+    "prior_days": 7,
+    "trigger": "zero_cross",
+    "positive_direction": "LONG",
+    "negative_direction": "SHORT",
+    "entry": "next_utc_day_open"
+  },
+  "discovery_gate": {
+    "mean_signed_7d_min": 0.0025,
+    "positive_symbol_fraction_min": 0.60
+  }
+}

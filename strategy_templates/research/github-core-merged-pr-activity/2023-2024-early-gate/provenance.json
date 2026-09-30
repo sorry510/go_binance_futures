@@ -1,0 +1,8 @@
+{
+  "research_date": "2026-09-30",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "event_source": "GitHub public search, server-side merged qualifier via connected GitHub",
+  "market_source": "go_bn_test market_klines_1h read-only",
+  "db_write": false,
+  "oos_status": "untouched; early gate failed"
+}

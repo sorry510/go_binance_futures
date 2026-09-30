@@ -1,0 +1,43 @@
+{
+  "components": {
+    "CRV": [
+      "curve-dex"
+    ],
+    "BAL": [
+      "balancer-v1",
+      "balancer-v2",
+      "balancer-v3"
+    ],
+    "SUSHI": [
+      "sushiswap",
+      "sushiswap-v3",
+      "sushi-aptos"
+    ],
+    "KNC": [
+      "kyberswap-classic",
+      "kyberswap-elastic"
+    ],
+    "DODO": [
+      "dodo-amm"
+    ],
+    "RAY": [
+      "raydium-amm"
+    ],
+    "RUNE": [
+      "thorchain-dex"
+    ],
+    "WOO": [
+      "woofi-swap"
+    ],
+    "UNI": [
+      "uniswap-v1",
+      "uniswap-v2",
+      "uniswap-v3",
+      "uniswap-v4"
+    ],
+    "INJ": [
+      "injective-spot"
+    ]
+  },
+  "global_days": 4608
+}

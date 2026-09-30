@@ -1,0 +1,33 @@
+{
+  "signals": {
+    "2023": 45,
+    "2024": 44,
+    "2025": 23,
+    "2026": 33
+  },
+  "discovery_2023_2024": {
+    "n_symbol_events": 866,
+    "mean24": -0.0037545545,
+    "mean72": -0.0083401869,
+    "positive_symbols24": 0,
+    "positive_symbols72": 0,
+    "symbols": 10
+  },
+  "oos1_2025": {
+    "n_symbol_events": 230,
+    "mean24": -0.0064994059,
+    "mean72": -0.0184838223,
+    "positive_symbols24": 1,
+    "positive_symbols72": 0,
+    "symbols": 10
+  },
+  "oos2_2026": {
+    "n_symbol_events": 310,
+    "mean24": -0.0075475368,
+    "mean72": 0.0004350379,
+    "positive_symbols24": 0,
+    "positive_symbols72": 4,
+    "symbols": 10
+  },
+  "decision": "freeze; pre-registered direction fails strongly. Do not reverse post hoc."
+}

@@ -1,0 +1,14 @@
+{
+  "n": 3225,
+  "mean1": -0.000153,
+  "mean4": -6.9e-05,
+  "mean12": -0.000482,
+  "win12": 0.48,
+  "by_symbol_mean12": {
+    "BTCUSDT": -0.000215,
+    "ETHUSDT": -0.000716,
+    "BNBUSDT": 1.9e-05,
+    "XRPUSDT": -0.001016
+  },
+  "decision": "freeze early gate"
+}

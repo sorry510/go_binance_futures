@@ -1,0 +1,313 @@
+[
+  {
+    "symbol": "TLMUSDT",
+    "time": "2023-07-14T11:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT Margined TLM Contract",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "API3USDT",
+    "time": "2023-07-21T10:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT Margined API3, IOST Contracts",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "IOSTUSDT",
+    "time": "2023-07-21T10:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT Margined API3, IOST Contracts",
+    "qv24": 5663112.0058470005,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "symbol": "NFTUSDT",
+    "time": "2023-07-28T09:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT Margined NFT, ERN Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "ERNUSDT",
+    "time": "2023-07-28T09:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT Margined NFT, ERN Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "JSTUSDT",
+    "time": "2023-08-26T09:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined JST and SLP Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "SLPUSDT",
+    "time": "2023-08-26T09:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined JST and SLP Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "TOMOUSDT",
+    "time": "2023-11-14T09:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined TOMO Contract",
+    "qv24": 43579061.03259999,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "symbol": "WSMUSDT",
+    "time": "2024-02-03T05:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined WSM Contract",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "STRAXUSDT",
+    "time": "2024-03-12T10:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined STRAX Contract",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "GNSUSDT",
+    "time": "2024-03-26T09:30:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined GNS and ANT Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "ANTUSDT",
+    "time": "2024-03-26T09:30:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined GNS and ANT Contracts",
+    "qv24": 3916092.7409000006,
+    "eligible": false,
+    "reason": "qv_lt_5m"
+  },
+  {
+    "symbol": "DGBUSDT",
+    "time": "2024-03-29T11:30:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined DGB Contract",
+    "qv24": 4750454.962010001,
+    "eligible": false,
+    "reason": "qv_lt_5m"
+  },
+  {
+    "symbol": "POGAIUSDT",
+    "time": "2024-04-15T07:30:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined POGAI Contract",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "STPTUSDT",
+    "time": "2024-05-20T04:00:00+00:00",
+    "title": "KuCoin Futures Will Delist USDT-Margined STPT Contract",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "SNTUSDT",
+    "time": "2024-05-22T08:57:26+00:00",
+    "title": "KuCoin Futures Will Delist and Update the Max Leverage and Risk Limit of USDT-Margined SNTUSDT, MBLUSDT and RADUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "MBLUSDT",
+    "time": "2024-05-22T08:57:26+00:00",
+    "title": "KuCoin Futures Will Delist and Update the Max Leverage and Risk Limit of USDT-Margined SNTUSDT, MBLUSDT and RADUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "RADUSDT",
+    "time": "2024-05-22T08:57:26+00:00",
+    "title": "KuCoin Futures Will Delist and Update the Max Leverage and Risk Limit of USDT-Margined SNTUSDT, MBLUSDT and RADUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "IDEXUSDT",
+    "time": "2024-05-28T08:00:00+00:00",
+    "title": "KuCoin Futures Will Delist and Update the Max Leverage and Risk Limit of USDT-Margined IDEXUSDT Perpetual Contract",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "TURTUSDT",
+    "time": "2024-05-30T04:00:00+00:00",
+    "title": "KuCoin Futures Will Delist and Update the Max Leverage and Risk Limit of USDT-Margined TURTUSDT Perpetual Contract",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "AGIXUSDT",
+    "time": "2024-06-06T04:03:08+00:00",
+    "title": "【Updated】 KuCoin Futures Will Delist USDT-Margined FETUSDT,  AGIXUSDT and OCEANUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "OCEANUSDT",
+    "time": "2024-06-06T04:03:08+00:00",
+    "title": "【Updated】 KuCoin Futures Will Delist USDT-Margined FETUSDT,  AGIXUSDT and OCEANUSDT Perpetual Contracts",
+    "qv24": 18976435.683799997,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "symbol": "FETUSDT",
+    "time": "2024-06-06T04:03:08+00:00",
+    "title": "【Updated】 KuCoin Futures Will Delist USDT-Margined FETUSDT,  AGIXUSDT and OCEANUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "DCUSDT",
+    "time": "2024-06-18T03:58:54+00:00",
+    "title": "KuCoin Futures Will Delist the DCUSDT Perpetual Contract ",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "GALUSDT",
+    "time": "2024-07-08T07:17:52+00:00",
+    "title": "KuCoin Futures Will Delist the GALUSDT and WOJAKUSDT Perpetual Contracts",
+    "qv24": 18515209.961499996,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "symbol": "WOJAKUSDT",
+    "time": "2024-07-08T07:17:52+00:00",
+    "title": "KuCoin Futures Will Delist the GALUSDT and WOJAKUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "RNDRUSDT",
+    "time": "2024-07-11T03:31:42+00:00",
+    "title": "KuCoin Futures Will Delist the RNDRUSDT Perpetual Contract",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "10000STARLUSDT",
+    "time": "2024-08-01T03:42:21+00:00",
+    "title": "KuCoin Futures Will Delist the 10000STARLUSDT and MSNUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "MSNUSDT",
+    "time": "2024-08-01T03:42:21+00:00",
+    "title": "KuCoin Futures Will Delist the 10000STARLUSDT and MSNUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "CELUSDT",
+    "time": "2024-08-09T03:54:27+00:00",
+    "title": "KuCoin Futures Will Delist the CELUSDT and SLNUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "SLNUSDT",
+    "time": "2024-08-09T03:54:27+00:00",
+    "title": "KuCoin Futures Will Delist the CELUSDT and SLNUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "BLOCKUSDT",
+    "time": "2024-08-16T03:40:34+00:00",
+    "title": "KuCoin Futures Will Delist the BLOCKUSDT Perpetual Contract",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "KMNOUSDT",
+    "time": "2024-08-23T07:33:05+00:00",
+    "title": "KuCoin Futures Will Delist the KMNOUSDT, DMAILUSDT and VENOMUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "DMAILUSDT",
+    "time": "2024-08-23T07:33:05+00:00",
+    "title": "KuCoin Futures Will Delist the KMNOUSDT, DMAILUSDT and VENOMUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "VENOMUSDT",
+    "time": "2024-08-23T07:33:05+00:00",
+    "title": "KuCoin Futures Will Delist the KMNOUSDT, DMAILUSDT and VENOMUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "MATICUSDT",
+    "time": "2024-08-29T03:58:32+00:00",
+    "title": "KuCoin Futures Will Delist the MATICUSDT Perpetual Contract",
+    "qv24": 253690375.8878,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "symbol": "VGXUSDT",
+    "time": "2024-10-09T03:26:29+00:00",
+    "title": "KuCoin Futures Will Delist the VGXUSDT, ZEROUSDT and LOOMUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "ZEROUSDT",
+    "time": "2024-10-09T03:26:29+00:00",
+    "title": "KuCoin Futures Will Delist the VGXUSDT, ZEROUSDT and LOOMUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "symbol": "LOOMUSDT",
+    "time": "2024-10-09T03:26:29+00:00",
+    "title": "KuCoin Futures Will Delist the VGXUSDT, ZEROUSDT and LOOMUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "BONDUSDT",
+    "time": "2024-12-20T09:24:02+00:00",
+    "title": "KuCoin Futures Will Delist the BONDUSDT and BLZUSDT Perpetual Contracts",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "symbol": "BLZUSDT",
+    "time": "2024-12-20T09:24:02+00:00",
+    "title": "KuCoin Futures Will Delist the BONDUSDT and BLZUSDT Perpetual Contracts",
+    "qv24": 118057125.13408001,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "symbol": "DARUSDT",
+    "time": "2024-12-27T07:36:02+00:00",
+    "title": "KuCoin Futures Will Delist the DARUSDT Perpetual Contract",
+    "qv24": 817546.8205100001,
+    "eligible": false,
+    "reason": "qv_lt_5m"
+  },
+  {
+    "symbol": "FTMUSDT",
+    "time": "2024-12-31T07:21:01+00:00",
+    "title": "KuCoin Futures Will Delist the FTMUSDT Perpetual Contract",
+    "qv24": 184120804.9965,
+    "eligible": true,
+    "reason": "ok"
+  }
+]

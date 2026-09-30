@@ -1,0 +1,38 @@
+{
+  "research_date": "2026-09-29",
+  "symbols": [
+    "TRXUSDT",
+    "ATOMUSDT",
+    "LTCUSDT",
+    "UNIUSDT"
+  ],
+  "raw_months": [
+    "2023-12",
+    "2024-01..2024-12"
+  ],
+  "signal_year": 2024,
+  "lookback_hours": 720,
+  "trigger_z_abs": 3,
+  "rearm_z_abs_below": 1,
+  "entry": "next 1h open",
+  "horizons_hours": [
+    1,
+    4,
+    12
+  ],
+  "min_history_years": 2,
+  "min_trailing_24h_quote_volume_usdt": 5000000,
+  "gate": {
+    "min_events": 20,
+    "mean12_min": 0.001,
+    "positive_symbols12_min": 3
+  },
+  "exact_execution": {
+    "leverage": 4,
+    "tp_pct": 8,
+    "sl_pct": 6,
+    "fee_per_side": 0.0005,
+    "slippage_per_side_bps": 5,
+    "single_position": true
+  }
+}

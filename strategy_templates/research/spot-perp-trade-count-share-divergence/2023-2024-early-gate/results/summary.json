@@ -1,0 +1,36 @@
+{
+  "symbols": {
+    "BTCUSDT": {
+      "n": 71,
+      "mean12": -0.000288,
+      "win12": 0.507
+    },
+    "ETHUSDT": {
+      "n": 85,
+      "mean12": 0.002422,
+      "win12": 0.529
+    },
+    "BNBUSDT": {
+      "n": 88,
+      "mean12": -0.000195,
+      "win12": 0.443
+    },
+    "XRPUSDT": {
+      "n": 97,
+      "mean12": -0.004857,
+      "win12": 0.423
+    }
+  },
+  "all": {
+    "n": 341,
+    "mean1": 0.000116,
+    "win1": 0.516,
+    "mean4": 0.000362,
+    "win4": 0.457,
+    "mean12": -0.000888,
+    "win12": 0.472,
+    "positive_symbols12": 1,
+    "total_symbols": 4
+  },
+  "decision": "freeze; early gate failed"
+}

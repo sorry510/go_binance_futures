@@ -1,0 +1,13 @@
+{
+  "venues": [
+    "Binance USD-M",
+    "Bybit linear"
+  ],
+  "interval": "1h",
+  "signal": "d = bybit hourly log return - binance hourly log return",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "sign(d), trade Binance catch-up",
+  "history_min_days": 730
+}

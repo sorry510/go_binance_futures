@@ -1,0 +1,20 @@
+{
+  "target_assets": [
+    "btc",
+    "eth",
+    "xrp",
+    "ada",
+    "link",
+    "bch",
+    "ltc",
+    "doge",
+    "uni",
+    "zec"
+  ],
+  "required_metrics": [
+    "FlowInExUSD",
+    "FlowOutExUSD",
+    "SplyExUSD"
+  ],
+  "result": "only btc/eth supported"
+}

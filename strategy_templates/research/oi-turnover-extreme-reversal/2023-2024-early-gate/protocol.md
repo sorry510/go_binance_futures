@@ -1,0 +1,1 @@
+Use hourly end open-interest notional divided by same-hour QuoteVolume. Normalize log ratio against prior 720 hours. First z>=3 triggers; z<1 rearms. Direction reverses completed trailing-12h return. Early gate requires at least +0.1% 12h mean and 3/4 positive symbols before any expansion.

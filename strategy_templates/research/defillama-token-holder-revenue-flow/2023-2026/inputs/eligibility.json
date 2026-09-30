@@ -1,0 +1,191 @@
+{
+  "AAVE": {
+    "futures_symbol": "AAVEUSDT",
+    "first_futures_date": "2020-10-16",
+    "eligible_from": "2022-10-16",
+    "included_slugs": [
+      "aave-v3",
+      "aave-v4"
+    ]
+  },
+  "BAL": {
+    "futures_symbol": "BALUSDT",
+    "first_futures_date": "2020-09-01",
+    "eligible_from": "2022-09-01",
+    "included_slugs": [
+      "balancer-v1",
+      "balancer-v2",
+      "balancer-v3"
+    ]
+  },
+  "CRV": {
+    "futures_symbol": "CRVUSDT",
+    "first_futures_date": "2020-09-01",
+    "eligible_from": "2022-09-01",
+    "included_slugs": [
+      "curve-dex",
+      "crvusd"
+    ]
+  },
+  "CVX": {
+    "futures_symbol": "CVXUSDT",
+    "first_futures_date": "2022-09-22",
+    "eligible_from": "2024-09-22",
+    "included_slugs": [
+      "convex-finance"
+    ]
+  },
+  "DODO": {
+    "futures_symbol": "DODOUSDT",
+    "first_futures_date": "2021-02-19",
+    "eligible_from": "2023-02-19",
+    "included_slugs": [
+      "dodo-amm"
+    ]
+  },
+  "GRT": {
+    "futures_symbol": "GRTUSDT",
+    "first_futures_date": "2020-12-19",
+    "eligible_from": "2022-12-19",
+    "included_slugs": [
+      "the-graph"
+    ]
+  },
+  "HNT": {
+    "futures_symbol": "HNTUSDT",
+    "first_futures_date": "2020-09-28",
+    "eligible_from": "2022-09-28",
+    "included_slugs": [
+      "helium-network"
+    ]
+  },
+  "KNC": {
+    "futures_symbol": "KNCUSDT",
+    "first_futures_date": "2020-06-22",
+    "eligible_from": "2022-06-22",
+    "included_slugs": [
+      "kyberswap-classic",
+      "kyberswap-elastic"
+    ]
+  },
+  "LDO": {
+    "futures_symbol": "LDOUSDT",
+    "first_futures_date": "2022-09-22",
+    "eligible_from": "2024-09-22",
+    "included_slugs": [
+      "lido"
+    ]
+  },
+  "LINK": {
+    "futures_symbol": "LINKUSDT",
+    "first_futures_date": "2020-01-17",
+    "eligible_from": "2022-01-17",
+    "included_slugs": [
+      "chainlink-staking"
+    ]
+  },
+  "LPT": {
+    "futures_symbol": "LPTUSDT",
+    "first_futures_date": "2021-11-11",
+    "eligible_from": "2023-11-11",
+    "included_slugs": [
+      "livepeer"
+    ]
+  },
+  "NEAR": {
+    "futures_symbol": "NEARUSDT",
+    "first_futures_date": "2020-10-15",
+    "eligible_from": "2022-10-15",
+    "included_slugs": [
+      "near-intents"
+    ]
+  },
+  "OGN": {
+    "futures_symbol": "OGNUSDT",
+    "first_futures_date": "2021-04-01",
+    "eligible_from": "2023-04-01",
+    "included_slugs": [
+      "origin-dollar",
+      "origin-ether",
+      "origin-arm"
+    ]
+  },
+  "RAY": {
+    "futures_symbol": "RAYUSDT",
+    "first_futures_date": "2021-08-20",
+    "eligible_from": "2023-08-20",
+    "included_slugs": [
+      "raydium-amm",
+      "launchlab"
+    ]
+  },
+  "RSR": {
+    "futures_symbol": "RSRUSDT",
+    "first_futures_date": "2020-10-19",
+    "eligible_from": "2022-10-19",
+    "included_slugs": [
+      "reserve-protocol"
+    ]
+  },
+  "RUNE": {
+    "futures_symbol": "RUNEUSDT",
+    "first_futures_date": "2020-09-04",
+    "eligible_from": "2022-09-04",
+    "included_slugs": [
+      "thorchain-dex"
+    ]
+  },
+  "SNX": {
+    "futures_symbol": "SNXUSDT",
+    "first_futures_date": "2020-08-14",
+    "eligible_from": "2022-08-14",
+    "included_slugs": [
+      "synthetix-v1+v2",
+      "synthetix-v4"
+    ]
+  },
+  "SPELL": {
+    "futures_symbol": "SPELLUSDT",
+    "first_futures_date": "2022-09-06",
+    "eligible_from": "2024-09-06",
+    "included_slugs": [
+      "abracadabra-spell"
+    ]
+  },
+  "SUSHI": {
+    "futures_symbol": "SUSHIUSDT",
+    "first_futures_date": "2020-09-04",
+    "eligible_from": "2022-09-04",
+    "included_slugs": [
+      "sushiswap",
+      "sushiswap-v3"
+    ]
+  },
+  "UNI": {
+    "futures_symbol": "UNIUSDT",
+    "first_futures_date": "2020-09-18",
+    "eligible_from": "2022-09-18",
+    "included_slugs": [
+      "uniswap-v1",
+      "uniswap-v2",
+      "uniswap-v3",
+      "uniswap-v4"
+    ]
+  },
+  "WOO": {
+    "futures_symbol": "WOOUSDT",
+    "first_futures_date": "2022-04-08",
+    "eligible_from": "2024-04-08",
+    "included_slugs": [
+      "woofi-swap"
+    ]
+  },
+  "YFI": {
+    "futures_symbol": "YFIUSDT",
+    "first_futures_date": "2020-08-31",
+    "eligible_from": "2022-08-31",
+    "included_slugs": [
+      "yearn-finance"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "valid_hours_per_symbol": 16113,
+  "max_z": {
+    "BTCUSDT": 1.4621,
+    "ETHUSDT": 1.7653,
+    "BNBUSDT": 0.6528,
+    "XRPUSDT": 1.0393
+  },
+  "events": 0,
+  "decision": "no-event feasibility freeze"
+}

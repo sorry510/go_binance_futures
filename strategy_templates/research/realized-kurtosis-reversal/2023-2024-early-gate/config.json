@@ -1,0 +1,8 @@
+{
+  "interval": "1h",
+  "window": 24,
+  "feature": "raw kurtosis of 24 hourly log returns",
+  "trigger": "cross from <=3 to >3",
+  "direction": "fade trailing24h return",
+  "entry": "next1h open"
+}

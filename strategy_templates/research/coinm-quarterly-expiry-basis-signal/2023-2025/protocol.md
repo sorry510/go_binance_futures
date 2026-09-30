@@ -1,0 +1,1 @@
+Discovery 2023-2024 tests the pre-registered expiry-unwind mapping. Because it failed strongly, the opposite mapping is treated only as a generated hypothesis and tested unchanged on untouched 2025 OOS. No basis-magnitude threshold, delayed entry or per-symbol filtering is allowed.

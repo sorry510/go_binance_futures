@@ -1,0 +1,723 @@
+[
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_230331",
+    "expiry_utc": "2023-03-31T08:00:00+00:00",
+    "expiry_ms": 1680249600000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_230630",
+    "expiry_utc": "2023-06-30T08:00:00+00:00",
+    "expiry_ms": 1688112000000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_230929",
+    "expiry_utc": "2023-09-29T08:00:00+00:00",
+    "expiry_ms": 1695974400000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_231229",
+    "expiry_utc": "2023-12-29T08:00:00+00:00",
+    "expiry_ms": 1703836800000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_240329",
+    "expiry_utc": "2024-03-29T08:00:00+00:00",
+    "expiry_ms": 1711699200000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_240628",
+    "expiry_utc": "2024-06-28T08:00:00+00:00",
+    "expiry_ms": 1719561600000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_240927",
+    "expiry_utc": "2024-09-27T08:00:00+00:00",
+    "expiry_ms": 1727424000000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_241227",
+    "expiry_utc": "2024-12-27T08:00:00+00:00",
+    "expiry_ms": 1735286400000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_250328",
+    "expiry_utc": "2025-03-28T08:00:00+00:00",
+    "expiry_ms": 1743148800000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_250627",
+    "expiry_utc": "2025-06-27T08:00:00+00:00",
+    "expiry_ms": 1751011200000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "ADA",
+    "quarterly_symbol": "ADAUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "ADAUSDT"
+  },
+  {
+    "base": "BCH",
+    "quarterly_symbol": "BCHUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "BCHUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "DOT",
+    "quarterly_symbol": "DOTUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "DOTUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "LINK",
+    "quarterly_symbol": "LINKUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "LINKUSDT"
+  },
+  {
+    "base": "LTC",
+    "quarterly_symbol": "LTCUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "LTCUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_250926",
+    "expiry_utc": "2025-09-26T08:00:00+00:00",
+    "expiry_ms": 1758873600000,
+    "target": "XRPUSDT"
+  },
+  {
+    "base": "BNB",
+    "quarterly_symbol": "BNBUSD_251226",
+    "expiry_utc": "2025-12-26T08:00:00+00:00",
+    "expiry_ms": 1766736000000,
+    "target": "BNBUSDT"
+  },
+  {
+    "base": "BTC",
+    "quarterly_symbol": "BTCUSD_251226",
+    "expiry_utc": "2025-12-26T08:00:00+00:00",
+    "expiry_ms": 1766736000000,
+    "target": "BTCUSDT"
+  },
+  {
+    "base": "ETH",
+    "quarterly_symbol": "ETHUSD_251226",
+    "expiry_utc": "2025-12-26T08:00:00+00:00",
+    "expiry_ms": 1766736000000,
+    "target": "ETHUSDT"
+  },
+  {
+    "base": "XRP",
+    "quarterly_symbol": "XRPUSD_251226",
+    "expiry_utc": "2025-12-26T08:00:00+00:00",
+    "expiry_ms": 1766736000000,
+    "target": "XRPUSDT"
+  }
+]

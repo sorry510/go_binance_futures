@@ -1,0 +1,16 @@
+{
+  "direction": "SHORT",
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "production_history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "entry": "next 1m open after first_listed_at",
+  "leverage": 4,
+  "profit": 8,
+  "loss": 6,
+  "fee": 0.0005,
+  "slippage_bps": 5,
+  "max_hold_hours": 72
+}

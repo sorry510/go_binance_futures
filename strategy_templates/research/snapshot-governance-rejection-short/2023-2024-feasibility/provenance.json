@@ -1,0 +1,12 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": [
+    "Snapshot proposals previously archived via DeFiLlama governanceID-safe mapping"
+  ],
+  "source_bundle": "../snapshot-governance-value-accrual/2023-2024-feasibility",
+  "limitations": [
+    "Only mechanically unambiguous binary choice labels are admitted.",
+    "No returns were inspected."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "event": "KuCoin temporarily closes both deposit and withdrawal services",
+  "direction": "SHORT",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "entry": "next full 1h open",
+  "gate": "12h mean >=0.50%, >50% event wins, >=7/11 symbol means positive"
+}

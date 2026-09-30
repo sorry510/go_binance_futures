@@ -1,0 +1,10 @@
+{
+  "planned_feature": "7d sum of chain bridge depositUSD - withdrawUSD, zero-cross",
+  "positive_cross": "LONG native token",
+  "negative_cross": "SHORT native token",
+  "entry": "next UTC-day open",
+  "minimum_discovery_symbols": 8,
+  "discovery_years": [2023, 2024],
+  "max_lookback_days": 7,
+  "return_data_inspected": false
+}

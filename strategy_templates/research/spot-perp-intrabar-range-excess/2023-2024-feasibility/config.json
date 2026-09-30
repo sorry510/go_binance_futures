@@ -1,0 +1,8 @@
+{
+  "feature": "log(log(H/L)_futures / log(H/L)_spot)",
+  "baseline_hours": 720,
+  "trigger": "first z>=3",
+  "rearm": "z<1",
+  "direction": "fade completed futures 1h return",
+  "entry": "next 1h open"
+}

@@ -1,0 +1,8 @@
+{
+  "direction": "SHORT",
+  "event_source": "KuCoin official Delistings CMS API",
+  "event_filter": "official KuCoin Futures delist announcements only; Trading Bot/Earn/Margin companion notices excluded",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_events": 8
+}

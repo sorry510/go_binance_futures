@@ -1,0 +1,7 @@
+{
+  "SOL": "solana-labs/solana has 68 stable release-days in 2023-2024 but 0 in 2025-2026 because development/release source migrated; no post-hoc successor-repo stitching.",
+  "FTM": "Fantom-foundation/go-opera has only 4 discovery release-days and 0 in 2025-2026; source continuity fails.",
+  "MATIC": "0xPolygon/bor canonical repo does not provide a usable GitHub Releases history under the fixed Release-object definition.",
+  "ARB": "Binance USD-M history begins 2023; cannot satisfy >=2y during 2023-2024 discovery.",
+  "SUI": "Binance USD-M history begins 2023; cannot satisfy >=2y during 2023-2024 discovery."
+}

@@ -1,0 +1,8 @@
+{
+  "research_date": "2026-09-29",
+  "mechanism": "CEX token reserve / net-inflow supply pressure",
+  "required_history": "2023-2026 discovery plus untouched OOS",
+  "required_granularity": "token-level historical balance or flow",
+  "return_inspection": false,
+  "decision": "data-access blocked"
+}

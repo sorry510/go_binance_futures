@@ -1,0 +1,5870 @@
+[
+  {
+    "article_code": "b02c41e76c7149b48d883cd06e44b2a7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-25)",
+    "release_time": 1735117203134,
+    "effective_time": 1735115400000,
+    "symbol": "USUALUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b02c41e76c7149b48d883cd06e44b2a7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-25)",
+    "release_time": 1735117203134,
+    "effective_time": 1735115400000,
+    "symbol": "PENGUUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b02c41e76c7149b48d883cd06e44b2a7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-25)",
+    "release_time": 1735117203134,
+    "effective_time": 1735115400000,
+    "symbol": "ZENUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b02c41e76c7149b48d883cd06e44b2a7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-25)",
+    "release_time": 1735117203134,
+    "effective_time": 1735115400000,
+    "symbol": "VANAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b02c41e76c7149b48d883cd06e44b2a7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-25)",
+    "release_time": 1735117203134,
+    "effective_time": 1735115400000,
+    "symbol": "MOCAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b02c41e76c7149b48d883cd06e44b2a7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-25)",
+    "release_time": 1735117203134,
+    "effective_time": 1735115400000,
+    "symbol": "VIRTUALUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac56a7249bcf4723a80b42821a088d33",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-19)",
+    "release_time": 1734597012271,
+    "effective_time": 1734596100000,
+    "symbol": "DARUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 50,
+    "classification": "tightening",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "26 - 50x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac56a7249bcf4723a80b42821a088d33",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-19)",
+    "release_time": 1734597012271,
+    "effective_time": 1734596100000,
+    "symbol": "MEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac56a7249bcf4723a80b42821a088d33",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-19)",
+    "release_time": 1734597012271,
+    "effective_time": 1734596100000,
+    "symbol": "CAKEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac56a7249bcf4723a80b42821a088d33",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-19)",
+    "release_time": 1734597012271,
+    "effective_time": 1734596100000,
+    "symbol": "IOTAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac56a7249bcf4723a80b42821a088d33",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-19)",
+    "release_time": 1734597012271,
+    "effective_time": 1734596100000,
+    "symbol": "LPTUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac56a7249bcf4723a80b42821a088d33",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-19)",
+    "release_time": 1734597012271,
+    "effective_time": 1734596100000,
+    "symbol": "ONEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac56a7249bcf4723a80b42821a088d33",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-19)",
+    "release_time": 1734597012271,
+    "effective_time": 1734596100000,
+    "symbol": "ZENUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "6b72121be6784033adf66af0a0e94ac4",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-17)",
+    "release_time": 1734429603506,
+    "effective_time": 1734427800000,
+    "symbol": "HBARUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "6b72121be6784033adf66af0a0e94ac4",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-17)",
+    "release_time": 1734429603506,
+    "effective_time": 1734427800000,
+    "symbol": "ONDOUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "6b72121be6784033adf66af0a0e94ac4",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-17)",
+    "release_time": 1734429603506,
+    "effective_time": 1734427800000,
+    "symbol": "SANDUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "41 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 25,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "6b72121be6784033adf66af0a0e94ac4",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-17)",
+    "release_time": 1734429603506,
+    "effective_time": 1734427800000,
+    "symbol": "ENSUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "6b72121be6784033adf66af0a0e94ac4",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-17)",
+    "release_time": 1734429603506,
+    "effective_time": 1734427800000,
+    "symbol": "VETUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "6b72121be6784033adf66af0a0e94ac4",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-17)",
+    "release_time": 1734429603506,
+    "effective_time": 1734427800000,
+    "symbol": "MOVEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "6995f8a0de1b4945a36e42a580eb652c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-12)",
+    "release_time": 1733995804368,
+    "effective_time": 1733994900000,
+    "symbol": "FTMUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "10x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "6995f8a0de1b4945a36e42a580eb652c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-12)",
+    "release_time": 1733995804368,
+    "effective_time": 1733994900000,
+    "symbol": "1000SHIBUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.650%",
+      "51 - 75x",
+      "0 < Position ≤ 25,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "6995f8a0de1b4945a36e42a580eb652c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-12)",
+    "release_time": 1733995804368,
+    "effective_time": 1733994900000,
+    "symbol": "PNUTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "6995f8a0de1b4945a36e42a580eb652c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-12)",
+    "release_time": 1733995804368,
+    "effective_time": 1733994900000,
+    "symbol": "LTCUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "6995f8a0de1b4945a36e42a580eb652c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-12)",
+    "release_time": 1733995804368,
+    "effective_time": 1733994900000,
+    "symbol": "LINKUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "6995f8a0de1b4945a36e42a580eb652c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-12)",
+    "release_time": 1733995804368,
+    "effective_time": 1733994900000,
+    "symbol": "WLDUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "6995f8a0de1b4945a36e42a580eb652c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-12)",
+    "release_time": 1733995804368,
+    "effective_time": 1733994900000,
+    "symbol": "BCHUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "FTMUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 20,
+    "classification": "tightening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "BLZUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 25,000",
+      "2.50%",
+      "7 - 10x",
+      "0 < Position ≤ 25,000",
+      "2.50%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "INJUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "CRVUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.650%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "CHILLGUYUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "BRETTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "ACXUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "ZRXUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "76800beea6d6459d902e9f5dcc486c01",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-11)",
+    "release_time": 1733908504328,
+    "effective_time": 1733907600000,
+    "symbol": "DASHUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "FTMUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 50,
+    "classification": "tightening",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "SEIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "1000BONKUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "FILUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 50,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 50,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "FETUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "ARBUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "UNIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "STXUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "HBARUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4cdde0518d1644c898df0d40080497a2",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-12-06)",
+    "release_time": 1733475608997,
+    "effective_time": 1733475000000,
+    "symbol": "GRASSUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "NEARUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "AVAXUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 25,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "PNUTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "XLMUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 10,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "ACTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "ETHFIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "THEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "ALGOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "BANUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "MAVIAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "9 - 10x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "OMGUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "9 - 10x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "BONDUSDT",
+    "old_first_max_leverage": 21,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "21x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "9 - 10x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "4576fbdd044d4622abffa646dd5ccddf",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-12-05)",
+    "release_time": 1733389204331,
+    "effective_time": 1733388600000,
+    "symbol": "ORBSUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "17 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "10x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "99e2b338aa4d4d74b6398e7eca073420",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-28)",
+    "release_time": 1732784403575,
+    "effective_time": 1732783800000,
+    "symbol": "XEMUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "9 - 10x",
+      "0 < Position ≤ 5,000",
+      "2.00%"
+    ]
+  },
+  {
+    "article_code": "99e2b338aa4d4d74b6398e7eca073420",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-28)",
+    "release_time": 1732784403575,
+    "effective_time": 1732783800000,
+    "symbol": "ORBSUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 20,
+    "classification": "tightening",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "17 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "99e2b338aa4d4d74b6398e7eca073420",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-28)",
+    "release_time": 1732784403575,
+    "effective_time": 1732783800000,
+    "symbol": "LOOMUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 25,000",
+      "3.00%",
+      "9 - 10x",
+      "0 < Position ≤ 25,000",
+      "3.00%"
+    ]
+  },
+  {
+    "article_code": "99e2b338aa4d4d74b6398e7eca073420",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-28)",
+    "release_time": 1732784403575,
+    "effective_time": 1732783800000,
+    "symbol": "LUNA2USDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "99e2b338aa4d4d74b6398e7eca073420",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-28)",
+    "release_time": 1732784403575,
+    "effective_time": 1732783800000,
+    "symbol": "QNTUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "99e2b338aa4d4d74b6398e7eca073420",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-28)",
+    "release_time": 1732784403575,
+    "effective_time": 1732783800000,
+    "symbol": "CHRUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "99e2b338aa4d4d74b6398e7eca073420",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-28)",
+    "release_time": 1732784403575,
+    "effective_time": 1732783800000,
+    "symbol": "JOEUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "ADAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "1000BONKUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "1000SHIBUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.650%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "PNUTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "1000FLOKIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "ACTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "RENDERUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "PYTHUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "HBARUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "GRASSUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "HIPPOUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2766181be07e49748736810996554c47",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-19)",
+    "release_time": 1732003203182,
+    "effective_time": 1732001400000,
+    "symbol": "RENUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 16,
+    "classification": "tightening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "16x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "DOGEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "ENAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "MOODENGUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "GOATUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "MKRUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "AAVEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "JUPUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "TROYUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "PEOPLEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "ARKMUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "DRIFTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0dc37e5073504db2968a5c3e9b2655fa",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-13)",
+    "release_time": 1731488437844,
+    "effective_time": 1731487800000,
+    "symbol": "COWUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "COMPUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "CTSIUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "BICOUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 10,000",
+      "3.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "DUSKUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "XVSUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "MAVUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "1000XECUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "KEYUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 10,
+    "classification": "tightening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "9 - 10x",
+      "0 < Position ≤ 5,000",
+      "2.00%"
+    ]
+  },
+  {
+    "article_code": "c178899ac5614333bf50d35cf5ff8b81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-11)",
+    "release_time": 1731315620315,
+    "effective_time": 1731313800000,
+    "symbol": "RENUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 20,
+    "classification": "tightening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "XRPUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "POPCATUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "TIAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "MOODENGUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "GOATUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "SCRUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "JTOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "TNSRUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "ENSUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "2c473e4efef140e8b58b950987bcc577",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-11-07)",
+    "release_time": 1730970006274,
+    "effective_time": 1730968200000,
+    "symbol": "PYTHUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ee0bc107cf7046e0a97b2b159f513637",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-31)",
+    "release_time": 1730365210185,
+    "effective_time": 1730364600000,
+    "symbol": "IDUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ee0bc107cf7046e0a97b2b159f513637",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-31)",
+    "release_time": 1730365210185,
+    "effective_time": 1730364600000,
+    "symbol": "FLOWUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ee0bc107cf7046e0a97b2b159f513637",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-31)",
+    "release_time": 1730365210185,
+    "effective_time": 1730364600000,
+    "symbol": "TRUUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ee0bc107cf7046e0a97b2b159f513637",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-31)",
+    "release_time": 1730365210185,
+    "effective_time": 1730364600000,
+    "symbol": "HOTUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ee0bc107cf7046e0a97b2b159f513637",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-31)",
+    "release_time": 1730365210185,
+    "effective_time": 1730364600000,
+    "symbol": "MAGICUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ee0bc107cf7046e0a97b2b159f513637",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-31)",
+    "release_time": 1730365210185,
+    "effective_time": 1730364600000,
+    "symbol": "SKLUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "DOGEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "APEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 25,000",
+      "0.650%",
+      "51 - 75x",
+      "0 < Position ≤ 25,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "MEWUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "ARBUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "BIGTIMEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "RUNEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "1000CATUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "MEMEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "PIXELUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "548dd91b4b1140cc9738fb1231210141",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-28)",
+    "release_time": 1730106003024,
+    "effective_time": 1730105400000,
+    "symbol": "UMAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "8e69e1eb4a5c4633934700362b8f851c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-25)",
+    "release_time": 1729846803120,
+    "effective_time": 1729845000000,
+    "symbol": "ICPUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "8e69e1eb4a5c4633934700362b8f851c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-25)",
+    "release_time": 1729846803120,
+    "effective_time": 1729845000000,
+    "symbol": "1INCHUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "1.20%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "8e69e1eb4a5c4633934700362b8f851c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-25)",
+    "release_time": 1729846803120,
+    "effective_time": 1729845000000,
+    "symbol": "DARUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "8e69e1eb4a5c4633934700362b8f851c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-25)",
+    "release_time": 1729846803120,
+    "effective_time": 1729845000000,
+    "symbol": "ROSEUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "8e69e1eb4a5c4633934700362b8f851c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-25)",
+    "release_time": 1729846803120,
+    "effective_time": 1729845000000,
+    "symbol": "EGLDUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "8e69e1eb4a5c4633934700362b8f851c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-25)",
+    "release_time": 1729846803120,
+    "effective_time": 1729845000000,
+    "symbol": "RSRUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "8e69e1eb4a5c4633934700362b8f851c",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-25)",
+    "release_time": 1729846803120,
+    "effective_time": 1729845000000,
+    "symbol": "SSVUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "TAOUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "TURBOUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "DOGSUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "JUPUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "ARKMUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "DIAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "MYROUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "AXLUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "BRETTUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "ac783c3d6b2a41d6b426361eb3adf6cd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-23)",
+    "release_time": 1729674014777,
+    "effective_time": 1729672200000,
+    "symbol": "GASUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4a5eb0d64bc941b2b6be88908f961ac3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-18)",
+    "release_time": 1729249203710,
+    "effective_time": 1729247400000,
+    "symbol": "WLDUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "4a5eb0d64bc941b2b6be88908f961ac3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-18)",
+    "release_time": 1729249203710,
+    "effective_time": 1729247400000,
+    "symbol": "APTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4a5eb0d64bc941b2b6be88908f961ac3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-18)",
+    "release_time": 1729249203710,
+    "effective_time": 1729247400000,
+    "symbol": "BOMEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "4a5eb0d64bc941b2b6be88908f961ac3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-18)",
+    "release_time": 1729249203710,
+    "effective_time": 1729247400000,
+    "symbol": "BNXUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 26,
+    "classification": "tightening",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "26x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "TURBOUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "ETHFIUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "CHZUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "CELOUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "ARKMUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "GTCUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "BEAMXUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "MYROUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "0fcaedd59b124b8cb8066711efee09fd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-15)",
+    "release_time": 1728982823593,
+    "effective_time": 1728981000000,
+    "symbol": "ORBSUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "NEIROUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "POPCATUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "EIGENUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "CFXUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "DYDXUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "MEWUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "CATIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "1MBABYDOGEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "ZKUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "BNXUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c2adea5bd44b423081ada6e037e303c8",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-14)",
+    "release_time": 1728896432383,
+    "effective_time": 1728894600000,
+    "symbol": "UNFIUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 11,
+    "classification": "tightening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 25,000",
+      "2.50%",
+      "11x",
+      "0 < Position ≤ 25,000",
+      "2.50%"
+    ]
+  },
+  {
+    "article_code": "b79e048dca4e4ea786fd857f36c61c96",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-07)",
+    "release_time": 1728293407079,
+    "effective_time": 1728293400000,
+    "symbol": "WIFUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b79e048dca4e4ea786fd857f36c61c96",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-07)",
+    "release_time": 1728293407079,
+    "effective_time": 1728293400000,
+    "symbol": "ENAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b79e048dca4e4ea786fd857f36c61c96",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-07)",
+    "release_time": 1728293407079,
+    "effective_time": 1728293400000,
+    "symbol": "SEIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b79e048dca4e4ea786fd857f36c61c96",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-07)",
+    "release_time": 1728293407079,
+    "effective_time": 1728293400000,
+    "symbol": "TAOUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b79e048dca4e4ea786fd857f36c61c96",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-07)",
+    "release_time": 1728293407079,
+    "effective_time": 1728293400000,
+    "symbol": "LDOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "b79e048dca4e4ea786fd857f36c61c96",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-07)",
+    "release_time": 1728293407079,
+    "effective_time": 1728293400000,
+    "symbol": "EIGENUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b79e048dca4e4ea786fd857f36c61c96",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-07)",
+    "release_time": 1728293407079,
+    "effective_time": 1728293400000,
+    "symbol": "JUPUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b79e048dca4e4ea786fd857f36c61c96",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-07)",
+    "release_time": 1728293407079,
+    "effective_time": 1728293400000,
+    "symbol": "BANANAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "af014897c9b44f299401b35da1f6ba17",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-01)",
+    "release_time": 1727773222697,
+    "effective_time": 1727771400000,
+    "symbol": "MKRUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "af014897c9b44f299401b35da1f6ba17",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-01)",
+    "release_time": 1727773222697,
+    "effective_time": 1727771400000,
+    "symbol": "ONDOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "af014897c9b44f299401b35da1f6ba17",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-01)",
+    "release_time": 1727773222697,
+    "effective_time": 1727771400000,
+    "symbol": "STXUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "af014897c9b44f299401b35da1f6ba17",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-01)",
+    "release_time": 1727773222697,
+    "effective_time": 1727771400000,
+    "symbol": "ARUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "af014897c9b44f299401b35da1f6ba17",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-01)",
+    "release_time": 1727773222697,
+    "effective_time": 1727771400000,
+    "symbol": "SXPUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "af014897c9b44f299401b35da1f6ba17",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-01)",
+    "release_time": 1727773222697,
+    "effective_time": 1727771400000,
+    "symbol": "FIDAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "af014897c9b44f299401b35da1f6ba17",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-01)",
+    "release_time": 1727773222697,
+    "effective_time": 1727771400000,
+    "symbol": "CELOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "af014897c9b44f299401b35da1f6ba17",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-10-01)",
+    "release_time": 1727773222697,
+    "effective_time": 1727771400000,
+    "symbol": "FIOUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "a62b443b2c304249989c50368acbc1f3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-30)",
+    "release_time": 1727686811189,
+    "effective_time": 1727685000000,
+    "symbol": "NEARUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "a62b443b2c304249989c50368acbc1f3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-30)",
+    "release_time": 1727686811189,
+    "effective_time": 1727685000000,
+    "symbol": "OMUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "a62b443b2c304249989c50368acbc1f3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-30)",
+    "release_time": 1727686811189,
+    "effective_time": 1727685000000,
+    "symbol": "SUIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "a62b443b2c304249989c50368acbc1f3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-30)",
+    "release_time": 1727686811189,
+    "effective_time": 1727685000000,
+    "symbol": "BNBUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "a62b443b2c304249989c50368acbc1f3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-30)",
+    "release_time": 1727686811189,
+    "effective_time": 1727685000000,
+    "symbol": "1000PEPEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "0.65%",
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "a62b443b2c304249989c50368acbc1f3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-30)",
+    "release_time": 1727686811189,
+    "effective_time": 1727685000000,
+    "symbol": "FETUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "a62b443b2c304249989c50368acbc1f3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-30)",
+    "release_time": 1727686811189,
+    "effective_time": 1727685000000,
+    "symbol": "ATOMUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < position ≤ 10,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < position ≤ 10,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "a62b443b2c304249989c50368acbc1f3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-30)",
+    "release_time": 1727686811189,
+    "effective_time": 1727685000000,
+    "symbol": "HMSTRUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c6f86973924d47e4bf314289d8469de5",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-26)",
+    "release_time": 1727334003562,
+    "effective_time": 1727332200000,
+    "symbol": "ZETAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c6f86973924d47e4bf314289d8469de5",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-26)",
+    "release_time": 1727334003562,
+    "effective_time": 1727332200000,
+    "symbol": "1000RATSUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c6f86973924d47e4bf314289d8469de5",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-26)",
+    "release_time": 1727334003562,
+    "effective_time": 1727332200000,
+    "symbol": "ARBUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "c6f86973924d47e4bf314289d8469de5",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-26)",
+    "release_time": 1727334003562,
+    "effective_time": 1727332200000,
+    "symbol": "RENDERUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c6f86973924d47e4bf314289d8469de5",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-26)",
+    "release_time": 1727334003562,
+    "effective_time": 1727332200000,
+    "symbol": "ALTUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c6f86973924d47e4bf314289d8469de5",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-26)",
+    "release_time": 1727334003562,
+    "effective_time": 1727332200000,
+    "symbol": "STRKUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c6f86973924d47e4bf314289d8469de5",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-26)",
+    "release_time": 1727334003562,
+    "effective_time": 1727332200000,
+    "symbol": "RUNEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "c6f86973924d47e4bf314289d8469de5",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-26)",
+    "release_time": 1727334003562,
+    "effective_time": 1727332200000,
+    "symbol": "ARKUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "20x",
+      "0 < Position ≤ 10,000",
+      "3.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b3a53767908741f8afb3a49dd43ee960",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-25)",
+    "release_time": 1727251217117,
+    "effective_time": 1727249400000,
+    "symbol": "NEIROUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b3a53767908741f8afb3a49dd43ee960",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-25)",
+    "release_time": 1727251217117,
+    "effective_time": 1727249400000,
+    "symbol": "UXLINKUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b3a53767908741f8afb3a49dd43ee960",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-25)",
+    "release_time": 1727251217117,
+    "effective_time": 1727249400000,
+    "symbol": "CKBUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b3a53767908741f8afb3a49dd43ee960",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-25)",
+    "release_time": 1727251217117,
+    "effective_time": 1727249400000,
+    "symbol": "1MBABYDOGEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b3a53767908741f8afb3a49dd43ee960",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-25)",
+    "release_time": 1727251217117,
+    "effective_time": 1727249400000,
+    "symbol": "SAGAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b3a53767908741f8afb3a49dd43ee960",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-25)",
+    "release_time": 1727251217117,
+    "effective_time": 1727249400000,
+    "symbol": "CATIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b3a53767908741f8afb3a49dd43ee960",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-25)",
+    "release_time": 1727251217117,
+    "effective_time": 1727249400000,
+    "symbol": "TURBOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "b3a53767908741f8afb3a49dd43ee960",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-25)",
+    "release_time": 1727251217117,
+    "effective_time": 1727249400000,
+    "symbol": "POPCATUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "dc02c1b008df4b94973c62318e68d7dd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-18)",
+    "release_time": 1726650010472,
+    "effective_time": 1726648200000,
+    "symbol": "TIAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "dc02c1b008df4b94973c62318e68d7dd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-18)",
+    "release_time": 1726650010472,
+    "effective_time": 1726648200000,
+    "symbol": "IOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "dc02c1b008df4b94973c62318e68d7dd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-18)",
+    "release_time": 1726650010472,
+    "effective_time": 1726648200000,
+    "symbol": "UNIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "dc02c1b008df4b94973c62318e68d7dd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-18)",
+    "release_time": 1726650010472,
+    "effective_time": 1726648200000,
+    "symbol": "INJUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "dc02c1b008df4b94973c62318e68d7dd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-18)",
+    "release_time": 1726650010472,
+    "effective_time": 1726648200000,
+    "symbol": "OPUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 10,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "dc02c1b008df4b94973c62318e68d7dd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-18)",
+    "release_time": 1726650010472,
+    "effective_time": 1726648200000,
+    "symbol": "PENDLEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "dc02c1b008df4b94973c62318e68d7dd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-18)",
+    "release_time": 1726650010472,
+    "effective_time": 1726648200000,
+    "symbol": "SEIUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "dc02c1b008df4b94973c62318e68d7dd",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-18)",
+    "release_time": 1726650010472,
+    "effective_time": 1726648200000,
+    "symbol": "BIGTIMEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "a05ae5aad6e44f6c848bde0a4c94ad4b",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-17)",
+    "release_time": 1726560002778,
+    "effective_time": 1726558200000,
+    "symbol": "LINKUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "a05ae5aad6e44f6c848bde0a4c94ad4b",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-17)",
+    "release_time": 1726560002778,
+    "effective_time": 1726558200000,
+    "symbol": "DOTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "a05ae5aad6e44f6c848bde0a4c94ad4b",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-17)",
+    "release_time": 1726560002778,
+    "effective_time": 1726558200000,
+    "symbol": "ETCUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "a05ae5aad6e44f6c848bde0a4c94ad4b",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-17)",
+    "release_time": 1726560002778,
+    "effective_time": 1726558200000,
+    "symbol": "EOSUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "a05ae5aad6e44f6c848bde0a4c94ad4b",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-17)",
+    "release_time": 1726560002778,
+    "effective_time": 1726558200000,
+    "symbol": "FILUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "41 - 75x",
+      "0 < Position ≤ 50,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 50,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "a05ae5aad6e44f6c848bde0a4c94ad4b",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-17)",
+    "release_time": 1726560002778,
+    "effective_time": 1726558200000,
+    "symbol": "PEOPLEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "a05ae5aad6e44f6c848bde0a4c94ad4b",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-17)",
+    "release_time": 1726560002778,
+    "effective_time": 1726558200000,
+    "symbol": "APEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "50x",
+      "0 < Position ≤ 5,000",
+      "0.65%",
+      "51 - 75x",
+      "0 < Position ≤ 25,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "a05ae5aad6e44f6c848bde0a4c94ad4b",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-17)",
+    "release_time": 1726560002778,
+    "effective_time": 1726558200000,
+    "symbol": "NEARUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 10,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "1d37707c47794fc9bb2236325c435642",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-11)",
+    "release_time": 1726041615297,
+    "effective_time": 1726039800000,
+    "symbol": "APTUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "1d37707c47794fc9bb2236325c435642",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-11)",
+    "release_time": 1726041615297,
+    "effective_time": 1726039800000,
+    "symbol": "ENAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "1d37707c47794fc9bb2236325c435642",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-11)",
+    "release_time": 1726041615297,
+    "effective_time": 1726039800000,
+    "symbol": "ADAUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "1d37707c47794fc9bb2236325c435642",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-11)",
+    "release_time": 1726041615297,
+    "effective_time": 1726039800000,
+    "symbol": "LTCUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "1d37707c47794fc9bb2236325c435642",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-11)",
+    "release_time": 1726041615297,
+    "effective_time": 1726039800000,
+    "symbol": "FTMUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "1d37707c47794fc9bb2236325c435642",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-11)",
+    "release_time": 1726041615297,
+    "effective_time": 1726039800000,
+    "symbol": "TRXUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "1d37707c47794fc9bb2236325c435642",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-11)",
+    "release_time": 1726041615297,
+    "effective_time": 1726039800000,
+    "symbol": "GALAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "bbee2ba7d5e94ff1b14acfdfb3d5fe72",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-10)",
+    "release_time": 1725955213463,
+    "effective_time": 1725953400000,
+    "symbol": "FETUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "bbee2ba7d5e94ff1b14acfdfb3d5fe72",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-10)",
+    "release_time": 1725955213463,
+    "effective_time": 1725953400000,
+    "symbol": "RDNTUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "bbee2ba7d5e94ff1b14acfdfb3d5fe72",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-10)",
+    "release_time": 1725955213463,
+    "effective_time": 1725953400000,
+    "symbol": "1000FLOKIUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "bbee2ba7d5e94ff1b14acfdfb3d5fe72",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-10)",
+    "release_time": 1725955213463,
+    "effective_time": 1725953400000,
+    "symbol": "AAVEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "bbee2ba7d5e94ff1b14acfdfb3d5fe72",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-10)",
+    "release_time": 1725955213463,
+    "effective_time": 1725953400000,
+    "symbol": "ZROUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "bbee2ba7d5e94ff1b14acfdfb3d5fe72",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-10)",
+    "release_time": 1725955213463,
+    "effective_time": 1725953400000,
+    "symbol": "SUNUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "bbee2ba7d5e94ff1b14acfdfb3d5fe72",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-10)",
+    "release_time": 1725955213463,
+    "effective_time": 1725953400000,
+    "symbol": "TAOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "bbee2ba7d5e94ff1b14acfdfb3d5fe72",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-10)",
+    "release_time": 1725955213463,
+    "effective_time": 1725953400000,
+    "symbol": "VIDTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "WLDUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "MEWUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "AVAXUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "1000BONKUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "1000SHIBUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "41 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.65%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "SUIUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "BCHUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "TONUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "d69b2a25cc80446b8225135e1b16c4a3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-09-04)",
+    "release_time": 1725436804741,
+    "effective_time": 1725435000000,
+    "symbol": "DOGSUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "194e244a94e9416cb400318dbed2f4b9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-27)",
+    "release_time": 1724747404962,
+    "effective_time": 1724743800000,
+    "symbol": "XRPUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "194e244a94e9416cb400318dbed2f4b9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-27)",
+    "release_time": 1724747404962,
+    "effective_time": 1724743800000,
+    "symbol": "BNBUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "194e244a94e9416cb400318dbed2f4b9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-27)",
+    "release_time": 1724747404962,
+    "effective_time": 1724743800000,
+    "symbol": "ORDIUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "75x",
+      "0 < Position ≤ 5,000",
+      "0.65%",
+      "75x",
+      "0 < Position ≤ 10,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "194e244a94e9416cb400318dbed2f4b9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-27)",
+    "release_time": 1724747404962,
+    "effective_time": 1724743800000,
+    "symbol": "NOTUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "194e244a94e9416cb400318dbed2f4b9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-27)",
+    "release_time": 1724747404962,
+    "effective_time": 1724743800000,
+    "symbol": "BOMEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "194e244a94e9416cb400318dbed2f4b9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-27)",
+    "release_time": 1724747404962,
+    "effective_time": 1724743800000,
+    "symbol": "RAREUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "572598a13c384de6aa3c4d4dc1be5f81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-22)",
+    "release_time": 1724320813751,
+    "effective_time": 1724319000000,
+    "symbol": "SOLUSDT",
+    "old_first_max_leverage": 100,
+    "new_first_max_leverage": 100,
+    "classification": "unchanged",
+    "first_row": [
+      "76 - 100x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "100x",
+      "0 < Position ≤ 20,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "572598a13c384de6aa3c4d4dc1be5f81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-22)",
+    "release_time": 1724320813751,
+    "effective_time": 1724319000000,
+    "symbol": "1000PEPEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.65%",
+      "51 - 75x",
+      "0 < Position ≤ 20,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "572598a13c384de6aa3c4d4dc1be5f81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-22)",
+    "release_time": 1724320813751,
+    "effective_time": 1724319000000,
+    "symbol": "CRVUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 50,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "572598a13c384de6aa3c4d4dc1be5f81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-22)",
+    "release_time": 1724320813751,
+    "effective_time": 1724319000000,
+    "symbol": "WIFUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "572598a13c384de6aa3c4d4dc1be5f81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-22)",
+    "release_time": 1724320813751,
+    "effective_time": 1724319000000,
+    "symbol": "1000SATSUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "572598a13c384de6aa3c4d4dc1be5f81",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-22)",
+    "release_time": 1724320813751,
+    "effective_time": 1724319000000,
+    "symbol": "DOGEUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "365375ab9cda445aa025c51bbaeea88e",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-02)",
+    "release_time": 1722582002492,
+    "effective_time": 1722580200000,
+    "symbol": "SOLUSDT",
+    "old_first_max_leverage": 100,
+    "new_first_max_leverage": 100,
+    "classification": "unchanged",
+    "first_row": [
+      "76 - 100x",
+      "0 < Position ≤ 10,000",
+      "0.50%",
+      "76 - 100x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "365375ab9cda445aa025c51bbaeea88e",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-02)",
+    "release_time": 1722582002492,
+    "effective_time": 1722580200000,
+    "symbol": "1000PEPEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "365375ab9cda445aa025c51bbaeea88e",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-02)",
+    "release_time": 1722582002492,
+    "effective_time": 1722580200000,
+    "symbol": "MEWUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "365375ab9cda445aa025c51bbaeea88e",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-08-02)",
+    "release_time": 1722582002492,
+    "effective_time": 1722580200000,
+    "symbol": "TAOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "d3c4a6ba91b247799bb0a57ad9749633",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-25)",
+    "release_time": 1721899806378,
+    "effective_time": 1721903400000,
+    "symbol": "REEFUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 26,
+    "classification": "tightening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "d3c4a6ba91b247799bb0a57ad9749633",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-25)",
+    "release_time": 1721899806378,
+    "effective_time": 1721903400000,
+    "symbol": "MAGICUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "d6e614e792c449fc93673067f5643d35",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-18)",
+    "release_time": 1721188802811,
+    "effective_time": 1721284200000,
+    "symbol": "COTIUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "d6e614e792c449fc93673067f5643d35",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-18)",
+    "release_time": 1721188802811,
+    "effective_time": 1721284200000,
+    "symbol": "RVNUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "11 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "d6e614e792c449fc93673067f5643d35",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-18)",
+    "release_time": 1721188802811,
+    "effective_time": 1721284200000,
+    "symbol": "ALPHAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "8ceea098625141bfa199148b5bba25d3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-10)",
+    "release_time": 1720508402135,
+    "effective_time": 1720506600000,
+    "symbol": "RNDRUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 26,
+    "classification": "tightening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "8ceea098625141bfa199148b5bba25d3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-10)",
+    "release_time": 1720508402135,
+    "effective_time": 1720506600000,
+    "symbol": "ZROUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "8ceea098625141bfa199148b5bba25d3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-10)",
+    "release_time": 1720508402135,
+    "effective_time": 1720506600000,
+    "symbol": "KNCUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "8ceea098625141bfa199148b5bba25d3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-10)",
+    "release_time": 1720508402135,
+    "effective_time": 1720506600000,
+    "symbol": "ICXUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "8ceea098625141bfa199148b5bba25d3",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-10)",
+    "release_time": 1720508402135,
+    "effective_time": 1720506600000,
+    "symbol": "LITUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 25,000",
+      "2.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "a4becf8462724b4d8bb45b5101f80ee9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-05)",
+    "release_time": 1720076403227,
+    "effective_time": 1720074600000,
+    "symbol": "GALUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 11,
+    "classification": "tightening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "11x",
+      "0 < Position ≤ 5,000",
+      "2.00%"
+    ]
+  },
+  {
+    "article_code": "a4becf8462724b4d8bb45b5101f80ee9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-05)",
+    "release_time": 1720076403227,
+    "effective_time": 1720074600000,
+    "symbol": "BATUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "11 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "a4becf8462724b4d8bb45b5101f80ee9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-05)",
+    "release_time": 1720076403227,
+    "effective_time": 1720074600000,
+    "symbol": "FLMUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "a4becf8462724b4d8bb45b5101f80ee9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-07-05)",
+    "release_time": 1720076403227,
+    "effective_time": 1720074600000,
+    "symbol": "SPELLUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2c9ef930911647ed92bf1e3619b8d1e7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-19)",
+    "release_time": 1718787605009,
+    "effective_time": 1718785800000,
+    "symbol": "FETUSDT",
+    "old_first_max_leverage": 26,
+    "new_first_max_leverage": 20,
+    "classification": "tightening",
+    "first_row": [
+      "26x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2c9ef930911647ed92bf1e3619b8d1e7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-19)",
+    "release_time": 1718787605009,
+    "effective_time": 1718785800000,
+    "symbol": "ENAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2c9ef930911647ed92bf1e3619b8d1e7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-19)",
+    "release_time": 1718787605009,
+    "effective_time": 1718785800000,
+    "symbol": "IOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2c9ef930911647ed92bf1e3619b8d1e7",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-19)",
+    "release_time": 1718787605009,
+    "effective_time": 1718785800000,
+    "symbol": "ARUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "11 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "f9e6ea2d58ce4de5bf9ecadea5170526",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-18)",
+    "release_time": 1718334009819,
+    "effective_time": 1718693400000,
+    "symbol": "DASHUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "f9e6ea2d58ce4de5bf9ecadea5170526",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-18)",
+    "release_time": 1718334009819,
+    "effective_time": 1718693400000,
+    "symbol": "IOTXUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "f9e6ea2d58ce4de5bf9ecadea5170526",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-18)",
+    "release_time": 1718334009819,
+    "effective_time": 1718693400000,
+    "symbol": "ASTRUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "f9e6ea2d58ce4de5bf9ecadea5170526",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-18)",
+    "release_time": 1718334009819,
+    "effective_time": 1718693400000,
+    "symbol": "KAVAUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "7f43e06a36e7417a82ed691a0d7307c4",
+    "article_title": "Updates on the Leverage & Margin Tiers of FETUSDT, AGIXUSDT, and OCEANUSDT USDⓈ-M Perpetual Contracts (2024-06-13)",
+    "release_time": 1718258401544,
+    "effective_time": 1718274600000,
+    "symbol": "FETUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 26,
+    "classification": "tightening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "7f43e06a36e7417a82ed691a0d7307c4",
+    "article_title": "Updates on the Leverage & Margin Tiers of FETUSDT, AGIXUSDT, and OCEANUSDT USDⓈ-M Perpetual Contracts (2024-06-13)",
+    "release_time": 1718258401544,
+    "effective_time": 1718274600000,
+    "symbol": "AGIXUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 25,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%"
+    ]
+  },
+  {
+    "article_code": "7f43e06a36e7417a82ed691a0d7307c4",
+    "article_title": "Updates on the Leverage & Margin Tiers of FETUSDT, AGIXUSDT, and OCEANUSDT USDⓈ-M Perpetual Contracts (2024-06-13)",
+    "release_time": 1718258401544,
+    "effective_time": 1718274600000,
+    "symbol": "OCEANUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 25,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%"
+    ]
+  },
+  {
+    "article_code": "b6eeb176a6ff48faa94259eb1dfda2ac",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-12)",
+    "release_time": 1717727402109,
+    "effective_time": 1718172000000,
+    "symbol": "1000BONKUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "b6eeb176a6ff48faa94259eb1dfda2ac",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-12)",
+    "release_time": 1717727402109,
+    "effective_time": 1718172000000,
+    "symbol": "RNDRUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "b6eeb176a6ff48faa94259eb1dfda2ac",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-12)",
+    "release_time": 1717727402109,
+    "effective_time": 1718172000000,
+    "symbol": "NOTUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "b6eeb176a6ff48faa94259eb1dfda2ac",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-12)",
+    "release_time": 1717727402109,
+    "effective_time": 1718172000000,
+    "symbol": "1000FLOKIUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "b6eeb176a6ff48faa94259eb1dfda2ac",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-12)",
+    "release_time": 1717727402109,
+    "effective_time": 1718172000000,
+    "symbol": "TONUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "b6eeb176a6ff48faa94259eb1dfda2ac",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-06-12)",
+    "release_time": 1717727402109,
+    "effective_time": 1718172000000,
+    "symbol": "BBUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "c0102f45f3e34212b068a0531f1934ed",
+    "article_title": "Updates on the Leverage & Margin Tiers of OGNUSDT, ONEUSDT and ZENUSDT USDⓈ-M Perpetual Contracts (2024-06-05)",
+    "release_time": 1717387201574,
+    "effective_time": 1717567200000,
+    "symbol": "OGNUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "c0102f45f3e34212b068a0531f1934ed",
+    "article_title": "Updates on the Leverage & Margin Tiers of OGNUSDT, ONEUSDT and ZENUSDT USDⓈ-M Perpetual Contracts (2024-06-05)",
+    "release_time": 1717387201574,
+    "effective_time": 1717567200000,
+    "symbol": "ONEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "c0102f45f3e34212b068a0531f1934ed",
+    "article_title": "Updates on the Leverage & Margin Tiers of OGNUSDT, ONEUSDT and ZENUSDT USDⓈ-M Perpetual Contracts (2024-06-05)",
+    "release_time": 1717387201574,
+    "effective_time": 1717567200000,
+    "symbol": "ZENUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "aa735cd2d8bd4e7bb092179cf086e486",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-05-28)",
+    "release_time": 1716789601615,
+    "effective_time": 1716892200000,
+    "symbol": "BTCUSDT",
+    "old_first_max_leverage": 125,
+    "new_first_max_leverage": 125,
+    "classification": "unchanged",
+    "first_row": [
+      "101 - 125x",
+      "0 < Position ≤ 50,000",
+      "0.40%",
+      "101 - 125x",
+      "0 < Position ≤ 50,000",
+      "0.40%"
+    ]
+  },
+  {
+    "article_code": "aa735cd2d8bd4e7bb092179cf086e486",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-05-28)",
+    "release_time": 1716789601615,
+    "effective_time": 1716892200000,
+    "symbol": "ETHUSDT",
+    "old_first_max_leverage": 125,
+    "new_first_max_leverage": 125,
+    "classification": "unchanged",
+    "first_row": [
+      "101 - 125x",
+      "0 < Position ≤ 50,000",
+      "0.40%",
+      "101 - 125x",
+      "0 < Position ≤ 50,000",
+      "0.40%"
+    ]
+  },
+  {
+    "article_code": "4fe1a16958ca4ebcac6d27a0529917f6",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-05-08)",
+    "release_time": 1715149811819,
+    "effective_time": 1715148000000,
+    "symbol": "1000PEPEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "4fe1a16958ca4ebcac6d27a0529917f6",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-05-08)",
+    "release_time": 1715149811819,
+    "effective_time": 1715148000000,
+    "symbol": "FETUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2efd086c96a7435fb89b3392d5eb6df9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-04-23)",
+    "release_time": 1713852449477,
+    "effective_time": 1713852000000,
+    "symbol": "WIFUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2efd086c96a7435fb89b3392d5eb6df9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-04-23)",
+    "release_time": 1713852449477,
+    "effective_time": 1713852000000,
+    "symbol": "ONDOUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2efd086c96a7435fb89b3392d5eb6df9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-04-23)",
+    "release_time": 1713852449477,
+    "effective_time": 1713852000000,
+    "symbol": "PENDLEUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2efd086c96a7435fb89b3392d5eb6df9",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-04-23)",
+    "release_time": 1713852449477,
+    "effective_time": 1713852000000,
+    "symbol": "RNDRUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "9c93b6ced6364eddbb14e328fb98ae3f",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-04-12)",
+    "release_time": 1712905030730,
+    "effective_time": 1712901600000,
+    "symbol": "BOMEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "c25886233c164665a425e3e9a730d109",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-03-05)",
+    "release_time": 1709637945375,
+    "effective_time": 1709635500000,
+    "symbol": "WLDUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "c25886233c164665a425e3e9a730d109",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-03-05)",
+    "release_time": 1709637945375,
+    "effective_time": 1709635500000,
+    "symbol": "JASMYUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 50,
+    "classification": "loosening",
+    "first_row": [
+      "11 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "c25886233c164665a425e3e9a730d109",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-03-05)",
+    "release_time": 1709637945375,
+    "effective_time": 1709635500000,
+    "symbol": "NFPUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "9d14c4166a814b5da364aef11f45e438",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-02-14)",
+    "release_time": 1707894042547,
+    "effective_time": 1707890400000,
+    "symbol": "TIAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "9d14c4166a814b5da364aef11f45e438",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-02-14)",
+    "release_time": 1707894042547,
+    "effective_time": 1707890400000,
+    "symbol": "MANTAUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.00%"
+    ]
+  },
+  {
+    "article_code": "9d14c4166a814b5da364aef11f45e438",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2024-02-14)",
+    "release_time": 1707894042547,
+    "effective_time": 1707890400000,
+    "symbol": "1000SATSUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "BTCUSDT",
+    "old_first_max_leverage": 125,
+    "new_first_max_leverage": 125,
+    "classification": "unchanged",
+    "first_row": [
+      "101 - 125x",
+      "0 < Position ≤ 50,000",
+      "0.40%",
+      "101 - 125x",
+      "0 < Position ≤ 50,000",
+      "0.40%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "ETHUSDT",
+    "old_first_max_leverage": 100,
+    "new_first_max_leverage": 125,
+    "classification": "loosening",
+    "first_row": [
+      "76 - 100x",
+      "0 < Position ≤ 200,000",
+      "0.50%",
+      "101 - 125x",
+      "0 < Position ≤ 50,000",
+      "0.40%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "ORDIUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 75,
+    "classification": "loosening",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "SOLUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 100,
+    "classification": "loosening",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%",
+      "76 - 100x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "BNBUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 5,000",
+      "0.50%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.50%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "OPUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "0.60%",
+      "26 - 50x",
+      "0 < Position ≤ 10,000",
+      "0.60%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "DOTUSDT",
+    "old_first_max_leverage": 75,
+    "new_first_max_leverage": 75,
+    "classification": "unchanged",
+    "first_row": [
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%",
+      "51 - 75x",
+      "0 < Position ≤ 10,000",
+      "0.65%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "NEARUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 10,000",
+      "1.50%",
+      "21 - 50x",
+      "0 < Position ≤ 10,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "d75c5ca94f704e96a6a4e55ffddfd65d",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M and COIN-M Perpetual Contracts (2024-01-02)",
+    "release_time": 1704203406255,
+    "effective_time": 1703410500000,
+    "symbol": "1000SATSUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "14cfc9a2f91e43fcbca2e657c35a01ca",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2023-12-19)",
+    "release_time": 1702979403324,
+    "effective_time": 1702976400000,
+    "symbol": "TRBUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "26 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "14cfc9a2f91e43fcbca2e657c35a01ca",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2023-12-19)",
+    "release_time": 1702979403324,
+    "effective_time": 1702976400000,
+    "symbol": "RNDRUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 20,
+    "classification": "unchanged",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%"
+    ]
+  },
+  {
+    "article_code": "14cfc9a2f91e43fcbca2e657c35a01ca",
+    "article_title": "Updates on the Leverage & Margin Tiers of Multiple USDⓈ-M Perpetual Contracts (2023-12-19)",
+    "release_time": 1702979403324,
+    "effective_time": 1702976400000,
+    "symbol": "BAKEUSDT",
+    "old_first_max_leverage": 50,
+    "new_first_max_leverage": 50,
+    "classification": "unchanged",
+    "first_row": [
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%",
+      "21 - 50x",
+      "0 < Position ≤ 5,000",
+      "1.50%"
+    ]
+  },
+  {
+    "article_code": "2ffa9131f81d4855b64752db068605a3",
+    "article_title": "Binance Futures Will Update the Leverage and Margin Tiers of Multiple USDⓈ-M Perpetual Contracts",
+    "release_time": 1696504577006,
+    "effective_time": 1696825800000,
+    "symbol": "XTZUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 20,
+    "classification": "tightening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 50,000",
+      "1.00%",
+      "16 - 20x",
+      "10,000 < Position ≤ 150,000",
+      "2.50%"
+    ]
+  },
+  {
+    "article_code": "2ffa9131f81d4855b64752db068605a3",
+    "article_title": "Binance Futures Will Update the Leverage and Margin Tiers of Multiple USDⓈ-M Perpetual Contracts",
+    "release_time": 1696504577006,
+    "effective_time": 1696825800000,
+    "symbol": "AAVEUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 20,
+    "classification": "tightening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 5,000",
+      "1.00%",
+      "16 - 20x",
+      "5,000 < Position ≤ 25,000",
+      "2.50%"
+    ]
+  },
+  {
+    "article_code": "2ffa9131f81d4855b64752db068605a3",
+    "article_title": "Binance Futures Will Update the Leverage and Margin Tiers of Multiple USDⓈ-M Perpetual Contracts",
+    "release_time": 1696504577006,
+    "effective_time": 1696825800000,
+    "symbol": "NEARUSDT",
+    "old_first_max_leverage": 25,
+    "new_first_max_leverage": 20,
+    "classification": "tightening",
+    "first_row": [
+      "21 - 25x",
+      "0 < Position ≤ 50,000",
+      "1.00%",
+      "16 - 20x",
+      "10,000 < Position ≤ 150,000",
+      "2.50%"
+    ]
+  },
+  {
+    "article_code": "a7f12c41cccd43d48fec310a473a7525",
+    "article_title": "Binance Futures Will Update the Leverage & Margin Tiers of USDⓈ-M LINAUSDT Perpetual Contract",
+    "release_time": 1685697314959,
+    "effective_time": 1685761200000,
+    "symbol": "LINAUSDT",
+    "old_first_max_leverage": 20,
+    "new_first_max_leverage": 20,
+    "classification": "unchanged",
+    "first_row": [
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%",
+      "16 - 20x",
+      "0 < Position ≤ 5,000",
+      "2.00%"
+    ]
+  }
+]

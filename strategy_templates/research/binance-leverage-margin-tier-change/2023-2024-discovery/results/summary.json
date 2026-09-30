@@ -1,0 +1,36 @@
+{
+  "parsed_contract_events": 326,
+  "unique_symbols_parsed": 200,
+  "classes": {
+    "unchanged": 174,
+    "loosening": 127,
+    "tightening": 25
+  },
+  "directional_events": 152,
+  "eligible": 68,
+  "eligible_symbols": 61,
+  "eligible_classes": {
+    "loosening": 53,
+    "tightening": 15
+  },
+  "excluded": {
+    "history_or_missing": 83,
+    "quote_volume_lt_5m": 1
+  },
+  "diagnostic": {
+    "n": 68,
+    "mean1": 0.0001536106,
+    "mean4": 0.0051184808,
+    "mean12": -0.0034938901,
+    "win12": 0.5,
+    "positive_symbols12": 30,
+    "symbols": 61,
+    "loosening_mean12": -0.010736343,
+    "tightening_mean12": 0.0220961103,
+    "year2023_n": 5,
+    "year2023_mean12": 0.0308139214,
+    "year2024_n": 63,
+    "year2024_mean12": -0.0062167322
+  },
+  "decision": "freeze full family; do not keep tightening post-hoc"
+}

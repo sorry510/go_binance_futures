@@ -1,0 +1,15 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": [
+    "DeFiLlama /overview/dexs dailyVolume",
+    "DeFiLlama /protocols",
+    "DeFiLlama /summary/dexs/{slug} dailyVolume",
+    "Binance Vision USD-M monthly 1d klines"
+  ],
+  "notes": [
+    "Binance REST exchangeInfo was unavailable from current egress due regional eligibility restriction; Binance Vision is used for historical existence and price/liquidity data.",
+    "OOS returns must not be read unless discovery gate passes.",
+    "Identity correction before canonical replay: DeFiLlama LIT=Lighter, while Binance historical LITUSDT=Litentry; LIT was excluded and the superseded discovery was preserved under legacy/pre-identity-correction/."
+  ]
+}

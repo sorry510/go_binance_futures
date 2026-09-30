@@ -1,0 +1,745 @@
+[
+  {
+    "symbol": "AERO",
+    "first_month": "2024-12",
+    "slugs": [
+      "aerodrome-slipstream",
+      "aerodrome-v1"
+    ],
+    "names": [
+      "Aerodrome Slipstream",
+      "Aerodrome V1"
+    ],
+    "alltime": 436391206546.0
+  },
+  {
+    "symbol": "ARC",
+    "first_month": "2025-01",
+    "slugs": [
+      "archly-v1",
+      "archly-v2"
+    ],
+    "names": [
+      "Archly V1",
+      "Archly V2"
+    ],
+    "alltime": 2328984.09
+  },
+  {
+    "symbol": "ARX",
+    "first_month": "2026-06",
+    "slugs": [
+      "arbitrum-exchange-v2",
+      "arbitrum-exchange-v3"
+    ],
+    "names": [
+      "Arbitrum Exchange V2",
+      "Arbitrum Exchange V3"
+    ],
+    "alltime": 375713370.0
+  },
+  {
+    "symbol": "ASTER",
+    "first_month": "2025-09",
+    "slugs": [
+      "aster-spot"
+    ],
+    "names": [
+      "Aster Spot"
+    ],
+    "alltime": 25511459084.0
+  },
+  {
+    "symbol": "BABY",
+    "first_month": "2025-04",
+    "slugs": [
+      "babyswap"
+    ],
+    "names": [
+      "BabySwap"
+    ],
+    "alltime": 25412080191.0
+  },
+  {
+    "symbol": "BAL",
+    "first_month": "2020-09",
+    "slugs": [
+      "balancer-v1",
+      "balancer-v2",
+      "balancer-v3"
+    ],
+    "names": [
+      "Balancer V1",
+      "Balancer V2",
+      "Balancer V3"
+    ],
+    "alltime": 133485096891.0
+  },
+  {
+    "symbol": "BNC",
+    "first_month": "2026-07",
+    "slugs": [
+      "bifrost-dex"
+    ],
+    "names": [
+      "Bifrost DEX"
+    ],
+    "alltime": 38346362.38999999
+  },
+  {
+    "symbol": "BNT",
+    "first_month": "2023-08",
+    "slugs": [
+      "bancor-v2.1",
+      "bancor-v3"
+    ],
+    "names": [
+      "Bancor V2.1",
+      "Bancor V3"
+    ],
+    "alltime": 812562700.0
+  },
+  {
+    "symbol": "BSW",
+    "first_month": "2024-09",
+    "slugs": [
+      "biswap-v2"
+    ],
+    "names": [
+      "Biswap V2"
+    ],
+    "alltime": 44742142667.0
+  },
+  {
+    "symbol": "BULLA",
+    "first_month": "2025-07",
+    "slugs": [
+      "bulla-exchange"
+    ],
+    "names": [
+      "Bulla Exchange"
+    ],
+    "alltime": 913508515.0
+  },
+  {
+    "symbol": "CAKE",
+    "first_month": "2023-11",
+    "slugs": [
+      "pancakeswap-amm",
+      "pancakeswap-amm-v1",
+      "pancakeswap-amm-v3",
+      "pancakeswap-infinity",
+      "pancakeswap-stableswap"
+    ],
+    "names": [
+      "PancakeSwap AMM",
+      "PancakeSwap AMM V1",
+      "PancakeSwap AMM V3",
+      "PancakeSwap Infinity",
+      "PancakeSwap StableSwap"
+    ],
+    "alltime": 2108333439106.0
+  },
+  {
+    "symbol": "CETUS",
+    "first_month": "2024-11",
+    "slugs": [
+      "cetus-clmm",
+      "cetus-dlmm"
+    ],
+    "names": [
+      "Cetus CLMM",
+      "Cetus DLMM"
+    ],
+    "alltime": 86148866354.0
+  },
+  {
+    "symbol": "CHR",
+    "first_month": "2021-03",
+    "slugs": [
+      "chronos-v1",
+      "chronos-v2"
+    ],
+    "names": [
+      "Chronos V1",
+      "Chronos V2"
+    ],
+    "alltime": 378875916.69000006
+  },
+  {
+    "symbol": "CLO",
+    "first_month": "2025-10",
+    "slugs": [
+      "yeiswap"
+    ],
+    "names": [
+      "YeiSwap"
+    ],
+    "alltime": 564365827.14
+  },
+  {
+    "symbol": "CRV",
+    "first_month": "2020-09",
+    "slugs": [
+      "curve-dex"
+    ],
+    "names": [
+      "Curve DEX"
+    ],
+    "alltime": 351504030825.0
+  },
+  {
+    "symbol": "DEEP",
+    "first_month": "2025-04",
+    "slugs": [
+      "deepbook-v2",
+      "deepbook-v3",
+      "deepstate"
+    ],
+    "names": [
+      "DeepBook V2",
+      "DeepBook V3",
+      "Deepstate"
+    ],
+    "alltime": 21232054192.0
+  },
+  {
+    "symbol": "DODO",
+    "first_month": "2021-02",
+    "slugs": [
+      "dodo-amm"
+    ],
+    "names": [
+      "DODO AMM"
+    ],
+    "alltime": 204504334049.89005
+  },
+  {
+    "symbol": "DRIFT",
+    "first_month": "2024-11",
+    "slugs": [
+      "drift-amm"
+    ],
+    "names": [
+      "Drift AMM"
+    ],
+    "alltime": 3464338404.0
+  },
+  {
+    "symbol": "EDGE",
+    "first_month": "2026-03",
+    "slugs": [
+      "edgex-spot"
+    ],
+    "names": [
+      "edgeX Spot"
+    ],
+    "alltime": 15702480519.0
+  },
+  {
+    "symbol": "EUL",
+    "first_month": "2025-10",
+    "slugs": [
+      "eulerswap"
+    ],
+    "names": [
+      "EulerSwap"
+    ],
+    "alltime": 4336208161.530001
+  },
+  {
+    "symbol": "FLM",
+    "first_month": "2020-09",
+    "slugs": [
+      "flamingo-finance"
+    ],
+    "names": [
+      "Flamingo Finance"
+    ],
+    "alltime": 1652112043.0
+  },
+  {
+    "symbol": "FLOW",
+    "first_month": "2022-02",
+    "slugs": [
+      "flowswap-v2",
+      "flowswap-v3",
+      "velocimeter-v2"
+    ],
+    "names": [
+      "FlowSwap V2",
+      "FlowSwap V3",
+      "Velocimeter V2"
+    ],
+    "alltime": 146551536.56
+  },
+  {
+    "symbol": "FLUID",
+    "first_month": "2025-09",
+    "slugs": [
+      "fluid-dex",
+      "fluid-dex-lite"
+    ],
+    "names": [
+      "Fluid DEX",
+      "Fluid DEX Lite"
+    ],
+    "alltime": 237091789649.0
+  },
+  {
+    "symbol": "FRAX",
+    "first_month": "2026-01",
+    "slugs": [
+      "frax-swap"
+    ],
+    "names": [
+      "Frax Swap"
+    ],
+    "alltime": 3632258679.0
+  },
+  {
+    "symbol": "GMX",
+    "first_month": "2023-02",
+    "slugs": [
+      "gmx-v1-amm",
+      "gmx-v2-amm"
+    ],
+    "names": [
+      "GMX V1 AMM",
+      "GMX V2 AMM"
+    ],
+    "alltime": 23220289540.0
+  },
+  {
+    "symbol": "GS",
+    "first_month": "2026-07",
+    "slugs": [
+      "deltaswap"
+    ],
+    "names": [
+      "DeltaSwap"
+    ],
+    "alltime": 188662111.0
+  },
+  {
+    "symbol": "HYPE",
+    "first_month": "2025-05",
+    "slugs": [
+      "hyperliquid-spot-orderbook"
+    ],
+    "names": [
+      "Hyperliquid Spot Orderbook"
+    ],
+    "alltime": 168871193007.0
+  },
+  {
+    "symbol": "IDEX",
+    "first_month": "2023-05",
+    "slugs": [
+      "idex-classic"
+    ],
+    "names": [
+      "IDEX Classic"
+    ],
+    "alltime": 578959144.0
+  },
+  {
+    "symbol": "INJ",
+    "first_month": "2022-08",
+    "slugs": [
+      "injective-spot"
+    ],
+    "names": [
+      "Injective Spot"
+    ],
+    "alltime": 6828368877.0
+  },
+  {
+    "symbol": "JOE",
+    "first_month": "2023-03",
+    "slugs": [
+      "joe-dex",
+      "joe-v2",
+      "joe-v2.1",
+      "joe-v2.2",
+      "lfj-poe"
+    ],
+    "names": [
+      "Joe DEX",
+      "Joe V2",
+      "Joe V2.1",
+      "Joe V2.2",
+      "LFJ POE"
+    ],
+    "alltime": 187676265344.2
+  },
+  {
+    "symbol": "JUP",
+    "first_month": "2024-01",
+    "slugs": [
+      "jupiter-lend-dex",
+      "jupiterz"
+    ],
+    "names": [
+      "Jupiter Lend DEX",
+      "Jupiterz"
+    ],
+    "alltime": 37204370548.53
+  },
+  {
+    "symbol": "KNC",
+    "first_month": "2020-06",
+    "slugs": [
+      "kyberswap-classic",
+      "kyberswap-elastic"
+    ],
+    "names": [
+      "KyberSwap Classic",
+      "KyberSwap Elastic"
+    ],
+    "alltime": 18252568813.0
+  },
+  {
+    "symbol": "LIGHT",
+    "first_month": "2025-09",
+    "slugs": [
+      "heaven"
+    ],
+    "names": [
+      "Heaven"
+    ],
+    "alltime": 412283891.59000003
+  },
+  {
+    "symbol": "LISTA",
+    "first_month": "2024-06",
+    "slugs": [
+      "lista-dex"
+    ],
+    "names": [
+      "Lista DEX"
+    ],
+    "alltime": 4137299450.0
+  },
+  {
+    "symbol": "LIT",
+    "first_month": "2021-02",
+    "slugs": [
+      "lighter-spot",
+      "lighter-v1"
+    ],
+    "names": [
+      "Lighter Spot",
+      "Lighter V1"
+    ],
+    "alltime": 12195558082.0
+  },
+  {
+    "symbol": "MAV",
+    "first_month": "2023-06",
+    "slugs": [
+      "maverick-v1",
+      "maverick-v2"
+    ],
+    "names": [
+      "Maverick V1",
+      "Maverick V2"
+    ],
+    "alltime": 71547032432.0
+  },
+  {
+    "symbol": "MEGA",
+    "first_month": "2026-01",
+    "slugs": [
+      "megaton-finance"
+    ],
+    "names": [
+      "Megaton Finance"
+    ],
+    "alltime": 57901561.0
+  },
+  {
+    "symbol": "MET",
+    "first_month": "2025-10",
+    "slugs": [
+      "meteora-damm-v1",
+      "meteora-damm-v2",
+      "meteora-dlmm"
+    ],
+    "names": [
+      "Meteora DAMM V1",
+      "Meteora DAMM V2",
+      "Meteora DLMM"
+    ],
+    "alltime": 298512296190.0
+  },
+  {
+    "symbol": "META",
+    "first_month": "2026-03",
+    "slugs": [
+      "futarchy-amm"
+    ],
+    "names": [
+      "Futarchy AMM"
+    ],
+    "alltime": 552655430.0
+  },
+  {
+    "symbol": "MILK",
+    "first_month": "2025-05",
+    "slugs": [
+      "muesliswap"
+    ],
+    "names": [
+      "MuesliSwap"
+    ],
+    "alltime": 505740805.36
+  },
+  {
+    "symbol": "MMT",
+    "first_month": "2025-11",
+    "slugs": [
+      "momentum"
+    ],
+    "names": [
+      "Momentum"
+    ],
+    "alltime": 31048548802.0
+  },
+  {
+    "symbol": "OMNI",
+    "first_month": "2024-04",
+    "slugs": [
+      "omni-exchange-flux",
+      "omni-exchange-v2",
+      "omni-exchange-v3",
+      "omnidrome"
+    ],
+    "names": [
+      "Omni Exchange Flux",
+      "Omni Exchange V2",
+      "Omni Exchange V3",
+      "Omnidrome"
+    ],
+    "alltime": 500358339.0599999
+  },
+  {
+    "symbol": "ORCA",
+    "first_month": "2024-12",
+    "slugs": [
+      "orca-dex"
+    ],
+    "names": [
+      "Orca DEX"
+    ],
+    "alltime": 499324838327.0
+  },
+  {
+    "symbol": "ORDER",
+    "first_month": "2025-09",
+    "slugs": [
+      "orderly-amm"
+    ],
+    "names": [
+      "Orderly AMM"
+    ],
+    "alltime": 839100948.0
+  },
+  {
+    "symbol": "PUMP",
+    "first_month": "2025-04",
+    "slugs": [
+      "pumpswap"
+    ],
+    "names": [
+      "PumpSwap"
+    ],
+    "alltime": 283211747387.0
+  },
+  {
+    "symbol": "QUICK",
+    "first_month": "2024-09",
+    "slugs": [
+      "quickswap-dex",
+      "quickswap-hydra",
+      "quickswap-v3",
+      "quickswap-v4"
+    ],
+    "names": [
+      "Quickswap Dex",
+      "Quickswap Hydra",
+      "Quickswap V3",
+      "Quickswap V4"
+    ],
+    "alltime": 111484108975.0
+  },
+  {
+    "symbol": "RAM",
+    "first_month": "2026-08",
+    "slugs": [
+      "ramses-cl",
+      "ramses-cl-v2",
+      "ramses-dlmm",
+      "ramses-legacy",
+      "ramses-legacy-v2"
+    ],
+    "names": [
+      "Ramses CL",
+      "Ramses CL V2",
+      "Ramses DLMM",
+      "Ramses Legacy",
+      "Ramses Legacy V2"
+    ],
+    "alltime": 29754151104.61
+  },
+  {
+    "symbol": "RAY",
+    "first_month": "2021-08",
+    "slugs": [
+      "raydium-amm"
+    ],
+    "names": [
+      "Raydium AMM"
+    ],
+    "alltime": 725839558928.0
+  },
+  {
+    "symbol": "RUNE",
+    "first_month": "2020-09",
+    "slugs": [
+      "thorchain-dex"
+    ],
+    "names": [
+      "THORChain DEX"
+    ],
+    "alltime": 126902269065.0
+  },
+  {
+    "symbol": "SHELL",
+    "first_month": "2025-02",
+    "slugs": [
+      "shell-protocol"
+    ],
+    "names": [
+      "Shell Protocol"
+    ],
+    "alltime": 101974579.0
+  },
+  {
+    "symbol": "SRM",
+    "first_month": "2020-09",
+    "slugs": [
+      "serum"
+    ],
+    "names": [
+      "Serum"
+    ],
+    "alltime": 3488914577.0
+  },
+  {
+    "symbol": "SUN",
+    "first_month": "2024-08",
+    "slugs": [
+      "sunswap-v1",
+      "sunswap-v2",
+      "sunswap-v3"
+    ],
+    "names": [
+      "SUNSwap V1",
+      "SUNSwap V2",
+      "SUNSwap V3"
+    ],
+    "alltime": 155172737571.0
+  },
+  {
+    "symbol": "SUSHI",
+    "first_month": "2020-09",
+    "slugs": [
+      "sushi-aptos",
+      "sushiswap",
+      "sushiswap-v3"
+    ],
+    "names": [
+      "Sushi Aptos",
+      "SushiSwap",
+      "SushiSwap V3"
+    ],
+    "alltime": 271456977584.0
+  },
+  {
+    "symbol": "THE",
+    "first_month": "2024-11",
+    "slugs": [
+      "thena-fusion",
+      "thena-integral",
+      "thena-v1"
+    ],
+    "names": [
+      "THENA FUSION",
+      "THENA INTEGRAL",
+      "THENA V1"
+    ],
+    "alltime": 40338551403.0
+  },
+  {
+    "symbol": "UNFI",
+    "first_month": "2021-02",
+    "slugs": [
+      "unifi"
+    ],
+    "names": [
+      "UniFi"
+    ],
+    "alltime": 12934617.0
+  },
+  {
+    "symbol": "UNI",
+    "first_month": "2020-09",
+    "slugs": [
+      "uniswap-v1",
+      "uniswap-v2",
+      "uniswap-v3",
+      "uniswap-v4"
+    ],
+    "names": [
+      "Uniswap V1",
+      "Uniswap V2",
+      "Uniswap V3",
+      "Uniswap V4"
+    ],
+    "alltime": 3938664969590.0
+  },
+  {
+    "symbol": "US",
+    "first_month": "2025-12",
+    "slugs": [
+      "ultrasolid-v3"
+    ],
+    "names": [
+      "Ultrasolid V3"
+    ],
+    "alltime": 885877853.0
+  },
+  {
+    "symbol": "WET",
+    "first_month": "2025-12",
+    "slugs": [
+      "humidifi"
+    ],
+    "names": [
+      "HumidiFi"
+    ],
+    "alltime": 204882956774.0
+  },
+  {
+    "symbol": "WOO",
+    "first_month": "2022-04",
+    "slugs": [
+      "woofi-swap"
+    ],
+    "names": [
+      "WOOFi Swap"
+    ],
+    "alltime": 36111495125.27
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "metric": "DeFiLlama protocol totalLiquidityUSD",
+  "signal": "daily log TVL return z-score vs prior 90 consecutive UTC days",
+  "trigger": "first z<=-3",
+  "rearm": "z>=-1",
+  "pre_registered_direction": "SHORT",
+  "entry": "next UTC day open",
+  "eligibility": ">=730d Binance USD-M history and signal-day QuoteVolume >=5M USDT"
+}

@@ -1,0 +1,23 @@
+{
+  "discovery_2023_2024": {
+    "n": 42,
+    "mean1": 0.0003482285,
+    "mean4": -0.0003018208,
+    "mean12": -0.002886476,
+    "positive_symbols12": 0,
+    "symbols": 3
+  },
+  "oos1_2025": {
+    "n": 108,
+    "mean12": 0.0011218082,
+    "positive_symbols12": 5,
+    "symbols": 10
+  },
+  "oos2_2026": {
+    "n": 65,
+    "mean12": -0.0024960385,
+    "positive_symbols12": 3,
+    "symbols": 10
+  },
+  "decision": "freeze"
+}

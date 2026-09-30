@@ -1,0 +1,8 @@
+09dd67d4174eae910c676a835a81ae8cf3739f9ee0be32af1c1ed4fc908c771a  ./README.md
+478e24151732a434887d593b1f3c1c9b60a573802c7eef237629b6f92e393210  ./config.json
+1ab7a06f77e7ad395e24a1ccffc75eb2cab0b0aebcfa2e2d0ded9905476a3579  ./inputs/universe.json
+d487820a9643ee0b393a787e203f33f7bbf742fe8fbb7a186c4b2c738e7c2490  ./protocol.md
+bf4a8d1cddab8a4d99f4834bbc12f1b63becbbef3b6f444f1054be478ab451d7  ./provenance.json
+fd18046fefe7678bbcd0948f0120e35cc9acdf318ccdb25ba4f0dcd2574deb0c  ./replay.py
+b646046627677b800ce972096b1a1b17ee73c2771dfb0b653eac5ef6a2626708  ./results/events.json
+5de2d5e5f6cf82805b417ea23984aac35ab718306ba9ebbd7f2892c98a46dbbb  ./results/summary.json

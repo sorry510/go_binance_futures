@@ -1,0 +1,537 @@
+{
+  "meta": {
+    "ETHUSDT": {
+      "chain": "Ethereum",
+      "days": 731,
+      "events": 3,
+      "first": "2023-01-01"
+    },
+    "BNBUSDT": {
+      "chain": "BSC",
+      "days": 731,
+      "events": 6,
+      "first": "2023-01-01"
+    },
+    "SOLUSDT": {
+      "chain": "Solana",
+      "days": 731,
+      "events": 1,
+      "first": "2023-01-01"
+    },
+    "AVAXUSDT": {
+      "chain": "Avalanche",
+      "days": 731,
+      "events": 3,
+      "first": "2023-01-01"
+    },
+    "ADAUSDT": {
+      "chain": "Cardano",
+      "days": 731,
+      "events": 15,
+      "first": "2023-01-01"
+    },
+    "NEARUSDT": {
+      "chain": "Near",
+      "days": 731,
+      "events": 1,
+      "first": "2023-01-01"
+    },
+    "TRXUSDT": {
+      "chain": "Tron",
+      "days": 731,
+      "events": 0,
+      "first": "2023-01-01"
+    },
+    "MATICUSDT": {
+      "chain": "Polygon",
+      "days": 731,
+      "events": 5,
+      "first": "2023-01-01"
+    },
+    "FTMUSDT": {
+      "chain": "Fantom",
+      "days": 731,
+      "events": 15,
+      "first": "2023-01-01"
+    },
+    "OPUSDT": {
+      "chain": "Optimism",
+      "days": 731,
+      "events": 1,
+      "first": "2023-01-01"
+    },
+    "APTUSDT": {
+      "chain": "Aptos",
+      "days": 731,
+      "events": 1,
+      "first": "2023-01-01"
+    },
+    "ARBUSDT": {
+      "chain": "Arbitrum",
+      "days": 731,
+      "events": 1,
+      "first": "2023-01-01"
+    },
+    "SUIUSDT": {
+      "chain": "Sui",
+      "days": 344,
+      "events": 5,
+      "first": "2024-01-23"
+    },
+    "XRPUSDT": {
+      "chain": "Ripple",
+      "days": 0,
+      "events": 0,
+      "first": null
+    }
+  },
+  "events": [
+    {
+      "symbol": "ETHUSDT",
+      "chain": "Ethereum",
+      "date": "2023-03-12",
+      "peg_ratio": 0.9764027264690125,
+      "supply_usd_nominal": 78846288812.0
+    },
+    {
+      "symbol": "ETHUSDT",
+      "chain": "Ethereum",
+      "date": "2024-10-07",
+      "peg_ratio": 0.994282004544787,
+      "supply_usd_nominal": 84936546523.0
+    },
+    {
+      "symbol": "ETHUSDT",
+      "chain": "Ethereum",
+      "date": "2024-10-25",
+      "peg_ratio": 0.9934558606234661,
+      "supply_usd_nominal": 84061057436.0
+    },
+    {
+      "symbol": "BNBUSDT",
+      "chain": "BSC",
+      "date": "2023-03-12",
+      "peg_ratio": 0.991986769929555,
+      "supply_usd_nominal": 7011012102.0
+    },
+    {
+      "symbol": "BNBUSDT",
+      "chain": "BSC",
+      "date": "2023-12-16",
+      "peg_ratio": 0.994812845267881,
+      "supply_usd_nominal": 5003123936.0
+    },
+    {
+      "symbol": "BNBUSDT",
+      "chain": "BSC",
+      "date": "2024-08-30",
+      "peg_ratio": 0.99445091319094,
+      "supply_usd_nominal": 5177688688.0
+    },
+    {
+      "symbol": "BNBUSDT",
+      "chain": "BSC",
+      "date": "2024-09-01",
+      "peg_ratio": 0.9932440586635962,
+      "supply_usd_nominal": 5177788743.0
+    },
+    {
+      "symbol": "BNBUSDT",
+      "chain": "BSC",
+      "date": "2024-09-05",
+      "peg_ratio": 0.9942338796994225,
+      "supply_usd_nominal": 5176436745.0
+    },
+    {
+      "symbol": "BNBUSDT",
+      "chain": "BSC",
+      "date": "2024-09-10",
+      "peg_ratio": 0.9945489343745357,
+      "supply_usd_nominal": 5175413018.0
+    },
+    {
+      "symbol": "SOLUSDT",
+      "chain": "Solana",
+      "date": "2023-03-12",
+      "peg_ratio": 0.9802077982352247,
+      "supply_usd_nominal": 1606171581.0
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "chain": "Avalanche",
+      "date": "2023-03-12",
+      "peg_ratio": 0.98106151771867,
+      "supply_usd_nominal": 1432513102.0
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "chain": "Avalanche",
+      "date": "2024-02-10",
+      "peg_ratio": 0.9948554895984641,
+      "supply_usd_nominal": 1153721450.0
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "chain": "Avalanche",
+      "date": "2024-02-27",
+      "peg_ratio": 0.9942518953440224,
+      "supply_usd_nominal": 1235114429.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-03-15",
+      "peg_ratio": 0.9897827073057992,
+      "supply_usd_nominal": 8346438.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-04-15",
+      "peg_ratio": 0.993100953186063,
+      "supply_usd_nominal": 11166760.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-05-30",
+      "peg_ratio": 0.994742563770158,
+      "supply_usd_nominal": 13045522.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-06-07",
+      "peg_ratio": 0.9910933748627078,
+      "supply_usd_nominal": 15234839.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-06-11",
+      "peg_ratio": 0.9799723583850557,
+      "supply_usd_nominal": 13448563.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-07-15",
+      "peg_ratio": 0.9855438023247063,
+      "supply_usd_nominal": 15081905.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-07-19",
+      "peg_ratio": 0.9946228040107896,
+      "supply_usd_nominal": 15234706.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-07-21",
+      "peg_ratio": 0.9870505908058861,
+      "supply_usd_nominal": 15297918.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-08-18",
+      "peg_ratio": 0.9802826449679988,
+      "supply_usd_nominal": 14948506.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-09-09",
+      "peg_ratio": 0.9938366118129087,
+      "supply_usd_nominal": 14948596.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-09-18",
+      "peg_ratio": 0.9897627962681228,
+      "supply_usd_nominal": 14796521.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-09-22",
+      "peg_ratio": 0.9896895977483922,
+      "supply_usd_nominal": 14823185.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2023-09-27",
+      "peg_ratio": 0.9921766075530505,
+      "supply_usd_nominal": 14815312.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2024-12-15",
+      "peg_ratio": 0.9892408443589058,
+      "supply_usd_nominal": 23936172.0
+    },
+    {
+      "symbol": "ADAUSDT",
+      "chain": "Cardano",
+      "date": "2024-12-24",
+      "peg_ratio": 0.9905886155651091,
+      "supply_usd_nominal": 23339393.0
+    },
+    {
+      "symbol": "NEARUSDT",
+      "chain": "Near",
+      "date": "2023-03-12",
+      "peg_ratio": 0.9853764818923364,
+      "supply_usd_nominal": 97016326.0
+    },
+    {
+      "symbol": "MATICUSDT",
+      "chain": "Polygon",
+      "date": "2023-03-12",
+      "peg_ratio": 0.9792010366188323,
+      "supply_usd_nominal": 1661291833.0
+    },
+    {
+      "symbol": "MATICUSDT",
+      "chain": "Polygon",
+      "date": "2023-10-12",
+      "peg_ratio": 0.9883703077861543,
+      "supply_usd_nominal": 1264453240.0
+    },
+    {
+      "symbol": "MATICUSDT",
+      "chain": "Polygon",
+      "date": "2024-08-11",
+      "peg_ratio": 0.9936533293321989,
+      "supply_usd_nominal": 1922561393.0
+    },
+    {
+      "symbol": "MATICUSDT",
+      "chain": "Polygon",
+      "date": "2024-10-25",
+      "peg_ratio": 0.9927714708236057,
+      "supply_usd_nominal": 1927816802.0
+    },
+    {
+      "symbol": "MATICUSDT",
+      "chain": "Polygon",
+      "date": "2024-11-17",
+      "peg_ratio": 0.994937543847287,
+      "supply_usd_nominal": 1718672466.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2023-03-12",
+      "peg_ratio": 0.9706756907091902,
+      "supply_usd_nominal": 397589143.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2023-07-08",
+      "peg_ratio": 0.9841602192495037,
+      "supply_usd_nominal": 336100738.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2023-10-23",
+      "peg_ratio": 0.9495249024102115,
+      "supply_usd_nominal": 334560106.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2023-11-01",
+      "peg_ratio": 0.9615589390696248,
+      "supply_usd_nominal": 334672631.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2023-12-24",
+      "peg_ratio": 0.9679516347676062,
+      "supply_usd_nominal": 336298932.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-01-27",
+      "peg_ratio": 0.9523458514364477,
+      "supply_usd_nominal": 335032363.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-01-31",
+      "peg_ratio": 0.9496138467965313,
+      "supply_usd_nominal": 335175518.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-05-17",
+      "peg_ratio": 0.9655851275660142,
+      "supply_usd_nominal": 347241938.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-06-04",
+      "peg_ratio": 0.9577942571372234,
+      "supply_usd_nominal": 347405898.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-06-08",
+      "peg_ratio": 0.9576206151838451,
+      "supply_usd_nominal": 347104661.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-06-18",
+      "peg_ratio": 0.9557096887759188,
+      "supply_usd_nominal": 346001407.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-06-26",
+      "peg_ratio": 0.9555459725698557,
+      "supply_usd_nominal": 346013711.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-07-02",
+      "peg_ratio": 0.9513429911652888,
+      "supply_usd_nominal": 345604619.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-07-07",
+      "peg_ratio": 0.9508290849337684,
+      "supply_usd_nominal": 345295323.0
+    },
+    {
+      "symbol": "FTMUSDT",
+      "chain": "Fantom",
+      "date": "2024-09-24",
+      "peg_ratio": 0.951145634046283,
+      "supply_usd_nominal": 345252091.0
+    },
+    {
+      "symbol": "OPUSDT",
+      "chain": "Optimism",
+      "date": "2023-03-12",
+      "peg_ratio": 0.9674656251679248,
+      "supply_usd_nominal": 635831397.0
+    },
+    {
+      "symbol": "APTUSDT",
+      "chain": "Aptos",
+      "date": "2023-03-12",
+      "peg_ratio": 0.972015428289448,
+      "supply_usd_nominal": 31602985.0
+    },
+    {
+      "symbol": "ARBUSDT",
+      "chain": "Arbitrum",
+      "date": "2023-03-12",
+      "peg_ratio": 0.9680260350724847,
+      "supply_usd_nominal": 1469727577.0
+    },
+    {
+      "symbol": "SUIUSDT",
+      "chain": "Sui",
+      "date": "2024-01-23",
+      "peg_ratio": 0.9889260519950919,
+      "supply_usd_nominal": 5338927.0
+    },
+    {
+      "symbol": "SUIUSDT",
+      "chain": "Sui",
+      "date": "2024-01-28",
+      "peg_ratio": 0.99479502391231,
+      "supply_usd_nominal": 5637682.0
+    },
+    {
+      "symbol": "SUIUSDT",
+      "chain": "Sui",
+      "date": "2024-01-31",
+      "peg_ratio": 0.9932219602067796,
+      "supply_usd_nominal": 5668453.0
+    },
+    {
+      "symbol": "SUIUSDT",
+      "chain": "Sui",
+      "date": "2024-02-06",
+      "peg_ratio": 0.9885269057019428,
+      "supply_usd_nominal": 6077262.0
+    },
+    {
+      "symbol": "SUIUSDT",
+      "chain": "Sui",
+      "date": "2024-02-13",
+      "peg_ratio": 0.9915640213261541,
+      "supply_usd_nominal": 8771952.0
+    }
+  ],
+  "dates": [
+    "2023-03-12",
+    "2023-03-15",
+    "2023-04-15",
+    "2023-05-30",
+    "2023-06-07",
+    "2023-06-11",
+    "2023-07-08",
+    "2023-07-15",
+    "2023-07-19",
+    "2023-07-21",
+    "2023-08-18",
+    "2023-09-09",
+    "2023-09-18",
+    "2023-09-22",
+    "2023-09-27",
+    "2023-10-12",
+    "2023-10-23",
+    "2023-11-01",
+    "2023-12-16",
+    "2023-12-24",
+    "2024-01-23",
+    "2024-01-27",
+    "2024-01-28",
+    "2024-01-31",
+    "2024-02-06",
+    "2024-02-10",
+    "2024-02-13",
+    "2024-02-27",
+    "2024-05-17",
+    "2024-06-04",
+    "2024-06-08",
+    "2024-06-18",
+    "2024-06-26",
+    "2024-07-02",
+    "2024-07-07",
+    "2024-08-11",
+    "2024-08-30",
+    "2024-09-01",
+    "2024-09-05",
+    "2024-09-10",
+    "2024-09-24",
+    "2024-10-07",
+    "2024-10-25",
+    "2024-11-17",
+    "2024-12-15",
+    "2024-12-24"
+  ]
+}

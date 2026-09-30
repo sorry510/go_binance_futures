@@ -1,0 +1,17 @@
+{
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "signal": "COIN-M funding/hour - USD-M funding/hour at same settlement timestamp",
+  "zscore_lookback_days": 90,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "COIN-M funding dominance -> SHORT USD-M; lower -> LONG USD-M",
+  "period": [
+    2023,
+    2024
+  ]
+}

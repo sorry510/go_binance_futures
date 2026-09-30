@@ -1,0 +1,333 @@
+{
+  "exclusions": {
+    "LIT": "ticker_collision_lighter_vs_litentry",
+    "CHR": "ticker_collision_chronos_vs_chromia",
+    "FLOW": "ticker_collision_flowswap_vs_flow",
+    "COMP": "methodology_explicit_no_holder_revenue",
+    "UNI": "holder_revenue_starts_2025_12",
+    "AAVE": "holder_revenue_starts_2025_04",
+    "YFI": "holder_revenue_starts_2026_02",
+    "LINK": "buyback_program_not_discovery_era",
+    "NEAR": "holder_revenue_starts_2026_02"
+  },
+  "coverage": {
+    "LDO": {
+      "first_month": "2022-09",
+      "slugs": [
+        "lido"
+      ],
+      "names": [
+        "Lido"
+      ],
+      "all_days": 1978,
+      "nonzero_2023_2024": 0,
+      "first_nonzero": null,
+      "last_nonzero": null,
+      "sum_2023_2024": 0
+    },
+    "RAY": {
+      "first_month": "2021-08",
+      "slugs": [
+        "raydium-amm",
+        "launchlab"
+      ],
+      "names": [
+        "Raydium AMM",
+        "LaunchLab"
+      ],
+      "all_days": 1080,
+      "nonzero_2023_2024": 536,
+      "first_nonzero": "2023-01-09",
+      "last_nonzero": "2024-07-04",
+      "sum_2023_2024": 23241645.0
+    },
+    "CRV": {
+      "first_month": "2020-09",
+      "slugs": [
+        "curve-dex",
+        "crvusd",
+        "curve-llamalend-v2"
+      ],
+      "names": [
+        "Curve DEX",
+        "crvUSD",
+        "Curve LlamaLend V2"
+      ],
+      "all_days": 1787,
+      "nonzero_2023_2024": 731,
+      "first_nonzero": "2023-01-01",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 157239700.0
+    },
+    "SUSHI": {
+      "first_month": "2020-09",
+      "slugs": [
+        "sushiswap",
+        "sushiswap-v3",
+        "sushi-perps"
+      ],
+      "names": [
+        "SushiSwap",
+        "SushiSwap V3",
+        "Sushi Perps"
+      ],
+      "all_days": 2212,
+      "nonzero_2023_2024": 731,
+      "first_nonzero": "2023-01-01",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 4637795.369999999
+    },
+    "CVX": {
+      "first_month": "2022-09",
+      "slugs": [
+        "convex-finance"
+      ],
+      "names": [
+        "Convex Finance"
+      ],
+      "all_days": 1961,
+      "nonzero_2023_2024": 731,
+      "first_nonzero": "2023-01-01",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 51972961.0
+    },
+    "BAL": {
+      "first_month": "2020-09",
+      "slugs": [
+        "balancer-v1",
+        "balancer-v2",
+        "balancer-v3"
+      ],
+      "names": [
+        "Balancer V1",
+        "Balancer V2",
+        "Balancer V3"
+      ],
+      "all_days": 1982,
+      "nonzero_2023_2024": 729,
+      "first_nonzero": "2023-01-01",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 15015552.02
+    },
+    "RUNE": {
+      "first_month": "2020-09",
+      "slugs": [
+        "thorchain-dex"
+      ],
+      "names": [
+        "THORChain DEX"
+      ],
+      "all_days": 1996,
+      "nonzero_2023_2024": 107,
+      "first_nonzero": "2024-09-16",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 629650.0
+    },
+    "DYDX": {
+      "first_month": "2021-09",
+      "slugs": [
+        "dydx-v3",
+        "dydx-v4"
+      ],
+      "names": [
+        "dYdX V3",
+        "dYdX V4"
+      ],
+      "all_days": 1036,
+      "nonzero_2023_2024": 405,
+      "first_nonzero": "2023-11-14",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 45598990.0
+    },
+    "SNX": {
+      "first_month": "2020-08",
+      "slugs": [
+        "synthetix-v1+v2",
+        "synthetix-v3",
+        "synthetix-v4"
+      ],
+      "names": [
+        "Synthetix v1+v2",
+        "Synthetix V3",
+        "Synthetix V4"
+      ],
+      "all_days": 1783,
+      "nonzero_2023_2024": 731,
+      "first_nonzero": "2023-01-01",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 54742923.0
+    },
+    "SPELL": {
+      "first_month": "2022-09",
+      "slugs": [
+        "abracadabra-spell"
+      ],
+      "names": [
+        "Abracadabra Spell"
+      ],
+      "all_days": 504,
+      "nonzero_2023_2024": 0,
+      "first_nonzero": null,
+      "last_nonzero": null,
+      "sum_2023_2024": 0
+    },
+    "DODO": {
+      "first_month": "2021-02",
+      "slugs": [
+        "dodo-amm"
+      ],
+      "names": [
+        "DODO AMM"
+      ],
+      "all_days": 97,
+      "nonzero_2023_2024": 0,
+      "first_nonzero": null,
+      "last_nonzero": null,
+      "sum_2023_2024": 0
+    },
+    "KNC": {
+      "first_month": "2020-06",
+      "slugs": [
+        "kyberswap-classic",
+        "kyberswap-elastic",
+        "kyberswap-aggregator"
+      ],
+      "names": [
+        "KyberSwap Classic",
+        "KyberSwap Elastic",
+        "KyberSwap Aggregator"
+      ],
+      "all_days": 965,
+      "nonzero_2023_2024": 470,
+      "first_nonzero": "2023-01-05",
+      "last_nonzero": "2024-12-24",
+      "sum_2023_2024": 1493922.0
+    },
+    "OGN": {
+      "first_month": "2021-04",
+      "slugs": [
+        "origin-dollar",
+        "origin-ether",
+        "origin-arm"
+      ],
+      "names": [
+        "Origin Dollar",
+        "Origin Ether",
+        "Origin ARM"
+      ],
+      "all_days": 1732,
+      "nonzero_2023_2024": 730,
+      "first_nonzero": "2023-01-01",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 1583123.0
+    },
+    "RSR": {
+      "first_month": "2020-10",
+      "slugs": [
+        "reserve-protocol"
+      ],
+      "names": [
+        "Reserve Protocol"
+      ],
+      "all_days": 701,
+      "nonzero_2023_2024": 75,
+      "first_nonzero": "2024-10-16",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 427446.0
+    },
+    "WOO": {
+      "first_month": "2022-04",
+      "slugs": [
+        "woofi-swap"
+      ],
+      "names": [
+        "WOOFi Swap"
+      ],
+      "all_days": 1315,
+      "nonzero_2023_2024": 580,
+      "first_nonzero": "2023-02-12",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 3337985.0
+    },
+    "HNT": {
+      "first_month": "2020-09",
+      "slugs": [
+        "helium-network"
+      ],
+      "names": [
+        "Helium Network"
+      ],
+      "all_days": 343,
+      "nonzero_2023_2024": 0,
+      "first_nonzero": null,
+      "last_nonzero": null,
+      "sum_2023_2024": 0
+    },
+    "GRT": {
+      "first_month": "2020-12",
+      "slugs": [
+        "the-graph"
+      ],
+      "names": [
+        "The Graph"
+      ],
+      "all_days": 545,
+      "nonzero_2023_2024": 0,
+      "first_nonzero": null,
+      "last_nonzero": null,
+      "sum_2023_2024": 0
+    },
+    "LPT": {
+      "first_month": "2021-11",
+      "slugs": [
+        "livepeer"
+      ],
+      "names": [
+        "Livepeer"
+      ],
+      "all_days": 776,
+      "nonzero_2023_2024": 139,
+      "first_nonzero": "2024-08-14",
+      "last_nonzero": "2024-12-31",
+      "sum_2023_2024": 113048.0
+    },
+    "LUNA": {
+      "first_month": "2021-01",
+      "slugs": [
+        "luna"
+      ],
+      "names": [
+        "LUNA"
+      ],
+      "all_days": 64,
+      "nonzero_2023_2024": 0,
+      "first_nonzero": null,
+      "last_nonzero": null,
+      "sum_2023_2024": 0
+    },
+    "FLM": {
+      "first_month": "2020-09",
+      "slugs": [
+        "flamingo-finance"
+      ],
+      "names": [
+        "Flamingo Finance"
+      ],
+      "all_days": 0,
+      "nonzero_2023_2024": 0,
+      "first_nonzero": null,
+      "last_nonzero": null,
+      "sum_2023_2024": 0
+    }
+  },
+  "errors": [
+    [
+      "DYDX",
+      "dydx-v3"
+    ],
+    [
+      "FLM",
+      "flamingo-finance"
+    ]
+  ]
+}

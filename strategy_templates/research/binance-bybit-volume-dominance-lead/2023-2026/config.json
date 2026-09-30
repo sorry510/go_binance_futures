@@ -1,0 +1,17 @@
+{
+  "feature": "log(Bybit linear turnover / Binance USD-M QuoteVolume)",
+  "interval": "1h",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "follow current-hour return on the unusually dominant venue",
+  "entry": "next Binance 1h open",
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "oos_years": [
+    2025,
+    2026
+  ]
+}

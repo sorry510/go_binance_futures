@@ -28,3 +28,8 @@ Production-eligible sample size is therefore **0**.
 This family is **not classified as a failed alpha**. It is frozen as **currently unverifiable / insufficient sample**.
 
 Do not relax the >=2-year rule, liquidity floor, or merge unrelated funding-frequency events merely to create a sample. Revisit only if a future local archive preserves 1h funding observations or another point-in-time source becomes available.
+
+## Binance Vision full-universe audit (2026-09-28)
+Re-audited official Binance Vision monthly fundingRate archives for the formal 15-symbol universe across 2024-01..2026-08. Fourteen symbols contain only 8h intervals; ONDOUSDT contains only 4h intervals from the beginning of its available archive. There are zero 1h rows and zero interval-change transitions in the formal universe.
+
+This confirms the earlier blocker is not a local-table artifact. There is no production-eligible compression event to test. The family remains permanently frozen unless Binance later publishes a genuinely point-in-time interval-change history with new events.

@@ -1,0 +1,28 @@
+{
+  "target_chains": {
+    "BTC": "Bitcoin",
+    "ETH": "Ethereum",
+    "BNB": "BSC",
+    "XRP": "Ripple",
+    "SOL": "Solana",
+    "AVAX": "Avalanche",
+    "ADA": "Cardano",
+    "NEAR": "Near",
+    "SUI": "Sui"
+  },
+  "discovery_usable": [
+    "Ethereum",
+    "BSC",
+    "Solana",
+    "Avalanche",
+    "Cardano",
+    "Near",
+    "Sui"
+  ],
+  "discovery_usable_count": 7,
+  "bitcoin": "no stablecoin chain endpoint",
+  "ripple_first_positive_date": "2025-04-02",
+  "sui_first_positive_date": "2024-01-23",
+  "minimum_required": 8,
+  "decision": "freeze before returns"
+}

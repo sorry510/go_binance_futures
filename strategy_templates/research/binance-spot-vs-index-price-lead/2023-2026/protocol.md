@@ -1,0 +1,1 @@
+Timestamp-align Binance Spot, USD-M Index Price and USD-M perpetual hourly bars from Binance Vision. Normalize local spot-vs-index premium against the prior 720 completed hours. First |z|>=3 triggers; |z|<1 rearms. Direction follows the premium sign as a local-spot lead hypothesis. No reversal or threshold/window search after results.

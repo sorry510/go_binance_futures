@@ -1,0 +1,9 @@
+{
+  "interval": "1h",
+  "indicator": "standard CMF(20)",
+  "trigger": "zero-cross",
+  "positive_cross": "LONG",
+  "negative_cross": "SHORT",
+  "entry": "next 1h open",
+  "gate": "12h mean >=0.10% and >=3/4 core symbols positive"
+}

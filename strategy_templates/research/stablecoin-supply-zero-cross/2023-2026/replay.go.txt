@@ -1,0 +1,53 @@
+package main
+import(
+ "database/sql";"encoding/json";"fmt";"math";"os";"sort";"time"
+ _ "go_binance_futures/bootstrap"
+ "github.com/beego/beego/v2/core/config"
+ _ "github.com/go-sql-driver/mysql"
+)
+type DLPoint struct{Date string `json:"date"`; Total map[string]float64 `json:"totalCirculatingUSD"`}
+type Bar struct{T int64;O,C float64}
+type Signal struct{Entry int64;Dir float64;Delta float64}
+type Ev struct{S string;Y int;R24,R72 float64}
+type Sum struct{N int `json:"n"`;Signals int `json:"signals"`;Mean24,Win24,Mean72,Win72 float64;PositiveSymbols24,PositiveSymbols72,Symbols int;BySymbol map[string]map[string]float64 `json:"by_symbol"`}
+func avg(e []Ev,f func(Ev)float64)(float64,float64){if len(e)==0{return 0,0};s:=0.0;w:=0;for _,x:=range e{v:=f(x);s+=v;if v>0{w++}};return s/float64(len(e)),float64(w)/float64(len(e))}
+func summary(e []Ev,syms []string)Sum{
+ z:=Sum{N:len(e),BySymbol:map[string]map[string]float64{}};z.Mean24,z.Win24=avg(e,func(x Ev)float64{return x.R24});z.Mean72,z.Win72=avg(e,func(x Ev)float64{return x.R72})
+ yearsig:=map[int64]bool{};for _,x:=range e{_ = x}
+ for _,s:=range syms{q:=[]Ev{};for _,x:=range e{if x.S==s{q=append(q,x)}};if len(q)>0{m24,w24:=avg(q,func(x Ev)float64{return x.R24});m72,w72:=avg(q,func(x Ev)float64{return x.R72});z.BySymbol[s]=map[string]float64{"n":float64(len(q)),"mean24":m24,"win24":w24,"mean72":m72,"win72":w72};z.Symbols++;if m24>0{z.PositiveSymbols24++};if m72>0{z.PositiveSymbols72++}}}
+ _=yearsig;return z
+}
+func main(){
+ raw,err:=os.ReadFile("/tmp/defillama_stablecoincharts_all.json");if err!=nil{panic(err)}
+ var pts []DLPoint;if err=json.Unmarshal(raw,&pts);err!=nil{panic(err)}
+ supply:=map[int64]float64{};dates:=[]int64{}
+ for _,p:=range pts{ts,err:=time.ParseInLocation("2006-01-02","1970-01-01",time.UTC);_ = ts;_ = err;sec:=int64(0);fmt.Sscan(p.Date,&sec);v:=p.Total["peggedUSD"];if sec>0&&v>0{supply[sec*1000]=v;dates=append(dates,sec*1000)}}
+ sort.Slice(dates,func(i,j int)bool{return dates[i]<dates[j]})
+ sigs:=[]Signal{};prevSign:=0.0
+ for _,d:=range dates{
+  if time.UnixMilli(d).UTC().Year()<2023||time.UnixMilli(d).UTC().Year()>2026{continue}
+  v0,ok0:=supply[d-7*86400000];v1,ok1:=supply[d];if !ok0||!ok1||v0<=0{continue}
+  delta:=v1/v0-1;sign:=0.0;if delta>0{sign=1}else if delta<0{sign=-1}else{continue}
+  if prevSign!=0&&sign!=prevSign{sigs=append(sigs,Signal{Entry:d+86400000,Dir:sign,Delta:delta})}
+  prevSign=sign
+ }
+ fmt.Println("SIGNALS",len(sigs))
+ for _,y:=range []int{2023,2024,2025,2026}{n:=0;for _,s:=range sigs{if time.UnixMilli(s.Entry).UTC().Year()==y{n++}};fmt.Println("YEAR",y,"signals",n)}
+ syms:=[]string{"BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT","SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"}
+ u,_:=config.String("database::username");pw,_:=config.String("database::password");h,_:=config.String("database::host");pt,_:=config.String("database::port");dbn,_:=config.String("database::dbname");if dbn!="go_bn_test"{panic(dbn)}
+ db,e:=sql.Open("mysql",fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4",u,pw,h,pt,dbn));if e!=nil{panic(e)};defer db.Close()
+ all:=[]Ev{}
+ for _,sym:=range syms{
+  rows,e:=db.Query("SELECT open_time,open_price,close_price FROM market_klines_1h WHERE market='futures_usdt' AND symbol=? ORDER BY open_time",sym);if e!=nil{panic(e)}
+  bars:=[]Bar{};for rows.Next(){var b Bar;rows.Scan(&b.T,&b.O,&b.C);bars=append(bars,b)};rows.Close();if len(bars)==0{continue}
+  idx:=map[int64]int{};for i,b:=range bars{idx[b.T]=i};n:=0
+  for _,s:=range sigs{
+   if sym=="ZECUSDT" && s.Entry < 1685577600000 {continue};i,ok:=idx[s.Entry];if !ok||i+72>=len(bars)||bars[i].O<=0{continue}
+   entry:=bars[i].O;r24:=s.Dir*math.Log(bars[i+24].C/entry);r72:=s.Dir*math.Log(bars[i+72].C/entry);y:=time.UnixMilli(s.Entry).UTC().Year();all=append(all,Ev{sym,y,r24,r72});n++
+  }
+  fmt.Println("SYMBOL",sym,"events",n)
+ }
+ disc:=[]Ev{};o1:=[]Ev{};o2:=[]Ev{};for _,x:=range all{if x.Y==2023||x.Y==2024{disc=append(disc,x)};if x.Y==2025{o1=append(o1,x)};if x.Y==2026{o2=append(o2,x)}}
+ res:=map[string]Sum{"discovery_2023_2024":summary(disc,syms),"oos1_2025":summary(o1,syms),"oos2_2026":summary(o2,syms),"all":summary(all,syms)}
+ out,_:=json.MarshalIndent(res,"","  ");fmt.Println(string(out))
+}

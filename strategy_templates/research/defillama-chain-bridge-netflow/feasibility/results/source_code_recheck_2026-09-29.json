@@ -1,0 +1,18 @@
+{
+  "research_date": "2026-09-29",
+  "bridges_server_repository": "https://github.com/DefiLlama/bridges-server",
+  "bridges_server_revision": "dd37313f7883dd6e3d983510107d451cef31e680",
+  "findings": {
+    "storage": "historical bridge flow aggregates are queried from Postgres bridges.daily_volume / bridges.hourly_volume",
+    "historical_route": "/bridgedaystats/:timestamp/:chain can query arbitrary historical day in source code",
+    "current_routes": ["/netflows/day", "/netflows/week", "/netflows/month"],
+    "deployment_access": "tested bridge/netflow/day-stats routes all return HTTP 402 paid API required",
+    "public_s3_bucket": "llama-bridges-data",
+    "s3_listing": "HTTP 403 AccessDenied",
+    "known_public_objects": ["lastRecordedBlocks.json", "recordedBlocks.json"],
+    "known_public_object_content": "block progress metadata only; no historical USD bridge flows",
+    "backup": "daily transaction backup uses a separately configured backup bucket and is not declared public-read"
+  },
+  "returns_inspected": false,
+  "decision": "remain data-access/data-cost blocked"
+}

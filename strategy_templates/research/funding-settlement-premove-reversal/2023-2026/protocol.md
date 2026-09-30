@@ -1,0 +1,1 @@
+Use only actual funding_time rows from market_funding_rates; never infer settlement with NowTime modulo. At each funding timestamp, reverse the previous completed 1h price move and enter at the settlement-hour open. Evaluate 1h and 4h. No funding-sign/size filter and no alternate time windows.

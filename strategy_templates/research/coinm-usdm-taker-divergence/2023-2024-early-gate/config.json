@@ -1,0 +1,14 @@
+{
+  "symbols": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "XRP"
+  ],
+  "feature": "daily mean signed taker imbalance CM minus UM",
+  "ratio_transform": "(ratio-1)/(ratio+1)",
+  "zscore_lookback_days": 30,
+  "trigger_abs_z_gte": 2,
+  "rearm_abs_z_lt": 1,
+  "direction": "sign of divergence"
+}

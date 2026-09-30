@@ -1,0 +1,25 @@
+{
+  "source": "DefiLlama stablecoincharts/all",
+  "supply_field": "totalCirculatingUSD.peggedUSD",
+  "signal": "7d completed-daily supply change zero-cross",
+  "positive": "LONG",
+  "negative": "SHORT",
+  "availability_lag": "record d enters at d+1 00:00 UTC",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT",
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "eligibility": "USD-M >=2y audited with Binance Vision",
+  "diagnostic_horizons_hours": [
+    24,
+    72
+  ]
+}

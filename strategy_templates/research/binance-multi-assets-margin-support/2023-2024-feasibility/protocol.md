@@ -1,0 +1,1 @@
+Enumerate 2023-2024 Binance official Latest News titles containing Multi-Assets Mode or margin asset. Audit full article bodies before returns. Stablecoin-only support and global auto-exchange threshold changes are not directional token events. Repeated postponements are not independent events. Proceed only with at least eight independent production-eligible token events.

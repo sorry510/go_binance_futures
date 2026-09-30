@@ -1,0 +1,36 @@
+{
+  "leverage": 4,
+  "tp_pct": 8,
+  "sl_pct": 6,
+  "fee_per_side": 0.0005,
+  "slippage_per_side_bps": 5,
+  "lookback_hours": 720,
+  "z_trigger": 3,
+  "z_rearm": 1,
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "discovery": [
+    2023,
+    2024
+  ],
+  "direction": {
+    "z_gt_3": "SHORT",
+    "z_lt_minus_3": "LONG"
+  },
+  "entry": "next 1h open",
+  "diagnostics_hours": [
+    1,
+    4,
+    12
+  ],
+  "gate": {
+    "mean12": 0.001,
+    "positive_symbols": 3,
+    "total_symbols": 4
+  },
+  "oos_status": "untouched; early gate failed"
+}

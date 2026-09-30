@@ -1,0 +1,1 @@
+Convert COIN-M OI value to USD using contemporaneous COIN-M price before computing share. Fixed 30d z>=2 high-share event and reversal of trailing 7d return. Core-4 discovery only; failure blocks expansion.

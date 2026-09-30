@@ -1,0 +1,17 @@
+{
+  "interval": "1h",
+  "feature": "log(quote_volume / trade_count)",
+  "zscore_lookback_hours": 168,
+  "trigger_z_gte": 3.0,
+  "rearm_z_lt": 1.0,
+  "direction": "trigger-hour return sign",
+  "history_min_days": 730,
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "oos_years": [
+    2025,
+    2026
+  ]
+}

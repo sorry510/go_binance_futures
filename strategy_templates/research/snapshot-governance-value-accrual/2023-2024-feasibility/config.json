@@ -1,0 +1,10 @@
+{
+  "minimum_events": 8,
+  "signal_time": "proposal creation",
+  "safe_mapping": "DeFiLlama governanceID only",
+  "directions": {
+    "value_accrual": "LONG",
+    "emissions_reduce": "LONG",
+    "emissions_increase": "SHORT"
+  }
+}

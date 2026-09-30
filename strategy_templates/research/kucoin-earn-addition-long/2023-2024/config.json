@@ -1,0 +1,14 @@
+{
+  "direction": "LONG",
+  "event_time": "official announcement publication",
+  "event_filter": "strict Earn utility addition only",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "discovery_year": 2023,
+  "untouched_oos_year": 2024,
+  "gate": {
+    "event_equal_12h_min": 0.005,
+    "batch_equal_12h_min": 0.005,
+    "positive_symbol_ratio_min": 0.6
+  }
+}

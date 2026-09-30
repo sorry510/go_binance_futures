@@ -1,0 +1,6 @@
+{
+  "research_date": "2026-09-27",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "binance_source": "go_bn_test.market_klines_1h",
+  "bybit_source": "official Bybit V5 /v5/market/kline linear 1h turnover"
+}

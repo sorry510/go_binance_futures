@@ -1,0 +1,14 @@
+{
+  "symbols": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "XRP"
+  ],
+  "feature": "CM OI USD / (CM OI USD + UM OI USD)",
+  "frequency": "daily last 5m metrics snapshot",
+  "zscore_lookback_days": 30,
+  "trigger_z_gte": 2,
+  "rearm_z_lt": 1,
+  "direction": "reverse trailing 7d return"
+}

@@ -1,0 +1,16 @@
+{
+  "n": 46,
+  "wins": 17,
+  "losses": 29,
+  "tp": 12,
+  "sl": 19,
+  "time": 15,
+  "pf": 0.6938533877867785,
+  "net_pct": -46.44848944339969,
+  "avg_pct": -1.0097497705086889,
+  "symbols": 40,
+  "positive_symbols": 16,
+  "batches": 16,
+  "batch_equal_net_pct": -0.6698140182157609,
+  "positive_batches": 7
+}

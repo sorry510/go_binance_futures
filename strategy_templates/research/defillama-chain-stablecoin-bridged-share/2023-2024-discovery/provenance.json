@@ -1,0 +1,6 @@
+{
+  "research_date": "2026-09-30",
+  "sources": ["DeFiLlama stablecoincharts chain history", "Binance Vision USD-M 1d klines"],
+  "db_write": false,
+  "oos_status": "untouched; discovery failed"
+}

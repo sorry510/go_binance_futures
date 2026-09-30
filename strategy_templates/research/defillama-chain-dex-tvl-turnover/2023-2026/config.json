@@ -1,0 +1,11 @@
+{
+  "signal": "log((sum DEX volume latest7 / avg TVL latest7) / (sum DEX volume prior7 / avg TVL prior7)), zero-cross",
+  "up_cross": "LONG",
+  "down_cross": "SHORT",
+  "entry": "next UTC daily open",
+  "eligibility": {"futures_history_years": 2, "quote_volume_usdt": 5000000},
+  "discovery": "2023-2024",
+  "economic_strength_bar": 0.0025,
+  "breadth_bar": 0.60,
+  "exact_status": "not entered; 2025 OOS mean7 below established economic-strength bar"
+}

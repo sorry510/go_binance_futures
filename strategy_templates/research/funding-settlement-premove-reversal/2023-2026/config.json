@@ -1,0 +1,18 @@
+{
+  "event": "actual market_funding_rates settlement timestamp",
+  "pre_window": "previous completed 1h",
+  "direction": "reverse pre-settlement 1h return",
+  "entry": "settlement-hour open",
+  "horizons_hours": [
+    1,
+    4
+  ],
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "oos_years": [
+    2025,
+    2026
+  ]
+}

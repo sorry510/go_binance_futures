@@ -1,0 +1,222 @@
+[
+  {
+    "symbol": "BALUSDT",
+    "included": true,
+    "first_futures": "2020-09-01",
+    "eligible_from": "2022-09-01",
+    "dex_slugs": [
+      "balancer-v1",
+      "balancer-v2",
+      "balancer-v3"
+    ]
+  },
+  {
+    "symbol": "BNTUSDT",
+    "included": true,
+    "first_futures": "2023-08-10",
+    "eligible_from": "2025-08-10",
+    "dex_slugs": [
+      "bancor-v2.1",
+      "bancor-v3"
+    ]
+  },
+  {
+    "symbol": "CAKEUSDT",
+    "included": true,
+    "first_futures": "2023-11-02",
+    "eligible_from": "2025-11-02",
+    "dex_slugs": [
+      "pancakeswap-amm",
+      "pancakeswap-amm-v1",
+      "pancakeswap-amm-v3",
+      "pancakeswap-infinity",
+      "pancakeswap-stableswap"
+    ]
+  },
+  {
+    "symbol": "CRVUSDT",
+    "included": true,
+    "first_futures": "2020-09-01",
+    "eligible_from": "2022-09-01",
+    "dex_slugs": [
+      "curve-dex"
+    ]
+  },
+  {
+    "symbol": "DODOUSDT",
+    "included": true,
+    "first_futures": "2021-02-19",
+    "eligible_from": "2023-02-19",
+    "dex_slugs": [
+      "dodo-amm"
+    ]
+  },
+  {
+    "symbol": "FLMUSDT",
+    "included": true,
+    "first_futures": "2020-09-29",
+    "eligible_from": "2022-09-29",
+    "dex_slugs": [
+      "flamingo-finance"
+    ]
+  },
+  {
+    "symbol": "GMXUSDT",
+    "included": true,
+    "first_futures": "2023-02-17",
+    "eligible_from": "2025-02-17",
+    "dex_slugs": [
+      "gmx-v1-amm",
+      "gmx-v2-amm"
+    ]
+  },
+  {
+    "symbol": "IDEXUSDT",
+    "included": true,
+    "first_futures": "2023-05-03",
+    "eligible_from": "2025-05-03",
+    "dex_slugs": [
+      "idex-classic"
+    ]
+  },
+  {
+    "symbol": "INJUSDT",
+    "included": true,
+    "first_futures": "2022-08-17",
+    "eligible_from": "2024-08-17",
+    "dex_slugs": [
+      "injective-spot"
+    ]
+  },
+  {
+    "symbol": "JOEUSDT",
+    "included": true,
+    "first_futures": "2023-03-29",
+    "eligible_from": "2025-03-29",
+    "dex_slugs": [
+      "joe-dex",
+      "joe-v2",
+      "joe-v2.1",
+      "joe-v2.2",
+      "lfj-poe"
+    ]
+  },
+  {
+    "symbol": "JUPUSDT",
+    "included": true,
+    "first_futures": "2024-01-31",
+    "eligible_from": "2026-01-31",
+    "dex_slugs": [
+      "jupiter-lend-dex",
+      "jupiterz"
+    ]
+  },
+  {
+    "symbol": "KNCUSDT",
+    "included": true,
+    "first_futures": "2020-06-22",
+    "eligible_from": "2022-06-22",
+    "dex_slugs": [
+      "kyberswap-classic",
+      "kyberswap-elastic"
+    ]
+  },
+  {
+    "symbol": "LISTAUSDT",
+    "included": true,
+    "first_futures": "2024-06-20",
+    "eligible_from": "2026-06-20",
+    "dex_slugs": [
+      "lista-dex"
+    ]
+  },
+  {
+    "symbol": "MAVUSDT",
+    "included": true,
+    "first_futures": "2023-06-29",
+    "eligible_from": "2025-06-29",
+    "dex_slugs": [
+      "maverick-v1",
+      "maverick-v2"
+    ]
+  },
+  {
+    "symbol": "RAYUSDT",
+    "included": true,
+    "first_futures": "2021-08-20",
+    "eligible_from": "2023-08-20",
+    "dex_slugs": [
+      "raydium-amm"
+    ]
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "included": true,
+    "first_futures": "2020-09-04",
+    "eligible_from": "2022-09-04",
+    "dex_slugs": [
+      "thorchain-dex"
+    ]
+  },
+  {
+    "symbol": "SRMUSDT",
+    "included": true,
+    "first_futures": "2020-09-05",
+    "eligible_from": "2022-09-05",
+    "dex_slugs": [
+      "serum"
+    ]
+  },
+  {
+    "symbol": "SUNUSDT",
+    "included": true,
+    "first_futures": "2024-08-22",
+    "eligible_from": "2026-08-22",
+    "dex_slugs": [
+      "sunswap-v1",
+      "sunswap-v2",
+      "sunswap-v3"
+    ]
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "included": true,
+    "first_futures": "2020-09-04",
+    "eligible_from": "2022-09-04",
+    "dex_slugs": [
+      "sushi-aptos",
+      "sushiswap",
+      "sushiswap-v3"
+    ]
+  },
+  {
+    "symbol": "UNFIUSDT",
+    "included": true,
+    "first_futures": "2021-02-19",
+    "eligible_from": "2023-02-19",
+    "dex_slugs": [
+      "unifi"
+    ]
+  },
+  {
+    "symbol": "UNIUSDT",
+    "included": true,
+    "first_futures": "2020-09-18",
+    "eligible_from": "2022-09-18",
+    "dex_slugs": [
+      "uniswap-v1",
+      "uniswap-v2",
+      "uniswap-v3",
+      "uniswap-v4"
+    ]
+  },
+  {
+    "symbol": "WOOUSDT",
+    "included": true,
+    "first_futures": "2022-04-08",
+    "eligible_from": "2024-04-08",
+    "dex_slugs": [
+      "woofi-swap"
+    ]
+  }
+]

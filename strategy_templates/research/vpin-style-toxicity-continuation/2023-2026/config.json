@@ -1,0 +1,9 @@
+{
+  "interval": "1h",
+  "toxicity": "sum(abs(taker_buy_quote-taker_sell_quote))/sum(quote_volume) over 24h",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "trigger-hour return sign",
+  "history_min_days": 730
+}

@@ -1,0 +1,36 @@
+{
+  "diagnostic": {
+    "discovery_2023_2024": {
+      "n": 99,
+      "mean1": -0.000462979,
+      "mean4": 0.0012253587,
+      "mean12": 0.0048732791,
+      "positive_symbols12": 2,
+      "symbols": 3
+    },
+    "oos1_2025": {
+      "n": 257,
+      "mean12": 0.0078732148,
+      "positive_symbols12": 8,
+      "symbols": 10
+    },
+    "oos2_2026": {
+      "n": 172,
+      "mean12": 0.0011282061,
+      "positive_symbols12": 6,
+      "symbols": 10
+    }
+  },
+  "exact_discovery": {
+    "n": 99,
+    "wins": 41,
+    "losses": 58,
+    "tp": 23,
+    "sl": 25,
+    "time": 51,
+    "pf": 0.8612017624,
+    "net_pct": -34.83967793,
+    "avg_pct": -0.3519159387
+  },
+  "decision": "freeze after exact discovery cost failure"
+}

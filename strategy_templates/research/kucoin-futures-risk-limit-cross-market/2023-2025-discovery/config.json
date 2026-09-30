@@ -1,0 +1,11 @@
+{
+  "mapping": {
+    "nondecreasing leverage+risk, at least one increase": "LONG Binance USD-M",
+    "nonincreasing leverage+risk, at least one decrease": "SHORT Binance USD-M",
+    "mixed": "exclude"
+  },
+  "entry": "next full 1h open after KuCoin announcement publish",
+  "eligibility": ">=730d Binance USD-M history and prior-24h QuoteVolume >=5M USDT",
+  "discovery": "2023-2025",
+  "oos": "2026 only if discovery passes"
+}

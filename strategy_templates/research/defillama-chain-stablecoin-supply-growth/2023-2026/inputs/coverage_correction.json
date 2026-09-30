@@ -1,0 +1,118 @@
+{
+  "BTCUSDT": {
+    "chain": "Bitcoin",
+    "error": "HTTPError:HTTP Error 404: Not Found"
+  },
+  "ETHUSDT": {
+    "chain": "Ethereum",
+    "points": 3227,
+    "first_positive": "2017-11-29",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "BNBUSDT": {
+    "chain": "BSC",
+    "points": 2172,
+    "first_positive": "2020-08-29",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "SOLUSDT": {
+    "chain": "Solana",
+    "points": 1603,
+    "first_positive": "2021-09-10",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "AVAXUSDT": {
+    "chain": "Avalanche",
+    "points": 2065,
+    "first_positive": "2021-02-03",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "ADAUSDT": {
+    "chain": "Cardano",
+    "points": 1406,
+    "first_positive": "2022-11-24",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "NEARUSDT": {
+    "chain": "Near",
+    "points": 1543,
+    "first_positive": "2022-07-10",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "TRXUSDT": {
+    "chain": "Tron",
+    "points": 2724,
+    "first_positive": "2019-04-16",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "MATICUSDT": {
+    "chain": "Polygon",
+    "points": 2253,
+    "first_positive": "2020-04-01",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "FTMUSDT": {
+    "chain": "Fantom",
+    "points": 2102,
+    "first_positive": "2019-12-27",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "OPUSDT": {
+    "chain": "OP Mainnet",
+    "points": 1783,
+    "first_positive": "2021-11-12",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "APTUSDT": {
+    "chain": "Aptos",
+    "points": 1436,
+    "first_positive": "2022-10-25",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "ARBUSDT": {
+    "chain": "Arbitrum",
+    "points": 1923,
+    "first_positive": "2021-06-25",
+    "last_positive": "2026-09-29",
+    "days_2023": 365,
+    "days_2024": 366
+  },
+  "SUIUSDT": {
+    "chain": "Sui",
+    "points": 981,
+    "first_positive": "2024-01-23",
+    "last_positive": "2026-09-29",
+    "days_2023": 0,
+    "days_2024": 344
+  },
+  "XRPUSDT": {
+    "chain": "XRPL",
+    "points": 546,
+    "first_positive": "2025-04-02",
+    "last_positive": "2026-09-29",
+    "days_2023": 0,
+    "days_2024": 0
+  }
+}

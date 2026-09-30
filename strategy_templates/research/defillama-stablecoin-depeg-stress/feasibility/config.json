@@ -1,0 +1,6 @@
+{
+  "decision": "historical-price/data-definition blocked",
+  "returns_inspected": false,
+  "source": "DeFiLlama stablecoin API",
+  "constraint_note": "global stablecoin price as market regime would violate MarketCondition/Benchmark constraint"
+}

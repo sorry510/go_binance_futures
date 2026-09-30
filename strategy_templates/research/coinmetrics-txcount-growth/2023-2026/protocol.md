@@ -1,0 +1,1 @@
+Reuse the fixed Active-Address family transform: compare the latest 7-day mean TxCnt with the preceding 7-day mean. Growth crossing <=0 to >0 is LONG; >=0 to <0 is SHORT. Signal-day metric is only actionable after the UTC day completes; entry is the next UTC day open. No window/direction search.

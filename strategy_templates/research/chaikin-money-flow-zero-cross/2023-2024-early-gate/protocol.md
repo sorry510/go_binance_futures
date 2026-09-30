@@ -1,0 +1,1 @@
+Use standard 20-period Chaikin Money Flow on 1h OHLC + QuoteVolume. Trigger only zero-crosses; positive cross LONG, negative cross SHORT. No trend filter or alternative period/threshold search. Expansion requires 12h mean >=0.10% and at least 3/4 core symbols positive.

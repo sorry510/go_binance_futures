@@ -1,0 +1,1 @@
+Audit DeFiLlama stablecoinchains and stablecoincharts before any return inspection. Use only native-chain mappings with the same semantic definition. Require at least eight target native assets with usable 2023-2024 chain stablecoin history before testing the planned 7-day supply-growth zero-cross. Do not add unrelated chains solely to meet sample size.

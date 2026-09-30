@@ -1,0 +1,14 @@
+{
+  "official_derivative_articles": 46,
+  "usdt_perpetual_symbol_events": 48,
+  "eligible": 5,
+  "eligible_symbols": [
+    "TOMOUSDT",
+    "OCEANUSDT",
+    "UNFIUSDT",
+    "BLZUSDT",
+    "FTMUSDT"
+  ],
+  "minimum_discovery_n": 8,
+  "decision": "freeze before returns: insufficient production-eligible sample"
+}

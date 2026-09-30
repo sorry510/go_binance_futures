@@ -1,0 +1,706 @@
+{
+  "futures": [
+    {
+      "href": "/support/articles/12560603846579",
+      "title": "[Important] Bitget to delist COMMONUSDT,ONUSDT futures and related services",
+      "section_date": "2025-12-25 11:50"
+    },
+    {
+      "href": "/support/articles/12560603846155",
+      "title": "[Important] Bitget to delist PTBUSDT, BIDUSDT, PRCLUSDT, TURTLEUSDT, NKNUSDT, XIONUSDT, HOOKUSDT, ZRCUSDT, GHSTUSDT, HEMIUSDT, PROMPTUSDT, SWARMSUSDT futures and related services",
+      "section_date": "2025-12-19 09:40"
+    },
+    {
+      "href": "/support/articles/12560603845994",
+      "title": "[Important] Bitget to delist AEVOPERP,OBTUSDT, XCNUSDT, DOGUSDT, YZYUSDT futures and related services",
+      "section_date": "2025-12-18 02:26"
+    },
+    {
+      "href": "/support/articles/12560603845754",
+      "title": "[Important] Bitget to delist YALAUSDT,BLUAIUSDT,NSUSDT,AVAAIUSDT,XNYUSDT futures and related services",
+      "section_date": "2025-12-15 07:17"
+    },
+    {
+      "href": "/support/articles/12560603845589",
+      "title": "[Important] Bitget to delist AIAUSDT futures and related services",
+      "section_date": "2025-12-11 12:12"
+    },
+    {
+      "href": "/support/articles/12560603845559",
+      "title": "[Important] Bitget to delist SDUSDT, ROAMUSDT, ASPUSDT, AIOZUSDT, ALPINEUSDT, GODSUSDT, DBRUSDT, ELONUSDT, AVLUSDT futures and related services",
+      "section_date": "2025-12-11 06:12"
+    },
+    {
+      "href": "/support/articles/12560603845088",
+      "title": "[Important] Bitget to delist EVAAUSDT, HANAUSDT, EPTUSDT, COSUSDT, REIUSDT, BTRUSDT, ESUSDT, CPOOLUSDT futures and related services",
+      "section_date": "2025-12-05 09:34"
+    },
+    {
+      "href": "/support/articles/12560603844915",
+      "title": "[Important] Bitget to delist FXSUSDT futures and related services",
+      "section_date": "2025-12-04 08:19"
+    },
+    {
+      "href": "/support/articles/12560603844738",
+      "title": "[Important] Bitget to delist IKAUSDT, AUDIOUSDT, FUELUSDT, SXPUSDT futures and related services",
+      "section_date": "2025-12-03 07:59"
+    },
+    {
+      "href": "/support/articles/12560603844218",
+      "title": "[Important] Bitget to delist XCXUSDT futures and related services",
+      "section_date": "2025-11-28 10:34"
+    },
+    {
+      "href": "/support/articles/12560603844192",
+      "title": "[Important] Bitget to delist RIOTUSDT futures and related services",
+      "section_date": "2025-11-28 08:45"
+    },
+    {
+      "href": "/support/articles/12560603844191",
+      "title": "[Important] Bitget to delist FHEUSDT, PUMPBTCUSDT, FWOGUSDT futures and related services",
+      "section_date": "2025-11-28 08:43"
+    },
+    {
+      "href": "/support/articles/12560603844076",
+      "title": "[Important] Bitget to delist ELXUSDT futures and related services",
+      "section_date": "2025-11-27 08:52"
+    },
+    {
+      "href": "/support/articles/12560603843762",
+      "title": "[Important] Bitget to delist RSS3USDT,SUNDOGUSDT,RADUSDT,PONKEUSDT,SWELLUSDT,QUICKUSDT futures and related services",
+      "section_date": "2025-11-25 06:41"
+    },
+    {
+      "href": "/support/articles/12560603843571",
+      "title": "[Important] Bitget to delist PORT3USDT futures and related services",
+      "section_date": "2025-11-23 07:08"
+    },
+    {
+      "href": "/support/articles/12560603843564",
+      "title": "[Important] Bitget to delist VOXEL, CUDIS, MILK futures and related services",
+      "section_date": "2025-11-22 13:35"
+    },
+    {
+      "href": "/support/articles/12560603842911",
+      "title": "[Important] Bitget to delist NOTPERP,CATIPERP,ACTPERP,MEPERP futures and related services",
+      "section_date": "2025-11-17 03:22"
+    },
+    {
+      "href": "/support/articles/12560603842909",
+      "title": "[Important] Bitget to delist KOMAUSDT,FIOUSDT,DMCUSDT,OBOLUSDT,FLMUSDT,NAVXUSDT,SWTCHUSDT,AMPUSDT futures and related services",
+      "section_date": "2025-11-17 03:18"
+    },
+    {
+      "href": "/support/articles/12560603842456",
+      "title": "[Important] Bitget to delist NFLXUSDT futures and related services",
+      "section_date": "2025-11-12 12:36"
+    },
+    {
+      "href": "/support/articles/12560603842284",
+      "title": "[Important] Bitget to delist MYROUSDT,XUSDT,AVAILUSDT futures and related services",
+      "section_date": "2025-11-11 10:48"
+    },
+    {
+      "href": "/support/articles/12560603842097",
+      "title": "[Important] Bitget to delist MANAUSD futures and related services",
+      "section_date": "2025-11-09 07:43"
+    },
+    {
+      "href": "/support/articles/12560603841948",
+      "title": "[Important] Bitget to delist RVVUSDT,DAMUSDT,SWEATUSDT,TAUSDT,CHESSUSDT,MDTUSDT,BLUEUSDT,UUSDT futures and related services",
+      "section_date": "2025-11-07 06:52"
+    },
+    {
+      "href": "/support/articles/12560603841251",
+      "title": "[Important] Bitget to delist AI16ZUSDT futures and related services",
+      "section_date": "2025-10-31 09:21"
+    },
+    {
+      "href": "/support/articles/12560603841250",
+      "title": "[Important] Bitget to delist TANSSIUSDT futures and related services",
+      "section_date": "2025-10-31 09:20"
+    },
+    {
+      "href": "/support/articles/12560603841249",
+      "title": "[Important] Bitget to delist FISUSDT futures and related services",
+      "section_date": "2025-10-31 09:19"
+    },
+    {
+      "href": "/support/articles/12560603841238",
+      "title": "[Important] Bitget to delist SKATEUSDT futures and related services",
+      "section_date": "2025-10-31 09:17"
+    },
+    {
+      "href": "/support/articles/12560603841237",
+      "title": "[Important] Bitget to delist PORTALSUSDT futures and related services",
+      "section_date": "2025-10-31 09:17"
+    },
+    {
+      "href": "/support/articles/12560603840702",
+      "title": "[Important] Bitget to delist LOOKSUSDT futures and related services",
+      "section_date": "2025-10-24 03:51"
+    },
+    {
+      "href": "/support/articles/12560603840597",
+      "title": "[Important] Bitget to delist BADGERUSDT futures and related services",
+      "section_date": "2025-10-23 10:51"
+    },
+    {
+      "href": "/support/articles/12560603840596",
+      "title": "[Important] Bitget to delist LAUNCHCOINUSDT futures and related services",
+      "section_date": "2025-10-23 10:49"
+    },
+    {
+      "href": "/support/articles/12560603840423",
+      "title": "[Important] Bitget to delist KDAUSDT futures and related services",
+      "section_date": "2025-10-22 07:29"
+    },
+    {
+      "href": "/support/articles/12560603840194",
+      "title": "[Important] Bitget to delist MAJORUSDT futures and related services",
+      "section_date": "2025-10-20 12:06"
+    },
+    {
+      "href": "/support/articles/12560603840135",
+      "title": "[Important] Bitget to delist KUSDT futures and related services",
+      "section_date": "2025-10-19 07:59"
+    },
+    {
+      "href": "/support/articles/12560603840123",
+      "title": "[Important] Bitget to delist 10000000AIDOGEUSDT futures and related services",
+      "section_date": "2025-10-18 11:51"
+    },
+    {
+      "href": "/support/articles/12560603840122",
+      "title": "[Important] Bitget to delist JUSDT futures and related services",
+      "section_date": "2025-10-18 11:50"
+    },
+    {
+      "href": "/support/articles/12560603839649",
+      "title": "[Important] Bitget to delist ALPHAUSDT futures and related services",
+      "section_date": "2025-10-13 10:34"
+    },
+    {
+      "href": "/support/articles/12560603839641",
+      "title": "[Important] Bitget to delist DFDVUSDT futures and related services",
+      "section_date": "2025-10-13 08:54"
+    },
+    {
+      "href": "/support/articles/12560603839639",
+      "title": "[Important] Bitget to delist DUCKUSDT futures and related services",
+      "section_date": "2025-10-13 08:23"
+    },
+    {
+      "href": "/support/articles/12560603839489",
+      "title": "[Important] Bitget to delist GORKUSDT futures and related services",
+      "section_date": "2025-10-10 07:00"
+    },
+    {
+      "href": "/support/articles/12560603839488",
+      "title": "[Important] Bitget to delist SERAPHUSDT futures and related services",
+      "section_date": "2025-10-10 07:00"
+    },
+    {
+      "href": "/support/articles/12560603838784",
+      "title": "[Important] Bitget to delist SLERFUSDT futures and related services",
+      "section_date": "2025-09-29 03:41"
+    },
+    {
+      "href": "/support/articles/12560603838688",
+      "title": "[Important] Bitget to delist NODEUSDT, HOUSEUSDT futures and related services",
+      "section_date": "2025-09-26 11:19"
+    },
+    {
+      "href": "/support/articles/12560603838476",
+      "title": "[Important] Bitget to delist UXLINKUSDT, NEIROETHUSDT futures and related services",
+      "section_date": "2025-09-24 10:16"
+    },
+    {
+      "href": "/support/articles/12560603838129",
+      "title": "[Important] Bitget announcement: Delisting of BAKEUSDT, HIFIUSDT, RHEAUSDT for futures trading and futures trading bots",
+      "section_date": "2025-09-18 12:17"
+    },
+    {
+      "href": "/support/articles/12560603837591",
+      "title": "[Important] Bitget to delist BSWUSDT futures and related services",
+      "section_date": "2025-09-11 09:58"
+    },
+    {
+      "href": "/support/articles/12560603837150",
+      "title": "[Important] Bitget to delist RWAUSDT futures and related services",
+      "section_date": "2025-09-05 11:50"
+    },
+    {
+      "href": "/support/articles/12560603836629",
+      "title": "[Important] Bitget to delist 10000WHYUSDT futures and related services",
+      "section_date": "2025-08-30 03:52"
+    },
+    {
+      "href": "/support/articles/12560603836586",
+      "title": "[Important] Bitget to delist AGTUSDT,BDXNUSDT futures and related services",
+      "section_date": "2025-08-29 08:16"
+    },
+    {
+      "href": "/support/articles/12560603836161",
+      "title": "[Important] Bitget to delist BULLAUSDT, RFCUSDT, FRAGUSDT futures and related services",
+      "section_date": "2025-08-22 11:19"
+    },
+    {
+      "href": "/support/articles/12560603835600",
+      "title": "[Important] Bitget to delist LEVERUSDT futures and related services",
+      "section_date": "2025-08-15 06:37"
+    },
+    {
+      "href": "/support/articles/12560603835188",
+      "title": "[Important] Bitget announcement: Delisting of TSTBSCPERP for futures trading and futures trading bots",
+      "section_date": "2025-08-08 09:58"
+    },
+    {
+      "href": "/support/articles/12560603834589",
+      "title": "[Important] Bitget announcement: Delisting of ASRRUSDT for futures trading and futures trading bots",
+      "section_date": "2025-08-01 06:26"
+    },
+    {
+      "href": "/support/articles/12560603834129",
+      "title": "[Important] Bitget announcement: Delisting of CBKUSDT, SHMUSDT, BOMBUSDT for futures trading and futures trading bots",
+      "section_date": "2025-07-25 07:47"
+    },
+    {
+      "href": "/support/articles/12560603832169",
+      "title": "[Important] Bitget announcement: Delisting of LOKAUSDT for futures trading and futures trading bots",
+      "section_date": "2025-07-19 03:58"
+    },
+    {
+      "href": "/support/articles/12560603831443",
+      "title": "[Important] Bitget announcement: Delisting of ELDEUSDT, TGTUSDT, PFVSUSDT, KILOUSDT for futures trading and futures trading bots",
+      "section_date": "2025-07-11 02:20"
+    },
+    {
+      "href": "/support/articles/12560603830805",
+      "title": "[Important] Bitget announcement: Delisting of NCUSDT, PRAIUSDT for futures trading and futures trading bots",
+      "section_date": "2025-07-03 02:44"
+    },
+    {
+      "href": "/support/articles/12560603830515",
+      "title": "[Important] Bitget announcement: Delisting of DARKUSDT, CLOUDUSDT for futures trading and futures trading bots",
+      "section_date": "2025-06-28 08:09"
+    },
+    {
+      "href": "/support/articles/12560603830059",
+      "title": "[Important] Bitget announcement: Delisting of FTNUSDT for futures trading and futures trading bots",
+      "section_date": "2025-06-22 10:39"
+    },
+    {
+      "href": "/support/articles/12560603829111",
+      "title": "[Important] Bitget announcement: Delisting of BROCCOLIF3BUSDT, AIOTUSDT, MYXUSDT, RDACUSDT, 1000000BOBUSDT for futures trading and futures trading bots",
+      "section_date": "2025-06-09 10:33"
+    },
+    {
+      "href": "/support/articles/12560603828335",
+      "title": "[Important] Bitget announcement: Delisting of PAWSUSDT for futures trading and futures trading bots",
+      "section_date": "2025-05-28 12:40"
+    },
+    {
+      "href": "/support/articles/12560603827761",
+      "title": "[Important] Bitget announcement: Delisting of FOXYUSDT for futures trading and futures trading bots",
+      "section_date": "2025-05-20 09:49"
+    },
+    {
+      "href": "/support/articles/12560603827476",
+      "title": "[Important] Bitget announcement: Delisting of STPTUSDT for futures trading and futures trading bots",
+      "section_date": "2025-05-15 09:37"
+    },
+    {
+      "href": "/support/articles/12560603827122",
+      "title": "[Important] Bitget announcement: Delisting of MEMEFIUSDT for futures trading and futures trading bots",
+      "section_date": "2025-05-10 04:47"
+    },
+    {
+      "href": "/support/articles/12560603826435",
+      "title": "[Important] Bitget announcement: Delisting of OIKUSDT for futures trading and futures trading bots",
+      "section_date": "2025-04-29 02:41"
+    },
+    {
+      "href": "/support/articles/12560603826332",
+      "title": "[Important] Bitget announcement: Delisting of LUCEUSDT for futures trading and futures trading bots",
+      "section_date": "2025-04-26 08:21"
+    },
+    {
+      "href": "/support/articles/12560603826249",
+      "title": "[Important] Bitget announcement: Delisting of MAXUSDT for futures trading and futures trading bots",
+      "section_date": "2025-04-24 12:54"
+    },
+    {
+      "href": "/support/articles/12560603826218",
+      "title": "[Important] Bitget announcement: Delisting of ALPACAUSDT for futures trading and futures trading bots",
+      "section_date": "2025-04-24 07:04"
+    },
+    {
+      "href": "/support/articles/12560603825532",
+      "title": "[Important] Bitget announcement: Delisting of VIDTUSDT for futures trading and futures trading bots",
+      "section_date": "2025-04-13 13:18"
+    },
+    {
+      "href": "/support/articles/12560603825523",
+      "title": "[Important] Bitget announcement: Delisting of JAILSTOOLUSDT for futures trading and futures trading bots",
+      "section_date": "2025-04-12 06:42"
+    },
+    {
+      "href": "/support/articles/12560603825302",
+      "title": "[Important] Bitget announcement: Delisting of NULSUSDT,TROYUSDT for futures trading and futures trading bots",
+      "section_date": "2025-04-10 03:26"
+    },
+    {
+      "href": "/support/articles/12560603825209",
+      "title": "[Important] Bitget announcement: Delisting of QKCUSDT,PROSUSDT for futures trading and futures trading bots",
+      "section_date": "2025-04-09 03:50"
+    },
+    {
+      "href": "/support/articles/12560603824723",
+      "title": "[Important] Bitget announcement: Delisting of AERGOUSDT for futures trading and futures trading bots",
+      "section_date": "2025-03-28 02:39"
+    },
+    {
+      "href": "/support/articles/12560603824514",
+      "title": "[Important] Bitget announcement: Delisting of BURGERUSDT for futures trading and futures trading bots",
+      "section_date": "2025-03-22 08:38"
+    },
+    {
+      "href": "/support/articles/12560603824511",
+      "title": "Bitget futures delisting rules",
+      "section_date": "2025-03-22 06:37"
+    },
+    {
+      "href": "/support/articles/12560603824345",
+      "title": "[Important] Bitget announcement: Delisting of JELLYJELLYUSDT for futures trading and futures trading bots",
+      "section_date": "2025-03-19 08:38"
+    },
+    {
+      "href": "/support/articles/12560603823880",
+      "title": "[Important] Bitget announcement: Delisting of FLOCKUSDT for futures trading and futures trading bots",
+      "section_date": "2025-03-11 03:11"
+    },
+    {
+      "href": "/support/articles/12560603823879",
+      "title": "[Important] Bitget announcement: Delisting of MAVIAUSDT for futures trading and futures trading bots",
+      "section_date": "2025-03-11 03:09"
+    },
+    {
+      "href": "/support/articles/12560603823720",
+      "title": "[Important] Bitget announcement: Delisting of RIFSOLUSDT for futures trading and futures trading bots",
+      "section_date": "2025-03-06 11:40"
+    },
+    {
+      "href": "/support/articles/12560603823457",
+      "title": "[Important] Bitget announcement: Delisting of GMCI30USDT,GMMEMEUSDST for futures trading and futures trading bots",
+      "section_date": "2025-03-02 04:05"
+    },
+    {
+      "href": "/support/articles/12560603823310",
+      "title": "[Important] Bitget announcement: Delisting of MVLUSDT, CATSUSDT for futures trading and futures trading bots",
+      "section_date": "2025-02-26 08:57"
+    },
+    {
+      "href": "/support/articles/12560603823132",
+      "title": "[Important] Bitget announcement: Delisting of L3USDT for futures trading and futures trading bots",
+      "section_date": "2025-02-22 06:06"
+    },
+    {
+      "href": "/support/articles/12560603823131",
+      "title": "[Important] Bitget announcement: Delisting of XTERUSDT for futures trading and futures trading bots",
+      "section_date": "2025-02-22 06:01"
+    },
+    {
+      "href": "/support/articles/12560603822827",
+      "title": "[Important] Bitget announcement: Delisting of STMXUSDT for futures trading and futures trading bots",
+      "section_date": "2025-02-18 03:22"
+    },
+    {
+      "href": "/support/articles/12560603822239",
+      "title": "[Important] Bitget announcement: Delisting of SMILEUSDT for futures trading and futures trading bots",
+      "section_date": "2025-02-06 10:38"
+    },
+    {
+      "href": "/support/articles/12560603822238",
+      "title": "[Important] Bitget announcement: Delisting of NEONUSDT for futures trading and futures trading bots",
+      "section_date": "2025-02-06 10:10"
+    },
+    {
+      "href": "/support/articles/12560603821330",
+      "title": "[Important] Bitget announcement: Delisting of REEFUSDT for futures trading and futures trading bots",
+      "section_date": "2025-01-15 10:09"
+    }
+  ],
+  "spot": [
+    {
+      "href": "/support/articles/12560603846919",
+      "title": "Notice of delisting 4 spot trading pairs on 9 January 2026",
+      "section_date": "2025-12-31 10:00"
+    },
+    {
+      "href": "/support/articles/12560603846646",
+      "title": "Notice of Delisting 6 Spot Trading Pairs on 31 December 2025",
+      "section_date": "2025-12-26 10:00"
+    },
+    {
+      "href": "/support/articles/12560603846149",
+      "title": "Notice of Delisting 12 Spot Trading Pairs on 26 December 2025",
+      "section_date": "2025-12-19 10:00"
+    },
+    {
+      "href": "/support/articles/12560603845622",
+      "title": "Notice of Delisting 12 Spot Trading Pairs on 19 December 2025",
+      "section_date": "2025-12-12 10:00"
+    },
+    {
+      "href": "/support/articles/12560603845063",
+      "title": "Notice of Delisting 15 Spot Trading Pairs on 12 December 2025",
+      "section_date": "2025-12-05 10:00"
+    },
+    {
+      "href": "/support/articles/12560603844175",
+      "title": "Notice of Delisting 10 Spot Trading Pairs on 5 December 2025",
+      "section_date": "2025-11-28 10:00"
+    },
+    {
+      "href": "/support/articles/12560603843472",
+      "title": "Notice of Delisting 15 Spot Trading Pairs on 28 November 2025",
+      "section_date": "2025-11-21 10:00"
+    },
+    {
+      "href": "/support/articles/12560603842756",
+      "title": "Notice of Delisting 6 Spot Trading Pairs on 21 November 2025",
+      "section_date": "2025-11-14 10:00"
+    },
+    {
+      "href": "/support/articles/12560603842214",
+      "title": "Notice of Delisting DEUSD Spot Trading Pair on 14 November 2025",
+      "section_date": "2025-11-11 04:00"
+    },
+    {
+      "href": "/support/articles/12560603841954",
+      "title": "Notice of Delisting 14 Spot Trading Pairs on 14 November 2025",
+      "section_date": "2025-11-07 10:00"
+    },
+    {
+      "href": "/support/articles/12560603841233",
+      "title": "Notice of Delisting 6 Spot Trading Pairs on 7 November 2025",
+      "section_date": "2025-10-31 10:00"
+    },
+    {
+      "href": "/support/articles/12560603840712",
+      "title": "Notice of Delisting 11 Spot Trading Pairs on 31 October 2025",
+      "section_date": "2025-10-24 10:00"
+    },
+    {
+      "href": "/support/articles/12560603840064",
+      "title": "Notice of Delisting 7 Spot Trading Pairs on 24 October 2025",
+      "section_date": "2025-10-17 10:00"
+    },
+    {
+      "href": "/support/articles/12560603838611",
+      "title": "Notice of Delisting 3 Spot Trading Pairs on 9 October 2025",
+      "section_date": "2025-09-26 05:30"
+    },
+    {
+      "href": "/support/articles/12560603838168",
+      "title": "Notice of Delisting 5 Spot Trading Pairs on 28 September 2025",
+      "section_date": "2025-09-19 10:00"
+    },
+    {
+      "href": "/support/articles/12560603837654",
+      "title": "Notice of Delisting 4 Spot Trading Pairs on 19 September 2025",
+      "section_date": "2025-09-12 10:00"
+    },
+    {
+      "href": "/support/articles/12560603837099",
+      "title": "Notice of Delisting 14 Spot Trading Pairs on 12 September 2025",
+      "section_date": "2025-09-05 10:00"
+    },
+    {
+      "href": "/support/articles/12560603836573",
+      "title": "Notice of Delisting 4 Spot Trading Pairs on 5 September 2025",
+      "section_date": "2025-08-29 10:00"
+    },
+    {
+      "href": "/support/articles/12560603836141",
+      "title": "Notice of Delisting 14 Spot Trading Pairs on 29 August 2025",
+      "section_date": "2025-08-22 10:00"
+    },
+    {
+      "href": "/support/articles/12560603835606",
+      "title": "Notice of Delisting 7 Spot Trading Pairs on 22 August 2025",
+      "section_date": "2025-08-15 10:00"
+    },
+    {
+      "href": "/support/articles/12560603835178",
+      "title": "Notice of Delisting 2 Spot Trading Pairs on 15 August 2025",
+      "section_date": "2025-08-08 10:00"
+    },
+    {
+      "href": "/support/articles/12560603834606",
+      "title": "Notice of Delisting 3 Spot Trading Pairs on 8 August 2025",
+      "section_date": "2025-08-01 10:00"
+    },
+    {
+      "href": "/support/articles/12560603834072",
+      "title": "Notice of Delisting ALU/USDT Spot Trading Pair on 1 August 2025",
+      "section_date": "2025-07-25 10:00"
+    },
+    {
+      "href": "/support/articles/12560603832100",
+      "title": "Notice of Delisting 5 Spot Trading Pairs on 25 July 2025",
+      "section_date": "2025-07-18 10:00"
+    },
+    {
+      "href": "/support/articles/12560603831363",
+      "title": "Notice of Delisting 4 Spot Trading Pairs on 17 July 2025",
+      "section_date": "2025-07-10 10:00"
+    },
+    {
+      "href": "/support/articles/12560603830972",
+      "title": "Notice of Delisting 35 Spot Trading Pairs on 12 July 2025",
+      "section_date": "2025-07-05 10:00"
+    },
+    {
+      "href": "/support/articles/12560603830276",
+      "title": "Notice of Delisting 5 Spot Trading Pairs on 2 July 2025",
+      "section_date": "2025-06-25 10:00"
+    },
+    {
+      "href": "/support/articles/12560603829361",
+      "title": "Notice of Delisting 2 Spot Trading Pairs on 19 June 2025",
+      "section_date": "2025-06-12 10:00"
+    },
+    {
+      "href": "/support/articles/12560603828881",
+      "title": "Notice of Delisting 4 Spot Trading Pairs on 12 June 2025",
+      "section_date": "2025-06-05 10:00"
+    },
+    {
+      "href": "/support/articles/12560603828397",
+      "title": "Notice of Delisting 9 Spot Trading Pairs on 5 June 2025",
+      "section_date": "2025-05-29 10:00"
+    },
+    {
+      "href": "/support/articles/12560603827910",
+      "title": "Notice of Delisting 5 Spot Trading Pairs on 29 May 2025",
+      "section_date": "2025-05-22 10:00"
+    },
+    {
+      "href": "/support/articles/12560603827810",
+      "title": "Announcement on the delisting of spot trading pairs from the unified account",
+      "section_date": "2025-05-21 03:59"
+    },
+    {
+      "href": "/support/articles/12560603827595",
+      "title": "Notice of Delisting 25 Spot Trading Pairs on 24 May 2025",
+      "section_date": "2025-05-17 10:00"
+    },
+    {
+      "href": "/support/articles/12560603827058",
+      "title": "Announcement on the delisting of spot trading pairs from the unified account",
+      "section_date": "2025-05-09 08:03"
+    },
+    {
+      "href": "/support/articles/12560603826958",
+      "title": "Notice of Delisting 7 Spot Trading Pairs on 15 May 2025",
+      "section_date": "2025-05-08 10:00"
+    },
+    {
+      "href": "/support/articles/12560603826640",
+      "title": "Notice of Delisting 4 Spot Trading Pairs on 10 May 2025",
+      "section_date": "2025-05-03 10:00"
+    },
+    {
+      "href": "/support/articles/12560603826150",
+      "title": "Notice of Delisting ARCA/USDT Spot Trading Pair on 6 May 2025",
+      "section_date": "2025-04-23 10:00"
+    },
+    {
+      "href": "/support/articles/12560603826151",
+      "title": "Notice of Delisting 3 Spot Trading Pairs on 30 April 2025",
+      "section_date": "2025-04-23 10:00"
+    },
+    {
+      "href": "/support/articles/12560603825700",
+      "title": "Notice of Delisting 6 Spot Trading Pairs on 23 April 2025",
+      "section_date": "2025-04-16 10:00"
+    },
+    {
+      "href": "/support/articles/12560603825236",
+      "title": "Notice of Delisting 6 Spot Trading Pairs on 16 April 2025",
+      "section_date": "2025-04-09 10:00"
+    },
+    {
+      "href": "/support/articles/12560603824997",
+      "title": "Notice of Delisting BIP1/USDT Spot Trading Pair on 24 April 2025",
+      "section_date": "2025-04-03 10:00"
+    },
+    {
+      "href": "/support/articles/12560603824995",
+      "title": "Notice of Delisting 5 Spot Trading Pairs on 10 April 2025",
+      "section_date": "2025-04-03 10:00"
+    },
+    {
+      "href": "/support/articles/12560603824999",
+      "title": "Notice of Delisting FDUSD/USDT Spot Trading Pair on 4 April 2025",
+      "section_date": "2025-04-03 10:00"
+    },
+    {
+      "href": "/support/articles/12560603824744",
+      "title": "Notice of Delisting 3 Spot Trading Pairs on 4 April 2025",
+      "section_date": "2025-03-28 10:00"
+    },
+    {
+      "href": "/support/articles/12560603824583",
+      "title": "Notice of Delisting 5 Spot Trading Pairs on 1 April 2025",
+      "section_date": "2025-03-25 10:00"
+    },
+    {
+      "href": "/support/articles/12560603824483",
+      "title": "Notice of Delisting LAI/USDT Spot Trading Pair on 23 March 2025",
+      "section_date": "2025-03-22 10:00"
+    },
+    {
+      "href": "/support/articles/12560603824441",
+      "title": "Notice of Delisting DEFI/USDT Spot Trading Pair on 3 April 2025",
+      "section_date": "2025-03-21 10:00"
+    },
+    {
+      "href": "/support/articles/12560603824261",
+      "title": "Notice of Delisting 3 Spot Trading Pairs on 25 March 2025",
+      "section_date": "2025-03-18 10:00"
+    },
+    {
+      "href": "/support/articles/12560603823877",
+      "title": "Notice of Delisting 73 Spot Trading Pairs on 18 March 2025",
+      "section_date": "2025-03-11 10:00"
+    },
+    {
+      "href": "/support/articles/12560603822828",
+      "title": "Notice of Delisting 2 Spot Trading Pairs on 4 March 2025",
+      "section_date": "2025-02-18 10:00"
+    },
+    {
+      "href": "/support/articles/12560603822596",
+      "title": "Notice of Delisting LAB/USDT Spot Trading Pair on 27 February 2025",
+      "section_date": "2025-02-13 12:00"
+    },
+    {
+      "href": "/support/articles/12560603822431",
+      "title": "Notice of Delisting GINOA/USDT Spot Trading Pair on 25 February 2025",
+      "section_date": "2025-02-11 10:00"
+    },
+    {
+      "href": "/support/articles/12560603822034",
+      "title": "Notice of Delisting 35 Spot Trading Pairs on 10 February 2025",
+      "section_date": "2025-01-27 10:00"
+    },
+    {
+      "href": "/support/articles/12560603821024",
+      "title": "Notice of Delisting XOR/USDT Spot Trading Pair on 9 January 2025",
+      "section_date": "2025-01-08 08:00"
+    }
+  ]
+}

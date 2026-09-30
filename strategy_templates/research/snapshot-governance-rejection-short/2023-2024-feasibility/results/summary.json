@@ -1,0 +1,13 @@
+{
+  "proposals_total": 626,
+  "clean_binary_2023_2024": 43,
+  "negative_wins": 2,
+  "negative_win_assets": 1,
+  "by_asset": {
+    "LDO": 2
+  },
+  "by_year": {
+    "2023": 2
+  },
+  "decision": "freeze_feasibility_sample_too_small"
+}

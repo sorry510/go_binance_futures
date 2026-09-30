@@ -1,0 +1,37 @@
+{
+  "leverage": 4,
+  "tp_pct": 8,
+  "sl_pct": 6,
+  "fee_per_side": 0.0005,
+  "slippage_per_side_bps": 5,
+  "signal": "7d direct holder revenue / previous 7d direct holder revenue log-growth zero-cross",
+  "direction": {
+    "up_cross": "LONG",
+    "down_cross": "SHORT"
+  },
+  "entry": "next UTC daily open",
+  "eligibility": {
+    "min_futures_history_years": 2,
+    "min_signal_day_quote_volume_usdt": 5000000
+  },
+  "discovery": {
+    "start": "2023-01-01",
+    "end": "2024-12-31",
+    "min_events": 80,
+    "min_symbols": 8,
+    "min_mean7": 0.0025,
+    "min_breadth": 0.6,
+    "require_each_year_positive": true
+  },
+  "oos": {
+    "start": "2025-01-01",
+    "end": "2026-08-24",
+    "min_events": 80,
+    "min_symbols": 8,
+    "min_mean7": 0.0025,
+    "min_breadth": 0.6,
+    "require_2025_positive": true,
+    "require_2026_positive": true
+  },
+  "source_map": "inputs/source_map.json"
+}

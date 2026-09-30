@@ -1,0 +1,19 @@
+{
+  "direction": {
+    "ratio_increase": "LONG",
+    "ratio_decrease": "SHORT"
+  },
+  "min_contract_history_days": 730,
+  "min_prior_24h_quote_volume_usdt": 5000000,
+  "planned_execution": {
+    "entry": "next 1m open",
+    "leverage": 4,
+    "profit": 8,
+    "loss": 6,
+    "fee": 0.0005,
+    "slippage_bps": 5,
+    "funding": true,
+    "max_hold_hours": 24
+  },
+  "discovery_period": "2024; 2023 checked before returns but no reproducible update series found"
+}

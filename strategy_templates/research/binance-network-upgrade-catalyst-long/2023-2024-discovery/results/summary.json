@@ -1,0 +1,27 @@
+{
+  "articles": 175,
+  "raw_events": 191,
+  "eligible": 82,
+  "unique_symbols": 32,
+  "excluded": {
+    "history_lt_2y_or_missing": 98,
+    "quote_volume_lt_5m": 8,
+    "missing_24h_bars": 3
+  },
+  "r1": {
+    "n": 82,
+    "mean": 0.0009024826966277824,
+    "win": 0.4146341463414634
+  },
+  "r4": {
+    "n": 82,
+    "mean": 0.0010768432128237084,
+    "win": 0.4878048780487805
+  },
+  "r12": {
+    "n": 82,
+    "mean": 0.0007432261830910366,
+    "win": 0.47560975609756095
+  },
+  "positive_symbols12": 14
+}

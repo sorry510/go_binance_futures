@@ -1,0 +1,110 @@
+[
+  {
+    "symbol": "UNIUSDT",
+    "slugs": [
+      "uniswap-v1",
+      "uniswap-v2",
+      "uniswap-v3",
+      "uniswap-v4"
+    ],
+    "first_futures": "2020-09-18T00:00:00+00:00",
+    "eligible_from": "2022-09-18",
+    "aligned_days": 793,
+    "discovery_events": 88
+  },
+  {
+    "symbol": "RAYUSDT",
+    "slugs": [
+      "raydium-amm"
+    ],
+    "first_futures": "2021-08-20T00:00:00+00:00",
+    "eligible_from": "2023-08-20",
+    "aligned_days": 793,
+    "discovery_events": 0
+  },
+  {
+    "symbol": "CRVUSDT",
+    "slugs": [
+      "curve-dex"
+    ],
+    "first_futures": "2020-09-01T00:00:00+00:00",
+    "eligible_from": "2022-09-01",
+    "aligned_days": 788,
+    "discovery_events": 84
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "slugs": [
+      "sushiswap",
+      "sushiswap-v3",
+      "sushi-aptos"
+    ],
+    "first_futures": "2020-09-04T00:00:00+00:00",
+    "eligible_from": "2022-09-04",
+    "aligned_days": 790,
+    "discovery_events": 91
+  },
+  {
+    "symbol": "DODOUSDT",
+    "slugs": [
+      "dodo-amm"
+    ],
+    "first_futures": "2021-02-19T00:00:00+00:00",
+    "eligible_from": "2023-02-19",
+    "aligned_days": 0,
+    "discovery_events": 0
+  },
+  {
+    "symbol": "BALUSDT",
+    "slugs": [
+      "balancer-v1",
+      "balancer-v2",
+      "balancer-v3"
+    ],
+    "first_futures": "2020-09-01T00:00:00+00:00",
+    "eligible_from": "2022-09-01",
+    "aligned_days": 791,
+    "discovery_events": 62
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "slugs": [
+      "thorchain-dex"
+    ],
+    "first_futures": "2020-09-04T00:00:00+00:00",
+    "eligible_from": "2022-09-04",
+    "aligned_days": 793,
+    "discovery_events": 96
+  },
+  {
+    "symbol": "WOOUSDT",
+    "slugs": [
+      "woofi-swap"
+    ],
+    "first_futures": "2022-04-08T00:00:00+00:00",
+    "eligible_from": "2024-04-08",
+    "aligned_days": 793,
+    "discovery_events": 27
+  },
+  {
+    "symbol": "KNCUSDT",
+    "slugs": [
+      "kyberswap-classic",
+      "kyberswap-elastic"
+    ],
+    "first_futures": "2020-06-22T00:00:00+00:00",
+    "eligible_from": "2022-06-22",
+    "aligned_days": 576,
+    "discovery_events": 58
+  },
+  {
+    "symbol": "INJUSDT",
+    "slugs": [
+      "injective-spot"
+    ],
+    "first_futures": "2022-08-17T00:00:00+00:00",
+    "eligible_from": "2024-08-17",
+    "aligned_days": 793,
+    "discovery_events": 13
+  }
+]

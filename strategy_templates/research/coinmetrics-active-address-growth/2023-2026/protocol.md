@@ -1,0 +1,1 @@
+Coin Metrics Community AdrActCnt only. Smooth with two non-overlapping 7d means; growth zero-cross is the natural threshold. Metric for day t is acted on only after day completion, using next UTC day Binance USD-M open. No threshold or direction reversal after results.

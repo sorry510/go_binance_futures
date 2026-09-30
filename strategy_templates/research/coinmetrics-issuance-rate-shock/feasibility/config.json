@@ -1,0 +1,17 @@
+{
+  "metric": "IssTotNtv / SplyCur",
+  "planned_signal": "log issuance-rate 90d causal z-score; z>=3 SHORT; z<=-3 LONG; |z|<1 rearm",
+  "minimum_variable_symbols": 8,
+  "candidate_assets": [
+    "btc",
+    "eth",
+    "ada",
+    "link",
+    "bch",
+    "ltc",
+    "doge",
+    "uni",
+    "zec",
+    "bnb"
+  ]
+}

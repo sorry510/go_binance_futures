@@ -1,0 +1,1 @@
+Use only the already-audited 326-event Binance leverage/margin-tier census. Require unchanged first-tier max leverage and unchanged first-tier notional cap, with a changed first-tier maintenance-margin rate. MMR decrease is pre-registered LONG; increase SHORT. Apply existing >=730d and >=5M prior-24h QuoteVolume rules.

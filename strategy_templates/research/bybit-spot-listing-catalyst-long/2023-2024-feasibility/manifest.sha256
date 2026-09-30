@@ -1,0 +1,8 @@
+4063e286229a9a0cc1970fca8df9e89425e19aa7732506bf6ab640d99591a61a  strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/README.md
+a9f059dc2365c5953bd15ef38d044037cc32e28ce7e152ec45a199f163e63ce2  strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/config.json
+0402e04000b97a60f8b0744538996f7404529b127a808347818f6599e9a817c9  strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/eligibility.py
+fb26b45056a98ec46f257f92c6538b3872f0d253580d19ae6a9e29abfff12ed8  strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/inputs/eligibility.json
+6d0052244cfbe2a18b8a74fca1b073215010abcc38323ba348878caf13b94ee3  strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/inputs/events.json
+675708f6106d400735b02baf91f89f39872c076723fe7dbd81cb7e211c451901  strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/protocol.md
+4c51e356efaa2f454c330f19391c34bc18b9da06c4e613c3cf5115e5c90d54aa  strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/provenance.json
+1c6912389377132b2912eb1c0128c6f0b6110dc7e23f2fb948ba1c798324d493  strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/universe.py

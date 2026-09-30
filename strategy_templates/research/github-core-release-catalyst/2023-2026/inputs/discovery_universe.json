@@ -1,0 +1,3202 @@
+[
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 103476678,
+    "tag_name": "v23.2",
+    "name": "Bitcoin Core 23.2",
+    "published_at": "2023-05-18T15:11:14Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v23.2",
+    "utc_date": "2023-05-18"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 104379726,
+    "tag_name": "v25.0",
+    "name": "Bitcoin Core 25.0",
+    "published_at": "2023-05-26T10:28:38Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v25.0",
+    "utc_date": "2023-05-26"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 125819516,
+    "tag_name": "v25.1",
+    "name": "Bitcoin Core 25.1",
+    "published_at": "2023-10-19T14:46:01Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v25.1",
+    "utc_date": "2023-10-19"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 127498670,
+    "tag_name": "v24.2",
+    "name": "Bitcoin Core 24.2",
+    "published_at": "2023-11-01T09:57:16Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v24.2",
+    "utc_date": "2023-11-01"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 133081040,
+    "tag_name": "v26.0",
+    "name": "Bitcoin Core 26.0",
+    "published_at": "2023-12-07T19:53:00Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v26.0",
+    "utc_date": "2023-12-07"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 149405578,
+    "tag_name": "v26.1",
+    "name": "Bitcoin Core 26.1",
+    "published_at": "2024-04-02T14:11:52Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v26.1",
+    "utc_date": "2024-04-02"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 151436726,
+    "tag_name": "v25.2",
+    "name": "Bitcoin Core 25.2",
+    "published_at": "2024-04-16T19:45:27Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v25.2",
+    "utc_date": "2024-04-16"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 160879133,
+    "tag_name": "v27.1",
+    "name": "Bitcoin Core 27.1",
+    "published_at": "2024-06-17T14:52:10Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v27.1",
+    "utc_date": "2024-06-17"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 164958671,
+    "tag_name": "v26.2",
+    "name": "Bitcoin Core 26.2",
+    "published_at": "2024-07-11T09:19:09Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v26.2",
+    "utc_date": "2024-07-11"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 178527470,
+    "tag_name": "v28.0",
+    "name": "Bitcoin Core 28.0",
+    "published_at": "2024-10-05T15:18:54Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v28.0",
+    "utc_date": "2024-10-05"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "repo": "bitcoin/bitcoin",
+    "release_id": 183357017,
+    "tag_name": "v27.2",
+    "name": "Bitcoin Core 27.2",
+    "published_at": "2024-11-04T12:21:22Z",
+    "html_url": "https://github.com/bitcoin/bitcoin/releases/tag/v27.2",
+    "utc_date": "2024-11-04"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 92007522,
+    "tag_name": "v1.11.0",
+    "name": "Annos Basin (v1.11.0)",
+    "published_at": "2023-02-15T18:16:02Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.11.0",
+    "utc_date": "2023-02-15"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 92750261,
+    "tag_name": "v1.11.1",
+    "name": "Saradril (v1.11.1)",
+    "published_at": "2023-02-16T19:54:38Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.11.1",
+    "utc_date": "2023-02-16"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 93283709,
+    "tag_name": "v1.11.2",
+    "name": "Kite's Nest (v1.11.2)",
+    "published_at": "2023-02-22T12:26:30Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.11.2",
+    "utc_date": "2023-02-22"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 94615838,
+    "tag_name": "v1.11.3",
+    "name": "Spekilas (v1.11.3)",
+    "published_at": "2023-03-07T17:18:42Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.11.3",
+    "utc_date": "2023-03-07"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 95235045,
+    "tag_name": "v1.11.4",
+    "name": "Vana (v1.11.4)",
+    "published_at": "2023-03-10T19:03:56Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.11.4",
+    "utc_date": "2023-03-10"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 96302483,
+    "tag_name": "v1.11.5",
+    "name": "Erszbat (v1.11.5)",
+    "published_at": "2023-03-21T08:05:22Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.11.5",
+    "utc_date": "2023-03-21"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 100157465,
+    "tag_name": "v1.11.6",
+    "name": "Azimir (v1.11.6)",
+    "published_at": "2023-04-20T18:17:29Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.11.6",
+    "utc_date": "2023-04-20"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 103938381,
+    "tag_name": "v1.12.0",
+    "name": "Krogam DMZ (v1.12.0)",
+    "published_at": "2023-05-25T10:02:50Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.12.0",
+    "utc_date": "2023-05-25"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 115973240,
+    "tag_name": "v1.12.1",
+    "name": "Antibaar (v1.12.1)",
+    "published_at": "2023-08-10T18:32:32Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.12.1",
+    "utc_date": "2023-08-10"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 116155607,
+    "tag_name": "v1.12.2",
+    "name": "Mawinor (v1.12.2)",
+    "published_at": "2023-08-12T09:05:53Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.12.2",
+    "utc_date": "2023-08-12"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 120749555,
+    "tag_name": "v1.13.0",
+    "name": "Therum (v1.13.0)",
+    "published_at": "2023-09-12T11:03:34Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.0",
+    "utc_date": "2023-09-12"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 121451099,
+    "tag_name": "v1.13.1",
+    "name": "Zakros (v1.13.1)",
+    "published_at": "2023-09-17T14:56:46Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.1",
+    "utc_date": "2023-09-17"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 122894544,
+    "tag_name": "v1.13.2",
+    "name": "Phaistos (v1.13.2)",
+    "published_at": "2023-09-28T07:24:11Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.2",
+    "utc_date": "2023-09-28"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 124801193,
+    "tag_name": "v1.13.3",
+    "name": "Armeni (v1.13.3)",
+    "published_at": "2023-10-12T11:38:52Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.3",
+    "utc_date": "2023-10-12"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 125394318,
+    "tag_name": "v1.13.4",
+    "name": "Archanes (v1.13.4)",
+    "published_at": "2023-10-17T11:19:18Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.4",
+    "utc_date": "2023-10-17"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 129333996,
+    "tag_name": "v1.13.5",
+    "name": "Carbonaceous (v1.13.5)",
+    "published_at": "2023-11-14T12:05:18Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.5",
+    "utc_date": "2023-11-14"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 134290436,
+    "tag_name": "v1.13.6",
+    "name": "Porolan (v1.13.6)",
+    "published_at": "2023-12-18T18:09:46Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.6",
+    "utc_date": "2023-12-18"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 134468599,
+    "tag_name": "v1.13.7",
+    "name": "Fargeluse (v1.13.7)",
+    "published_at": "2023-12-19T13:04:09Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.7",
+    "utc_date": "2023-12-19"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 134870107,
+    "tag_name": "v1.13.8",
+    "name": "Patavig (v1.13.8)",
+    "published_at": "2023-12-22T12:49:08Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.8",
+    "utc_date": "2023-12-22"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 136450639,
+    "tag_name": "v1.13.9",
+    "name": "Sharjila (v1.13.9)",
+    "published_at": "2024-01-10T16:32:21Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.9",
+    "utc_date": "2024-01-10"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 136705855,
+    "tag_name": "v1.13.10",
+    "name": "Sharjila B (v1.13.10)",
+    "published_at": "2024-01-11T17:30:03Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.10",
+    "utc_date": "2024-01-11"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 138282093,
+    "tag_name": "v1.13.11",
+    "name": "Tremanre (v1.13.11)",
+    "published_at": "2024-01-24T10:56:36Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.11",
+    "utc_date": "2024-01-24"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 140512671,
+    "tag_name": "v1.13.12",
+    "name": "Edolus (v1.13.12)",
+    "published_at": "2024-02-09T07:00:58Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.12",
+    "utc_date": "2024-02-09"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 142993435,
+    "tag_name": "v1.13.13",
+    "name": "Alsages (v1.13.13)",
+    "published_at": "2024-02-21T14:49:30Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.13",
+    "utc_date": "2024-02-21"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 143787724,
+    "tag_name": "v1.13.14",
+    "name": "Altaaya (v1.13.14)",
+    "published_at": "2024-02-27T11:53:11Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.14",
+    "utc_date": "2024-02-27"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 151371733,
+    "tag_name": "v1.13.15",
+    "name": "Ontamalca (v1.13.15)",
+    "published_at": "2024-04-17T05:23:22Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.13.15",
+    "utc_date": "2024-04-17"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 152356798,
+    "tag_name": "v1.14.0",
+    "name": "Asteria (v1.14.0)",
+    "published_at": "2024-04-24T08:06:28Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.0",
+    "utc_date": "2024-04-24"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 154730888,
+    "tag_name": "v1.14.2",
+    "name": "Ker (v1.14.2)",
+    "published_at": "2024-05-08T14:32:19Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.2",
+    "utc_date": "2024-05-08"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 154917232,
+    "tag_name": "v1.14.3",
+    "name": "Fuel Depot (v1.14.3)",
+    "published_at": "2024-05-09T10:40:10Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.3",
+    "utc_date": "2024-05-09"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 158747462,
+    "tag_name": "v1.14.4",
+    "name": "Triodia (v1.14.4)",
+    "published_at": "2024-06-05T08:12:17Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.4",
+    "utc_date": "2024-06-05"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 159181262,
+    "tag_name": "v1.14.5",
+    "name": "Bothros (v1.14.5)",
+    "published_at": "2024-06-06T13:41:53Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.5",
+    "utc_date": "2024-06-06"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 163590177,
+    "tag_name": "v1.14.6",
+    "name": "Talaria (v1.14.6)",
+    "published_at": "2024-07-02T15:29:23Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.6",
+    "utc_date": "2024-07-02"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 164988551,
+    "tag_name": "v1.14.7",
+    "name": "Trident (v1.14.7)",
+    "published_at": "2024-07-11T12:37:41Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.7",
+    "utc_date": "2024-07-11"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 169762277,
+    "tag_name": "v1.14.8",
+    "name": "Rayingri (v1.14.8)",
+    "published_at": "2024-08-12T12:18:33Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.8",
+    "utc_date": "2024-08-12"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 175481421,
+    "tag_name": "v1.14.9",
+    "name": "Aegis (v1.14.9)",
+    "published_at": "2024-09-18T17:54:48Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.9",
+    "utc_date": "2024-09-18"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 177247591,
+    "tag_name": "v1.14.10",
+    "name": "Kopis (v1.14.10)",
+    "published_at": "2024-09-27T11:15:39Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.10",
+    "utc_date": "2024-09-27"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 177755297,
+    "tag_name": "v1.14.11",
+    "name": "Makhaira (v1.14.11)",
+    "published_at": "2024-10-01T13:25:38Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.11",
+    "utc_date": "2024-10-01"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "repo": "ethereum/go-ethereum",
+    "release_id": 185895467,
+    "tag_name": "v1.14.12",
+    "name": "Gei Hinnom (v1.14.12)",
+    "published_at": "2024-11-19T13:53:28Z",
+    "html_url": "https://github.com/ethereum/go-ethereum/releases/tag/v1.14.12",
+    "utc_date": "2024-11-19"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 92175007,
+    "tag_name": "v1.1.19",
+    "name": "v1.1.19",
+    "published_at": "2023-02-13T06:21:03Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.1.19",
+    "utc_date": "2023-02-13"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 95690037,
+    "tag_name": "v1.1.20",
+    "name": "v1.1.20",
+    "published_at": "2023-03-15T11:59:39Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.1.20",
+    "utc_date": "2023-03-15"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 96995168,
+    "tag_name": "v1.1.21",
+    "name": "v1.1.21",
+    "published_at": "2023-03-27T09:07:09Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.1.21",
+    "utc_date": "2023-03-27"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 99732973,
+    "tag_name": "v1.1.23",
+    "name": "v1.1.23",
+    "published_at": "2023-04-17T11:29:20Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.1.23",
+    "utc_date": "2023-04-17"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 100777178,
+    "tag_name": "v1.2.0",
+    "name": "v1.2.0",
+    "published_at": "2023-04-25T08:54:57Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.0",
+    "utc_date": "2023-04-25"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 102746139,
+    "tag_name": "v1.2.3",
+    "name": "v1.2.3",
+    "published_at": "2023-05-12T07:44:15Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.3",
+    "utc_date": "2023-05-12"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 103889731,
+    "tag_name": "v1.2.4",
+    "name": "v1.2.4",
+    "published_at": "2023-05-23T02:34:41Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.4",
+    "utc_date": "2023-05-23"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 107806656,
+    "tag_name": "v1.2.5",
+    "name": "v1.2.5",
+    "published_at": "2023-06-08T09:40:24Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.5",
+    "utc_date": "2023-06-08"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 109216808,
+    "tag_name": "v1.2.7",
+    "name": "v1.2.7",
+    "published_at": "2023-06-20T12:17:30Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.7",
+    "utc_date": "2023-06-20"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 110008695,
+    "tag_name": "v1.2.8",
+    "name": "v1.2.8",
+    "published_at": "2023-06-27T07:02:24Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.8",
+    "utc_date": "2023-06-27"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 113087231,
+    "tag_name": "v1.2.9",
+    "name": "v1.2.9",
+    "published_at": "2023-07-21T09:51:10Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.9",
+    "utc_date": "2023-07-21"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 114906856,
+    "tag_name": "v1.2.10",
+    "name": "v1.2.10",
+    "published_at": "2023-08-03T04:11:33Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.10",
+    "utc_date": "2023-08-03"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 118339603,
+    "tag_name": "v1.2.11",
+    "name": "v1.2.11",
+    "published_at": "2023-08-23T03:42:58Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.11",
+    "utc_date": "2023-08-23"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 120613444,
+    "tag_name": "v1.2.12",
+    "name": "v1.2.12",
+    "published_at": "2023-09-11T09:57:49Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.12",
+    "utc_date": "2023-09-11"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 127790258,
+    "tag_name": "v1.2.13",
+    "name": "v1.2.13",
+    "published_at": "2023-11-03T02:49:33Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.13",
+    "utc_date": "2023-11-03"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 128898100,
+    "tag_name": "v1.3.1-beta",
+    "name": "v1.3.1-beta",
+    "published_at": "2023-11-10T11:48:49Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.1-beta",
+    "utc_date": "2023-11-10"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 132484879,
+    "tag_name": "v1.2.15",
+    "name": "v1.2.15",
+    "published_at": "2023-12-04T11:14:06Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.2.15",
+    "utc_date": "2023-12-04"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 133135174,
+    "tag_name": "v1.3.5",
+    "name": "v1.3.5",
+    "published_at": "2023-12-08T07:29:06Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.5",
+    "utc_date": "2023-12-08"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 133888386,
+    "tag_name": "v1.3.6",
+    "name": "v1.3.6",
+    "published_at": "2023-12-14T06:36:24Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.6",
+    "utc_date": "2023-12-14"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 134423624,
+    "tag_name": "v1.3.7",
+    "name": "v1.3.7",
+    "published_at": "2023-12-19T07:12:39Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.7",
+    "utc_date": "2023-12-19"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 138861939,
+    "tag_name": "v1.3.8",
+    "name": "v1.3.8",
+    "published_at": "2024-01-29T06:45:45Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.8",
+    "utc_date": "2024-01-29"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 142750574,
+    "tag_name": "v1.3.9",
+    "name": "v1.3.9",
+    "published_at": "2024-02-20T11:26:34Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.9",
+    "utc_date": "2024-02-20"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 144584595,
+    "tag_name": "v1.3.10",
+    "name": "v1.3.10",
+    "published_at": "2024-03-04T06:43:59Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.10",
+    "utc_date": "2024-03-04"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 146961076,
+    "tag_name": "v1.3.11",
+    "name": "v1.3.11",
+    "published_at": "2024-03-18T03:35:28Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.11",
+    "utc_date": "2024-03-18"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 147174387,
+    "tag_name": "v1.3.12",
+    "name": "v1.3.12",
+    "published_at": "2024-03-19T06:25:25Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.12",
+    "utc_date": "2024-03-19"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 149186953,
+    "tag_name": "v1.3.13",
+    "name": "v1.3.13",
+    "published_at": "2024-04-01T05:55:22Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.3.13",
+    "utc_date": "2024-04-01"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 150584473,
+    "tag_name": "v1.4.5",
+    "name": "v1.4.5",
+    "published_at": "2024-04-10T13:46:43Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.5",
+    "utc_date": "2024-04-10"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 153188874,
+    "tag_name": "v1.4.6",
+    "name": "v1.4.6",
+    "published_at": "2024-04-29T06:18:14Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.6",
+    "utc_date": "2024-04-29"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 156223896,
+    "tag_name": "v1.4.7",
+    "name": "v1.4.7",
+    "published_at": "2024-05-17T08:35:04Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.7",
+    "utc_date": "2024-05-17"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 156666248,
+    "tag_name": "v1.4.8",
+    "name": "v1.4.8",
+    "published_at": "2024-05-21T10:44:38Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.8",
+    "utc_date": "2024-05-21"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 159804964,
+    "tag_name": "v1.4.9",
+    "name": "v1.4.9",
+    "published_at": "2024-06-11T06:25:40Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.9",
+    "utc_date": "2024-06-11"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 161619405,
+    "tag_name": "v1.4.10",
+    "name": "v1.4.10",
+    "published_at": "2024-06-21T08:25:27Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.10",
+    "utc_date": "2024-06-21"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 162896782,
+    "tag_name": "v1.4.11",
+    "name": "v1.4.11",
+    "published_at": "2024-06-28T01:17:07Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.11",
+    "utc_date": "2024-06-28"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 166826753,
+    "tag_name": "v1.4.12",
+    "name": "v1.4.12",
+    "published_at": "2024-07-24T04:18:53Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.12",
+    "utc_date": "2024-07-24"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 169434260,
+    "tag_name": "v1.4.13",
+    "name": "v1.4.13",
+    "published_at": "2024-08-09T02:21:59Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.13",
+    "utc_date": "2024-08-09"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 172077373,
+    "tag_name": "v1.4.14",
+    "name": "v1.4.14",
+    "published_at": "2024-08-27T07:10:32Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.14",
+    "utc_date": "2024-08-27"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 175819128,
+    "tag_name": "v1.4.15",
+    "name": "v1.4.15",
+    "published_at": "2024-09-19T07:07:54Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.15",
+    "utc_date": "2024-09-19"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "repo": "bnb-chain/bsc",
+    "release_id": 187492114,
+    "tag_name": "v1.4.16",
+    "name": "v1.4.16",
+    "published_at": "2024-11-26T09:42:13Z",
+    "html_url": "https://github.com/bnb-chain/bsc/releases/tag/v1.4.16",
+    "utc_date": "2024-11-26"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 95603234,
+    "tag_name": "1.10.0",
+    "name": "rippled (XRP Ledger server) Version 1.10.0",
+    "published_at": "2023-03-14T18:20:01Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/1.10.0",
+    "utc_date": "2023-03-14"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 96534299,
+    "tag_name": "1.10.1",
+    "name": "rippled (XRP Ledger server) Version 1.10.1",
+    "published_at": "2023-03-22T18:26:25Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/1.10.1",
+    "utc_date": "2023-03-22"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 109303892,
+    "tag_name": "1.11.0",
+    "name": "rippled (XRP Ledger server) Version 1.11.0",
+    "published_at": "2023-06-21T00:03:50Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/1.11.0",
+    "utc_date": "2023-06-21"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 120197088,
+    "tag_name": "1.12.0",
+    "name": "rippled (XRP Ledger server) Version 1.12.0",
+    "published_at": "2023-09-06T21:51:33Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/1.12.0",
+    "utc_date": "2023-09-06"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 136344812,
+    "tag_name": "2.0.0",
+    "name": "rippled (XRP Ledger server) Version 2.0.0",
+    "published_at": "2024-01-09T15:05:15Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.0.0",
+    "utc_date": "2024-01-09"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 139046415,
+    "tag_name": "2.0.1",
+    "name": "rippled (XRP Ledger server) Version 2.0.1",
+    "published_at": "2024-01-30T02:55:31Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.0.1",
+    "utc_date": "2024-01-30"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 143051118,
+    "tag_name": "2.1.0",
+    "name": "rippled (XRP Ledger server) Version 2.1.0",
+    "published_at": "2024-02-21T19:57:23Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.1.0",
+    "utc_date": "2024-02-21"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 148676705,
+    "tag_name": "2.1.1",
+    "name": "rippled (XRP Ledger server) Version 2.1.1",
+    "published_at": "2024-03-27T13:37:41Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.1.1",
+    "utc_date": "2024-03-27"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 158893016,
+    "tag_name": "2.2.0",
+    "name": "rippled (XRP Ledger server) Version 2.2.0",
+    "published_at": "2024-06-04T23:09:54Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.2.0",
+    "utc_date": "2024-06-04"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 167719985,
+    "tag_name": "2.2.1",
+    "name": "rippled (XRP Ledger server) Version 2.2.1",
+    "published_at": "2024-07-29T19:37:30Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.2.1",
+    "utc_date": "2024-07-29"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 173277902,
+    "tag_name": "2.2.2",
+    "name": "rippled (XRP Ledger server) Version 2.2.2",
+    "published_at": "2024-09-03T18:10:30Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.2.2",
+    "utc_date": "2024-09-03"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 175123585,
+    "tag_name": "2.2.3",
+    "name": "rippled (XRP Ledger server) Version 2.2.3",
+    "published_at": "2024-09-15T14:32:19Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.2.3",
+    "utc_date": "2024-09-15"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "repo": "XRPLF/rippled",
+    "release_id": 187428565,
+    "tag_name": "2.3.0",
+    "name": "rippled (XRP Ledger server) Version 2.3.0",
+    "published_at": "2024-11-26T00:17:49Z",
+    "html_url": "https://github.com/XRPLF/rippled/releases/tag/2.3.0",
+    "utc_date": "2024-11-26"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 90416264,
+    "tag_name": "1.35.5",
+    "name": "Cardano Node 1.35.5",
+    "published_at": "2023-01-27T13:01:12Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/1.35.5",
+    "utc_date": "2023-01-27"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 95571070,
+    "tag_name": "1.35.6",
+    "name": "Cardano Node 1.35.6",
+    "published_at": "2023-03-16T14:01:54Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/1.35.6",
+    "utc_date": "2023-03-16"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 97856597,
+    "tag_name": "1.35.7",
+    "name": "Cardano Node 1.35.7",
+    "published_at": "2023-04-04T18:06:24Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/1.35.7",
+    "utc_date": "2023-04-04"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 101475105,
+    "tag_name": "8.0.0",
+    "name": "Cardano Node 8.0.0",
+    "published_at": "2023-05-09T17:18:18Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.0.0",
+    "utc_date": "2023-05-09"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 109131338,
+    "tag_name": "8.1.1",
+    "name": "Cardano Node 8.1.1",
+    "published_at": "2023-06-19T17:55:45Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.1.1",
+    "utc_date": "2023-06-19"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 113341666,
+    "tag_name": "8.1.2",
+    "name": "Cardano Node 8.1.2",
+    "published_at": "2023-07-26T12:17:56Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.1.2",
+    "utc_date": "2023-07-26"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 133178107,
+    "tag_name": "8.7.2",
+    "name": "Cardano Node 8.7.2",
+    "published_at": "2023-12-08T19:29:35Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.7.2",
+    "utc_date": "2023-12-08"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 134129461,
+    "tag_name": "8.7.3",
+    "name": "Cardano Node 8.7.3",
+    "published_at": "2024-01-09T20:33:42Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.7.3",
+    "utc_date": "2024-01-09"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 144921732,
+    "tag_name": "8.9.0",
+    "name": "Cardano Node 8.9.0",
+    "published_at": "2024-03-12T15:07:12Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.9.0",
+    "utc_date": "2024-03-12"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 147533112,
+    "tag_name": "8.9.1",
+    "name": " Cardano Node 8.9.1",
+    "published_at": "2024-03-25T20:36:38Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.9.1",
+    "utc_date": "2024-03-25"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 150423683,
+    "tag_name": "8.9.2",
+    "name": "8.9.2",
+    "published_at": "2024-04-16T10:57:38Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.9.2",
+    "utc_date": "2024-04-16"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 154807717,
+    "tag_name": "8.9.3",
+    "name": "Cardano Node 8.9.3",
+    "published_at": "2024-05-28T18:07:02Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.9.3",
+    "utc_date": "2024-05-28"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 162684980,
+    "tag_name": "8.12.1",
+    "name": "Cardano Node 8.12.1",
+    "published_at": "2024-06-27T14:42:28Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.12.1",
+    "utc_date": "2024-06-27"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 163139607,
+    "tag_name": "8.12.2",
+    "name": "Cardano Node 8.12.2",
+    "published_at": "2024-06-29T14:52:08Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/8.12.2",
+    "utc_date": "2024-06-29"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 163877375,
+    "tag_name": "9.0.0",
+    "name": "Cardano Node 9.0.0",
+    "published_at": "2024-07-08T18:47:18Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/9.0.0",
+    "utc_date": "2024-07-08"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 167010319,
+    "tag_name": "9.1.0",
+    "name": "Cardano Node 9.1.0",
+    "published_at": "2024-07-25T01:06:15Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/9.1.0",
+    "utc_date": "2024-07-25"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 172985289,
+    "tag_name": "9.1.1",
+    "name": "9.1.1",
+    "published_at": "2024-09-02T17:08:08Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/9.1.1",
+    "utc_date": "2024-09-02"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 175739576,
+    "tag_name": "9.2.0",
+    "name": "9.2.0",
+    "published_at": "2024-09-20T19:36:18Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/9.2.0",
+    "utc_date": "2024-09-20"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 176747757,
+    "tag_name": "9.2.1",
+    "name": "9.2.1",
+    "published_at": "2024-09-25T19:50:24Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/9.2.1",
+    "utc_date": "2024-09-25"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 182504085,
+    "tag_name": "10.1.1",
+    "name": "10.1.1",
+    "published_at": "2024-10-30T16:35:33Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/10.1.1",
+    "utc_date": "2024-10-30"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 183124209,
+    "tag_name": "10.1.2",
+    "name": "10.1.2",
+    "published_at": "2024-11-04T11:57:36Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/10.1.2",
+    "utc_date": "2024-11-04"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "repo": "IntersectMBO/cardano-node",
+    "release_id": 187599830,
+    "tag_name": "10.1.3",
+    "name": "10.1.3",
+    "published_at": "2024-11-30T13:53:10Z",
+    "html_url": "https://github.com/IntersectMBO/cardano-node/releases/tag/10.1.3",
+    "utc_date": "2024-11-30"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 88638814,
+    "tag_name": "v1.9.6",
+    "name": "Banff.6 - Dynamic State Syncing Support",
+    "published_at": "2023-01-11T21:07:05Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.9.6",
+    "utc_date": "2023-01-11"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 91052400,
+    "tag_name": "v1.9.8",
+    "name": "Banff.8 - PROXY Protocol",
+    "published_at": "2023-02-01T23:57:30Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.9.8",
+    "utc_date": "2023-02-01"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 93213166,
+    "tag_name": "v1.9.9",
+    "name": "Banff.9 - gRPC Plugin Protocol",
+    "published_at": "2023-02-21T20:44:07Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.9.9",
+    "utc_date": "2023-02-21"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 94164569,
+    "tag_name": "v1.9.10",
+    "name": "Banff.10 - Warp UX Improvements",
+    "published_at": "2023-03-02T00:56:47Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.9.10",
+    "utc_date": "2023-03-02"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 94486362,
+    "tag_name": "v1.9.11",
+    "name": "Banff.11 - Plugin Registration Regression",
+    "published_at": "2023-03-04T02:40:25Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.9.11",
+    "utc_date": "2023-03-04"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 96567442,
+    "tag_name": "v1.9.14",
+    "name": "Banff.14",
+    "published_at": "2023-03-23T01:16:27Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.9.14",
+    "utc_date": "2023-03-23"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 96737373,
+    "tag_name": "v1.9.15",
+    "name": "Banff.15",
+    "published_at": "2023-03-24T00:44:53Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.9.15",
+    "utc_date": "2023-03-24"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 96919570,
+    "tag_name": "v1.9.16",
+    "name": "Banff.16",
+    "published_at": "2023-03-26T01:58:47Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.9.16",
+    "utc_date": "2023-03-26"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 98989522,
+    "tag_name": "v1.10.0",
+    "name": "Cortina - X-Chain Linearization",
+    "published_at": "2023-04-12T00:07:08Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0",
+    "utc_date": "2023-04-12"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 101356442,
+    "tag_name": "v1.10.1",
+    "name": "Cortina.1 - DAG Engine Removal",
+    "published_at": "2023-04-29T03:39:25Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.1",
+    "utc_date": "2023-04-29"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 104043084,
+    "tag_name": "v1.10.2",
+    "name": "Cortina.2 - Post-Linearization Cleanup",
+    "published_at": "2023-05-24T03:13:13Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.2",
+    "utc_date": "2023-05-24"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 108644664,
+    "tag_name": "v1.10.3",
+    "name": "Cortina.3 - Push Query Reduction",
+    "published_at": "2023-06-14T23:14:59Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.3",
+    "utc_date": "2023-06-14"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 111714848,
+    "tag_name": "v1.10.4",
+    "name": "Cortina.4 - X-Chain DB Cleanup",
+    "published_at": "2023-07-10T22:34:10Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.4",
+    "utc_date": "2023-07-10"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 112886821,
+    "tag_name": "v1.10.5",
+    "name": "Cortina.5 - X-Chain Height Indexing",
+    "published_at": "2023-07-19T22:42:34Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.5",
+    "utc_date": "2023-07-19"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 114874314,
+    "tag_name": "v1.10.7",
+    "name": "Cortina.7 - Validator Diff Indexing",
+    "published_at": "2023-08-02T19:48:25Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.7",
+    "utc_date": "2023-08-02"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 116005819,
+    "tag_name": "v1.10.8",
+    "name": "Cortina.8 - Partial Sync",
+    "published_at": "2023-08-11T01:32:56Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8",
+    "utc_date": "2023-08-11"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 118636486,
+    "tag_name": "v1.10.9",
+    "name": "Cortina.9 - Zstandard Compression",
+    "published_at": "2023-08-25T00:00:14Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.9",
+    "utc_date": "2023-08-25"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 121765858,
+    "tag_name": "v1.10.10",
+    "name": "Cortina.10 - Pull Gossip",
+    "published_at": "2023-09-19T20:56:16Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.10",
+    "utc_date": "2023-09-19"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 122284751,
+    "tag_name": "v1.10.11",
+    "name": "Cortina.11 - ArchiveDB",
+    "published_at": "2023-09-22T22:07:44Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.11",
+    "utc_date": "2023-09-22"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 124535157,
+    "tag_name": "v1.10.12",
+    "name": "Cortina.12 - Dual-Alpha Support",
+    "published_at": "2023-10-11T02:42:14Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.12",
+    "utc_date": "2023-10-11"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 125506240,
+    "tag_name": "v1.10.13",
+    "name": "Cortina.13 - API Locking Refactor",
+    "published_at": "2023-10-17T22:02:08Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.13",
+    "utc_date": "2023-10-17"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 126714385,
+    "tag_name": "v1.10.14",
+    "name": "Cortina.14 - Validator Set Management Redesign",
+    "published_at": "2023-10-26T06:22:57Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.14",
+    "utc_date": "2023-10-26"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 127621777,
+    "tag_name": "v1.10.15",
+    "name": "Cortina.15 - PebbleDB",
+    "published_at": "2023-11-02T02:24:22Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.15",
+    "utc_date": "2023-11-02"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 131159396,
+    "tag_name": "v1.10.16",
+    "name": "Cortina.16 - Concurrent Trie Prefetching",
+    "published_at": "2023-11-23T01:30:11Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.16",
+    "utc_date": "2023-11-23"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 132360123,
+    "tag_name": "v1.10.17",
+    "name": "Cortina.17 - Optimized Block Gossip",
+    "published_at": "2023-12-02T01:02:26Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.17",
+    "utc_date": "2023-12-02"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 137624748,
+    "tag_name": "v1.10.18",
+    "name": "Cortina.18 - Optimize Peer Discovery",
+    "published_at": "2024-01-18T20:01:47Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.18",
+    "utc_date": "2024-01-18"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 139020587,
+    "tag_name": "v1.10.19",
+    "name": "Cortina.19 - Options Before Verification",
+    "published_at": "2024-01-29T22:33:01Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.10.19",
+    "utc_date": "2024-01-29"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 143067352,
+    "tag_name": "v1.11.0",
+    "name": "Durango - C-Chain Warp Messaging",
+    "published_at": "2024-02-21T21:47:48Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.0",
+    "utc_date": "2024-02-21"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 143377524,
+    "tag_name": "v1.11.1",
+    "name": "Durango.1 - Disable Push Re-Gossip",
+    "published_at": "2024-02-23T15:59:37Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.1",
+    "utc_date": "2024-02-23"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 144295576,
+    "tag_name": "v1.11.2",
+    "name": "Durango.2 - Push Gossip Redesign",
+    "published_at": "2024-03-01T01:07:45Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.2",
+    "utc_date": "2024-03-01"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 147823208,
+    "tag_name": "v1.11.3",
+    "name": "Durango.3 - Legacy Gossip Removal",
+    "published_at": "2024-03-21T22:57:09Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.3",
+    "utc_date": "2024-03-21"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 150470322,
+    "tag_name": "v1.11.4",
+    "name": "Durango.4 - Interval Tree Bootstrapping",
+    "published_at": "2024-04-09T20:51:11Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.4",
+    "utc_date": "2024-04-09"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 153557362,
+    "tag_name": "v1.11.5",
+    "name": "Durango.5 - Bootstrapping Optimizations",
+    "published_at": "2024-04-30T17:59:07Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.5",
+    "utc_date": "2024-04-30"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 157164363,
+    "tag_name": "v1.11.6",
+    "name": "Durango.6 - Bootstrapping Execution Improvements",
+    "published_at": "2024-05-23T16:08:45Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.6",
+    "utc_date": "2024-05-23"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 159083946,
+    "tag_name": "v1.11.7",
+    "name": "Durango.7 - Metrics Overhaul Preparation",
+    "published_at": "2024-06-05T22:21:27Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.7",
+    "utc_date": "2024-06-05"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 160143359,
+    "tag_name": "v1.11.8",
+    "name": "Durango.8 - Metrics Overhaul",
+    "published_at": "2024-06-12T17:36:34Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.8",
+    "utc_date": "2024-06-12"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 163905472,
+    "tag_name": "v1.11.9",
+    "name": "Durango.9 - Consensus Engine Improvements",
+    "published_at": "2024-07-03T23:46:54Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.9",
+    "utc_date": "2024-07-03"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 167215469,
+    "tag_name": "v1.11.10",
+    "name": "Durango.10 - Block Status Removal",
+    "published_at": "2024-07-25T22:42:53Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.10",
+    "utc_date": "2024-07-25"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 173321089,
+    "tag_name": "v1.11.11",
+    "name": "Durango.11 - SoV Networking",
+    "published_at": "2024-09-04T00:01:13Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.11",
+    "utc_date": "2024-09-04"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 179882344,
+    "tag_name": "v1.11.12",
+    "name": "Durango.12 - Etna Prep",
+    "published_at": "2024-10-14T19:54:14Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.12",
+    "utc_date": "2024-10-14"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 186065947,
+    "tag_name": "v1.11.13",
+    "name": "Durango.13 - Etna Compatible",
+    "published_at": "2024-11-18T22:24:03Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.11.13",
+    "utc_date": "2024-11-18"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 188584710,
+    "tag_name": "v1.12.0",
+    "name": "Etna - Reinventing Subnets",
+    "published_at": "2024-12-02T22:26:05Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.12.0",
+    "utc_date": "2024-12-02"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "repo": "ava-labs/avalanchego",
+    "release_id": 191296238,
+    "tag_name": "v1.12.1",
+    "name": "Etna.1 - P-Chain Mempool",
+    "published_at": "2024-12-17T23:21:23Z",
+    "html_url": "https://github.com/ava-labs/avalanchego/releases/tag/v1.12.1",
+    "utc_date": "2024-12-17"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 91017005,
+    "tag_name": "1.30.1",
+    "name": "1.30.1",
+    "published_at": "2023-02-01T17:54:00Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.30.1",
+    "utc_date": "2023-02-01"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 91583527,
+    "tag_name": "1.31.0",
+    "name": "1.31.0",
+    "published_at": "2023-02-07T10:56:59Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.31.0",
+    "utc_date": "2023-02-07"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 92399594,
+    "tag_name": "1.31.1",
+    "name": "1.31.1",
+    "published_at": "2023-02-14T17:33:00Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.31.1",
+    "utc_date": "2023-02-14"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 96453347,
+    "tag_name": "1.32.0",
+    "name": "1.32.0",
+    "published_at": "2023-03-22T09:10:12Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.32.0",
+    "utc_date": "2023-03-22"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 96641187,
+    "tag_name": "1.32.1",
+    "name": "1.32.1",
+    "published_at": "2023-03-23T14:10:19Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.32.1",
+    "utc_date": "2023-03-23"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 97317501,
+    "tag_name": "1.32.2",
+    "name": "1.32.2",
+    "published_at": "2023-03-29T12:47:59Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.32.2",
+    "utc_date": "2023-03-29"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 100966297,
+    "tag_name": "1.33.0",
+    "name": "1.33.0",
+    "published_at": "2023-04-26T15:51:38Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.33.0",
+    "utc_date": "2023-04-26"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 105340909,
+    "tag_name": "1.34.0",
+    "name": "1.34.0",
+    "published_at": "2023-05-30T10:24:09Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.34.0",
+    "utc_date": "2023-05-30"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 109406301,
+    "tag_name": "1.35.0-rc.1",
+    "name": "1.35.0-rc.1",
+    "published_at": "2023-06-21T16:00:02Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.35.0-rc.1",
+    "utc_date": "2023-06-21"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 113534809,
+    "tag_name": "1.35.0",
+    "name": "1.35.0",
+    "published_at": "2023-07-25T16:43:48Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.35.0",
+    "utc_date": "2023-07-25"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 127270225,
+    "tag_name": "1.36.0",
+    "name": "1.36.0",
+    "published_at": "2023-10-30T23:01:36Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.36.0",
+    "utc_date": "2023-10-30"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 133573132,
+    "tag_name": "1.36.1",
+    "name": "1.36.1",
+    "published_at": "2023-12-14T11:24:12Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.36.1",
+    "utc_date": "2023-12-14"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 134373116,
+    "tag_name": "1.36.2",
+    "name": "",
+    "published_at": "2023-12-18T19:26:23Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.36.2",
+    "utc_date": "2023-12-18"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 135720327,
+    "tag_name": "1.36.3",
+    "name": "1.36.3",
+    "published_at": "2024-01-03T18:22:34Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.36.3",
+    "utc_date": "2024-01-03"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 139306144,
+    "tag_name": "1.36.5",
+    "name": "1.36.5",
+    "published_at": "2024-01-31T12:09:14Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.36.5",
+    "utc_date": "2024-01-31"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 144925112,
+    "tag_name": "1.37.0",
+    "name": "1.37.0",
+    "published_at": "2024-03-05T18:29:50Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.37.0",
+    "utc_date": "2024-03-05"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 145545340,
+    "tag_name": "1.37.1",
+    "name": "1.37.1",
+    "published_at": "2024-03-08T18:31:31Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.37.1",
+    "utc_date": "2024-03-08"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 145888552,
+    "tag_name": "1.38.0-rc.1",
+    "name": "1.38.0-rc.1",
+    "published_at": "2024-03-11T17:21:48Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.38.0-rc.1",
+    "utc_date": "2024-03-11"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 145952909,
+    "tag_name": "1.37.2",
+    "name": "1.37.2",
+    "published_at": "2024-03-12T02:00:51Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.37.2",
+    "utc_date": "2024-03-12"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 146636509,
+    "tag_name": "1.37.3",
+    "name": "1.37.3",
+    "published_at": "2024-03-14T17:34:35Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.37.3",
+    "utc_date": "2024-03-14"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 147099514,
+    "tag_name": "1.38.0",
+    "name": "1.38.0",
+    "published_at": "2024-03-18T18:58:58Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.38.0",
+    "utc_date": "2024-03-18"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 148896340,
+    "tag_name": "1.38.1",
+    "name": "1.38.1",
+    "published_at": "2024-03-28T17:06:26Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.38.1",
+    "utc_date": "2024-03-28"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 149238330,
+    "tag_name": "1.38.2",
+    "name": "1.38.2",
+    "published_at": "2024-04-01T15:14:11Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.38.2",
+    "utc_date": "2024-04-01"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 150286535,
+    "tag_name": "1.39.0",
+    "name": "1.39.0",
+    "published_at": "2024-04-08T20:13:08Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.39.0",
+    "utc_date": "2024-04-08"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 151750079,
+    "tag_name": "1.39.1",
+    "name": "1.39.1",
+    "published_at": "2024-04-18T13:51:45Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.39.1",
+    "utc_date": "2024-04-18"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 156999572,
+    "tag_name": "1.39.2",
+    "name": "1.39.2",
+    "published_at": "2024-05-22T21:14:39Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.39.2",
+    "utc_date": "2024-05-22"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 160901619,
+    "tag_name": "1.40.0",
+    "name": "1.40.0",
+    "published_at": "2024-06-17T17:00:16Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/1.40.0",
+    "utc_date": "2024-06-17"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 168754593,
+    "tag_name": "2.0.0",
+    "name": "2.0.0",
+    "published_at": "2024-08-05T16:55:23Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/2.0.0",
+    "utc_date": "2024-08-05"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 171030493,
+    "tag_name": "2.1.1",
+    "name": "2.1.1",
+    "published_at": "2024-08-20T09:39:54Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/2.1.1",
+    "utc_date": "2024-08-20"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 174179293,
+    "tag_name": "2.2.0",
+    "name": "2.2.0",
+    "published_at": "2024-09-09T17:34:52Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/2.2.0",
+    "utc_date": "2024-09-09"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 175250862,
+    "tag_name": "2.2.1",
+    "name": "2.2.1",
+    "published_at": "2024-09-16T14:20:22Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/2.2.1",
+    "utc_date": "2024-09-16"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 182721773,
+    "tag_name": "2.3.0",
+    "name": "2.3.0",
+    "published_at": "2024-10-30T15:19:20Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/2.3.0",
+    "utc_date": "2024-10-30"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 185268292,
+    "tag_name": "2.3.1",
+    "name": "2.3.1",
+    "published_at": "2024-11-13T18:37:00Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/2.3.1",
+    "utc_date": "2024-11-13"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "repo": "near/nearcore",
+    "release_id": 190067590,
+    "tag_name": "2.4.0",
+    "name": "2.4.0",
+    "published_at": "2024-12-10T22:00:49Z",
+    "html_url": "https://github.com/near/nearcore/releases/tag/2.4.0",
+    "utc_date": "2024-12-10"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 89407222,
+    "tag_name": "GreatVoyage-v4.7.0.1",
+    "name": "GreatVoyage-v4.7.0.1(Aristotle)",
+    "published_at": "2023-01-20T06:21:26Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.0.1",
+    "utc_date": "2023-01-20"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 93753417,
+    "tag_name": "GreatVoyage-v4.7.1",
+    "name": "GreatVoyage-v4.7.1(Sartre)",
+    "published_at": "2023-02-27T10:48:56Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.1",
+    "utc_date": "2023-02-27"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 99707701,
+    "tag_name": "GreatVoyage-v4.7.1.1",
+    "name": "GreatVoyage-v4.7.1.1(Pittacus) ",
+    "published_at": "2023-04-17T10:17:40Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.1.1",
+    "utc_date": "2023-04-17"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 110324751,
+    "tag_name": "GreatVoyage-v4.7.2",
+    "name": "GreatVoyage-v4.7.2(Periander)",
+    "published_at": "2023-07-01T10:02:59Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.2",
+    "utc_date": "2023-07-01"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 126599315,
+    "tag_name": "GreatVoyage-v4.7.3",
+    "name": "GreatVoyage-v4.7.3(Chilon)",
+    "published_at": "2023-10-25T14:01:11Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.3",
+    "utc_date": "2023-10-25"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 136769142,
+    "tag_name": "GreatVoyage-v4.7.3.1",
+    "name": "GreatVoyage-v4.7.3.1(Solon)",
+    "published_at": "2024-01-12T06:37:43Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.3.1",
+    "utc_date": "2024-01-12"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 146744923,
+    "tag_name": "GreatVoyage-v4.7.4",
+    "name": "GreatVoyage-v4.7.4(Bias)",
+    "published_at": "2024-03-15T10:03:32Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.4",
+    "utc_date": "2024-03-15"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 158145553,
+    "tag_name": "GreatVoyage-v4.7.5",
+    "name": "GreatVoyage-v4.7.5(Cleobulus)",
+    "published_at": "2024-05-30T13:06:32Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.5",
+    "utc_date": "2024-05-30"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 178418081,
+    "tag_name": "GreatVoyage-v4.7.6",
+    "name": "GreatVoyage-v4.7.6(Anaximander)",
+    "published_at": "2024-10-04T14:44:02Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.6",
+    "utc_date": "2024-10-04"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "repo": "tronprotocol/java-tron",
+    "release_id": 188141578,
+    "tag_name": "GreatVoyage-v4.7.7",
+    "name": "GreatVoyage-v4.7.7(Epicurus)",
+    "published_at": "2024-11-29T06:24:24Z",
+    "html_url": "https://github.com/tronprotocol/java-tron/releases/tag/GreatVoyage-v4.7.7",
+    "utc_date": "2024-11-29"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 92580823,
+    "tag_name": "@eth-optimism/sdk@1.10.2",
+    "name": "@eth-optimism/sdk@1.10.2",
+    "published_at": "2023-02-15T16:43:47Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/%40eth-optimism/sdk%401.10.2",
+    "utc_date": "2023-02-15"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 93383571,
+    "tag_name": "@eth-optimism/sdk@1.10.3",
+    "name": "@eth-optimism/sdk@1.10.3",
+    "published_at": "2023-02-23T02:03:25Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/%40eth-optimism/sdk%401.10.3",
+    "utc_date": "2023-02-23"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 93624411,
+    "tag_name": "@eth-optimism/sdk@1.10.4",
+    "name": "@eth-optimism/sdk@1.10.4",
+    "published_at": "2023-02-24T19:47:30Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/%40eth-optimism/sdk%401.10.4",
+    "utc_date": "2023-02-24"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 94298928,
+    "tag_name": "@eth-optimism/sdk@2.0.0",
+    "name": "@eth-optimism/sdk@2.0.0",
+    "published_at": "2023-03-02T18:34:26Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/%40eth-optimism/sdk%402.0.0",
+    "utc_date": "2023-03-02"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 95138188,
+    "tag_name": "op-node/v1.0.0",
+    "name": "op-node v1.0.0",
+    "published_at": "2023-03-09T22:06:58Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.0.0",
+    "utc_date": "2023-03-09"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 95873460,
+    "tag_name": "@eth-optimism/sdk@2.0.1",
+    "name": "@eth-optimism/sdk@2.0.1",
+    "published_at": "2023-03-16T16:40:43Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/%40eth-optimism/sdk%402.0.1",
+    "utc_date": "2023-03-16"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 95935076,
+    "tag_name": "@eth-optimism/l2geth-exporter@0.0.8",
+    "name": "@eth-optimism/l2geth-exporter@0.0.8",
+    "published_at": "2023-03-17T03:54:15Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/%40eth-optimism/l2geth-exporter%400.0.8",
+    "utc_date": "2023-03-17"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 97089923,
+    "tag_name": "op-batcher/v1.0.1",
+    "name": "Release op-batcher v1.0.1",
+    "published_at": "2023-03-27T22:08:28Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-batcher/v1.0.1",
+    "utc_date": "2023-03-27"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 97896060,
+    "tag_name": "op-node/v1.0.1",
+    "name": "Release op-node v1.0.1",
+    "published_at": "2023-04-03T19:17:41Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.0.1",
+    "utc_date": "2023-04-03"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 98834908,
+    "tag_name": "v1.0.2",
+    "name": "Release op-node, op-batcher, op-proposer v1.0.2",
+    "published_at": "2023-04-10T20:38:16Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.0.2",
+    "utc_date": "2023-04-10"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 98837024,
+    "tag_name": "v1.0.3",
+    "name": "Release op-node, op-batcher, op-proposer v1.0.3",
+    "published_at": "2023-04-17T19:34:29Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.0.3",
+    "utc_date": "2023-04-17"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 100698723,
+    "tag_name": "v1.0.4",
+    "name": "Release op-node,op-batcher,op-proposer v1.0.4",
+    "published_at": "2023-04-24T18:16:01Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.0.4",
+    "utc_date": "2023-04-24"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 101507300,
+    "tag_name": "v1.0.5",
+    "name": "Release op-node, op-batcher, op-proposer v1.0.5",
+    "published_at": "2023-05-01T22:45:53Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.0.5",
+    "utc_date": "2023-05-01"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 102276451,
+    "tag_name": "v1.0.6",
+    "name": "op-node, op-batcher, op-proposer v1.0.6",
+    "published_at": "2023-05-08T23:33:07Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.0.6",
+    "utc_date": "2023-05-08"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 103055708,
+    "tag_name": "v1.0.7",
+    "name": "Release op-node, op-batcher, op-proposer v1.0.7",
+    "published_at": "2023-05-15T19:46:22Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.0.7",
+    "utc_date": "2023-05-15"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 103878707,
+    "tag_name": "v1.0.8",
+    "name": "Release op-node, op-batcher, op-proposer v1.0.8",
+    "published_at": "2023-05-22T23:17:47Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.0.8",
+    "utc_date": "2023-05-22"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 105578409,
+    "tag_name": "v1.0.9",
+    "name": "Release op-node, op-batcher, op-proposer v1.0.9",
+    "published_at": "2023-05-31T19:05:51Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.0.9",
+    "utc_date": "2023-05-31"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 107437573,
+    "tag_name": "op-node/v1.1.0",
+    "name": "Bedrock Mainnet: op-node, op-batcher, op-proposer v1.1.0",
+    "published_at": "2023-06-06T17:40:13Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.1.0",
+    "utc_date": "2023-06-06"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 107917358,
+    "tag_name": "indexer/v0.6.0",
+    "name": "@eth-optimism/indexer@0.6.0",
+    "published_at": "2023-06-09T00:38:32Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/indexer/v0.6.0",
+    "utc_date": "2023-06-09"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 109995071,
+    "tag_name": "op-node/v1.1.1",
+    "name": "Release op-node, op-batcher, op-proposer v1.1.1",
+    "published_at": "2023-06-28T03:51:44Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.1.1",
+    "utc_date": "2023-06-28"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 117244312,
+    "tag_name": "v1.1.2",
+    "name": "Release op-node,batcher,proposer v1.1.2",
+    "published_at": "2023-08-14T23:15:39Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.1.2",
+    "utc_date": "2023-08-14"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 117530238,
+    "tag_name": "op-node/v1.1.3",
+    "name": "Release op-node, op-batcher, op-proposer v1.1.3",
+    "published_at": "2023-08-16T22:38:49Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.1.3",
+    "utc_date": "2023-08-16"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 120098466,
+    "tag_name": "v1.1.4",
+    "name": "v1.1.4",
+    "published_at": "2023-09-06T11:05:06Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.1.4",
+    "utc_date": "2023-09-06"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 124474953,
+    "tag_name": "v1.1.6",
+    "name": "Release op-node, op-batcher, op-proposer v1.1.6",
+    "published_at": "2023-10-12T21:50:05Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.1.6",
+    "utc_date": "2023-10-12"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 125515600,
+    "tag_name": "v1.2.0",
+    "name": "Release op-node, op-batcher, op-proposer v1.2.0",
+    "published_at": "2023-10-17T23:34:52Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.2.0",
+    "utc_date": "2023-10-17"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 127441973,
+    "tag_name": "op-node/v1.3.0",
+    "name": "Release op-node v1.3.0",
+    "published_at": "2023-10-31T21:42:34Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.3.0",
+    "utc_date": "2023-10-31"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 128242480,
+    "tag_name": "op-node/v1.3.1",
+    "name": "Release op-node v1.3.1",
+    "published_at": "2023-11-07T02:01:09Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.3.1",
+    "utc_date": "2023-11-07"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 130026661,
+    "tag_name": "op-batcher/v1.3.0",
+    "name": "Release op-batcher & op-proposer 1.3.0",
+    "published_at": "2023-11-17T21:08:41Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-batcher/v1.3.0",
+    "utc_date": "2023-11-17"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 133491175,
+    "tag_name": "op-node/v1.3.2",
+    "name": "Release op-node v1.3.2",
+    "published_at": "2023-12-11T23:13:29Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.3.2",
+    "utc_date": "2023-12-11"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 136760305,
+    "tag_name": "op-batcher/v1.4.2",
+    "name": "Release op-batcher & op-proposer v1.4.2",
+    "published_at": "2024-01-12T01:58:36Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-batcher/v1.4.2",
+    "utc_date": "2024-01-12"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 138637719,
+    "tag_name": "op-batcher/v1.4.3",
+    "name": "op-node, op-batcher, op-proposer v1.4.3",
+    "published_at": "2024-01-26T10:03:11Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-batcher/v1.4.3",
+    "utc_date": "2024-01-26"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 139490095,
+    "tag_name": "v1.5.0",
+    "name": "op-node, op-batcher, op-proposer v1.5.0 - mainnet Delta & goerli Ecotone",
+    "published_at": "2024-02-01T12:05:32Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.5.0",
+    "utc_date": "2024-02-01"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 141119995,
+    "tag_name": "v1.5.1",
+    "name": "op-node, op-batcher, op-proposer v1.5.1 - Sepolia Ecotone Release",
+    "published_at": "2024-02-09T21:28:42Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.5.1",
+    "utc_date": "2024-02-09"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 142413450,
+    "tag_name": "v1.6.1",
+    "name": "op-node, op-batcher, op-proposer v1.6.1 - OUTDATED Ecotone Mainnet Release",
+    "published_at": "2024-02-16T21:41:29Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.6.1",
+    "utc_date": "2024-02-16"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 143264016,
+    "tag_name": "op-contracts/v1.0.0",
+    "name": "op-contracts/v1.0.0: Bedrock Contracts Release",
+    "published_at": "2024-02-22T21:23:40Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v1.0.0",
+    "utc_date": "2024-02-22"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 143334299,
+    "tag_name": "op-contracts/v1.2.0",
+    "name": "op-contracts v1.2.0 - Adding SuperchainConfig with extended pause functionality",
+    "published_at": "2024-02-23T11:21:25Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v1.2.0",
+    "utc_date": "2024-02-23"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 143627421,
+    "tag_name": "v1.7.0",
+    "name": "op-node, op-batcher, op-proposer v1.7.0 - Optimistic Ecotone Mainnet Release",
+    "published_at": "2024-02-26T13:39:04Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.7.0",
+    "utc_date": "2024-02-26"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 145111933,
+    "tag_name": "op-node/v1.7.1",
+    "name": "Release op-node v1.7.1",
+    "published_at": "2024-03-06T17:57:47Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.7.1",
+    "utc_date": "2024-03-06"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 146444215,
+    "tag_name": "op-contracts/v1.3.0",
+    "name": "op-contracts v1.3.0 - Multi-Chain Prep (MCP) L1",
+    "published_at": "2024-03-13T22:17:07Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v1.3.0",
+    "utc_date": "2024-03-13"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 147897433,
+    "tag_name": "v1.7.2",
+    "name": "op-node, op-batcher, op-proposer v1.7.2 - Batcher Improvements",
+    "published_at": "2024-03-22T19:01:30Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.7.2",
+    "utc_date": "2024-03-22"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 150851868,
+    "tag_name": "v1.7.3",
+    "name": "Release op-node, op-batcher, op-proposer v1.7.3",
+    "published_at": "2024-04-11T23:35:37Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.7.3",
+    "utc_date": "2024-04-11"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 153036116,
+    "tag_name": "v1.7.4",
+    "name": "op-stack v1.7.4",
+    "published_at": "2024-04-26T18:09:11Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.7.4",
+    "utc_date": "2024-04-26"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 153872881,
+    "tag_name": "op-node/v1.7.5",
+    "name": "op-node v1.7.5",
+    "published_at": "2024-05-02T18:22:32Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.7.5",
+    "utc_date": "2024-05-02"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 156095335,
+    "tag_name": "op-contracts/v1.5.0-rc.1",
+    "name": "Release op-contracts/v1.5.0-rc.1 \u2014 Safe Extensions",
+    "published_at": "2024-05-16T14:31:32Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v1.5.0-rc.1",
+    "utc_date": "2024-05-16"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 156716267,
+    "tag_name": "op-contracts/v1.4.0-rc.4",
+    "name": "Release op-contracts/v1.4.0-rc.4 - Fault Proofs",
+    "published_at": "2024-05-21T15:39:56Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v1.4.0-rc.4",
+    "utc_date": "2024-05-21"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 157381764,
+    "tag_name": "v1.7.6",
+    "name": "op-stack v1.7.6 - Sepolia Fjord activation",
+    "published_at": "2024-05-24T16:23:53Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.7.6",
+    "utc_date": "2024-05-24"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 159431629,
+    "tag_name": "op-contracts/v1.4.0",
+    "name": "op-contracts/v1.4.0 \u2014 Fault Proofs",
+    "published_at": "2024-06-07T19:28:57Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v1.4.0",
+    "utc_date": "2024-06-07"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 159639868,
+    "tag_name": "op-challenger/v1.0.0",
+    "name": "op-challenger v1.0.0",
+    "published_at": "2024-06-10T10:28:28Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-challenger/v1.0.0",
+    "utc_date": "2024-06-10"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 160341480,
+    "tag_name": "v1.7.7",
+    "name": "op-stack v1.7.7 - Optimistic Fjord Mainnet release",
+    "published_at": "2024-06-13T16:58:48Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.7.7",
+    "utc_date": "2024-06-13"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 160663307,
+    "tag_name": "op-dispute-mon/v1.0.1",
+    "name": "op-dispute-mon v1.0.1",
+    "published_at": "2024-06-15T19:51:28Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-dispute-mon/v1.0.1",
+    "utc_date": "2024-06-15"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 166983191,
+    "tag_name": "v1.8.0",
+    "name": "\u2728\ud83d\udd34 OP Stack - v1.8.0",
+    "published_at": "2024-07-24T18:50:16Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.8.0",
+    "utc_date": "2024-07-24"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 169196982,
+    "tag_name": "v1.9.0",
+    "name": "op-stack v1.9.0 - Sepolia Granite activation",
+    "published_at": "2024-08-07T20:23:05Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.9.0",
+    "utc_date": "2024-08-07"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 172612681,
+    "tag_name": "v1.9.1",
+    "name": "op-stack v1.9.1 - Optimistic Granite Mainnet release",
+    "published_at": "2024-08-29T17:02:56Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.9.1",
+    "utc_date": "2024-08-29"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 173734384,
+    "tag_name": "op-contracts/v1.6.0",
+    "name": "op-contracts/v1.6.0 - Fault Proof Fixes",
+    "published_at": "2024-09-05T21:20:46Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v1.6.0",
+    "utc_date": "2024-09-05"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 174642187,
+    "tag_name": "op-challenger/v1.1.0",
+    "name": "op-challenger v1.1.0",
+    "published_at": "2024-09-11T21:16:26Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-challenger/v1.1.0",
+    "utc_date": "2024-09-11"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 175277075,
+    "tag_name": "op-contracts/v.1.7.0-beta.1+l2-contracts",
+    "name": "op-contracts/v1.7.0-beta.1+l2-contracts",
+    "published_at": "2024-09-16T16:06:54Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v.1.7.0-beta.1%2Bl2-contracts",
+    "utc_date": "2024-09-16"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 176357965,
+    "tag_name": "v1.9.2",
+    "name": "op-stack v1.9.2",
+    "published_at": "2024-09-23T09:59:22Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.9.2",
+    "utc_date": "2024-09-23"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 177204249,
+    "tag_name": "op-challenger/v1.1.2",
+    "name": "op-challenger v1.1.2",
+    "published_at": "2024-09-27T04:03:14Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-challenger/v1.1.2",
+    "utc_date": "2024-09-27"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 177168550,
+    "tag_name": "v1.9.3",
+    "name": "op-stack v1.9.3",
+    "published_at": "2024-10-01T09:55:59Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.9.3",
+    "utc_date": "2024-10-01"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 180781747,
+    "tag_name": "op-deployer/v0.0.1-rc.0",
+    "name": "op-deployer/v0.0.1-rc.0",
+    "published_at": "2024-10-19T03:29:13Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-deployer/v0.0.1-rc.0",
+    "utc_date": "2024-10-19"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 181038713,
+    "tag_name": "v1.9.4",
+    "name": "op-stack v1.9.4",
+    "published_at": "2024-10-21T15:23:41Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.9.4",
+    "utc_date": "2024-10-21"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 181325163,
+    "tag_name": "op-deployer/v0.0.2",
+    "name": "op-deployer/v0.0.2",
+    "published_at": "2024-10-22T22:06:32Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-deployer/v0.0.2",
+    "utc_date": "2024-10-22"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 182169923,
+    "tag_name": "op-deployer/v0.0.3",
+    "name": "op-deployer/v0.0.3",
+    "published_at": "2024-10-28T05:27:23Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-deployer/v0.0.3",
+    "utc_date": "2024-10-28"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 183826800,
+    "tag_name": "op-challenger/v1.2.0",
+    "name": "op-challenger/v1.2.0",
+    "published_at": "2024-11-05T22:55:18Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-challenger/v1.2.0",
+    "utc_date": "2024-11-05"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 184073633,
+    "tag_name": "op-contracts/v1.8.0-rc.1",
+    "name": "OP Contracts v1.8.0-rc.1",
+    "published_at": "2024-11-07T05:51:05Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-contracts/v1.8.0-rc.1",
+    "utc_date": "2024-11-07"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 184668578,
+    "tag_name": "v1.9.5",
+    "name": "op-stack v1.9.5 - Batcher Sequencer Throttling",
+    "published_at": "2024-11-11T12:19:39Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/v1.9.5",
+    "utc_date": "2024-11-11"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 186237572,
+    "tag_name": "op-deployer/v0.0.4",
+    "name": "op-deployer/v0.0.4",
+    "published_at": "2024-11-19T16:33:39Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-deployer/v0.0.4",
+    "utc_date": "2024-11-19"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 186478326,
+    "tag_name": "op-deployer/v0.0.6",
+    "name": "op-deployer/v0.0.6",
+    "published_at": "2024-11-20T17:30:27Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-deployer/v0.0.6",
+    "utc_date": "2024-11-20"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 186716773,
+    "tag_name": "op-deployer/v0.0.7",
+    "name": "op-deployer/v0.0.7",
+    "published_at": "2024-11-21T18:50:14Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-deployer/v0.0.7",
+    "utc_date": "2024-11-21"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 188803128,
+    "tag_name": "op-node/v1.10.1",
+    "name": "op-node/v1.10.1",
+    "published_at": "2024-12-03T21:18:09Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.10.1",
+    "utc_date": "2024-12-03"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 189443509,
+    "tag_name": "op-deployer/v0.0.8",
+    "name": "op-deployer/v0.0.8",
+    "published_at": "2024-12-06T16:44:19Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-deployer/v0.0.8",
+    "utc_date": "2024-12-06"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 189854848,
+    "tag_name": "op-dispute-mon/v1.3.0",
+    "name": "op-dispute-mon/v1.3.0",
+    "published_at": "2024-12-10T03:29:40Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-dispute-mon/v1.3.0",
+    "utc_date": "2024-12-10"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 191183603,
+    "tag_name": "op-node/v1.10.2",
+    "name": "op-node/v1.10.2 - Holocene Mainnet Superchain",
+    "published_at": "2024-12-17T15:00:43Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-node/v1.10.2",
+    "utc_date": "2024-12-17"
+  },
+  {
+    "symbol": "OPUSDT",
+    "repo": "ethereum-optimism/optimism",
+    "release_id": 191932554,
+    "tag_name": "op-deployer/v0.0.9",
+    "name": "op-deployer/v0.0.9",
+    "published_at": "2024-12-20T21:55:46Z",
+    "html_url": "https://github.com/ethereum-optimism/optimism/releases/tag/op-deployer/v0.0.9",
+    "utc_date": "2024-12-20"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 170062244,
+    "tag_name": "aptos-cli-v4.0.0",
+    "name": "Aptos CLI Release v4.0.0",
+    "published_at": "2024-08-13T21:28:49Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.0.0",
+    "utc_date": "2024-08-13"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 171579976,
+    "tag_name": "aptos-framework-v1.18.0",
+    "name": "[Mainnet] Aptos Framework Release v1.18.0",
+    "published_at": "2024-08-23T00:46:58Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-framework-v1.18.0",
+    "utc_date": "2024-08-23"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 172832148,
+    "tag_name": "aptos-cli-v4.1.0",
+    "name": "Aptos CLI Release v4.1.0",
+    "published_at": "2024-08-30T19:00:06Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.1.0",
+    "utc_date": "2024-08-30"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 175324664,
+    "tag_name": "aptos-node-v1.19.1-rc",
+    "name": "[Testnet] Aptos Node Release v1.19.1-rc",
+    "published_at": "2024-09-16T21:13:47Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.19.1-rc",
+    "utc_date": "2024-09-16"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 175556092,
+    "tag_name": "aptos-cli-v4.2.0",
+    "name": "Aptos CLI Release v4.2.0",
+    "published_at": "2024-09-17T22:52:05Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.2.0",
+    "utc_date": "2024-09-17"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 175737207,
+    "tag_name": "aptos-node-v1.19.1",
+    "name": "[Mainnet] Aptos Node Release v1.19.1",
+    "published_at": "2024-09-18T18:10:17Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.19.1",
+    "utc_date": "2024-09-18"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 176003133,
+    "tag_name": "aptos-cli-v4.2.1",
+    "name": "Aptos CLI Release v4.2.1",
+    "published_at": "2024-09-19T23:28:28Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.2.1",
+    "utc_date": "2024-09-19"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 176194591,
+    "tag_name": "aptos-cli-v4.2.2",
+    "name": "Aptos CLI Release v4.2.2",
+    "published_at": "2024-09-20T21:27:16Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.2.2",
+    "utc_date": "2024-09-20"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 176460512,
+    "tag_name": "adhoc-20240919",
+    "name": "[Mainnet] Adhoc Release 20240919",
+    "published_at": "2024-09-23T18:05:18Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/adhoc-20240919",
+    "utc_date": "2024-09-23"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 176681515,
+    "tag_name": "aptos-node-v1.19.2",
+    "name": "[Mainnet] Aptos Node Release v1.19.2",
+    "published_at": "2024-09-24T17:46:44Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.19.2",
+    "utc_date": "2024-09-24"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 177182748,
+    "tag_name": "aptos-node-v1.20.0-rc",
+    "name": "[Testnet] Aptos Node Release v1.20.0",
+    "published_at": "2024-09-26T23:09:29Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.20.0-rc",
+    "utc_date": "2024-09-26"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 177654707,
+    "tag_name": "aptos-node-v1.20.1-rc",
+    "name": "[Testnet] Aptos Node Release v1.20.1",
+    "published_at": "2024-09-30T17:49:04Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.20.1-rc",
+    "utc_date": "2024-09-30"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 177838856,
+    "tag_name": "aptos-node-v1.20.1",
+    "name": "[Mainnet] Aptos Node Release v1.20.1",
+    "published_at": "2024-10-01T15:41:51Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.20.1",
+    "utc_date": "2024-10-01"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 178304026,
+    "tag_name": "aptos-framework-v1.20.0",
+    "name": "[Mainnet] Aptos Framework Release v1.20.0",
+    "published_at": "2024-10-03T21:40:43Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-framework-v1.20.0",
+    "utc_date": "2024-10-03"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 178978342,
+    "tag_name": "aptos-node-v1.21.0-rc",
+    "name": "[Testnet] Aptos Node Release v1.21.0",
+    "published_at": "2024-10-08T19:58:59Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.21.0-rc",
+    "utc_date": "2024-10-08"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 179434315,
+    "tag_name": "aptos-node-v1.21.1-rc",
+    "name": "[Testnet] Aptos Node Release v1.21.1",
+    "published_at": "2024-10-10T22:33:41Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.21.1-rc",
+    "utc_date": "2024-10-10"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 180059300,
+    "tag_name": "aptos-node-v1.21.2-rc",
+    "name": "[Testnet] Aptos Node Release v1.21.2",
+    "published_at": "2024-10-15T16:27:49Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.21.2-rc",
+    "utc_date": "2024-10-15"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 181067243,
+    "tag_name": "aptos-framework-v1.21.0",
+    "name": "[Mainnet] Aptos Framework Release v1.21.0",
+    "published_at": "2024-10-21T17:58:50Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-framework-v1.21.0",
+    "utc_date": "2024-10-21"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 181340275,
+    "tag_name": "aptos-cli-v4.2.4",
+    "name": "Aptos CLI Release v4.2.4",
+    "published_at": "2024-10-23T01:06:19Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.2.4",
+    "utc_date": "2024-10-23"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 181608630,
+    "tag_name": "aptos-cli-v4.2.6",
+    "name": "Aptos CLI Release v4.2.6",
+    "published_at": "2024-10-24T00:25:34Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.2.6",
+    "utc_date": "2024-10-24"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 182788160,
+    "tag_name": "aptos-cli-v4.3.0",
+    "name": "Aptos CLI Release v4.3.0",
+    "published_at": "2024-10-30T20:16:53Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.3.0",
+    "utc_date": "2024-10-30"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 183403702,
+    "tag_name": "aptos-node-v1.22.0",
+    "name": "[Mainnet] Aptos Node Release v1.22.0",
+    "published_at": "2024-11-04T15:47:48Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.22.0",
+    "utc_date": "2024-11-04"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 183950096,
+    "tag_name": "adhoc-20241105",
+    "name": "Adhoc Release 20241105",
+    "published_at": "2024-11-06T14:39:48Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/adhoc-20241105",
+    "utc_date": "2024-11-06"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 184378023,
+    "tag_name": "aptos-framework-v1.22.0",
+    "name": "[Mainnet] Aptos Framework Release v1.22.0",
+    "published_at": "2024-11-08T14:38:44Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-framework-v1.22.0",
+    "utc_date": "2024-11-08"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 185554150,
+    "tag_name": "aptos-node-v1.23.2-rc",
+    "name": "[Testnet] Aptos Node Release v1.23.2",
+    "published_at": "2024-11-15T03:10:35Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.23.2-rc",
+    "utc_date": "2024-11-15"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 186269551,
+    "tag_name": "aptos-framework-v1.23.0",
+    "name": "[Mainnet] Aptos Framework Release v1.23.0",
+    "published_at": "2024-11-19T19:23:17Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-framework-v1.23.0",
+    "utc_date": "2024-11-19"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 186519031,
+    "tag_name": "aptos-cli-v4.5.0",
+    "name": "Aptos CLI Release v4.5.0",
+    "published_at": "2024-11-20T22:10:04Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.5.0",
+    "utc_date": "2024-11-20"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 186654983,
+    "tag_name": "aptos-node-v1.23.3",
+    "name": "[Mainnet] Aptos Node Release v1.23.3",
+    "published_at": "2024-11-21T14:28:36Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.23.3",
+    "utc_date": "2024-11-21"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 187130432,
+    "tag_name": "aptos-node-v1.23.5",
+    "name": "[Mainnet] Aptos Node Release v1.23.5",
+    "published_at": "2024-11-23T21:18:13Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.23.5",
+    "utc_date": "2024-11-23"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 188273768,
+    "tag_name": "aptos-cli-v4.6.0",
+    "name": "Aptos CLI Release v4.6.0",
+    "published_at": "2024-11-30T03:08:29Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.6.0",
+    "utc_date": "2024-11-30"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 188774443,
+    "tag_name": "aptos-node-v1.24.2",
+    "name": "[Mainnet] Aptos Node Release v1.24.2",
+    "published_at": "2024-12-03T18:23:15Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.24.2",
+    "utc_date": "2024-12-03"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 190071586,
+    "tag_name": "aptos-cli-v4.7.0",
+    "name": "Aptos CLI Release v4.7.0",
+    "published_at": "2024-12-10T22:33:04Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v4.7.0",
+    "utc_date": "2024-12-10"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 190299697,
+    "tag_name": "aptos-cli-v5.0.0",
+    "name": "Aptos CLI Release v5.0.0",
+    "published_at": "2024-12-11T20:53:42Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v5.0.0",
+    "utc_date": "2024-12-11"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 190544372,
+    "tag_name": "aptos-node-v1.25.0-rc",
+    "name": "[Testnet] Aptos Node Release v1.25.0",
+    "published_at": "2024-12-13T00:00:25Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.25.0-rc",
+    "utc_date": "2024-12-13"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 190857353,
+    "tag_name": "aptos-cli-v5.1.0",
+    "name": "Aptos CLI Release v5.1.0",
+    "published_at": "2024-12-16T02:26:23Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-cli-v5.1.0",
+    "utc_date": "2024-12-16"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 191060514,
+    "tag_name": "aptos-framework-v1.24.1",
+    "name": "[Mainnet] Aptos Framework Release v1.24.1",
+    "published_at": "2024-12-17T00:13:56Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-framework-v1.24.1",
+    "utc_date": "2024-12-17"
+  },
+  {
+    "symbol": "APTUSDT",
+    "repo": "aptos-labs/aptos-core",
+    "release_id": 191535223,
+    "tag_name": "aptos-node-v1.25.1",
+    "name": "[Mainnet] Aptos Node Release v1.25.1",
+    "published_at": "2024-12-18T20:56:02Z",
+    "html_url": "https://github.com/aptos-labs/aptos-core/releases/tag/aptos-node-v1.25.1",
+    "utc_date": "2024-12-18"
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "research_date": "2026-09-27",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "source": "Binance Vision data/futures/cm/daily/liquidationSnapshot + USD-M monthly 1h klines",
+  "coverage_note": "liquidationSnapshot observed 2023-06-25 through 2024-10-14"
+}

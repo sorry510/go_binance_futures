@@ -1,0 +1,1 @@
+Reuse the fixed network-growth transform: latest 7-day mean AdrBalCnt versus the preceding 7-day mean; growth zero-cross positive is LONG and negative is SHORT. Signal day must complete before next UTC-day entry. No window or direction search.

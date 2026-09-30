@@ -1,0 +1,23 @@
+{
+  "event_definition": "change in maximum leverage of smallest-notional USD-M tier",
+  "direction": {
+    "increase": "LONG",
+    "decrease": "SHORT",
+    "unchanged": "exclude"
+  },
+  "min_contract_history_days": 730,
+  "min_prior_24h_quote_volume_usdt": 5000000,
+  "entry": "next 1m open after official effective time",
+  "leverage": 4,
+  "profit": 8,
+  "loss": 6,
+  "fee": 0.0005,
+  "slippage_bps": 5,
+  "max_hold_hours": 24,
+  "funding": true,
+  "periods": {
+    "discovery": 2024,
+    "oos1": 2025,
+    "oos2": "2026 through 2026-09-25"
+  }
+}

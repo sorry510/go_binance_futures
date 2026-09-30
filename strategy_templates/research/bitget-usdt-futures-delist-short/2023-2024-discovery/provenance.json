@@ -1,0 +1,10 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "event_source": "Bitget official Help Center Trading pair delisting section",
+  "archive_pages": [16,17,18,19,20,21,22,23,24],
+  "archive_boundary": "page 22 reaches 2023-09; page 24 reaches 2022-05",
+  "price_source": "Binance Vision USD-M 1h klines",
+  "database_write": false,
+  "returns_inspected_before_gate_freeze": false
+}

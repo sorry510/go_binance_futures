@@ -1,0 +1,2272 @@
+[
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-01-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-02-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-03-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-03-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-03-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-03-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-04-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-04-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-05-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-06-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-06-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-06-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-06-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-07-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-07-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-08-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-08-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-08-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-08-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-08-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-08-31",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-09-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-09-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-09-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-09-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-09-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-10-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-10-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-10-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-10-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-11-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-12-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-12-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-12-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2025-12-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-01-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-01-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-01-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-01-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-01-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-02-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-03-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-03-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-03-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-03-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-04-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-04-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-04-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-04-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-04-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "BALUSDT",
+    "signal_date": "2026-04-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-01-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-01-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-01-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-01-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-01-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-02-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-02-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-02-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-02-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-03-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-03-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-03-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-03-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-04-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-04-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-04-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-04-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-04-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-05-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-05-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-05-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-05-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-06-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-06-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-06-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-06-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-07-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-07-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-07-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-08-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-09-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-09-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-09-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-09-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-10-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-10-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-10-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-11-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-11-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-11-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-11-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-12-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-12-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-12-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-12-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2025-12-31",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-01-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-01-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-02-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-02-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-03-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-03-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-03-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-03-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-04-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-04-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-04-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-04-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-04-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-05-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-05-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-05-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-05-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-06-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-06-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-06-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-06-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-07-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-07-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-07-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-07-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-07-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-08-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-08-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "CVXUSDT",
+    "signal_date": "2026-08-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "DODOUSDT",
+    "signal_date": "2026-06-22",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "DODOUSDT",
+    "signal_date": "2026-07-03",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "DODOUSDT",
+    "signal_date": "2026-07-10",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "DODOUSDT",
+    "signal_date": "2026-08-06",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "DODOUSDT",
+    "signal_date": "2026-08-14",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "DODOUSDT",
+    "signal_date": "2026-08-17",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "DODOUSDT",
+    "signal_date": "2026-08-22",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "GRTUSDT",
+    "signal_date": "2026-01-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "GRTUSDT",
+    "signal_date": "2026-03-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "GRTUSDT",
+    "signal_date": "2026-04-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-11-04",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-11-08",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-11-24",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-11-25",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-11-27",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-11-29",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-11-30",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-09",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-12",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-13",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-14",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-16",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-17",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-20",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-23",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-24",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-28",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "HNTUSDT",
+    "signal_date": "2025-12-30",
+    "reason": "no_signal_day_price"
+  },
+  {
+    "symbol": "KNCUSDT",
+    "signal_date": "2025-01-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2025-12-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2025-12-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-02-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-03-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-03-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-03-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-03-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-03-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-04-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-04-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-04-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-04-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-05-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-06-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-06-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-06-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-06-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-06-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-06-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-06-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-06-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-07-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-07-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-07-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-07-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-07-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-07-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-07-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-08-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-08-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-08-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-08-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "LPTUSDT",
+    "signal_date": "2026-08-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-02-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-02-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-02-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-03-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-03-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-03-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-03-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-04-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-04-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-04-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-04-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-04-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-05-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-05-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-05-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-05-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-06-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-06-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-06-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-06-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-08-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-08-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-10-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-11-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-12-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-12-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-12-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2025-12-31",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-01-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-01-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-01-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-01-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-02-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-02-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-02-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-02-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-02-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-03-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-03-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-03-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-04-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-04-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-04-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-04-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-04-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-04-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-05-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-05-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-05-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-05-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-06-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-06-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-06-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-06-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-06-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-06-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-07-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-07-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-07-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "OGNUSDT",
+    "signal_date": "2026-08-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-05-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-06-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-06-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-06-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-07-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-07-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-07-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-08-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-08-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-08-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-08-31",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-09-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-09-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-09-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-09-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-09-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-09-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-09-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-09-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-10-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-10-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-10-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-11-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-11-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2025-12-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-01-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-01-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-01-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-02-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-02-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-02-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-03-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-03-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-04-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-04-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-04-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-05-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-05-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-05-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-05-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-05-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-06-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-06-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-06-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-07-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-07-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-08-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RAYUSDT",
+    "signal_date": "2026-08-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2025-06-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-01-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-01-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-01-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-01-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-01-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-01-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-01-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-01-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-02-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-02-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-03-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-03-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-03-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-04-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-04-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-04-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-04-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-05-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-05-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-05-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-05-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-05-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-05-31",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-06-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-06-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-06-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-06-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-06-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-07-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-07-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-07-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-07-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-08-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-08-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RSRUSDT",
+    "signal_date": "2026-08-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2025-12-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2025-12-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2025-12-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-01-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-02-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-02-22",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-03-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-04-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-04-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-04-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-05-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-06-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-07-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-07-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-07-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-07-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-08-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-08-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "signal_date": "2026-08-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SNXUSDT",
+    "signal_date": "2025-04-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SNXUSDT",
+    "signal_date": "2025-05-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SNXUSDT",
+    "signal_date": "2025-07-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-06-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-06-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-06-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-07-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-07-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-08-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-08-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-08-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SPELLUSDT",
+    "signal_date": "2026-08-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-01-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-02-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-03-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-03-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-03-25",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-04-06",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-04-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-04-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-04-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-04-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-04-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-05-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-05-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-06-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-06-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-07-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-07-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-08-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-08-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-08-16",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "SUSHIUSDT",
+    "signal_date": "2026-08-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-04-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-04-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-04-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-04-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-04-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-05-17",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-05-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-05-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-06-07",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-06-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-06-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-06-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-07-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-08-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-08-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-08-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-10-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-11-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-11-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-11-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2025-11-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-01-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-01-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-02-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-02-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-02-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-03-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-03-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-03-12",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-03-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-03-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-03-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-03-20",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-03-31",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-04-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-04-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-04-04",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-04-13",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-04-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-06-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-07-02",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-07-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-07-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-07-09",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-07-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-08-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-08-10",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "WOOUSDT",
+    "signal_date": "2026-08-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-02-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-02-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-03-05",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-03-21",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-03-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-04-03",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-04-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-04-18",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-04-26",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-04-30",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-05-01",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-05-08",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-05-15",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-05-24",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-05-28",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-05-29",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-06-14",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-06-19",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-06-27",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-07-11",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-07-23",
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "signal_date": "2026-08-11",
+    "reason": "quote_volume_lt_5m"
+  }
+]

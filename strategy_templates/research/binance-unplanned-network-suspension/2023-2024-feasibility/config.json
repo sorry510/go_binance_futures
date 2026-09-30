@@ -1,0 +1,15 @@
+{
+  "catalog_id": 157,
+  "years": [
+    2023,
+    2024
+  ],
+  "family": "unplanned security/network incident causing deposit/withdrawal suspension",
+  "exclude": [
+    "scheduled network upgrade",
+    "hard fork",
+    "wallet maintenance"
+  ],
+  "minimum_sample": 8,
+  "planned_direction": "SHORT affected token"
+}

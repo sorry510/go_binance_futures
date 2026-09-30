@@ -1,0 +1,5 @@
+{
+  "intended_signal": "log1p(daily pageviews) 90d z>=3; direction=signal-day price sign; next UTC day entry",
+  "status": "blocked before return testing",
+  "reason": "non-comparable canonical page histories across symbols"
+}

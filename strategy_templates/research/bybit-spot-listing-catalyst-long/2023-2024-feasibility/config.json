@@ -1,0 +1,7 @@
+{
+  "direction": "LONG",
+  "event": "Bybit official Spot listing announcement",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_events": 8
+}

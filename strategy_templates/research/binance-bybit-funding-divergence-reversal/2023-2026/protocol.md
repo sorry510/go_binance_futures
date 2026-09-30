@@ -1,0 +1,1 @@
+Match Binance and Bybit funding only at identical settlement timestamps. Normalize each settlement rate by its actual historical interval hours. Use the prior 90 days of matched differences for causal z-score. First |z|>=3 triggers, |z|<1 rearms. Positive Binance-minus-Bybit funding divergence is SHORT; negative is LONG. No parameter or direction search after results.

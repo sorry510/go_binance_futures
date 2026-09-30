@@ -1,0 +1,1 @@
+Align Binance USD-M and Bybit linear perpetual hourly closes. Premium is log(Binance/Bybit), normalized against the prior 720 completed hours. First |z|>=3 triggers convergence; |z|<1 rearms. Positive Binance premium is SHORT Binance and negative premium is LONG. No threshold or direction search after results.

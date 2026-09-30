@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-09-29",
+  "aggregate_endpoint": {
+    "path": "/overview/derivatives",
+    "result": "Upgrade to the paid API plan at https://defillama.com/subscription"
+  },
+  "single_protocol_checks": [
+    {"adapter": "dydx", "result": "paid_api_required"},
+    {"adapter": "gmx-derivatives", "result": "paid_api_required"},
+    {"adapter": "gains-network", "result": "paid_api_required"},
+    {"adapter": "synthetix", "result": "paid_api_required"}
+  ],
+  "returns_inspected": false
+}

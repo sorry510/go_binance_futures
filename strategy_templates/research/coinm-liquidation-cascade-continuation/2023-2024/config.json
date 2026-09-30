@@ -1,0 +1,20 @@
+{
+  "bases": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "XRP",
+    "ADA",
+    "LINK",
+    "BCH",
+    "DOT",
+    "LTC"
+  ],
+  "feature": "hourly deduped COIN-M liquidation quantity, log1p(total)",
+  "zscore_hours": 720,
+  "trigger_z_gte": 3,
+  "rearm_z_lt": 1,
+  "direction": "net liquidation side continuation",
+  "discovery": "2023-06-25..2023-12-31",
+  "oos1": "2024-01-01..2024-10-14"
+}

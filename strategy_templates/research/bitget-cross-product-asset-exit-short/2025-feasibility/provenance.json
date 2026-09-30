@@ -1,0 +1,11 @@
+{
+  "research_date": "2026-09-29",
+  "source": "Bitget official Help Center Trading pair delisting archive",
+  "hypothesis_origin": "generated after 2023-2024 futures-only delist breadth failure",
+  "new_discovery": 2025,
+  "untouched_oos": 2026,
+  "futures_candidate_articles_2025": 86,
+  "spot_candidate_articles_2025": 54,
+  "matched_tokens": ["HIFI"],
+  "returns_inspected": false
+}

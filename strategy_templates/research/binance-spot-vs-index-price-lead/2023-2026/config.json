@@ -1,0 +1,16 @@
+{
+  "feature": "log(Binance Spot close / Binance USD-M Index Price close)",
+  "interval": "1h",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "spot premium LONG USD-M; spot discount SHORT USD-M",
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "oos_years": [
+    2025,
+    2026
+  ]
+}

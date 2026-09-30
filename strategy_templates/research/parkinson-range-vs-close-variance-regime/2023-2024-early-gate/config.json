@@ -1,0 +1,9 @@
+{
+  "interval": "1h",
+  "window_hours": 24,
+  "ratio": "sum Parkinson variance / sum close-to-close squared returns",
+  "natural_threshold": 1,
+  "cross_above": "fade trailing 4h return",
+  "cross_below": "follow trailing 4h return",
+  "entry": "next 1h open"
+}

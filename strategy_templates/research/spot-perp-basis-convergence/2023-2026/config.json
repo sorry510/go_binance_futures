@@ -1,0 +1,8 @@
+{
+  "feature": "log(perp_close/spot_close)",
+  "interval": "1h",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "positive basis SHORT; negative basis LONG"
+}

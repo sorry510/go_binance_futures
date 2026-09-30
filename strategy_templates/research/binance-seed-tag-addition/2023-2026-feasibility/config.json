@@ -1,0 +1,6 @@
+{
+  "event": "Seed Tag addition",
+  "source": "Binance Latest News complete title census",
+  "window": "2023-2026",
+  "minimum_independent_batches": 8
+}

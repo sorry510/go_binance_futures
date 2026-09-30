@@ -1,0 +1,10 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": [
+    "DeFiLlama overview/dexs/{chain} dailyVolume",
+    "DeFiLlama stablecoins API stablecoincharts/{chain}",
+    "Binance Vision USD-M monthly 1d klines"
+  ],
+  "decision": "frozen after OOS instability; exact replay not entered"
+}

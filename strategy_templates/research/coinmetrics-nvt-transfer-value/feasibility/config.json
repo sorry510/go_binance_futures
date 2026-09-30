@@ -1,0 +1,19 @@
+{
+  "requested_metrics": [
+    "NVTAdj",
+    "TxTfrValAdjUSD"
+  ],
+  "assets": [
+    "btc",
+    "eth",
+    "xrp",
+    "ada",
+    "link",
+    "bch",
+    "ltc",
+    "doge",
+    "uni",
+    "zec"
+  ],
+  "result": "HTTP 403 from Community API"
+}

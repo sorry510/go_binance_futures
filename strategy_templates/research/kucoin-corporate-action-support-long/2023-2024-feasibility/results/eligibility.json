@@ -1,0 +1,830 @@
+[
+  {
+    "time": "2023-01-06T09:17:39+00:00",
+    "article_id": 54443,
+    "title": "KuCoin Supports the Swipe (SXP) Rebranding",
+    "ticker": "SXP",
+    "direction": "LONG",
+    "symbol": "SXPUSDT",
+    "qv24": 8137931.037040001,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "time": "2023-01-31T08:13:32+00:00",
+    "article_id": 55990,
+    "title": "KuCoin Supports the vEmpire DDAO (VEMP) Rebranding",
+    "ticker": "VEMP",
+    "direction": "LONG",
+    "symbol": "VEMPUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-02-06T07:45:37+00:00",
+    "article_id": 56557,
+    "title": "KuCoin Will Support MahaDAO (MAHA) Token Swap",
+    "ticker": "MAHA",
+    "direction": "LONG",
+    "symbol": "MAHAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-02-07T07:21:43+00:00",
+    "article_id": 56749,
+    "title": "KuCoin Supports the Chain (XCN) Rebranding",
+    "ticker": "XCN",
+    "direction": "LONG",
+    "symbol": "XCNUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-02-08T07:13:08+00:00",
+    "article_id": 56978,
+    "title": "KuCoin Will Support the Phantasma Mainnet and Token Swap of Phantasma (SOUL)",
+    "ticker": "SOUL",
+    "direction": "LONG",
+    "symbol": "SOULUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-02-13T08:04:20+00:00",
+    "article_id": 35561,
+    "title": "KuCoin Will Support the Radixdlt Mainnet Radix (XRD) and Token Swap from EXRD to XRD ",
+    "ticker": "EXRD",
+    "direction": "LONG",
+    "symbol": "EXRDUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-02-21T02:13:13+00:00",
+    "article_id": 58782,
+    "title": "KuCoin Will Support the Mainframe (MFT) Token Swap to Hifi Finance (HIFI) ",
+    "ticker": "MFT",
+    "direction": "LONG",
+    "symbol": "MFTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-02-23T10:11:34+00:00",
+    "article_id": 59553,
+    "title": "KuCoin Will Support The AllianceBlock (ALBT) Token Swap To AllianceBlock Nexera (NXRA) ",
+    "ticker": "ALBT",
+    "direction": "LONG",
+    "symbol": "ALBTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-03-17T11:17:12+00:00",
+    "article_id": 62068,
+    "title": "KuCoin Will Support the Migration for ERC20 TARAXA (TARA) to Mainnet TARAXA (TARA) Tokens",
+    "ticker": "TARA",
+    "direction": "LONG",
+    "symbol": "TARAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-03-22T01:56:49+00:00",
+    "article_id": 62974,
+    "title": "KuCoin Will Support Radiant (RDNT) Token Swap",
+    "ticker": "RDNT",
+    "direction": "LONG",
+    "symbol": "RDNTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-03-22T10:53:10+00:00",
+    "article_id": 62833,
+    "title": "KuCoin Will Support LABS Group (LABS) Token Swap",
+    "ticker": "LABS",
+    "direction": "LONG",
+    "symbol": "LABSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-04-05T09:19:29+00:00",
+    "article_id": 65141,
+    "title": "KuCoin Will Support the Migration for Mainnet Helium (HNT) to Solana Helium (HNT) Tokens",
+    "ticker": "HNT",
+    "direction": "LONG",
+    "symbol": "HNTUSDT",
+    "qv24": 0.0,
+    "eligible": false,
+    "reason": "qv_lt_5m"
+  },
+  {
+    "time": "2023-04-17T08:32:26+00:00",
+    "article_id": 67055,
+    "title": "KuCoin Supports the VideoCoin (VID) Rebranding",
+    "ticker": "VID",
+    "direction": "LONG",
+    "symbol": "VIDUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-04-24T08:54:34+00:00",
+    "article_id": 68728,
+    "title": "KuCoin Supports the WinGoal (MLS) Rebranding",
+    "ticker": "MLS",
+    "direction": "LONG",
+    "symbol": "MLSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-04T14:31:13+00:00",
+    "article_id": 70398,
+    "title": "KuCoin Will Support the Migration for V1 Gala Games (GALA) to V2 Gala Games (GALA) Tokens",
+    "ticker": "GALA",
+    "direction": "LONG",
+    "symbol": "GALAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-05-18T14:14:31+00:00",
+    "article_id": 73935,
+    "title": "KuCoin Will Support the Cocos-BCX (COCOS) Token Swap to COMBO (COMBO) ",
+    "ticker": "COCOS",
+    "direction": "LONG",
+    "symbol": "COCOSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-05-23T06:39:53+00:00",
+    "article_id": 73796,
+    "title": "KuCoin Will Support the Token Swap of CrytoGPT (GPT) to LayerAI (LAI)",
+    "ticker": "GPT",
+    "direction": "LONG",
+    "symbol": "GPTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-06-02T11:03:35+00:00",
+    "article_id": 76911,
+    "title": "KuCoin Supports the Elrond Network (EGLD)  Rebranding",
+    "ticker": "EGLD",
+    "direction": "LONG",
+    "symbol": "EGLDUSDT",
+    "qv24": 11693516.435999999,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "time": "2023-06-08T04:01:46+00:00",
+    "article_id": 77517,
+    "title": "KuCoin Supports the Alpha Finance Lab (ALPHA) Rebranding",
+    "ticker": "ALPHA",
+    "direction": "LONG",
+    "symbol": "ALPHAUSDT",
+    "qv24": 900293256.7603604,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "time": "2023-06-16T09:16:22+00:00",
+    "article_id": 78723,
+    "title": "KuCoin Supports the Dusk Network (DUSK) Rebranding",
+    "ticker": "DUSK",
+    "direction": "LONG",
+    "symbol": "DUSKUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-06-19T03:49:30+00:00",
+    "article_id": 78777,
+    "title": "KuCoin Will Support the NEO (NEO) and NeoGas (GAS) Tokens Migration From NEO Legacy to NEO N3 Network",
+    "ticker": "NEO",
+    "direction": "LONG",
+    "symbol": "NEOUSDT",
+    "qv24": 14003890.721720003,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "time": "2023-06-19T03:49:30+00:00",
+    "article_id": 78777,
+    "title": "KuCoin Will Support the NEO (NEO) and NeoGas (GAS) Tokens Migration From NEO Legacy to NEO N3 Network",
+    "ticker": "GAS",
+    "direction": "LONG",
+    "symbol": "GASUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-07-25T12:33:28+00:00",
+    "article_id": 83293,
+    "title": "KuCoin Will Support the Token Swap of EpiK Protocol (EPK) to EpiK Protocol (AIEPK)",
+    "ticker": "EPK",
+    "direction": "LONG",
+    "symbol": "EPKUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-07-27T10:07:17+00:00",
+    "article_id": 83492,
+    "title": "KuCoin Will Support OpenOcean (OOE) Token Swap",
+    "ticker": "OOE",
+    "direction": "LONG",
+    "symbol": "OOEUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-07-27T10:09:34+00:00",
+    "article_id": 83515,
+    "title": "KuCoin Will Support Torum (XTM) Token Swap",
+    "ticker": "XTM",
+    "direction": "LONG",
+    "symbol": "XTMUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-08-01T10:52:43+00:00",
+    "article_id": 83847,
+    "title": "KuCoin Will Support Seascape Crowns (CWS) Token Swap",
+    "ticker": "CWS",
+    "direction": "LONG",
+    "symbol": "CWSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-08-01T12:01:39+00:00",
+    "article_id": 83800,
+    "title": "KuCoin Will Support Dotmoovs (MOOV) Token Swap",
+    "ticker": "MOOV",
+    "direction": "LONG",
+    "symbol": "MOOVUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-08-29T11:59:34+00:00",
+    "article_id": 85657,
+    "title": "KuCoin Will Support the Token Swap of Stepwatch (STEPWATCH) to Sprint (SPRINT) ",
+    "ticker": "STEPWATCH",
+    "direction": "LONG",
+    "symbol": "STEPWATCHUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-09-04T08:05:23+00:00",
+    "article_id": 85852,
+    "title": "KuCoin Supports the Ambire AdEx (ADX) Rebranding",
+    "ticker": "ADX",
+    "direction": "LONG",
+    "symbol": "ADXUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-09-05T12:50:56+00:00",
+    "article_id": 86024,
+    "title": "KuCoin Will Support Travala (AVA) Token Swap",
+    "ticker": "AVA",
+    "direction": "LONG",
+    "symbol": "AVAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-09-06T06:37:25+00:00",
+    "article_id": 86001,
+    "title": "KuCoin Will Support TENET (TENET) Token Swap",
+    "ticker": "TENET",
+    "direction": "LONG",
+    "symbol": "TENETUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-09-06T09:52:04+00:00",
+    "article_id": 86118,
+    "title": "KuCoin will support the Lybra Finance (LBR) token swap",
+    "ticker": "LBR",
+    "direction": "LONG",
+    "symbol": "LBRUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-09-07T07:58:38+00:00",
+    "article_id": 86186,
+    "title": "KuCoin Will Support the LayerAI (LAI) Token Swap",
+    "ticker": "LAI",
+    "direction": "LONG",
+    "symbol": "LAIUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-09-11T03:44:47+00:00",
+    "article_id": 86416,
+    "title": "KuCoin Will Support the DeXe (DEXE) Token Swap",
+    "ticker": "DEXE",
+    "direction": "LONG",
+    "symbol": "DEXEUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-10-05T12:07:32+00:00",
+    "article_id": 87756,
+    "title": "KuCoin Will Support the Token Swap of ONSTON (ONSTON) to ZELIX (ZELIX)",
+    "ticker": "ONSTON",
+    "direction": "LONG",
+    "symbol": "ONSTONUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-11-10T03:13:50+00:00",
+    "article_id": 90263,
+    "title": "KuCoin Will Support the Token Migration of Morpheus Labs (MITX) to Morpheus Labs Infrastructure Node (MIND)",
+    "ticker": "MITX",
+    "direction": "LONG",
+    "symbol": "MITXUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-11-18T00:00:00+00:00",
+    "article_id": 90935,
+    "title": "KuCoin Supports the Utrust(UTK) Rebranding",
+    "ticker": "UTK",
+    "direction": "LONG",
+    "symbol": "UTKUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-11-24T12:24:39+00:00",
+    "article_id": 91445,
+    "title": "KuCoin Will Support the Ideaology (IDEA) Token Swap",
+    "ticker": "IDEA",
+    "direction": "LONG",
+    "symbol": "IDEAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-11-29T01:59:14+00:00",
+    "article_id": 91784,
+    "title": "KuCoin Will Support the Token Swap of Virtua (TVK) to Vanar (VANRY)",
+    "ticker": "TVK",
+    "direction": "LONG",
+    "symbol": "TVKUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-11-29T04:00:40+00:00",
+    "article_id": 91858,
+    "title": "KuCoin Will Support the Dypius (DYP) Token Migration",
+    "ticker": "DYP",
+    "direction": "LONG",
+    "symbol": "DYPUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-12-04T09:03:54+00:00",
+    "article_id": 92150,
+    "title": "KuCoin Will Support the OpenLeverage (OLE) Token Swap",
+    "ticker": "OLE",
+    "direction": "LONG",
+    "symbol": "OLEUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-01-03T07:25:36+00:00",
+    "article_id": 94838,
+    "title": "KuCoin Will Support the Token Swap of AntiMatter (MATTER) to BituneAi (TUNE）",
+    "ticker": "MATTER",
+    "direction": "LONG",
+    "symbol": "MATTERUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-01-18T06:33:25+00:00",
+    "article_id": 96449,
+    "title": "KuCoin Will Support the Pepe 2.0 (PEPE2) Token Swap",
+    "ticker": "PEPE2",
+    "direction": "LONG",
+    "symbol": "PEPE2USDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-01-23T13:26:42+00:00",
+    "article_id": 97034,
+    "title": "KuCoin Will Support the Quickswap (QUICK) Token Swap",
+    "ticker": "QUICK",
+    "direction": "LONG",
+    "symbol": "QUICKUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-01-25T08:51:47+00:00",
+    "article_id": 97252,
+    "title": "KuCoin Will Support the Token Swap of Netvrk (NTVRK) to NetVRk (NETVR)",
+    "ticker": "NTVRK",
+    "direction": "LONG",
+    "symbol": "NTVRKUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-02-29T08:18:40+00:00",
+    "article_id": 100086,
+    "title": "KuCoin Will Support the Token Swap of Huobi Token (HT) to HTX DAO (HTX）",
+    "ticker": "HT",
+    "direction": "LONG",
+    "symbol": "HTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-03-01T08:12:15+00:00",
+    "article_id": 100472,
+    "title": "KuCoin Will Support the Cashaa (CAS) Token Swap",
+    "ticker": "CAS",
+    "direction": "LONG",
+    "symbol": "CASUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-03-15T03:41:49+00:00",
+    "article_id": 102087,
+    "title": "KuCoin Will Support the Proton (XPR) Rebranding to XPR Network (XPR)",
+    "ticker": "XPR",
+    "direction": "LONG",
+    "symbol": "XPRUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-03-16T02:53:34+00:00",
+    "article_id": 102325,
+    "title": "KuCoin Will Support the Stratis (STRAX) Token Swap",
+    "ticker": "STRAX",
+    "direction": "LONG",
+    "symbol": "STRAXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-04-10T02:05:27+00:00",
+    "article_id": 104897,
+    "title": "KuCoin Will Support the AllianceBlock Nexera (NXRA) Rebranding to Nexera Foundation (NXRA)",
+    "ticker": "NXRA",
+    "direction": "LONG",
+    "symbol": "NXRAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-04-15T04:09:26+00:00",
+    "article_id": 105409,
+    "title": "KuCoin Will Support the Zebec (ZBC) Token Swap",
+    "ticker": "ZBC",
+    "direction": "LONG",
+    "symbol": "ZBCUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-04-16T02:01:05+00:00",
+    "article_id": 105584,
+    "title": "KuCoin Will Support the Rebranding of Qredo Token (QRDO) To Open Custody Protocol (OPEN)",
+    "ticker": "QRDO",
+    "direction": "LONG",
+    "symbol": "QRDOUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-04-28T07:26:23+00:00",
+    "article_id": 107042,
+    "title": "KuCoin Will Support the Syntropy (NOIA) Rebranding to Synternet (NOIA)",
+    "ticker": "NOIA",
+    "direction": "LONG",
+    "symbol": "NOIAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-05-09T06:44:59+00:00",
+    "article_id": 108081,
+    "title": "KuCoin Will Support the Launchpool token (LPOOL) Token Swap",
+    "ticker": "LPOOL",
+    "direction": "LONG",
+    "symbol": "LPOOLUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-05-13T09:01:16+00:00",
+    "article_id": 108503,
+    "title": "KuCoin Will Support the Token Swap of DeRace (DERC) to zkRace (ZERC）",
+    "ticker": "DERC",
+    "direction": "LONG",
+    "symbol": "DERCUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-05-21T10:45:46+00:00",
+    "article_id": 109341,
+    "title": "KuCoin Will Support the Lisk (LSK) Token Swap",
+    "ticker": "LSK",
+    "direction": "LONG",
+    "symbol": "LSKUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-05-31T03:04:44+00:00",
+    "article_id": 110534,
+    "title": "KuCoin Will Support the ALEX Lab (ALEX) Token Swap",
+    "ticker": "ALEX",
+    "direction": "LONG",
+    "symbol": "ALEXUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-06-25T09:27:57+00:00",
+    "article_id": 113840,
+    "title": "KuCoin Will Support the Telos (TLOS) Token Migration on Ethereum and BNB Networks",
+    "ticker": "TLOS",
+    "direction": "LONG",
+    "symbol": "TLOSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-06-27T01:39:11+00:00",
+    "article_id": 114071,
+    "title": "KuCoin Will Support the Rebranding of ATOR Protocol (ATOR) to ANyONe Protocol (ANYONE)",
+    "ticker": "ATOR",
+    "direction": "LONG",
+    "symbol": "ATORUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-07-02T03:11:26+00:00",
+    "article_id": 114366,
+    "title": "KuCoin Will Support the Polychain Monsters (PMON) Rebranding to Protocol Monster Labs (PMON)",
+    "ticker": "PMON",
+    "direction": "LONG",
+    "symbol": "PMONUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-07-03T08:12:06+00:00",
+    "article_id": 114414,
+    "title": "KuCoin Will Support the Rebranding of RedFox (RFOX) to JUICE (JUC)",
+    "ticker": "RFOX",
+    "direction": "LONG",
+    "symbol": "RFOXUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-07-07T06:43:06+00:00",
+    "article_id": 114706,
+    "title": "KuCoin Will Support the Token Migration of Synternet (NOIA) to Synternet (SYNT)",
+    "ticker": "NOIA",
+    "direction": "LONG",
+    "symbol": "NOIAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-07-15T10:15:18+00:00",
+    "article_id": 115519,
+    "title": "KuCoin Will Support the Covalent Query Token (CQT) Token Swap to Covalent X Token (CXT)",
+    "ticker": "CQT",
+    "direction": "LONG",
+    "symbol": "CQTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-07-18T03:01:49+00:00",
+    "article_id": 115728,
+    "title": "KuCoin Will Support the Galxe (GAL) Token Swap to Gravity (G)",
+    "ticker": "GAL",
+    "direction": "LONG",
+    "symbol": "GALUSDT",
+    "qv24": 0.0,
+    "eligible": false,
+    "reason": "qv_lt_5m"
+  },
+  {
+    "time": "2024-07-30T13:09:08+00:00",
+    "article_id": 117055,
+    "title": "KuCoin Will Support the Newscrypto (NWC) Rebranding to Numerico (NWC)",
+    "ticker": "NWC",
+    "direction": "LONG",
+    "symbol": "NWCUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-08-16T04:26:56+00:00",
+    "article_id": 119107,
+    "title": "KuCoin Will Support the Router Protocol (ROUTE) Mainnet Launch and Migration Plan",
+    "ticker": "ROUTE",
+    "direction": "LONG",
+    "symbol": "ROUTEUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-08-19T08:33:57+00:00",
+    "article_id": 119335,
+    "title": "KuCoin Will Support the Reality Metaverse (RLTM) Token Swap to Reality Metaverse (RMV)",
+    "ticker": "RLTM",
+    "direction": "LONG",
+    "symbol": "RLTMUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-08-23T09:16:20+00:00",
+    "article_id": 120175,
+    "title": "KuCoin Will Support the Token Swap and Rebranding of Frontier (FRONT) to Self Chain (SLF)",
+    "ticker": "FRONT",
+    "direction": "LONG",
+    "symbol": "FRONTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-08-29T05:27:43+00:00",
+    "article_id": 121176,
+    "title": "KuCoin Will Support the Crypterium (CRPT) Token Swap to Choise.ai (CHO)",
+    "ticker": "CRPT",
+    "direction": "LONG",
+    "symbol": "CRPTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-08-30T08:05:38+00:00",
+    "article_id": 121487,
+    "title": "KuCoin Will Support the Token Swap of Polygon (MATIC) to Polygon (POL)",
+    "ticker": "MATIC",
+    "direction": "LONG",
+    "symbol": "MATICUSDT",
+    "qv24": 163435075.48549998,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "time": "2024-09-04T09:29:38+00:00",
+    "article_id": 122403,
+    "title": "KuCoin Will Support the Token Swap of Woonkly Power (WOOP) to Woonkly (WOOP)",
+    "ticker": "WOOP",
+    "direction": "LONG",
+    "symbol": "WOOPUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-09-25T13:46:16+00:00",
+    "article_id": 124969,
+    "title": "KuCoin Will Support the Token Swap of WorldMobileToken (WMT) to WMTX",
+    "ticker": "WMT",
+    "direction": "LONG",
+    "symbol": "WMTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-10-10T09:58:49+00:00",
+    "article_id": 127192,
+    "title": "KuCoin Will Support the PlayZap (PZP) Token Swap",
+    "ticker": "PZP",
+    "direction": "LONG",
+    "symbol": "PZPUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-10-16T07:17:10+00:00",
+    "article_id": 127835,
+    "title": "KuCoin Will Support the Token Swap of XDEFI Wallet (XDEFI) to Ctrl Wallet (CTRL)",
+    "ticker": "XDEFI",
+    "direction": "LONG",
+    "symbol": "XDEFIUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-10-24T07:53:24+00:00",
+    "article_id": 129370,
+    "title": "KuCoin Will Support the Rebranding of Klaytn (KLAY) to Kaia (KAIA)",
+    "ticker": "KLAY",
+    "direction": "LONG",
+    "symbol": "KLAYUSDT",
+    "qv24": 0.0,
+    "eligible": false,
+    "reason": "qv_lt_5m"
+  },
+  {
+    "time": "2024-11-06T01:32:02+00:00",
+    "article_id": 131231,
+    "title": "KuCoin Will Support the TruFlation (TRUF) Token Swap",
+    "ticker": "TRUF",
+    "direction": "LONG",
+    "symbol": "TRUFUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-11-08T09:56:02+00:00",
+    "article_id": 131600,
+    "title": "KuCoin Supports the Moon App (APP) Rebranding",
+    "ticker": "APP",
+    "direction": "LONG",
+    "symbol": "APPUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-11-11T09:48:02+00:00",
+    "article_id": 132348,
+    "title": "KuCoin Will Support the Token Swap of Orion Protocol (ORN) to Lumia (LUMIA)",
+    "ticker": "ORN",
+    "direction": "LONG",
+    "symbol": "ORNUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-11-19T10:16:01+00:00",
+    "article_id": 133925,
+    "title": "KuCoin Will Support the Nimiq (NIM) Migration to Proof of Stake",
+    "ticker": "NIM",
+    "direction": "LONG",
+    "symbol": "NIMUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-11-20T08:44:01+00:00",
+    "article_id": 134132,
+    "title": "KuCoin Will Support the Rebranding of Scallop (SCLP) to E Money Network (EMYC)",
+    "ticker": "SCLP",
+    "direction": "LONG",
+    "symbol": "SCLPUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-12-02T14:20:02+00:00",
+    "article_id": 136785,
+    "title": "KuCoin Will Support the Akropolis (AKRO) Rebranding to Kaon (AKRO)",
+    "ticker": "AKRO",
+    "direction": "LONG",
+    "symbol": "AKROUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-12-03T15:12:01+00:00",
+    "article_id": 137085,
+    "title": "KuCoin Will Support the Vemp (VEMP) Token Migration on Arbitrum Network",
+    "ticker": "VEMP",
+    "direction": "LONG",
+    "symbol": "VEMPUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  }
+]

@@ -1,0 +1,1 @@
+ER=abs(C_t-C_t-24)/sum(abs hourly close changes,24h). Trigger only the upward crossing of the rolling 720h median ER; follow trailing-24h direction. Fixed before returns. Expansion gate requires 12h mean >=0.10% and at least 3/4 core symbols positive.

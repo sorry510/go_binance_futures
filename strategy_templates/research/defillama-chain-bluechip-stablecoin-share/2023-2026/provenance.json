@@ -1,0 +1,9 @@
+{
+  "research_date": "2026-09-30",
+  "sources": ["DeFiLlama stablecoin/1", "DeFiLlama stablecoin/2", "DeFiLlama stablecoincharts/{chain}", "Binance Vision USD-M daily klines"],
+  "usdt_id": 1,
+  "usdc_id": 2,
+  "returns_after_preregistration": true,
+  "oos_evaluated": false,
+  "db_write": false
+}

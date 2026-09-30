@@ -1,0 +1,18 @@
+{
+  "source": "same 20 official Binance Loan/VIP Loan announcement batches as collateral family",
+  "event": "new loanable asset",
+  "direction": "SHORT",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "diagnostic_entry": "next full 1h open",
+  "exact_entry": "next 1m open",
+  "leverage": 4,
+  "profit": 8,
+  "loss": 6,
+  "fee": 0.0005,
+  "slippage_bps": 5,
+  "funding": true,
+  "max_hold_hours": 12,
+  "discovery": 2023,
+  "oos1": 2024
+}

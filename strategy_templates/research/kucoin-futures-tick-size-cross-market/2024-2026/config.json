@@ -1,0 +1,21 @@
+{
+  "source": "KuCoin official CMS + official announcement pages",
+  "discovery_years": [
+    2024,
+    2025
+  ],
+  "untouched_oos_years": [
+    2026
+  ],
+  "direction_mapping": {
+    "tick_decrease": "LONG Binance USD-M",
+    "tick_increase": "SHORT Binance USD-M"
+  },
+  "effective_time": "end of stated KuCoin update window; exact time for single-time announcements",
+  "entry": "next complete Binance USD-M 1h open",
+  "eligibility": {
+    "history_days": 730,
+    "prior_24h_quote_volume_min_usdt": 5000000
+  },
+  "oos_rule": "do not inspect 2026 returns unless discovery mean12>=0.10% and majority batches/symbols positive"
+}

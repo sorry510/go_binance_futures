@@ -1,0 +1,8 @@
+{
+  "stage": "data_access_and_universe_feasibility",
+  "required_metric": "stablecoin borrow APY and/or borrow utilization",
+  "minimum_cross_chain_coverage": 8,
+  "historical_universe_required": true,
+  "deposit_apy_substitution_allowed": false,
+  "returns_inspected": false
+}

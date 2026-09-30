@@ -1,0 +1,12 @@
+{
+  "research_date": "2026-09-29",
+  "years": [
+    2023,
+    2024
+  ],
+  "minimum_events": 8,
+  "signal_time": "proposal end",
+  "direction": "SHORT only if explicit negative option wins",
+  "mapping": "reuse governanceID-safe Snapshot universe",
+  "returns_inspected": false
+}

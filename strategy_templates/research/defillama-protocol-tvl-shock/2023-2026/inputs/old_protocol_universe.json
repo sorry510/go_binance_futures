@@ -1,0 +1,453 @@
+[
+  {
+    "asset": "CVX",
+    "slug": "convex-finance",
+    "category": "Yield",
+    "tvl": 591589721.2316282,
+    "chains": [
+      "Ethereum",
+      "Fraxtal",
+      "Arbitrum",
+      "Polygon"
+    ],
+    "first_um_month": "2022-09"
+  },
+  {
+    "asset": "LDO",
+    "slug": "lido",
+    "category": "Liquid Staking",
+    "tvl": 26323901206.37855,
+    "chains": [
+      "Ethereum",
+      "Solana",
+      "Terra",
+      "Moonriver",
+      "Moonbeam"
+    ],
+    "first_um_month": "2022-09"
+  },
+  {
+    "asset": "ANKR",
+    "slug": "ankr",
+    "category": "Liquid Staking",
+    "tvl": 28360614.831207328,
+    "chains": [
+      "Ethereum",
+      "Flow",
+      "Binance",
+      "Avalanche",
+      "Polkadot",
+      "Fantom",
+      "xDai",
+      "Kusama"
+    ],
+    "first_um_month": "2021-01"
+  },
+  {
+    "asset": "CELR",
+    "slug": "cbridge",
+    "category": "Bridge",
+    "tvl": 15355095.761344714,
+    "chains": [
+      "Ethereum",
+      "Binance",
+      "Polygon",
+      "Arbitrum",
+      "Avalanche",
+      "Optimism",
+      "zkSync Era",
+      "Linea",
+      "Aurora",
+      "Scroll",
+      "Boba",
+      "OKExChain",
+      "Metis",
+      "Fantom",
+      "xDai",
+      "Celo",
+      "Heco",
+      "Polygon zkEVM",
+      "Moonriver",
+      "Moonbeam",
+      "CLV",
+      "Harmony",
+      "Milkomeda",
+      "REI",
+      "Conflux",
+      "Oasis",
+      "Astar",
+      "Syscoin",
+      "Shiden"
+    ],
+    "first_um_month": "2021-03"
+  },
+  {
+    "asset": "EOS",
+    "slug": "vaulta-rex",
+    "category": "Lending",
+    "tvl": 39283095.975380845,
+    "chains": [
+      "EOS"
+    ],
+    "first_um_month": "2020-01"
+  },
+  {
+    "asset": "RSR",
+    "slug": "reserve-protocol",
+    "category": "Indexes",
+    "tvl": 37230060.17763298,
+    "chains": [
+      "Ethereum",
+      "Base",
+      "Arbitrum",
+      "Binance"
+    ],
+    "first_um_month": "2020-10"
+  },
+  {
+    "asset": "BAKE",
+    "slug": "bakeryswap",
+    "category": "Dexs",
+    "tvl": 4096521.6557955635,
+    "chains": [
+      "Binance"
+    ],
+    "first_um_month": "2021-05"
+  },
+  {
+    "asset": "SPELL",
+    "slug": "abracadabra-spell",
+    "category": "CDP",
+    "tvl": 5009523.585572696,
+    "chains": [
+      "Ethereum",
+      "Arbitrum",
+      "Binance",
+      "Avalanche",
+      "Blast",
+      "Fantom",
+      "Kava",
+      "Optimism"
+    ],
+    "first_um_month": "2022-09"
+  },
+  {
+    "asset": "1INCH",
+    "slug": "1inch-swap",
+    "category": "DEX Aggregator",
+    "tvl": 3438312.4981160923,
+    "chains": [
+      "Ethereum",
+      "Binance"
+    ],
+    "first_um_month": "2020-12"
+  },
+  {
+    "asset": "KEEP",
+    "slug": "keep-network",
+    "category": "Cross Chain Bridge",
+    "tvl": 962214.4199817046,
+    "chains": [
+      "Ethereum"
+    ],
+    "first_um_month": "2021-06"
+  },
+  {
+    "asset": "BTCST",
+    "slug": "btcst",
+    "category": "Yield",
+    "tvl": 1025955.080284548,
+    "chains": [
+      "Binance"
+    ],
+    "first_um_month": "2021-03"
+  },
+  {
+    "asset": "API3",
+    "slug": "api3",
+    "category": "Risk Curators",
+    "tvl": 20770209.25507975,
+    "chains": [
+      "Ethereum",
+      "Base"
+    ],
+    "first_um_month": "2022-02"
+  },
+  {
+    "asset": "KSM",
+    "slug": "karura-liquid-staking",
+    "category": "Liquid Staking",
+    "tvl": 596297.8209255128,
+    "chains": [
+      "Karura"
+    ],
+    "first_um_month": "2020-10"
+  },
+  {
+    "asset": "YFII",
+    "slug": "yfii",
+    "category": "Yield Aggregator",
+    "tvl": 471957.59141534986,
+    "chains": [
+      "Ethereum"
+    ],
+    "first_um_month": "2020-09"
+  },
+  {
+    "asset": "ONE",
+    "slug": "one-dex",
+    "category": "Dexs",
+    "tvl": 198383.85164945954,
+    "chains": [
+      "Elrond"
+    ],
+    "first_um_month": "2021-03"
+  },
+  {
+    "asset": "TLM",
+    "slug": "alien-worlds",
+    "category": "Gaming",
+    "tvl": 56159.05231100859,
+    "chains": [
+      "Wax"
+    ],
+    "first_um_month": "2021-07"
+  },
+  {
+    "asset": "ROSE",
+    "slug": "rose",
+    "category": "Dexs",
+    "tvl": 120600.93732349324,
+    "chains": [
+      "Aurora"
+    ],
+    "first_um_month": "2021-12"
+  },
+  {
+    "asset": "LRC",
+    "slug": "loopring",
+    "category": "Dexs",
+    "tvl": 33529.78728491476,
+    "chains": [
+      "Ethereum",
+      "Taiko",
+      "Base"
+    ],
+    "first_um_month": "2020-10"
+  },
+  {
+    "asset": "BEL",
+    "slug": "bella-protocol",
+    "category": "Yield",
+    "tvl": 20687.001203002368,
+    "chains": [
+      "zkSync Era",
+      "Manta",
+      "Ethereum",
+      "Mantle"
+    ],
+    "first_um_month": "2020-11"
+  },
+  {
+    "asset": "SXP",
+    "slug": "swipe",
+    "category": "Dexs",
+    "tvl": 19381.81831537476,
+    "chains": [
+      "Binance",
+      "Ethereum"
+    ],
+    "first_um_month": "2020-07"
+  },
+  {
+    "asset": "LINA",
+    "slug": "linear-finance",
+    "category": "Derivatives",
+    "tvl": 4850.347649344284,
+    "chains": [
+      "Binance"
+    ],
+    "first_um_month": "2021-03"
+  },
+  {
+    "asset": "BTS",
+    "slug": "bitgert-swap",
+    "category": "Dexs",
+    "tvl": 40.66978011738802,
+    "chains": [
+      "Bitgert"
+    ],
+    "first_um_month": "2021-02"
+  },
+  {
+    "asset": "REN",
+    "slug": "renvm",
+    "category": "Bridge",
+    "tvl": 0,
+    "chains": [
+      "Solana",
+      "Ethereum",
+      "Avalanche",
+      "Binance",
+      "Fantom",
+      "Polygon",
+      "Arbitrum",
+      "Kava",
+      "Optimism"
+    ],
+    "first_um_month": "2020-10"
+  },
+  {
+    "asset": "ANC",
+    "slug": "anchor",
+    "category": "Lending",
+    "tvl": 0,
+    "chains": [
+      "Terra",
+      "Avalanche"
+    ],
+    "first_um_month": "2022-03"
+  },
+  {
+    "asset": "GTC",
+    "slug": "gitcoin",
+    "category": "Charity Fundraising",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2021-06"
+  },
+  {
+    "asset": "ETH",
+    "slug": "ethereum-foundation",
+    "category": "Foundation",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2020-01"
+  },
+  {
+    "asset": "ATA",
+    "slug": "atlas-aggregator",
+    "category": "Yield Aggregator",
+    "tvl": 0,
+    "chains": [
+      "Arbitrum"
+    ],
+    "first_um_month": "2021-08"
+  },
+  {
+    "asset": "APE",
+    "slug": "apecoin",
+    "category": "Yield",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2022-03"
+  },
+  {
+    "asset": "ALICE",
+    "slug": "my-neighbor-alice",
+    "category": "Services",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2021-03"
+  },
+  {
+    "asset": "ANT",
+    "slug": "aragon",
+    "category": "Services",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2021-12"
+  },
+  {
+    "asset": "SAND",
+    "slug": "the-sandbox",
+    "category": "Gaming",
+    "tvl": 0,
+    "chains": [
+      "Polygon",
+      "Ethereum"
+    ],
+    "first_um_month": "2021-01"
+  },
+  {
+    "asset": "ENS",
+    "slug": "ens",
+    "category": "Domains",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2021-11"
+  },
+  {
+    "asset": "ARPA",
+    "slug": "arpa-staking",
+    "category": "Staking Pool",
+    "tvl": 0,
+    "chains": [
+      "Ethereum"
+    ],
+    "first_um_month": "2021-10"
+  },
+  {
+    "asset": "DEFI",
+    "slug": "defiway",
+    "category": "Wallets",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2020-08"
+  },
+  {
+    "asset": "BAT",
+    "slug": "basic-attention",
+    "category": "Services",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2020-02"
+  },
+  {
+    "asset": "AKRO",
+    "slug": "akropolis",
+    "category": "Yield",
+    "tvl": 0,
+    "chains": [
+      "Ethereum"
+    ],
+    "first_um_month": "2021-01"
+  },
+  {
+    "asset": "GRT",
+    "slug": "the-graph",
+    "category": "Developer Tools",
+    "tvl": 0,
+    "chains": [
+      "Ethereum",
+      "Arbitrum"
+    ],
+    "first_um_month": "2020-12"
+  },
+  {
+    "asset": "C98",
+    "slug": "coin98",
+    "category": "Farm",
+    "tvl": 0,
+    "chains": [
+      "TomoChain"
+    ],
+    "first_um_month": "2021-08"
+  },
+  {
+    "asset": "AXS",
+    "slug": "axie-infinity",
+    "category": "Gaming",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2020-11"
+  },
+  {
+    "asset": "LPT",
+    "slug": "livepeer",
+    "category": "Video Infrastructure",
+    "tvl": 0,
+    "chains": [],
+    "first_um_month": "2021-11"
+  }
+]

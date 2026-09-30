@@ -1,0 +1,1 @@
+Transform Binance metrics taker long/short volume ratio to signed imbalance, average daily, and subtract USD-M from COIN-M. Fixed 30d |z|>=2 event, direction by divergence sign. Core-4 discovery only.

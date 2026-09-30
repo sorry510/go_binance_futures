@@ -1,0 +1,8 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": ["DeFiLlama stablecoincharts chain history", "Binance Vision USD-M daily klines"],
+  "eligibility_source": "defillama-chain-stablecoin-supply-growth/2023-2026/inputs/universe.json",
+  "returns_inspected_before_gate_freeze": false,
+  "oos_evaluated": false
+}

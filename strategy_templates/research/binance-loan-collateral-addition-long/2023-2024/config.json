@@ -1,0 +1,8 @@
+{
+  "source": "Binance Latest Binance News official CMS",
+  "event": "new collateral asset on Flexible Loan / VIP Loan",
+  "direction": "LONG",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "entry": "next full 1h open after announcement"
+}

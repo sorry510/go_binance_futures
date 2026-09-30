@@ -1,0 +1,9 @@
+{
+  "research_date": "2026-09-28",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": [
+    "Binance Vision USD-M daily metrics",
+    "Bybit public /v5/market/account-ratio",
+    "Binance Vision USD-M monthly 1h klines"
+  ]
+}

@@ -1,0 +1,147 @@
+[
+  {
+    "symbol": "BTCUSDT",
+    "chain": "Bitcoin",
+    "status": "no_stablecoin_history"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "chain": "Ethereum",
+    "status": "ok",
+    "first_futures": "2020-01-01T00:00:00+00:00",
+    "eligible_from": "2022-01-01",
+    "stablecoin_first": "2017-11-29",
+    "aligned_days": 793,
+    "discovery_events": 118
+  },
+  {
+    "symbol": "BNBUSDT",
+    "chain": "BSC",
+    "status": "ok",
+    "first_futures": "2020-02-10T00:00:00+00:00",
+    "eligible_from": "2022-02-10",
+    "stablecoin_first": "2020-08-29",
+    "aligned_days": 793,
+    "discovery_events": 122
+  },
+  {
+    "symbol": "SOLUSDT",
+    "chain": "Solana",
+    "status": "ok",
+    "first_futures": "2020-09-14T00:00:00+00:00",
+    "eligible_from": "2022-09-14",
+    "stablecoin_first": "2021-09-10",
+    "aligned_days": 793,
+    "discovery_events": 104
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "chain": "Avalanche",
+    "status": "ok",
+    "first_futures": "2020-09-23T00:00:00+00:00",
+    "eligible_from": "2022-09-23",
+    "stablecoin_first": "2021-02-03",
+    "aligned_days": 793,
+    "discovery_events": 109
+  },
+  {
+    "symbol": "ADAUSDT",
+    "chain": "Cardano",
+    "status": "ok",
+    "first_futures": "2020-01-31T00:00:00+00:00",
+    "eligible_from": "2022-01-31",
+    "stablecoin_first": "2022-11-24",
+    "aligned_days": 793,
+    "discovery_events": 146
+  },
+  {
+    "symbol": "NEARUSDT",
+    "chain": "Near",
+    "status": "ok",
+    "first_futures": "2020-10-15T00:00:00+00:00",
+    "eligible_from": "2022-10-15",
+    "stablecoin_first": "2022-07-10",
+    "aligned_days": 793,
+    "discovery_events": 134
+  },
+  {
+    "symbol": "TRXUSDT",
+    "chain": "Tron",
+    "status": "ok",
+    "first_futures": "2020-01-15T00:00:00+00:00",
+    "eligible_from": "2022-01-15",
+    "stablecoin_first": "2019-04-16",
+    "aligned_days": 793,
+    "discovery_events": 120
+  },
+  {
+    "symbol": "MATICUSDT",
+    "chain": "Polygon",
+    "status": "ok",
+    "first_futures": "2020-10-22T00:00:00+00:00",
+    "eligible_from": "2022-10-22",
+    "stablecoin_first": "2020-04-01",
+    "aligned_days": 651,
+    "discovery_events": 112
+  },
+  {
+    "symbol": "FTMUSDT",
+    "chain": "Fantom",
+    "status": "ok",
+    "first_futures": "2020-09-24T00:00:00+00:00",
+    "eligible_from": "2022-09-24",
+    "stablecoin_first": "2019-12-27",
+    "aligned_days": 793,
+    "discovery_events": 118
+  },
+  {
+    "symbol": "OPUSDT",
+    "chain": "OP Mainnet",
+    "status": "ok",
+    "first_futures": "2022-06-01T00:00:00+00:00",
+    "eligible_from": "2024-06-01",
+    "stablecoin_first": "2021-11-12",
+    "aligned_days": 793,
+    "discovery_events": 30
+  },
+  {
+    "symbol": "APTUSDT",
+    "chain": "Aptos",
+    "status": "ok",
+    "first_futures": "2022-10-19T00:00:00+00:00",
+    "eligible_from": "2024-10-19",
+    "stablecoin_first": "2022-10-25",
+    "aligned_days": 793,
+    "discovery_events": 11
+  },
+  {
+    "symbol": "ARBUSDT",
+    "chain": "Arbitrum",
+    "status": "ok",
+    "first_futures": "2023-03-23T00:00:00+00:00",
+    "eligible_from": "2025-03-23",
+    "stablecoin_first": "2021-06-25",
+    "aligned_days": 681,
+    "discovery_events": 0
+  },
+  {
+    "symbol": "SUIUSDT",
+    "chain": "Sui",
+    "status": "ok",
+    "first_futures": "2023-05-03T00:00:00+00:00",
+    "eligible_from": "2025-05-03",
+    "stablecoin_first": "2024-01-23",
+    "aligned_days": 375,
+    "discovery_events": 0
+  },
+  {
+    "symbol": "XRPUSDT",
+    "chain": "XRPL",
+    "status": "ok",
+    "first_futures": "2020-01-06T00:00:00+00:00",
+    "eligible_from": "2022-01-06",
+    "stablecoin_first": "2025-04-02",
+    "aligned_days": 0,
+    "discovery_events": 0
+  }
+]

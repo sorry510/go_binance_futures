@@ -1,0 +1,6 @@
+{
+  "CHR": "Chronos token ticker is not Binance Chromia CHR",
+  "FLOW": "FlowSwap/Velocimeter ticker identity is ambiguous versus Binance FLOW",
+  "LIT": "Lighter ticker is not Binance Litentry/Heima LIT",
+  "OMNI": "Omni Exchange/Omnidrome ticker is not Binance Omni Network OMNI"
+}

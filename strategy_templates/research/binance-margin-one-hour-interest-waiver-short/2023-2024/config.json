@@ -1,0 +1,13 @@
+{
+  "direction": "SHORT",
+  "mechanism": "one-hour borrowing-interest waiver lowers crypto borrow cost",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "discovery_year": 2023,
+  "oos1_year": 2024,
+  "horizons_hours": [
+    1,
+    4,
+    12
+  ]
+}

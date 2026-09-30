@@ -1,0 +1,10 @@
+{
+  "signal": "7d log-change of stablecoin_supply / chain_TVL, zero-cross",
+  "up_cross": "SHORT",
+  "down_cross": "LONG",
+  "entry": "next UTC daily open",
+  "eligibility": {"futures_history_years": 2, "quote_volume_usdt": 5000000},
+  "discovery": "2023-2024",
+  "gate": {"mean7": 0.0025, "positive_symbol_fraction": 0.60, "both_years_positive": true},
+  "oos_status": "untouched; discovery failed"
+}

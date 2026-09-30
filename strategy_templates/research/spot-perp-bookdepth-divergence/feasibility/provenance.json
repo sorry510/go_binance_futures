@@ -1,0 +1,6 @@
+{
+  "research_date": "2026-09-30",
+  "source": "Binance Vision S3 directory listing",
+  "spot_daily_prefixes": ["aggTrades", "klines", "trades"],
+  "usd_m_daily_includes": "bookDepth"
+}

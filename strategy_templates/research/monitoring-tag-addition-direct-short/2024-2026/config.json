@@ -29,5 +29,11 @@
   "archived_replay_funding_semantics": {
     "status": "known_bug",
     "problem": "historical helpers require a nonexistent fourth mark_price CSV column and silently skip funding rows"
+  },
+  "corrected_replay_funding_semantics": {
+    "status": "validated",
+    "parser": "calc_time,funding_interval_hours,last_funding_rate",
+    "mark_price_fallback": "current 1m bar.Close at funding cashflow",
+    "location": "replay_corrected/"
   }
 }

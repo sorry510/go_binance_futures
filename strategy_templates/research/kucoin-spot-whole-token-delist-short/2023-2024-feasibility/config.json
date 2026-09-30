@@ -1,0 +1,8 @@
+{
+  "direction": "SHORT",
+  "event_source": "KuCoin official Delistings CMS + official announcement pages",
+  "event_filter": "whole-token/project ST delisting only; Earn/TradingBot/Margin/ETF companion notices excluded",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_events": 8
+}

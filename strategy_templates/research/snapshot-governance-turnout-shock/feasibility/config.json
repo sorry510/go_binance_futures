@@ -1,0 +1,6 @@
+{
+  "minimum_symbols": 8,
+  "mapped_symbols": ["APEUSDT","ENSUSDT","GTCUSDT","LDOUSDT","LINAUSDT","LRCUSDT","RENUSDT"],
+  "signal_time_if_feasible": "proposal end",
+  "decision": "coverage blocked"
+}

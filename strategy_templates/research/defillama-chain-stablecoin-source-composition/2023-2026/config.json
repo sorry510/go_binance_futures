@@ -1,0 +1,15 @@
+{
+  "feature": "log(bridged_stablecoin_usd / minted_stablecoin_usd) 7d change zero-cross",
+  "up_cross": "LONG",
+  "down_cross": "SHORT",
+  "discovery": [2023, 2024],
+  "min_history_years": 2,
+  "min_signal_day_quote_volume_usdt": 5000000,
+  "gate_mean7": 0.0025,
+  "gate_positive_symbol_fraction": 0.60,
+  "leverage": 4,
+  "tp_pct": 8,
+  "sl_pct": 6,
+  "fee_per_side": 0.0005,
+  "slippage_per_side_bps": 5
+}

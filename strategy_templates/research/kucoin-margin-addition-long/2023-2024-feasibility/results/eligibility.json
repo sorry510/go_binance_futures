@@ -1,0 +1,1055 @@
+[
+  {
+    "time": "2024-12-17T10:00:02+00:00",
+    "ticker": "HYPE",
+    "title": "KuCoin Isolated Margin Adds the Hyperliquid (HYPE) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-241217",
+    "article_id": 140633,
+    "symbol": "HYPEUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-11-29T12:52:02+00:00",
+    "ticker": "MAJOR",
+    "title": "KuCoin Isolated Margin Adds the Major (MAJOR) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-major",
+    "article_id": 136552,
+    "symbol": "MAJORUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-11-27T02:44:02+00:00",
+    "ticker": "MEMEFI",
+    "title": "KuCoin Isolated Margin Adds the MEMEFI and BRETT Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-memefi-brett",
+    "article_id": 135562,
+    "symbol": "MEMEFIUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-11-27T02:44:02+00:00",
+    "ticker": "BRETT",
+    "title": "KuCoin Isolated Margin Adds the MEMEFI and BRETT Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-memefi-brett",
+    "article_id": 135562,
+    "symbol": "BRETTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-11-15T10:20:02+00:00",
+    "ticker": "PNUT",
+    "title": "KuCoin Isolated Margin Adds the Peanut the Squirrel (PNUT) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-pnut",
+    "article_id": 133480,
+    "symbol": "PNUTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-11-13T09:24:02+00:00",
+    "ticker": "SWELL",
+    "title": "KuCoin Isolated Margin Adds the SWELL Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-swell",
+    "article_id": 132509,
+    "symbol": "SWELLUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-11-07T12:48:02+00:00",
+    "ticker": "SMILE",
+    "title": "KuCoin Isolated Margin Adds the bitSmiley token (SMILE) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-smile",
+    "article_id": 131880,
+    "symbol": "SMILEUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-11-05T11:56:01+00:00",
+    "ticker": "X",
+    "title": "KuCoin Isolated Margin Adds the X Empire (X) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-x",
+    "article_id": 131300,
+    "symbol": "1000XUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-10-29T11:24:46+00:00",
+    "ticker": "GRASS",
+    "title": "KuCoin Isolated Margin Adds the GRASS, MOODENG Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-grass-moodeng",
+    "article_id": 129967,
+    "symbol": "GRASSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-10-29T11:24:46+00:00",
+    "ticker": "MOODENG",
+    "title": "KuCoin Isolated Margin Adds the GRASS, MOODENG Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-grass-moodeng",
+    "article_id": 129967,
+    "symbol": "MOODENGUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-10-22T10:47:23+00:00",
+    "ticker": "SCR",
+    "title": "KuCoin Isolated Margin Adds the Scroll (SCR) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-scr",
+    "article_id": 129045,
+    "symbol": "SCRUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-10-16T12:29:36+00:00",
+    "ticker": "PUFFER",
+    "title": "KuCoin Isolated Margin Adds the Puffer (PUFFER) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-puffer",
+    "article_id": 128187,
+    "symbol": "PUFFERUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-10-08T10:41:15+00:00",
+    "ticker": "CATS",
+    "title": "KuCoin Isolated Margin Adds the CATS (CATS) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-cats",
+    "article_id": 126608,
+    "symbol": "CATSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-10-01T06:12:22+00:00",
+    "ticker": "EIGEN",
+    "title": "KuCoin Isolated Margin Adds the Eigen (EIGEN) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-eigen",
+    "article_id": 126056,
+    "symbol": "EIGENUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-09-26T13:56:19+00:00",
+    "ticker": "HMSTR",
+    "title": "KuCoin Isolated Margin Adds the Hamster Kombat (HMSTR) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-hmstr",
+    "article_id": 125326,
+    "symbol": "HMSTRUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-09-20T13:06:27+00:00",
+    "ticker": "CATI",
+    "title": "KuCoin Isolated Margin Adds the CATI, NEIROCTO Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-cati-neirocto",
+    "article_id": 124305,
+    "symbol": "CATIUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-09-20T13:06:27+00:00",
+    "ticker": "NEIROCTO",
+    "title": "KuCoin Isolated Margin Adds the CATI, NEIROCTO Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-cati-neirocto",
+    "article_id": 124305,
+    "symbol": "NEIROCTOUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-09-19T10:08:39+00:00",
+    "ticker": "NEIRO",
+    "title": "KuCoin Isolated Margin Adds the Neiro (NEIRO) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-neiro",
+    "article_id": 124060,
+    "symbol": "NEIROUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-09-17T10:08:46+00:00",
+    "ticker": "TURBO",
+    "title": "KuCoin Isolated Margin Adds the Turbo (TURBO) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-turbo",
+    "article_id": 123786,
+    "symbol": "TURBOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-09-11T09:09:56+00:00",
+    "ticker": "POL",
+    "title": "KuCoin Isolated Margin Adds the Polygon Ecosystem Token (POL) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-pol",
+    "article_id": 123236,
+    "symbol": "POLUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-08-26T13:16:38+00:00",
+    "ticker": "RENDER",
+    "title": "KuCoin Isolated Margin Adds the RENDER, DOGS Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-render-dogs",
+    "article_id": 120597,
+    "symbol": "RENDERUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-08-26T13:16:38+00:00",
+    "ticker": "DOGS",
+    "title": "KuCoin Isolated Margin Adds the RENDER, DOGS Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-render-dogs",
+    "article_id": 120597,
+    "symbol": "DOGSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-08-23T12:05:41+00:00",
+    "ticker": "CAT",
+    "title": "KuCoin Isolated Margin Adds the Simon's Cat (CAT) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-cat",
+    "article_id": 120241,
+    "symbol": "CATUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-08-08T08:39:29+00:00",
+    "ticker": "MAX",
+    "title": "KuCoin Isolated Margin Adds the Matr1x (MAX) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-max",
+    "article_id": 118135,
+    "symbol": "MAXUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-07-22T10:02:18+00:00",
+    "ticker": "BANANA",
+    "title": "KuCoin Isolated Margin Adds the Banana Gun (BANANA) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-banana",
+    "article_id": 116130,
+    "symbol": "BANANAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-06-27T09:38:06+00:00",
+    "ticker": "BLAST",
+    "title": "KuCoin Isolated Margin Adds the Blast (BLAST) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-blast",
+    "article_id": 114161,
+    "symbol": "BLASTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-06-21T03:41:57+00:00",
+    "ticker": "ZRO",
+    "title": "KuCoin Isolated Margin Adds the ZRO, LISTA Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-zro-lista",
+    "article_id": 113438,
+    "symbol": "ZROUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-06-21T03:41:57+00:00",
+    "ticker": "LISTA",
+    "title": "KuCoin Isolated Margin Adds the ZRO, LISTA Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-zro-lista",
+    "article_id": 113438,
+    "symbol": "LISTAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-06-20T11:07:57+00:00",
+    "ticker": "ATH",
+    "title": "KuCoin Isolated Margin Adds the Aethir (ATH) Trading Pair",
+    "path": "/kucoin-margin-adds-ath",
+    "article_id": 113324,
+    "symbol": "ATHUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-06-12T08:30:19+00:00",
+    "ticker": "IO",
+    "title": "KuCoin Isolated Margin Adds the IO.NET (IO) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-io",
+    "article_id": 112152,
+    "symbol": "IOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-06-06T12:16:40+00:00",
+    "ticker": "TAIKO",
+    "title": "KuCoin Isolated Margin Adds the Taiko (TAIKO) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-taiko",
+    "article_id": 111468,
+    "symbol": "TAIKOUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-05-17T07:42:38+00:00",
+    "ticker": "NOT",
+    "title": "KuCoin Isolated Margin Adds the Notcoin (NOT) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-not",
+    "article_id": 109045,
+    "symbol": "NOTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-05-14T08:43:04+00:00",
+    "ticker": "BB",
+    "title": "KuCoin Isolated Margin Adds the BounceBit (BB) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-bb",
+    "article_id": 108786,
+    "symbol": "BBUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-04-30T08:20:02+00:00",
+    "ticker": "MSN",
+    "title": "KuCoin Isolated Margin Adds the Meson.Network (MSN) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-msn",
+    "article_id": 107427,
+    "symbol": "MSNUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-04-19T11:13:55+00:00",
+    "ticker": "MERL",
+    "title": "KuCoin Isolated Margin Adds the Merlin Chain (MERL) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-merl",
+    "article_id": 106411,
+    "symbol": "MERLUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-04-17T13:40:08+00:00",
+    "ticker": "OMNI",
+    "title": "KuCoin Isolated Margin Adds the Omni Network (OMNI) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-omni",
+    "article_id": 105960,
+    "symbol": "OMNIUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-04-17T08:04:35+00:00",
+    "ticker": "PRCL",
+    "title": "KuCoin Isolated Margin Adds the PRCL, FOXY Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-prcl-foxy",
+    "article_id": 105889,
+    "symbol": "PRCLUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-04-17T08:04:35+00:00",
+    "ticker": "FOXY",
+    "title": "KuCoin Isolated Margin Adds the PRCL, FOXY Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-prcl-foxy",
+    "article_id": 105889,
+    "symbol": "FOXYUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-04-09T08:35:57+00:00",
+    "ticker": "MEW",
+    "title": "KuCoin Isolated Margin Adds the cat in a dogs world (MEW) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-mew",
+    "article_id": 104828,
+    "symbol": "MEWUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-04-09T03:04:21+00:00",
+    "ticker": "TNSR",
+    "title": "KuCoin Isolated Margin Adds the Tensor (TNSR) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-tnsr",
+    "article_id": 104741,
+    "symbol": "TNSRUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-04-04T06:33:42+00:00",
+    "ticker": "W",
+    "title": "KuCoin Isolated Margin Adds the Wormhole (W) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-w",
+    "article_id": 104098,
+    "symbol": "WUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-04-02T08:42:31+00:00",
+    "ticker": "ENA",
+    "title": "KuCoin Isolated Margin Adds the Ethena (ENA) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ena",
+    "article_id": 103982,
+    "symbol": "ENAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-03-28T13:14:28+00:00",
+    "ticker": "VENOM",
+    "title": "KuCoin Isolated Margin Adds the Venom Blockchain (VENOM) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-venom",
+    "article_id": 103713,
+    "symbol": "VENOMUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-03-27T10:21:06+00:00",
+    "ticker": "TOKEN",
+    "title": "KuCoin Isolated Margin Adds the TokenFi (TOKEN) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-token",
+    "article_id": 103555,
+    "symbol": "TOKENUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-03-22T07:13:07+00:00",
+    "ticker": "RAY",
+    "title": "KuCoin Isolated Margin Adds the Raydium (RAY) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ray",
+    "article_id": 102999,
+    "symbol": "RAYUSDT",
+    "qv24": 0.0,
+    "eligible": false,
+    "reason": "qv_lt_5m"
+  },
+  {
+    "time": "2024-03-20T06:47:35+00:00",
+    "ticker": "ZK",
+    "title": "KuCoin Isolated Margin Adds the Polyhedra (ZK) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-zk",
+    "article_id": 102769,
+    "symbol": "ZKUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-03-19T08:31:57+00:00",
+    "ticker": "COQ",
+    "title": "KuCoin Isolated Margin Adds the Coq Inu (COQ) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-coq",
+    "article_id": 102671,
+    "symbol": "COQUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-03-18T12:49:15+00:00",
+    "ticker": "ETHFI",
+    "title": "KuCoin Isolated Margin Adds the ether.fi (ETHFI) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ethfi",
+    "article_id": 102498,
+    "symbol": "ETHFIUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-03-16T11:14:48+00:00",
+    "ticker": "BOME",
+    "title": "KuCoin Isolated Margin Adds the BOOK OF MEME (BOME) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-bome",
+    "article_id": 102371,
+    "symbol": "BOMEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-03-13T10:48:10+00:00",
+    "ticker": "AEVO",
+    "title": "KuCoin Isolated Margin Adds the Aevo (AEVO) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-aevo",
+    "article_id": 101773,
+    "symbol": "AEVOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-03-12T09:11:41+00:00",
+    "ticker": "MYRO",
+    "title": "KuCoin Isolated Margin Adds the Myro (MYRO), dogwifhat (WIF) Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-myro-wif",
+    "article_id": 101489,
+    "symbol": "MYROUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-03-12T09:11:41+00:00",
+    "ticker": "WIF",
+    "title": "KuCoin Isolated Margin Adds the Myro (MYRO), dogwifhat (WIF) Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-myro-wif",
+    "article_id": 101489,
+    "symbol": "WIFUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-03-07T09:29:36+00:00",
+    "ticker": "TAO",
+    "title": "KuCoin Isolated Margin Adds the Bittensor (TAO) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-tao",
+    "article_id": 100928,
+    "symbol": "TAOUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-02-29T10:46:18+00:00",
+    "ticker": "PORTAL",
+    "title": "KuCoin Isolated Margin Adds the Portal (PORTAL) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-portal",
+    "article_id": 100264,
+    "symbol": "PORTALUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-02-20T12:45:00+00:00",
+    "ticker": "STRK",
+    "title": "KuCoin Isolated Margin Adds the Starknet (STRK) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-strk",
+    "article_id": 99277,
+    "symbol": "STRKUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-02-20T09:39:43+00:00",
+    "ticker": "PIXEL",
+    "title": "KuCoin Isolated Margin Adds the Pixels (PIXEL) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-pixel",
+    "article_id": 99232,
+    "symbol": "PIXELUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-02-08T09:41:14+00:00",
+    "ticker": "DYM",
+    "title": "KuCoin Isolated Margin Adds the Dymension (DYM) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-dym",
+    "article_id": 98893,
+    "symbol": "DYMUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-02-02T08:20:24+00:00",
+    "ticker": "ZETA",
+    "title": "KuCoin Isolated Margin Adds the ZetaChain (ZETA) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-zeta",
+    "article_id": 98163,
+    "symbol": "ZETAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-01-31T15:49:55+00:00",
+    "ticker": "JUP",
+    "title": "KuCoin Isolated Margin Adds the JUP, DMAIL Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-jup-dmail",
+    "article_id": 97906,
+    "symbol": "JUPUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-01-31T15:49:55+00:00",
+    "ticker": "DMAIL",
+    "title": "KuCoin Isolated Margin Adds the JUP, DMAIL Trading Pairs",
+    "path": "/kucoin-isolated-margin-adds-jup-dmail",
+    "article_id": 97906,
+    "symbol": "DMAILUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-01-26T08:37:58+00:00",
+    "ticker": "KALT",
+    "title": "KuCoin Isolated Margin Adds the Altlayer (kALT) Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-kalt",
+    "article_id": 97459,
+    "symbol": "KALTUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2024-01-24T03:59:09+00:00",
+    "ticker": "ONDO",
+    "title": "KuCoin Isolated Margin Adds the ONDO Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ondo",
+    "article_id": 97059,
+    "symbol": "ONDOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-01-18T10:49:40+00:00",
+    "ticker": "MANTA",
+    "title": "KuCoin Isolated Margin Adds MANTA Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-manta",
+    "article_id": 96564,
+    "symbol": "MANTAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-01-10T07:23:14+00:00",
+    "ticker": "XAI",
+    "title": "KuCoin Isolated Margin Adds XAI Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-xai",
+    "article_id": 95768,
+    "symbol": "XAIUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2024-01-05T09:40:05+00:00",
+    "ticker": "METIS",
+    "title": "KuCoin Isolated Margin Adds METIS Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-metis",
+    "article_id": 95335,
+    "symbol": "METISUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-12-18T09:58:04+00:00",
+    "ticker": "SATS",
+    "title": "KuCoin Isolated Margin Adds SATS Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-sats",
+    "article_id": 93395,
+    "symbol": "1000SATSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-12-14T10:40:23+00:00",
+    "ticker": "BONK",
+    "title": "KuCoin Isolated Margin Adds BONK Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-bonk",
+    "article_id": 93021,
+    "symbol": "1000BONKUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-12-08T10:17:51+00:00",
+    "ticker": "JTO",
+    "title": "KuCoin Isolated Margin Adds JTO Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-jto",
+    "article_id": 92615,
+    "symbol": "JTOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-11-27T10:08:38+00:00",
+    "ticker": "USTC",
+    "title": "KuCoin Isolated Margin Adds USTC Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ustc",
+    "article_id": 91661,
+    "symbol": "USTCUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-11-21T08:44:17+00:00",
+    "ticker": "PYTH",
+    "title": "KuCoin Isolated Margin Adds PYTH Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-pyth",
+    "article_id": 91246,
+    "symbol": "PYTHUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-11-06T09:14:00+00:00",
+    "ticker": "MEME",
+    "title": "KuCoin Isolated Margin Adds MEME Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-meme",
+    "article_id": 89943,
+    "symbol": "MEMEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-10-31T15:47:06+00:00",
+    "ticker": "TIA",
+    "title": "KuCoin Isolated Margin Adds TIA Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-tia",
+    "article_id": 89541,
+    "symbol": "TIAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-10-26T08:26:47+00:00",
+    "ticker": "TRB",
+    "title": "KuCoin Isolated Margin Adds TRB Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-trb",
+    "article_id": 89040,
+    "symbol": "TRBUSDT",
+    "qv24": 2493780061.9923005,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "time": "2023-10-20T08:54:11+00:00",
+    "ticker": "BOND",
+    "title": "KuCoin Isolated Margin Adds BOND Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-bond",
+    "article_id": 88551,
+    "symbol": "BONDUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-10-16T10:37:04+00:00",
+    "ticker": "BIGTIME",
+    "title": "KuCoin Isolated Margin Adds BIGTIME Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-bigtime",
+    "article_id": 88158,
+    "symbol": "BIGTIMEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-08-18T09:44:14+00:00",
+    "ticker": "SEI",
+    "title": "KuCoin Isolated Margin Adds SEI Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-sei",
+    "article_id": 85179,
+    "symbol": "SEIUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-07-24T12:23:20+00:00",
+    "ticker": "WLD",
+    "title": "KuCoin Isolated Margin Adds WLD Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-wld",
+    "article_id": 83107,
+    "symbol": "WLDUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-07-11T11:02:39+00:00",
+    "ticker": "PEPE2",
+    "title": "KuCoin Isolated Margin Adds PEPE2 Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-pepe2",
+    "article_id": 81605,
+    "symbol": "PEPE2USDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-07-07T03:56:16+00:00",
+    "ticker": "MAV",
+    "title": "KuCoin Isolated Margin Adds MAV Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-mav",
+    "article_id": 81136,
+    "symbol": "MAVUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-06-13T10:45:25+00:00",
+    "ticker": "KAS",
+    "title": "KuCoin Isolated Margin Adds KAS Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-kas",
+    "article_id": 78323,
+    "symbol": "KASUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-06-09T08:52:45+00:00",
+    "ticker": "TOMI",
+    "title": "KuCoin Isolated Margin Adds TOMI Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-tomi",
+    "article_id": 77791,
+    "symbol": "TOMIUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-06-01T10:30:34+00:00",
+    "ticker": "ORDI",
+    "title": "KuCoin Isolated Margin Adds ORDI Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ordi",
+    "article_id": 76644,
+    "symbol": "ORDIUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-26T10:31:05+00:00",
+    "ticker": "LADYS",
+    "title": "KuCoin Isolated Margin Adds LADYS Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ladys",
+    "article_id": 75511,
+    "symbol": "LADYSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-23T09:08:44+00:00",
+    "ticker": "ASTRA",
+    "title": "KuCoin Isolated Margin Adds ASTRA Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-astra",
+    "article_id": 74539,
+    "symbol": "ASTRAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-12T04:24:05+00:00",
+    "ticker": "CETUS",
+    "title": "KuCoin Isolated Margin Adds CETUS Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-cetus",
+    "article_id": 72439,
+    "symbol": "CETUSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-10T10:58:27+00:00",
+    "ticker": "UOS",
+    "title": "KuCoin Isolated Margin Adds UOS Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-uos",
+    "article_id": 72005,
+    "symbol": "UOSUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-09T10:55:56+00:00",
+    "ticker": "FLR",
+    "title": "KuCoin Isolated Margin Adds FLR Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-flr",
+    "article_id": 71512,
+    "symbol": "FLRUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-08T11:17:57+00:00",
+    "ticker": "XRD",
+    "title": "KuCoin Isolated Margin Adds XRD Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-xrd",
+    "article_id": 71345,
+    "symbol": "XRDUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-05T13:13:39+00:00",
+    "ticker": "PEPE",
+    "title": "KuCoin Isolated Margin Adds PEPE Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-pepe",
+    "article_id": 70872,
+    "symbol": "1000PEPEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-05-05T10:35:44+00:00",
+    "ticker": "AZERO",
+    "title": "KuCoin Isolated Margin Adds AZERO Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-azero",
+    "article_id": 70690,
+    "symbol": "AZEROUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-04T11:21:47+00:00",
+    "ticker": "SPA",
+    "title": "KuCoin Isolated Margin Adds SPA Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-spa",
+    "article_id": 70420,
+    "symbol": "SPAUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-05-03T12:29:18+00:00",
+    "ticker": "SUI",
+    "title": "KuCoin Isolated Margin Adds SUI Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-sui",
+    "article_id": 70101,
+    "symbol": "SUIUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-04-26T11:53:02+00:00",
+    "ticker": "CSPR",
+    "title": "KuCoin Isolated Margin Adds CSPR Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-cspr",
+    "article_id": 69382,
+    "symbol": "CSPRUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-04-25T11:35:19+00:00",
+    "ticker": "XDC",
+    "title": "KuCoin Isolated Margin Adds XDC Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-xdc",
+    "article_id": 68950,
+    "symbol": "XDCUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-04-19T11:45:34+00:00",
+    "ticker": "BABYDOGE",
+    "title": "KuCoin Isolated Margin Adds BABYDOGE Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-babydoge",
+    "article_id": 67847,
+    "symbol": "BABYDOGEUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-04-13T10:28:05+00:00",
+    "ticker": "MTL",
+    "title": "KuCoin Isolated Margin Adds MTL Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-mtl",
+    "article_id": 66561,
+    "symbol": "MTLUSDT",
+    "qv24": 28459999.644999996,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "time": "2023-03-28T08:35:13+00:00",
+    "ticker": "ID",
+    "title": "KuCoin Isolated Margin Adds ID Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-id",
+    "article_id": 63931,
+    "symbol": "IDUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-03-23T15:44:13+00:00",
+    "ticker": "ARB",
+    "title": "KuCoin Isolated Margin Adds ARB Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-arb",
+    "article_id": 63249,
+    "symbol": "ARBUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-03-17T10:28:05+00:00",
+    "ticker": "LQTY",
+    "title": "KuCoin Isolated Margin Adds LQTY Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-lqty",
+    "article_id": 62595,
+    "symbol": "LQTYUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-02-24T08:01:40+00:00",
+    "ticker": "LDO",
+    "title": "KuCoin Isolated Margin Adds LDO Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ldo",
+    "article_id": 59662,
+    "symbol": "LDOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-02-22T10:31:10+00:00",
+    "ticker": "ACH",
+    "title": "KuCoin Isolated Margin Adds ACH Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-ach-0222",
+    "article_id": 59301,
+    "symbol": "ACHUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-02-21T09:29:08+00:00",
+    "ticker": "CFX",
+    "title": "KuCoin Isolated Margin Adds CFX Trading Pair",
+    "path": "/kucoin-isolated-margin-adds-cfx",
+    "article_id": 58913,
+    "symbol": "CFXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-02-16T11:00:47+00:00",
+    "ticker": "BLUR",
+    "title": "KuCoin Isolated Margin Adds BLUR Trading Pair",
+    "path": "/kucoin-margin-adds-blur-0216",
+    "article_id": 58396,
+    "symbol": "BLURUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "time": "2023-02-09T12:03:42+00:00",
+    "ticker": "AGIX",
+    "title": "KuCoin Cross Margin & Isolated Margin Adds AGIX Trading Pair",
+    "path": "/en-kucoin-margin-adds-agix",
+    "article_id": 57334,
+    "symbol": "AGIXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "time": "2023-02-04T13:00:38+00:00",
+    "ticker": "TON",
+    "title": "KuCoin Isolated Margin Adds TON Trading Pair, Enjoy Margin Bonus Week",
+    "path": "/en-kucoin-margin-adds-ton",
+    "article_id": 56498,
+    "symbol": "TONUSDT",
+    "eligible": false,
+    "reason": "no_event_month"
+  }
+]

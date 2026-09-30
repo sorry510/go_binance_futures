@@ -1,0 +1,1 @@
+Use only official Binance Maintenance Updates titles explicitly containing Network Upgrade or Hard Fork. Parenthetical tickers are mechanically mapped to same-name USD-M symbols. Apply >=730d history and >=5M prior-24h QuoteVolume. Direction is pre-registered LONG; enter next full 1h open after release. No semantic benefit scoring, reversal or subtype filtering after results.

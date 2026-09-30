@@ -1,0 +1,135 @@
+package main
+
+import (
+	"database/sql"
+	"encoding/csv"
+	"fmt"
+	"github.com/beego/beego/v2/core/config"
+	_ "github.com/go-sql-driver/mysql"
+	_ "go_binance_futures/bootstrap"
+	"math"
+	"os"
+	"strconv"
+	"time"
+)
+
+type B struct {
+	T       int64
+	O, C, Q float64
+}
+
+func meanSD(x []float64) (float64, float64) {
+	s := 0.0
+	for _, v := range x {
+		s += v
+	}
+	m := s / float64(len(x))
+	q := 0.0
+	for _, v := range x {
+		d := v - m
+		q += d * d
+	}
+	return m, math.Sqrt(q / float64(len(x)))
+}
+func main() {
+	syms := []string{"BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "SOLUSDT", "DOGEUSDT", "LTCUSDT", "AVAXUSDT", "UNIUSDT", "ZECUSDT"}
+	u, _ := config.String("database::username")
+	pw, _ := config.String("database::password")
+	h, _ := config.String("database::host")
+	pt, _ := config.String("database::port")
+	dbn, _ := config.String("database::dbname")
+	if dbn != "go_bn_test" {
+		panic(dbn)
+	}
+	db, e := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4", u, pw, h, pt, dbn))
+	if e != nil {
+		panic(e)
+	}
+	defer db.Close()
+	f, _ := os.Create("/tmp/volume_concentration_events.csv")
+	defer f.Close()
+	w := csv.NewWriter(f)
+	defer w.Flush()
+	w.Write([]string{"symbol", "event_time", "year", "z", "direction"})
+	for _, s := range syms {
+		rows, e := db.Query("SELECT open_time,open_price,close_price,quote_volume FROM market_klines_1h WHERE market='futures_usdt' AND symbol=? ORDER BY open_time", s)
+		if e != nil {
+			panic(e)
+		}
+		b := []B{}
+		for rows.Next() {
+			var x B
+			rows.Scan(&x.T, &x.O, &x.C, &x.Q)
+			b = append(b, x)
+		}
+		rows.Close()
+		if len(b) < 800 {
+			continue
+		}
+		firstEligible := b[0].T + 730*24*3600*1000
+		hhi := make([]float64, len(b))
+		valid := make([]bool, len(b))
+		for i := 23; i < len(b); i++ {
+			sum := 0.0
+			ok := true
+			for j := i - 23; j <= i; j++ {
+				if b[j].Q <= 0 {
+					ok = false
+					break
+				}
+				sum += b[j].Q
+			}
+			if !ok || sum <= 0 {
+				continue
+			}
+			v := 0.0
+			for j := i - 23; j <= i; j++ {
+				sh := b[j].Q / sum
+				v += sh * sh
+			}
+			hhi[i] = v
+			valid[i] = true
+		}
+		armed := true
+		for i := 743; i+12 < len(b); i++ {
+			if b[i].T < firstEligible || !valid[i] {
+				continue
+			}
+			hist := make([]float64, 0, 720)
+			ok := true
+			for j := i - 720; j < i; j++ {
+				if !valid[j] {
+					ok = false
+					break
+				}
+				hist = append(hist, hhi[j])
+			}
+			if !ok {
+				continue
+			}
+			m, sd := meanSD(hist)
+			if sd <= 0 {
+				continue
+			}
+			z := (hhi[i] - m) / sd
+			if z < 1 {
+				armed = true
+			}
+			if !armed || z < 3 {
+				continue
+			}
+			mom := math.Log(b[i].C / b[i-23].O)
+			if mom == 0 {
+				continue
+			}
+			dir := "LONG"
+			if mom < 0 {
+				dir = "SHORT"
+			}
+			eventT := b[i].T + 3600000 - 1
+			y := time.UnixMilli(eventT).UTC().Year()
+			w.Write([]string{s, strconv.FormatInt(eventT, 10), strconv.Itoa(y), fmt.Sprint(z), dir})
+			armed = false
+		}
+	}
+}

@@ -1,0 +1,9 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": ["DeFiLlama free chain fees API", "DeFiLlama historical chain TVL API", "Binance Vision USD-M 1d klines"],
+  "database_write": false,
+  "discovery_gate_pass": true,
+  "oos_evaluated": true,
+  "exact_replay": false
+}

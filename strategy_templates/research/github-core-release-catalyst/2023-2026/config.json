@@ -1,0 +1,42 @@
+{
+  "family": "github-core-release-catalyst",
+  "direction": "LONG",
+  "discovery": [
+    "2023-01-01",
+    "2024-12-31"
+  ],
+  "oos": [
+    "2025-01-01",
+    "2026-08-31"
+  ],
+  "event_filter": {
+    "draft": false,
+    "prerelease": false,
+    "dedupe": "earliest published_at per symbol per UTC date"
+  },
+  "entry": "next complete Binance USD-M 1h open after GitHub published_at",
+  "eligibility": {
+    "futures_history_years": 2,
+    "trailing_24h_quote_volume_usdt_min": 5000000
+  },
+  "endpoint_hours": [
+    1,
+    4,
+    12
+  ],
+  "discovery_gate": {
+    "min_events": 80,
+    "min_symbols": 8,
+    "min_mean12": 0.0025,
+    "min_positive_symbol_breadth": 0.6,
+    "each_discovery_year_positive": true
+  },
+  "execution": {
+    "leverage": 4,
+    "tp_pct": 8,
+    "sl_pct": 6,
+    "fee_per_side": 0.0005,
+    "slippage_per_side_bps": 5,
+    "single_position": true
+  }
+}

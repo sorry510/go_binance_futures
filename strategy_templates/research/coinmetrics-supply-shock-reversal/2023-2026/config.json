@@ -1,0 +1,13 @@
+{
+  "metric": "CoinMetrics SplyCur",
+  "signal": "daily log supply change z-score vs prior 90d",
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "positive supply shock SHORT; negative supply shock LONG",
+  "entry": "next UTC day Binance USD-M open",
+  "horizons_days": [
+    1,
+    3,
+    7
+  ]
+}

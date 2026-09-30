@@ -1,0 +1,21 @@
+{
+  "signal_source": "Binance Spot BASE/USDT tick-size changes",
+  "pre_registered_mapping": {
+    "tick_size_decrease": "LONG USD-M",
+    "tick_size_increase": "SHORT USD-M"
+  },
+  "eligibility": {
+    "usd_m_history_days": 730,
+    "prior_24h_quote_volume_min_usdt": 5000000
+  },
+  "exact": {
+    "leverage": 4,
+    "tp_pct": 8,
+    "sl_pct": 6,
+    "fee_per_side": 0.0005,
+    "slippage_per_side": 0.0005,
+    "max_hold_hours": 72,
+    "entry": "next 1m open after effective time"
+  },
+  "generated_hypothesis": "tick-size increase only -> SHORT; requires untouched OOS validation"
+}

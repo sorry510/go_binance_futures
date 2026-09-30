@@ -1,0 +1,386 @@
+{
+  "research_date": "2026-09-29",
+  "exclusions": {
+    "LIT": "ticker collision: DeFiLlama LIT is Lighter/other protocols, Binance historical LITUSDT is Litentry",
+    "CHR": "ticker collision: Chronos vs Binance Chromia",
+    "FLOW": "ticker collision: FlowSwap/Velocimeter vs Binance Flow chain token",
+    "LUNA": "ticker collision: DeFiLlama LUNA gamified-mining token vs Binance Terra LUNA",
+    "DYDX": "dydx-v3 holder-revenue summary currently HTTP 400; token history would be incomplete",
+    "FLM": "flamingo-finance holder-revenue summary currently HTTP 400",
+    "COMP": "methodology explicitly says no revenue share for COMP token holders"
+  },
+  "adapter_exclusions": {
+    "CRV": [
+      "curve-llamalend-v2"
+    ],
+    "SUSHI": [
+      "sushi-perps"
+    ],
+    "COMP": [
+      "compound-v2"
+    ],
+    "SNX": [
+      "synthetix-v3"
+    ],
+    "KNC": [
+      "kyberswap-aggregator"
+    ]
+  },
+  "symbols": [
+    {
+      "symbol": "AAVE",
+      "futures_symbol": "AAVEUSDT",
+      "first_month": "2020-10",
+      "included_slugs": [
+        "aave-v3",
+        "aave-v4"
+      ],
+      "all_mapped_slugs": [
+        "aave-v3",
+        "aave-v4"
+      ],
+      "protocol_names": [
+        "Aave V3",
+        "Aave V4"
+      ]
+    },
+    {
+      "symbol": "BAL",
+      "futures_symbol": "BALUSDT",
+      "first_month": "2020-09",
+      "included_slugs": [
+        "balancer-v1",
+        "balancer-v2",
+        "balancer-v3"
+      ],
+      "all_mapped_slugs": [
+        "balancer-v1",
+        "balancer-v2",
+        "balancer-v3"
+      ],
+      "protocol_names": [
+        "Balancer V1",
+        "Balancer V2",
+        "Balancer V3"
+      ]
+    },
+    {
+      "symbol": "CRV",
+      "futures_symbol": "CRVUSDT",
+      "first_month": "2020-09",
+      "included_slugs": [
+        "curve-dex",
+        "crvusd"
+      ],
+      "all_mapped_slugs": [
+        "curve-dex",
+        "crvusd",
+        "curve-llamalend-v2"
+      ],
+      "protocol_names": [
+        "Curve DEX",
+        "crvUSD",
+        "Curve LlamaLend V2"
+      ]
+    },
+    {
+      "symbol": "CVX",
+      "futures_symbol": "CVXUSDT",
+      "first_month": "2022-09",
+      "included_slugs": [
+        "convex-finance"
+      ],
+      "all_mapped_slugs": [
+        "convex-finance"
+      ],
+      "protocol_names": [
+        "Convex Finance"
+      ]
+    },
+    {
+      "symbol": "DODO",
+      "futures_symbol": "DODOUSDT",
+      "first_month": "2021-02",
+      "included_slugs": [
+        "dodo-amm"
+      ],
+      "all_mapped_slugs": [
+        "dodo-amm"
+      ],
+      "protocol_names": [
+        "DODO AMM"
+      ]
+    },
+    {
+      "symbol": "GRT",
+      "futures_symbol": "GRTUSDT",
+      "first_month": "2020-12",
+      "included_slugs": [
+        "the-graph"
+      ],
+      "all_mapped_slugs": [
+        "the-graph"
+      ],
+      "protocol_names": [
+        "The Graph"
+      ]
+    },
+    {
+      "symbol": "HNT",
+      "futures_symbol": "HNTUSDT",
+      "first_month": "2020-09",
+      "included_slugs": [
+        "helium-network"
+      ],
+      "all_mapped_slugs": [
+        "helium-network"
+      ],
+      "protocol_names": [
+        "Helium Network"
+      ]
+    },
+    {
+      "symbol": "KNC",
+      "futures_symbol": "KNCUSDT",
+      "first_month": "2020-06",
+      "included_slugs": [
+        "kyberswap-classic",
+        "kyberswap-elastic"
+      ],
+      "all_mapped_slugs": [
+        "kyberswap-classic",
+        "kyberswap-elastic",
+        "kyberswap-aggregator"
+      ],
+      "protocol_names": [
+        "KyberSwap Classic",
+        "KyberSwap Elastic",
+        "KyberSwap Aggregator"
+      ]
+    },
+    {
+      "symbol": "LDO",
+      "futures_symbol": "LDOUSDT",
+      "first_month": "2022-09",
+      "included_slugs": [
+        "lido"
+      ],
+      "all_mapped_slugs": [
+        "lido"
+      ],
+      "protocol_names": [
+        "Lido"
+      ]
+    },
+    {
+      "symbol": "LINK",
+      "futures_symbol": "LINKUSDT",
+      "first_month": "2020-01",
+      "included_slugs": [
+        "chainlink-staking"
+      ],
+      "all_mapped_slugs": [
+        "chainlink-staking"
+      ],
+      "protocol_names": [
+        "Chainlink Staking"
+      ]
+    },
+    {
+      "symbol": "LPT",
+      "futures_symbol": "LPTUSDT",
+      "first_month": "2021-11",
+      "included_slugs": [
+        "livepeer"
+      ],
+      "all_mapped_slugs": [
+        "livepeer"
+      ],
+      "protocol_names": [
+        "Livepeer"
+      ]
+    },
+    {
+      "symbol": "NEAR",
+      "futures_symbol": "NEARUSDT",
+      "first_month": "2020-10",
+      "included_slugs": [
+        "near-intents"
+      ],
+      "all_mapped_slugs": [
+        "near-intents"
+      ],
+      "protocol_names": [
+        "NEAR Intents"
+      ]
+    },
+    {
+      "symbol": "OGN",
+      "futures_symbol": "OGNUSDT",
+      "first_month": "2021-04",
+      "included_slugs": [
+        "origin-dollar",
+        "origin-ether",
+        "origin-arm"
+      ],
+      "all_mapped_slugs": [
+        "origin-dollar",
+        "origin-ether",
+        "origin-arm"
+      ],
+      "protocol_names": [
+        "Origin Dollar",
+        "Origin Ether",
+        "Origin ARM"
+      ]
+    },
+    {
+      "symbol": "RAY",
+      "futures_symbol": "RAYUSDT",
+      "first_month": "2021-08",
+      "included_slugs": [
+        "raydium-amm",
+        "launchlab"
+      ],
+      "all_mapped_slugs": [
+        "raydium-amm",
+        "launchlab"
+      ],
+      "protocol_names": [
+        "Raydium AMM",
+        "LaunchLab"
+      ]
+    },
+    {
+      "symbol": "RSR",
+      "futures_symbol": "RSRUSDT",
+      "first_month": "2020-10",
+      "included_slugs": [
+        "reserve-protocol"
+      ],
+      "all_mapped_slugs": [
+        "reserve-protocol"
+      ],
+      "protocol_names": [
+        "Reserve Protocol"
+      ]
+    },
+    {
+      "symbol": "RUNE",
+      "futures_symbol": "RUNEUSDT",
+      "first_month": "2020-09",
+      "included_slugs": [
+        "thorchain-dex"
+      ],
+      "all_mapped_slugs": [
+        "thorchain-dex"
+      ],
+      "protocol_names": [
+        "THORChain DEX"
+      ]
+    },
+    {
+      "symbol": "SNX",
+      "futures_symbol": "SNXUSDT",
+      "first_month": "2020-08",
+      "included_slugs": [
+        "synthetix-v1+v2",
+        "synthetix-v4"
+      ],
+      "all_mapped_slugs": [
+        "synthetix-v1+v2",
+        "synthetix-v3",
+        "synthetix-v4"
+      ],
+      "protocol_names": [
+        "Synthetix v1+v2",
+        "Synthetix V3",
+        "Synthetix V4"
+      ]
+    },
+    {
+      "symbol": "SPELL",
+      "futures_symbol": "SPELLUSDT",
+      "first_month": "2022-09",
+      "included_slugs": [
+        "abracadabra-spell"
+      ],
+      "all_mapped_slugs": [
+        "abracadabra-spell"
+      ],
+      "protocol_names": [
+        "Abracadabra Spell"
+      ]
+    },
+    {
+      "symbol": "SUSHI",
+      "futures_symbol": "SUSHIUSDT",
+      "first_month": "2020-09",
+      "included_slugs": [
+        "sushiswap",
+        "sushiswap-v3"
+      ],
+      "all_mapped_slugs": [
+        "sushiswap",
+        "sushiswap-v3",
+        "sushi-perps"
+      ],
+      "protocol_names": [
+        "SushiSwap",
+        "SushiSwap V3",
+        "Sushi Perps"
+      ]
+    },
+    {
+      "symbol": "UNI",
+      "futures_symbol": "UNIUSDT",
+      "first_month": "2020-09",
+      "included_slugs": [
+        "uniswap-v1",
+        "uniswap-v2",
+        "uniswap-v3",
+        "uniswap-v4"
+      ],
+      "all_mapped_slugs": [
+        "uniswap-v1",
+        "uniswap-v2",
+        "uniswap-v3",
+        "uniswap-v4"
+      ],
+      "protocol_names": [
+        "Uniswap V1",
+        "Uniswap V2",
+        "Uniswap V3",
+        "Uniswap V4"
+      ]
+    },
+    {
+      "symbol": "WOO",
+      "futures_symbol": "WOOUSDT",
+      "first_month": "2022-04",
+      "included_slugs": [
+        "woofi-swap"
+      ],
+      "all_mapped_slugs": [
+        "woofi-swap"
+      ],
+      "protocol_names": [
+        "WOOFi Swap"
+      ]
+    },
+    {
+      "symbol": "YFI",
+      "futures_symbol": "YFIUSDT",
+      "first_month": "2020-08",
+      "included_slugs": [
+        "yearn-finance"
+      ],
+      "all_mapped_slugs": [
+        "yearn-finance"
+      ],
+      "protocol_names": [
+        "Yearn Finance"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "event": "KuCoin operational reopening of both crypto deposit and withdrawal services",
+  "direction": "LONG",
+  "entry": "next full 1h open",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "discovery_years": [2023, 2024],
+  "return_data_inspected": false
+}

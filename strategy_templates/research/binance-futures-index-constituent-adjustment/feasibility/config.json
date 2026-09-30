@@ -1,0 +1,8 @@
+{
+  "discovery": "2023-2024",
+  "source": "Binance public CMS catalogId=49",
+  "title_filter": "index price|constituent|weight|price index",
+  "candidate_articles": 0,
+  "returns_inspected": false,
+  "decision": "coverage blocked before returns"
+}

@@ -1,0 +1,418 @@
+[
+  {
+    "bitget_symbol": "FITFIUSDT",
+    "event_ts": 1686855616.0,
+    "event_iso_utc": "2023-06-15T19:00:16+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603791904",
+    "title": "Bitget Announcement on Delisting of FITFIUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the FITFIUSDT futures trading pair at 11:00 on June 19, 2023 ("
+  },
+  {
+    "bitget_symbol": "BGHOT10USDT",
+    "event_ts": 1690412408.0,
+    "event_iso_utc": "2023-07-26T23:00:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603795515",
+    "title": "[Important] Bitget Announcement on Delisting of BGHOT10USDT and METAHOTUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the BGHOT10USDT and METAHOTUSDT futures trading pairs at 11:00"
+  },
+  {
+    "bitget_symbol": "METAHOTUSDT",
+    "event_ts": 1690412408.0,
+    "event_iso_utc": "2023-07-26T23:00:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603795515",
+    "title": "[Important] Bitget Announcement on Delisting of BGHOT10USDT and METAHOTUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the BGHOT10USDT and METAHOTUSDT futures trading pairs at 11:00"
+  },
+  {
+    "bitget_symbol": "GFTUSDT",
+    "event_ts": 1691517603.0,
+    "event_iso_utc": "2023-08-08T18:00:03+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603795987",
+    "title": "Bitget Announcement on Delisting of GFTUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the GFTUSDT futures trading pair at 03:00 on August 10, 2023 ("
+  },
+  {
+    "bitget_symbol": "BLZUSDT",
+    "event_ts": 1693778569.0,
+    "event_iso_utc": "2023-09-03T22:02:49+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603797497",
+    "title": "Bitget Announcement on Delisting of BLZUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the BLZUSDT  futures trading pair at 03:00 on September 6, 202"
+  },
+  {
+    "bitget_symbol": "YFIUSDT",
+    "event_ts": 1701108042.0,
+    "event_iso_utc": "2023-11-27T18:00:42+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603801128",
+    "title": "Bitget Announcement on Delisting of YFIUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the YFIUSDT  futures trading pair at 03:00 on November 29, 202"
+  },
+  {
+    "bitget_symbol": "AMBUSDT",
+    "event_ts": 1704329348.0,
+    "event_iso_utc": "2024-01-04T00:49:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603803040",
+    "title": "Bitget Announcement on Delisting of AMBUSDT and 10000LADYSUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the AMBUSDT and 10000 LADYSUSDT futures trading pair at 03:00 "
+  },
+  {
+    "bitget_symbol": "10000LADYSUSDT",
+    "event_ts": 1704329348.0,
+    "event_iso_utc": "2024-01-04T00:49:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603803040",
+    "title": "Bitget Announcement on Delisting of AMBUSDT and 10000LADYSUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the AMBUSDT and 10000 LADYSUSDT futures trading pair at 03:00 "
+  },
+  {
+    "bitget_symbol": "TRBUSDT",
+    "event_ts": 1705001272.0,
+    "event_iso_utc": "2024-01-11T19:27:52+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603803531",
+    "title": "Bitget Announcement on Delisting of TRBUSDT and ZZZUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the TRBUSDT and  ZZZUSDT futures trading pairs at 03:00 on Jan"
+  },
+  {
+    "bitget_symbol": "ZZZUSDT",
+    "event_ts": 1705001272.0,
+    "event_iso_utc": "2024-01-11T19:27:52+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603803531",
+    "title": "Bitget Announcement on Delisting of TRBUSDT and ZZZUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the TRBUSDT and  ZZZUSDT futures trading pairs at 03:00 on Jan"
+  },
+  {
+    "bitget_symbol": "CTSIUSDT",
+    "event_ts": 1705773725.0,
+    "event_iso_utc": "2024-01-20T18:02:05+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804054",
+    "title": "Bitget Announcement on Delisting of CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT     future"
+  },
+  {
+    "bitget_symbol": "HIGHUSDT",
+    "event_ts": 1705773725.0,
+    "event_iso_utc": "2024-01-20T18:02:05+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804054",
+    "title": "Bitget Announcement on Delisting of CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT     future"
+  },
+  {
+    "bitget_symbol": "ALICEUSDT",
+    "event_ts": 1705773725.0,
+    "event_iso_utc": "2024-01-20T18:02:05+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804054",
+    "title": "Bitget Announcement on Delisting of CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT     future"
+  },
+  {
+    "bitget_symbol": "RENUSDT",
+    "event_ts": 1705773725.0,
+    "event_iso_utc": "2024-01-20T18:02:05+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804054",
+    "title": "Bitget Announcement on Delisting of CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT     future"
+  },
+  {
+    "bitget_symbol": "PHBUSDT",
+    "event_ts": 1705773725.0,
+    "event_iso_utc": "2024-01-20T18:02:05+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804054",
+    "title": "Bitget Announcement on Delisting of CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the CTSIUSDT, HIGHUSDT, ALICEUSDT, RENUSDT, PHBUSDT     future"
+  },
+  {
+    "bitget_symbol": "TWTUSDT",
+    "event_ts": 1706126048.0,
+    "event_iso_utc": "2024-01-24T19:54:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804391",
+    "title": "Bitget Announcement on Delisting of TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT     futures "
+  },
+  {
+    "bitget_symbol": "RLCUSDT",
+    "event_ts": 1706126048.0,
+    "event_iso_utc": "2024-01-24T19:54:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804391",
+    "title": "Bitget Announcement on Delisting of TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT     futures "
+  },
+  {
+    "bitget_symbol": "LINAUSDT",
+    "event_ts": 1706126048.0,
+    "event_iso_utc": "2024-01-24T19:54:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804391",
+    "title": "Bitget Announcement on Delisting of TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT     futures "
+  },
+  {
+    "bitget_symbol": "HFTUSDT",
+    "event_ts": 1706126048.0,
+    "event_iso_utc": "2024-01-24T19:54:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804391",
+    "title": "Bitget Announcement on Delisting of TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT     futures "
+  },
+  {
+    "bitget_symbol": "DUSKUSDT",
+    "event_ts": 1706126048.0,
+    "event_iso_utc": "2024-01-24T19:54:08+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804391",
+    "title": "Bitget Announcement on Delisting of TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the TWTUSDT, RLCUSDT, LINAUSDT, HFTUSDT, DUSKUSDT     futures "
+  },
+  {
+    "bitget_symbol": "ANTUSDT",
+    "event_ts": 1706741227.0,
+    "event_iso_utc": "2024-01-31T22:47:07+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804838",
+    "title": "Bitget Announcement on Delisting of 3 Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the ANTUSDT, REEFUSDT XMRUSDT futures trading pairs at 04:00 o"
+  },
+  {
+    "bitget_symbol": "REEFUSDT",
+    "event_ts": 1706741227.0,
+    "event_iso_utc": "2024-01-31T22:47:07+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804838",
+    "title": "Bitget Announcement on Delisting of 3 Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the ANTUSDT, REEFUSDT XMRUSDT futures trading pairs at 04:00 o"
+  },
+  {
+    "bitget_symbol": "XMRUSDT",
+    "event_ts": 1706741227.0,
+    "event_iso_utc": "2024-01-31T22:47:07+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804838",
+    "title": "Bitget Announcement on Delisting of 3 Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the ANTUSDT, REEFUSDT XMRUSDT futures trading pairs at 04:00 o"
+  },
+  {
+    "bitget_symbol": "ZECUSDT",
+    "event_ts": 1708020050.0,
+    "event_iso_utc": "2024-02-15T18:00:50+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804841",
+    "title": "Bitget Announcement on Delisting of 3 Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the ZECUSDT, ZENUSDT DASHUSDT futures trading pairs at 04:00 o"
+  },
+  {
+    "bitget_symbol": "ZENUSDT",
+    "event_ts": 1708020050.0,
+    "event_iso_utc": "2024-02-15T18:00:50+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804841",
+    "title": "Bitget Announcement on Delisting of 3 Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the ZECUSDT, ZENUSDT DASHUSDT futures trading pairs at 04:00 o"
+  },
+  {
+    "bitget_symbol": "DASHUSDT",
+    "event_ts": 1708020050.0,
+    "event_iso_utc": "2024-02-15T18:00:50+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603804841",
+    "title": "Bitget Announcement on Delisting of 3 Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the ZECUSDT, ZENUSDT DASHUSDT futures trading pairs at 04:00 o"
+  },
+  {
+    "bitget_symbol": "EDUUSDT",
+    "event_ts": 1711321911.0,
+    "event_iso_utc": "2024-03-24T23:11:51+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603807106",
+    "title": "Bitget Announcement on Delisting of EDUUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the EDUUSDT futures trading pair at 03:00 on April 1, 2024 (UT"
+  },
+  {
+    "bitget_symbol": "ALPHAUSDT",
+    "event_ts": 1713847679.0,
+    "event_iso_utc": "2024-04-23T04:47:59+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603808667",
+    "title": "Bitget Announcement on Delisting of ALPHAUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the ALPHAUSDT futures trading pair at 06:00 on April 30, 2024 "
+  },
+  {
+    "bitget_symbol": "COMBOUSDT",
+    "event_ts": 1714331982.0,
+    "event_iso_utc": "2024-04-28T19:19:42+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603808923",
+    "title": "Bitget Announcement on Delisting of COMBOUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the COMBOUSDT futures trading pair at May 06, 7 AM (UTC) .    "
+  },
+  {
+    "bitget_symbol": "CTKUSDT",
+    "event_ts": 1715042916.0,
+    "event_iso_utc": "2024-05-07T00:48:36+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603809244",
+    "title": "Bitget Announcement on Delisting of CTKUSDT, ORNUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the CTKUSDT, ORNUSDT futures trading pair at 03:00 on May 15, "
+  },
+  {
+    "bitget_symbol": "ORNUSDT",
+    "event_ts": 1715042916.0,
+    "event_iso_utc": "2024-05-07T00:48:36+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603809244",
+    "title": "Bitget Announcement on Delisting of CTKUSDT, ORNUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the CTKUSDT, ORNUSDT futures trading pair at 03:00 on May 15, "
+  },
+  {
+    "bitget_symbol": "IDEXUSDT",
+    "event_ts": 1715134172.0,
+    "event_iso_utc": "2024-05-08T02:09:32+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603809335",
+    "title": "Bitget Announcement on Delisting of IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT futures tr"
+  },
+  {
+    "bitget_symbol": "SLPUSDT",
+    "event_ts": 1715134172.0,
+    "event_iso_utc": "2024-05-08T02:09:32+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603809335",
+    "title": "Bitget Announcement on Delisting of IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT futures tr"
+  },
+  {
+    "bitget_symbol": "GLMRUSDT",
+    "event_ts": 1715134172.0,
+    "event_iso_utc": "2024-05-08T02:09:32+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603809335",
+    "title": "Bitget Announcement on Delisting of IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT futures tr"
+  },
+  {
+    "bitget_symbol": "MDTUSDT",
+    "event_ts": 1715134172.0,
+    "event_iso_utc": "2024-05-08T02:09:32+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603809335",
+    "title": "Bitget Announcement on Delisting of IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT futures tr"
+  },
+  {
+    "bitget_symbol": "AUDIOUSDT",
+    "event_ts": 1715134172.0,
+    "event_iso_utc": "2024-05-08T02:09:32+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603809335",
+    "title": "Bitget Announcement on Delisting of IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the IDEXUSDT, SLPUSDT, GLMRUSDT, MDTUSDT, AUDIOUSDT futures tr"
+  },
+  {
+    "bitget_symbol": "UMAUSDT",
+    "event_ts": 1715282743.0,
+    "event_iso_utc": "2024-05-09T19:25:43+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603809407",
+    "title": "Bitget Announcement on Delisting of UMAUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the UMAUSDT futures trading pair at 03:00 on May 17, 2024 (UTC"
+  },
+  {
+    "bitget_symbol": "RADUSDT",
+    "event_ts": 1716504269.0,
+    "event_iso_utc": "2024-05-23T22:44:29+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603810176",
+    "title": "Bitget Announcement on Delisting of RADUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the RADUSDT futures trading pair at 10:00 on May 31, 2024 (UTC"
+  },
+  {
+    "bitget_symbol": "CVXUSDT",
+    "event_ts": 1716504994.0,
+    "event_iso_utc": "2024-05-23T22:56:34+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603810178",
+    "title": "Bitget Announcement on Delisting of CVXUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the CVXUSDT futures trading pair at 10:00 on May 31, 2024 (UTC"
+  },
+  {
+    "bitget_symbol": "CVCUSDT",
+    "event_ts": 1716940087.0,
+    "event_iso_utc": "2024-05-28T23:48:07+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603810440",
+    "title": "Bitget Announcement on Delisting of CVCUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the CVCUSDT futures trading pair at 03:00 on June 6, 2024 (UTC"
+  },
+  {
+    "bitget_symbol": "OMGUSDT",
+    "event_ts": 1717381754.0,
+    "event_iso_utc": "2024-06-03T02:29:14+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603810673",
+    "title": "Bitget Announcement on Delisting of OMGUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the OMGUSDT futures trading pair at 03:00 on June  14, 2024 (U"
+  },
+  {
+    "bitget_symbol": "WAVESUSDT",
+    "event_ts": 1717381823.0,
+    "event_iso_utc": "2024-06-03T02:30:23+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603810657",
+    "title": "Bitget Announcement on Delisting of WAVES Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the WAVES futures trading pair at 03:00 on June 14, 2024 (UTC "
+  },
+  {
+    "bitget_symbol": "VGXUSDT",
+    "event_ts": 1726684255.0,
+    "event_iso_utc": "2024-09-18T18:30:55+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603815824",
+    "title": "Bitget Announcement on Delisting of VGXUSDT Futures Trading Pair",
+    "description": "In order to provide a better trading experience, Bitget will delist the VGXUSDT futures trading pair at 07:00 on September 26, 202"
+  },
+  {
+    "bitget_symbol": "SLFUSDT",
+    "event_ts": 1728521919.0,
+    "event_iso_utc": "2024-10-10T00:58:39+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603816616",
+    "title": "Bitget Announcement on Delisting of SLFUSDT, LOOMUSDT, BONDUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the SLFUSDT, LOOMUSDT, BONDUSDT futures trading pair at 07:00 "
+  },
+  {
+    "bitget_symbol": "LOOMUSDT",
+    "event_ts": 1728521919.0,
+    "event_iso_utc": "2024-10-10T00:58:39+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603816616",
+    "title": "Bitget Announcement on Delisting of SLFUSDT, LOOMUSDT, BONDUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the SLFUSDT, LOOMUSDT, BONDUSDT futures trading pair at 07:00 "
+  },
+  {
+    "bitget_symbol": "BONDUSDT",
+    "event_ts": 1728521919.0,
+    "event_iso_utc": "2024-10-10T00:58:39+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603816616",
+    "title": "Bitget Announcement on Delisting of SLFUSDT, LOOMUSDT, BONDUSDT Futures Trading Pairs",
+    "description": "In order to provide a better trading experience, Bitget will delist the SLFUSDT, LOOMUSDT, BONDUSDT futures trading pair at 07:00 "
+  },
+  {
+    "bitget_symbol": "UNFIUSDT",
+    "event_ts": 1729642454.0,
+    "event_iso_utc": "2024-10-23T00:14:14+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603817152",
+    "title": "[Important] Bitget announcement: Delisting of UNFIUSDT for futures trading and futures trading bots",
+    "description": "Bitget will delist UNFIUSDT for futures trading and futures trading bot on October 30, 2024, 3:00 PM (UTC+8).                     "
+  },
+  {
+    "bitget_symbol": "KEYUSDT",
+    "event_ts": 1732587119.0,
+    "event_iso_utc": "2024-11-26T02:11:59+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603818832",
+    "title": "[Important] Bitget announcement: Delisting of KEYUSDT for futures trading and futures trading bots",
+    "description": "Bitget will delist KEYUSDT for futures trading and futures trading bot on December 3, 2024, 3:00 PM (UTC+8).                      "
+  },
+  {
+    "bitget_symbol": "ORBSUSDT",
+    "event_ts": 1732834143.0,
+    "event_iso_utc": "2024-11-28T22:49:03+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603818997",
+    "title": "[Important] Bitget announcement: Delisting of ORBSUSDT for futures trading and futures trading bots",
+    "description": "Bitget will delist ORBSUSDT for futures trading and futures trading bot on December 09, 2024, 3:00 PM (UTC+8).                    "
+  },
+  {
+    "bitget_symbol": "A8USDT",
+    "event_ts": 1734912852.0,
+    "event_iso_utc": "2024-12-23T00:14:12+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603820245",
+    "title": "[Important] Bitget announcement: Delisting of A8USDT, ALEOUSDT, PIRATEUSDT for futures trading and futures trading bots",
+    "description": "Bitget will delist A8USDT, ALEOUSDT, PIRATEUSDT for futures trading and futures trading bot on December 27, 2024, 3:00 PM (UTC+8)."
+  },
+  {
+    "bitget_symbol": "ALEOUSDT",
+    "event_ts": 1734912852.0,
+    "event_iso_utc": "2024-12-23T00:14:12+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603820245",
+    "title": "[Important] Bitget announcement: Delisting of A8USDT, ALEOUSDT, PIRATEUSDT for futures trading and futures trading bots",
+    "description": "Bitget will delist A8USDT, ALEOUSDT, PIRATEUSDT for futures trading and futures trading bot on December 27, 2024, 3:00 PM (UTC+8)."
+  },
+  {
+    "bitget_symbol": "PIRATEUSDT",
+    "event_ts": 1734912852.0,
+    "event_iso_utc": "2024-12-23T00:14:12+00:00",
+    "article_url": "https://www.bitget.com/support/articles/12560603820245",
+    "title": "[Important] Bitget announcement: Delisting of A8USDT, ALEOUSDT, PIRATEUSDT for futures trading and futures trading bots",
+    "description": "Bitget will delist A8USDT, ALEOUSDT, PIRATEUSDT for futures trading and futures trading bot on December 27, 2024, 3:00 PM (UTC+8)."
+  }
+]

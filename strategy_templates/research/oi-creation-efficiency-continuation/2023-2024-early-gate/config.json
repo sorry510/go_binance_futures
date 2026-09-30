@@ -1,0 +1,15 @@
+{
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "interval": "1h",
+  "feature": "log1p(max(delta OI notional,0)/QuoteVolume)",
+  "zscore_lookback_hours": 720,
+  "trigger_z_gte": 3,
+  "rearm_z_lt": 1,
+  "direction": "follow completed trigger-hour return",
+  "gate": "12h mean >= 0.10% and >=3/4 symbols positive"
+}

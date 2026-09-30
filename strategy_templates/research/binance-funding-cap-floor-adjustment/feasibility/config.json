@@ -1,0 +1,10 @@
+{
+  "source": "Binance official CMS catalog 49",
+  "audit_articles": 4436,
+  "funding_title_matches": 90,
+  "target_period": [2023, 2024],
+  "clean_standalone_cap_floor_events": 1,
+  "clean_event": "OGNUSDT 2023-10-01",
+  "minimum_events": 8,
+  "decision": "sample-size blocked before returns"
+}

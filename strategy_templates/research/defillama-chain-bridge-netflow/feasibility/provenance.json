@@ -1,0 +1,7 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "source": "DeFiLlama Bridges historical API",
+  "probe_host": "local research Mac via Remote Desktop Commander",
+  "known_limitation": "historical bridge API access returned HTTP 402 on public bridges.llama.fi endpoints"
+}

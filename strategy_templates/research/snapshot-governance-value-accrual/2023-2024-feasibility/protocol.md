@@ -1,0 +1,1 @@
+Do not use proposal outcome because that would leak future information relative to creation. Do not expand by ticker-only Snapshot space mapping. Strong semantic phrases only; generic fee/burn words are insufficient.

@@ -1,0 +1,1680 @@
+[
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of BNXUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1676374879,
+    "description": "Bybit will be delisting the BNXUSDT Perpetual contract at 8AM UTC on Feb 16, 2023, ",
+    "end_date_timestamp": 1676547679,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt8efa3ed073235940",
+    "start_date_timestamp": 1676374879,
+    "thumbnail_url": "",
+    "title": "Delisting of BNXUSDT Perpetual Contract",
+    "topics": [
+      "Delistings",
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-bnxusdt-perpetual-contract-blt8efa3ed073235940",
+    "event_ts": 1676374879,
+    "bybit_symbol": "BNXUSDT",
+    "token": "BNX",
+    "symbol": "BNXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of COCOSUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1685006914,
+    "description": "Delisting of COCOSUSDT Perpetual Contract",
+    "end_date_timestamp": 1685006914,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt23b7080e10c7166b",
+    "start_date_timestamp": 1685006914,
+    "thumbnail_url": "",
+    "title": "Delisting of COCOSUSDT Perpetual Contract",
+    "topics": [
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-cocosusdt-perpetual-contract-blt23b7080e10c7166b/",
+    "event_ts": 1685006914,
+    "bybit_symbol": "COCOSUSDT",
+    "token": "COCOS",
+    "symbol": "COCOSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of CREAMUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1687831200,
+    "description": "Bybit will delist the CREAMUSDT Perpetual Contract at 9AM UTC on Jun 30, 2023.",
+    "end_date_timestamp": 1688117314,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt899511710feec7c6",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt6d30ccb94a425374/63aa71bfce24c111bb10866c/Announcement_1600x900_WEBP.webp",
+    "start_date_timestamp": 1687831200,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/1188fc6c7b93ff265ab981363f87ed29.png",
+    "title": "Delisting of CREAMUSDT Perpetual Contract",
+    "topics": [
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-creamusdt-perpetual-contract-blt899511710feec7c6/",
+    "event_ts": 1687831200,
+    "bybit_symbol": "CREAMUSDT",
+    "token": "CREAM",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of BIT Derivatives Contracts"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1687951714,
+    "description": "In preparation for the upcoming token conversion from BIT to MNT, Bybit will delist the BITUSD Perpetual Contract at Jun 30, 2023, 7AM UTC and the BITUSDT Perpetual Contract at Jul 4, 2023, 7AM UTC.",
+    "end_date_timestamp": 1688117314,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltdf9866413eb8bf10",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt6d30ccb94a425374/63aa71bfce24c111bb10866c/Announcement_1600x900_WEBP.webp",
+    "start_date_timestamp": 1687951714,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/1188fc6c7b93ff265ab981363f87ed29.png",
+    "title": "Delisting of BIT Derivatives Contracts",
+    "topics": [
+      "Delistings",
+      "Derivatives"
+    ],
+    "url": "/article/delisting-of-bit-derivatives-contracts-bltdf9866413eb8bf10/",
+    "event_ts": 1687951714,
+    "bybit_symbol": "BITUSDT",
+    "token": "BIT",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Notice on Delisting of IME, CRAFT, INSUR, OKSE, and ZBC"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1694167200,
+    "description": "Bybit will be delisting the Spot trading pairs, IME/USDT, CRAFT/USDT, INSUR/USDT, OKSE/USDT, and ZBC/USDT, with effect from Sep 15, 2023 at 6AM UTC. ",
+    "end_date_timestamp": 1694707200,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt73cca81a526bc5bf",
+    "start_date_timestamp": 1694167200,
+    "thumbnail_url": "",
+    "title": "Notice on Delisting of IME, CRAFT, INSUR, OKSE, and ZBC",
+    "topics": [
+      "Spot",
+      "Derivatives"
+    ],
+    "url": "/article/notice-on-delisting-of-ime-craft-insur-okse-and-zbc-blt73cca81a526bc5bf/",
+    "event_ts": 1694167200,
+    "bybit_symbol": "ZBCUSDT",
+    "token": "ZBC",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of MCUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1698993575,
+    "description": "Delisting of MCUSDT Perpetual Contract",
+    "end_date_timestamp": 1698993575,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt65888584f43ee0c0",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltfe56474bfa8ba058/6544a608f50283001b39df22/Templates_Announcement_Dark-1600x900.png",
+    "start_date_timestamp": 1698993575,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/ca1ac501fb1a8f8499e672b60503252a.png",
+    "title": "Delisting of MCUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/delisting-of-mcusdt-perpetual-contract-blt65888584f43ee0c0/",
+    "event_ts": 1698993575,
+    "bybit_symbol": "MCUSDT",
+    "token": "MC",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of TOMOUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1699599416,
+    "description": "Bybit will delist the TOMOUSDT Perpetual Contract at 9AM on Nov 14, 2023 UTC.",
+    "end_date_timestamp": 1701327416,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt606f61017c126dab",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt6d30ccb94a425374/6544c6522797e3040709dee0/ann.png",
+    "start_date_timestamp": 1699599416,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/1188fc6c7b93ff265ab981363f87ed29.png",
+    "title": "Delisting of TOMOUSDT Perpetual Contract",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/delisting-of-tomousdt-perpetual-contract-blt606f61017c126dab/",
+    "event_ts": 1699599416,
+    "bybit_symbol": "TOMOUSDT",
+    "token": "TOMO",
+    "symbol": "TOMOUSDT",
+    "bars_24h": 24,
+    "quote_volume_24h": 55162393.3344,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of BUSDUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1701673016,
+    "description": "Bybit will delist the BUSDUSDT Perpetual Contract at 9AM on Dec 08, 2023 UTC.",
+    "end_date_timestamp": 1704005816,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt4ca5614b10d75e11",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt6d30ccb94a425374/6544c6522797e3040709dee0/ann.png",
+    "start_date_timestamp": 1701673016,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/1188fc6c7b93ff265ab981363f87ed29.png",
+    "title": "Delisting of BUSDUSDT Perpetual Contract",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/delisting-of-busdusdt-perpetual-contract-blt4ca5614b10d75e11/",
+    "event_ts": 1701673016,
+    "bybit_symbol": "BUSDUSDT",
+    "token": "BUSD",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of WSMUSDT and 1000000VINUUSDT Perpetual Contracts"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1706796521,
+    "description": "Bybit will delist the WSMUSDT Perpetual Contract at 10AM UTC on Feb 5, 2024 and the 1000000VINUUSDT Perpetual Contract at 10AM UTC on Feb 6, 2024.",
+    "end_date_timestamp": 1709215721,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltf5f47a638b73d83a",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltb41c62098740880e/658113be3ea3613081573f05/VN_Banner_News_231219.png",
+    "start_date_timestamp": 1706796521,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/4482ca75c698b0b9d6e83c539eea6749.png",
+    "title": "Delisting of WSMUSDT and 1000000VINUUSDT Perpetual Contracts",
+    "topics": [
+      "Delistings"
+    ],
+    "url": "/article/bltf5f47a638b73d83a/",
+    "event_ts": 1706796521,
+    "bybit_symbol": "1000000VINUUSDT",
+    "token": "1000000VINU",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of WSMUSDT and 1000000VINUUSDT Perpetual Contracts"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1706796521,
+    "description": "Bybit will delist the WSMUSDT Perpetual Contract at 10AM UTC on Feb 5, 2024 and the 1000000VINUUSDT Perpetual Contract at 10AM UTC on Feb 6, 2024.",
+    "end_date_timestamp": 1709215721,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltf5f47a638b73d83a",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltb41c62098740880e/658113be3ea3613081573f05/VN_Banner_News_231219.png",
+    "start_date_timestamp": 1706796521,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/4482ca75c698b0b9d6e83c539eea6749.png",
+    "title": "Delisting of WSMUSDT and 1000000VINUUSDT Perpetual Contracts",
+    "topics": [
+      "Delistings"
+    ],
+    "url": "/article/bltf5f47a638b73d83a/",
+    "event_ts": 1706796521,
+    "bybit_symbol": "WSMUSDT",
+    "token": "WSM",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of MULTIUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1708999200,
+    "description": "Bybit will delist the MULTIUSDT Perpetual Contract at 10AM UTC on Mar 5, 2024 ",
+    "end_date_timestamp": 1709150399,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt0dbc75ed98625edd",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt0229689e9225714d/659822741c5d7c2b7d0f3be6/AnncGeneral_EN2024.jpg",
+    "start_date_timestamp": 1708999200,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/07c24bd04699ab926e26c98990c95469.webp",
+    "title": "Delisting of MULTIUSDT Perpetual Contract",
+    "topics": [
+      "Institutions",
+      "Derivatives",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-multiusdt-perpetual-contract-blt0dbc75ed98625edd/",
+    "event_ts": 1708999200,
+    "bybit_symbol": "MULTIUSDT",
+    "token": "MULTI",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of STRAXUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1710837408,
+    "description": "",
+    "end_date_timestamp": 1710837408,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltb8cab042a75047dd",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt5c0e2ec740d049e6/65f81dfe0780b90c6f61d4bb/Announcement0923_EN_(1).webp",
+    "publish_time": 1710907364,
+    "start_date_timestamp": 1710837408,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/44a71282f357fa470202164a270e540c.webp",
+    "title": "Delisting of STRAXUSDT Perpetual Contract",
+    "topics": [
+      "Delistings",
+      "Derivatives"
+    ],
+    "url": "/article/delisting-of-straxusdt-perpetual-contract-bltb8cab042a75047dd/",
+    "event_ts": 1710907364,
+    "bybit_symbol": "STRAXUSDT",
+    "token": "STRAX",
+    "symbol": "STRAXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of YFIIUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1711710867,
+    "description": "Delisting of YFIIUSDT Perpetual Contract",
+    "end_date_timestamp": 1711710867,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt1aa4642c341ef12c",
+    "publish_time": 1711713053,
+    "start_date_timestamp": 1711710867,
+    "thumbnail_url": "",
+    "title": "Delisting of YFIIUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/delisting-of-yfiiusdt-perpetual-contract-blt1aa4642c341ef12c/",
+    "event_ts": 1711713053,
+    "bybit_symbol": "YFIIUSDT",
+    "token": "YFII",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1717146000,
+    "description": "In preparation of the upcoming token merger of Fetch.AI (FET), SingularityNET (AGIX) and Ocean Protocol (OCEAN) into Artificial Superintelligence Alliance (ASI), Bybit will be delisting the FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts at 10AM UTC on Jun 7, 2024.",
+    "end_date_timestamp": 1717776000,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt76ce31b7f7becb38",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltb22284fb78908bc6/662f529e776d0c14b6250202/AnncGeneral_EN2024.webp",
+    "publish_time": 1717142896,
+    "start_date_timestamp": 1717146000,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/f4d545b23def958eba4fa861babacf4f.webp",
+    "title": "Delisting of FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts",
+    "topics": [
+      "Delistings",
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-fetusdt-oceanusdt-and-agixusdt-perpetual-contracts-blt76ce31b7f7becb38/",
+    "event_ts": 1717142896,
+    "bybit_symbol": "AGIXUSDT",
+    "token": "AGIX",
+    "symbol": "AGIXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1717146000,
+    "description": "In preparation of the upcoming token merger of Fetch.AI (FET), SingularityNET (AGIX) and Ocean Protocol (OCEAN) into Artificial Superintelligence Alliance (ASI), Bybit will be delisting the FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts at 10AM UTC on Jun 7, 2024.",
+    "end_date_timestamp": 1717776000,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt76ce31b7f7becb38",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltb22284fb78908bc6/662f529e776d0c14b6250202/AnncGeneral_EN2024.webp",
+    "publish_time": 1717142896,
+    "start_date_timestamp": 1717146000,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/f4d545b23def958eba4fa861babacf4f.webp",
+    "title": "Delisting of FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts",
+    "topics": [
+      "Delistings",
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-fetusdt-oceanusdt-and-agixusdt-perpetual-contracts-blt76ce31b7f7becb38/",
+    "event_ts": 1717142896,
+    "bybit_symbol": "FETUSDT",
+    "token": "FET",
+    "symbol": "FETUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1717146000,
+    "description": "In preparation of the upcoming token merger of Fetch.AI (FET), SingularityNET (AGIX) and Ocean Protocol (OCEAN) into Artificial Superintelligence Alliance (ASI), Bybit will be delisting the FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts at 10AM UTC on Jun 7, 2024.",
+    "end_date_timestamp": 1717776000,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt76ce31b7f7becb38",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltb22284fb78908bc6/662f529e776d0c14b6250202/AnncGeneral_EN2024.webp",
+    "publish_time": 1717142896,
+    "start_date_timestamp": 1717146000,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/f4d545b23def958eba4fa861babacf4f.webp",
+    "title": "Delisting of FETUSDT, OCEANUSDT, and AGIXUSDT Perpetual Contracts",
+    "topics": [
+      "Delistings",
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-fetusdt-oceanusdt-and-agixusdt-perpetual-contracts-blt76ce31b7f7becb38/",
+    "event_ts": 1717142896,
+    "bybit_symbol": "OCEANUSDT",
+    "token": "OCEAN",
+    "symbol": "OCEANUSDT",
+    "bars_24h": 24,
+    "quote_volume_24h": 26190968.267299995,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of ZKUSDT Perpetual Contracts"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1717405200,
+    "description": "Bybit will be delisting the ZKUSDT Perpetual Contracts at 12AM UTC on Jun 7, 2024.",
+    "end_date_timestamp": 1717776000,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltca75d9a1f0754fbb",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltb22284fb78908bc6/662f529e776d0c14b6250202/AnncGeneral_EN2024.webp",
+    "publish_time": 1717402073,
+    "start_date_timestamp": 1717405200,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/f4d545b23def958eba4fa861babacf4f.webp",
+    "title": "Delisting of ZKUSDT Perpetual Contracts",
+    "topics": [
+      "Delistings",
+      "Derivatives"
+    ],
+    "url": "/article/delisting-of-zkusdt-perpetual-contracts-bltca75d9a1f0754fbb/",
+    "event_ts": 1717402073,
+    "bybit_symbol": "ZKUSDT",
+    "token": "ZK",
+    "symbol": "ZKUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting  of  LFTUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1719822460,
+    "description": "Bybit will be delisting the LFTUSDT Perpetual Contract at Jul 8, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1719822460,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt8a7931c3ed838634",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1719824945,
+    "start_date_timestamp": 1719822460,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting  of  LFTUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-lftusdt-perpetual-contract-blt8a7931c3ed838634/",
+    "event_ts": 1719824945,
+    "bybit_symbol": "LFTUSDT",
+    "token": "LFT",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of PUNDUUSDT  Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1719824450,
+    "description": "Bybit will be delisting the PUNDUUSDT Perpetual Contract at Jul 8, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1719824450,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt8acf562e15b3dcb9",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1719826066,
+    "start_date_timestamp": 1719824450,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of PUNDUUSDT  Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-punduusdt-perpetual-contract-blt8acf562e15b3dcb9/",
+    "event_ts": 1719826066,
+    "bybit_symbol": "PUNDUUSDT",
+    "token": "PUNDU",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of 1000IQ50USDT Perpetual  Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1719823640,
+    "description": "Bybit will be delisting the 1000IQ50USDT Perpetual Contract at Jul 8, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1719823640,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt28d3999aae077e86",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1719826271,
+    "start_date_timestamp": 1719823640,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of 1000IQ50USDT Perpetual  Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-1000iq50usdt-perpetual-contract-blt28d3999aae077e86/",
+    "event_ts": 1719826271,
+    "bybit_symbol": "1000IQ50USDT",
+    "token": "1000IQ50",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting  of RNDRUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1721044910,
+    "description": "Bybit will be delisting the RNDRUSDT Perpetual Contract at Jul 22, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1721044910,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltaf7ceeb1f0b1da6e",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1721052850,
+    "start_date_timestamp": 1721044910,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting  of RNDRUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-rndrusdt-perpetual-contract-bltaf7ceeb1f0b1da6e/",
+    "event_ts": 1721052850,
+    "bybit_symbol": "RNDRUSDT",
+    "token": "RNDR",
+    "symbol": "RNDRUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of GALUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1721124740,
+    "description": "Bybit will be delisting the GALUSDT Perpetual Contract at Jul 22, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1721124740,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt8832671dd66c1ae5",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1721124865,
+    "start_date_timestamp": 1721124740,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of GALUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-galusdt-perpetual-contract-blt8832671dd66c1ae5/",
+    "event_ts": 1721124865,
+    "bybit_symbol": "GALUSDT",
+    "token": "GAL",
+    "symbol": "GALUSDT",
+    "bars_24h": 24,
+    "quote_volume_24h": 0.0,
+    "eligible": false,
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of COVALUSDT  Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1721637240,
+    "description": "Bybit will be delisting the COVALUSDT Perpetual Contract at Jul 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1721637240,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltb3abd6270c61be74",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1721637331,
+    "start_date_timestamp": 1721637240,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of COVALUSDT  Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-covalusdt-perpetual-contract-bltb3abd6270c61be74/",
+    "event_ts": 1721637331,
+    "bybit_symbol": "COVALUSDT",
+    "token": "COVAL",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of ANTUSDT  Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1721728420,
+    "description": "Bybit will be delisting the ANTUSDT Perpetual Contract at Jul 25, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1721728420,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt445ad8f3117a0788",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1721728660,
+    "start_date_timestamp": 1721728420,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of ANTUSDT  Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-antusdt-perpetual-contract-blt445ad8f3117a0788/",
+    "event_ts": 1721728660,
+    "bybit_symbol": "ANTUSDT",
+    "token": "ANT",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of 10000STARLUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1722246740,
+    "description": "Bybit will be delisting the 10000STARLUSDT Perpetual Contract at Aug 1, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1722246740,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt626e13f38794b072",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1722246807,
+    "start_date_timestamp": 1722246740,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of 10000STARLUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-10000starlusdt-perpetual-contract-blt626e13f38794b072/",
+    "event_ts": 1722246807,
+    "bybit_symbol": "10000STARLUSDT",
+    "token": "10000STARL",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting  of CANTOUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1723024210,
+    "description": "Bybit will be delisting the CANTOUSDT Perpetual Contract at Aug 12, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1723024210,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt1c2e46eb7d0d55c5",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1723024280,
+    "start_date_timestamp": 1723024210,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting  of CANTOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-cantousdt-perpetual-contract-blt1c2e46eb7d0d55c5/",
+    "event_ts": 1723024280,
+    "bybit_symbol": "CANTOUSDT",
+    "token": "CANTO",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting  of FRONTUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1724320620,
+    "description": "Bybit will be delisting the FRONTUSDT Perpetual Contract at Aug 27, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1724320620,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt672ef3a9c57efa2c",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1724320674,
+    "start_date_timestamp": 1724320620,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting  of FRONTUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-frontusdt-perpetual-contract-blt672ef3a9c57efa2c/",
+    "event_ts": 1724320674,
+    "bybit_symbol": "FRONTUSDT",
+    "token": "FRONT",
+    "symbol": "FRONTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of  10000NFTUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1726209930,
+    "description": "Bybit will be delisting the 10000NFTUSDT Perpetual Contract at Sep 18, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1726209930,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blta98c927fd4e41c22",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1726210124,
+    "start_date_timestamp": 1726209930,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of  10000NFTUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-10000nftusdt-perpetual-contract-blta98c927fd4e41c22/",
+    "event_ts": 1726210124,
+    "bybit_symbol": "10000NFTUSDT",
+    "token": "10000NFT",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1726740000,
+    "description": "Bybit will be delisting the DAOUSDT, VGXUSDT, LOOMUSDT Perpetual Contract at Sep 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1727179200,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt6f0a60a930b45537",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt2af5e6929cb023e3/66dff4d5f7198c1eaab2a5d4/default_banner.jpeg",
+    "publish_time": 1727963505,
+    "start_date_timestamp": 1727172000,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/9b58306509143f00e342792d84578be3.jpeg",
+    "title": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract",
+    "topics": [
+      "Delistings",
+      "Broker",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-daousdt-vgxusdt-loomusdt-zcxusdt-mapousdt-perpetual-contract-blt6f0a60a930b45537/",
+    "event_ts": 1727963505,
+    "bybit_symbol": "DAOUSDT",
+    "token": "DAO",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1726740000,
+    "description": "Bybit will be delisting the DAOUSDT, VGXUSDT, LOOMUSDT Perpetual Contract at Sep 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1727179200,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt6f0a60a930b45537",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt2af5e6929cb023e3/66dff4d5f7198c1eaab2a5d4/default_banner.jpeg",
+    "publish_time": 1727963505,
+    "start_date_timestamp": 1727172000,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/9b58306509143f00e342792d84578be3.jpeg",
+    "title": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract",
+    "topics": [
+      "Delistings",
+      "Broker",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-daousdt-vgxusdt-loomusdt-zcxusdt-mapousdt-perpetual-contract-blt6f0a60a930b45537/",
+    "event_ts": 1727963505,
+    "bybit_symbol": "LOOMUSDT",
+    "token": "LOOM",
+    "symbol": "LOOMUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1726740000,
+    "description": "Bybit will be delisting the DAOUSDT, VGXUSDT, LOOMUSDT Perpetual Contract at Sep 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1727179200,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt6f0a60a930b45537",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt2af5e6929cb023e3/66dff4d5f7198c1eaab2a5d4/default_banner.jpeg",
+    "publish_time": 1727963505,
+    "start_date_timestamp": 1727172000,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/9b58306509143f00e342792d84578be3.jpeg",
+    "title": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract",
+    "topics": [
+      "Delistings",
+      "Broker",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-daousdt-vgxusdt-loomusdt-zcxusdt-mapousdt-perpetual-contract-blt6f0a60a930b45537/",
+    "event_ts": 1727963505,
+    "bybit_symbol": "MAPOUSDT",
+    "token": "MAPO",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1726740000,
+    "description": "Bybit will be delisting the DAOUSDT, VGXUSDT, LOOMUSDT Perpetual Contract at Sep 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1727179200,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt6f0a60a930b45537",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt2af5e6929cb023e3/66dff4d5f7198c1eaab2a5d4/default_banner.jpeg",
+    "publish_time": 1727963505,
+    "start_date_timestamp": 1727172000,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/9b58306509143f00e342792d84578be3.jpeg",
+    "title": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract",
+    "topics": [
+      "Delistings",
+      "Broker",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-daousdt-vgxusdt-loomusdt-zcxusdt-mapousdt-perpetual-contract-blt6f0a60a930b45537/",
+    "event_ts": 1727963505,
+    "bybit_symbol": "VGXUSDT",
+    "token": "VGX",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1726740000,
+    "description": "Bybit will be delisting the DAOUSDT, VGXUSDT, LOOMUSDT Perpetual Contract at Sep 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1727179200,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt6f0a60a930b45537",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/blt2af5e6929cb023e3/66dff4d5f7198c1eaab2a5d4/default_banner.jpeg",
+    "publish_time": 1727963505,
+    "start_date_timestamp": 1727172000,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/9b58306509143f00e342792d84578be3.jpeg",
+    "title": "Delisting of DAOUSDT, VGXUSDT, LOOMUSDT, ZCXUSDT, MAPOUSDT Perpetual Contract",
+    "topics": [
+      "Delistings",
+      "Broker",
+      "Institutions"
+    ],
+    "url": "/article/delisting-of-daousdt-vgxusdt-loomusdt-zcxusdt-mapousdt-perpetual-contract-blt6f0a60a930b45537/",
+    "event_ts": 1727963505,
+    "bybit_symbol": "ZCXUSDT",
+    "token": "ZCX",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of  CEEKUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1728035110,
+    "description": "Bybit will be delisting the CEEKUSDT Perpetual Contract at Oct 10, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1728035110,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt9618fca342dd8b06",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1728035510,
+    "start_date_timestamp": 1728035110,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of  CEEKUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-ceekusdt-perpetual-contract-blt9618fca342dd8b06/",
+    "event_ts": 1728035510,
+    "bybit_symbol": "CEEKUSDT",
+    "token": "CEEK",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of ORNUSDT Perpetual  Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1728982340,
+    "description": "Bybit will be delisting the ORNUSDT Perpetual Contract at Oct 17, 2024, 9:00AM UTC.",
+    "end_date_timestamp": 1728982340,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltd27ce647bd3e36ea",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1728982867,
+    "start_date_timestamp": 1728982340,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of ORNUSDT Perpetual  Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-ornusdt-perpetual-contract-bltd27ce647bd3e36ea/",
+    "event_ts": 1728982867,
+    "bybit_symbol": "ORNUSDT",
+    "token": "ORN",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of  1000BEERUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1729245310,
+    "description": "Bybit will be delisting the 1000BEERUSDT Perpetual Contract at Oct 22, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1729245310,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt38ec1ce8fe3dc93e",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1729245521,
+    "start_date_timestamp": 1729245310,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of  1000BEERUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-1000beerusdt-perpetual-contract-blt38ec1ce8fe3dc93e/",
+    "event_ts": 1729245521,
+    "bybit_symbol": "1000BEERUSDT",
+    "token": "1000BEER",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of  KLAYUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1729677080,
+    "description": "Bybit will be delisting the KLAYUSDT Perpetual Contract at Oct 28, 2024, 3:00AM UTC.",
+    "end_date_timestamp": 1729677080,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt5ff8d91e5ecd3d34",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1729677162,
+    "start_date_timestamp": 1729677080,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of  KLAYUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-klayusdt-perpetual-contract-blt5ff8d91e5ecd3d34/",
+    "event_ts": 1729677162,
+    "bybit_symbol": "KLAYUSDT",
+    "token": "KLAY",
+    "symbol": "KLAYUSDT",
+    "bars_24h": 24,
+    "quote_volume_24h": 0.0,
+    "eligible": false,
+    "reason": "quote_volume_lt_5m"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of UNFIUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1730109310,
+    "description": "Bybit will be delisting the UNFIUSDT Perpetual Contract at Nov 4, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1730109310,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltbe563c310a0acdc4",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1730109416,
+    "start_date_timestamp": 1730109310,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of UNFIUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-unfiusdt-perpetual-contract-bltbe563c310a0acdc4/",
+    "event_ts": 1730109416,
+    "bybit_symbol": "UNFIUSDT",
+    "token": "UNFI",
+    "symbol": "UNFIUSDT",
+    "bars_24h": 24,
+    "quote_volume_24h": 45907476.520500004,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of  FITFIUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1730195720,
+    "description": "Bybit will be delisting the FITFIUSDT Perpetual Contract at Nov 5, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1730195720,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt6c9669e38d85ebb5",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1730195817,
+    "start_date_timestamp": 1730195720,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of  FITFIUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-fitfiusdt-perpetual-contract-blt6c9669e38d85ebb5/",
+    "event_ts": 1730195817,
+    "bybit_symbol": "FITFIUSDT",
+    "token": "FITFI",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of TOMIUSDT Perpetual  Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1730633250,
+    "description": "Bybit will be delisting the TOMIUSDT Perpetual Contract at Nov 5, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1730633250,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt5a25f1b27b7c6d06",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1730654653,
+    "start_date_timestamp": 1730633250,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of TOMIUSDT Perpetual  Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-tomiusdt-perpetual-contract-blt5a25f1b27b7c6d06/",
+    "event_ts": 1730654653,
+    "bybit_symbol": "TOMIUSDT",
+    "token": "TOMI",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of PIXFIUSDT Perpetual  Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1730633940,
+    "description": "Bybit will be delisting the PIXFIUSDT Perpetual Contract at Nov 5, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1730633940,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blte0301542cbc42b7e",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1730654977,
+    "start_date_timestamp": 1730633940,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of PIXFIUSDT Perpetual  Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-pixfiusdt-perpetual-contract-blte0301542cbc42b7e/",
+    "event_ts": 1730654977,
+    "bybit_symbol": "PIXFIUSDT",
+    "token": "PIXFI",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of ZKFUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1731318610,
+    "description": "Bybit will be delisting the ZKFUSDT Perpetual Contract at Nov 15, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1731318610,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt31d0db308bca0279",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1731318874,
+    "start_date_timestamp": 1731318610,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of ZKFUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-zkfusdt-perpetual-contract-blt31d0db308bca0279/",
+    "event_ts": 1731318874,
+    "bybit_symbol": "ZKFUSDT",
+    "token": "ZKF",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of FUNUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1731319260,
+    "description": "Bybit will be delisting the FUNUSDT Perpetual Contract at Nov 15, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1731319260,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.bltc54659b280af361a",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1731319460,
+    "start_date_timestamp": 1731319260,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of FUNUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-funusdt-perpetual-contract-bltc54659b280af361a/",
+    "event_ts": 1731319460,
+    "bybit_symbol": "FUNUSDT",
+    "token": "FUN",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of GFTUSDT Perpetual  Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1732783870,
+    "description": "Bybit will be delisting the GFTUSDT Perpetual Contract at Dec 2, 2024, 9:00AM UTC.",
+    "end_date_timestamp": 1732783870,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt1fda24fc951764c5",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1732784067,
+    "start_date_timestamp": 1732783870,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of GFTUSDT Perpetual  Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-gftusdt-perpetual-contract-blt1fda24fc951764c5/",
+    "event_ts": 1732784067,
+    "bybit_symbol": "GFTUSDT",
+    "token": "GFT",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting  of AKROUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1734602440,
+    "description": "Bybit will be delisting the AKROUSDT Perpetual Contract at Dec 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1734602440,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt1c45d16b99a0bb80",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1734603180,
+    "start_date_timestamp": 1734602440,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting  of AKROUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-akrousdt-perpetual-contract-blt1c45d16b99a0bb80/",
+    "event_ts": 1734603180,
+    "bybit_symbol": "AKROUSDT",
+    "token": "AKRO",
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of  BLZUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1734603160,
+    "description": "Bybit will be delisting the BLZUSDT Perpetual Contract at Dec 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1734603160,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt4b9c26385241a446",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1734603289,
+    "start_date_timestamp": 1734603160,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of  BLZUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-blzusdt-perpetual-contract-blt4b9c26385241a446/",
+    "event_ts": 1734603289,
+    "bybit_symbol": "BLZUSDT",
+    "token": "BLZ",
+    "symbol": "BLZUSDT",
+    "bars_24h": 24,
+    "quote_volume_24h": 275954533.88703,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting of BONDUSDT  Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1734604200,
+    "description": "Bybit will be delisting the BONDUSDT Perpetual Contract at Dec 24, 2024, 10:00AM UTC.",
+    "end_date_timestamp": 1734604200,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt0d7f0fd8e4cee404",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1734604265,
+    "start_date_timestamp": 1734604200,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting of BONDUSDT  Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-bondusdt-perpetual-contract-blt0d7f0fd8e4cee404/",
+    "event_ts": 1734604265,
+    "bybit_symbol": "BONDUSDT",
+    "token": "BOND",
+    "symbol": "BONDUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "_highlightResult": {
+      "title": {
+        "matchLevel": "none",
+        "matchedWords": [],
+        "value": "Delisting  of FTMUSDT Perpetual Contract"
+      }
+    },
+    "category": {
+      "key": "delistings",
+      "title": "Delistings"
+    },
+    "date_timestamp": 1735207440,
+    "description": "Bybit will be delisting the FTMUSDT Perpetual Contract at Jan 10, 2025, 10:00AM UTC.",
+    "end_date_timestamp": 1735207440,
+    "is_old_url": false,
+    "is_top": false,
+    "objectID": "article.blt21e0f27baf3a4dcd",
+    "old_thumbnail_url": "https://images.contentstack.io/v3/assets/blt8ec5b78e9ea1d11d/bltbcc27b234f96a77e/6527bd917ea98698822ecc8c/31564_EN_Brand_3_Announcement_Generic_1600x900.webp",
+    "publish_time": 1735207801,
+    "start_date_timestamp": 1735207440,
+    "thumbnail_url": "https://static.bybit.com/download/noce/announcement_img/367990081fefcf98ba9a302d324116c7.webp",
+    "title": "Delisting  of FTMUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Delistings"
+    ],
+    "url": "/article/delisting-of-ftmusdt-perpetual-contract-blt21e0f27baf3a4dcd/",
+    "event_ts": 1735207801,
+    "bybit_symbol": "FTMUSDT",
+    "token": "FTM",
+    "symbol": "FTMUSDT",
+    "bars_24h": 24,
+    "quote_volume_24h": 137033795.80180004,
+    "eligible": true,
+    "reason": "ok"
+  }
+]

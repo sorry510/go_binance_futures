@@ -1,0 +1,7 @@
+{
+  "source": "Gate API v4 /futures/usdt/contract_stats",
+  "fields": ["long_liq_usd", "short_liq_usd", "open_interest"],
+  "required_history": "2023-2026 discovery/OOS",
+  "api_limit_days": 180,
+  "decision": "historical-data blocked"
+}

@@ -1,0 +1,17 @@
+{
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "interval": "1h",
+  "impact_window_hours": 168,
+  "impact_slope": "sum(return*signed_taker_fraction)/sum(signed_taker_fraction^2)",
+  "feature": "log(abs(lambda_spot)/abs(lambda_perp))",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "if spot impact dominates follow completed spot taker flow; if perp dominates follow completed perp taker flow",
+  "entry": "next perp 1h open"
+}

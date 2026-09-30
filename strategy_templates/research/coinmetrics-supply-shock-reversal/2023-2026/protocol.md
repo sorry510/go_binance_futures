@@ -1,0 +1,1 @@
+Use CoinMetrics Community SplyCur. Daily log supply change is normalized against the prior 90 completed UTC days. First |z|>=3 triggers, |z|<1 rearms. Positive supply shock is pre-registered SHORT and negative supply shock LONG. Signal day must complete before next-day Binance USD-M entry. Observe fixed 1d/3d/7d horizons without selecting a winner post hoc.

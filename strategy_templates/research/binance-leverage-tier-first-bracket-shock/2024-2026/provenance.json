@@ -1,0 +1,27 @@
+{
+  "research_date": "2026-09-27",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "event_source": "Official Binance Support leverage/margin-tier announcements",
+  "market_data": "Binance Vision USD-M monthly/daily klines + fundingRate; public USD-M REST only for unclosed Sep-2026 current-month exact replay",
+  "official_article_ids": [
+    "572598a13c384de6aa3c4d4dc1be5f81",
+    "c178899ac5614333bf50d35cf5ff8b81",
+    "4cdde0518d1644c898df0d40080497a2",
+    "76800beea6d6459d902e9f5dcc486c01",
+    "93fe7d8426a34f16b1a929b3f1a11463",
+    "be0b2e950851420d8b7f9f427097be08",
+    "2571ff99a0f3480f92416699f624a584",
+    "47071723d8fe4302ab15dafbd9a2edc8",
+    "a46249effc4645c89db2c18a198119d4",
+    "361baed0b23744a8b322bc7023cba3a9",
+    "26d93ead76134f94901e75edd3e008d4",
+    "6a7aff2596ed4593af4fb924ad687286",
+    "4d11138559ff4598b60965c479517934",
+    "d1954a75b8514a2d91b9135a13348df5",
+    "f7dbb4547b4f443d975eb7d619ad2969",
+    "97b4f93f9c684da2a5701ab09530d3df",
+    "4bf81e4829b64eacae3caa802ec6fc59",
+    "3f18062274ea49199475b4ad9ff35738",
+    "de15b9501a8f43e1aece2cbe7f3809de"
+  ]
+}

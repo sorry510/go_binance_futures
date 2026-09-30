@@ -1,0 +1,8 @@
+{
+  "discovery": "2023-2024",
+  "min_symbols": 8,
+  "value_definition": "treasury USD excluding OwnTokens branches",
+  "catalog_candidates": ["API3", "CVX", "ENS", "GNS", "HFT", "LDO", "PERP", "RSR"],
+  "production_eligible_during_discovery": ["API3", "CVX", "ENS", "LDO", "RSR"],
+  "decision": "coverage blocked before returns"
+}

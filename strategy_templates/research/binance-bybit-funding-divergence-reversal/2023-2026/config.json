@@ -1,0 +1,17 @@
+{
+  "feature": "Binance normalized funding per hour minus Bybit normalized funding per hour at identical settlement timestamp",
+  "normalization": "funding rate divided by actual historical settlement interval hours",
+  "zscore_lookback_days": 90,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "Binance higher -> SHORT; Binance lower -> LONG",
+  "entry": "next full 1h open after settlement",
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "oos_years": [
+    2025,
+    2026
+  ]
+}

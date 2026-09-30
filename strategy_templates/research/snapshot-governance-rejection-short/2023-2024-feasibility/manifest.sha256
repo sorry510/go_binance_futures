@@ -1,0 +1,7 @@
+09014dc950d8a1d7d8931f9311feb0bc91a47138ec5ccda8071ea0cbf21dde50  ./README.md
+47d56fb12f935b82be754361847830db34dc30374d48a16a22f76d60b117b2aa  ./config.json
+70d77ed796dd47f66cbd0ebce4a65d261ecc0b289d8bfc944df33dfd6fb9b2be  ./inputs/all_proposals.json
+8ab9b3e216c112694d2a725c808aa88203db94a4c5c96731cecaccf6c2f63e53  ./protocol.md
+745947c177a28a1a9ef234f0a2a53383a02fddda048d86e3b0ada3bc3acdba0c  ./provenance.json
+e931525589d0ad20aa643f230344e32a5cb94e2aebf7fefea671527a23807d00  ./replay.py
+2373a2190cdcc25c8c1765d9e8585379ba0d96a543942b1cefef619fc4bf3f47  ./results/summary.json

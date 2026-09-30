@@ -1,0 +1,17 @@
+{
+  "signal": "annualized log(COIN-M nearest-quarterly / COIN-M perpetual)",
+  "quarterly_selection": "nearest expiry with DTE > 7 days",
+  "interval": "1h",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "positive contango -> SHORT USD-M; negative backwardation -> LONG USD-M",
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "oos_years": [
+    2025,
+    2026
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "event": "new USDC-margined perpetual for asset with existing USDT perpetual",
+  "direction": "SHORT existing USDT perpetual",
+  "launch_time": "first Binance Vision USDC 1h kline",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "diagnostic_hours": [
+    1,
+    4,
+    12
+  ]
+}

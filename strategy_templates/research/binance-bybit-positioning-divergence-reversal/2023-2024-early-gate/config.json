@@ -1,0 +1,16 @@
+{
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "binance_field": "count_long_short_ratio",
+  "bybit_field": "buyRatio/sellRatio",
+  "feature": "log(Bybit account LS / Binance global account LS)",
+  "interval": "1h",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "Bybit relatively more long -> SHORT Binance; relatively more short -> LONG"
+}

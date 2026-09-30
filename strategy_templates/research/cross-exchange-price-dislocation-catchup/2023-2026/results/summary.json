@@ -1,0 +1,33 @@
+{
+  "discovery_2023_2024": {
+    "n": 671,
+    "mean1": 0.0001158959,
+    "mean4": -0.0004787289,
+    "mean12": -0.0005032188,
+    "positive_symbols12": 5,
+    "symbols": 10
+  },
+  "oos1_2025": {
+    "n": 424,
+    "mean1": 0.0035268081,
+    "mean4": 0.00421509,
+    "mean12": 0.0052896695,
+    "positive_symbols12": 9,
+    "symbols": 10
+  },
+  "oos2_2026": {
+    "n": 287,
+    "mean1": -0.0007481304,
+    "mean4": 0.0002243622,
+    "mean12": -0.0003314473,
+    "positive_symbols12": 7,
+    "symbols": 10
+  },
+  "all": {
+    "n": 1382,
+    "mean12": 0.0013097212,
+    "positive_symbols12": 7,
+    "symbols": 10
+  },
+  "decision": "freeze: discovery negative and 2026 edge disappears"
+}

@@ -1,0 +1,5 @@
+{
+  "decision": "same-source historical-data blocked",
+  "returns_inspected": false,
+  "required": "Spot and USD-M bookDepth from the same official sampling definition"
+}

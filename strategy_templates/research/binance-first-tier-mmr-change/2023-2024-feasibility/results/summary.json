@@ -1,0 +1,34 @@
+{
+  "events": 2,
+  "eligible": 0,
+  "excluded": {
+    "history_lt_2y_or_missing": 2
+  },
+  "r1": {
+    "n": 0,
+    "mean": null,
+    "win": null
+  },
+  "r4": {
+    "n": 0,
+    "mean": null,
+    "win": null
+  },
+  "r12": {
+    "n": 0,
+    "mean": null,
+    "win": null
+  },
+  "decrease_r12": {
+    "n": 0,
+    "mean": null,
+    "win": null
+  },
+  "increase_r12": {
+    "n": 0,
+    "mean": null,
+    "win": null
+  },
+  "symbols": 0,
+  "positive_symbols12": 0
+}

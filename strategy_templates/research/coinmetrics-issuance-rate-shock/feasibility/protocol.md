@@ -1,0 +1,1 @@
+Feasibility gate precedes returns. Planned rule was log(IssTotNtv/SplyCur), prior-90d causal z-score, +3 sigma SHORT, -3 sigma LONG, |z|<1 re-arm, next UTC-day open. Require at least eight old symbols with nonconstant series. Gate failed at seven.

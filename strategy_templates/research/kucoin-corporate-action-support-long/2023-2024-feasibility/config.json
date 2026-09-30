@@ -1,0 +1,7 @@
+{
+  "direction": "LONG",
+  "event": "first KuCoin Support/Will Support token swap, migration or rebranding announcement",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_events": 8
+}

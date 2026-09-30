@@ -1,0 +1,13 @@
+package main
+import("database/sql";"fmt";"math";_ "go_binance_futures/bootstrap";"github.com/beego/beego/v2/core/config";_ "github.com/go-sql-driver/mysql")
+type B struct{T int64;O,C float64}
+type E struct{S string;R1,R4,R12 float64}
+func varpop(x []float64)float64{if len(x)==0{return 0};m:=0.0;for _,v:=range x{m+=v};m/=float64(len(x));s:=0.0;for _,v:=range x{d:=v-m;s+=d*d};return s/float64(len(x))}
+func main(){syms:=[]string{"BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT"};u,_:=config.String("database::username");pw,_:=config.String("database::password");h,_:=config.String("database::host");pt,_:=config.String("database::port");dbn,_:=config.String("database::dbname");if dbn!="go_bn_test"{panic(dbn)};db,e:=sql.Open("mysql",fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4",u,pw,h,pt,dbn));if e!=nil{panic(e)};defer db.Close();all:=[]E{}
+for _,s:=range syms{rows,e:=db.Query("SELECT open_time,open_price,close_price FROM market_klines_1h WHERE market='futures_usdt' AND symbol=? AND open_time>=? AND open_time<? ORDER BY open_time",s,int64(1672531200000),int64(1735689600000));if e!=nil{panic(e)};b:=[]B{};for rows.Next(){var x B;rows.Scan(&x.T,&x.O,&x.C);b=append(b,x)};rows.Close();ret:=make([]float64,len(b));for i:=1;i<len(b);i++{if b[i].C>0&&b[i-1].C>0{ret[i]=math.Log(b[i].C/b[i-1].C)}};vr:=make([]float64,len(b));valid:=make([]bool,len(b))
+for i:=96;i<len(b);i++{one:=append([]float64(nil),ret[i-95:i+1]...);v1:=varpop(one);if v1<=0{continue};four:=[]float64{};for j:=i-95;j<=i-3;j++{sum:=ret[j]+ret[j+1]+ret[j+2]+ret[j+3];four=append(four,sum)};v4:=varpop(four);vr[i]=v4/(4*v1);valid[i]=true}
+n:=0;sum:=0.0;w:=0
+for i:=97;i+12<len(b);i++{if !valid[i]||!valid[i-1]{continue};mom:=b[i].C-b[i-4].C;if mom==0{continue};sgn:=1.0;if mom<0{sgn=-1};d:=0.0;if vr[i]>1&&vr[i-1]<=1{d=sgn};if vr[i]<1&&vr[i-1]>=1{d=-sgn};if d==0{continue};entry:=b[i+1].O;if entry<=0{continue};r1:=d*math.Log(b[i+1].C/entry);r4:=d*math.Log(b[i+4].C/entry);r12:=d*math.Log(b[i+12].C/entry);all=append(all,E{s,r1,r4,r12});n++;sum+=r12;if r12>0{w++}}
+fmt.Printf("%s n=%d mean12=%.6f win12=%.3f\n",s,n,sum/float64(n),float64(w)/float64(n))}
+for _,k:=range []int{1,4,12}{sum:=0.0;w:=0;for _,x:=range all{v:=x.R1;if k==4{v=x.R4};if k==12{v=x.R12};sum+=v;if v>0{w++}};fmt.Printf("ALL r%d n=%d mean=%.6f win=%.3f\n",k,len(all),sum/float64(len(all)),float64(w)/float64(len(all)))}
+}

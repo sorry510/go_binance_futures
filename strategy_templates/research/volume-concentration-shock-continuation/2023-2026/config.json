@@ -1,0 +1,17 @@
+{
+  "feature": "24h QuoteVolume HHI=sum(hourly_share^2)",
+  "zscore_lookback_hours": 720,
+  "trigger_z_gte": 3,
+  "rearm_z_lt": 1,
+  "direction": "trailing24h return sign",
+  "exact": {
+    "entry": "next 1m open",
+    "leverage": 4,
+    "profit": 8,
+    "loss": 6,
+    "fee": 0.0005,
+    "slippage_bps": 5,
+    "funding": true,
+    "max_hold_hours": 12
+  }
+}

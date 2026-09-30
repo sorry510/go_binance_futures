@@ -1,0 +1,8 @@
+{
+  "required_symbols": 8,
+  "discovery": "2023-2024",
+  "data_types": ["dailyProtocolRevenue", "dailyHoldersRevenue"],
+  "eligible_complete_protocol_revenue": ["LDO", "ENS", "AXS"],
+  "late_holder_revenue": {"LPT": "2024-08-14"},
+  "decision": "coverage blocked"
+}

@@ -1,0 +1,1 @@
+Direction mapping was fixed before returns. Announcement publication is causal event time; enter next full 1h open. Mixed leverage/risk changes excluded. OOS 2026 is inspected only if discovery gate passes; it did not.

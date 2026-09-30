@@ -1,0 +1,1 @@
+Use only events from the already-audited complete Binance leverage/margin-tier census. Require unchanged first-tier maximum leverage and changed first-tier notional cap. Expansion is pre-registered LONG, contraction SHORT. Apply >=730 days USD-M history and >=5M USDT prior-24h QuoteVolume. Entry proxy is next full 1h open after effective time.

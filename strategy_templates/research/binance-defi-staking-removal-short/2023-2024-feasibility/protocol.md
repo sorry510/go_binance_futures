@@ -1,0 +1,1 @@
+Enumerate 2023-2024 official Binance notices about removing or ceasing support for DeFi Staking/Simple Earn/Staking assets before inspecting returns. Count independent policy timestamps, not token count, for the discovery feasibility gate.

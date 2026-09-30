@@ -1,0 +1,15 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": [
+    "DeFiLlama overview/dexs dailyVolume",
+    "DeFiLlama summary/dexs/{slug} dailyVolume",
+    "DeFiLlama protocols mapping",
+    "Binance Vision USD-M monthly 1d klines"
+  ],
+  "known_limitations": [
+    "DeFiLlama protocol history is consumed as currently published and may include later methodology revisions.",
+    "Two mechanical universe symbols produced zero eligible discovery events.",
+    "OOS returns were intentionally not evaluated after discovery gate failure."
+  ]
+}

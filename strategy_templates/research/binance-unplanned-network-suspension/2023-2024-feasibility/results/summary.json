@@ -1,0 +1,10 @@
+{
+  "catalog_articles_2023_2024_approx": 220,
+  "clear_unplanned_incident_classes": 2,
+  "examples": [
+    "TORN DAO incident",
+    "Multichain situation"
+  ],
+  "minimum_sample": 8,
+  "decision": "freeze feasibility: insufficient sample"
+}

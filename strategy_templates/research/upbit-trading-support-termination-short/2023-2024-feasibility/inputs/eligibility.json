@@ -1,0 +1,128 @@
+[
+  {
+    "ticker": "DAD",
+    "symbol": "DADUSDT",
+    "event_time": "2024-12-30T09:00:00+00:00",
+    "title": "다드(DAD) 거래지원 종료 안내 (1/31 15:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "BTG",
+    "symbol": "BTGUSDT",
+    "event_time": "2024-12-24T05:30:01+00:00",
+    "title": "비트코인골드(BTG) 거래지원 종료 안내 (1/23 14:30)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "FOR",
+    "symbol": "FORUSDT",
+    "event_time": "2024-11-11T10:00:00+00:00",
+    "title": "포튜브(FOR) 거래지원 종료 안내 (12/11 19:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "PDA",
+    "symbol": "PDAUSDT",
+    "event_time": "2024-03-11T05:00:00+00:00",
+    "title": "플레이댑(PDA) 거래지원 종료 안내 (3/25 14:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "SSX",
+    "symbol": "SSXUSDT",
+    "event_time": "2024-02-27T06:00:01+00:00",
+    "title": "썸씽(SSX) 거래지원 종료 안내 (3/12 15:00) (출금 재개 안내)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "LINA",
+    "symbol": "LINAUSDT",
+    "event_time": "2023-10-06T07:00:00+00:00",
+    "title": "리니어파이낸스(LINA) 거래지원 종료 안내 (10/20 16:00)",
+    "bars_24h": 24,
+    "quote_volume_24h": 15795943.904629998,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "ticker": "DAWN",
+    "symbol": "DAWNUSDT",
+    "event_time": "2023-09-12T07:00:00+00:00",
+    "title": "던프로토콜(DAWN), 리퍼리움(RFR), 마로(MARO) 거래지원 종료 안내 (09/26 16:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "RFR",
+    "symbol": "RFRUSDT",
+    "event_time": "2023-09-12T07:00:00+00:00",
+    "title": "던프로토콜(DAWN), 리퍼리움(RFR), 마로(MARO) 거래지원 종료 안내 (09/26 16:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "MARO",
+    "symbol": "MAROUSDT",
+    "event_time": "2023-09-12T07:00:00+00:00",
+    "title": "던프로토콜(DAWN), 리퍼리움(RFR), 마로(MARO) 거래지원 종료 안내 (09/26 16:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "REP",
+    "symbol": "REPUSDT",
+    "event_time": "2023-06-29T05:00:00+00:00",
+    "title": "어거(REP) 거래지원 종료 안내 (07/13 14:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "BASIC",
+    "symbol": "BASICUSDT",
+    "event_time": "2023-04-14T07:00:00+00:00",
+    "title": "베이직(BASIC) 거래지원 종료 안내 (04/28 16:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "OMG",
+    "symbol": "OMGUSDT",
+    "event_time": "2023-04-12T05:00:00+00:00",
+    "title": "오미세고(OMG), 세럼(SRM) 거래지원 종료 안내 (04/26 14:00)",
+    "bars_24h": 24,
+    "quote_volume_24h": 100052610.07079999,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "ticker": "SRM",
+    "symbol": "SRMUSDT",
+    "event_time": "2023-04-12T05:00:00+00:00",
+    "title": "오미세고(OMG), 세럼(SRM) 거래지원 종료 안내 (04/26 14:00)",
+    "bars_24h": 24,
+    "quote_volume_24h": 0.0,
+    "eligible": false,
+    "reason": "qv_lt_5m"
+  },
+  {
+    "ticker": "PCI",
+    "symbol": "PCIUSDT",
+    "event_time": "2023-03-31T07:00:00+00:00",
+    "title": "페이코인(PCI) 거래지원 종료 안내 (04/14 15:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  },
+  {
+    "ticker": "NU",
+    "symbol": "NUUSDT",
+    "event_time": "2023-03-02T06:00:03+00:00",
+    "title": "누사이퍼(NU) 거래지원 종료 안내 (04/02 12:00)",
+    "eligible": false,
+    "reason": "no_event_month"
+  }
+]

@@ -21,5 +21,7 @@
   "historical_metrics_validation": "pending corrected funding parser replay",
   "known_issue": "Archived helpers assume fundingRate CSV has a fourth MarkPrice column; actual archive is three columns and production Engine falls back to 1m bar.Close.",
   "missing_evidence": "The complete pre-eligibility event universe and exclusion rows were not found in surviving /tmp artifacts; only eligible event lists and historical replay helpers are archived.",
-  "large_market_data_archived": false
+  "large_market_data_archived": false,
+  "corrected_funding_replay_date": "2026-09-28",
+  "corrected_funding_replay_note": "original helpers preserved; replay_corrected changes only funding parser/fallback semantics"
 }

@@ -1,0 +1,10 @@
+{
+  "signal": "log((sum fees latest7 / avg TVL latest7) / (sum fees prior7 / avg TVL prior7)), zero-cross",
+  "up_cross": "LONG",
+  "down_cross": "SHORT",
+  "entry": "next UTC daily open",
+  "eligibility": {"futures_history_years": 2, "quote_volume_usdt": 5000000},
+  "discovery": "2023-2024",
+  "gate": {"mean7": 0.0025, "positive_symbol_fraction": 0.60, "both_years_positive": true},
+  "exact_status": "blocked by OOS decay"
+}

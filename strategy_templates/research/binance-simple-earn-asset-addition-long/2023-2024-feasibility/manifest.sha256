@@ -1,0 +1,7 @@
+691336e77cfa9cfa5d755f2b4bbb2ad0be7c2e2d65d6e24d857035edf9920480  strategy_templates/research/binance-simple-earn-asset-addition-long/2023-2024-feasibility/README.md
+15d03fc62bcc03ba9d4eaad145c343dccfc819b222655f2874fd0e486f563eda  strategy_templates/research/binance-simple-earn-asset-addition-long/2023-2024-feasibility/config.json
+314734ad1597aa15c44020627aec583fe200a74e1ed995cc0187a606279a50ae  strategy_templates/research/binance-simple-earn-asset-addition-long/2023-2024-feasibility/eligibility.py
+ffa82e453934f2055ad4fd9d638bcced28f1241a4ed87ee04cb5aedf1c7ea889  strategy_templates/research/binance-simple-earn-asset-addition-long/2023-2024-feasibility/inputs/eligibility.json
+88c551b8ca11cb6fa41cf45bfa36796fd443f22d53ce4a13389599ceb17164ba  strategy_templates/research/binance-simple-earn-asset-addition-long/2023-2024-feasibility/inputs/events.json
+33e88cd954d8981b1d736026cc60928320f3f9455f4dae251c2b2867d584bf3a  strategy_templates/research/binance-simple-earn-asset-addition-long/2023-2024-feasibility/protocol.md
+3ab5faccd0ad432803a779fb0f506c882ae77df2ee116bdadee4059ecb20a984  strategy_templates/research/binance-simple-earn-asset-addition-long/2023-2024-feasibility/provenance.json

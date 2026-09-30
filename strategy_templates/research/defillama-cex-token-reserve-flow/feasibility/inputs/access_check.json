@@ -1,0 +1,23 @@
+{
+  "free_cexs_binance_fields": [
+    "currentTvl",
+    "cleanAssetsTvl",
+    "inflows_24h",
+    "inflows_1w",
+    "inflows_1m",
+    "spotVolume",
+    "oi",
+    "derivVolume",
+    "leverage"
+  ],
+  "free_openapi_path_count": 31,
+  "free_cex_history_endpoint_found": false,
+  "pro_historical_endpoint": "GET /api/inflows/{protocol}/{timestamp}",
+  "anonymous_pro_probe_response": {
+    "body": {
+      "error": "API Key is wrong"
+    },
+    "http_status": 500
+  },
+  "no_returns_inspected": true
+}

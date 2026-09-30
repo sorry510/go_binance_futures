@@ -1,0 +1,52 @@
+{
+  "discovery_2023": {
+    "r1": {
+      "n": 46,
+      "mean": -0.0004977815524665217,
+      "win": 0.41304347826086957
+    },
+    "r4": {
+      "n": 46,
+      "mean": 0.001636294819757425,
+      "win": 0.45652173913043476
+    },
+    "r12": {
+      "n": 46,
+      "mean": 0.007234426839062385,
+      "win": 0.5869565217391305
+    },
+    "symbols": 40,
+    "positive_symbols12": 26,
+    "batches": 16,
+    "batch_equal_mean12": 0.006327231691784365,
+    "positive_batches12": 10
+  },
+  "oos1_2024": {
+    "r1": {
+      "n": 10,
+      "mean": 0.00609936875457064,
+      "win": 0.9
+    },
+    "r4": {
+      "n": 10,
+      "mean": 0.02398943795033058,
+      "win": 0.9
+    },
+    "r12": {
+      "n": 10,
+      "mean": 0.028063176607172596,
+      "win": 0.9
+    },
+    "symbols": 10,
+    "positive_symbols12": 9,
+    "batches": 1,
+    "batch_equal_mean12": 0.028063176607172596,
+    "positive_batches12": 1
+  },
+  "excluded": {
+    "history_lt_2y_or_missing": 150,
+    "missing_24h_bars": 3,
+    "quote_volume_lt_5m": 4
+  },
+  "eligible": 56
+}

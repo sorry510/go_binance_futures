@@ -1,0 +1,8 @@
+{
+  "research_date": "2026-09-29",
+  "source": "GitHub official Repository Security Advisories API",
+  "repo_mapping": "github-core-release-catalyst/2023-2026/inputs/source_map.json",
+  "2023_2024_public_advisories": {"ethereum/go-ethereum": 2},
+  "other_fixed_repositories": 0,
+  "returns_inspected": false
+}

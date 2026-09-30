@@ -1,0 +1,6 @@
+{
+  "research_date": "2026-09-30",
+  "sources": ["DeFiLlama /protocols catalog", "DeFiLlama /treasury/{slug}", "Binance Vision USD-M monthly 1d archive index"],
+  "returns_inspected": false,
+  "db_write": false
+}

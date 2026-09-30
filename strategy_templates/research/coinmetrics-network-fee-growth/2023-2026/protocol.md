@@ -1,0 +1,1 @@
+Use the same fixed 7d-vs-prior-7d zero-cross construction as prior chain-activity families. CoinMetrics FeeTotNtv is native-unit fees, avoiding price in the signal. Positive growth cross is LONG; negative cross SHORT. Signal is used only after the metric day completes; enter next UTC-day open. No window, z-score, horizon or direction search after results.

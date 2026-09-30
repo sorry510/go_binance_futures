@@ -1,0 +1,15 @@
+{
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": [
+    "https://api.llama.fi/cexs",
+    "DefiLlama api-docs defillama-openapi-free.json",
+    "DefiLlama api-docs defillama-openapi-pro.json",
+    "DefiLlama api-docs llms-pro.txt"
+  ],
+  "observations": [
+    "Free /cexs exposes current exchange-level totals and rolling 24h/1w/1m aggregate inflows only.",
+    "Free OpenAPI has no CEX historical/token-reserve path.",
+    "Pro OpenAPI exposes /api/inflows/{protocol}/{timestamp}.",
+    "Anonymous Pro historical inflow probe returned API Key is wrong."
+  ]
+}

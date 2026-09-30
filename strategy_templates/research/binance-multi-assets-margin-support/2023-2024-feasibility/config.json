@@ -1,0 +1,7 @@
+{
+  "event": "Binance Futures Multi-Assets Mode margin-asset support change",
+  "direction": "support addition LONG; support removal SHORT",
+  "minimum_independent_events": 8,
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000
+}

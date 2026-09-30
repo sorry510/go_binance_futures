@@ -1,0 +1,1 @@
+Binance Spot and USD-M 1h closes are timestamp-aligned. Basis is normalized by the prior 720 completed hours. First |z|>=3 triggers convergence direction; |z|<1 rearms. 2023-2024 discovery, 2025 OOS1, 2026 OOS2. No threshold/window/direction search.

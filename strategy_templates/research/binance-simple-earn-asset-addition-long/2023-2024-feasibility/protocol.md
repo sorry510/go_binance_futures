@@ -1,0 +1,1 @@
+Include only announcements adding new assets to Simple Earn Locked/Flexible Products. Exclude payment-option changes, APR campaigns, Range Bound, One-Click Earn and duration-only additions. Direction is pre-registered LONG. Require >=730 days USD-M history and >=5M USDT prior-24h QuoteVolume. Minimum discovery sample is eight; if below, do not inspect returns.

@@ -1,0 +1,1 @@
+{"interval":"1h","autocorr_window":24,"lag":1,"positive_cross":"follow trailing 4h return","negative_cross":"reverse trailing 4h return","entry":"next 1h open","horizons_hours":[1,4,12],"discovery_years":[2023,2024],"oos_years":[2025,2026]}

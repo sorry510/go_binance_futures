@@ -1,0 +1,12 @@
+{
+  "source": "Binance official announcement catalog",
+  "articles_2023_2024": 58,
+  "classification": {
+    "loosening": "first notional tier maximum leverage increases => LONG",
+    "tightening": "first notional tier maximum leverage decreases => SHORT",
+    "unchanged": "excluded"
+  },
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "entry": "next full 1h open after effective tier-change time"
+}

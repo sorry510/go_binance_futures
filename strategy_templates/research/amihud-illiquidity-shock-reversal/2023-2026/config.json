@@ -1,0 +1,8 @@
+{
+  "interval": "1h",
+  "feature": "sum_24h(abs(log_return)/quote_volume)",
+  "zscore_lookback_hours": 720,
+  "trigger_z_gte": 3,
+  "rearm_z_lt": 1,
+  "direction": "reverse trailing 24h return"
+}

@@ -1,0 +1,19 @@
+{
+  "bases": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "XRP",
+    "ADA",
+    "LINK",
+    "BCH",
+    "DOT",
+    "LTC"
+  ],
+  "quarterly_selection": "nearest expiry with DTE > 7d",
+  "feature": "annualized log(quarterly/perp) basis",
+  "zscore_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "contango extreme SHORT; backwardation extreme LONG"
+}

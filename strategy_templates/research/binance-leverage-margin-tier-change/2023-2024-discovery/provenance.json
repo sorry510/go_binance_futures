@@ -1,0 +1,12 @@
+{
+  "research_date": "2026-09-26",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "announcement_source": "Binance official CMS API",
+  "history_sources": [
+    "Binance Futures exchangeInfo onboardDate",
+    "Binance public REST 1h klines",
+    "Binance Vision fallback"
+  ],
+  "database": "go_bn_test",
+  "db_write": false
+}

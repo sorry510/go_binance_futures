@@ -1,0 +1,8 @@
+{
+  "feature": "daily DEX-volume log return residualized against native-token return with prior 90d causal beta; sum residual last 7d",
+  "positive_zero_cross": "LONG",
+  "negative_zero_cross": "SHORT",
+  "entry": "next UTC day open",
+  "dynamic_history_min_years": 2,
+  "discovery_gate": "7d mean >=0.25% and >=60% symbol means positive"
+}

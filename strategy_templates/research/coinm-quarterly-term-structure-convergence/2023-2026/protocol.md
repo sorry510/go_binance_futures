@@ -1,0 +1,1 @@
+Use Binance Vision COIN-M perpetual and delivery contracts plus USD-M perpetual target prices. Select the nearest delivery contract with more than seven days to expiry. Annualize log(delivery/perpetual) by DTE. Normalize against the prior 720 completed hours; first |z|>=3 triggers convergence and |z|<1 rearms. No threshold, DTE or direction search after observing results.

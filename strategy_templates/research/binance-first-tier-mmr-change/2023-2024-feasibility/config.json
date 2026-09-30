@@ -1,0 +1,7 @@
+{
+  "source": "existing complete 326-event Binance leverage/margin-tier census",
+  "event_filter": "first-tier max leverage unchanged; first-tier notional cap unchanged; first-tier MMR changed",
+  "direction": "MMR decrease LONG; MMR increase SHORT",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000
+}

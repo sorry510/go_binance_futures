@@ -1,0 +1,1 @@
+Enumerate complete Bybit official New Listings server-side pages for 2023-2024. Include explicit Spot listings only; exclude perpetual, pre-market, convert and margin-only notices. Use announcement publication time. Before viewing returns require Binance USD-M event-month existence, >=730 days history and >=5M USDT prior-24h QuoteVolume.

@@ -1,0 +1,24 @@
+{
+  "symbols_requested": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "XRPUSDT"
+  ],
+  "signal_dates": [
+    "2026-01-15",
+    "2026-04-15",
+    "2026-07-15"
+  ],
+  "baseline": "previous full UTC day",
+  "large_trade_threshold": "previous-day aggTrade notional q99",
+  "feature": "hourly signed notional among aggTrades >= q99 divided by total tail notional",
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "signed tail-flow direction",
+  "horizons_hours": [
+    1,
+    4,
+    12
+  ]
+}

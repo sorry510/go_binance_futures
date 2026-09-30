@@ -1,0 +1,1 @@
+24h Amihud illiquidity is the sum of hourly absolute log return divided by QuoteVolume. Normalize against the prior 720 completed hourly observations. First z>=3 triggers, z<1 rearms. Direction is reversal of trailing-24h return. No continuation rescue or threshold/window search after results.

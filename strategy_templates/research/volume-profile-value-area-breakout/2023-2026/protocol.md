@@ -1,0 +1,1 @@
+Parameters and continuation direction were fixed before returns. The 70% value area was represented by weighted 15%/85% price quantiles. No search over profile window, value-area width, rearm rule, direction or horizons is permitted after results.

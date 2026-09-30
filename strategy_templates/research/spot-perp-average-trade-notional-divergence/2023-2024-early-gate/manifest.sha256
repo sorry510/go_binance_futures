@@ -1,0 +1,6 @@
+2ec2faada10fa2f778034c178bc9b64d9f94e313ba6c4dc650a1f4ed6dbc12d8  strategy_templates/research/spot-perp-average-trade-notional-divergence/2023-2024-early-gate/README.md
+23e4c9de62825461364dfb0b325eeba52656c168660f0e2c8f5e6c4dce345f7f  strategy_templates/research/spot-perp-average-trade-notional-divergence/2023-2024-early-gate/config.json
+7299cf90df42f384c49cbe20a6ce4d922a407f03b963176156c0392fcf23c202  strategy_templates/research/spot-perp-average-trade-notional-divergence/2023-2024-early-gate/provenance.json
+6265d3252be215e0027f621f531d13873682dc2e2dd359678a15fa89db11fae4  strategy_templates/research/spot-perp-average-trade-notional-divergence/2023-2024-early-gate/replay.go.txt
+72abc8d589aefe87b3146cd4b5f33c0af7b1fe12c8f5bee5ed5b438082cfdb4a  strategy_templates/research/spot-perp-average-trade-notional-divergence/2023-2024-early-gate/results/summary.json
+aa42f30ef341cfb16b6642b7f5392e83db0adcfff98397cbea8e473a2618286d  strategy_templates/research/spot-perp-average-trade-notional-divergence/2023-2024-early-gate/spot_fetch.py

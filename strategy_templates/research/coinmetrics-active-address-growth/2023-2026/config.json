@@ -1,0 +1,24 @@
+{
+  "assets": [
+    "btc",
+    "eth",
+    "xrp",
+    "ada",
+    "link",
+    "bch",
+    "ltc",
+    "doge",
+    "uni",
+    "zec"
+  ],
+  "metric": "AdrActCnt",
+  "feature": "log(mean(t-6:t)/mean(t-13:t-7))",
+  "signal": "zero crossing; positive LONG, negative SHORT",
+  "entry": "next UTC day Binance USD-M open",
+  "lookback_days": 14,
+  "horizons_days": [
+    1,
+    3,
+    7
+  ]
+}

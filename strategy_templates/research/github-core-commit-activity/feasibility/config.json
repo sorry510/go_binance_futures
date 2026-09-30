@@ -1,0 +1,7 @@
+{
+  "decision": "timestamp-semantics blocked before returns",
+  "returns_inspected": false,
+  "candidate_core_symbols": ["BTC", "ETH", "BNB", "XRP"],
+  "invalid_shortcut": "git author/committer date as market-visible time",
+  "required_revisit_source": "auditable repository visibility / push event time"
+}

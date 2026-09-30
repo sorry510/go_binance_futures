@@ -1,0 +1,9 @@
+{
+  "bridgevolume_probe": {
+    "https://bridges.llama.fi/bridgevolume/Ethereum": "HTTP 402 Payment Required",
+    "https://bridges.llama.fi/bridges?includeChains=true": "HTTP 402 Payment Required",
+    "https://api.llama.fi/bridges/bridgevolume/Ethereum": "no usable response (timeout)"
+  },
+  "returns_inspected": false,
+  "decision": "data-access blocked before discovery"
+}

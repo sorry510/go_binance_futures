@@ -1,0 +1,8 @@
+{
+  "discovery": "2023-2024",
+  "source": "Binance public CMS catalogId=49",
+  "futures_articles": 2,
+  "unique_contracts": ["BTCUSDT", "ETHUSDT", "LINKUSDT", "BCHUSDT", "ETCUSDT", "LTCUSDT"],
+  "returns_inspected": false,
+  "decision": "coverage blocked before returns"
+}

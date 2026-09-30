@@ -1,0 +1,9 @@
+a0c4c8a406fd972ca2dfe394265c6b984de00086d91b228f107b5a3f4f928fc2  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/README.md
+f1e904c5cd0c25eb32dc4c17ebdb91529d9e4df6f607582b99f861bfb32744b6  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/config.json
+4032be4c0680281accabc6206bc8dd8a61f0e2aef86908991aced9aa114a59b3  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/inputs/articles.json
+350c1bcd27b8dc2a75d4f8dfafd9078c3bf4a3daa4212269232a8b00259ced7b  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/inputs/eligibility.json
+311708e85056933983852c5228f93e7f3b4b7d04236ec1973c7047f3c91ad64a  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/inputs/events.json
+97bbd37124b3f22b0e550d18e9efe73a84c81feff899d82a93c2f06dd017710d  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/protocol.md
+d1d3b4dabc60ed06f62359aee01dc3bb5a0bb3203c6887df3420a595b39b2bc8  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/provenance.json
+dbc84758d383edbfcd8fa937cb1442133268db995c94a785ebdd3d2cd20182b6  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/replay.py
+3c3a2aaa6a7278376f30aee3f4a787e069b77b964c8ac9a76f8be4373ade5f66  strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/results/discovery.json

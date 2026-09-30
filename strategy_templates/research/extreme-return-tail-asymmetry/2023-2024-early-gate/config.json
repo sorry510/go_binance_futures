@@ -1,0 +1,9 @@
+{
+  "interval": "1h",
+  "window_hours": 24,
+  "feature": "max positive 1h log return / abs(max negative 1h log return)",
+  "natural_threshold": 1,
+  "cross_above": "LONG",
+  "cross_below": "SHORT",
+  "entry": "next 1h open"
+}

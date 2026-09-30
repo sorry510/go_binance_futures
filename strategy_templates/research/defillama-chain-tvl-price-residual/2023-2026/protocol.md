@@ -1,0 +1,1 @@
+Use DeFiLlama historical chain TVL and Binance Vision USD-M 1d prices. Estimate causal 90-day beta of daily TVL log returns on token log returns, compute current TVL-return residual, sum the latest seven residuals, and trade zero-cross direction at the next UTC-day open. Contract must already have two years of Binance USD-M history. No chain-specific rules or window changes.

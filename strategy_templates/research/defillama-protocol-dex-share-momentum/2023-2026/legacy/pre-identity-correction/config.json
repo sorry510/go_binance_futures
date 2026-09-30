@@ -1,0 +1,47 @@
+{
+  "research_date": "2026-09-29",
+  "discovery_years": [
+    2023,
+    2024
+  ],
+  "oos1_years": [
+    2025
+  ],
+  "oos2_years": [
+    2026
+  ],
+  "signal": "zero-cross of log(trailing_7d_protocol_dex_share / same share 7d earlier)",
+  "entry": "next UTC day open",
+  "endpoint_horizons_days": [
+    1,
+    3,
+    7
+  ],
+  "min_history_years": 2,
+  "min_signal_day_quote_volume_usdt": 5000000,
+  "discovery_gate": {
+    "mean7_min": 0.0025,
+    "positive_symbol_fraction_min": 0.6
+  },
+  "execution_constraints": {
+    "leverage": 4,
+    "tp_pct": 8,
+    "sl_pct": 6,
+    "fee_per_side": 0.0005,
+    "slippage_per_side_bps": 5,
+    "single_position": true
+  },
+  "candidates": [
+    "UNI",
+    "RAY",
+    "CRV",
+    "SUSHI",
+    "DODO",
+    "BAL",
+    "RUNE",
+    "WOO",
+    "KNC",
+    "LIT",
+    "INJ"
+  ]
+}

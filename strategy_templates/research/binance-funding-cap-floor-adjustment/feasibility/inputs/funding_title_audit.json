@@ -1,0 +1,452 @@
+[
+  {
+    "date": "2021-05-11T11:53:56.338000+00:00",
+    "title": "Updates on Binance Perpetual Futures Funding Rate Calculation (2021-05-11)",
+    "code": "130cd2fec1fe474bb06167b2152bd2e9"
+  },
+  {
+    "date": "2021-08-12T08:02:06.658000+00:00",
+    "title": "Binance P2P Wallet to Funding Wallet Migration",
+    "code": "9a4e2ebd83a543caba5b1172f621b20f"
+  },
+  {
+    "date": "2021-11-04T04:14:15.497000+00:00",
+    "title": "Binance Funding Wallet to Support Crypto Deposit & Withdrawal",
+    "code": "f9899ba6962249cb8921d647735a29cb"
+  },
+  {
+    "date": "2021-11-11T11:30:31.069000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of OMG USDⓈ-M Perpetual Contract (2021-11-11)",
+    "code": "c943ef87fdcd40b194884805309f4f7f"
+  },
+  {
+    "date": "2021-12-21T11:19:26.721000+00:00",
+    "title": "Binance Pool Wallet to Funding Wallet Migration",
+    "code": "50cc6303c5b644bc9ba53cae64a94f24"
+  },
+  {
+    "date": "2022-01-25T04:10:03.283000+00:00",
+    "title": "The Convert & OTC Portal Now Supports Funding Wallet",
+    "code": "2514c06e20344e06b202cc3224f84ed4"
+  },
+  {
+    "date": "2022-02-27T16:30:23.203000+00:00",
+    "title": "Binance to Donate $10M to Ukraine Humanitarian Effort and Launch Crypto-First Crowdfunding Site to Further Help Provide Aid to Ukraine",
+    "code": "6bce8615076a4173a4738817c597b09e"
+  },
+  {
+    "date": "2022-05-29T08:20:36.442000+00:00",
+    "title": "Updates on Leverage, Margin Tiers and Capped Funding Rate Multiplier for BEL USDⓈ-M Perpetual Contract (2022-05-29)",
+    "code": "42b2b86a223945ddbe6fe30ce48a5d3f"
+  },
+  {
+    "date": "2022-06-29T04:50:19.197000+00:00",
+    "title": "Binance Futures Launches Funding Rate Arbitrage Table",
+    "code": "7da9ae55c2c04a478ccc1b843d6dc8ec"
+  },
+  {
+    "date": "2022-09-17T08:50:35.363000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of PHBBUSD Perpetual Contract (2022-09-17)",
+    "code": "e5535f205b514da4929adfa9967826ad"
+  },
+  {
+    "date": "2022-09-20T08:05:03.968000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of PHBBUSD Perpetual Contract (2022-09-20)",
+    "code": "c487615c6e824dff9c991c965805fed7"
+  },
+  {
+    "date": "2022-10-03T11:25:07.864000+00:00",
+    "title": "Updates on Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M LIT Perpetual Contracts (2022-10-03)",
+    "code": "55e699609db74cf49981db73c982dbed"
+  },
+  {
+    "date": "2022-11-09T17:05:03.492000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of SOLUSDT, SOLBUSD and SOLUSD Perpetual Futures Contracts (2022-11-09)",
+    "code": "e8be17e1e544418490e86723d84759f0"
+  },
+  {
+    "date": "2022-11-10T02:10:05.799000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of FTTUSDT and FTTBUSD Perpetual Futures Contracts (2022-11-10)",
+    "code": "9fe9291e97ee4e12b2e89a5bb4e2c796"
+  },
+  {
+    "date": "2022-12-04T11:15:33.624000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of USDⓈ-M BNXUSDT Perpetual Contracts (2022-12-04)",
+    "code": "e894a11164af4d61935735f9d1f70a88"
+  },
+  {
+    "date": "2022-12-21T17:36:19.864000+00:00",
+    "title": "Updates on Margin Tiers, Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of USDⓈ-M HNTUSDT Perpetual Contracts (2022-12-21)",
+    "code": "06c5ed7b560d4049bd21451977ec52f8"
+  },
+  {
+    "date": "2023-04-03T12:55:08.271000+00:00",
+    "title": "Updates on Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M SXPUSDT Perpetual Contract (2023-04-03)",
+    "code": "29e3d04494cc49259bd5b152ed7b3953"
+  },
+  {
+    "date": "2023-06-07T13:30:40.024000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers, Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of USDⓈ-M MTLUSDT Perpetual Contract (2023-06-07)",
+    "code": "19db5196d07f42efb6774219855d0a04"
+  },
+  {
+    "date": "2023-07-05T10:00:02.880000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M STORJUSDT Perpetual Contract",
+    "code": "50eb47de435f4313b09615c3c2c68bb8"
+  },
+  {
+    "date": "2023-07-06T14:41:01.792000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, and Funding Rate Settlement Frequency of USDⓈ-M XVGUSDT Perpetual Contract (2023-07-06)",
+    "code": "6487117a846a45cd89639a228c34bc69"
+  },
+  {
+    "date": "2023-07-23T07:00:17.765000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, and Funding Rate Settlement Frequency of USDⓈ-M STMXUSDT Perpetual Contract (2023-07-23)",
+    "code": "c83d5650ed1048c2ab0b0d28562c2332"
+  },
+  {
+    "date": "2023-08-06T16:15:06.022000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M YGGUSDT and API3USDT Perpetual Contracts (2023-08-06)",
+    "code": "6fbe457748354c788cd7626a6d091976"
+  },
+  {
+    "date": "2023-08-07T09:01:52.858000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M LPTUSDT and API3USDT Perpetual Contracts (2023-08-07)",
+    "code": "8763b2c00e694cad98877a91e94669f6"
+  },
+  {
+    "date": "2023-08-07T12:57:40.743000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M YGGUSDT Perpetual Contract (2023-08-07)",
+    "code": "6760d1ab2acd4aca84a055274b2391d6"
+  },
+  {
+    "date": "2023-08-13T10:00:04.016000+00:00",
+    "title": "Updates on the Funding Rate Settlement Frequency of USDⓈ-M LPTUSDT Perpetual Contract (2023-08-13)",
+    "code": "ed3c7b7e35b546aeab635cb4a5b3ee80"
+  },
+  {
+    "date": "2023-08-14T09:35:36.967000+00:00",
+    "title": "Updates on Leverage, Margin Tiers and Funding Rate Settlement Frequency of USDⓈ-M BLZUSDT Perpetual Contract (2023-08-14)",
+    "code": "ec448dc132844b40babcb87414f6d233"
+  },
+  {
+    "date": "2023-08-28T03:10:03.272000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M AMBUSDT Perpetual Contract",
+    "code": "b41f816705da4f70b104c7cb9b755102"
+  },
+  {
+    "date": "2023-08-31T03:01:53.012000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of USDⓈ-M CYBERUSDT Perpetual Contract (2023-08-31)",
+    "code": "b2e97fb3415f4f51a7175782242165d8"
+  },
+  {
+    "date": "2023-09-02T08:45:37.616000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of USDⓈ-M CYBERUSDT Perpetual Contract (2023-09-02)",
+    "code": "a8d06b87a6b940d2b684d0faa34c7b67"
+  },
+  {
+    "date": "2023-09-02T13:38:55.789000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of USDⓈ-M NMRUSDT Perpetual Contract (2023-09-02)",
+    "code": "9bd5ad1119a047f4bd2f6a5e2ffede74"
+  },
+  {
+    "date": "2023-09-05T17:30:03.342000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, Funding Rate Settlement Frequency and Capped Funding Rate Multiplier of USDⓈ-M FLMUSDT Perpetual Contract (2023-09-05)",
+    "code": "9541c2046a5a4876bebfe2a18bb60422"
+  },
+  {
+    "date": "2023-09-05T18:01:36.106000+00:00",
+    "title": "Updates on the Funding Rate Settlement Frequency of USDⓈ-M BLZUSDT Perpetual Contract (2023-09-05)",
+    "code": "78c2d897e2eb41a48d7a8c7484fe6876"
+  },
+  {
+    "date": "2023-09-08T05:40:03.474000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M UNFIUSDT and TRBUSDT Perpetual Contracts",
+    "code": "019f394b8ad34fafaf33d1afe2de5bef"
+  },
+  {
+    "date": "2023-09-10T03:32:12.440000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M PERPUSDT Perpetual Contract",
+    "code": "f0dcb5d06d3a48aaa6f40d04b1a090a4"
+  },
+  {
+    "date": "2023-09-16T02:35:03.199000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M TRBUSDT Perpetual Contract",
+    "code": "cd5b5d50cd2d4864a942848e639b71c3"
+  },
+  {
+    "date": "2023-09-16T18:27:42.509000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M HIFIUSDT Perpetual Contract",
+    "code": "36d64aa905554ea3ad94edf68eb8b543"
+  },
+  {
+    "date": "2023-09-21T03:03:14.309000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate Multiplier of USDⓈ-M IMXUSDT Perpetual Contract",
+    "code": "527708a88c54414398746b906072d4ce"
+  },
+  {
+    "date": "2023-09-28T09:10:26.892000+00:00",
+    "title": "Important Updates on Funding Rates of USDⓈ-M Perpetual Contracts",
+    "code": "98d6b24d3e5c4f84a8ed04087997d8d0"
+  },
+  {
+    "date": "2023-10-01T13:28:08.902000+00:00",
+    "title": "Updates on Capped Funding Rate of USDⓈ-M OGNUSDT Perpetual Contract (2023-10-01)",
+    "code": "f9f5e43bfc434097bd54568fce72cd5a"
+  },
+  {
+    "date": "2023-10-17T09:30:33.253000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate of Multiple USDⓈ-M Perpetual Contracts (2023-10-18)",
+    "code": "28be84f8bdb14158a4f23187db073e69"
+  },
+  {
+    "date": "2023-10-25T10:47:37.267000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate of Multiple USDⓈ-M Perpetual Contracts (2023-10-30)",
+    "code": "0cccc793a53c440aa063509f6a6de0a9"
+  },
+  {
+    "date": "2023-11-03T12:22:38.706000+00:00",
+    "title": "Binance Futures Will Update the Leverage, Margin Tiers and Capped Funding Rate of Multiple USDⓈ-M Perpetual Contracts (2023-11-06)",
+    "code": "9c88b57603534ad68444e209ea9d9c28"
+  },
+  {
+    "date": "2024-01-19T18:41:11.245000+00:00",
+    "title": "Updates on the Funding Rate Settlement Frequency of USDⓈ-M UMAUSDT Perpetual Contract (2024-01-19)",
+    "code": "dfd2cd4d92034086afa82dd504ea3dfe"
+  },
+  {
+    "date": "2024-06-19T05:30:04.254000+00:00",
+    "title": "Notice on Binance Futures Funding Fee Notification Maintenance (2024-06-19)",
+    "code": "960975fc39bd4cfc9ff6a6c0d7bc6e20"
+  },
+  {
+    "date": "2024-06-24T07:00:09.281000+00:00",
+    "title": "Binance Futures Funding Fee Notification To Resume (2024-06-24)",
+    "code": "d40cb640db6c4d62aa00ef98e00f65b3"
+  },
+  {
+    "date": "2024-10-16T05:00:02.166000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, and Funding Rate Settlement Frequency of USDⓈ-M REEFUSDT Perpetual Contract (2024-10-16)",
+    "code": "4929eb99d61f47ebab7c39ca6dca8197"
+  },
+  {
+    "date": "2025-01-25T14:53:57.417000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, and Funding Rate Settlement Frequency of USDⓈ-M BANUSDT Perpetual Contract (2025-01-25)",
+    "code": "1a1248ee804542d691e9ce7f3e2fd948"
+  },
+  {
+    "date": "2025-02-09T12:02:48.972000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, and Funding Rate Settlement Frequency of USDⓈ-M BNXUSDT Perpetual Contract (2025-02-09)",
+    "code": "f271df557b024c8cb44e2e3395b7a6d8"
+  },
+  {
+    "date": "2025-02-12T04:30:22.748000+00:00",
+    "title": "Updates on Leverage, Margin Tiers, and Funding Rate Settlement Frequency of USDⓈ-M LAYERUSDT Perpetual Contract (2025-02-12)",
+    "code": "3a89d93b183f45809368fae1cc2d4130"
+  },
+  {
+    "date": "2025-02-17T04:59:51.659000+00:00",
+    "title": "Funding Rate Settlement Frequency of USDⓈ-M LAYERUSDT Perpetual Contract Will Be Resumed (2025-02-17)",
+    "code": "17e5680f94e84bbe97226a72acb64082"
+  },
+  {
+    "date": "2025-02-17T15:19:11.807000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M ARKUSDT Perpetual Contract (2025-02-17)",
+    "code": "1bb089e1ddab407fbef9bfc7c35de14e"
+  },
+  {
+    "date": "2025-02-24T06:30:01.391000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M BANUSDT Perpetual Contract (2025-02-24)",
+    "code": "cf74febfa6e54838a8f4570c58be4334"
+  },
+  {
+    "date": "2025-02-26T02:30:03.398000+00:00",
+    "title": "Funding Rate Settlement Frequency of USDⓈ-M BANUSDT Perpetual Contract Will Be Resumed (2025-02-26)",
+    "code": "68762bd07bce4879878b0671142168c2"
+  },
+  {
+    "date": "2025-03-21T09:30:12.655000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M ORCAUSDT Perpetual Contract (2025-03-21)",
+    "code": "659d59ec82e54b08833bae32b175ea79"
+  },
+  {
+    "date": "2025-03-24T06:30:51.896000+00:00",
+    "title": "Funding Rate Settlement Frequency of USDⓈ-M ORCAUSDT Perpetual Contract Will Be Resumed (2025-03-24)",
+    "code": "78bc8706fa4e4d34bf9780e6f836ffe8"
+  },
+  {
+    "date": "2025-04-05T16:13:20.021000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M FUNUSDT Perpetual Contract (2025-04-05)",
+    "code": "6e6d1f52906a4bc79467c876e7da9089"
+  },
+  {
+    "date": "2025-04-09T03:35:05.636000+00:00",
+    "title": "Funding Rate Settlement Frequency of USDⓈ-M FUNUSDT Perpetual Contract Will Be Resumed (2025-04-09)",
+    "code": "c9bc19558a974e08aaa55ef9e19b795e"
+  },
+  {
+    "date": "2025-04-09T08:30:16.260000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M VIDTUSDT Perpetual Contract (2025-04-09)",
+    "code": "2d258573e6d746cfbcc3deeecc1129b5"
+  },
+  {
+    "date": "2025-04-10T07:45:11.674000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M TROYUSDT and GASUSDT Perpetual Contracts (2025-04-10)",
+    "code": "b731b3cc752c4c98b38332e772b006f4"
+  },
+  {
+    "date": "2025-04-12T05:47:03.276000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M ORCAUSDT Perpetual Contract (2025-04-12)",
+    "code": "35a37cf889ee40848633c0eb15188b12"
+  },
+  {
+    "date": "2025-04-16T10:30:23.212000+00:00",
+    "title": "Funding Rate Settlement Frequency of USDⓈ-M GASUSDT and ORCAUSDT Perpetual Contracts Will Be Resumed (2025-04-16)",
+    "code": "516228fe026d4029a457d1dcfeeee625"
+  },
+  {
+    "date": "2025-04-16T13:44:15.014000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M AERGOUSDT Perpetual Contract (2025-04-16)",
+    "code": "ff4a3561e08b4871922245210e7eca53"
+  },
+  {
+    "date": "2025-04-18T11:44:47.589000+00:00",
+    "title": "Updates on the Funding Rate Settlement Frequency of USDⓈ-M TUSDT Perpetual Contract (2025-04-18)",
+    "code": "ffa90d74a5384211b62c643409fb4247"
+  },
+  {
+    "date": "2025-04-19T14:01:15.868000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M VOXELUSDT Perpetual Contract (2025-04-19)",
+    "code": "ccb0ef8b85e449ef917fd33459448820"
+  },
+  {
+    "date": "2025-04-20T03:29:13.044000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M VOXELUSDT Perpetual Contract (2025-04-20)",
+    "code": "eb3ff993968d456dbde92331ae42a7b6"
+  },
+  {
+    "date": "2025-04-20T08:54:01.647000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M NKNUSDT and BROCCOLIF3BUSDT Perpetual Contracts (2025-04-20)",
+    "code": "d86a99c8edd84dfaa6fa28e568ae7845"
+  },
+  {
+    "date": "2025-04-21T16:39:48.380000+00:00",
+    "title": "Updates on the Funding Rate Settlement Frequency of USDⓈ-M MAGICUSDT Perpetual Contract (2025-04-21)",
+    "code": "773fd9f959b048078273026a1ffb334e"
+  },
+  {
+    "date": "2025-04-24T16:45:13.202000+00:00",
+    "title": "Updates on the Funding Rate Settlement Frequency of USDⓈ-M ALPACAUSDT Perpetual Contract (2025-04-24)",
+    "code": "3880a020618b4652a6ed8cb6edbb6385"
+  },
+  {
+    "date": "2025-04-25T07:17:31.626000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M ALPACAUSDT and FLMUSDT Perpetual Contracts (2025-04-25)",
+    "code": "209e18f8600f41c09f064d2909e17474"
+  },
+  {
+    "date": "2025-04-25T09:46:53.902000+00:00",
+    "title": "Funding Rate Settlement Frequency of USDⓈ-M TUSDT and AERGOUSDT Perpetual Contracts Will Be Resumed (2025-04-25)",
+    "code": "1d9e2a14b3d84d7890527e55eca4b5dc"
+  },
+  {
+    "date": "2025-04-25T12:30:52.056000+00:00",
+    "title": "Important Updates on Funding Rate Settlement Frequency of USDⓈ-M Perpetual Contracts (2025-05-02)",
+    "code": "3243c81a35bd4f0c86a37315c3dc96cc"
+  },
+  {
+    "date": "2025-04-29T08:44:19.656000+00:00",
+    "title": "Updates on Funding Rate Settlement Frequency of USDⓈ-M SIGNUSDT Perpetual Contract (2025-04-29)",
+    "code": "fcdbbade1b7c4f56b3bfcaeb5ea001ad"
+  },
+  {
+    "date": "2025-04-29T09:42:36.456000+00:00",
+    "title": "Updates on the Capped Funding Rate of USDⓈ-M ALPACAUSDT Perpetual Contract (2025-04-29)",
+    "code": "c19fd6e3483947a89b484e3508eec052"
+  },
+  {
+    "date": "2025-07-18T13:15:12.985000+00:00",
+    "title": "Funding Rate Settlement Frequency of Multiple USDⓈ-M Perpetual Contracts Will Be Resumed (2025-07-18)",
+    "code": "9d275ab9716f4366a38f3ec41deacdd0"
+  },
+  {
+    "date": "2025-07-22T08:45:11.055000+00:00",
+    "title": "Funding Rate Settlement Frequency of Multiple USDⓈ-M Perpetual Contracts Will Be Resumed (2025-07-22)",
+    "code": "996d3a06ab3d48eea3ff70b5b395fe5d"
+  },
+  {
+    "date": "2025-08-11T07:45:35.773000+00:00",
+    "title": "Funding Rate Settlement Frequency of Multiple USDⓈ-M Perpetual Contracts Will Be Resumed (2025-08-11)",
+    "code": "b0ef0ee20038422eaab7669f211decf6"
+  },
+  {
+    "date": "2025-08-31T12:31:26.309000+00:00",
+    "title": "Important Updates on Funding Rate Settlement Frequency of USDⓈ-M Perpetual Contracts (2025-09-01)",
+    "code": "6d707b1f7ae34f419621b4c807464ab1"
+  },
+  {
+    "date": "2025-09-16T09:00:08.582000+00:00",
+    "title": "Important Updates on Funding Rate Formula and Mark Price Calculation of Futures Contracts (2025-09-18)",
+    "code": "c00588a7e8504b3eb28d02a2da00530b"
+  },
+  {
+    "date": "2026-01-02T07:33:13.416000+00:00",
+    "title": "Important Updates on Funding Rate Settlement Frequency of USDⓈ-M Perpetual Contracts (2026-01-02)",
+    "code": "e4445d0389ce4defa6009021fcf6ee46"
+  },
+  {
+    "date": "2026-01-22T11:57:43.149000+00:00",
+    "title": "Important Updates on the Funding Rate of USDⓈ-M XAUUSDT and XAGUSDT Perpetual Contracts (2026-01-23)",
+    "code": "4636922abdba4e5787c5f7643f8170d7"
+  },
+  {
+    "date": "2026-01-30T06:30:30.309000+00:00",
+    "title": "Important Updates on the Funding Rate of TradFi Perpetual Contracts (2026-01-30)",
+    "code": "db04567123a44a89b112b9ae403a9c7d"
+  },
+  {
+    "date": "2026-01-30T18:03:54.884000+00:00",
+    "title": "Important Updates on the Funding Rate of XAUUSDT, XAGUSDT, XPTUSDT and XPDUSDT Perpetual Contracts (2026-01-30)",
+    "code": "55bd3594394a46daa910df5746355ff4"
+  },
+  {
+    "date": "2026-02-03T07:14:23.184000+00:00",
+    "title": "Important Updates on the Funding Rate of USDⓈ-M INTCUSDT and HOODUSDT Perpetual Contracts (2026-02-03)",
+    "code": "eb3a382337604e8da580a5fe537d5703"
+  },
+  {
+    "date": "2026-05-21T07:15:49.004000+00:00",
+    "title": "Important Updates on the Funding Rate of SPCXUSDT USDⓈ-M Futures Pre-IPO Perp (2026-05-21)",
+    "code": "a8dca6743118408caef5a02310de096d"
+  },
+  {
+    "date": "2026-07-10T05:30:01.585000+00:00",
+    "title": "Updates on the Capped Funding Rate of USDⓈ-M SKHYNIXUSDT Perpetual Contract (2026-07-10)",
+    "code": "7bd8c31be83b467eaf771d8e362d3203"
+  },
+  {
+    "date": "2026-07-14T08:15:31.415000+00:00",
+    "title": "Important Updates on the Funding Rate of USDⓈ-M SKHYNIXUSDT, SAMSUNGUSDT and HYUNDAIUSDT Perpetual Contracts (2026-07-14)",
+    "code": "ea1076c42f754775850044719885d934"
+  },
+  {
+    "date": "2026-08-19T06:45:01.476000+00:00",
+    "title": "Important Updates on the Funding Rate of USDⓈ-M UNITREEUSDT Perpetual Contract (2026-08-19)",
+    "code": "1309b6acfdb04b9f81d4547da49f1cbd"
+  },
+  {
+    "date": "2026-09-02T07:15:13.359000+00:00",
+    "title": "Binance Futures Will Adjust the Funding Interval of Multiple USDⓈ-Margined TradFi Perpetual Contracts (2026-09-04)",
+    "code": "68eb952fbf3e4abbb105c78ed6c406e6"
+  },
+  {
+    "date": "2026-09-08T02:15:15.871000+00:00",
+    "title": "Binance Futures Will Adjust the Funding Interval of Multiple USDⓈ-Margined TradFi Perpetual Contracts (2026-09-10)",
+    "code": "aff73212559d4951945600e973240c52"
+  },
+  {
+    "date": "2026-09-23T02:00:17.678000+00:00",
+    "title": "Binance Funding Account to be Renamed “Stocks Account”; User Crypto Balance in Funding Account to be Migrated to Spot Account",
+    "code": "01cbe42ead1e4f1a9382363754d2eb5a"
+  }
+]

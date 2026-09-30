@@ -1,0 +1,7 @@
+{
+  "direction": "SHORT Binance USD-M",
+  "event": "Bybit official USDT perpetual delist announcement",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_n": 8
+}

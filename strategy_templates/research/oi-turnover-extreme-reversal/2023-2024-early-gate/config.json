@@ -1,0 +1,14 @@
+{
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "feature": "log(hour-end OI notional / hourly QuoteVolume)",
+  "zscore_lookback_hours": 720,
+  "trigger_z_gte": 3,
+  "rearm_z_lt": 1,
+  "direction": "reverse trailing12h return",
+  "gate": "mean12>=0.1% and >=3/4 symbols positive"
+}

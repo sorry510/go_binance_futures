@@ -1,0 +1,53 @@
+package main
+import(
+ "database/sql";"encoding/csv";"encoding/json";"fmt";"math";"os";"sort";"strconv";"time"
+ _ "go_binance_futures/bootstrap"
+ "github.com/beego/beego/v2/core/config"
+ _ "github.com/go-sql-driver/mysql"
+)
+type Bar struct{T int64;O,C float64}
+type E struct{S string;Y int;Z,D,R1,R4,R12 float64}
+type EI struct{Symbols []struct{Symbol string `json:"symbol"`;Onboard int64 `json:"onboardDate"`} `json:"symbols"`}
+type Sum struct{N int `json:"n"`;Mean1,Win1,Mean4,Win4,Mean12,Win12 float64;PositiveSymbols12,Symbols int;BySymbol map[string]map[string]float64 `json:"by_symbol"`}
+func meanSD(x []float64)(float64,float64){s:=0.0;for _,v:=range x{s+=v};m:=s/float64(len(x));q:=0.0;for _,v:=range x{d:=v-m;q+=d*d};return m,math.Sqrt(q/float64(len(x)))}
+func avg(e []E,f func(E)float64)(float64,float64){if len(e)==0{return 0,0};s:=0.0;w:=0;for _,x:=range e{v:=f(x);s+=v;if v>0{w++}};return s/float64(len(e)),float64(w)/float64(len(e))}
+func summary(e []E,syms []string)Sum{z:=Sum{N:len(e),BySymbol:map[string]map[string]float64{}};z.Mean1,z.Win1=avg(e,func(x E)float64{return x.R1});z.Mean4,z.Win4=avg(e,func(x E)float64{return x.R4});z.Mean12,z.Win12=avg(e,func(x E)float64{return x.R12});for _,s:=range syms{q:=[]E{};for _,x:=range e{if x.S==s{q=append(q,x)}};if len(q)>0{m,w:=avg(q,func(x E)float64{return x.R12});z.BySymbol[s]=map[string]float64{"n":float64(len(q)),"mean12":m,"win12":w};z.Symbols++;if m>0{z.PositiveSymbols12++}}};return z}
+func loadBybit(sym string)map[int64]Bar{f,e:=os.Open("/tmp/bybit_1h/"+sym+".csv");if e!=nil{panic(e)};defer f.Close();r:=csv.NewReader(f);r.Read();m:=map[int64]Bar{};for{row,e:=r.Read();if e!=nil{break};t,_:=strconv.ParseInt(row[0],10,64);o,_:=strconv.ParseFloat(row[1],64);c,_:=strconv.ParseFloat(row[2],64);m[t]=Bar{t,o,c}};return m}
+func main(){
+ syms:=[]string{"BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT","SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"}
+ raw,_:=os.ReadFile("/tmp/fapi_exchangeInfo.json");var ei EI;json.Unmarshal(raw,&ei);onboard:=map[string]int64{};for _,x:=range ei.Symbols{onboard[x.Symbol]=x.Onboard}
+ u,_:=config.String("database::username");pw,_:=config.String("database::password");h,_:=config.String("database::host");pt,_:=config.String("database::port");dbn,_:=config.String("database::dbname");if dbn!="go_bn_test"{panic(dbn)}
+ db,e:=sql.Open("mysql",fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4",u,pw,h,pt,dbn));if e!=nil{panic(e)};defer db.Close()
+ start:=time.Date(2023,1,1,0,0,0,0,time.UTC).UnixMilli();end:=time.Date(2026,9,1,0,0,0,0,time.UTC).UnixMilli()-1
+ all:=[]E{}
+ for _,s:=range syms{
+  rows,e:=db.Query("SELECT open_time,open_price,close_price FROM market_klines_1h WHERE market='futures_usdt' AND symbol=? AND open_time BETWEEN ? AND ? ORDER BY open_time",s,start,end);if e!=nil{panic(e)}
+  bin:=[]Bar{};for rows.Next(){var b Bar;rows.Scan(&b.T,&b.O,&b.C);bin=append(bin,b)};rows.Close()
+  by:=loadBybit(s)
+  sort.Slice(bin,func(i,j int)bool{return bin[i].T<bin[j].T})
+  d:=make([]float64,len(bin));valid:=make([]bool,len(bin))
+  for i:=1;i<len(bin);i++{
+   if bin[i].T-bin[i-1].T!=3600000{continue}
+   b0,ok0:=by[bin[i-1].T];b1,ok1:=by[bin[i].T];if !ok0||!ok1||b0.C<=0||b1.C<=0||bin[i-1].C<=0||bin[i].C<=0{continue}
+   rb:=math.Log(bin[i].C/bin[i-1].C);ry:=math.Log(b1.C/b0.C);d[i]=ry-rb;valid[i]=true
+  }
+  armed:=true;n:=0
+  minAge:=onboard[s]+730*24*3600*1000
+  for i:=721;i+12<len(bin);i++{
+   if bin[i].T<minAge||!valid[i]{continue}
+   hist:=make([]float64,0,720);ok:=true
+   for j:=i-720;j<i;j++{if !valid[j]{ok=false;break};hist=append(hist,d[j])}
+   if !ok{continue};m,sd:=meanSD(hist);if sd<=0{continue};z:=(d[i]-m)/sd
+   if math.Abs(z)<1{armed=true};if !armed||math.Abs(z)<3{continue}
+   dir:=1.0;if d[i]<0{dir=-1}
+   if bin[i+1].T-bin[i].T!=3600000||bin[i+4].T-bin[i].T!=4*3600000||bin[i+12].T-bin[i].T!=12*3600000{continue}
+   entry:=bin[i+1].O;if entry<=0{continue}
+   r1:=dir*math.Log(bin[i+1].C/entry);r4:=dir*math.Log(bin[i+4].C/entry);r12:=dir*math.Log(bin[i+12].C/entry)
+   y:=time.UnixMilli(bin[i].T).UTC().Year();all=append(all,E{s,y,z,d[i],r1,r4,r12});armed=false;n++
+  }
+  fmt.Println("SYMBOL",s,"bin",len(bin),"bybit",len(by),"events",n)
+ }
+ disc,o1,o2:=[]E{},[]E{},[]E{};for _,x:=range all{if x.Y==2023||x.Y==2024{disc=append(disc,x)};if x.Y==2025{o1=append(o1,x)};if x.Y==2026{o2=append(o2,x)}}
+ res:=map[string]Sum{"discovery_2023_2024":summary(disc,syms),"oos1_2025":summary(o1,syms),"oos2_2026":summary(o2,syms),"all":summary(all,syms)}
+ out,_:=json.MarshalIndent(res,"","  ");fmt.Println(string(out))
+}

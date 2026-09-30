@@ -1,0 +1,11 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": [
+    "DeFiLlama stablecoins API stablecoincharts/{chain}",
+    "DeFiLlama stablecoinchains",
+    "Binance Vision USD-M monthly 1d klines"
+  ],
+  "correction": "Supersedes feasibility-only 2026-09-28 coverage audit; no returns had been inspected before universe correction.",
+  "oos_evaluated": false
+}

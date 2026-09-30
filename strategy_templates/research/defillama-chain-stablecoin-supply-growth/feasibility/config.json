@@ -1,0 +1,10 @@
+{
+  "planned_feature": "chain totalCirculatingUSD.peggedUSD 7d log-growth zero-cross",
+  "positive_cross": "LONG native token",
+  "negative_cross": "SHORT native token",
+  "minimum_discovery_symbols": 8,
+  "discovery_years": [
+    2023,
+    2024
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "direction": "SHORT",
+  "event_source": "Upbit official trade announcements",
+  "event_filter": "거래지원 종료 안내",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "minimum_discovery_events": 8
+}

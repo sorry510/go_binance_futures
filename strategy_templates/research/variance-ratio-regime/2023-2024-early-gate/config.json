@@ -1,0 +1,10 @@
+{
+  "interval": "1h",
+  "window_hours": 96,
+  "q": 4,
+  "feature": "Var(overlapping 4h returns)/(4*Var(1h returns))",
+  "natural_threshold": 1,
+  "cross_above": "follow completed 4h return",
+  "cross_below": "fade completed 4h return",
+  "entry": "next 1h open"
+}

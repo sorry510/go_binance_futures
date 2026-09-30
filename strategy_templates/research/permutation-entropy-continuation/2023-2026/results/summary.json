@@ -1,0 +1,27 @@
+{
+  "discovery_2023_2024": {
+    "n": 3,
+    "mean_1h": 0.0069501213,
+    "mean_4h": 0.0033983805,
+    "mean_12h": 0.003813876,
+    "positive_symbols_12h": 2,
+    "symbols": 3
+  },
+  "oos1_2025": {
+    "n": 8,
+    "mean_1h": 0.0047392596,
+    "mean_4h": 0.0085309792,
+    "mean_12h": 0.003017455,
+    "positive_symbols_12h": 2,
+    "symbols": 6
+  },
+  "oos2_2026": {
+    "n": 6,
+    "mean_1h": 0.0073903461,
+    "mean_4h": 0.0228745296,
+    "mean_12h": 0.017369627,
+    "positive_symbols_12h": 3,
+    "symbols": 6
+  },
+  "decision": "freeze: trigger is far too sparse; no threshold relaxation"
+}

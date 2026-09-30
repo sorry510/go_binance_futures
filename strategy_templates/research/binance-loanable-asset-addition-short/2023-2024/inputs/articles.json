@@ -1,0 +1,580 @@
+[
+  {
+    "code": "7820c321d08a454e84eb5d8260fae078",
+    "title": "New Loanable and Collateral Assets Available on Binance Loans and VIP Loan - 2024-04-03",
+    "release_time": 1712135334458,
+    "tokens": [
+      "1INCH",
+      "ACA",
+      "ARPA",
+      "ASTR",
+      "BAND",
+      "BNX",
+      "COMP",
+      "CYBER",
+      "DODO",
+      "ID",
+      "IOTX",
+      "KAVA",
+      "KSM",
+      "LOKA",
+      "MAGIC",
+      "OCEAN",
+      "PYR",
+      "RIF",
+      "SUSHI",
+      "ALT",
+      "DGB"
+    ],
+    "rows": []
+  },
+  {
+    "code": "36995f0dd925451b999879eef52ed1e7",
+    "title": "New Loanable Assets and Collateral Assets Available on Flexible Loan & VIP Loan (2023-08-16)",
+    "release_time": 1692151863206,
+    "tokens": [
+      "CHR",
+      "NKN",
+      "ACA",
+      "TVK",
+      "FIDA",
+      "HIFI",
+      "HIVE",
+      "NULS",
+      "STRAX"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "CHR, NKN, ACA, TVK, FIDA",
+        "WBETH, SC, BAT, TKO, ALPHA"
+      ],
+      [
+        "VIP Loan",
+        "HIFI, HIVE, NULS, STRAX, FIDA",
+        "WBETH"
+      ]
+    ]
+  },
+  {
+    "code": "1c2cc4782b324bf98e46c80f885980bf",
+    "title": "New Loanable Assets and Collateral Assets Available on Flexible Loan & VIP Loan (2023-08-10)",
+    "release_time": 1691644203084,
+    "tokens": [
+      "STMX",
+      "CVX",
+      "FORTH",
+      "AMP",
+      "CITY",
+      "GTC",
+      "CELO",
+      "DODO",
+      "ATM",
+      "ASR",
+      "BADGER",
+      "BLZ",
+      "UTK"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "STMX, CVX, FORTH, AMP, CITY, GTC",
+        "FDUSD, SLP, KDA, RVN, AUCTION, 1INCH, ASTR, ARKM, QTUM"
+      ],
+      [
+        "VIP Loan",
+        "CELO, DODO, CVX, CITY, ATM, ASR, BADGER, BLZ, UTK",
+        "FDUSD"
+      ]
+    ]
+  },
+  {
+    "code": "9c8303191b1a4a6bbd7458b3e4ff668d",
+    "title": "New Loanable Assets and Collateral Assets Available on Flexible Loan & VIP Loan (2023-08-04)",
+    "release_time": 1691115024481,
+    "tokens": [
+      "AUCTION",
+      "PYR",
+      "ILV",
+      "KNC",
+      "YGG",
+      "GAS",
+      "CELO",
+      "IRIS",
+      "NKN",
+      "FARM",
+      "DIA",
+      "OGN",
+      "ACA"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "AUCTION, PYR, ILV, KNC, YGG, GAS, CELO, IRIS",
+        "SHIB, COMP, IOTA, RLC, HOT, ENJ, THETA, IOST"
+      ],
+      [
+        "VIP Loan",
+        "NKN, FARM, DIA, YGG, OGN, ACA",
+        "-"
+      ]
+    ]
+  },
+  {
+    "code": "cd589cb24614431ba9df4352da3fc486",
+    "title": "New Loanable Assets and Collateral Assets Available on Flexible Loan & VIP Loan (2023-07-26)",
+    "release_time": 1690351525089,
+    "tokens": [
+      "SHIB",
+      "WLD",
+      "PROM",
+      "SFP",
+      "KDA",
+      "BAT",
+      "BAND",
+      "ORN",
+      "QI",
+      "OXT",
+      "SYS",
+      "ARDR",
+      "MOVR"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "SHIB, WLD, PROM, SFP, KDA, BAT, BAND&nbsp;",
+        "GRT, PROM, PEPE, ENS, SFP"
+      ],
+      [
+        "VIP Loan",
+        "WLD, ORN, QI, OXT, SYS, ARDR, MOVR",
+        "-"
+      ]
+    ]
+  },
+  {
+    "code": "264f0e6f9766411fbb8d145aacfe8d10",
+    "title": "New Loanable Assets and Collateral Assets Available on Flexible Loan & VIP Loan (2023-07-20)",
+    "release_time": 1689826517532,
+    "tokens": [
+      "ARKM",
+      "XEM",
+      "ZRX",
+      "PLA",
+      "NMR",
+      "SYN",
+      "AGLD",
+      "CVC",
+      "MAV",
+      "CTXC",
+      "MC",
+      "FORTH",
+      "VTHO",
+      "RSR",
+      "CLV",
+      "GAS",
+      "AERGO"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "ARKM, XEM, ZRX, PLA, NMR, SYN, AGLD, CVC",
+        "DAI, DAR, CTSI, CAKE, IDEX, GAL, MKR, ICX"
+      ],
+      [
+        "VIP Loan",
+        "ARKM, MAV, CTXC, CVC, MC, FORTH, VTHO, RSR, CLV, GAS, AERGO",
+        "-"
+      ]
+    ]
+  },
+  {
+    "code": "b9022967318d4e5f8fa2861d8099626e",
+    "title": "New Loanable Assets and Collateral Assets Available on Flexible Loan & VIP Loan (2023-07-12)",
+    "release_time": 1689152402279,
+    "tokens": [
+      "STORJ",
+      "XEC",
+      "LPT",
+      "FLM",
+      "IQ",
+      "GNS",
+      "POLYX",
+      "AGLD",
+      "SUPER",
+      "KP3R",
+      "NMR",
+      "PLA",
+      "AMP"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "STORJ, XEC, LPT, FLM, IQ, GNS, POLYX",
+        "BEL, KAVA, USDP, RDNT, SUSHI, AR, WOO, KLAY"
+      ],
+      [
+        "VIP Loan",
+        "AGLD, SUPER, KP3R, NMR, PLA, AMP",
+        "-"
+      ]
+    ]
+  },
+  {
+    "code": "94b2e70b6c314181b7dde2759f4c33df",
+    "title": "New Loanable Assets and Collateral Assets Available on Flexible Loan & VIP Loan (2023-07-06)",
+    "release_time": 1688620203044,
+    "tokens": [
+      "ALPHA",
+      "BAL",
+      "COMP",
+      "IOTX",
+      "KSM",
+      "MAV",
+      "PENDLE",
+      "OSMO",
+      "AUCTION",
+      "C98",
+      "GLM",
+      "POLS",
+      "TVK",
+      "TRB"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "1INCH, ALPHA, BAL, COMP, IOTX, KSM, MAV, PENDLE, OSMO",
+        "AAVE, GMX, HBAR, LRC, NEO, RAD, RUNE, SANTOS"
+      ],
+      [
+        "VIP Loan",
+        "AUCTION, C98, GLM, PENDLE, POLS, TVK, TRB",
+        "WBETH"
+      ]
+    ]
+  },
+  {
+    "code": "381724453dcb409fbd86a97323cb2a7f",
+    "title": "New Loanable Assets and Collateral Assets Available on Flexible Loan & VIP Loan (2023-06-28)",
+    "release_time": 1687929906853,
+    "tokens": [
+      "LAZIO",
+      "C98",
+      "CKB",
+      "TLM",
+      "VOXEL",
+      "CHESS",
+      "TOMO",
+      "ERN",
+      "ALPHA"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "LAZIO, C98, CKB, TLM, VOXEL, CHESS, TOMO, ERN",
+        "TRU, MDT, SNX, OCEAN, IMX, AUDIO, JOE, PHB"
+      ],
+      [
+        "VIP Loan",
+        "ERN, VOXEL, ALPHA, CKB",
+        "SXP, TRU, ALPINE, ZIL"
+      ]
+    ]
+  },
+  {
+    "code": "1a2a8e440f7143828221ded24fc8708d",
+    "title": "New Loanable Assets & Collateral Assets Available on Flexible Loan & VIP Loan (2023-06-21)",
+    "release_time": 1687320009355,
+    "tokens": [
+      "COMBO",
+      "ENJ",
+      "THETA",
+      "ASTR",
+      "ONT",
+      "LOKA",
+      "QUICK",
+      "AMP"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "COMBO, ENJ, THETA, ASTR, ONT, LOKA",
+        "ARPA, STG, LQTY, FXS, BNX"
+      ],
+      [
+        "VIP Loan",
+        "COMBO, QUICK, AMP",
+        "ARPA, FXS"
+      ]
+    ]
+  },
+  {
+    "code": "b356e9b428e249fe8bb520caaa060f81",
+    "title": "New Loanable Assets & Collateral Assets Available on Flexible Loan & VIP Loan (2023-06-15)",
+    "release_time": 1686802503888,
+    "tokens": [
+      "FLUX",
+      "KAVA",
+      "AR",
+      "XLM",
+      "LEVER",
+      "DODO",
+      "PEOPLE",
+      "MTL",
+      "CTXC",
+      "PHB",
+      "LPT"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "FLUX, KAVA, AR, XLM, LEVER, DODO, PEOPLE, MTL, CTXC",
+        "ACH, GMT, EDU, HFT,&nbsp;SXP, MINA, SSV"
+      ],
+      [
+        "VIP Loan",
+        "FLUX, PHB, T, LPT",
+        "RAD, PHB, FLUX, LPT, KSM, ASTR"
+      ]
+    ]
+  },
+  {
+    "code": "11ef4ce8064944e3b9a41000a4224af1",
+    "title": "New Loanable Assets & Collateral Assets Available on Flexible Loan & VIP Loan (2023-06-08)",
+    "release_time": 1686198055870,
+    "tokens": [
+      "MINA",
+      "BNX",
+      "TRU",
+      "DAI",
+      "PHB",
+      "RUNE",
+      "FLOW",
+      "RAD",
+      "ASTR"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "MINA, BNX, TRU, DAI, PHB, RUNE, T",
+        "LINK, MAGIC, AGIX, HOOK, ID, RNDR, STX, HIGH"
+      ],
+      [
+        "VIP Loan",
+        "FLOW, RAD, ASTR",
+        "MDT, VOXEL, POLS, SUPER, IDEX, POND, FIS, ILV, VTHO, AGLD, FARM, BOND, ERN, AERGO, GLM, QUICK, FORTH, TVK, MTL, CVC, REQ, QI, NMR, SANTOS, OSMO, PYR, RARE, ALCX, LOKA, AMP, RSR, PLA"
+      ]
+    ]
+  },
+  {
+    "code": "b1b080317dd54961a2662a949ffb3186",
+    "title": "New Loanable Assets & Collateral Assets Available on Flexible Loan & VIP Loan (2023-06-02)",
+    "release_time": 1685674457900,
+    "tokens": [
+      "BCH",
+      "FLOW",
+      "KLAY",
+      "CAKE",
+      "ICX",
+      "SUSHI",
+      "RAD",
+      "DAR",
+      "AR",
+      "TRU",
+      "BICO",
+      "CHESS",
+      "FIO",
+      "RARE",
+      "REI"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "BCH, FLOW, KLAY, CAKE, ICX, SUSHI, RAD, DAR",
+        "ARB, BCH, INJ, TUSD, ZIL, XLM, FLOW, FTM"
+      ],
+      [
+        "VIP Loan",
+        "AR, TRU, BICO, CHESS, FIO, RARE, REI",
+        "IMX, RUNE, GAL"
+      ]
+    ]
+  },
+  {
+    "code": "9ae4ce38bc174a8b9cdfe5f25958b9c9",
+    "title": "New Loanable Assets & Collateral Assets Available on Flexible Loan & VIP Loan (2023-05-25)",
+    "release_time": 1684984216161,
+    "tokens": [
+      "CRV",
+      "VET",
+      "NEO",
+      "SNX",
+      "SANTOS",
+      "SXP",
+      "SYN",
+      "PROM",
+      "POND",
+      "PAXG",
+      "MULTI",
+      "LOKA",
+      "LEVER",
+      "HARD",
+      "GNS",
+      "FRONT",
+      "AVA",
+      "ATA",
+      "ANT"
+    ],
+    "rows": [
+      [
+        "",
+        "New Loanable Assets",
+        "New Collateral Assets"
+      ],
+      [
+        "Flexible Loan",
+        "CRV, VET, NEO, SNX, SANTOS, SXP",
+        "DOT, SOL, MATIC, SUI, APT, VET, LDO, CRV"
+      ],
+      [
+        "VIP Loan",
+        "SYN, PROM, POND, PAXG, MULTI, LOKA, LEVER, HARD, GNS, FRONT, AVA, ATA, ANT",
+        "EDU, LQTY, ENS"
+      ]
+    ]
+  },
+  {
+    "code": "b8d6382de13d42b49e2a9a506a32394c",
+    "title": "Binance VIP Loan Adds FXS, MKR, QNT and More as New Loanable Assets, SUI, FLOW, LDO and More as New Collateral Assets",
+    "release_time": 1684462531786,
+    "tokens": [
+      "SUI",
+      "FLOW",
+      "LDO",
+      "OCEAN",
+      "CTSI",
+      "SNX",
+      "UNFI",
+      "STG",
+      "VET",
+      "INJ",
+      "JOE"
+    ],
+    "rows": []
+  },
+  {
+    "code": "04c562d6635c4463af0772265ed1ea15",
+    "title": "Binance VIP Loan Adds REQ, IMX, RPL and More as New Loanable Assets, USDP, SSV, THETA and More as New Collateral Assets",
+    "release_time": 1683684921097,
+    "tokens": [
+      "USDP",
+      "COCOS",
+      "ACH",
+      "SSV",
+      "TWT",
+      "RDNT",
+      "HFT",
+      "THETA",
+      "HIGH",
+      "PEOPLE"
+    ],
+    "rows": []
+  },
+  {
+    "code": "113109b5c3f24e488bd65f522bc63d21",
+    "title": "Binance VIP Loan Adds SUI, EDU as New Loanable Assets, and ALGO, BAND, EGLD, HBAR, MINA, QNT, RDNT, SUSHI as New Collateral Assets",
+    "release_time": 1683258302925,
+    "tokens": [
+      "ALGO",
+      "BAND",
+      "EGLD",
+      "HBAR",
+      "MINA",
+      "QNT",
+      "RDNT",
+      "SUSHI"
+    ],
+    "rows": []
+  },
+  {
+    "code": "097b38b439ef4c4eb97df6ab8e605e25",
+    "title": "Binance Flexible Loan Adds BETH as Collateral Asset With ETH Staking Rewards",
+    "release_time": 1683173107910,
+    "tokens": [],
+    "rows": []
+  },
+  {
+    "code": "ec8c733a50284ee78e04f67f3d1152af",
+    "title": "Binance VIP Loan Adds AAVE, CRV, EOS and More as New Collateral Assets",
+    "release_time": 1682650210011,
+    "tokens": [],
+    "rows": []
+  },
+  {
+    "code": "3f862db05208418583fd11898a494833",
+    "title": "Binance Flexible Loan Adds USDC, APE, OP and More as Loanable Assets, and USDC as Collateral Asset",
+    "release_time": 1679554809706,
+    "tokens": [],
+    "rows": []
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-09-29",
+  "pools_endpoint": {
+    "url": "https://yields.llama.fi/pools",
+    "result": "HTTP 200",
+    "pool_count_observed": 17012,
+    "borrow_fields_in_current_schema": false
+  },
+  "example_pool": {
+    "project": "aave-v3",
+    "chain": "Ethereum",
+    "symbol": "USDT",
+    "pool": "f981a304-bb6c-45b8-b0c5-fd2f515ad23a",
+    "chart_endpoint": "HTTP 200, historical deposit-side APY/TVL from 2023",
+    "chartLendBorrow_endpoint": "HTTP 402 paid API required"
+  },
+  "returns_inspected": false,
+  "decision": "data-access/data-quality blocked"
+}

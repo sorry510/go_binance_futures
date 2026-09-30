@@ -1,0 +1,10 @@
+{
+  "interval": "1h",
+  "roll_window_hours": 24,
+  "spread": "2*sqrt(max(-lag1_covariance,0))",
+  "zscore_lookback_hours": 720,
+  "trigger_z_gte": 3,
+  "rearm_z_lt": 1,
+  "direction": "opposite trigger-hour return",
+  "history_min_days": 730
+}

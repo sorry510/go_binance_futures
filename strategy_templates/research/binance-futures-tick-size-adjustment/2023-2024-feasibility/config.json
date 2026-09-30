@@ -1,0 +1,10 @@
+{
+  "direction": "tick finer -> LONG; tick coarser -> SHORT",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "diagnostic_horizons_hours": [
+    1,
+    4,
+    12
+  ]
+}

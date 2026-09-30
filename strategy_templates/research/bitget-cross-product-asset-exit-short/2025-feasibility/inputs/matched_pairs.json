@@ -1,0 +1,14 @@
+[
+  {
+    "base": "HIFI",
+    "futures_ts_approx": 1758169020.0,
+    "futures_section_iso": "2025-09-18T04:17:00+00:00",
+    "futures_url": "https://www.bitget.com/support/articles/12560603838129",
+    "futures_title": "[Important] Bitget announcement: Delisting of BAKEUSDT, HIFIUSDT, RHEAUSDT for futures trading and futures trading bots",
+    "spot_ts": 1757642445.0,
+    "spot_iso": "2025-09-12T02:00:45+00:00",
+    "spot_url": "https://www.bitget.com/support/articles/12560603837654",
+    "spot_title": "Notice of Delisting 4 Spot Trading Pairs on 19 September 2025",
+    "gap_hours": 146.27083333333334
+  }
+]

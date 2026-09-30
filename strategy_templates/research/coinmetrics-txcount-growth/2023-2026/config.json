@@ -1,0 +1,12 @@
+{
+  "metric": "CoinMetrics Community TxCnt",
+  "signal": "log(mean last7d / mean previous7d) zero-cross",
+  "positive": "LONG",
+  "negative": "SHORT",
+  "entry": "next UTC day open",
+  "horizons_days": [
+    1,
+    3,
+    7
+  ]
+}

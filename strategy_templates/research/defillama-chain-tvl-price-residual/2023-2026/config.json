@@ -1,0 +1,23 @@
+{
+  "chains": [
+    "Bitcoin",
+    "Ethereum",
+    "BSC",
+    "Ripple",
+    "Solana",
+    "Avalanche",
+    "Cardano",
+    "Near",
+    "Sui"
+  ],
+  "feature": "daily log TVL return residualized against native-token return with prior 90d beta; sum residual last 7d",
+  "positive_zero_cross": "LONG",
+  "negative_zero_cross": "SHORT",
+  "entry": "next UTC day open",
+  "horizons_days": [
+    1,
+    3,
+    7
+  ],
+  "history_min_years": 2
+}

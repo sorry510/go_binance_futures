@@ -1,0 +1,1 @@
+Enumerate all Binance Vision COIN-M *_PERP symbols and use the first archived monthly 1h bar as launch evidence. Keep 2023-2024 launches only. Map to the same-base USD-M contract and require >=730 days USD-M history plus the standard liquidity gate before any return inspection. Direction is pre-registered LONG.

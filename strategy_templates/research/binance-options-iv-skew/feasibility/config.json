@@ -1,0 +1,8 @@
+{
+  "source": "Binance Vision options daily",
+  "required_underlyings_min": 8,
+  "datasets": [
+    "BVOLIndex",
+    "EOHSummary"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "classification": "first-tier max leverage direction; if unchanged then first-tier max position cap direction",
+  "expansion": "LONG Binance USD-M",
+  "contraction": "SHORT Binance USD-M",
+  "history_min_days": 730,
+  "quote_volume_24h_min_usdt": 5000000,
+  "exact": {
+    "entry": "next 1m open after Bybit announcement",
+    "leverage": 4,
+    "profit": 8,
+    "loss": 6,
+    "fee": 0.0005,
+    "slippage_bps": 5,
+    "funding": true,
+    "timeout_hours": 12
+  }
+}

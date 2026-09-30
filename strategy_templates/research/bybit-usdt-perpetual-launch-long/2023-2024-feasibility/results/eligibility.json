@@ -1,0 +1,3602 @@
+[
+  {
+    "bybit_symbol": "1000PEPEUSDT",
+    "event_ts": 1683087774,
+    "title": "Coming Soon: 1000PEPEUSDT Perpetual Contracts",
+    "description": "Bybit will list 1000PEPEUSDT Perpetual Contracts with up to 25x Leverage on May 3, 2023, at approximately 12PM UTC. ",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/coming-soon-1000pepeusdt-perpetual-contracts-blt628091406e3889cc/",
+    "objectID": "article.blt628091406e3889cc",
+    "date_timestamp": 1683087774,
+    "start_date_timestamp": 1683087774,
+    "publish_time": null,
+    "symbol": "1000PEPEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "EDUUSDT",
+    "event_ts": 1683260574,
+    "title": "Coming Soon: EDUUSDT Perpetual Contracts",
+    "description": "Bybit will list EDUUSDT Perpetual Contracts with up to 25x Leverage on May 5, 2023, at approximately 11AM UTC. ",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/coming-soon-eduusdt-perpetual-contracts-blte64a706ebd101ada/",
+    "objectID": "article.blte64a706ebd101ada",
+    "date_timestamp": 1683260574,
+    "start_date_timestamp": 1683260574,
+    "publish_time": null,
+    "symbol": "EDUUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "10000LADYSUSDT",
+    "event_ts": 1683778974,
+    "title": "Coming Soon: 10000LADYSUSDT Perpetual Contracts",
+    "description": "Bybit will list EDUUSDT Perpetual Contracts with up to 25x Leverage on May 5, 2023, at approximately 1PM UTC. ",
+    "topics": [
+      "Institutions",
+      "Derivatives",
+      "Trading Bots"
+    ],
+    "url": "/article/coming-soon-10000ladysusdt-perpetual-contracts-blt72ae80c1d90d8567/",
+    "objectID": "article.blt72ae80c1d90d8567",
+    "date_timestamp": 1683778974,
+    "start_date_timestamp": 1683778974,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "POLYXUSDT",
+    "event_ts": 1698141600,
+    "title": "🔥New POLYXUSDT, POWRUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — POLYXUSDT, POWRUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-polyxusdt-powrusdt-perpetual-contracts-bltc5a9ffce74ad45d3/",
+    "objectID": "article.bltc5a9ffce74ad45d3",
+    "date_timestamp": 1698141600,
+    "start_date_timestamp": 1698144046,
+    "publish_time": null,
+    "symbol": "POLYXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "POWRUSDT",
+    "event_ts": 1698141600,
+    "title": "🔥New POLYXUSDT, POWRUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — POLYXUSDT, POWRUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-polyxusdt-powrusdt-perpetual-contracts-bltc5a9ffce74ad45d3/",
+    "objectID": "article.bltc5a9ffce74ad45d3",
+    "date_timestamp": 1698141600,
+    "start_date_timestamp": 1698144046,
+    "publish_time": null,
+    "symbol": "POWRUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "TIAUSDT",
+    "event_ts": 1698770870,
+    "title": "Coming Soon: TIAUSDT Perpetual  Contract!",
+    "description": "Bybit will list TIAUSDT Perpetual Contract with up to 16.67x Leverage on Oct 31, 2023, at approximately 6PM UTC. ",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/coming-soon-tiausdt-perpetual-contract--blt6e8c5a1c6f707f7b/",
+    "objectID": "article.blt6e8c5a1c6f707f7b",
+    "date_timestamp": 1698770870,
+    "start_date_timestamp": 1698770870,
+    "publish_time": null,
+    "symbol": "TIAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "CAKEUSDT",
+    "event_ts": 1699006470,
+    "title": "Coming Soon: MEMEUSDT and CAKEUSDT Perpetual Contracts",
+    "description": "Bybit will list MEMEUSDT and CAKEUSDT Perpetual Contracts with up to 25x Leverage on Nov 3, 2023, at approximately 1PM UTC. ",
+    "topics": [
+      "Institutions",
+      "Derivatives",
+      "Trading Bots"
+    ],
+    "url": "/article/coming-soon-memeusdt-and-cakeusdt-perpetual-contracts-blt2dc9c7b4202510cf/",
+    "objectID": "article.blt2dc9c7b4202510cf",
+    "date_timestamp": 1699006470,
+    "start_date_timestamp": 1699006230,
+    "publish_time": null,
+    "symbol": "CAKEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "MEMEUSDT",
+    "event_ts": 1699006470,
+    "title": "Coming Soon: MEMEUSDT and CAKEUSDT Perpetual Contracts",
+    "description": "Bybit will list MEMEUSDT and CAKEUSDT Perpetual Contracts with up to 25x Leverage on Nov 3, 2023, at approximately 1PM UTC. ",
+    "topics": [
+      "Institutions",
+      "Derivatives",
+      "Trading Bots"
+    ],
+    "url": "/article/coming-soon-memeusdt-and-cakeusdt-perpetual-contracts-blt2dc9c7b4202510cf/",
+    "objectID": "article.blt2dc9c7b4202510cf",
+    "date_timestamp": 1699006470,
+    "start_date_timestamp": 1699006230,
+    "publish_time": null,
+    "symbol": "MEMEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "BEAMUSDT",
+    "event_ts": 1699956000,
+    "title": "🔥New MBLUSDT, BEAMUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — MBLUSDT, BEAMUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-mblusdt-beamusdt-perpetual-contracts-blt289587e2aeac4903/",
+    "objectID": "article.blt289587e2aeac4903",
+    "date_timestamp": 1699956000,
+    "start_date_timestamp": 1699958446,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MBLUSDT",
+    "event_ts": 1699956000,
+    "title": "🔥New MBLUSDT, BEAMUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — MBLUSDT, BEAMUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-mblusdt-beamusdt-perpetual-contracts-blt289587e2aeac4903/",
+    "objectID": "article.blt289587e2aeac4903",
+    "date_timestamp": 1699956000,
+    "start_date_timestamp": 1699958446,
+    "publish_time": null,
+    "symbol": "MBLUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "10000SATSUSDT",
+    "event_ts": 1700148049,
+    "title": "🔥New 10000SATSUSDT, AERGOUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — 10000SATSUSDT, AERGOUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/-new-10000satsusdt-aergousdt-perpetual-contracts-blt3bec1585ebaa835d/",
+    "objectID": "article.blt3bec1585ebaa835d",
+    "date_timestamp": 1700148049,
+    "start_date_timestamp": 1700148049,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AERGOUSDT",
+    "event_ts": 1700148049,
+    "title": "🔥New 10000SATSUSDT, AERGOUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — 10000SATSUSDT, AERGOUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/-new-10000satsusdt-aergousdt-perpetual-contracts-blt3bec1585ebaa835d/",
+    "objectID": "article.blt3bec1585ebaa835d",
+    "date_timestamp": 1700148049,
+    "start_date_timestamp": 1700148049,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AGIUSDT",
+    "event_ts": 1700198540,
+    "title": "Coming Soon: AGIUSDT Perpetual Contract",
+    "description": "Bybit will list AGIUSDT Perpetual Contract with up to 25x Leverage ",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/coming-soon-agiusdt-perpetual-contract-bltc9a830e9dec4436b/",
+    "objectID": "article.bltc9a830e9dec4436b",
+    "date_timestamp": 1700198540,
+    "start_date_timestamp": 1700198540,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "GODSUSDT",
+    "event_ts": 1700572309,
+    "title": "Coming Soon: GODSUSDT Perpetual Contract",
+    "description": "Bybit will list GODSUSDT Perpetual Contracts with up to 50x Leverage on Nov 22, 2023 UTC. ",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/coming-soon-godsusdt-perpetual-contract-blt17af8363769ef94f/",
+    "objectID": "article.blt17af8363769ef94f",
+    "date_timestamp": 1700572309,
+    "start_date_timestamp": 1700572309,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000RATSUSDT",
+    "event_ts": 1700647200,
+    "title": "🔥New GODSUSDT and 1000RATSUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — GODSUSDT and 1000RATSUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-godsusdt-and-1000ratsusdt-perpetual-contracts-blt0a36d4b23a1afb0e/",
+    "objectID": "article.blt0a36d4b23a1afb0e",
+    "date_timestamp": 1700647200,
+    "start_date_timestamp": 1700649646,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "GODSUSDT",
+    "event_ts": 1700647200,
+    "title": "🔥New GODSUSDT and 1000RATSUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — GODSUSDT and 1000RATSUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-godsusdt-and-1000ratsusdt-perpetual-contracts-blt0a36d4b23a1afb0e/",
+    "objectID": "article.blt0a36d4b23a1afb0e",
+    "date_timestamp": 1700647200,
+    "start_date_timestamp": 1700649646,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MOVRUSDT",
+    "event_ts": 1700733600,
+    "title": "🔥New MOVRUSDT and SUPERUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — MOVRUSDT and SUPERUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-movrusdt-and-superusdt-perpetual-contracts-blt6a38812e733326d3/",
+    "objectID": "article.blt6a38812e733326d3",
+    "date_timestamp": 1700733600,
+    "start_date_timestamp": 1700736046,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "SUPERUSDT",
+    "event_ts": 1700733600,
+    "title": "🔥New MOVRUSDT and SUPERUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — MOVRUSDT and SUPERUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-movrusdt-and-superusdt-perpetual-contracts-blt6a38812e733326d3/",
+    "objectID": "article.blt6a38812e733326d3",
+    "date_timestamp": 1700733600,
+    "start_date_timestamp": 1700736046,
+    "publish_time": null,
+    "symbol": "SUPERUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "RAREUSDT",
+    "event_ts": 1701079200,
+    "title": "🔥New USTCUSDT and RAREUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — MOVRUSDT and SUPERUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-ustcusdt-and-rareusdt-perpetual-contracts-blt59795428f561c70c/",
+    "objectID": "article.blt59795428f561c70c",
+    "date_timestamp": 1701079200,
+    "start_date_timestamp": 1701081646,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "USTCUSDT",
+    "event_ts": 1701079200,
+    "title": "🔥New USTCUSDT and RAREUSDT Perpetual Contracts",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — MOVRUSDT and SUPERUSDT Perpetual Contracts — are now live!",
+    "topics": [
+      "Derivatives",
+      "Trading Bots",
+      "Institutions"
+    ],
+    "url": "/article/-new-ustcusdt-and-rareusdt-perpetual-contracts-blt59795428f561c70c/",
+    "objectID": "article.blt59795428f561c70c",
+    "date_timestamp": 1701079200,
+    "start_date_timestamp": 1701081646,
+    "publish_time": null,
+    "symbol": "USTCUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "IGUUSDT",
+    "event_ts": 1701841550,
+    "title": "Bybit Will Launch IGUUSDT Perpetual Contract With Up to 25x Leverage",
+    "description": "Bybit Will Launch IGUUSDT Perpetual Contract With Up to 25x Leverage",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/bybit-will-launch-iguusdt-perpetual-contract-with-up-to-25x-leverage-bltdeb5fd4f8bd11b97/",
+    "objectID": "article.bltdeb5fd4f8bd11b97",
+    "date_timestamp": 1701841550,
+    "start_date_timestamp": 1701841550,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AXLUSDT",
+    "event_ts": 1701942304,
+    "title": "Coming Soon: AXLUSDT Perpetual Contract",
+    "description": "Bybit will list AXLUSDT Perpetual Contract with up to 25x Leverage on Dec 7, 2023 UTC, at approximately 12:00 UTC. ",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/coming-soon-axlusdt-perpetual-contract-blt23f74c50f6dd440b/",
+    "objectID": "article.blt23f74c50f6dd440b",
+    "date_timestamp": 1701942304,
+    "start_date_timestamp": 0,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "JTOUSDT",
+    "event_ts": 1701963412,
+    "title": "Bybit Will Launch JTOUSDT Perpetual Contract With Up to 50x Leverage",
+    "description": "Bybit will launch JTOUSDT Perpetual Contract with up to 50x Leverage on Dec 08, 2023, at approximately 5AM UTC. ",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "Trading Bots"
+    ],
+    "url": "/article/bybit-will-launch-jtousdt-perpetual-contract-with-up-to-50x-leverage-blt3c7493bb106a8089/",
+    "objectID": "article.blt3c7493bb106a8089",
+    "date_timestamp": 1701963412,
+    "start_date_timestamp": 1701963412,
+    "publish_time": null,
+    "symbol": "JTOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "WIFUSDT",
+    "event_ts": 1704976485,
+    "title": "New Listing: WIFUSDT Perpetual Contract",
+    "description": "Bybit will list WIFUSDT Perpetual Contract with up to 25x Leverage",
+    "topics": [
+      "Derivatives",
+      "USDT",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-wifusdt-perpetual-contract-bltcea809eb83936aa1/",
+    "objectID": "article.bltcea809eb83936aa1",
+    "date_timestamp": 1704976485,
+    "start_date_timestamp": 1704976485,
+    "publish_time": null,
+    "symbol": "WIFUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "MANTAUSDT",
+    "event_ts": 1705579727,
+    "title": "New Listing: MANTAUSDT Perpetual Contract",
+    "description": "Bybit will list MANTAUSDT Perpetual Contract with up to 50x Leverage on Jan 18, 2024 UTC, at approximately 13:00 UTC.",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "USDT"
+    ],
+    "url": "/article/new-listing-mantausdt-perpetual-contract-bltfacc2da9dca14b43/",
+    "objectID": "article.bltfacc2da9dca14b43",
+    "date_timestamp": 1705579727,
+    "start_date_timestamp": 1705579727,
+    "publish_time": null,
+    "symbol": "MANTAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "MBOXUSDT",
+    "event_ts": 1705581891,
+    "title": "New Listing: MBOXUSDT Perpetual Contract",
+    "description": "Bybit will list MBOXUSDT Perpetual Contract with up to 12.5x Leverage on Jan 19, 2024 UTC, at approximately 9:00 UTC. ",
+    "topics": [
+      "Derivatives",
+      "USDT",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-mboxusdt-perpetual-contract-blta69e174d1e165c33/",
+    "objectID": "article.blta69e174d1e165c33",
+    "date_timestamp": 1705581891,
+    "start_date_timestamp": 1705581891,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MYROUSDT",
+    "event_ts": 1705584233,
+    "title": "New Listing: MYROUSDT Perpetual Contract",
+    "description": "Bybit will list MYROUSDT Perpetual Contract with up to 25x Leverage on Jan 19, 2024 UTC, at approximately 10:00 UTC. ",
+    "topics": [
+      "Derivatives",
+      "USDT",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-myrousdt-perpetual-contract-blt294ac8e94cec0f47/",
+    "objectID": "article.blt294ac8e94cec0f47",
+    "date_timestamp": 1705584233,
+    "start_date_timestamp": 1705584233,
+    "publish_time": null,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ONDOUSDT",
+    "event_ts": 1706000400,
+    "title": "New Listing: ONDOUSDT Perpetual Contract",
+    "description": "Bybit will list ONDOUSDT Perpetual Contract with up to 50x Leverage on Jan 23, 2024 at approximately 10:00 UTC.",
+    "topics": [
+      "Derivatives",
+      "USDT",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-ondousdt-perpetual-contract-blt544aae61950368a6/",
+    "objectID": "article.blt544aae61950368a6",
+    "date_timestamp": 1706000400,
+    "start_date_timestamp": 1706000400,
+    "publish_time": null,
+    "symbol": "ONDOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ALTUSDT",
+    "event_ts": 1706188483,
+    "title": "New Listing: ALTUSDT Perpetual Contract",
+    "description": "Bybit will list ALTUSDT Perpetual Contract with up to 25x Leverage on Jan 25, 2024 UTC, at approximately 12:30 UTC.",
+    "topics": [
+      "Derivatives",
+      "Institutions",
+      "USDT"
+    ],
+    "url": "/article/new-listing-altusdt-perpetual-contract-blt487e943df3a34425/",
+    "objectID": "article.blt487e943df3a34425",
+    "date_timestamp": 1706188483,
+    "start_date_timestamp": 1706188483,
+    "publish_time": null,
+    "symbol": "ALTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "STRKUSDT",
+    "event_ts": 1708439857,
+    "title": "New Listing: STRKUSDT Perpetual Contract",
+    "description": "Bybit will list STRKUSDT Perpetual Contract on Feb 20, 2024 UTC, at approximately 12:30  UTC.",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-strkusdt-perpetual-contract-blt29675383331d9a2a/",
+    "objectID": "article.blt29675383331d9a2a",
+    "date_timestamp": 1708439857,
+    "start_date_timestamp": 1708439854,
+    "publish_time": null,
+    "symbol": "STRKUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "1000TURBOUSDT",
+    "event_ts": 1709172000,
+    "title": "New Listing: 1000TURBOUSDT Perpetual Contract",
+    "description": "Bybit will list 1000TURBOUSDT Perpetual Contract on Feb 29, 2024 at approximately 10:30 UTC.",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-1000turbousdt-perpetual-contract-blta1f67d964f8069d2/",
+    "objectID": "article.blta1f67d964f8069d2",
+    "date_timestamp": 1709172000,
+    "start_date_timestamp": 1709172000,
+    "publish_time": 1710154086,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PORTALUSDT",
+    "event_ts": 1709258400,
+    "title": "New Listing: PORTALUSDT Perpetual Contract",
+    "description": "Bybit will list PORTALUSDT Perpetual Contract on Mar 1, 2024 at approximately 6:00 UTC.",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-portalusdt-perpetual-contract-bltac9ae3578d14dfde/",
+    "objectID": "article.bltac9ae3578d14dfde",
+    "date_timestamp": 1709258400,
+    "start_date_timestamp": 1709258400,
+    "publish_time": 1710154100,
+    "symbol": "PORTALUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "10000000AIDOGEUSDT",
+    "event_ts": 1709625600,
+    "title": "New Listing: 10000000AIDOGEUSDT Perpetual Contract",
+    "description": "Bybit will list 10000000AIDOGEUSDT Perpetual Contract on Mar 5, 2024 at approximately 11:00  UTC.",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-10000000aidogeusdt-perpetual-contract-blt40eda40d71805847/",
+    "objectID": "article.blt40eda40d71805847",
+    "date_timestamp": 1709625600,
+    "start_date_timestamp": 1709625600,
+    "publish_time": 1710154114,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ORNUSDT",
+    "event_ts": 1710144600,
+    "title": "New Listing: ORNUSDT Perpetual Contract",
+    "description": "Bybit will list ORNUSDT Perpetual Contract on Mar 11, 2024 at approximately 09:30 UTC.",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-ornusdt-perpetual-contract-blt53a0186eb926b10d/",
+    "objectID": "article.blt53a0186eb926b10d",
+    "date_timestamp": 1710144600,
+    "start_date_timestamp": 1710144600,
+    "publish_time": 1710151181,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "10000COQUSDT",
+    "event_ts": 1710230400,
+    "title": "New Listing: 10000COQUSDT Perpetual Contract",
+    "description": "Bybit will list 10000COQUSDT Perpetual Contract on Mar 12, 2024 at approximately 10:10 UTC.",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-10000coqusdt-perpetual-contract-blt0d9996ee6d198f01/",
+    "objectID": "article.blt0d9996ee6d198f01",
+    "date_timestamp": 1710230400,
+    "start_date_timestamp": 1710230400,
+    "publish_time": 1710237500,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AEVOUSDT",
+    "event_ts": 1710230400,
+    "title": "New Listing: AEVOUSDT Perpetual Contract",
+    "description": "Bybit will list AEVOUSDT Perpetual Contract on Mar 13, 2024 at approximately 12:00 UTC.",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-aevousdt-perpetual-contract-blt3367127671d75086/",
+    "objectID": "article.blt3367127671d75086",
+    "date_timestamp": 1710230400,
+    "start_date_timestamp": 1710230400,
+    "publish_time": 1710320035,
+    "symbol": "AEVOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "SCAUSDT",
+    "event_ts": 1710316800,
+    "title": "New Listing: SCAUSDT Perpetual Contract",
+    "description": "Bybit will list SCAUSDT Perpetual Contract on Mar 13, 2024 at approximately 10:30 AM UTC.",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-scausdt-perpetual-contract-blt86417a02a9bce96e/",
+    "objectID": "article.blt86417a02a9bce96e",
+    "date_timestamp": 1710316800,
+    "start_date_timestamp": 1710316800,
+    "publish_time": 1710321553,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "VANRYUSDT",
+    "event_ts": 1710417152,
+    "title": "New Listing: VANRYUSDT Perpetual Contract",
+    "description": "Bybit will list VANRYUSDT Perpetual Contract on Mar 14, 2024 at approximately 12:30 UTC.",
+    "topics": [
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-vanryusdt-perpetual-contract-blt8d5f6135dc40ae51/",
+    "objectID": "article.blt8d5f6135dc40ae51",
+    "date_timestamp": 1710417152,
+    "start_date_timestamp": 1710417152,
+    "publish_time": 1710419041,
+    "symbol": "VANRYUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "BOMEUSDT",
+    "event_ts": 1710489600,
+    "title": "New Listing: BOMEUSDT Perpetual Contract",
+    "description": "Bybit will list BOMEUSDT Perpetual Contract on Mar 15, 2024 at approximately 10:30 AM UTC.",
+    "topics": [
+      "Institutions",
+      "Derivatives"
+    ],
+    "url": "/article/new-listing-bomeusdt-perpetual-contract-bltdf1ba627d03113a4/",
+    "objectID": "article.bltdf1ba627d03113a4",
+    "date_timestamp": 1710489600,
+    "start_date_timestamp": 1710489600,
+    "publish_time": 1710496547,
+    "symbol": "BOMEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ORCAUSDT",
+    "event_ts": 1710727200,
+    "title": "New Listing: ORCAUSDT Perpetual Contract",
+    "description": "New Listing: ORCAUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-orcausdt-perpetual-contract-bltea9c68dbc557697f/",
+    "objectID": "article.bltea9c68dbc557697f",
+    "date_timestamp": 1710727200,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1711984888,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "OMUSDT",
+    "event_ts": 1710756000,
+    "title": "New Listing: OMUSDT Perpetual Contract",
+    "description": "",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-omusdt-perpetual-contract-blt74bc617189bfcf85/",
+    "objectID": "article.blt74bc617189bfcf85",
+    "date_timestamp": 1710756000,
+    "start_date_timestamp": 1710756000,
+    "publish_time": 1710760466,
+    "symbol": "OMUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "SLERFUSDT",
+    "event_ts": 1710766800,
+    "title": "New Listing: SLERFUSDT Perpetual Contract",
+    "description": "",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-slerfusdt-perpetual-contract-bltdf1935afe80460c1/",
+    "objectID": "article.bltdf1935afe80460c1",
+    "date_timestamp": 1710766800,
+    "start_date_timestamp": 1710766800,
+    "publish_time": 1710765690,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ETHFIUSDT",
+    "event_ts": 1710774000,
+    "title": "New Listing: ETHFIUSDT Perpetual Contract",
+    "description": "Bybit will list ETHFIUSDT Perpetual Contract on Mar 18, 2024 at approximately 15:00 AM UTC.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-ethfiusdt-perpetual-contract-blta624cb5cc776c64b/",
+    "objectID": "article.blta624cb5cc776c64b",
+    "date_timestamp": 1710774000,
+    "start_date_timestamp": 1710774000,
+    "publish_time": 1710766009,
+    "symbol": "ETHFIUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "1000IQ50USDT",
+    "event_ts": 1710847579,
+    "title": "New Listing: 1000IQ50USDT Perpetual Contract",
+    "description": "",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000iq50usdt-perpetual-contract-blte11cb27ab6fdf7f5/",
+    "objectID": "article.blte11cb27ab6fdf7f5",
+    "date_timestamp": 1710847579,
+    "start_date_timestamp": 1710847579,
+    "publish_time": 1711104077,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ZKUSDT",
+    "event_ts": 1711103713,
+    "title": "New Listing: ZKUSDT Perpetual Contract",
+    "description": "",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zkusdt-perpetual-contract-blt856eb538fa884753/",
+    "objectID": "article.blt856eb538fa884753",
+    "date_timestamp": 1711103713,
+    "start_date_timestamp": 1711103713,
+    "publish_time": 1711104010,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "DAOUSDT",
+    "event_ts": 1711539530,
+    "title": "New Listing: DAOUSDT Perpetual Contract",
+    "description": "",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-daousdt-perpetual-contract-bltca97f9a5b2fbb01e/",
+    "objectID": "article.bltca97f9a5b2fbb01e",
+    "date_timestamp": 1711539530,
+    "start_date_timestamp": 1711539530,
+    "publish_time": 1711539792,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "POPCATUSDT",
+    "event_ts": 1711591200,
+    "title": "New Listing: POPCATUSDT Perpetual Contract",
+    "description": "New Listing: POPCATUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/popcatusdt-new-listing-perpetual-contract-blt40b101ae335e95aa/",
+    "objectID": "article.blt40b101ae335e95aa",
+    "date_timestamp": 1711591200,
+    "start_date_timestamp": 1711591200,
+    "publish_time": 1711619783,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PUNDUUSDT",
+    "event_ts": 1711630800,
+    "title": "New Listing: PUNDUUSDT Perpetual Contract",
+    "description": "New Listing: PUNDUUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-punduusdt-perpetual-contract-bltf76877e9d0efc25b/",
+    "objectID": "article.bltf76877e9d0efc25b",
+    "date_timestamp": 1711630800,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1711631414,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "DEGENUSDT",
+    "event_ts": 1711983600,
+    "title": "New Listing: DEGENUSDT Perpetual Contract",
+    "description": "New Listing: DEGENUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-degenusdt-perpetual-contract-blt861e73e2f98a532f/",
+    "objectID": "article.blt861e73e2f98a532f",
+    "date_timestamp": 1711983600,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1711984376,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "LTOUSDT",
+    "event_ts": 1711983600,
+    "title": "New Listing:LTOUSDT Perpetual Contract",
+    "description": "New Listing:LTOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-ltousdt-perpetual-contract-blt084905073d5340f5/",
+    "objectID": "article.blt084905073d5340f5",
+    "date_timestamp": 1711983600,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1711984677,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ENAUSDT",
+    "event_ts": 1712023200,
+    "title": "New Listing: ENAUSDT Perpetual Contract",
+    "description": "New Listing: ENAUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-enausdt-perpetual-contract-blt8575460a2d763201/",
+    "objectID": "article.blt8575460a2d763201",
+    "date_timestamp": 1712023200,
+    "start_date_timestamp": 1710759600,
+    "publish_time": 1712058137,
+    "symbol": "ENAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "SAGAUSDT",
+    "event_ts": 1712628000,
+    "title": "New Listing: SAGAUSDT Perpetual Contract",
+    "description": "New Listing: SAGAUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-sagausdt-perpetual-contract-bltd885bd7e6e010cda/",
+    "objectID": "article.bltd885bd7e6e010cda",
+    "date_timestamp": 1712628000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1712666213,
+    "symbol": "SAGAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "TNSRUSDT",
+    "event_ts": 1712628000,
+    "title": "New Listing:TNSRUSDT Perpetual Contract",
+    "description": "New Listing:TNSRUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-tnsrusdt-perpetual-contract-bltbe501ec1e49a8e2e/",
+    "objectID": "article.bltbe501ec1e49a8e2e",
+    "date_timestamp": 1712628000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1712659439,
+    "symbol": "TNSRUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ZEUSUSDT",
+    "event_ts": 1712628000,
+    "title": "New Listing: ZEUSUSDT Perpetual Contract",
+    "description": "New Listing: ZEUSUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zeususdt-perpetual-contract-blt9d748e2faa3e089e/",
+    "objectID": "article.blt9d748e2faa3e089e",
+    "date_timestamp": 1712628000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1712638525,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "FOXYUSDT",
+    "event_ts": 1712887200,
+    "title": "New Listing: FOXYUSDT Perpetual Contract",
+    "description": "New Listing: FOXYUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-foxyusdt-perpetual-contract-blt02076562373cf239/",
+    "objectID": "article.blt02076562373cf239",
+    "date_timestamp": 1712887200,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1712922398,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "OMNIUSDT",
+    "event_ts": 1713319200,
+    "title": "New Listing: OMNIUSDT Perpetual Contract",
+    "description": "New Listing: OMNIUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-omniusdt-perpetual-contract-blt9cfe7476d330600f/",
+    "objectID": "article.blt9cfe7476d330600f",
+    "date_timestamp": 1713319200,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1713362575,
+    "symbol": "OMNIUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ZBCNUSDT",
+    "event_ts": 1713319200,
+    "title": "New Listing:ZBCNUSDT Perpetual Contract",
+    "description": "New Listing:ZBCNUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zbcnusdt-perpetual-contract-bltd4dc3617c7f69d60/",
+    "objectID": "article.bltd4dc3617c7f69d60",
+    "date_timestamp": 1713319200,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1713353540,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MERLUSDT",
+    "event_ts": 1713492000,
+    "title": "New Listing: MERLUSDT Perpetual Contract",
+    "description": "New Listing: MERLUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-merlusdt-perpetual-contract-blt1fd841a5d9748ece/",
+    "objectID": "article.blt1fd841a5d9748ece",
+    "date_timestamp": 1713492000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1713529602,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MEWUSDT",
+    "event_ts": 1713837600,
+    "title": "New Listing: MEWUSDT Perpetual Contract",
+    "description": "New Listing: MEWUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-mewusdt-perpetual-contract-bltd1b054751e9b9645/",
+    "objectID": "article.bltd1b054751e9b9645",
+    "date_timestamp": 1713837600,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1713878608,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "BRETTUSDT",
+    "event_ts": 1714096800,
+    "title": "New Listing: BRETTUSDT Perpetual Contract",
+    "description": "New Listing: BRETTUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-brettusdt-perpetual-contract-bltbab5befe6a317460/",
+    "objectID": "article.bltbab5befe6a317460",
+    "date_timestamp": 1714096800,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1714135618,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "LAIUSDT",
+    "event_ts": 1714096800,
+    "title": "New Listing:LAIUSDT Perpetual Contract",
+    "description": "New Listing:LAIUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-laiusdt-perpetual-contract-blt75b9440d3635b12e/",
+    "objectID": "article.blt75b9440d3635b12e",
+    "date_timestamp": 1714096800,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1714135813,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "SAFEUSDT",
+    "event_ts": 1714356000,
+    "title": "New Listing: SAFEUSDT Perpetual Contract",
+    "description": "New Listing: SAFEUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-safeusdt-perpetual-contract-bltde27ad518b225559/",
+    "objectID": "article.bltde27ad518b225559",
+    "date_timestamp": 1714356000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1714392179,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "REZUSDT",
+    "event_ts": 1715133600,
+    "title": "New Listing: REZUSDT Perpetual Contract",
+    "description": "New Listing: REZUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-rezusdt-perpetual-contract-blt38b976261dd76238/",
+    "objectID": "article.blt38b976261dd76238",
+    "date_timestamp": 1715133600,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715166411,
+    "symbol": "REZUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "COSUSDT",
+    "event_ts": 1715220000,
+    "title": "New Listing: COSUSDT Perpetual Contract",
+    "description": "New Listing: COSUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-cosusdt-perpetual-contract-blt1e646aa3967a6ac6/",
+    "objectID": "article.blt1e646aa3967a6ac6",
+    "date_timestamp": 1715220000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715242555,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "FIREUSDT",
+    "event_ts": 1715220000,
+    "title": "New Listing : FIREUSDT Perpetual Contract",
+    "description": "New Listing: FIREUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/copy-of-new-listing-fireusdt-perpetual-contract-blte0eefcc7a7ba41fb/",
+    "objectID": "article.blte0eefcc7a7ba41fb",
+    "date_timestamp": 1715220000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715242240,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "BBUSDT",
+    "event_ts": 1715688000,
+    "title": "New Listing: BBUSDT Perpetual Contract",
+    "description": "New Listing: BBUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-bbusdt-perpetual-contract-bltd28226b9ea80cb59/",
+    "objectID": "article.bltd28226b9ea80cb59",
+    "date_timestamp": 1715688000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715690045,
+    "symbol": "BBUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "GNOUSDT",
+    "event_ts": 1715689200,
+    "title": "New Listing: GNOUSDT Perpetual Contract",
+    "description": "New Listing: GNOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-gnousdt-perpetual-contract-bltbc36c01ba148e365/",
+    "objectID": "article.bltbc36c01ba148e365",
+    "date_timestamp": 1715689200,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715690289,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "FTNUSDT",
+    "event_ts": 1715856000,
+    "title": "New Listing: FTNUSDT Perpetual Contract",
+    "description": "New Listing: FTNUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-ftnusdt-perpetual-contract-blt7703ab7bb16ef8bb/",
+    "objectID": "article.blt7703ab7bb16ef8bb",
+    "date_timestamp": 1715856000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715856768,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "LFTUSDT",
+    "event_ts": 1715856000,
+    "title": "New Listing: LFTUSDT Perpetual Contract",
+    "description": "New Listing: LFTUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-lftusdt-perpetual-contract-blt9b6ff1f210827c70/",
+    "objectID": "article.blt9b6ff1f210827c70",
+    "date_timestamp": 1715856000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715875848,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MOGUSDT",
+    "event_ts": 1715856000,
+    "title": "New Listing: MOGUSDT Perpetual Contract",
+    "description": "New Listing: MOGUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-mogusdt-perpetual-contract-blt042c06ae05895929/",
+    "objectID": "article.blt042c06ae05895929",
+    "date_timestamp": 1715856000,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715875687,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "NOTUSDT",
+    "event_ts": 1715942400,
+    "title": "New Listing:  NOTUSDT Perpetual Contract",
+    "description": "New Listing:  NOTUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-notusdt-perpetual-contract-bltfba5618a7f9e774d/",
+    "objectID": "article.bltfba5618a7f9e774d",
+    "date_timestamp": 1715942400,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1715875734,
+    "symbol": "NOTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "VELOUSDT",
+    "event_ts": 1716199200,
+    "title": "New Listing: VELOUSDT Perpetual Contract",
+    "description": "New Listing: VELOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-velousdt-perpetual-contract-blta7d778f97deeb8d9/",
+    "objectID": "article.blta7d778f97deeb8d9",
+    "date_timestamp": 1716199200,
+    "start_date_timestamp": 1710727200,
+    "publish_time": 1716201086,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MASAUSDT",
+    "event_ts": 1716285900,
+    "title": "New Listing: MASAUSDT Perpetual Contract",
+    "description": "New Listing: MASAUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-driftusdt-perpetual-contract-blte54d97a13251a6c7/",
+    "objectID": "article.blte54d97a13251a6c7",
+    "date_timestamp": 1716285900,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1716286582,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "DRIFTUSDT",
+    "event_ts": 1716286500,
+    "title": "New Listing: DRIFTUSDT Perpetual Contract",
+    "description": "New Listing: DRIFTUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-driftusdt-perpetual-contract-blt0455257d53be1c4a/",
+    "objectID": "article.blt0455257d53be1c4a",
+    "date_timestamp": 1716286500,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1716286788,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "CANTOUSDT",
+    "event_ts": 1716456600,
+    "title": "New Listing: CANTOUSDT Perpetual Contract",
+    "description": "New Listing: CANTOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-cantousdt-perpetual-contract-bltea3ef78213067be2/",
+    "objectID": "article.bltea3ef78213067be2",
+    "date_timestamp": 1716456600,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1716458032,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MAPOUSDT",
+    "event_ts": 1716456600,
+    "title": "New Listing: MAPOUSDT Perpetual Contract",
+    "description": "New Listing: MAPOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-mapousdt-perpetual-contract-bltd7d368afc6d6c206/",
+    "objectID": "article.bltd7d368afc6d6c206",
+    "date_timestamp": 1716456600,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1716457100,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "SPECUSDT",
+    "event_ts": 1716799500,
+    "title": "New Listing: SPECUSDT Perpetual Contract",
+    "description": "New Listing: SPECUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-specusdt-perpetual-contract-bltc205e8e76c9d790d/",
+    "objectID": "article.bltc205e8e76c9d790d",
+    "date_timestamp": 1716799500,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1716801605,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "XCHUSDT",
+    "event_ts": 1716799800,
+    "title": "New Listing: XCHUSDT Perpetual Contract",
+    "description": "New Listing: XCHUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-xchusdt-perpetual-contract-bltcee2bdcefed6ab76/",
+    "objectID": "article.bltcee2bdcefed6ab76",
+    "date_timestamp": 1716799800,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1716802056,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PENGUSDT",
+    "event_ts": 1716816900,
+    "title": "New Listing: PENGUSDT Perpetual Contract",
+    "description": "New Listing: PENGUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-pengusdt-perpetual-contract-blt68c504ed483d2f6c/",
+    "objectID": "article.blt68c504ed483d2f6c",
+    "date_timestamp": 1716816900,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1716817258,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "NYANUSDT",
+    "event_ts": 1716973833,
+    "title": "New Listing: NYANUSDT Perpetual Contract",
+    "description": "New Listing: NYANUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-nyanusdt-perpetual-contract-blteb3160cd798faf29/",
+    "objectID": "article.blteb3160cd798faf29",
+    "date_timestamp": 1716973833,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1716975508,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "OSMOUSDT",
+    "event_ts": 1716979261,
+    "title": "New Listing: OSMOUSDT Perpetual Contract",
+    "description": "New Listing: OSMOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-osmousdt-perpetual-contract-blt6d80461e4cf42b42/",
+    "objectID": "article.blt6d80461e4cf42b42",
+    "date_timestamp": 1716979261,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717066006,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MONUSDT",
+    "event_ts": 1716984285,
+    "title": "New Listing: MONUSDT Perpetual Contract",
+    "description": "New Listing: MONUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-monusdt-perpetual-contract-blt48d546cd343758f8/",
+    "objectID": "article.blt48d546cd343758f8",
+    "date_timestamp": 1716984285,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717070979,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000BEERUSDT",
+    "event_ts": 1717150419,
+    "title": "New Listing: 1000BEERUSDT Perpetual Contract",
+    "description": "New Listing: 1000BEERUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000beerusdt-perpetual-contract-blt1b6a0c79d501e3ba/",
+    "objectID": "article.blt1b6a0c79d501e3ba",
+    "date_timestamp": 1717150419,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717150442,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PHAUSDT",
+    "event_ts": 1717151931,
+    "title": "New Listing: PHAUSDT Perpetual Contract",
+    "description": "New Listing: PHAUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-phausdt-perpetual-contract-blt0406c304bab40c7f/",
+    "objectID": "article.blt0406c304bab40c7f",
+    "date_timestamp": 1717151931,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717152165,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "BENDOGUSDT",
+    "event_ts": 1717408377,
+    "title": "New Listing: BENDOGUSDT Perpetual Contract",
+    "description": "New Listing: BENDOGUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-bendogusdt-perpetual-contract-bltce42d0b320f6d2d7/",
+    "objectID": "article.bltce42d0b320f6d2d7",
+    "date_timestamp": 1717408377,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717408442,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "TAIKOUSDT",
+    "event_ts": 1717493400,
+    "title": "New Listing: TAIKOUSDT Perpetual Contract",
+    "description": "New Listing: TAIKOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-taikousdt-perpetual-contract-blt1f1e8979bae79672/",
+    "objectID": "article.blt1f1e8979bae79672",
+    "date_timestamp": 1717493400,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717494426,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "RAYDIUMUSDT",
+    "event_ts": 1717494916,
+    "title": "New Listing: RAYDIUMUSDT Perpetual Contract",
+    "description": "New Listing: RAYDIUMUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-raydiumusdt-perpetual-contract-bltb71b4f88666c8211/",
+    "objectID": "article.bltb71b4f88666c8211",
+    "date_timestamp": 1717494916,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717495031,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ETHBTCUSDT",
+    "event_ts": 1717756152,
+    "title": "New Listing: ETHBTCUSDT Perpetual Contract",
+    "description": "New Listing: ETHBTCUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-ethbtcusdt-perpetual-contract-bltc8277503da278746/",
+    "objectID": "article.bltc8277503da278746",
+    "date_timestamp": 1717756152,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717757735,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PONKEUSDT",
+    "event_ts": 1717757770,
+    "title": "New Listing: PONKEUSDT Perpetual Contract",
+    "description": "New Listing: PONKEUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-dogusdt-perpetual-contract-bltc943acd3e846a16b/",
+    "objectID": "article.bltc943acd3e846a16b",
+    "date_timestamp": 1717757770,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1717757897,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000000BABYDOGEUSDT",
+    "event_ts": 1718112531,
+    "title": "New Listing: 1000000BABYDOGEUSDT Perpetual   Contract Jun 11, 2024",
+    "description": "Bybit has listed the 1000000BABYDOGEUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000000babydogeusdt-perpetual-contract-jun-11-2024-bltb7d1458eb76cc4f2/",
+    "objectID": "article.bltb7d1458eb76cc4f2",
+    "date_timestamp": 1718112531,
+    "start_date_timestamp": 1718112531,
+    "publish_time": 1718112688,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "GMEUSDT",
+    "event_ts": 1718115780,
+    "title": "New Listing: GMEUSDT Perpetual Contract",
+    "description": "New Listing: GMEUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-gmeusdt-perpetual-contract-blt05a4300101afbf8a/",
+    "objectID": "article.blt05a4300101afbf8a",
+    "date_timestamp": 1718115780,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1718118134,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "IOUSDT",
+    "event_ts": 1718117119,
+    "title": "New Listing: IOUSDT Perpetual Contract",
+    "description": "New Listing: IOUSDT Perpetual Contract",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-iousdt-perpetual-contract-blt6eb30e52edff5b32/",
+    "objectID": "article.blt6eb30e52edff5b32",
+    "date_timestamp": 1718117119,
+    "start_date_timestamp": 1710727500,
+    "publish_time": 1718117257,
+    "symbol": "IOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ATHUSDT",
+    "event_ts": 1718272881,
+    "title": "New Listing: ATHUSDT Perpetual  Contract Jun 13,  2024",
+    "description": "Bybit has listed the ATHUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-athusdt-perpetual-contract-jun-13-2024-blt1f2931853434dbf1/",
+    "objectID": "article.blt1f2931853434dbf1",
+    "date_timestamp": 1718272881,
+    "start_date_timestamp": 1718272881,
+    "publish_time": 1718273016,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AIOZUSDT",
+    "event_ts": 1718273361,
+    "title": "New Listing: AIOZUSDT Perpetual  Contract Jun 13, 2024",
+    "description": "Bybit has listed the AIOZUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-aiozusdt-perpetual-contract-jun-13-2024-blt40b90b5a3c9c0478/",
+    "objectID": "article.blt40b90b5a3c9c0478",
+    "date_timestamp": 1718273361,
+    "start_date_timestamp": 1718273361,
+    "publish_time": 1718273623,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ZKJUSDT",
+    "event_ts": 1718624211,
+    "title": "New Listing: ZKJUSDT Perpetual  Contract  Jun 17, 2024",
+    "description": "Bybit has listed the ZKJUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zkjusdt-perpetual-contract-jun-17-2024-blt7fc7e2d1bdac2b43/",
+    "objectID": "article.blt7fc7e2d1bdac2b43",
+    "date_timestamp": 1718624211,
+    "start_date_timestamp": 1718624211,
+    "publish_time": 1718624301,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000APUUSDT",
+    "event_ts": 1718882301,
+    "title": "New Listing: 1000APUUSDT Perpetual  Contract Jun 20, 2024",
+    "description": "Bybit has listed the 1000APUUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000apuusdt-perpetual-contract-jun-20-2024-bltc6ce0fdc0584e85e/",
+    "objectID": "article.bltc6ce0fdc0584e85e",
+    "date_timestamp": 1718882301,
+    "start_date_timestamp": 1718882301,
+    "publish_time": 1718882706,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ZKUSDT",
+    "event_ts": 1718883685,
+    "title": "🔥 New ZKUSDT (zkSync) Perpetual Contract",
+    "description": "Bybit is pleased to announce that the continued expansion of our product offerings — ZKUSDT Contract — is now live!",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/-new-zkusdt-zksync-perpetual-contract-blted71e5370f799842/",
+    "objectID": "article.blted71e5370f799842",
+    "date_timestamp": 1718883685,
+    "start_date_timestamp": 1718883685,
+    "publish_time": 1718883944,
+    "symbol": "ZKUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ZROUSDT",
+    "event_ts": 1718896321,
+    "title": "New Listing: ZROUSDT Perpetual  Contract Jun 20, 2024",
+    "description": "Bybit has listed the ZROUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zrousdt-perpetual-contract-jun-20-2024-bltf5f5112170927fde/",
+    "objectID": "article.bltf5f5112170927fde",
+    "date_timestamp": 1718896321,
+    "start_date_timestamp": 1718896321,
+    "publish_time": 1718896437,
+    "symbol": "ZROUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "LISTAUSDT",
+    "event_ts": 1718967921,
+    "title": "New Listing: LISTAUSDT Perpetual  Contract Jun 21, 2024",
+    "description": "Bybit has listed the LISTAUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-listausdt-perpetual-contract-jun-21-2024-blt3d728d976a6febec/",
+    "objectID": "article.blt3d728d976a6febec",
+    "date_timestamp": 1718967921,
+    "start_date_timestamp": 1718967921,
+    "publish_time": 1718967979,
+    "symbol": "LISTAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ZCXUSDT",
+    "event_ts": 1719234651,
+    "title": "New Listing: ZCXUSDT Perpetual  Contract Jun 24, 2024",
+    "description": "Bybit has listed the ZCXUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zcxusdt-perpetual-contract-jun-24-2024-blt0c38e5b4424def60/",
+    "objectID": "article.blt0c38e5b4424def60",
+    "date_timestamp": 1719234651,
+    "start_date_timestamp": 1719234651,
+    "publish_time": 1719234779,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AKTUSDT",
+    "event_ts": 1719395170,
+    "title": "New Listing: AKTUSDT Perpetual  Contract Jun 26, 2024",
+    "description": "Bybit has listed the AKTUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-aktusdt-perpetual-contract-jun-26-2024-blt9ba073d08c5894a7/",
+    "objectID": "article.blt9ba073d08c5894a7",
+    "date_timestamp": 1719395170,
+    "start_date_timestamp": 1719395170,
+    "publish_time": 1719395378,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MANEKIUSDT",
+    "event_ts": 1719395810,
+    "title": "New Listing: MANEKIUSDT Perpetual  Contract Jun 26, 2024",
+    "description": "Bybit has listed the MANEKIUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-manekiusdt-perpetual-contract-jun-26-2024-blt2132c2c39db62a3f/",
+    "objectID": "article.blt2132c2c39db62a3f",
+    "date_timestamp": 1719395810,
+    "start_date_timestamp": 1719395810,
+    "publish_time": 1719395927,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "BLASTUSDT",
+    "event_ts": 1719482590,
+    "title": "New Listing: BLASTUSDT Perpetual  Contract Jun 27, 2024",
+    "description": "Bybit has listed the BLASTUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-blastusdt-perpetual-contract-jun-27-2024-blta7bcdd7a13356e4f/",
+    "objectID": "article.blta7bcdd7a13356e4f",
+    "date_timestamp": 1719482590,
+    "start_date_timestamp": 1719482590,
+    "publish_time": 1719482730,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000000PEIPEIUSDT",
+    "event_ts": 1720090780,
+    "title": "New Listing: 1000000PEIPEIUSDT Perpetual  Contract Jul 4, 2024",
+    "description": "Bybit has listed the 1000000PEIPEIUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000000peipeiusdt-perpetual-contract-jul-4-2024-blt2bf0ea3ee6348c30/",
+    "objectID": "article.blt2bf0ea3ee6348c30",
+    "date_timestamp": 1720090780,
+    "start_date_timestamp": 1720090780,
+    "publish_time": 1720090904,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "DOP1USDT",
+    "event_ts": 1720604970,
+    "title": "New Listing:  DOP1USDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the DOP1USDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-dop1usdt-perpetual-contract-with-up-to-12-5x-leverage-blt4ec3af3a28de8a82/",
+    "objectID": "article.blt4ec3af3a28de8a82",
+    "date_timestamp": 1720604970,
+    "start_date_timestamp": 1720604970,
+    "publish_time": 1720605074,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MOCAUSDT",
+    "event_ts": 1720781520,
+    "title": "New Listing:  MOCAUSDT Perpetual Contract, with up to 25x  leverage",
+    "description": "Bybit has listed the MOCAUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-mocausdt-perpetual-contract-with-up-to-25x-leverage-blt933b939465e4e889/",
+    "objectID": "article.blt933b939465e4e889",
+    "date_timestamp": 1720781520,
+    "start_date_timestamp": 1720781520,
+    "publish_time": 1720781618,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AEROUSDT",
+    "event_ts": 1721036620,
+    "title": "New Listing:  AEROUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the AEROUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-aerousdt-perpetual-contract-with-up-to-25x-leverage-blt24689650a25c2c48/",
+    "objectID": "article.blt24689650a25c2c48",
+    "date_timestamp": 1721036620,
+    "start_date_timestamp": 1721036620,
+    "publish_time": 1721036668,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PRCLUSDT",
+    "event_ts": 1721210890,
+    "title": "New Listing:  PRCLUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the PRCLUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-prclusdt-perpetual-contract-with-up-to-12-5x-leverage-bltc28b2cafa71b9fcf/",
+    "objectID": "article.bltc28b2cafa71b9fcf",
+    "date_timestamp": 1721210890,
+    "start_date_timestamp": 1721210890,
+    "publish_time": 1721210999,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "CLOUDUSDT",
+    "event_ts": 1721383940,
+    "title": "New Listing:  CLOUDUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the CLOUDUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-cloudusdt-perpetual-contract-with-up-to-12-5x-leverage-blt1177123514845c76/",
+    "objectID": "article.blt1177123514845c76",
+    "date_timestamp": 1721383940,
+    "start_date_timestamp": 1721383940,
+    "publish_time": 1721384015,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "UXLINKUSDT",
+    "event_ts": 1721384590,
+    "title": "New Listing:  UXLINKUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the UXLINKUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-uxlinkusdt-perpetual-contract-with-up-to-12-5x-leverage-blt4a7251a3bcdb27d1/",
+    "objectID": "article.blt4a7251a3bcdb27d1",
+    "date_timestamp": 1721384590,
+    "start_date_timestamp": 1721384590,
+    "publish_time": 1721384675,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "BANANAUSDT",
+    "event_ts": 1721388810,
+    "title": "New Listing:  BANANAUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the BANANAUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-bananausdt-perpetual-contract-with-up-to-25x-leverage-blt53d2364737f600cc/",
+    "objectID": "article.blt53d2364737f600cc",
+    "date_timestamp": 1721388810,
+    "start_date_timestamp": 1721388810,
+    "publish_time": 1721388890,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PIRATEUSDT",
+    "event_ts": 1721646650,
+    "title": "New Listing:  PIRATEUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the PIRATEUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-pirateusdt-perpetual-contract-with-up-to-12-5x-leverage-blt4e2898d76e8c61a7/",
+    "objectID": "article.blt4e2898d76e8c61a7",
+    "date_timestamp": 1721646650,
+    "start_date_timestamp": 1721646650,
+    "publish_time": 1721646796,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "A8USDT",
+    "event_ts": 1721649720,
+    "title": "New Listing:  A8USDT Perpetual Contract, with up  to 12.5x leverage",
+    "description": "Bybit has listed the A8USDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-a8usdt-perpetual-contract-with-up-to-12-5x-leverage-blt6c8ec32794e87894/",
+    "objectID": "article.blt6c8ec32794e87894",
+    "date_timestamp": 1721649720,
+    "start_date_timestamp": 1721649720,
+    "publish_time": 1721649909,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AVAILUSDT",
+    "event_ts": 1721747920,
+    "title": "New Listing:  AVAILUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the AVAILUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-availusdt-perpetual-contract-with-up-to-25x-leverage-blt554dd814c88b61ca/",
+    "objectID": "article.blt554dd814c88b61ca",
+    "date_timestamp": 1721747920,
+    "start_date_timestamp": 1721747920,
+    "publish_time": 1721747968,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "DEXEUSDT",
+    "event_ts": 1721904500,
+    "title": "New Listing:  DEXEUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the DEXEUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-dexeusdt-perpetual-contract-with-up-to-12-5x-leverage-blt597129bad9605c38/",
+    "objectID": "article.blt597129bad9605c38",
+    "date_timestamp": 1721904500,
+    "start_date_timestamp": 1721904500,
+    "publish_time": 1721904611,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "RENDERUSDT",
+    "event_ts": 1721984320,
+    "title": "New Listing:  RENDERUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the RENDERUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-renderusdt-perpetual-contract-with-up-to-50x-leverage-blt3961883d10489d1b/",
+    "objectID": "article.blt3961883d10489d1b",
+    "date_timestamp": 1721984320,
+    "start_date_timestamp": 1721984320,
+    "publish_time": 1721984378,
+    "symbol": "RENDERUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "L3USDT",
+    "event_ts": 1722419500,
+    "title": "New Listing:  L3USDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the L3USDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-l3usdt-perpetual-contract-with-up-to-12-5x-leverage-bltc7355efa066b0835/",
+    "objectID": "article.bltc7355efa066b0835",
+    "date_timestamp": 1722419500,
+    "start_date_timestamp": 1722419500,
+    "publish_time": 1722419542,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MAXUSDT",
+    "event_ts": 1722938470,
+    "title": "New Listing:  MAXUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the MAXUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-maxusdt-perpetual-contract-with-up-to-25x-leverage-blt11417ac1e547bfaa/",
+    "objectID": "article.blt11417ac1e547bfaa",
+    "date_timestamp": 1722938470,
+    "start_date_timestamp": 1722938470,
+    "publish_time": 1722938751,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "USDEUSDT",
+    "event_ts": 1723027170,
+    "title": "New Listing:  USDEUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the USDEUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-usdeusdt-perpetual-contract-with-up-to-50x-leverage-blte0eb50f431c806bc/",
+    "objectID": "article.blte0eb50f431c806bc",
+    "date_timestamp": 1723027170,
+    "start_date_timestamp": 1723027170,
+    "publish_time": 1723027216,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PIXFIUSDT",
+    "event_ts": 1723111070,
+    "title": "New Listing:  PIXFIUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the PIXFIUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-pixfiusdt-perpetual-contract-with-up-to-12-5x-leverage-blt8441835dfae4d7d6/",
+    "objectID": "article.blt8441835dfae4d7d6",
+    "date_timestamp": 1723111070,
+    "start_date_timestamp": 1723111070,
+    "publish_time": 1723111116,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MOTHERUSDT",
+    "event_ts": 1723113270,
+    "title": "New Listing: MOTHERUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit will list the MOTHERUSDT Perpetual Contract at approximately Aug 9, 2024, 10:00AM UTC, with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-motherusdt-perpetual-contract-with-up-to-12-5x-leverage-blt6e100c8256fab075/",
+    "objectID": "article.blt6e100c8256fab075",
+    "date_timestamp": 1723113270,
+    "start_date_timestamp": 1723113270,
+    "publish_time": 1723113503,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "NEIROETHUSDT",
+    "event_ts": 1723716030,
+    "title": "New Listing:  NEIROETHUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the NEIROETHUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-neiroethusdt-perpetual-contract-with-up-to-12-5x-leverage-blt601dfa1c6b7854e1/",
+    "objectID": "article.blt601dfa1c6b7854e1",
+    "date_timestamp": 1723716030,
+    "start_date_timestamp": 1723716030,
+    "publish_time": 1723716079,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "FDUSDUSDT",
+    "event_ts": 1723804930,
+    "title": "New Listing:  FDUSDUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the FDUSDUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-fdusdusdt-perpetual-contract-with-up-to-50x-leverage-blt6a8512fd8b38e465/",
+    "objectID": "article.blt6a8512fd8b38e465",
+    "date_timestamp": 1723804930,
+    "start_date_timestamp": 1723804930,
+    "publish_time": 1723805086,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "SYSUSDT",
+    "event_ts": 1724149540,
+    "title": "New Listing:  SYSUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the SYSUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-sysusdt-perpetual-contract-with-up-to-25x-leverage-blta58a32b337ef8fd9/",
+    "objectID": "article.blta58a32b337ef8fd9",
+    "date_timestamp": 1724149540,
+    "start_date_timestamp": 1724149540,
+    "publish_time": 1724149582,
+    "symbol": "SYSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "SYNUSDT",
+    "event_ts": 1724149600,
+    "title": "New Listing:  SYNUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the SYNUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-synusdt-perpetual-contract-with-up-to-25x-leverage-blt0bc36b2b74c81157/",
+    "objectID": "article.blt0bc36b2b74c81157",
+    "date_timestamp": 1724149600,
+    "start_date_timestamp": 1724149600,
+    "publish_time": 1724149702,
+    "symbol": "SYNUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "VOXELUSDT",
+    "event_ts": 1724239490,
+    "title": "New Listing:  VOXELUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the VOXELUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-voxelusdt-perpetual-contract-with-up-to-25x-leverage-blte93e3bbf68c5df06/",
+    "objectID": "article.blte93e3bbf68c5df06",
+    "date_timestamp": 1724239490,
+    "start_date_timestamp": 1724239490,
+    "publish_time": 1724239533,
+    "symbol": "VOXELUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "VIDTUSDT",
+    "event_ts": 1724662260,
+    "title": "New Listing:  VIDTUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the VIDTUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-vidtusdt-perpetual-contract-with-up-to-12-5x-leverage-blt0a5a66da8b2cacf9/",
+    "objectID": "article.blt0a5a66da8b2cacf9",
+    "date_timestamp": 1724662260,
+    "start_date_timestamp": 1724662260,
+    "publish_time": 1724662347,
+    "symbol": "VIDTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "SUNDOGUSDT",
+    "event_ts": 1724662970,
+    "title": "New Listing:  SUNDOGUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the SUNDOGUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-sundogusdt-perpetual-contract-with-up-to-12-5x-leverage-bltd22215b8301052f9/",
+    "objectID": "article.bltd22215b8301052f9",
+    "date_timestamp": 1724662970,
+    "start_date_timestamp": 1724662970,
+    "publish_time": 1724663005,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "DOGSUSDT",
+    "event_ts": 1724679340,
+    "title": "New Listing:  DOGSUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the DOGSUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-dogsusdt-perpetual-contract-with-up-to-50x-leverage-blt956a80c9a18a3950/",
+    "objectID": "article.blt956a80c9a18a3950",
+    "date_timestamp": 1724679340,
+    "start_date_timestamp": 1724679340,
+    "publish_time": 1724679395,
+    "symbol": "DOGSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "NULSUSDT",
+    "event_ts": 1724755280,
+    "title": "New Listing:  NULSUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the NULSUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-nulsusdt-perpetual-contract-with-up-to-12-5x-leverage-blt0db699d558ed14c0/",
+    "objectID": "article.blt0db699d558ed14c0",
+    "date_timestamp": 1724755280,
+    "start_date_timestamp": 1724755280,
+    "publish_time": 1724755314,
+    "symbol": "NULSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ORDERUSDT",
+    "event_ts": 1724756420,
+    "title": "New Listing:  ORDERUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the ORDERUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-orderusdt-perpetual-contract-with-up-to-12-5x-leverage-bltba393f365571850b/",
+    "objectID": "article.bltba393f365571850b",
+    "date_timestamp": 1724756420,
+    "start_date_timestamp": 1724756420,
+    "publish_time": 1724756462,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "CHESSUSDT",
+    "event_ts": 1725269670,
+    "title": "New Listing:  CHESSUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the CHESSUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-chessusdt-perpetual-contract-with-up-to-12-5x-leverage-blt2abfb8f8af333a83/",
+    "objectID": "article.blt2abfb8f8af333a83",
+    "date_timestamp": 1725269670,
+    "start_date_timestamp": 1725269670,
+    "publish_time": 1725269709,
+    "symbol": "CHESSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "SLFUSDT",
+    "event_ts": 1725356100,
+    "title": "New Listing:  SLFUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the SLFUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-slfusdt-perpetual-contract-with-up-to-12-5x-leverage-blt1a6ebb90b250ad0e/",
+    "objectID": "article.blt1a6ebb90b250ad0e",
+    "date_timestamp": 1725356100,
+    "start_date_timestamp": 1725356100,
+    "publish_time": 1725356143,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "FLUXUSDT",
+    "event_ts": 1725440530,
+    "title": "New Listing:  FLUXUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the FLUXUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-fluxusdt-perpetual-contract-with-up-to-25x-leverage-blt2c4bbdf0d79e7cf9/",
+    "objectID": "article.blt2c4bbdf0d79e7cf9",
+    "date_timestamp": 1725440530,
+    "start_date_timestamp": 1725440530,
+    "publish_time": 1725440572,
+    "symbol": "FLUXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "POLUSDT",
+    "event_ts": 1725526840,
+    "title": "New Listing:  POLUSDT Perpetual Contract, with up to 75x leverage",
+    "description": "Bybit has listed the POLUSDT Perpetual Contract with up to 75x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-polusdt-perpetual-contract-with-up-to-75x-leverage-bltfc9ce1dac62405be/",
+    "objectID": "article.bltfc9ce1dac62405be",
+    "date_timestamp": 1725526840,
+    "start_date_timestamp": 1725526840,
+    "publish_time": 1725526910,
+    "symbol": "POLUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "QUICKUSDT",
+    "event_ts": 1725961280,
+    "title": "New Listing:  QUICKUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the QUICKUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-quickusdt-perpetual-contract-with-up-to-12-5x-leverage-blt2a9abe913330fb9e/",
+    "objectID": "article.blt2a9abe913330fb9e",
+    "date_timestamp": 1725961280,
+    "start_date_timestamp": 1725961280,
+    "publish_time": 1725961311,
+    "symbol": "QUICKUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "1000CATUSDT",
+    "event_ts": 1726229500,
+    "title": "New Listing: 1000CATUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the 1000CATUSDT Perpetual Contract, allowing you to trade with leverage of up to 12.5x. ",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000catusdt-perpetual-contract-up-to-12-5x-blt974bdcb0b0e40714/",
+    "objectID": "article.blt974bdcb0b0e40714",
+    "date_timestamp": 1726229500,
+    "start_date_timestamp": 1726229500,
+    "publish_time": 1726230015,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000NEIROCTOUSDT",
+    "event_ts": 1726487270,
+    "title": "New Listing: 1000NEIROCTOUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the 1000NEIROCTOUSDT Perpetual Contract, allowing you to trade with leverage of up to 12.5x. ",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000neiroctousdt-perpetual-contract-up-to-12-5x-blt45e7fc1d386337ee/",
+    "objectID": "article.blt45e7fc1d386337ee",
+    "date_timestamp": 1726487270,
+    "start_date_timestamp": 1726487270,
+    "publish_time": 1726487760,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ALEOUSDT",
+    "event_ts": 1726737490,
+    "title": "New Listing:  ALEOUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the ALEOUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-aleousdt-perpetual-contract-with-up-to-25x-leverage-bltf9b804228e6c3f88/",
+    "objectID": "article.bltf9b804228e6c3f88",
+    "date_timestamp": 1726737490,
+    "start_date_timestamp": 1726737490,
+    "publish_time": 1726737557,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000MUMUUSDT",
+    "event_ts": 1727086250,
+    "title": "New Listing: 1000MUMUUSDT Perpetual Contract in Innovation Zone, with up  to 12.5x leverage",
+    "description": "Bybit has listed the 1000MUMUUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000mumuusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt41ac204ded52b16c/",
+    "objectID": "article.blt41ac204ded52b16c",
+    "date_timestamp": 1727086250,
+    "start_date_timestamp": 1727086250,
+    "publish_time": 1727086299,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "FBUSDT",
+    "event_ts": 1727259690,
+    "title": "New Listing: FBUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the FBUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-fbusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt31845f6673cc4743/",
+    "objectID": "article.blt31845f6673cc4743",
+    "date_timestamp": 1727259690,
+    "start_date_timestamp": 1727259690,
+    "publish_time": 1727259766,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "FIDAUSDT",
+    "event_ts": 1727259790,
+    "title": "New Listing: FIDAUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the FIDAUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-fidausdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltc08395b3c77fef38/",
+    "objectID": "article.bltc08395b3c77fef38",
+    "date_timestamp": 1727259790,
+    "start_date_timestamp": 1727259790,
+    "publish_time": 1727259834,
+    "symbol": "FIDAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "FIOUSDT",
+    "event_ts": 1727339160,
+    "title": "New Listing: FIOUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the FIOUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-fiousdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blta156022f97c89541/",
+    "objectID": "article.blta156022f97c89541",
+    "date_timestamp": 1727339160,
+    "start_date_timestamp": 1727339160,
+    "publish_time": 1727339214,
+    "symbol": "FIOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "PRIMEUSDT",
+    "event_ts": 1727686630,
+    "title": "New Listing:  PRIMEUSDT Perpetual Contract, with  up to 25x leverage",
+    "description": "Bybit has listed the PRIMEUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-primeusdt-perpetual-contract-with-up-to-25x-leverage-bltf7c45a076ba2fdbb/",
+    "objectID": "article.bltf7c45a076ba2fdbb",
+    "date_timestamp": 1727686630,
+    "start_date_timestamp": 1727686630,
+    "publish_time": 1727686675,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MOODENGUSDT",
+    "event_ts": 1727771570,
+    "title": "New Listing: MOODENGUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the MOODENGUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-moodengusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt345205aa7f317ea7/",
+    "objectID": "article.blt345205aa7f317ea7",
+    "date_timestamp": 1727771570,
+    "start_date_timestamp": 1727771570,
+    "publish_time": 1727771631,
+    "symbol": "MOODENGUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "GOMININGUSDT",
+    "event_ts": 1727858700,
+    "title": "New Listing:  GOMININGUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the GOMININGUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-gominingusdt-perpetual-contract-with-up-to-12-5x-leverage-bltb1d2db15457ba043/",
+    "objectID": "article.bltb1d2db15457ba043",
+    "date_timestamp": 1727858700,
+    "start_date_timestamp": 1727858700,
+    "publish_time": 1727858752,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "10000WHYUSDT",
+    "event_ts": 1728038710,
+    "title": "New Listing: 10000WHYUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the 10000WHYUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-10000whyusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt7b442502ba1f8ef2/",
+    "objectID": "article.blt7b442502ba1f8ef2",
+    "date_timestamp": 1728038710,
+    "start_date_timestamp": 1728038710,
+    "publish_time": 1728038755,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PYRUSDT",
+    "event_ts": 1728292070,
+    "title": "New Listing: PYRUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the PYRUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-pyrusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt2418085c1d28fc2f/",
+    "objectID": "article.blt2418085c1d28fc2f",
+    "date_timestamp": 1728292070,
+    "start_date_timestamp": 1728292070,
+    "publish_time": 1728292116,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "KMNOUSDT",
+    "event_ts": 1728468190,
+    "title": "New Listing:  KMNOUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the KMNOUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-kmnousdt-perpetual-contract-with-up-to-25x-leverage-bltaa70b902d970eb00/",
+    "objectID": "article.bltaa70b902d970eb00",
+    "date_timestamp": 1728468190,
+    "start_date_timestamp": 1728468190,
+    "publish_time": 1728468250,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000CATSUSDT",
+    "event_ts": 1728639610,
+    "title": "New Listing: 1000CATSUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the 1000CATSUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000catsusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltde33085952d0a20e/",
+    "objectID": "article.bltde33085952d0a20e",
+    "date_timestamp": 1728639610,
+    "start_date_timestamp": 1728639610,
+    "publish_time": 1728639682,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PUFFERUSDT",
+    "event_ts": 1728911470,
+    "title": "New Listing:  PUFFERUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the PUFFERUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-pufferusdt-perpetual-contract-with-up-to-25x-leverage-bltfd6e8c0c2b197323/",
+    "objectID": "article.bltfd6e8c0c2b197323",
+    "date_timestamp": 1728911470,
+    "start_date_timestamp": 1728911470,
+    "publish_time": 1728911532,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "CARVUSDT",
+    "event_ts": 1729069800,
+    "title": "New Listing: CARVUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the CARVUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-carvusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blta53263c2f2d36b70/",
+    "objectID": "article.blta53263c2f2d36b70",
+    "date_timestamp": 1729069800,
+    "start_date_timestamp": 1729069800,
+    "publish_time": 1729069837,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "DBRUSDT",
+    "event_ts": 1729165540,
+    "title": "New Listing:  DBRUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the DBRUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-dbrusdt-perpetual-contract-with-up-to-25x-leverage-blt8a365224c6ce5afd/",
+    "objectID": "article.blt8a365224c6ce5afd",
+    "date_timestamp": 1729165540,
+    "start_date_timestamp": 1729165540,
+    "publish_time": 1729165582,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "DEEPUSDT",
+    "event_ts": 1729166470,
+    "title": "New Listing: DEEPUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the DEEPUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-deepusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltdc80906d319f8313/",
+    "objectID": "article.bltdc80906d319f8313",
+    "date_timestamp": 1729166470,
+    "start_date_timestamp": 1729166470,
+    "publish_time": 1729166514,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "HPOS10IUSDT",
+    "event_ts": 1729416310,
+    "title": "New Listing: HPOS10IUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit will list the HPOS10IUSDT Perpetual Contract at approximately Oct 21, 2024, 10:00AM UTC, with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-hpos10iusdt-perpetual-contract-with-up-to-12-5x-leverage-blt729ecbe2b6b18be3/",
+    "objectID": "article.blt729ecbe2b6b18be3",
+    "date_timestamp": 1729416310,
+    "start_date_timestamp": 1729416310,
+    "publish_time": 1729416849,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "GOATUSDT",
+    "event_ts": 1729677610,
+    "title": "New Listing: GOATUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the GOATUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-goatusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltfa3d24018682532d/",
+    "objectID": "article.bltfa3d24018682532d",
+    "date_timestamp": 1729677610,
+    "start_date_timestamp": 1729677610,
+    "publish_time": 1729677666,
+    "symbol": "GOATUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "LUMIAUSDT",
+    "event_ts": 1729847930,
+    "title": "New Listing: LUMIAUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the LUMIAUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-lumiausdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt157632d59c043cc6/",
+    "objectID": "article.blt157632d59c043cc6",
+    "date_timestamp": 1729847930,
+    "start_date_timestamp": 1729847930,
+    "publish_time": 1729847974,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "SPXUSDT",
+    "event_ts": 1730192410,
+    "title": "New Listing: SPXUSDT Perpetual Contract in Innovation Zone, with up to 25x leverage",
+    "description": "Bybit has listed the SPXUSDT Perpetual Contract in Innovation Zone with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-spxusdt-perpetual-contract-in-innovation-zone-with-up-to-25x-leverage-blt8456fe3eb24d41f6/",
+    "objectID": "article.blt8456fe3eb24d41f6",
+    "date_timestamp": 1730192410,
+    "start_date_timestamp": 1730192410,
+    "publish_time": 1730192559,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "KAIAUSDT",
+    "event_ts": 1730453560,
+    "title": "New Listing:  KAIAUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the KAIAUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-kaiausdt-perpetual-contract-with-up-to-50x-leverage-bltcb7566b4d3f023d8/",
+    "objectID": "article.bltcb7566b4d3f023d8",
+    "date_timestamp": 1730453560,
+    "start_date_timestamp": 1730453560,
+    "publish_time": 1730453601,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "VIRTUALUSDT",
+    "event_ts": 1730454020,
+    "title": "New Listing: VIRTUALUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the VIRTUALUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-virtualusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt52932e0140ba3463/",
+    "objectID": "article.blt52932e0140ba3463",
+    "date_timestamp": 1730454020,
+    "start_date_timestamp": 1730454020,
+    "publish_time": 1730454087,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "SWELLUSDT",
+    "event_ts": 1730979030,
+    "title": "New Listing:  SWELLUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the SWELLUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-swellusdt-perpetual-contract-with-up-to-25x-leverage-bltae12c9d4f6539e68/",
+    "objectID": "article.bltae12c9d4f6539e68",
+    "date_timestamp": 1730979030,
+    "start_date_timestamp": 1730979030,
+    "publish_time": 1730979084,
+    "symbol": "SWELLUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "COWUSDT",
+    "event_ts": 1731062450,
+    "title": "New Listing:  COWUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the COWUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-cowusdt-perpetual-contract-with-up-to-50x-leverage-blt9b5260c24f13eb6b/",
+    "objectID": "article.blt9b5260c24f13eb6b",
+    "date_timestamp": 1731062450,
+    "start_date_timestamp": 1731062450,
+    "publish_time": 1731062507,
+    "symbol": "COWUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "PNUTUSDT",
+    "event_ts": 1731309000,
+    "title": "New Listing: PNUTUSDT Perpetual Contract, with up to  50x leverage",
+    "description": "Bybit will list the PNUTUSDT Perpetual Contract at approximately Nov 11, 2024, 9:00AM UTC, with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-pnutusdt-perpetual-contract-with-up-to-50x-leverage-blta93a84f8adca3a3a/",
+    "objectID": "article.blta93a84f8adca3a3a",
+    "date_timestamp": 1731309000,
+    "start_date_timestamp": 1731309000,
+    "publish_time": 1731309055,
+    "symbol": "PNUTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ACTUSDT",
+    "event_ts": 1731310190,
+    "title": "New Listing: ACTUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit will list the ACTUSDT Perpetual Contract at approximately Nov 11, 2024, 9:00AM UTC, with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-actusdt-perpetual-contract-with-up-to-25x-leverage-blt6859b70006b3802f/",
+    "objectID": "article.blt6859b70006b3802f",
+    "date_timestamp": 1731310190,
+    "start_date_timestamp": 1731310190,
+    "publish_time": 1731310230,
+    "symbol": "ACTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "FWOGUSDT",
+    "event_ts": 1731404980,
+    "title": "New Listing: FWOGUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the FWOGUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-fwogusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltc9340f9c6ec18170/",
+    "objectID": "article.bltc9340f9c6ec18170",
+    "date_timestamp": 1731404980,
+    "start_date_timestamp": 1731404980,
+    "publish_time": 1731405048,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "TROYUSDT",
+    "event_ts": 1731490770,
+    "title": "New Listing:  TROYUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the TROYUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-troyusdt-perpetual-contract-with-up-to-25x-leverage-blt05522b9126bc4e64/",
+    "objectID": "article.blt05522b9126bc4e64",
+    "date_timestamp": 1731490770,
+    "start_date_timestamp": 1731490770,
+    "publish_time": 1731490842,
+    "symbol": "TROYUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "TAIUSDT",
+    "event_ts": 1731567600,
+    "title": "New Listing: TAIUSDT Perpetual Contract, with up to 25x  leverage",
+    "description": "Bybit will list the TAIUSDT Perpetual Contract at approximately Nov 14, 2024, 10:00AM UTC, with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-taiusdt-perpetual-contract-with-up-to-25x-leverage-bltd2c4ad9faa2d3ade/",
+    "objectID": "article.bltd2c4ad9faa2d3ade",
+    "date_timestamp": 1731567600,
+    "start_date_timestamp": 1731567600,
+    "publish_time": 1731567654,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "HIPPOUSDT",
+    "event_ts": 1731578090,
+    "title": "New Listing:  HIPPOUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the HIPPOUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-hippousdt-perpetual-contract-with-up-to-25x-leverage-blte96dc9406753c146/",
+    "objectID": "article.blte96dc9406753c146",
+    "date_timestamp": 1731578090,
+    "start_date_timestamp": 1731578090,
+    "publish_time": 1731578122,
+    "symbol": "HIPPOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "SDUSDT",
+    "event_ts": 1731578140,
+    "title": "New Listing:  SDUSDT Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit has listed the SDUSDT Perpetual Contract with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-sdusdt-perpetual-contract-with-up-to-12-5x-leverage-blt6143f4a58b80453f/",
+    "objectID": "article.blt6143f4a58b80453f",
+    "date_timestamp": 1731578140,
+    "start_date_timestamp": 1731578140,
+    "publish_time": 1731578184,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PROSUSDT",
+    "event_ts": 1731666440,
+    "title": "New Listing: PROSUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the PROSUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-prosusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt6108b063f0295754/",
+    "objectID": "article.blt6108b063f0295754",
+    "date_timestamp": 1731666440,
+    "start_date_timestamp": 1731666440,
+    "publish_time": 1731666473,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "BANUSDT",
+    "event_ts": 1731920840,
+    "title": "New Listing: BANUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the BANUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-banusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt2da6b90da285d3d4/",
+    "objectID": "article.blt2da6b90da285d3d4",
+    "date_timestamp": 1731920840,
+    "start_date_timestamp": 1731920840,
+    "publish_time": 1731920895,
+    "symbol": "BANUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "RIFSOLUSDT",
+    "event_ts": 1731926470,
+    "title": "New Listing: RIFSOLUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the RIFSOLUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-rifsolusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt415ea97ad192c9e8/",
+    "objectID": "article.blt415ea97ad192c9e8",
+    "date_timestamp": 1731926470,
+    "start_date_timestamp": 1731926470,
+    "publish_time": 1731926554,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "PEAQUSDT",
+    "event_ts": 1732009740,
+    "title": "New Listing: PEAQUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the PEAQUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-peaqusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt7f92bec8687af474/",
+    "objectID": "article.blt7f92bec8687af474",
+    "date_timestamp": 1732009740,
+    "start_date_timestamp": 1732009740,
+    "publish_time": 1732009776,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "LUCEUSDT",
+    "event_ts": 1732009820,
+    "title": "New Listing: LUCEUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the LUCEUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-luceusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltb824316724b236c8/",
+    "objectID": "article.bltb824316724b236c8",
+    "date_timestamp": 1732009820,
+    "start_date_timestamp": 1732009820,
+    "publish_time": 1732009977,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "OLUSDT",
+    "event_ts": 1732184680,
+    "title": "New Listing:  OLUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the OLUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-olusdt-perpetual-contract-with-up-to-25x-leverage-blt5835d2f71c1e8985/",
+    "objectID": "article.blt5835d2f71c1e8985",
+    "date_timestamp": 1732184680,
+    "start_date_timestamp": 1732184680,
+    "publish_time": 1732184730,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "CHILLGUYUSDT",
+    "event_ts": 1732184750,
+    "title": "New Listing: CHILLGUYUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the CHILLGUYUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-chillguyusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt944aa69f7c9810d3/",
+    "objectID": "article.blt944aa69f7c9810d3",
+    "date_timestamp": 1732184750,
+    "start_date_timestamp": 1732184750,
+    "publish_time": 1732184855,
+    "symbol": "CHILLGUYUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "MORPHOUSDT",
+    "event_ts": 1732266450,
+    "title": "New Listing:  MORPHOUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the MORPHOUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-morphousdt-perpetual-contract-with-up-to-25x-leverage-blt2c4570f39421b627/",
+    "objectID": "article.blt2c4570f39421b627",
+    "date_timestamp": 1732266450,
+    "start_date_timestamp": 1732266450,
+    "publish_time": 1732266494,
+    "symbol": "MORPHOUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ZRCUSDT",
+    "event_ts": 1732531490,
+    "title": "New Listing:  ZRCUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the ZRCUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zrcusdt-perpetual-contract-with-up-to-25x-leverage-blt38c31ace0c8822d8/",
+    "objectID": "article.blt38c31ace0c8822d8",
+    "date_timestamp": 1732531490,
+    "start_date_timestamp": 1732531490,
+    "publish_time": 1732531523,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000000CHEEMSUSDT",
+    "event_ts": 1732533580,
+    "title": "New Listing:  1000000CHEEMSUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the 1000000CHEEMSUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000000cheemsusdt-perpetual-contract-with-up-to-25x-leverage-blt5ab439034f309eb4/",
+    "objectID": "article.blt5ab439034f309eb4",
+    "date_timestamp": 1732533580,
+    "start_date_timestamp": 1732533580,
+    "publish_time": 1732533651,
+    "symbol": "1000CHEEMSUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "THEUSDT",
+    "event_ts": 1732700330,
+    "title": "New Listing:  THEUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit has listed the THEUSDT Perpetual Contract with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-theusdt-perpetual-contract-with-up-to-25x-leverage-bltcdf602dc2a4392df/",
+    "objectID": "article.bltcdf602dc2a4392df",
+    "date_timestamp": 1732700330,
+    "start_date_timestamp": 1732700330,
+    "publish_time": 1732700366,
+    "symbol": "THEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "BILLYUSDT",
+    "event_ts": 1732700390,
+    "title": "New Listing: BILLYUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the BILLYUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-billyusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt776659366dd44e71/",
+    "objectID": "article.blt776659366dd44e71",
+    "date_timestamp": 1732700390,
+    "start_date_timestamp": 1732700390,
+    "publish_time": 1732700426,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "MVLUSDT",
+    "event_ts": 1732869820,
+    "title": "New Listing: MVLUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the MVLUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-mvlusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt226ab097d7974851/",
+    "objectID": "article.blt226ab097d7974851",
+    "date_timestamp": 1732869820,
+    "start_date_timestamp": 1732869820,
+    "publish_time": 1732870177,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "COOKUSDT",
+    "event_ts": 1733130810,
+    "title": "New Listing: COOKUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the COOKUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-cookusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltaf5c9c818e30fa5e/",
+    "objectID": "article.bltaf5c9c818e30fa5e",
+    "date_timestamp": 1733130810,
+    "start_date_timestamp": 1733130810,
+    "publish_time": 1733130955,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "GEMSUSDT",
+    "event_ts": 1733308360,
+    "title": "New Listing: GEMSUSDT  Perpetual Contract, with up to 12.5x leverage",
+    "description": "Bybit will list the GEMSUSDT Perpetual Contract at approximately Dec 5, 2024, 11:00AM UTC, with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-gemsusdt-perpetual-contract-with-up-to-12-5x-leverage-blta85df49ea1434ce5/",
+    "objectID": "article.blta85df49ea1434ce5",
+    "date_timestamp": 1733308360,
+    "start_date_timestamp": 1733308360,
+    "publish_time": 1733308440,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "1000TOSHIUSDT",
+    "event_ts": 1733392830,
+    "title": "New Listing: 1000TOSHIUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the 1000TOSHIUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-1000toshiusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltd85e64a669c9ae27/",
+    "objectID": "article.bltd85e64a669c9ae27",
+    "date_timestamp": 1733392830,
+    "start_date_timestamp": 1733392830,
+    "publish_time": 1733392878,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "XIONUSDT",
+    "event_ts": 1733395490,
+    "title": "New Listing:  XIONUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the XIONUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-xionusdt-perpetual-contract-with-up-to-50x-leverage-blt79f68560a8026099/",
+    "objectID": "article.blt79f68560a8026099",
+    "date_timestamp": 1733395490,
+    "start_date_timestamp": 1733395490,
+    "publish_time": 1733395555,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ACXUSDT",
+    "event_ts": 1733481430,
+    "title": "New Listing:  ACXUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the ACXUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-acxusdt-perpetual-contract-with-up-to-50x-leverage-bltc5df54763f1600c4/",
+    "objectID": "article.bltc5df54763f1600c4",
+    "date_timestamp": 1733481430,
+    "start_date_timestamp": 1733481430,
+    "publish_time": 1733481472,
+    "symbol": "ACXUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "MOVEUSDT",
+    "event_ts": 1733746950,
+    "title": "New Listing:  MOVEUSDT Perpetual Contract, with up to 75x leverage",
+    "description": "Bybit has listed the MOVEUSDT Perpetual Contract with up to 75x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-moveusdt-perpetual-contract-with-up-to-75x-leverage-blt901003aabcfca660/",
+    "objectID": "article.blt901003aabcfca660",
+    "date_timestamp": 1733746950,
+    "start_date_timestamp": 1733746950,
+    "publish_time": 1733746991,
+    "symbol": "MOVEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "GIGAUSDT",
+    "event_ts": 1733996830,
+    "title": "New Listing: GIGAUSDT Perpetual Contract in Innovation Zone, with up to 50x leverage",
+    "description": "Bybit has listed the GIGAUSDT Perpetual Contract in Innovation Zone with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-gigausdt-perpetual-contract-in-innovation-zone-with-up-to-50x-leverage-blt5661891d5838d2ba/",
+    "objectID": "article.blt5661891d5838d2ba",
+    "date_timestamp": 1733996830,
+    "start_date_timestamp": 1733996830,
+    "publish_time": 1733996984,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "VELODROMEUSDT",
+    "event_ts": 1734084310,
+    "title": "New Listing:  VELODROMEUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the VELODROMEUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-velodromeusdt-perpetual-contract-with-up-to-50x-leverage-blt484075d9127c5cdc/",
+    "objectID": "article.blt484075d9127c5cdc",
+    "date_timestamp": 1734084310,
+    "start_date_timestamp": 1734084310,
+    "publish_time": 1734084353,
+    "symbol": "VELODROMEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "UROUSDT",
+    "event_ts": 1734084500,
+    "title": "New Listing: UROUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the UROUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-urousdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blte5c32ebc40abf7f3/",
+    "objectID": "article.blte5c32ebc40abf7f3",
+    "date_timestamp": 1734084500,
+    "start_date_timestamp": 1734084500,
+    "publish_time": 1734084532,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "SENDUSDT",
+    "event_ts": 1734084720,
+    "title": "New Listing:  SENDUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the SENDUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-sendusdt-perpetual-contract-with-up-to-50x-leverage-bltc7b0d337f7c42588/",
+    "objectID": "article.bltc7b0d337f7c42588",
+    "date_timestamp": 1734084720,
+    "start_date_timestamp": 1734084720,
+    "publish_time": 1734084787,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AVAUSDT",
+    "event_ts": 1734345070,
+    "title": "New Listing:  AVAUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the AVAUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-avausdt-perpetual-contract-with-up-to-50x-leverage-blt3816ed97e6b9fafd/",
+    "objectID": "article.blt3816ed97e6b9fafd",
+    "date_timestamp": 1734345070,
+    "start_date_timestamp": 1734345070,
+    "publish_time": 1734345177,
+    "symbol": "AVAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "VANAUSDT",
+    "event_ts": 1734350620,
+    "title": "New Listing:  VANAUSDT Perpetual Contract, with up to 75x leverage",
+    "description": "Bybit has listed the VANAUSDT Perpetual Contract with up to 75x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-vanausdt-perpetual-contract-with-up-to-75x-leverage-blt4eeab3ed8a985b60/",
+    "objectID": "article.blt4eeab3ed8a985b60",
+    "date_timestamp": 1734350620,
+    "start_date_timestamp": 1734350620,
+    "publish_time": 1734350663,
+    "symbol": "VANAUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "PENGUUSDT",
+    "event_ts": 1734446330,
+    "title": "New Listing:  PENGUUSDT Perpetual Contract, with up to 75x leverage",
+    "description": "Bybit has listed the PENGUUSDT Perpetual Contract with up to 75x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-penguusdt-perpetual-contract-with-up-to-75x-leverage-blt6bf7c6d6504d14e9/",
+    "objectID": "article.blt6bf7c6d6504d14e9",
+    "date_timestamp": 1734446330,
+    "start_date_timestamp": 1734446330,
+    "publish_time": 1734446419,
+    "symbol": "PENGUUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "BLUEUSDT",
+    "event_ts": 1734512130,
+    "title": "New Listing: BLUEUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the BLUEUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-blueusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt38c122051035c285/",
+    "objectID": "article.blt38c122051035c285",
+    "date_timestamp": 1734512130,
+    "start_date_timestamp": 1734512130,
+    "publish_time": 1734512472,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "GRIFFAINUSDT",
+    "event_ts": 1734685240,
+    "title": "New Listing: GRIFFAINUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the GRIFFAINUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-griffainusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt92874e06800ea548/",
+    "objectID": "article.blt92874e06800ea548",
+    "date_timestamp": 1734685240,
+    "start_date_timestamp": 1734685240,
+    "publish_time": 1734685307,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "NSUSDT",
+    "event_ts": 1734685270,
+    "title": "New Listing: NSUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the NSUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-nsusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt226e6af39960fe52/",
+    "objectID": "article.blt226e6af39960fe52",
+    "date_timestamp": 1734685270,
+    "start_date_timestamp": 1734685270,
+    "publish_time": 1734685317,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AIXBTUSDT",
+    "event_ts": 1734685370,
+    "title": "New Listing: AIXBTUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the AIXBTUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-aixbtusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-blt806b6f76a0373c65/",
+    "objectID": "article.blt806b6f76a0373c65",
+    "date_timestamp": 1734685370,
+    "start_date_timestamp": 1734685370,
+    "publish_time": 1734685401,
+    "symbol": "AIXBTUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "FARTCOINUSDT",
+    "event_ts": 1734686500,
+    "title": "New Listing:  FARTCOINUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the FARTCOINUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-fartcoinusdt-perpetual-contract-with-up-to-50x-leverage-blt9bce657d8dd9b1c0/",
+    "objectID": "article.blt9bce657d8dd9b1c0",
+    "date_timestamp": 1734686500,
+    "start_date_timestamp": 1734686500,
+    "publish_time": 1734686563,
+    "symbol": "FARTCOINUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "ZENTUSDT",
+    "event_ts": 1734946610,
+    "title": "New Listing:  ZENTUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the ZENTUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zentusdt-perpetual-contract-with-up-to-50x-leverage-bltfda5aa9d3d255528/",
+    "objectID": "article.bltfda5aa9d3d255528",
+    "date_timestamp": 1734946610,
+    "start_date_timestamp": 1734946610,
+    "publish_time": 1734946643,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "HIVEUSDT",
+    "event_ts": 1734951610,
+    "title": "New Listing:  HIVEUSDT Perpetual Contract, with up to 75x leverage",
+    "description": "Bybit has listed the HIVEUSDT Perpetual Contract with up to 75x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-hiveusdt-perpetual-contract-with-up-to-75x-leverage-blt3cf71a853c41b3c2/",
+    "objectID": "article.blt3cf71a853c41b3c2",
+    "date_timestamp": 1734951610,
+    "start_date_timestamp": 1734951610,
+    "publish_time": 1734951667,
+    "symbol": "HIVEUSDT",
+    "eligible": false,
+    "reason": "history_lt_2y"
+  },
+  {
+    "bybit_symbol": "10000QUBICUSDT",
+    "event_ts": 1735036460,
+    "title": "New Listing: 10000QUBICUSDT Perpetual Contract in Innovation Zone, with up to 12.5x leverage",
+    "description": "Bybit has listed the 10000QUBICUSDT Perpetual Contract in Innovation Zone with up to 12.5x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-10000qubicusdt-perpetual-contract-in-innovation-zone-with-up-to-12-5x-leverage-bltbc71bc6a5f5ef6cb/",
+    "objectID": "article.bltbc71bc6a5f5ef6cb",
+    "date_timestamp": 1735036460,
+    "start_date_timestamp": 1735036460,
+    "publish_time": 1735036496,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "SOLOUSDT",
+    "event_ts": 1735117000,
+    "title": "New Listing: SOLOUSDT Perpetual Contract, with up to 25x leverage",
+    "description": "Bybit will list the SOLOUSDT Perpetual Contract at approximately Dec 26, 2024, 10:00AM UTC, with up to 25x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-solousdt-perpetual-contract-with-up-to-25x-leverage-blt478186b643f6d5f2/",
+    "objectID": "article.blt478186b643f6d5f2",
+    "date_timestamp": 1735117000,
+    "start_date_timestamp": 1735117000,
+    "publish_time": 1735117196,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "AI16ZUSDT",
+    "event_ts": 1735547290,
+    "title": "New Listing:  AI16ZUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the AI16ZUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-ai16zusdt-perpetual-contract-with-up-to-50x-leverage-blt274bad4b46ff987a/",
+    "objectID": "article.blt274bad4b46ff987a",
+    "date_timestamp": 1735547290,
+    "start_date_timestamp": 1735547290,
+    "publish_time": 1735547332,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "ZEREBROUSDT",
+    "event_ts": 1735547350,
+    "title": "New Listing:  ZEREBROUSDT Perpetual Contract, with up to 50x leverage",
+    "description": "Bybit has listed the ZEREBROUSDT Perpetual Contract with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-zerebrousdt-perpetual-contract-with-up-to-50x-leverage-blt1566e11b9fb56a2d/",
+    "objectID": "article.blt1566e11b9fb56a2d",
+    "date_timestamp": 1735547350,
+    "start_date_timestamp": 1735547350,
+    "publish_time": 1735547392,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  },
+  {
+    "bybit_symbol": "FUELUSDT",
+    "event_ts": 1735631970,
+    "title": "New Listing: FUELUSDT Perpetual  Contract, with up to 50x leverage",
+    "description": "Bybit will list the FUELUSDT Perpetual Contract at approximately Dec 31, 2024, 10:00AM UTC, with up to 50x leverage.",
+    "topics": [
+      "Derivatives",
+      "Institutions"
+    ],
+    "url": "/article/new-listing-fuelusdt-perpetual-contract-with-up-to-50x-leverage-blt1b24225c9ae73c9d/",
+    "objectID": "article.blt1b24225c9ae73c9d",
+    "date_timestamp": 1735631970,
+    "start_date_timestamp": 1735631970,
+    "publish_time": 1735632024,
+    "eligible": false,
+    "reason": "no_binance_usdm_event_month"
+  }
+]

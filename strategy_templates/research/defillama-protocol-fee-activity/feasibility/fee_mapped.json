@@ -1,0 +1,68 @@
+[
+  {
+    "asset": "CVX",
+    "protocol_slug": "convex-finance",
+    "category": "Yield",
+    "fee_slug": "convex"
+  },
+  {
+    "asset": "LDO",
+    "protocol_slug": "lido",
+    "category": "Liquid Staking",
+    "fee_slug": "lido"
+  },
+  {
+    "asset": "ANKR",
+    "protocol_slug": "ankr",
+    "category": "Liquid Staking",
+    "fee_slug": "ankr-lst"
+  },
+  {
+    "asset": "EOS",
+    "protocol_slug": "vaulta-rex",
+    "category": "Lending",
+    "fee_slug": "vaulta-rex"
+  },
+  {
+    "asset": "RSR",
+    "protocol_slug": "reserve-protocol",
+    "category": "Indexes",
+    "fee_slug": "reserve"
+  },
+  {
+    "asset": "SPELL",
+    "protocol_slug": "abracadabra-spell",
+    "category": "CDP",
+    "fee_slug": "abracadabra"
+  },
+  {
+    "asset": "API3",
+    "protocol_slug": "api3",
+    "category": "Risk Curators",
+    "fee_slug": "api3"
+  },
+  {
+    "asset": "ENS",
+    "protocol_slug": "ens",
+    "category": "Domains",
+    "fee_slug": "ens"
+  },
+  {
+    "asset": "GRT",
+    "protocol_slug": "the-graph",
+    "category": "Developer Tools",
+    "fee_slug": "thegraph"
+  },
+  {
+    "asset": "AXS",
+    "protocol_slug": "axie-infinity",
+    "category": "Gaming",
+    "fee_slug": "axie-infinity"
+  },
+  {
+    "asset": "LPT",
+    "protocol_slug": "livepeer",
+    "category": "Video Infrastructure",
+    "fee_slug": "livepeer"
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "name": "v58b 放量反向确认后提前止损",
+  "rule_suffix": "_v58b",
+  "replacements": [
+    {
+      "type": "close_long",
+      "find": "let loss_close = ROI <= -5 && confirmed_reversal;",
+      "replace": "let reversal_volume = kline_1h.Qps[1] >= mean(kline_1h.Qps[2:10]) * 1.10 && kline_1h.Close[1] < kline_1h.Open[1] && kline_1h.TakerBuyRatio[1] < 0.48;\nlet loss_close = ROI <= -5 && (confirmed_reversal || reversal_volume);"
+    },
+    {
+      "type": "close_short",
+      "find": "let loss_close = ROI <= -5 && confirmed_reversal;",
+      "replace": "let reversal_volume = kline_1h.Qps[1] >= mean(kline_1h.Qps[2:10]) * 1.10 && kline_1h.Close[1] > kline_1h.Open[1] && kline_1h.TakerBuyRatio[1] > 0.52;\nlet loss_close = ROI <= -5 && (confirmed_reversal || reversal_volume);"
+    }
+  ]
+}

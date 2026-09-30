@@ -1,0 +1,1 @@
+Compute 24h Pearson correlation of 1h log returns and log QuoteVolume changes. At <=0 to >0 cross follow completed 4h return; at >=0 to <0 cross fade completed 4h return. Zero is the only threshold. No one-sided selection or alternate correlation window after results.

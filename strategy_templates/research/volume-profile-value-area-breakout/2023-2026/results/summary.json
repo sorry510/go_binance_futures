@@ -1,0 +1,6 @@
+{
+  "discovery_2023_2024": {"n":21303,"mean1":0.0000006368040984618553,"mean4":-0.000012721760149297485,"mean12":-0.000021539061865310582,"positive_symbols12":6,"symbols":10},
+  "oos1_2025": {"n":10446,"mean1":0.0004214268374736094,"mean4":0.0006703139900450154,"mean12":0.0005758901388379779,"positive_symbols12":6,"symbols":10},
+  "oos2_2026": {"n":7238,"mean1":0.0001302058791050987,"mean4":0.0006245578050491727,"mean12":0.0012080935915277718,"positive_symbols12":8,"symbols":10},
+  "decision":"freeze: discovery economically zero/negative; no exact replay"
+}

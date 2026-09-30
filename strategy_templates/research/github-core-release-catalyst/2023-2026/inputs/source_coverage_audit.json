@@ -1,0 +1,129 @@
+{
+  "BTC": {
+    "repo": "bitcoin/bitcoin",
+    "cached_files": [
+      "BTC-1.json"
+    ],
+    "stable_objects": 68,
+    "min_published": "2016-11-01",
+    "max_published": "2026-07-10",
+    "discovery_release_days": 11,
+    "covers_before_2023": true
+  },
+  "ETH": {
+    "repo": "ethereum/go-ethereum",
+    "cached_files": [
+      "ETH-1.json"
+    ],
+    "stable_objects": 100,
+    "min_published": "2020-09-09",
+    "max_published": "2026-09-23",
+    "discovery_release_days": 38,
+    "covers_before_2023": true
+  },
+  "BNB": {
+    "repo": "bnb-chain/bsc",
+    "cached_files": [
+      "BNB-1.json"
+    ],
+    "stable_objects": 75,
+    "min_published": "2022-09-30",
+    "max_published": "2026-08-13",
+    "discovery_release_days": 38,
+    "covers_before_2023": true
+  },
+  "XRP": {
+    "repo": "XRPLF/rippled",
+    "cached_files": [
+      "XRP-1.json"
+    ],
+    "stable_objects": 63,
+    "min_published": "2017-10-20",
+    "max_published": "2026-09-17",
+    "discovery_release_days": 13,
+    "covers_before_2023": true
+  },
+  "ADA": {
+    "repo": "IntersectMBO/cardano-node",
+    "cached_files": [
+      "ADA-small-1.json",
+      "ADA-small-2.json",
+      "ADA-small-3.json",
+      "ADA-small-4.json"
+    ],
+    "stable_objects": 54,
+    "min_published": "2020-10-07",
+    "max_published": "2026-09-17",
+    "discovery_release_days": 22,
+    "covers_before_2023": true
+  },
+  "AVAX": {
+    "repo": "ava-labs/avalanchego",
+    "cached_files": [
+      "AVAX-1.json"
+    ],
+    "stable_objects": 87,
+    "min_published": "2021-11-02",
+    "max_published": "2026-09-08",
+    "discovery_release_days": 43,
+    "covers_before_2023": true
+  },
+  "NEAR": {
+    "repo": "near/nearcore",
+    "cached_files": [
+      "NEAR-1.json",
+      "NEAR-2.json"
+    ],
+    "stable_objects": 94,
+    "min_published": "2021-03-29",
+    "max_published": "2026-09-03",
+    "discovery_release_days": 34,
+    "covers_before_2023": true
+  },
+  "TRX": {
+    "repo": "tronprotocol/java-tron",
+    "cached_files": [
+      "TRX-1.json"
+    ],
+    "stable_objects": 83,
+    "min_published": "2017-12-28",
+    "max_published": "2026-09-08",
+    "discovery_release_days": 10,
+    "covers_before_2023": true
+  },
+  "OP": {
+    "repo": "ethereum-optimism/optimism",
+    "cached_files": [
+      "OP-1.json",
+      "OP-2.json",
+      "OP-3.json",
+      "OP-4.json"
+    ],
+    "stable_objects": 329,
+    "min_published": "2023-02-15",
+    "max_published": "2026-09-25",
+    "discovery_release_days": 74,
+    "covers_before_2023": false
+  },
+  "APT": {
+    "repo": "aptos-labs/aptos-core",
+    "cached_files": [
+      "APT-small-1.json",
+      "APT-small-2.json",
+      "APT-small-3.json",
+      "APT-small-4.json",
+      "APT-small-5.json",
+      "APT-small-6.json",
+      "APT-small-7.json",
+      "APT-small-8.json",
+      "APT-small-9.json",
+      "APT-small-10.json",
+      "APT-small-11.json"
+    ],
+    "stable_objects": 192,
+    "min_published": "2024-08-13",
+    "max_published": "2026-09-23",
+    "discovery_release_days": 37,
+    "covers_before_2023": false
+  }
+}

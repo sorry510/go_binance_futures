@@ -1,0 +1,20 @@
+{
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "feature": "Bybit linear premium-index close minus Binance USD-M premium-index close",
+  "interval": "1h",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "Bybit premium relatively higher -> SHORT Binance; lower -> LONG",
+  "entry": "next Binance 1h open",
+  "horizons_hours": [
+    1,
+    4,
+    12
+  ]
+}

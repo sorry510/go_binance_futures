@@ -1453,3 +1453,1045 @@
 - 结论：Upbit listing direct-LONG 在 discovery 被强烈否定。
 - 状态：**整条 Upbit new-market direct-LONG family 冻结 / 不进入2025 OOS / 不入库**。尤其不因 11/12 亏损而事后反向改做 SHORT，也不按 KRW/USDT市场、币种、公告时刻、首分钟走势或后续更新筛选。
 - 审计归档：`strategy_templates/research/upbit-new-market-direct-long/2024-discovery/`。
+
+
+## 2026-09-26 — Upbit Risk-Warning Direct-SHORT：2023–2024 Discovery
+- 2024 单年只有4个 production-eligible，因此在查看任何收益前把 discovery 扩为2023–2024；方向和资格规则不变。
+- 官方风险警示宇宙：27篇公告、33 token-events、29 unique tokens；>=2年 USD-M 历史 + 前24h QuoteVolume>=500万 后剩 12事件/10币。
+- exact 1m SHORT：12笔，4胜8负，PF 0.4524，normalized net -37.22%，avg -3.10%。
+- 结论：冻结 / 不进2025-2026 OOS / 不入库。不按风险原因筛选、不只保留正式指定、不反向改 LONG。
+- 归档：strategy_templates/research/upbit-risk-warning-direct-short/2023-2024-discovery/。
+
+## 2026-09-26 — Permutation Entropy Continuation
+- 固定定义：1h收益最近48根、ordinal order=3 normalized permutation entropy；H<=0.85首次触发，H>=0.90 re-arm；方向取过去12h收益符号。
+- 2023–2024 discovery 仅3事件/3币；2025 8事件；2026 6事件。
+- 虽部分 forward signed move 为正，但频率远低于项目要求，样本不足以判断跨币泛化。
+- 结论：因样本/频率不足冻结。不放宽 entropy 阈值、不改窗口/order、不换相邻 entropy 指标挽救。
+- 归档：strategy_templates/research/permutation-entropy-continuation/2023-2026/。
+
+## 2026-09-26 — Average Trade Size Shock Continuation
+- 固定定义：1h log(quote_volume/trade_count) 对过去168h做 z-score；首次 z>=3 触发、z<1 re-arm；方向取触发小时涨跌方向。
+- 2023–2024 discovery：45事件，12h signed mean +0.2025%，但仅 3/6 有样本币为正。
+- 2025：210事件，12h +0.1975%，6/10为正；2026：172事件，12h -0.0258%，仅4/10为正。
+- 结论：成本余量不足且 2026 regime failure，冻结 / 不进 exact Engine / 不入库。不扫相邻 z/window，也不事后反向。
+- 归档：strategy_templates/research/average-trade-size-shock-continuation/2023-2026/。
+
+
+## 2026-09-26 — VPIN-style Toxicity Continuation
+- 1h taker quote 构造24h toxicity，过去720h z-score，|z|>=3 首次触发，方向跟随触发小时。
+- 2023–2024 discovery：42事件，12h signed mean -0.2886%，0/3 有样本币为正。
+- 2025：+0.1122%；2026：-0.2496%，明显 regime flip。
+- 结论：冻结，不反向、不调 z/window。归档：strategy_templates/research/vpin-style-toxicity-continuation/2023-2026/。
+
+## 2026-09-26 — Roll Effective-Spread Shock Reversal
+- 24h lag-1 return covariance 构造 Roll spread，720h z-score，z>=3，方向与触发小时相反。
+- discovery 46事件，12h +0.3682%，但只有 BTC/ETH 有样本且仅1/2为正；2025 -0.2629%，2026 +0.1602%。
+- 结论：跨 regime 不稳定，冻结。归档：strategy_templates/research/roll-spread-shock-reversal/2023-2026/。
+
+## 2026-09-26 — Volume Concentration Shock Continuation
+- 24h QuoteVolume HHI，720h z-score，z>=3，方向跟随过去24h return。
+- 1h诊断曾较强：2025 12h +0.7873%（8/10正），2026 +0.1128%（6/10正）。
+- frozen exact 1m discovery：99笔，41胜58负，TP23/SL25/TIME51，PF 0.8612，normalized net -34.84%，avg -0.352%。
+- 结论：统计 edge 无法覆盖实际执行成本，冻结；不延长12h持仓、不调参数。归档：strategy_templates/research/volume-concentration-shock-continuation/2023-2026/。
+
+## 2026-09-26 — Binance Leverage / Margin Tier Change
+- 官方 2023–2024 共58篇档位调整公告，解析326个合约事件；首档最大杠杆机械分类：loosening127、tightening25、unchanged174。
+- >=2年历史 + 前24h QuoteVolume>=500万 后剩68事件/61币：loosening53、tightening15。
+- 预注册方向：loosening LONG、tightening SHORT。全体12h signed mean -0.3494%，仅30/61币为正；2024单年63事件为 -0.6217%。
+- tightening 子样本虽 +2.2096%，但完整 family 失败后只保留 tightening 属于事后选赢家，因此不采用。
+- 结论：整条 family 冻结 / 不进 exact Engine / 不做2025-2026 OOS。归档：strategy_templates/research/binance-leverage-margin-tier-change/2023-2024-discovery/。
+
+## 2026-09-26 — Binance–Bybit Price Dislocation Catch-up
+- 1h d = Bybit return - Binance return，720h causal z-score，|z|>=3，方向取 d 符号，在 Binance 做 catch-up。
+- 2023–2024 discovery：671事件，12h -0.0503%，5/10正。
+- 2025：+0.5290%，9/10正；2026：-0.0331%，7/10正。
+- 结论：discovery 为负且 2026 edge 消失，不能用2025反推规则；冻结，不调2σ/4σ、不改 reversal。归档：strategy_templates/research/cross-exchange-price-dislocation-catchup/2023-2026/。
+
+
+## 2026-09-27 — Binance Leverage-Tier First-Bracket Shock：2024 Discovery → 2025/2026 OOS
+- 机制：只看 Binance USD-M 官方杠杆/保证金档位调整中「最小名义档最大杠杆」的真实变化。上调预注册 LONG，下调预注册 SHORT；首档最大杠杆不变的纯容量/maintenance tier 调整排除。
+- 资格：事件时合约历史 >=2年，事件前24h QuoteVolume >=500万 USDT；不因样本少放宽。
+- 执行固定：下一根1m open；4x；TP8/SL6；双边 fee=0.0005 + 5bps slippage；funding；最长24h。
+- 2024 discovery：9笔，6TP/3SL，PF **2.0625**，normalized net **+24.42%**，avg +2.71%。
+- 2025 OOS1：10笔，6TP/4SL，PF **1.4967**，normalized net **+15.94%**，avg +1.59%。
+- 2026 OOS2：10笔，3TP/7SL，PF **0.4334**，normalized net **-33.99%**，avg -3.40%。
+- 2026-09 当前月 monthly archive 未封存；9/25 资格用 Vision daily 1h，exact 1m/funding 用 Binance public USD-M REST 补齐，规则与前两期一致。
+- 结论：虽然 discovery + OOS1 很强，但 OOS2 硬失败，**整条 family 冻结 / 不入库 / 不进 Engine**。禁止事后只保留 loosening LONG、把 tightening 反向、改24h horizon或降低2年/500万门槛。
+- 归档：strategy_templates/research/binance-leverage-tier-first-bracket-shock/2024-2026/。
+
+## 2026-09-27 — Binance Portfolio Margin Collateral-Ratio Repricing：2024 Feasibility
+- 机制预注册：Portfolio Margin collateral ratio 上调→LONG，下调→SHORT；同名 USD-M；事件时历史>=2年、前24h QuoteVolume>=500万。
+- 2024 官方事件宇宙：5批、36 asset-events；严格资格后仅 **7笔**：LINK/AAVE/DOT/MATIC/WOO SHORT，NEAR/APT LONG。
+- 在查看任何收益前尝试检索2023扩充 discovery，但未找到可复现的同类调整序列；因此不使用2025/2026制造 discovery。
+- 预注册最低 discovery 样本=8，故**未运行收益回放**。
+- 结论：**样本不足冻结 / 不进 Engine / 不入库**。不降低2年/500万门槛。
+- 归档：strategy_templates/research/binance-portfolio-margin-collateral-ratio/2024-feasibility/。
+
+## 2026-09-27 — Aggregate Stablecoin Supply Zero-Cross
+- 外部流动性机制：DefiLlama peggedUSD 总 circulating USD；过去7个完整日供应变化从<=0穿到>0做LONG，从>=0穿到<0做SHORT；记录日 d 最早在 d+1 00:00 UTC 使用。
+- 资格审计修正：不能用本地1h缓存首条记录代表合约上市时间；改用 Binance Vision 月档确认 >=2年。修正后2023–2024覆盖10老币。
+- 2023–2024 discovery：866币×信号样本；24h signed mean -0.375%，72h -0.834%；24h/72h均 0/10币为正。
+- 2025：230样本；24h -0.650%，72h -1.848%，72h 0/10为正。2026：310样本；24h -0.755%，0/10为正。
+- 结论：预注册“供应扩张LONG/收缩SHORT”方向被强烈否定，family冻结 / 不进exact Engine / 不入库。禁止事后反向。
+- 归档：strategy_templates/research/stablecoin-supply-zero-cross/2023-2026/。
+
+## 2026-09-27 — Volume Concentration Shock：Exact Replay
+- 24h QuoteVolume HHI / 720h causal z-score，z>=3 首次触发，z<1 re-arm，方向跟随过去24h return。
+- 统计 diagnostic 很强：2023-2024 12h +0.487%；2025 +0.787%（8/10正）；2026 +0.113%（6/10正）；全样本9/10币正。
+- 但 frozen exact 1m discovery（4x、TP8/SL6、双边fee+5bps、funding、12h TIME）99笔：41胜58负，23TP/25SL/51TIME，PF **0.8612**，net **-34.84%**。
+- 结论：统计终点 edge 无法覆盖路径与成本，**冻结 / 不做 exact OOS / 不入库**。不改 12h horizon、不扫 HHI/z 邻近值。
+- 归档：strategy_templates/research/volume-concentration-shock-continuation/2023-2026/。
+
+
+## 2026-09-27 — Spot–Perp Basis Convergence
+- 固定定义：Binance Spot 与 USD-M 1h 同时刻 close，basis=log(perp/spot)；过去720h causal z-score，首次 |z|>=3 触发，|z|<1 re-arm；正basis做SHORT、负basis做LONG。
+- 2023-2024 discovery：730事件，12h signed mean **+0.022%**，6/10币正；2025 +0.506%；2026 +0.195%。
+- discovery 经济幅度近零，不能因为后续年份更强而晋级。**冻结 / 不做 exact Engine / 不入库**。
+- 归档：strategy_templates/research/spot-perp-basis-convergence/2023-2026/。
+
+## 2026-09-27 — Binance Futures Tick-Size Adjustment：Feasibility
+- 预注册：tick变细=LONG、tick变粗=SHORT；>=2年历史、前24h QuoteVolume>=500万。
+- 已检索的2023-2024官方批次在严格资格后仅剩 TRB、VET、SOL **3事件**；12h signed mean +4.52%，2/3正。
+- n=3 低于最低可研究规模，**按样本不足冻结**。不降低2年门槛，不消耗2025/2026制造 discovery。
+- 归档：strategy_templates/research/binance-futures-tick-size-adjustment/2023-2024-feasibility/。
+
+## 2026-09-27 — Amihud Illiquidity Shock Reversal
+- 固定定义：1h abs(log return)/QuoteVolume，过去24h求和；相对过去720h做 causal z-score；首次 z>=3，z<1 re-arm；方向反转过去24h return。
+- 2023-2024 discovery：198事件，12h signed mean -0.0953%，5/10币正；2025 -0.3342%，3/10正；2026 -0.0154%，5/10正。
+- 结论：预注册 reversal 方向失败且幅度远低于成本，冻结 / 不改 continuation / 不进 exact Engine / 不入库。
+- 归档：strategy_templates/research/amihud-illiquidity-shock-reversal/2023-2026/。
+
+## 2026-09-27 — Coinbase Listing Catalyst：Data Feasibility
+- Coinbase 官方自2022起不再为每个新资产发布独立 blog，而改用官方社交账号发布 listing 公告。
+- 当前可访问公开检索无法保证2023-2024官方 X 历史事件全集与精确时间戳完整，因此不能用零散搜索结果构造无偏 discovery universe。
+- 状态：data-feasibility blocked / 不做挑样本回测。若未来获得可审计的 @CoinbaseAssets/@CoinbaseExch 历史完整归档，再预注册 direct-LONG 验证。
+
+## 2026-09-27 — COIN-M Quarterly Term-Structure Reversion
+- 固定定义：最近到期且 DTE>7天的 COIN-M quarterly 与 COIN-M perpetual 做 annualized basis；过去720h causal z-score，|z|>=3 触发、|z|<1 re-arm；contango极端 SHORT、backwardation极端 LONG。
+- 2023-2024 discovery：66事件，12h signed mean -1.1828%，仅3/8币正；2025：965事件，-0.2283%，3/9正；2026 +0.0473%但仅4币有数据。
+- 结论：预注册 mean-reversion 方向明确失败，冻结 / 不事后改 continuation / 不进 exact Engine。
+- 归档：strategy_templates/research/coinm-quarterly-term-structure-reversion/2023-2026/。
+
+## 2026-09-27 — Official COIN-M Liquidation Cascade Continuation
+- Binance Vision COIN-M daily liquidationSnapshot 覆盖9个老币，共3587个日文件；精确去重后按小时聚合 BUY/SELL 强平量。
+- 固定定义：log1p(hourly liquidation qty) 对过去720h z-score；z>=3首次触发，z<1 re-arm；BUY强平占优做LONG、SELL占优做SHORT，测试 cascade continuation。
+- 2023H2 discovery：831事件，12h -0.3751%，仅2/9币正；2024 OOS1：1160事件，12h -0.1270%，仅2/7币正。
+- 结论：continuation 冻结。反号 liquidation-exhaustion reversal 仅是看完结果后生成的新假设，未验证；只能留给未来真正未见 liquidation 数据。
+- 归档：strategy_templates/research/coinm-liquidation-cascade-continuation/2023-2024/。
+
+## 2026-09-27 — Binance Margin One-Hour Interest Waiver Direct-SHORT
+- 机制预注册：借入指定 crypto 自动减免1小时利息，降低借币卖空融资成本，因此活动开始时固定 SHORT；>=2年 USD-M 历史、前24h QuoteVolume>=500万。
+- 可审计事件全集使用2023三批、2024四批；严格资格后2023=22 token-events、2024=27。
+- 2023 discovery：12h signed mean +0.5132%，8/10币正；2024 OOS1：12h -0.4427%，8/15币正，整体反向。
+- 结论：跨活动批次不稳定，冻结 / 不做 exact TP8-SL6 / 不删除2024-11坏批次 / 不反向 LONG。
+- 归档：strategy_templates/research/binance-margin-one-hour-interest-waiver-short/2023-2024/。
+
+## 2026-09-27 — COIN-M Quarterly Term-Structure Convergence
+- 固定定义：最近到期且 DTE>7d 的 COIN-M delivery vs COIN-M perpetual，annualized basis=log(quarterly/perp)*365/DTE；过去720h z-score，|z|>=3，|z|<1 re-arm；正 contango 做 SHORT USD-M、负 backwardation 做 LONG。
+- 2023-2024 discovery：1,313事件，12h signed mean **+0.0006%**，仅3/9币正；2025 **-0.2176%**，3/9正；2026 +0.0473%，3/4正。
+- 结论：统计层面即失败，**冻结 / 不进 exact Engine / 不调 DTE、z 或方向**。
+- 归档：strategy_templates/research/coinm-quarterly-term-structure-convergence/2023-2026/。
+
+## 2026-09-27 — COIN-M / USD-M OI-Share Reversal：Early Gate
+- 核心4币2023-2024：52事件；1d +0.257%，3d -0.178%，7d **-0.036%**，仅2/4币7d为正。
+- 结论：跨币结构不存在，**early gate 冻结 / 不扩9币与OOS**。
+- 归档：strategy_templates/research/coinm-usdm-oi-share-reversal/2023-2024-early-gate/。
+
+## 2026-09-27 — COIN-M / USD-M Taker Divergence：Early Gate
+- 固定定义：daily mean signed taker imbalance 的 CM-UM 差，30d |z|>=2，按 divergence 符号交易。
+- 核心4币2023-2024：141事件；1d +0.063%，3d +0.535%，7d **+0.036%**，仅2/4币正；BTC/BNB负、ETH/XRP正。
+- 结论：**early gate 冻结 / 不扩币与OOS**。
+- 归档：strategy_templates/research/coinm-usdm-taker-divergence/2023-2024-early-gate/。
+
+## 2026-09-27 — Binance Unplanned Network/Security Suspension：Feasibility
+- 完整枚举 Maintenance Updates catalog 157 的2023-2024约220篇公告，并全文扫描事故/攻击/异常语义，排除计划 network upgrade / hard fork / wallet maintenance。
+- 仅机械识别出 TORN DAO incident 与 Multichain situation 两类清晰非计划事故，低于最低样本8。
+- 结论：**样本不足，不做收益回放，不混入计划维护制造样本**。
+- 归档：strategy_templates/research/binance-unplanned-network-suspension/2023-2024-feasibility/。
+
+## 2026-09-27 — Coin Metrics Active-Address Growth
+- 10老币 Community AdrActCnt；最近7日均值 / 前7日均值的 log growth 零穿越，正向LONG、负向SHORT；信号日完成后下一UTC日入场。
+- 2023-2024 discovery：951事件，7d **-0.249%**，4/10正；2025 -0.122%，5/10；2026 -0.104%，3/10；全样本1749事件 -0.192%，仅2/10正。
+- 结论：**冻结 / 不因负结果事后反向**。
+- 归档：strategy_templates/research/coinmetrics-active-address-growth/2023-2026/。
+
+## 2026-09-27 — Coin Metrics MVRV Extreme Reversal
+- 10老币 CapMVRVCur；log(MVRV) 对过去90日 z-score，z>=2 SHORT、z<=-2 LONG，|z|<1 re-arm；下一UTC日入场。
+- 2023-2024 discovery：107事件，7d **-0.684%**，5/10正；2025 +0.675%，7/10；2026 **-6.020%**，仅2/10正。
+- 结论：discovery失败且 second OOS 明显崩溃，**MVRV reversal 冻结 / 不改 momentum**。
+- 归档：strategy_templates/research/coinmetrics-mvrv-extreme-reversal/2023-2026/。
+
+## 2026-09-27 — COIN-M Quarterly Term-Structure Convergence
+- 固定定义：同币 COIN-M 最近到期且 DTE>7天的季度合约相对 COIN-M perpetual 的 annualized log basis；过去720h causal z-score，首次 |z|>=3，|z|<1 re-arm；正 contango 做 SHORT USD-M，负 backwardation 做 LONG。
+- 2023-2024 discovery：1313事件、9币，12h signed mean **+0.00056%**，仅3/9币正；2025 **-0.2176%**，3/9正；2026 +0.0473%，仅剩4个长期季度合约族。
+- 全样本2707事件，12h **-0.0692%**。discovery 经济幅度近零且 OOS1 反向，**冻结 / 不进 exact Engine / 不入库**。
+- 归档：strategy_templates/research/coinm-quarterly-term-structure-convergence/2023-2026/。
+
+## 2026-09-27 — Binance First-Tier Notional Capacity Change
+- 基于已有完整 326-event leverage/margin-tier census，只取首档最大杠杆不变但首档 notional cap 变化的纯容量事件。
+- 共57事件，全部为 capacity expansion；严格 >=2年 后剩15事件/15币。
+- 预注册 expansion=LONG：1h mean -0.248%，4h -0.598%，12h **-1.456%**；12h 8/15正但负尾显著。
+- 结论：**冻结 / 不反向改 SHORT / 不进 exact Engine / 不入库**。
+- 归档：strategy_templates/research/binance-first-tier-notional-capacity-change/2023-2024-discovery/。
+
+## 2026-09-27 — Binance First-Tier MMR Change：Feasibility
+- 在完整326-event leverage/margin-tier census 中，排除首档最大杠杆和首档 notional cap 变化后，仅剩2个纯首档 MMR 变化事件，且均为 MMR 下调。
+- 两个事件在发生时都不满足 USD-M 历史>=2年，最终 **0 eligible**。
+- 结论：**feasibility 不足 / 冻结 / 不消耗后续年份 / 不降低资格门槛**。
+- 归档：strategy_templates/research/binance-first-tier-mmr-change/2023-2024-feasibility/。
+
+## 2026-09-27 — Binance vs Bybit Funding Divergence Reversal
+- 同一 settlement timestamp 配对；两边 funding 都按实际历史结算间隔换算为单位小时费率；diff=Binance-Bybit，过去90天 causal z-score。
+- 首次 |z|>=3，|z|<1 re-arm；Binance更高做SHORT、更低做LONG。
+- 2023-2024 discovery：266事件，12h **-0.2993%**，仅2/10币正；2025 +0.0296%，4/10正；2026 +0.0185%，3/10正。
+- 结论：预注册 crowding-reversal 方向失败，**冻结 / 不反向改 continuation / 不加 absolute funding/OI filter / 不进 exact Engine**。
+- 归档：strategy_templates/research/binance-bybit-funding-divergence-reversal/2023-2026/。
+
+## 2026-09-27 — Large Aggressor Order Flow：2026 Early Gate
+- 用 Binance Vision aggTrades；前一完整 UTC 日的 aggTrade notional q99 定义“大额主动单”，逐小时 tail signed-flow 相对前一日24h baseline 首次 |z|>=3 触发，|z|<1 re-arm；按 flow 符号顺势。
+- 固定 Jan/Apr/Jul 15 三个 signal day。SOL 仅1事件（12h +0.681%）；XRP 4事件（12h -0.054%）；合计5事件，1h +0.161%、4h +0.168%、12h +0.093%，12h 仅1/2币正。
+- BTC/ETH 大文件下载未完成，但 SOL/XRP early gate 已显示频率过低、跨币12h不一致且经济幅度不足，因此主动停止扩展。
+- 结论：**early freeze / 不降 q99→q95 / 不降3σ→2σ / 不为找正结果继续下载 BTC/ETH**。
+- 归档：strategy_templates/research/large-aggressor-order-flow/2026-early-gate/。
+
+## 2026-09-27 — Binance Network Upgrade / Hard-Fork Catalyst LONG
+- Binance Maintenance Updates 官方目录：2023-2024 共175篇明确 Network Upgrade / Hard Fork 公告，机械解析191 token-events；严格 >=2年 + 24h QV>=500万 后剩 **82事件/32币**。
+- 预注册 LONG：1h +0.090%，4h +0.108%，12h **+0.074%**；仅14/32币12h均值为正。
+- 年度明显翻转：2023 +0.726%，2024 **-0.610%**。
+- 结论：**regime 不稳定且经济幅度不足，冻结 / 不进 exact Engine / 不按升级类型后验筛选 / 不反向 SHORT**。
+- 归档：strategy_templates/research/binance-network-upgrade-catalyst-long/2023-2024-discovery/。
+
+## 2026-09-27 — CoinMetrics Daily Supply Shock Reversal
+- CoinMetrics Community SplyCur 日变化，对前90个完整UTC日做 z-score；首次 |z|>=3，|z|<1 re-arm；供给正冲击=SHORT、负冲击=LONG；下一UTC日 open 入场。
+- 2023-2024 discovery：77事件，7d +0.182%，仅3/8币正；2025 +3.113%，6/8正；2026 **-0.842%**，4/8正。
+- 结论：跨币/跨 regime 不稳定，**冻结 / 不事后只挑1d horizon / 不进 exact Engine / 不入库**。
+- 归档：strategy_templates/research/coinmetrics-supply-shock-reversal/2023-2026/。
+
+## 2026-09-27 — CoinMetrics Exchange Netflow：Feasibility
+- Community catalog 中 FlowInExUSD / FlowOutExUSD / SplyExUSD 仅 BTC/ETH 支持；XRP/ADA/LINK/BCH/LTC/DOGE/UNI/ZEC 不支持。
+- 结论：不满足“同一策略跨很多合约”，**data-feasibility blocked / 不做 BTC/ETH 特例**。
+- 归档：strategy_templates/research/coinmetrics-exchange-netflow/feasibility/。
+
+## 2026-09-27 — Binance Loan Collateral-Asset Addition LONG
+- 20个官方2023-2024 Loan批次，严格区分 collateral 与 loanable；collateral-only universe 201 token-events，production eligibility 后60事件。
+- 2023 discovery：53事件，12h **-0.705%**，仅14/41币正；16个 eligible batch，batch-equal 12h **-0.552%**，仅7/16批次正。
+- 2024 OOS1：7事件，**0/7正**，12h **-5.426%**。
+- 结论：**新增抵押用途→LONG 明确失败，冻结 / 不反向 SHORT / 不进 exact Engine / 不入库**。
+- 归档：strategy_templates/research/binance-loan-collateral-addition-long/2023-2024/。
+
+## 2026-09-27 — CoinMetrics Transaction-Count Growth
+- 10老币 Community TxCnt；最近7日均值 / 前7日均值 log-growth 零穿越，正向LONG、负向SHORT；信号日完成后下一UTC日入场。
+- 2023-2024 discovery：867事件，7d **+0.266%**，7/10正；2025 OOS1 **-0.532%**，5/10正；2026 OOS2 **-0.729%**，3/10正。
+- 全样本1609事件，7d -0.134%。两个时间外均反向，**冻结 / 不调窗口 / 不事后反向 / 不入库**。
+- 归档：strategy_templates/research/coinmetrics-txcount-growth/2023-2026/。
+
+## 2026-09-27 — CoinMetrics NVT / Adjusted Transfer Value：Feasibility
+- Community API 对 NVTAdj 与 TxTfrValAdjUSD 返回 HTTP 403；当前无凭证条件下不可复现。
+- 结论：**data-access blocked**；不使用推算 NVT 或其它口径替代。
+- 归档：strategy_templates/research/coinmetrics-nvt-transfer-value/feasibility/。
+
+## 2026-09-27 — CoinMetrics Transaction-Count Growth
+- 复用 Active Address 的固定变换：最近7日 TxCnt 均值 / 前7日均值，log growth 零穿越；正向LONG、负向SHORT；下一UTC日open入场。
+- 2023-2024 discovery：867事件，7d **+0.266%**，7/10币正；2025 OOS1 **-0.532%**，5/10正；2026 OOS2 **-0.729%**，仅3/10正。
+- 全样本1609事件，7d -0.134%，4/10正。结论：**forward失效，冻结 / 不反向 / 不调7d窗口**。
+- 归档：strategy_templates/research/coinmetrics-txcount-growth/2023-2026/。
+
+## 2026-09-27 — CoinMetrics NVT / Adjusted Transfer Value：Feasibility
+- 10币查询 NVTAdj 与 TxTfrValAdjUSD 时，CoinMetrics Community API 当前返回 HTTP 403；TxCnt 同期仍可公开访问。
+- 结论：**data-access blocked / 不假设付费数据 / 不做BTC-ETH特例**。
+- 归档：strategy_templates/research/coinmetrics-nvt-transfer-value/feasibility/。
+
+## 2026-09-27 — CoinMetrics Holder-Base Growth
+- AdrBalCnt 表示非零余额地址数量，区别于当天 Active Address；仍使用固定最近7日均值/前7日均值的 growth 零穿越，正向LONG、负向SHORT。
+- 2023-2024 discovery：293事件，7d **-0.519%**，仅2/9有事件币正；2025 +0.680%；2026 +1.571%。
+- discovery 方向明确失败，不能用后两年转正反推规则。结论：**冻结 / 不调窗口 / 不继续枚举相邻 activity 指标**。
+- 归档：strategy_templates/research/coinmetrics-holder-base-growth/2023-2026/。
+
+## 2026-09-27 — US Macro Release First-Hour Continuation
+- 初始预注册事件集：CPI / Employment Situation(NFP) / PPI / FOMC；官方ET发布时间转UTC；每币自身事件后60分钟方向，下一根5m open顺势入场。
+- 2023-2024 discovery：88事件时点、875币×事件实例；12h **+0.0037%**，仅4/10币正，2023为负、2024仅+0.0887%，整体 family 失败。
+- FOMC 子集在 discovery 为 +1.397%、75.5%胜率，因此只作为新生成假设，规则冻结后测试完全未见的2025/2026 FOMC。
+- FOMC OOS：129实例，12h **-0.3298%**，仅4/10币正；2025 **-0.5935%**。
+- 结论：**宏观混合 family 与 FOMC-only 均冻结 / 不进 exact TP8-SL6 / 不入库**。
+- 归档：strategy_templates/research/us-macro-release-first-hour-continuation/2023-2026/。
+
+## 2026-09-27 — Wikipedia Attention Shock：Feasibility
+- 计划用英文 Wikipedia daily pageviews 的90日异常作为注意力冲击；但10币 canonical 页面历史不可比。
+- BNB token页面2023审计窗口仅个位数浏览量；XRP Ledger主相关页面无法回溯到2023；若为不同币改用网络/公司/代币不同类型页面，会引入 symbol-specific 语义偏差。
+- 结论：**data-quality blocked / 未看收益 / 不按币挑页面**。
+- 归档：strategy_templates/research/wikipedia-attention-shock/feasibility/。
+
+## 2026-09-27 — OI / Turnover Extreme Reversal：Early Gate
+- 固定定义：hour-end OI notional / 同小时 QuoteVolume 的 log ratio，720h causal z-score；首次 z>=3、z<1 re-arm；反转过去12h return。
+- BTC/ETH/BNB/XRP 2023-2024：前三币 **0事件**，XRP仅1事件且12h -1.536%。
+- 结论：**触发过稀且 gate 失败，冻结 / 不降3σ→2σ / 不扩10币与OOS**。
+- 归档：strategy_templates/research/oi-turnover-extreme-reversal/2023-2024-early-gate/。
+
+## 2026-09-27 — Kraken Spot Listing Catalyst：Feasibility
+- Kraken官方 WordPress Asset Listings 2023-2024 全归档：机械排除地域扩展、margin、OTC、network/funding 后，得到56篇首次全球交易文章、85 asset-events。
+- 严格 Binance USD-M 历史>=2年 + 前24h QuoteVolume>=500万 后仅 **2 eligible**：LIT、RSR；2023为0。
+- 结论：**样本不足，未看收益 / 冻结 / 不降低2年门槛**。
+- 归档：strategy_templates/research/kraken-spot-listing-catalyst/2023-2024-feasibility/。
+
+## 2026-09-27 — CoinMetrics Transaction-Count Growth
+- 10老币 CoinMetrics Community TxCnt；最近7日均值 / 前7日均值的 log growth 零穿越，正向LONG、负向SHORT；指标日完成后下一UTC日入场。
+- 2023-2024 discovery：867事件，7d **+0.266%**，7/10币正；2025 OOS1 **-0.532%**，5/10正；2026 OOS2 **-0.729%**，3/10正。
+- 全样本1609事件，7d -0.134%，仅4/10币正。
+- 结论：**连续两个OOS翻负，冻结 / 不缩短到1d/3d / 不事后反向 / 不入库**。
+- 归档：strategy_templates/research/coinmetrics-transaction-count-growth/2023-2026/。
+
+## 2026-09-27 — Binance Loanable-Asset Addition SHORT
+- 复用同一20篇官方 Loan/VIP Loan 公告，重新机械解析 New Loanable Assets；213 token-events / 161 unique，严格 >=2年 + 24h QV>=500万 后剩56事件。
+- 2023 diagnostic：46事件，12h SHORT +0.723%，26/40币正、10/16批次正；2024 diagnostic：10事件 +2.806%、9/10正，但仅1个批次。
+- frozen exact 1m 2023 discovery：46笔，17胜29负，12TP/19SL/15TIME，PF **0.6939**，normalized net **-46.45%**，avg -1.01%；16/40币、7/16批次净正。
+- 结论：**路径/成本关失败，冻结 / 不跑2024 exact / 不反向LONG / 不改12h horizon / 不入库**。
+- 归档：strategy_templates/research/binance-loanable-asset-addition-short/2023-2024/。
+
+## 2026-09-27 — Binance Simple Earn Asset-Addition LONG：Feasibility
+- 2023-2024 官方目录机械筛出31篇新资产 Simple Earn Locked/Flexible Products 公告、39 token-events。
+- 严格 USD-M 历史>=2年 + 前24h QuoteVolume>=500万 后仅剩 **4事件：BTC/ANKR/DYDX/WOO**。
+- 低于最低 discovery 样本8，**未查看收益，样本不足冻结 / 不降低2年门槛 / 不入库**。
+- 归档：strategy_templates/research/binance-simple-earn-asset-addition-long/2023-2024-feasibility/。
+
+## 2026-09-27 — Binance–Bybit Volume-Dominance Lead
+- 同币1h log(Bybit linear turnover / Binance QuoteVolume)，过去720h causal z-score；首次 |z|>=3，|z|<1 re-arm。
+- Bybit异常占优时跟随该小时Bybit return；Binance异常占优时跟随Binance return；下一根Binance 1h open入场。
+- 2023-2024 discovery：1042事件，12h **-0.0428%**，4/10币正；2025 +0.0184%，5/10；2026 **-0.0640%**，4/10。
+- 全样本2022事件，12h -0.0287%。结论：**冻结 / 不反向 / 不调z / 不进exact Engine / 不入库**。
+- 归档：strategy_templates/research/binance-bybit-volume-dominance-lead/2023-2026/。
+
+## 2026-09-27 — CoinMetrics Network-Fee Growth
+- CoinMetrics Community FeeTotNtv 对8个老币完整可用；最近7日均值/前7日均值 log-growth 零穿越，正向LONG、负向SHORT；下一UTC日open入场。
+- 2023-2024 discovery：723事件，7d **-0.347%**，仅3/8币正；2025 **-1.024%**，2/8正；2026 **-1.275%**，仅1/8正。
+- 全样本1338事件，7d -0.672%，2/8正。
+- 结论：预注册需求增长方向在 discovery 与两个OOS均失败，**冻结 / 不事后反向 / 不再枚举相邻 CoinMetrics activity 指标 / 不入库**。
+- 归档：strategy_templates/research/coinmetrics-network-fee-growth/2023-2026/。
+
+## 2026-09-27 — Binance Spot/Margin Minimum Order Size Reduction：Feasibility
+- 2021-2024 官方同类历史仅4个独立批次；2023-08-31 虽影响大量交易对，但同一政策时点不能按多币伪装成独立事件。
+- 结论：**未看收益即因独立 batch 数不足冻结**。
+- 归档：strategy_templates/research/binance-spot-minimum-order-size-reduction/2021-2024-feasibility/。
+
+## 2026-09-27 — Binance Convert Asset Addition LONG：Feasibility
+- 2023-2024 官方标题全集得到40个明确新增 crypto token-event；21个事件月已有 USD-M，但 **0个**满足两年前同月已有 USD-M 历史。
+- 结论：与 >=2年生产资格天然冲突，**未看收益冻结**。
+- 归档：strategy_templates/research/binance-convert-asset-addition-long/2023-2024-feasibility/。
+
+## 2026-09-27 — Binance Vision BookTicker Top-of-Book：Feasibility
+- bookTicker 是独立 top-of-book event stream，但 BTC 单日压缩约90-185MB、月档4-8GB；当前公开历史观察到约2024-04即结束，缺2025/2026 OOS。
+- 结论：**historical-OOS blocked**；不为无法做近期验证的 family 下载多GB历史。
+- 归档：strategy_templates/research/binance-bookticker-top-of-book/feasibility/。
+
+## 2026-09-27 — Binance Secondary USDC-Perpetual Launch SHORT
+- 官方2024 USDC perpetual launch universe 25 token-events；用 USDC 合约第一根 Vision K线确定实际 launch 时间，避免延期公告歧义。
+- 严格 >=2年 + 24h QV>=500万 后剩14事件、9独立 launch 批次。
+- 预注册 SHORT 原 USDT perpetual：1h **-0.491%**、4h **-1.215%**、12h **-1.281%**，仅4/14正；batch-equal 12h **-0.681%**，4/9批次正。
+- 结论：discovery 明确失败，**冻结 / 不事后改 LONG / 不消耗小样本2025 OOS / 不入库**。
+- 归档：strategy_templates/research/binance-usdc-perpetual-secondary-launch-short/2024-discovery/。
+
+## 2026-09-28 — Binance–Bybit OI Divergence Reversal：Early Gate
+- 固定定义：log(Binance USD-M OI / Bybit linear OI)，过去720h causal z-score；首次 |z|>=3，|z|<1 re-arm；Binance OI异常占优做SHORT、Bybit异常占优做LONG。
+- BTC/ETH/BNB/XRP 2023-2024：60事件，12h signed mean **+0.3582%**，win 58.3%，但仅 **2/4币** 12h均值为正；BTC/XRP为负。
+- 每币两年仅13-17次触发，频率明显低于目标。
+- 结论：**early gate 冻结 / 不扩10币与OOS / 不降3σ→2σ / 不改 continuation / 不入库**。
+- 归档：strategy_templates/research/binance-bybit-oi-divergence-reversal/2023-2024-early-gate/。
+
+## 2026-09-28 — COIN-M / USD-M Funding Divergence Reversal：Early Gate
+- 同一 settlement timestamp 配对 COIN-M / USD-M funding，并按实际 funding_interval_hours 换算单位小时费率；diff=CM-UM，过去90天 causal z-score。
+- 首次 |z|>=3，|z|<1 re-arm；COIN-M funding异常更高做SHORT USD-M、更低做LONG。
+- BTC/ETH/BNB/XRP 2023-2024：59事件；1h -0.102%、4h -0.377%、12h **-0.095%**，仅 **2/4币** 12h为正；每币两年仅11-19次触发。
+- 结论：**early gate 冻结 / 不扩9币与OOS / 不降3σ / 不改 continuation / 不入库**。
+- 归档：strategy_templates/research/coinm-usdm-funding-divergence-reversal/2023-2024-early-gate/。
+
+## 2026-09-28 — CoinMetrics Issuance-Rate Shock：Feasibility
+- 计划指标：IssTotNtv/SplyCur；log issuance-rate 对前90日 causal z-score，+3σ SHORT、-3σ LONG、|z|<1 re-arm；下一UTC日open。
+- Community 可变序列只有 BTC/ETH/ADA/BCH/LTC/DOGE/ZEC **7币**；LINK/UNI IssTotNtv 全程为0，BNB无可用序列。
+- 预注册最低覆盖=8币，因此**未看收益即冻结 / 不降低覆盖要求 / 不做symbol-specific替代**。
+- 归档：strategy_templates/research/coinmetrics-issuance-rate-shock/feasibility/。
+
+## 2026-09-28 — Binance–Bybit Level-Premium Convergence
+- 固定定义：同币 Binance USD-M / Bybit linear perpetual 1h close 的 log price-level premium；过去720h causal z-score，首次 |z|>=3，|z|<1 re-arm；Binance premium高做SHORT，低做LONG。
+- 2023-2024 discovery：697事件，12h **-0.0971%**，仅3/10币正；2025 +0.3731%，5/10正；2026 **-0.0186%**，4/10正。
+- 全样本1313事件，12h +0.0456%，但仅3/10币正。
+- 结论：**discovery失败，冻结 / 不用2025反推 / 不改continuation / 不进exact Engine / 不入库**。
+- 归档：strategy_templates/research/binance-bybit-level-premium-convergence/2023-2026/。
+
+## 2026-09-28 — Bybit USDT Perpetual Delist → Binance SHORT：Feasibility
+- Bybit 官方 Delistings 2023-2024 全集：46篇 derivatives-tagged 公告；正文审计 BIT/ZBC 后得到48个 unique USDT perpetual symbol-events。
+- 预注册方向：Bybit 衍生品下架后 SHORT Binance USD-M；资格仍为事件时历史>=2年、前24h QuoteVolume>=500万。
+- 严格资格后仅剩 **5事件：TOMO/OCEAN/UNFI/BLZ/FTM**，低于最低 discovery 样本8。
+- 结论：**未看收益即样本不足冻结 / 不降低门槛 / 不混入Spot delist / 不入库**。
+- 归档：strategy_templates/research/bybit-usdt-perpetual-delist-short/2023-2024-feasibility/。
+
+## 2026-09-28 — Upbit Trading-Support Termination → Binance SHORT：Feasibility
+- Upbit 官方 2023-2024 trade 公告完整枚举：12篇交易支持终止公告、15 token-events、15 unique token。
+- 严格 Binance USD-M 历史>=2年 + 前24h QuoteVolume>=500万 后仅剩 **2 eligible：LINA、OMG**；12事件月无 USD-M，1个流动性不足。
+- 低于最低 discovery 样本8，**未查看收益即冻结 / 不降低门槛 / 不入库**。
+- 归档：strategy_templates/research/upbit-trading-support-termination-short/2023-2024-feasibility/。
+
+## 2026-09-28 — Bybit USDT Perpetual Launch → Binance LONG：Feasibility
+- Bybit 官方 New Listings 服务端分页完整枚举：严格上线标题207 token-events / 205 unique symbols；排除 Pre-Market、转换和 adjustment 标题。
+- 其中68个事件月 Binance 已有 USD-M，但 **68/68 均不满足事件时历史>=2年**；production-eligible = 0。
+- 结论：与 >=2年生产资格天然冲突，**未看收益即冻结 / 不降低门槛 / 不入库**。
+- 归档：strategy_templates/research/bybit-usdt-perpetual-launch-long/2023-2024-feasibility/。
+
+## 2026-09-28 — Bybit Risk-Limit Adjustment → Binance USD-M
+- 官方2023-2024三类公告完整枚举37篇；只解析结构化 before/after 表，不OCR。22篇可解析，156合约事件，152有明确 expansion/contraction。
+- 严格 >=2年 + 24h QV>=500万 后剩 **25事件/24币/8批次**。1h diagnostic 12h signed mean +2.33%，batch-equal +4.24%，表面较强。
+- frozen exact 1m（公告后下一1m open、4x、TP8/SL6、fee/slippage/funding、12h）：**25笔，7胜18负，4TP/18SL/3TIME，PF 0.3944，net -76.91%**。
+- expansion PF 0.503；contraction 4/4全SL。结论：**路径/成本关明确失败，冻结 / 不跑2025-2026 OOS / 不反向 / 不改TP/SL/horizon / 不入库**。
+- 归档：strategy_templates/research/bybit-risk-limit-adjustment/2023-2024-discovery/。
+
+## 2026-09-28 — Upbit Trading-Support Termination → Binance SHORT：Feasibility
+- 2023-2024 Upbit 官方完整终止支持全集：12篇 / 15 token-events / 15 unique token；预注册方向 SHORT。
+- 严格 Binance USD-M 历史>=2年 + 前24h QuoteVolume>=500万 后仅剩 **2事件：LINA、OMG**；12个事件月无USD-M，SRM流动性不足。
+- 低于最低 discovery 样本8，因此**未看收益即冻结 / 不降低2年和流动性门槛 / 不入库**。
+- 归档：strategy_templates/research/upbit-trading-support-termination-short/2023-2024-feasibility/。
+
+## 2026-09-28 — Binance Spot vs USD-M Index Price Lead
+- 固定定义：同币 Binance Spot close / USD-M Index Price close 的 log premium；过去720h causal z-score；首次 |z|>=3，|z|<1 re-arm；spot premium正做LONG USD-M、负做SHORT。
+- 2023-2024 discovery：1752事件，12h **+0.246%**，9/10币正；2025 OOS1 **+0.0119%**，5/10正；2026 OOS2 **+0.0334%**，5/10正。1h 在各阶段均为负。
+- 结论：discovery 广度没有转化为可持续 OOS 幅度，**冻结 / 不反向 / 不进 exact Engine / 不入库**。
+- 归档：strategy_templates/research/binance-spot-vs-index-price-lead/2023-2026/。
+
+## 2026-09-28 — Funding Settlement Pre-Move Reversal
+- 只用真实 market_funding_rates.funding_time 触发，不使用 NowTime %；反转结算前完整1h return，结算小时open入场。
+- 2023-2024 discovery：21,711事件，4h **+0.0160%**，7/10币正；2025 OOS1 **-0.0596%**，仅1/10正；2026 OOS2 **-0.0189%**，3/10正。
+- 全样本40,195事件，4h -0.0111%，经济幅度远低于成本。
+- 结论：**两个OOS连续失败，冻结 / 不改continuation / 不改窗口 / 不入库**。
+- 归档：strategy_templates/research/funding-settlement-premove-reversal/2023-2026/。
+
+## 2026-09-28 — Upbit Trading-Support Termination → Binance SHORT：Feasibility
+- Upbit官方2023-2024交易公告全集：12篇交易支持终止公告、15 token-events / 15 unique。
+- 预注册方向 SHORT；资格：事件时 Binance USD-M 存在、历史>=2年、前24h QuoteVolume>=500万。
+- 严格资格仅剩 **2事件：LINAUSDT、OMGUSDT**；12个事件月无USD-M，1个未过流动性。
+- 低于最低 discovery 样本8，**未看收益即冻结 / 不降低门槛 / 不进exact replay / 不入库**。
+- 归档：strategy_templates/research/upbit-trading-support-termination-short/2023-2024-feasibility/。
+
+## 2026-09-28 — Bybit Spot Listing → Binance LONG：Feasibility
+- Bybit官方 New Listings 完整分页：2023-2024 明确 Spot listing **257 token-events / 253 unique**；排除 perpetual、Pre-Market、Convert、Margin-only。
+- 43个事件月 Binance 已有 USD-M；其中41个历史<2年、1个24h QV<500万，最终仅 **1 eligible：KAVAUSDT**。
+- 低于最低样本8，**未看收益即冻结 / 不降低门槛 / 不继续枚举相邻外部Spot listing交易所来凑样本 / 不入库**。
+- 归档：strategy_templates/research/bybit-spot-listing-catalyst-long/2023-2024-feasibility/。
+
+## 2026-09-28 — Binance Options IV / Skew：Feasibility
+- Binance Vision Options 历史目录：BVOLIndex 仅 BTC/ETH；EOHSummary 仅 BTC/ETH/BNB/XRP/DOGE，共5个 underlying。
+- 低于新数据源最低跨币覆盖8；用 BTC/ETH Options 当其它币 market factor 又会落入禁止的 Benchmark/MarketCondition 类。
+- 结论：**未看收益即 coverage blocked / 不做5币特例 / 不入库**。
+- 归档：strategy_templates/research/binance-options-iv-skew/feasibility/。
+
+## 2026-09-28 — Monitoring Tag Addition SHORT：Funding Parser Corrected Replay
+- 保留原始35事件、SHORT、4x、TP8/SL6、双边fee0.0005、双边5bps、72h、single-position；唯一修改是 fundingRate 按真实三列解析，并在无 MarkPrice 时使用 funding 所在1m bar.Close，和正式 Engine 一致。
+- corrected 2024 discovery：PF **1.3775**，net **+10.91%**（旧1.374/+10.84）。
+- corrected 2025 OOS：PF **1.1121**，net **+8.13%**（旧1.107/+7.77）；MDT TIME 因正 funding 从约-0.80%修正为-0.44%。
+- corrected 2026 second OOS：PF **0.9069**，net **-8.44%**（旧0.910/-8.13）。
+- 三年35事件 corrected：PF **1.0552**，normalized net **+10.61%**；18胜17负。
+- 结论：funding parser bug 对数值影响很小，不改变最终冻结结论。2026 OOS仍失败，长期接近盈亏平衡且 gap tail 极大；不入库、不升级为第三候选。
+- 原始有bug helper继续保存在 replay/；修正版在 replay_corrected/，用于审计。
+
+## 2026-09-28 — Volume Profile / Value Area Breakout
+- 固定定义：过去24个已完成1h，typical price=(H+L+C)/3、QuoteVolume加权；15%/85% weighted price quantile 作为中央70% Value Area；首次收盘突破VAH做LONG、跌破VAL做SHORT，回到价值区re-arm。
+- Binance Vision真实上线月确认10老币在2023均已满2年；不使用本地1h第一根时间作为合约年龄。
+- 2023-2024 discovery：21,303事件，12h **-0.0022%**，6/10币正；2025 +0.0576%；2026 +0.1208%。
+- discovery 经济幅度为零且略负，后期改善不能反推。**冻结 / 不进exact 1m / 不改reversal / 不调value-area宽度或窗口 / 不入库**。
+- 归档：strategy_templates/research/volume-profile-value-area-breakout/2023-2026/。
+
+## 2026-09-28 — Return Autocorrelation Regime
+- 最近24个1h log return 的 lag-1 autocorrelation；rho由<=0穿到>0时跟随过去4h方向，rho由>=0穿到<0时反转过去4h方向；零点为唯一自然阈值。
+- 2023-2024 discovery：14,995事件，12h **+0.0235%**，8/10币正；2025 OOS1 **-0.0308%**，3/10正；2026 OOS2 **-0.0667%**，3/10正。
+- 全样本28,200事件，12h -0.0086%。结论：**两个OOS连续翻负，冻结 / 不只保留一侧regime / 不调窗口或阈值 / 不进exact Engine / 不入库**。
+- 归档：strategy_templates/research/return-autocorrelation-regime/2023-2026/。
+
+## 2026-09-28 — Upbit Trading-Support Termination → Binance SHORT：Feasibility
+- 2023-2024 Upbit 官方交易支持终止全集：12篇公告、15 token-events / 15 unique token。
+- 严格 Binance USD-M 历史>=2年 + 前24h QuoteVolume>=500万 后仅剩 **2事件：LINA、OMG**。
+- 低于最低 discovery 样本8，**未查看收益即冻结 / 不降低2年门槛 / 不混入风险警示或交易对移除 / 不入库**。
+- 归档：strategy_templates/research/upbit-trading-support-termination-short/2023-2024-feasibility/。
+
+## 2026-09-28 — Binance DeFi Staking Removal → SHORT：Feasibility
+- 2023-2024 官方全集只有2个独立 policy batch：2023-12-05 BTC/ETH；2024-01-09 BNB/USDT/XVS/DAI/CVX。
+- 同批多个 token 不视为独立事件；独立 batch 数远低于最低 discovery 规模。
+- 结论：**未看收益即冻结 / 不按 token 拆成伪独立样本 / 不入库**。
+- 归档：strategy_templates/research/binance-defi-staking-removal-short/2023-2024-feasibility/。
+
+## 2026-09-28 — Binance-Bybit Positioning Divergence Reversal：Early Gate
+- 固定定义：1h log(Bybit long/short account ratio / Binance global long/short account ratio)，过去720h causal z-score；首次 |z|>=3，|z|<1 re-arm；Bybit相对更偏多→SHORT Binance，相对更偏空→LONG。
+- BTC/ETH/BNB/XRP 2023-2024：60事件，12h +0.1264%，win 56.7%，但仅 2/4币 正。
+- 2023 +0.6247%、4/4正；2024 -0.3097%、仅2/4正。BTC/XRP全 discovery 均值为负，且每币两年仅8-29事件。
+- 结论：年度 regime flip + breadth/frequency 不足，early gate 冻结 / 不扩10币与OOS / 不降3σ / 不改 continuation / 不入库。
+- 归档：strategy_templates/research/binance-bybit-positioning-divergence-reversal/2023-2024-early-gate/。
+
+## 2026-09-28 — Binance-Bybit Premium Index Divergence Reversal：Early Gate
+- 固定定义：Bybit linear premium-index close - Binance USD-M premium-index close；1h 对齐，过去720h causal z-score；首次 |z|>=3，|z|<1 re-arm；Bybit premium相对更高→SHORT Binance，相对更低→LONG。
+- BTC/ETH/BNB/XRP 2023-2024：462事件，12h **-0.0908%**，win 47.4%，仅 **2/4币** 正。
+- 2023 **-0.3841%**、仅1/4正；2024才转为 +0.1391%、3/4正。Discovery 本身方向错误且年度翻转。
+- 结论：**early gate 冻结 / 不扩10币与OOS / 不降3σ / 不改 continuation / 不入库**。
+- 归档：strategy_templates/research/binance-bybit-premium-index-divergence-reversal/2023-2024-early-gate/。
+
+## 2026-09-28 — Spot-Perp Price-Impact Allocation：Early Gate
+- 固定定义：Spot 与 USD-M Perp 分别用过去168h估计 return~signed taker fraction 的无截距 impact slope；log(|lambda_spot|/|lambda_perp|) 对过去720h做 causal z-score；首次 |z|>=3，|z|<1 re-arm。
+- Spot impact异常占优则跟随已完成Spot taker flow；Perp异常占优则跟随Perp taker flow；下一根Perp 1h open入场。
+- BTC/ETH/BNB/XRP 2023-2024：44事件，12h **-0.6592%**，win 40.9%，仅 **1/4币** 正；2023 -0.4330%，2024 -0.8658%。
+- 结论：**机制方向本身失败，early gate 冻结 / 不反向 / 不降3σ / 不扩10币与OOS / 不入库**。
+- 归档：strategy_templates/research/spot-perp-price-impact-allocation/2023-2024-early-gate/。
+
+## 2026-09-28 — DeFiLlama Protocol Exploit → Binance SHORT
+- 事件全集机械构建：DeFiLlama Hacks 中 DeFi Protocol/Token，排除 Rugpull；必须 defillamaId→protocol.id→protocol.symbol 唯一映射，不人工猜ticker；>=2年 USD-M + 事件日前完整UTC日 QV>=500万。
+- 2023-2024 discovery 严格资格剩8事件/7币。下一UTC日open SHORT endpoint diagnostic：1d +1.793%、3d +3.659%、7d **+2.706%**，6/8正；2023 +1.849%、2024 +4.135%，通过预注册晋级gate。
+- 真 OOS 2025-2026 严格资格剩6事件/6币：3d **+4.730%**，7d **+7.277%**、5/6正；2025 +8.587%、2026 +5.967%。
+- 但冻结 exact 1m（下一UTC日00:00 open、4x、TP8/SL6、双边fee+5bps、funding、最长72h）失败：
+  - discovery：8笔，3TP/5SL，PF **0.675**，net -11.61%；
+  - OOS：6笔，2TP/4SL，PF **0.553**，net -13.08%；2025 PF0.532、2026 PF0.573；
+  - 全14笔：PF **0.620**，net -24.69%。
+- 结论：多日终点下跌真实存在，但固定执行路径经常先反抽触发SL，**路径/成本关失败，冻结 / 不扩大SL / 不延长72h / 不延迟入场 / 不按攻击类型后验筛选 / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-exploit-short/2023-2026/。
+
+## 2026-09-28 — COIN-M Perpetual Secondary Launch → USD-M LONG：Feasibility
+- Binance Vision 全量 COIN-M perpetual 中，2023-2024 只有 WIF/DOGS/SUI/WLD 四个首次月档。
+- 四者事件月都有对应 USD-M，但两年前月档全部不存在，严格 >=2年 后 **0 eligible**。
+- 结论：**天然与生产资格冲突 / 未看收益冻结 / 不降低2年门槛 / 不入库**。
+- 归档：strategy_templates/research/coinm-perpetual-secondary-launch-long/2023-2024-feasibility/。
+
+## 2026-09-28 — Funding Interval Compression：Binance Vision Full Audit
+- 官方 Binance Vision fundingRate 月档重审正式15币，2024-01~2026-08。
+- BTC/ETH/BNB/XRP/SOL/DOGE/LTC/AVAX/UNI/ZEC/ADA/NEAR/1000PEPE/SUI 全程只有8h；ONDO全程只有4h。
+- **1h rows = 0，真实 interval-change transition = 0**。ONDO不是8h→4h压缩事件。
+- 结论：此前 blocker 不是本地表缺数，官方归档本身也没有 production-eligible compression event。**永久冻结 / 不再重开该 family**。
+
+## 2026-09-28 — Binance Multi-Assets Margin Support：Feasibility
+- 2023-2024 Binance 官方标题全集共7篇相关公告；正文审计后真正的方向性 crypto margin-asset 事件仅 ADA/DOT/SOL/XRP 的支持撤销。
+- TUSD/USDP 是稳定币新增；2024-02 是全局默认模式更新；auto-exchange threshold 是全局制度变化；SOL 旧公告有延期/重发，不能拆成伪独立样本。
+- 独立方向事件远低于最低 discovery 规模8，**未看收益即冻结 / 不把重复阶段拆样本 / 不入库**。
+- 归档：strategy_templates/research/binance-multi-assets-margin-support/2023-2024-feasibility/。
+
+## 2026-09-28 — OI Creation Efficiency Continuation：Early Gate
+- 固定定义：max(ΔOI notional,0)/QuoteVolume 做 log1p，过去720h causal z-score；首次 z>=3、z<1 re-arm；方向跟随触发小时已完成 return。
+- BTC/ETH/BNB/XRP 2023-2024：1063事件；1h +0.0154%、4h +0.0108%、12h **-0.0100%**，win49.6%。
+- 12h：BTC +0.1303%、ETH +0.0808%、BNB +0.0374%、XRP -0.3020%；虽3/4币正，但总体经济 edge 为零且未达到预注册 +0.10% gate。
+- 结论：**early gate冻结 / 不删XRP / 不降3σ / 不改720h / 不扩10币与OOS / 不入库**。
+- 归档：strategy_templates/research/oi-creation-efficiency-continuation/2023-2024-early-gate/。
+
+## 2026-09-28 — DeFiLlama Chain TVL Price-Residual Flow
+- 9条原生链；日频 TVL return 用前90日 beta 对本币 return 做 causal residual，最近7日 residual 求和；零上穿 LONG、零下穿 SHORT；下一UTC日open。
+- 动态要求 Binance USD-M 已有>=2年历史。2023-2024 discovery：880事件/8币，7d **+0.0391%**，仅4/8币正。
+- 2025 +0.1034%、5/9正；2026 +0.3116%、5/9正。后期增强但 discovery 广度/经济幅度不足。
+- 结论：**冻结 / 不后验只留SUI-XRP-SOL / 不调90d beta或7d窗口 / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-tvl-price-residual/2023-2026/。
+
+## 2026-09-28 — DeFiLlama Chain Stablecoin Supply Growth：Feasibility
+- 计划研究链级 stablecoin circulating USD 的7日增长零穿越，区别于已冻结的全市场 aggregate stablecoin supply。
+- 2023-2024 同语义可用原生链仅 **7个：ETH/BNB/SOL/AVAX/ADA/NEAR/SUI**；Bitcoin 无对应 chain stablecoin endpoint，Ripple 历史直到 2025-04-02 才开始。
+- 低于预注册最低覆盖8，**未查看收益即冻结 / 不加入无关链凑样本 / 不降低覆盖门槛 / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-supply-growth/feasibility/。
+
+## 2026-09-28 — KuCoin Futures Delist → Binance SHORT：Feasibility
+- KuCoin 官方 Delistings CMS API 可完整分页，但当前历史最早仅到 2023-06-30。
+- 2023-2024：28篇官方 Futures delist 公告，去重后43 contract-events；排除 Trading Bot/Earn/Margin 伴随公告与重复 Updated。
+- 严格 Binance USD-M 历史>=2年 + 前24h QuoteVolume>=500万 后仅剩 **7事件：IOST/TOMO/OCEAN/GAL/MATIC/BLZ/FTM**。
+- 低于最低 discovery 样本8，且官方API无法扩到2022；**未看收益即冻结 / 不降低门槛 / 不用搜索引擎补历史 / 不入库**。
+- 归档：strategy_templates/research/kucoin-futures-delist-short/2023-2024-feasibility/。
+
+## 2026-09-28 — KuCoin Spot Whole-Token Delist → Binance SHORT：Feasibility
+- KuCoin 官方 Delistings CMS + 公告正文完整解析 2023-2024：34篇 whole-token/project 下架公告，240 token-events / 240 unique token。
+- 排除 Earn/Trading Bot/Margin/ETF 伴随公告；token 从官方正文交易对段机械解析。
+- 仅3个 token 在事件月仍有 Binance USD-M；严格历史>=2年 + 前24h QV>=500万 后仅 **ANT 1事件**。
+- 结论：**未看收益即 feasibility 冻结 / 不降低门槛 / 不再扩同类外部Spot下架 / 不入库**。
+- 归档：strategy_templates/research/kucoin-spot-whole-token-delist-short/2023-2024-feasibility/。
+
+## 2026-09-28 — Kaufman Efficiency Ratio Continuation：Early Gate
+- 标准1h ER(24)=净24h位移/24h总路径长度；ER从过去720h滚动中位数下方上穿时触发，方向跟随已完成24h return，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024 共5126事件；12h：BTC -0.0936%、ETH -0.0279%、BNB -0.0320%、XRP -0.0086%，**4/4均为负**；合计 -0.0406%。
+- 结论：**early gate失败，冻结 / 不扩10币与OOS / 不事后改fade / 不入库**。
+- 归档：strategy_templates/research/kaufman-efficiency-ratio-continuation/2023-2024-early-gate/。
+
+## 2026-09-28 — Chaikin Money Flow Zero-Cross：Early Gate
+- 标准1h CMF(20)；上穿0做LONG、下穿0做SHORT，下一1h open，不加趋势确认或其它阈值。
+- BTC/ETH/BNB/XRP 2023-2024 共8290事件；12h **+0.0070%**，win49.1%；BTC +0.0111%、ETH +0.0148%、BNB -0.0044%、XRP +0.0054%。
+- 远低于预注册 +0.10% gate，**冻结 / 不扩10币与OOS / 不调period或阈值 / 不入库**。
+- 归档：strategy_templates/research/chaikin-money-flow-zero-cross/2023-2024-early-gate/。
+
+## 2026-09-28 — Money Flow Index(14) Center Cross：Early Gate
+- 标准1h MFI(14)，上穿50 LONG、下穿50 SHORT，下一1h open；不加20/80或趋势确认。
+- BTC/ETH/BNB/XRP 2023-2024 共7814事件；12h **-0.0060%**，win48.9%；BTC/ETH略正，BNB/XRP为负。
+- 结论：**early gate失败，冻结 / 不扩10币与OOS / 不再枚举OBV/CCI/RSI等相邻传统TA / 不入库**。
+- 归档：strategy_templates/research/money-flow-index-center-cross/2023-2024-early-gate/。
+
+## 2026-09-28 — Price–Volume Correlation Regime：Early Gate
+- 1h log return 与 log QuoteVolume change 的24h Pearson correlation；rho由<=0上穿0时跟随已完成4h return，rho由>=0下穿0时反转4h return；下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024 共3938事件；1h -0.0097%、4h +0.0205%、12h **+0.0265%**，win49.4%；BTC/BNB/XRP略正，ETH近零。
+- 远低于预注册 +0.10% gate，**冻结 / 不扩10币与OOS / 不只保留单侧regime / 不调correlation窗口 / 不入库**。
+- 归档：strategy_templates/research/price-volume-correlation-regime/2023-2024-early-gate/。
+
+## 2026-09-28 — Binance Seed Tag Addition：Feasibility
+- Binance官方2023-2026完整标题审计：只有2023-07-26一次性“Introducing Seed Tags & Monitoring Tags”制度上线；之后Seed Tag相关公告均为 removal，没有独立新增批次。
+- 同一制度上线时多个token不能拆成伪独立事件；独立batch远低于最低样本。
+- 结论：**未看收益即 feasibility blocked / 不按token拆批次 / 不入库**。
+- 归档：strategy_templates/research/binance-seed-tag-addition/2023-2026-feasibility/。
+
+## 2026-09-28 — Binance Spot Tick-Size → USD-M Cross-Market Signal
+- 预注册：BASE/USDT Spot tick变细→LONG USD-M，tick变粗→SHORT；官方实际生效时间；>=2年 + 24h QV>=500万。
+- 2023-2024：107 symbol-events，严格 eligible **20事件/18币/9批次**；endpoint 12h signed mean +0.918%。
+- frozen exact 1m：20笔、8TP/12SL，PF **0.8297**，net **-13.91%**，原双向 family 路径关失败。
+- 分侧仅作 attribution：变细→LONG 13笔 2TP/11SL，PF **0.2711**、net -54.69%；变粗→SHORT 7笔 6TP/1SL，PF **7.1198**、net +40.77%。后者只能作为新生成假设，不能用 discovery 自证。
+- 2025-2026 forward：14批、144个 BASE/USDT 调整，**144/144 全为tick下调，tick上调=0**，因此 SHORT 假设 forward 无事件可验证。
+- 2021-2022 earlier-OOT：已锁定18篇官方文章，但 Binance CMS article-detail 当前统一HTTP错误；正文尚未重建，**未查看收益**。
+- 结论：**原双向 family冻结；tick上调→SHORT仅保留待独立验证，不入库**。
+- 归档：strategy_templates/research/binance-spot-tick-size-cross-market/2023-2026/。
+
+## 2026-09-28 — Parkinson Range-vs-Close Variance Regime：Early Gate
+- 最近24h Parkinson range variance / close-to-close realized variance；自然阈值1。上穿1反转已完成4h方向，下穿1跟随4h方向，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024：3238事件；1h -0.0122%、4h约0、12h **+0.0056%**，win49.4%；BNB/XRP为负。
+- 结论：**early gate失败，冻结 / 不换Garman-Klass/Yang-Zhang继续挖相同机制 / 不入库**。
+- 归档：strategy_templates/research/parkinson-range-vs-close-variance-regime/2023-2024-early-gate/。
+
+## 2026-09-28 — DeFiLlama Protocol TVL Shock
+- unique protocol.symbol，排除 CEX/Chain/Canonical Bridge；日频 USD TVL log-return 相对前90个连续UTC日 causal z-score；首次 z<=-3，z>=-1 re-arm；>=2年 + signal-day QV>=500万。
+- 预注册 SHORT discovery 2023-2024：严格 **96事件/16币**；1d -0.274%、3d -2.144%、7d **-4.283%**；2023/2024均为负，仅5/16币正，明确失败。
+- discovery 生成的镜像 LONG 只允许去未见OOS：2025-2026严格 **46事件/16币**；1d +0.626%，3d -0.747%，7d **-5.813%**；2025 -5.882%、2026 -5.351%，仅6/16币正。
+- 结论：**两个方向跨regime均不成立，整个family冻结 / 不按类别或z强度后验筛选 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-tvl-shock/2023-2026/。
+
+## 2026-09-28 — DeFiLlama Protocol Fee Activity：Feasibility
+- 40个老协议token中仅11个暴露 dimensions.fees；免费 fee-summary 当前只有 **5币：SPELL/GRT/ENS/AXS/LDO** 具备足够2023-2024历史。
+- CVX/ANKR/RSR endpoint当前400；EOS/API3/LPT历史起点过晚。
+- 低于新数据源最低跨币覆盖8，**未看收益即 coverage blocked / 不做5币特例 / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-fee-activity/feasibility/。
+
+## 2026-09-29 — Wick Rejection Asymmetry：Early Gate
+- 单根1h=(lower_wick-upper_wick)/(high-low)，最近24h取均值；上穿0 LONG、下穿0 SHORT，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024 共5095事件；1h -0.0083%、4h -0.0163%、12h **-0.0145%**，仅XRP略正。
+- 结论：**early gate失败，冻结 / 不改窗口或反向 / 不入库**。
+- 归档：strategy_templates/research/wick-rejection-asymmetry/2023-2024-early-gate/。
+
+## 2026-09-29 — USDC-vs-USDT Perpetual Dislocation Catch-Up
+- 固定信号：1h log(USDC-perp/USDT-perp) 相对 prior720h causal z-score；首次 |z|>=3，|z|<1 re-arm；USDC相对贵→LONG USDT，USDC相对便宜→SHORT USDT；下一完整1h open；目标USD-M历史>=2年。
+- discovery 2024-2025：1154事件，1h +0.1561%、4h +0.1700%、12h +0.2158%，17/27币正；2024 +0.4418%，2025 +0.0525%。
+- untouched 2026-01~08 OOS：578事件，1h +0.0927%、4h +0.1139%、12h +0.2849%，19/27币正，endpoint gate通过。
+- frozen exact 1m（同一下一1h open、4x、TP8/SL6、fee0.0005/side、5bps/side、funding、12h、single-position/symbol）：1732 signals中32重叠跳过，1700 trades、0 data errors。
+  - discovery exact：1140笔，471TP/529SL/140TIME，PF 0.9923，net -30.86%；
+  - 2026 OOS exact：560笔，193TP/231SL/136TIME，PF 0.9177，net -151.77%；
+  - 合计 PF 0.9688，net -182.64%；OOS LONG PF0.8634、SHORT PF0.9610，双侧均失败。
+- 一致性审计：exact实际成交子集 endpoint 仍为正（discovery 12h +0.2156%、OOS +0.2864%）；OOS gross（已含双边5bps滑点、未扣fee）PF 1.0421、平均 +0.1294%，但4x双边手续费平均约0.3999%/笔，funding近零。结论是真实成本裕度不足，而非信号/时间对齐错误。
+- 结论：冻结 / 不降成本假设 / 不调z/window/leverage / 不只留majors或单方向 / 不入库。
+- 归档：strategy_templates/research/usdc-usdt-perpetual-dislocation-catchup/2024-2026/。
+
+## 2026-09-29 — Realized Kurtosis Reversal：Early Gate
+- 最近24个1h log return raw kurtosis 从<=3上穿>3时触发，反转已完成24h方向，下一1h open；3为高斯自然基准。
+- BTC/ETH/BNB/XRP 2023-2024：2422事件；1h +0.0033%、4h -0.0131%、12h **-0.0315%**；BTC/ETH/BNB均负，仅XRP略正。
+- 结论：**early gate失败，冻结 / 不后验改continuation / 不调window或阈值 / 不入库**。
+- 归档：strategy_templates/research/realized-kurtosis-reversal/2023-2024-early-gate/。
+
+## 2026-09-29 — KuCoin Earn Delist → Binance SHORT：Feasibility
+- 2023-2024官方Earn下架全集：24篇，机械解析34 token-events；严格>=2年 + QV>=500万后仅7事件：APE/GRT/GAL/DAR/BAND/IOST/ALGO。
+- 低于最低样本8，**未看收益即冻结 / 不降低门槛 / 不入库**。
+- 归档：strategy_templates/research/kucoin-earn-delist-short/2023-2024-feasibility/。
+
+## 2026-09-29 — KuCoin Earn Addition → Binance LONG
+- 完整KuCoin Earn关键词档案998篇/50页；严格语义筛选35篇2023-2024新增Saving/Staking文章；官方产品表完整解析172 token-events / 166 unique，35/35数量校验通过。
+- 严格>=2年 + QV>=500万后50事件/49币/14批。看收益前锁定2023 discovery、2024 untouched OOS。
+- 2023 discovery 44事件：1h **-0.1723%**、4h **-0.1080%**、12h **-0.7185%**；batch-equal 12h **-0.1737%**，仅4/11批次正；43币仅18正。
+- discovery明确失败，**不查看2024六个OOS事件 / 不反向SHORT / 冻结 / 不入库**。
+- 归档：strategy_templates/research/kucoin-earn-addition-long/2023-2024/。
+
+## 2026-09-29 — Snapshot Governance Value-Accrual：Feasibility
+- 仅用DeFiLlama governanceID安全映射8个成熟Snapshot spaces；2023-2024完整626 proposals。
+- 以proposal创建时刻为因果事件；严格fee-switch/token-buyback/token-burn/revenue-share/protocol-fee-distribution语义只剩6事件/3币（LDO/LRC/APE）；emissions/inflation严格事件=0。
+- verified Snapshot ticker-only扩 universe 因语义映射不安全被拒绝。
+- **低于最低样本8，未看收益即冻结 / 不入库**。
+- 归档：strategy_templates/research/snapshot-governance-value-accrual/2023-2024-feasibility/。
+
+## 2026-09-29 — Spot-vs-Perp Average Trade Notional Divergence：Early Gate
+- 1h log((futures QuoteVolume/trade_count)/(spot QuoteVolume/trade_count)) 相对 prior720h causal z-score；首次 |z|>=3、|z|<1 re-arm；方向跟随触发小时 futures return，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024：397事件；1h -0.0172%、4h -0.0652%、12h **-0.0183%**；BTC/XRP略正，ETH/BNB负。
+- 结论：**early gate失败，冻结 / 不反向、不调z/window / 不入库**。
+- 归档：strategy_templates/research/spot-perp-average-trade-notional-divergence/2023-2024-early-gate/。
+
+## 2026-09-29 — Spot-vs-Perp Intrabar Range Excess：Feasibility
+- 1h E=log(log(H/L)_futures / log(H/L)_spot)，prior720h causal z-score；预注册 z>=3 首触发、z<1 re-arm，反转触发小时 futures return。
+- 时间戳对齐正常，BTC/ETH/BNB/XRP 各16113有效小时；2023-2024最大z仅 **1.4621 / 1.7653 / 0.6528 / 1.0393**，固定3σ条件 **0事件**。
+- 结论：**no-event feasibility冻结 / 不降3σ制造样本 / 不继续相邻range变体 / 不入库**。
+- 归档：strategy_templates/research/spot-perp-intrabar-range-excess/2023-2024-feasibility/。
+
+## 2026-09-29 — COIN-M Liquidation Exhaustion Reversal：OOS Feasibility Recheck
+- 2023H2/2024 continuation失败后曾明确生成“liquidation exhaustion reversal”假设，并规定只能用未来未见数据验证。
+- 2026-09-29重新审计 Binance Vision：原9币 liquidationSnapshot 均停在 **2024-10-10~14**；BTC/ETH/DOT到10-14，XRP/ADA/LINK/LTC到10-13，BCH到10-10，BNB到10-14；**2025+ 文件=0**。
+- 结论：**historical-OOS blocked / 不用旧样本反向自证 / 不入库**。
+- 归档：strategy_templates/research/coinm-liquidation-exhaustion-reversal/2025-2026-feasibility/。
+
+## 2026-09-29 — KuCoin Futures Tick-Size → Binance USD-M
+- KuCoin官方2024-2026完整 tick-size 公告全集：28独立批次、282 contract-events、0解析失败；**282/282均为tick下调**，因此预注册family实际只有LONG。
+- 严格 Binance >=2年 + 前24h QV>=500万：2024-2025 discovery **20事件/20币/11批**；2026 untouched OOS **15事件/15币/5批**。
+- discovery：1h -0.0680%、4h +0.4111%、12h **-0.6555%**；2024 -0.2142%、2025 -0.7333%；仅 **3/11批次**、**6/20币** 12h为正。
+- discovery gate明确失败，**不查看2026 OOS收益 / 不事后改SHORT / 冻结 / 不入库**。
+- 归档：strategy_templates/research/kucoin-futures-tick-size-cross-market/2024-2026/。
+
+
+## 2026-09-29 — Wick Rejection Asymmetry：Early Gate
+- 1h `(lower wick - upper wick)/(high-low)` 零穿越；上穿0 LONG、下穿0 SHORT，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024 共33553事件；1h -0.0124%、4h -0.0128%、12h **-0.0039%**，win49.4%；BTC/ETH/BNB均负。
+- 结论：**early gate失败，冻结 / 不加wick强度或body/volume过滤 / 不入库**。
+- 归档：strategy_templates/research/wick-rejection-asymmetry/2023-2024-early-gate/。
+
+## 2026-09-29 — Aggressor Buy/Sell Average Trade-Size Asymmetry：Data-Cost Feasibility
+- 该机制区别于总Average Trade Size Shock与q99 Large Aggressor Flow；拟测 `log(avg aggressive-buy notional / avg aggressive-sell notional)` 的720h causal z-score。
+- 本地 market_trades 对 BTC/ETH/BNB/XRP 均为0行；若做2023-2024 gate需大体量下载 aggTrades。
+- **未看收益即 data-cost blocked**；不是alpha失败，暂不为单一未验证信号下载多年原始成交档。
+- 归档：strategy_templates/research/aggressor-trade-size-asymmetry/data-cost-feasibility/。
+
+## 2026-09-29 — Lo-MacKinlay Variance Ratio Regime：Early Gate
+- 最近96个1h return 的 VR(4)=Var(overlapping 4h return)/(4×Var(1h return))；自然阈值1。上穿1跟随已完成4h方向，下穿1反转4h方向，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024：2177事件；1h -0.0174%、4h +0.0012%、12h **-0.0228%**；BTC/XRP为负。
+- 结论：**early gate失败，冻结 / 不扫q=2/8或窗口 / 不入库**。
+- 归档：strategy_templates/research/variance-ratio-regime/2023-2024-early-gate/。
+
+## 2026-09-29 — Semivariance Regime：Early Gate
+- 最近48个1h return：SV+/SV- 自然阈值1；上穿1 LONG、下穿1 SHORT，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024：3225事件；1h -0.0153%、4h -0.0069%、12h **-0.0482%**，win48.0%；仅BNB近零。
+- 结论：**standalone early gate失败，冻结 / 不改窗口、不加70%阈值、不反向 / 不入库**。
+- 归档：strategy_templates/research/semivariance-regime/2023-2024-early-gate/。
+
+## 2026-09-29 — Volatility Clustering Regime：Early Gate
+- 最近48个1h squared log return 的lag-1 autocorrelation；零为自然阈值。上穿0跟随已完成4h方向，下穿0反转4h方向，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024：2936事件；1h -0.0278%、4h -0.0480%、12h **+0.0193%**，win49.3%；ETH/BNB/XRP略正但幅度不足。
+- 结论：**低于+0.10% gate，冻结 / 不改成abs-return、不调窗口/阈值 / 不入库**。
+- 归档：strategy_templates/research/volatility-clustering-regime/2023-2024-early-gate/。
+
+## 2026-09-29 — Runup-vs-Drawdown Excursion Asymmetry：Early Gate
+- 最近24个1h close：最大有序trough→peak log-runup / 最大有序peak→trough log-drawdown；自然阈值1，上穿1 LONG、下穿1 SHORT，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024：3211事件；1h +0.0227%、4h +0.0252%、12h **+0.0213%**，win47.3%；ETH为负，BTC/BNB近零，主要由XRP贡献。
+- 结论：**远低于+0.10% gate，冻结 / 不调窗口或阈值 / 不入库**。
+- 归档：strategy_templates/research/runup-drawdown-excursion-asymmetry/2023-2024-early-gate/。
+
+## 2026-09-29 — Extreme Return Tail Asymmetry：Early Gate
+- 最近24个1h return：max positive / abs(max negative)，自然阈值1；上穿1 LONG、下穿1 SHORT，下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024：3106事件；1h +0.0027%、4h +0.0123%、12h **-0.0031%**，win46.7%；BTC/ETH/BNB均负，仅XRP略正。
+- 结论：**early gate失败，冻结 / 不加极端幅度阈值、不调窗口 / 不入库**。
+- 归档：strategy_templates/research/extreme-return-tail-asymmetry/2023-2024-early-gate/。
+
+
+## 2026-09-29 — KuCoin Margin Addition → Binance LONG：Feasibility
+- KuCoin官方 margin trading 完整CMS档案：2023-2024共97篇新增文章，机械解析 **105 token-events / 105 unique**，97/97文章成功解析。
+- 62事件在当月存在 Binance USD-M；严格历史>=2年 + 前24h QV>=500万 后仅 **TRB、MTL 2事件**。
+- 结论：**低于最低样本8，未看收益即冻结 / 不降低生产门槛 / 不入库**。
+- 归档：strategy_templates/research/kucoin-margin-addition-long/2023-2024-feasibility/。
+
+## 2026-09-29 — KuCoin Futures Leverage/Risk-Limit → Binance USD-M：Discovery
+- 官方before/after表机械解析；非下降且至少一项上升→LONG，非上升且至少一项下降→SHORT，mixed排除；公告后下一完整1h open。
+- 严格>=2年 + QV>=500万后 **112事件/86币/12批**，LONG97、SHORT15。
+- discovery 2023-2025：1h **-0.0617%**、4h **-0.6097%**、12h **-1.0978%**；batch-equal 12h **-0.8755%**，仅5/12批正。
+- 年度：2023 +0.6359%，2024 -2.0438%，2025 -3.7504%；仅28/86币平均为正；LONG/SHORT两侧均为负。
+- 结论：**discovery gate明确失败，冻结 / 不解析2026 OOS / 不拆方向救活 / 不入库**。
+- 归档：strategy_templates/research/kucoin-futures-risk-limit-cross-market/2023-2025-discovery/。
+
+## 2026-09-29 — Binance Spot Step-Size Adjustment：Feasibility
+- 已审计2021-2024 Spot tick-size公告集中，仅 **2021-08-12** 一篇标题包含 Step Size；独立批次上限=1。
+- **未看收益即样本不足冻结 / 不拆同批token伪造独立样本 / 不入库**。
+- 归档：strategy_templates/research/binance-spot-step-size-adjustment/2021-feasibility/。
+
+## 2026-09-29 — KuCoin Corporate-Action Support → Binance LONG：Feasibility
+- KuCoin官方完整关键词CMS档案机械筛选 swap/migration/rebranding 首次支持公告：2023-2024共81篇、82 token-events / 80 unique。
+- 严格 Binance USD-M 历史>=2年 + 前24h QV>=500万后仅 **5事件：SXP/EGLD/ALPHA/NEO/MATIC**。
+- 低于最低样本8，**未看收益即冻结 / 不降低门槛 / 不入库**。
+- 归档：strategy_templates/research/kucoin-corporate-action-support-long/2023-2024-feasibility/。
+
+## 2026-09-29 — KuCoin Deposit+Withdrawal Closure → Binance SHORT
+- KuCoin官方2023-2024同时关闭 deposit+withdrawal 全集：49事件/43 unique token；严格>=2年 + QV>=500万后 **12事件/11币**，全部位于2023。
+- 预注册SHORT、下一完整1h open；discovery：1h -0.0187%、4h **-0.5548%**、12h **-0.3821%**；event win58.3%，7/11币均值正。
+- 虽breadth勉强，但经济均值为负且未过+0.50% gate，**冻结 / 不查看后续OOS / 不对同一关闭事件事后反向LONG / 不入库**。
+- 归档：strategy_templates/research/kucoin-deposit-withdrawal-closure-short/2023-2024/。
+
+## 2026-09-29 — DeFiLlama Chain DEX-Volume Residual Flow
+- daily DEX-volume log return 用前90日 causal beta 对 native-token return 做 residual，最近7日 residual sum 零穿越；正穿LONG、负穿SHORT，下一UTC日open；动态>=2年。
+- 2023-2024 discovery：**2334事件/12币，7d +0.3447%，9/12币正**，通过预注册 +0.25% / 60% breadth gate。
+- 2025 OOS：1521事件/14币，7d仅 **+0.0551%**，8/14正（57.1%）；2026 OOS：1027事件/14币，7d **-0.0657%**，6/14正。
+- 结论：**OOS明显衰减并在2026翻负，冻结 / 不按链后验筛选 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-dex-volume-residual/2023-2026/。
+
+## 2026-09-29 — DeFiLlama Chain Fee Residual Flow
+- 与DEX-volume residual同一因果框架：daily chain-fee log return 用prior90d beta对native-token return残差化；最近7日 residual sum 零穿越，正穿LONG/负穿SHORT，下一UTC日open，动态>=2年。
+- 2023-2024 discovery：**1892事件/12币，7d +0.1788%，8/12币正**；breadth通过，但低于预注册 +0.25% economic gate。
+- 复用脚本机械计算了2025/2026字段，但这是 discovery gate 检查前的实现失误；后续值仅保留审计，**不允许用于救活/调参/反向**。
+- 结论：**discovery冻结 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-fee-residual/2023-2024-discovery/。
+
+
+## 2026-09-29 — COIN-M Quarterly Expiry Basis Signal
+- 事件：COIN-M季度合约08:00 UTC到期；信号取到期前最后完整1h的 log(quarterly/perp)；严格>=2年 + 24h QV>=500万。
+- 预注册 unwind：正basis→SHORT USD-M、负basis→LONG，08:00 open入场。2023-2024 **72事件/9币/8批**：1h -0.418%、4h -0.975%、12h **-0.583%**；两年均负，仅3/9币、2/8批正。
+- discovery 生成镜像 continuation 只去未见2025 OOS：**31事件/9币**，12h **-0.564%**，仅1/9币正。
+- 结论：**两方向都失败，整个family冻结 / 不调basis幅度或延迟入场 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/coinm-quarterly-expiry-basis-signal/2023-2025/。
+
+## 2026-09-29 — DeFiLlama Chain Bridge Netflow：Data-Access Feasibility
+- 机制：链级跨链桥净流入应支持原生币、净流出形成压力；预注册拟用最近7个UTC日 `depositUSD-withdrawUSD` 合计零穿越，正穿LONG、负穿SHORT，下一UTC日open；要求至少8个production-eligible原生链。
+- 在**未查看任何收益前**检查历史源：`bridges.llama.fi/bridgevolume/Ethereum` 与 bridge catalog 当前均返回 **HTTP 402 Payment Required**；alternate `api.llama.fi` bridgevolume 路径也无法得到可用历史响应。
+- 结论：**data-access blocked / 不抓取可视化页面拼残缺历史 / 不降低完整可审计数据要求 / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-bridge-netflow/feasibility/。
+
+## 2026-09-29 — KuCoin Deposit+Withdrawal Resumption → Binance LONG：Feasibility
+- 预注册机制：外部交易所同时恢复 crypto deposit+withdrawal 后，跨所套利/流动性通道重新开放，固定 LONG Binance USD-M，下一完整1h open；先要求>=2年 + 24h QV>=500万。
+- 完整 KuCoin CMS “Deposit and Withdrawal Services” 语料 **1215篇**；2023-2024 resumption/reopen 标题候选 **36篇**。
+- 机械分类后 **35/36** 是 token swap/migration/rebranding 完成公告，属于已冻结 corporate-action family，必须排除；唯一非 corporate-action 是 **PIX法币**充提维护恢复，不对应crypto USD-M。
+- 因此独立 crypto resumption 事件 **0个**，**未看收益即 feasibility失败 / 不把corporate-action completion重复包装成新family / 不入库**。
+- 归档：strategy_templates/research/kucoin-deposit-withdrawal-resumption-long/2023-2024-feasibility/。
+
+## 2026-09-29 — DeFiLlama Protocol DEX Market-Share Flow
+- 完整 universe 由 DefiLlama DEX protocol symbol 与 Binance Vision USD-M 历史目录机械求交：59 ticker；只保留到2026-08可能满足>=2年的合约，并在看收益前排除 CHR/FLOW/LIT/OMNI 4个明确 ticker 身份碰撞，最终研究 universe 22币。
+- 固定信号：协议全部 DEX module 的7日成交额 / 全市场DEX 7日成交额，与前7日市场份额比较；份额增速零上穿 LONG、零下穿 SHORT，下一UTC日open；>=2年且 signal-day QuoteVolume>=500万。
+- discovery 2023-2024：**607事件/10个实际触发币**；1d **-0.1161%**、3d **-0.5286%**、7d **-0.7074%**，仅 **2/10币** 7d均值为正。
+- 分年：2023 7d **-0.4592%**，2024 **-0.9934%**，连续两年为负；预注册 gate（mean7>=+0.25%、breadth>=60%、两年均正）明确失败。
+- 结论：**discovery冻结 / 不查看2025-2026 OOS / 不事后反向 / 不调7d窗口或阈值 / 不进exact TP8/SL6 / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-dex-market-share/2023-2026/。
+
+## 2026-09-29 — DeFiLlama Protocol DEX Share Momentum
+- 机制：按 DeFiLlama protocol ID→symbol 聚合同一协议代币的全部 DEX adapter；计算 trailing-7d protocol DEX volume / trailing-7d global DEX volume，再取该 share 的 7d log-change 零穿越；正穿 LONG、负穿 SHORT，下一 UTC 日 open。
+- 严格动态资格：USD-M 历史>=2年、signal-day QuoteVolume>=500万；2023-2024 discovery 最终 **519事件/8币**。
+- canonical discovery：1d **-0.1460%**、3d **-0.2756%**、7d **-0.5292%**，仅 **1/8币** 7d 均值为正；远低于预注册 +0.25% / 60% breadth gate。
+- 身份审计发现 LIT ticker collision：DeFiLlama LIT=Lighter，而 Binance 历史 LITUSDT=Litentry；含 LIT 的首次 run 已移入 legacy，剔除后失败更明确。
+- 结论：**discovery gate 明确失败，冻结 / 不读取2025-2026 OOS / 不反向 / 不扫窗口 / 不筛 UNI 等子集 / 不进 exact / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-dex-share-momentum/2023-2026/。
+
+## 2026-09-29 — Snapshot Governance Rejection → Binance SHORT：Feasibility
+- 复用 governanceID 安全映射的 Snapshot 完整 626 proposals；只接受 exactly-2 choices，且能机械识别一正一负（For/Against、Yes/No、Approve/Reject 等）的干净二元提案。
+- 2023-2024 共 **43** 个 clean binary proposals，但真正“负面选项胜出”仅 **2 个，且全部是 LDO/2023**。
+- 低于最低 discovery 样本8且无跨币 breadth，**未查看任何收益即冻结 / 不放宽为反对率阈值 / 不纳入模糊多选语义 / 不入库**。
+- 归档：strategy_templates/research/snapshot-governance-rejection-short/2023-2024-feasibility/。
+
+## 2026-09-29 — DeFiLlama Protocol DEX Market-Share Flow
+- 机制：按 DeFiLlama protocol token 聚合同一代币的全部 DEX 版本成交量，再除以全市场 DEX 日成交量得到协议 market share；最近7日平均份额 / 前7日平均份额的 log change 零穿越，正穿 LONG、负穿 SHORT，下一 UTC 日 open；动态 USD-M 历史>=2年 + signal-day QV>=500万。
+- 在看收益前冻结 discovery=2023-2024，gate=7d signed mean >= +0.25% 且 >=60% 有事件币种均值为正；不扫阈值、不按协议后验筛选、不反向。
+- discovery：**519事件 / 8个有事件币**；1d **-0.1242%**、3d **-0.3934%**、7d **-0.4786%**，仅 **2/8币** 7d均值为正。RAY/DODO 保留在机械 universe，但严格连续数据/零穿越规则下 discovery 事件=0。
+- 结论：**discovery gate 明确失败，冻结 / 2025-2026 OOS 未计算 / 不事后反向 SHORT / 不进 exact TP8/SL6 / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-dex-market-share/2023-2026/。
+
+## 2026-09-29 — DeFiLlama Protocol Derivatives Market-Share：Data-Access Feasibility
+- 机制设想：去中心化永续/衍生品协议日成交量占全市场 derivatives volume 的份额变化，作为协议使用量与手续费来源竞争力变化，映射协议代币；先要求完整 aggregate denominator + protocol-level 历史，再冻结信号。
+- 在**未查看任何收益前**检查数据源：DeFiLlama 公共 protocols 目录仍能看到 dYdX/GMX/Gains/Synthetix 等 derivatives adapter，但 /overview/derivatives 与实测的 /summary/derivatives/{adapter} 均统一返回 **paid API required**。
+- 因无法从当前免费公开 API 机械重建完整且可审计的历史 market share，**data-access blocked / 不抓可视化页面 / 不拼零散第三方历史 / 不看 discovery/OOS / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-derivatives-market-share/feasibility/。
+
+## 2026-09-29 — DeFiLlama Chain Stablecoin Supply Growth：Coverage Audit Correction → Discovery
+- 修正旧 feasibility：原 2026-09-28 target-chain audit 漏了 TRX/Tron、Polygon/MATIC、Fantom/FTM 等同语义原生链；旧阶段**未查看收益**，因此可做 outcome-independent universe 修正。修正后同一15-chain映射中12链具备2023-2024 stablecoin历史；事件层继续严格动态 USD-M 历史>=2年 + signal-day QV>=500万。
+- 冻结信号：g_t=log(chain totalCirculatingUSD.peggedUSD_t / supply_t-7d)；上穿0 LONG、下穿0 SHORT，下一UTC日open；discovery gate 在看收益前固定为 7d signed mean >= +0.25% 且 >=60% 有事件币种均值为正。
+- 2023-2024 discovery：**1086事件 / 11个有事件币**；1d **-0.1924%**、3d **-0.0759%**、7d **+0.1777%**；**7/11币（63.6%）** 7d均值为正。
+- breadth gate通过，但 economic gate +0.25% 未通过。结论：**冻结 / 2025-2026 OOS 未计算 / 不调增长窗口或幅度阈值 / 不按链筛选 / 不反向 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-supply-growth/2023-2026/；旧 feasibility README 已标记 superseded audit。
+
+## 2026-09-29 — DeFiLlama Chain Stablecoin Velocity
+- 机制：链级 weekly velocity = 7日 DEX volume sum / 同7日 stablecoin supply mean；flow=log(最近7日velocity / 前7日velocity)，零上穿LONG、零下穿SHORT，下一UTC日open；动态>=2年 + signal-day QV>=500万。不是单独DEX流量或stablecoin增长。
+- discovery gate 在看收益前冻结为 7d signed mean >= +0.25% 且 >=60% 有事件币种均值为正；不扫窗口/阈值、不做symbol-specific过滤。
+- 2023-2024 discovery：**806事件/11币，7d +1.0474%，10/11币正**（1d +0.1142%、3d +0.5436%），强通过 discovery。
+- untouched 2025 OOS：**482事件/12币，7d -0.0218%**，8/12币正，经济edge基本消失并略负。
+- 2026 OOS：**360事件/12币，7d +0.2701%**，但仅 **6/12币正**；幅度回升但breadth失败。
+- 结论：**跨regime不稳定，冻结 / 不进exact TP8/SL6 / 不删弱币救活 / 不调窗口或velocity阈值 / 不反向 / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-velocity/2023-2026/。
+
+## 2026-09-29 — DeFiLlama Chain Bridge Netflow：Open-Source Recheck
+- 对既有 402 blocker 做源码级复核：DeFiLlama `bridges-server`（rev dd37313f...）确认历史资金流来自 Postgres `bridges.daily_volume/hourly_volume`，且源码存在按 timestamp 查询历史日统计的 `bridgedaystats` 路由以及 day/week/month netflows。
+- 但部署端 `netflows`、`bridgedaystats`、`bridgevolume` 实测均统一 **HTTP 402 paid API required**；公开 `llama-bridges-data` S3 bucket 禁止 list（403），已知可读 `lastRecordedBlocks.json/recordedBlocks.json` 只有区块进度、不含历史USD资金流；数据库日备份使用另一个可配置bucket且未声明public-read。
+- 若自行重建需回放大量 bridge adapters/链上日志，成本相当于重新构建历史数据库。结论：**仍 data-access/data-cost blocked / 未看收益 / 不抓前端残缺数据 / 不入库**。
+- 归档更新：strategy_templates/research/defillama-chain-bridge-netflow/feasibility/。
+
+## 2026-09-29 — Spot-vs-Perp Trade-Count Share Divergence：Early Gate
+- 机制：1h `log(perp trade_count / spot trade_count)` 对 prior720h 做 causal z-score；首次 |z|>=3、|z|<1 re-arm。Perp交易到达异常占优视为杠杆拥挤→SHORT；Spot异常占优→LONG；下一1h open。
+- BTC/ETH/BNB/XRP 2023-2024：**341事件**；1h +0.0116%、4h +0.0362%、12h **-0.0888%**，win12 47.2%；仅 **1/4币** 12h均值为正（ETH +0.2422%，BTC/BNB/XRP均负）。
+- 结论：**early gate明确失败，冻结 / 不反向 / 不降3σ / 不改720h窗口 / 不扩10币与OOS / 不进exact / 不入库**。
+- 归档：strategy_templates/research/spot-perp-trade-count-share-divergence/2023-2024-early-gate/。
+
+## 2026-09-29 — Gate USDT Futures Insurance-Fund Stress：Historical Feasibility
+- 机制：外部交易所保险基金异常净流出代表清算/穿仓压力，拟作为 Binance USD-M 的系统性去杠杆信号；先只审计官方历史数据，不看收益。
+- Gate 官方 `GET /api/v4/futures/usdt/insurance` 实测：`limit=100` 与 `limit=1000` 都只返回 **31个日点**，范围 **2026-08-30~2026-09-29**；接口没有 from/to 历史参数。
+- Binance 官方 `/fapi/v1/insuranceBalance` 也只是当前 snapshot，无历史时间参数。
+- 结论：**historical-data blocked / 未看收益 / 可保留未来forward采集价值 / 不用非官方scrape回填 / 不入库**。
+- 归档：strategy_templates/research/gate-futures-insurance-fund-stress/feasibility/。
+
+## 2026-09-29 — Gate Futures Liquidation/OI Contract Stats：Historical Feasibility
+- Gate 官方 `contract_stats` 明确暴露 `long_liq_usd`、`short_liq_usd`、`open_interest`，机制上可用于跨交易所清算压力信号。
+- 在**未看任何收益前**直接请求 BTC_USDT/ETH_USDT 的 2023-01-01、BTC_USDT 的 2024-01-01 历史，全部返回 **`from time exceeds 180-day limit`**。
+- 结论：**仅最近180天可用，无法满足2023-2024 discovery + later OOS，historical-OOS blocked / 可用于未来forward采集 / 不降低研究协议 / 不入库**。
+- 归档：strategy_templates/research/gate-futures-liquidation-stats/feasibility/。
+
+## 2026-09-29 — GitHub Core Release Catalyst：Discovery
+- 外生事件源：为每个 token 预先固定 canonical core-node/client GitHub repository；只接受 `draft=false`、`prerelease=false` 且有 `published_at` 的 GitHub Release，同币同UTC日多 release 折叠到最早发布时间；不以tag/commit补事件。
+- 固定方向 LONG，release 后下一完整 Binance USD-M 1h open 入场；事件时历史>=2年、前24h QuoteVolume>=500万。discovery=2023-2024；冻结 gate：>=80事件、>=8币、12h mean>=+0.25%、>=60%币正、且2023/2024都为正。
+- discovery：**257事件/10币**；1h -0.0207%、4h +0.1653%、12h **+0.1364%**，**7/10币** 12h均值为正；symbol-equal 12h +0.1232%。
+- 年度：2023 12h **+0.3607%**；2024 **-0.0018%**，跨年 gate 失败且整体经济幅度低于 +0.25%。
+- 结论：**discovery冻结 / 2025-2026 OOS保持未读 / 不事后反向SHORT / 不换repo、不做semver/title筛选 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/github-core-release-catalyst/2023-2026/。
+
+## 2026-09-29 — Aggressor Buy/Sell Average Trade-Size Asymmetry：Blocker Relief → 2024 Early Gate
+- 旧状态是 data-cost blocked；本轮用**看收益前冻结**的 TRX/ATOM/LTC/UNI 4个成熟且2024 aggTrades档案体量可控的币解除 blocker，没有先下载 BTC/ETH 多年大档。
+- 每小时按 aggTrade 的 `last_trade_id-first_trade_id+1` 还原raw trade count；buyer_is_maker=false/true分别为主动买/卖，计算两侧平均notional，`A=log(avg_buy_notional/avg_sell_notional)`；prior720h causal z，首个 z>=3 LONG、z<=-3 SHORT，|z|<1 re-arm，下一1h open。
+- 冻结 gate：>=20事件、12h signed mean>=+0.10%、>=3/4币正。实际 **288事件**；1h +0.0517%、4h +0.0625%、12h **-0.0326%**，win12 50.69%，仅 **2/4币** 12h均值为正（TRX/UNI正，ATOM/LTC负）。
+- 结论：**blocker已解除但alpha early gate失败，整个family冻结 / 不再扩BTC/ETH或多年下载 / 不改z/window/direction / 不看OOS / 不进exact / 不入库**。
+- 归档：strategy_templates/research/aggressor-trade-size-asymmetry/2024-early-gate/。
+
+## 2026-09-29 — DeFiLlama Stablecoin Borrow-Cost / Leverage-Demand：Feasibility
+- 机制：链级 stablecoin 借款利率/利用率作为杠杆美元需求代理；先只检查可审计历史源，不看收益。
+- 免费 DeFiLlama yields pool catalog 与普通 `chart/{pool}` 可访问，但历史仅有 deposit-side APY/TVL；真正的 borrow APY/borrow history `chartLendBorrow/{pool}` 实测 **HTTP 402 paid API required**。
+- 用 deposit APY 替代会改变机制；按当前仍存活 pool 手工重建历史还会引入 survivorship/pool-selection bias。
+- 结论：**data-access/data-quality blocked / 未看收益 / 不用存款收益替代 / 不手选当前pool / 不进 discovery/OOS/exact / 不入库**。
+- 归档：strategy_templates/research/defillama-stablecoin-borrow-cost/feasibility/。
+
+## 2026-09-29 — DeFiLlama Token-Holder Revenue Flow：Boundary Audit Correction
+- 新机制只使用直接回流 token holder/staker 的经济价值：fee share、buyback、burn、staking/locked-governance distribution；pre-return source map 与 identity/methodology 排除规则保持原样。
+- 审计发现初始 discovery 允许 2024-12-25~31 信号的 7d endpoint 落入 2025-01-01~07，破坏 discovery→untouched OOS 边界；旧 discovery/OOS 输出已保留为 `legacy_boundary_leak_*`，不再用于晋级判断。
+- canonical 修正：discovery 事件必须完整 7d endpoint <= 2024-12-31；冻结信号、方向、7v7窗口、>=2年与 QV>=500万门槛均不变。
+- 修正后 2023-2024 discovery：**547事件/10币**；1d +0.2449%、3d +0.2436%、7d **+1.2513%**；2023 **+0.9338%**、2024 **+1.5326%**，但仅 **5/10币** 7d均值为正，breadth **50% < 60%**。
+- 因 canonical discovery breadth gate 已失败，协议上**不允许进入 OOS**；此前生成的 2025~2026 OOS 仅保留 legacy 审计，不得作为候选证据。
+- 结论：**discovery冻结 / 不用较窄后验 universe 救活 / 不删 KNC/OGN 等弱币 / 不调7v7或方向 / 不进exact TP8/SL6 / 不入库**。
+- 归档：strategy_templates/research/defillama-token-holder-revenue-flow/2023-2026/。
+
+## 2026-09-29 — DeFiLlama CEX Token Reserve / Inflow：Feasibility
+- 机制：CEX token balance / net inflow 代表可立即卖出的交易所供给变化，拟作为同币 Binance USD-M 的外生供给压力信号；本阶段只审计历史源，**未看收益**。
+- 免费 `api.llama.fi/cexs` 可访问，但 Binance 条目只有当前 `currentTvl/cleanAssetsTvl` 与滚动 `inflows_24h/1w/1m` 等交易所级聚合快照，没有历史序列或 per-token balance history。
+- 官方 API docs 审计：free OpenAPI 共31个 path，**没有 CEX history/reserve endpoint**；Pro OpenAPI 才有 `GET /api/inflows/{protocol}/{timestamp}`，匿名调用返回 API-key error。
+- 结论：**data-access blocked / 不抓前端私有缓存、不拼不完整历史 / 不进 discovery/OOS/exact / 不入库**。
+- 归档：strategy_templates/research/defillama-cex-token-reserve-flow/feasibility/。
+
+## 2026-09-29 — Binance Funding Cap/Floor Adjustment：Feasibility
+- 完整分页 Binance 官方 CMS catalog 49：**4436篇**，其中 funding 相关标题 **90篇**；本阶段只审计事件覆盖，未看收益。
+- 为避免和已研究的 leverage/margin-tier、funding-interval family 混淆，只接受**独立 cap/floor 调整**；同时修改 leverage、margin tier 或 funding settlement frequency 的公告全部排除，市场级统一规则也只算一个batch。
+- 2023-2024 真正干净的 standalone capped-funding 事件仅 **2023-10-01 OGNUSDT 1批**；2023-09-28 全市场规则同时涉及 settlement-frequency 且不是独立token事件。
+- 结论：**样本<8，未看收益即冻结 / 不把混杂 leverage-tier 公告重复包装成 funding alpha / 不拆全市场规则伪造样本 / 不入库**。
+- 归档：strategy_templates/research/binance-funding-cap-floor-adjustment/feasibility/。
+
+## 2026-09-29 — DeFiLlama Protocol Value-Accrual Revenue：Feasibility
+- 机制：用协议 `ProtocolRevenue` / `HoldersRevenue` 直接价值回流，而不是gross fees，作为协议代币结构性现金流信号；先做coverage，不看收益。
+- 复用此前安全映射的成熟协议token；免费 fees-summary 明确支持 `dailyProtocolRevenue` / `dailyHoldersRevenue`。
+- 2023-2024 有完整非零 ProtocolRevenue 历史的仅 **LDO、ENS、AXS 3币**；LPT HoldersRevenue 也只从 **2024-08-14** 起，discovery期仅139个非零日；其它映射币为0、无序列或2025+才开始。
+- 结论：**低于最低8币，未看收益即 coverage blocked / 不用gross fees或supply-side revenue替代 / 不进 discovery/OOS/exact / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-value-accrual-revenue/feasibility/。
+
+
+## 2026-09-29 — DeFiLlama Chain Stablecoin Depeg Stress：Feasibility
+- 机制：链级 USD stablecoin 的 supply-weighted 历史价格压力；DeFiLlama `stablecoincharts/{chain}` 同时提供 `totalCirculating.peggedUSD` 与 `totalCirculatingUSD.peggedUSD`，两者比值可还原历史加权peg。语义验证中 2023-03-12 Ethereum 比值约 **0.9764**，真实重现 USDC 脱锚。
+- 看收益前冻结事件：首次 ratio<=0.995 触发、恢复到>=0.999才 re-arm，固定 SHORT 原生币；为防小池噪声，事件日链上 peggedUSD 名义供给>=**5000万美元**，并要求 Binance USD-M 历史>=2年；coverage 最低8币且至少8个独立UTC日期。
+- 原始2023-2024覆盖：57 chain-events / 12币 / 46个UTC日期；加入固定 5000万美元 + >=2年质量门后仅 **34事件 / 7币 / 27日期**，剩 ETH/BNB/SOL/AVAX/NEAR/MATIC/FTM。
+- 结论：**7<8，未看任何收益即 coverage blocked / 不撤回5000万美元质量门、不加入未成熟OP/APT/ARB/SUI、不把一次跨链USDC脱锚拆成伪独立alpha / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-depeg-stress/feasibility/。
+
+## 2026-09-29 — DeFiLlama Chain Stablecoin-to-TVL Capital Rotation
+- 机制：链级 `USD stablecoin nominal supply / chain TVL` 作为资金在“稳定币现金”与风险型DeFi仓位之间的相对配置；最近7日ratio log-change零穿越，上穿固定SHORT原生币、下穿LONG，下一UTC日open。
+- 动态资格：USD-M历史>=2年、signal-day QuoteVolume>=500万；discovery严格2023-2024且7d endpoint不得跨入2025。预注册 gate：7d signed mean>=+0.25%、>=60%币正、2023/2024两年都正。
+- discovery：**1124事件/11币**；1d +0.1096%、3d -0.1083%、7d **-0.0818%**，仅 **4/11币** 7d均值为正。
+- 年度：2023 7d **+0.2393%**，2024 **-0.3818%**；跨年稳定性直接失败。
+- 结论：**discovery gate失败 / 2025-2026 OOS未读 / 不反向、不改7d窗口、不删弱币 / 不进exact TP8/SL6 / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-tvl-rotation/2023-2026/。
+
+## 2026-09-29 — DeFiLlama Chain Fee Yield / Capital Productivity
+- 机制：最近7个完整UTC日链上 user fees 总额 / 同7日平均 chain TVL，作为单位锁仓资本的手续费生产率；与前7日同口径比较，log growth 零上穿 LONG、零下穿 SHORT，下一UTC日open。
+- 动态资格：USD-M历史>=2年、signal-day QuoteVolume>=500万；discovery严格2023-2024且7d endpoint不得跨界。预注册 gate：7d signed mean>=+0.25%、>=60%币正、2023/2024两年都正。
+- discovery **780事件/12币**：1d +0.1462%、3d +0.2427%、7d **+0.8336%**，**10/12币正**；2023 **+1.3448%**，2024 **+0.3841%**，强通过 discovery。
+- untouched 2025：**588事件/13币，7d +0.1465%，8/13币正**；方向仍正但经济幅度明显降到 +0.25% gate 以下。
+- 2026：**415事件/13币，7d +0.1468%，仅7/13币正（53.8%）**；经济幅度仍弱且breadth失败。
+- 结论：**OOS衰减，冻结 / 不调7v7窗口或阈值、不删弱币、不反向 / 不进exact TP8/SL6 / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-fee-tvl-yield/2023-2026/。
+
+## 2026-09-29 — DeFiLlama Chain DEX Turnover / TVL
+- 机制：最近7个完整UTC日 DEX volume 总额 / 同7日平均 chain TVL，衡量单位DeFi资本的交易周转强度；与前7日同口径比较，log growth 零上穿 LONG、零下穿 SHORT，下一UTC日open。
+- 动态资格：USD-M历史>=2年、signal-day QuoteVolume>=500万；discovery严格2023-2024且7d endpoint不得跨界。预注册 discovery gate：7d signed mean>=+0.25%、>=60%币正、2023/2024两年都正。
+- discovery **922事件/12币**：1d +0.2506%、3d +0.5813%、7d **+0.8263%**，**10/12币正**；2023 **+0.9719%**，2024 **+0.6839%**，强通过 discovery。
+- untouched 2025：**542事件/13币，7d +0.2203%，8/13币正**；方向和breadth保持，但经济幅度略低于既定 +0.25% 强门槛。
+- 2026：**388事件/13币，7d +0.3817%，9/13币正**，重新高于强门槛。
+- 结论：**near-pass但不严格晋级 exact**。OOS已看过后不能把 +0.25% 事后放宽成 +0.20%；保留为重点forward观察 family，但不调7v7、不删弱币、不进TP8/SL6、不入库。
+- 归档：strategy_templates/research/defillama-chain-dex-tvl-turnover/2023-2026/。
+
+## 2026-09-29 — DeFiLlama Chain Stablecoin Depeg Stress
+- 机制：链级 USD stablecoin basket 的隐含价格 `implicit_peg=totalCirculatingUSD.peggedUSD/totalCirculating.peggedUSD`；每日 stress=`abs(log(implicit_peg))`，再计算最近7日平均stress / 前7日平均stress 的 log flow。压力零上穿→SHORT native token，零下穿→LONG，下一UTC日open。
+- chain→native-token 与动态>=2年资格直接复用此前已审计的 Chain Stablecoin Supply Growth universe；signal-day QV>=500万；discovery严格2023-2024且7d endpoint不得越界到2025。
+- 预注册 gate：7d signed mean>=+0.25% 且>=60%有事件币为正。实际 **996事件/11币**；1d **+0.1224%**、3d **+0.0634%**、7d **-0.4077%**，win7 48.09%，仅 **4/11币（36.4%）** 7d均值为正。
+- 结论：**discovery明确失败 / 2025-2026 OOS未计算 / 不反向 / 不调7v7 / 不改成单一USDT/USDC挑选 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-depeg-stress/2023-2026/。
+
+## 2026-09-29 — Snapshot Governance Turnout Shock：Feasibility
+- 机制：proposal结束时的最终治理参与度 `scores_total` 相对同space此前已结束proposal的自身历史异常放大；严格规定最终票数只能在 `end` 后使用，不能在created时回看，避免look-ahead。
+- 复用既有 DeFiLlama governanceID 安全映射 proposal corpus；实际仅 **7个 USD-M token space：APE/ENS/GTC/LDO/LINA/LRC/REN**，且 LINA/LRC/REN 历史极稀疏。
+- 低于新数据源最低8币，**未看收益即 coverage blocked / 不扩大模糊Snapshot身份映射 / 不进入discovery/OOS/exact / 不入库**。
+- 归档：strategy_templates/research/snapshot-governance-turnout-shock/feasibility/。
+
+## 2026-09-29 — Bitget USDT Futures Delist → Binance SHORT：Discovery
+- 官方数据完整性：Bitget Help Center `Trading pair delisting` section 可连续分页；page16~24 从2025-01连续覆盖到2022-05，完整包住2023-2024，不依赖搜索引擎拼事件。2023-2024共有 **39篇** futures/perpetual delist候选公告。
+- 先做 outcome-independent 清洗：排除 FET/OCEAN/AGIX、RNDR、GAL、FRONT、KLAY、TOMO、COCOS 等 merge/rebrand/swap 类 corporate action、10000AIDOGE面额生命周期，以及非USDT coin-margined合约；得到52个独立token-events。
+- 严格 Binance eligibility（公告时USD-M存在、实际历史>=2年、此前完整24h QV>=500万）后 **20事件/20币/12独立批次**。冻结方向 SHORT，官方 `datePublished` 后下一完整1h open入场；看收益前 gate 固定为 event 12h mean>=+0.50%、batch-equal>=+0.50%、>=60%币正、>=60%批次正。
+- discovery：1h **+2.3269%**、4h **+2.6439%**、12h **+4.9583%**；batch-equal 12h **+9.0632%**，但 win12仅30.0%，只有 **6/20币**、**4/12批次** 为正。2023仅2事件，12h -0.9629%；2024 18事件 +5.6162%。
+- 高均值主要集中在 OMG/WAVES/UNFI 等极少数大跌事件，绝大多数事件方向相反；因此 breadth gate 明确失败。
+- 结论：**discovery冻结 / 不查看2025-2026 OOS / 不后验只留暴跌币、不加severity过滤 / 不反向或延迟入场 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/bitget-usdt-futures-delist-short/2023-2024-discovery/。
+
+## 2026-09-29 — DeFiLlama Chain Stablecoin Source Composition
+- 机制：比较链上 USD stablecoin 的桥入来源与本地铸造来源，`composition=log(totalBridgedToUSD/totalMintedUSD)`，取7日变化零穿越；桥入来源相对增强→LONG native token，减弱→SHORT，下一UTC日open。与总stablecoin supply、depeg stress、velocity及全资产bridge netflow不同。
+- chain→native-token 与>=2年 eligibility 复用已审计 stablecoin universe；signal-day QV>=500万；discovery=2023-2024且7d endpoint不越界。预注册 gate：7d mean>=+0.25%、>=60%币正。
+- discovery：**810事件/9币**；1d **+0.2175%**、3d **-0.1447%**、7d **-0.0632%**，win7 49.63%，仅 **3/9币** 7d均值为正。
+- 结论：**discovery失败 / 2025-2026 OOS未计算 / 不反向、不调7d、不加composition阈值 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-source-composition/2023-2026/。
+
+## 2026-09-29 — GitHub Core Security Advisory：Feasibility
+- 机制：固定 canonical core repo 的公开 vulnerability/security advisory 作为负面外生安全事件；repo identity 完全复用 GitHub Core Release Catalyst，避免收益后挑repo；只做coverage，未看收益。
+- GitHub 官方 Repository Security Advisories API 审计10个固定repo：2023-2024 **只有 ethereum/go-ethereum 2条**（均high severity）；其余9个repo公开advisory=0。
+- 这不能解释为其它项目“没有漏洞”，而是项目披露渠道不一致，因此无法形成同语义跨币事件全集。
+- 结论：**coverage/data-definition blocked / 不改用事后项目特定CVE渠道拼样本 / 不进discovery/OOS/exact / 不入库**。
+- 归档：strategy_templates/research/github-core-security-advisory/feasibility/。
+
+## 2026-09-29 — Bitget Cross-Product Asset Exit → Binance SHORT：Post-Hoc Feasibility
+- 该机制由 Bitget futures-only 2023-2024 breadth失败后生成，因此**不回旧 discovery 自证**；新协议固定 2025 discovery、2026 untouched OOS。
+- 定义：同一 token 必须在 Bitget 官方 spot delist 与 futures delist 公告中同时出现，两个发布时间相差<=7天；信号时间取较晚公告（届时 cross-product exit 才完全公开）；最低覆盖8事件/8币，未过覆盖门前不看收益。
+- 2025官方完整archive：**86篇 futures delist候选 + 54篇 spot delist公告**；spot正文机械解析 TOKEN/USDT、TOKEN/USDC 后，满足7天配对的只有 **HIFI 1个**（间隔约146.3h）。
+- 结论：**未看2025收益即样本不足冻结 / 2026保持未读 / 不扩大7天窗口、不混入futures-only凑样本 / 不入库**。
+- 归档：strategy_templates/research/bitget-cross-product-asset-exit-short/2025-feasibility/。
+
+## 2026-09-30 — Spot-vs-Perp Order-Book Imbalance Divergence：Feasibility
+- 机制：比较 Spot 与 USD-M 近端 bid/ask depth 的供需差，寻找真实现货需求与杠杆市场盘口分歧；未看收益。
+- Binance Vision USD-M daily 有 `bookDepth`；但官方 Spot daily 目录只有 `aggTrades/klines/trades`，**没有 Spot bookDepth**。
+- 结论：**同源历史数据 blocked / 不用不同供应商盘口拼接造成采样定义偏差 / 不进 discovery/OOS/exact / 不入库**。
+- 归档：strategy_templates/research/spot-perp-bookdepth-divergence/feasibility/。
+
+## 2026-09-30 — GitHub Core Merged-PR Activity：2023-2024 Early Gate
+- 固定 repo 映射复用 GitHub Core Release family，不按收益换仓库；只用 GitHub Search 服务器侧 `merged:` 时间，避免 commit author timestamp look-ahead。
+- 月频信号：`log1p(当月merged PR)-mean(log1p(前3个月))`；>0 LONG、<0 SHORT；次月1日00:00 UTC open。为保持 untouched OOS，最后 discovery signal month=2024-11，完整7d endpoint 不跨入2025。
+- BTC/ETH/BNB/XRP 2023-2024：**92事件**；1d -0.0420%、3d +0.1788%、7d **+0.3612%**；但仅 **2/4币** 为正。年度：2023 **-0.3072%**、2024 **+1.0903%**。
+- 结论：经济幅度过门但 breadth + cross-year gate 失败，**冻结 / 不扩其余6个repo / 不读取2025+ / 不调窗口或方向 / 不进exact / 不入库**。
+- 归档：strategy_templates/research/github-core-merged-pr-activity/2023-2024-early-gate/。
+
+## 2026-09-30 — DeFiLlama Chain Stablecoin Bridged-Share：Discovery
+- 机制：`totalBridgedToUSD / totalCirculatingUSD` 表示链上稳定币中外部桥接资本占比；7日 share change 零上穿 LONG、零下穿 SHORT，下一UTC日open；复用15-chain映射、>=2年、QV>=500万。
+- discovery 2023-2024：**809事件/9币**；1d +0.2756%、3d -0.1169%、7d **-0.1316%**，仅 **4/9币** 7d均值为正。
+- 年度：2023 **-0.5191%**，2024 **+0.1714%**，明显 regime flip。
+- 结论：**discovery gate失败，整个 bridged-share family 冻结 / 不反向解释为桥接依赖风险 / 不调7d窗口 / 不看OOS / 不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-stablecoin-bridged-share/2023-2024-discovery/。
+
+## 2026-09-30 — DeFiLlama Protocol External-Treasury Runway：Feasibility
+- 机制：协议 treasury 的**非 OwnTokens 外部资产**增减代表运营 runway/抗风险能力，区别于TVL、fees与holder revenue；先做coverage，未看收益。
+- outcome-independent universe：从 DeFiLlama `/protocols` 中 `treasury != null` 且 ticker 唯一的条目机械筛选，再要求 Binance USD-M；得到 API3/CVX/ENS/GNS/HFT/LDO/PERP/RSR 8个候选，8个 treasury endpoint 都有非自有资产历史。
+- 但生产历史>=2年后，2023-2024 实际可用仅 **API3、CVX、ENS、LDO、RSR 5币**；GNS 无 USD-M，HFT/PERP 到2025才满2年。
+- 结论：**低于最低8币，未看收益即 coverage blocked / 不手工加入UNI/AAVE等知名parent protocol补样本 / 不进discovery/OOS/exact / 不入库**。
+- 归档：strategy_templates/research/defillama-protocol-external-treasury-runway/feasibility/。
+
+## 2026-09-30 — GitHub Core Commit Activity：Feasibility
+- 机制：core repo commit 活跃度作为开发强度代理；repo 映射复用 GitHub Release family，不按收益换仓库。
+- 关键审计：Git author/committer timestamp 不等于 commit 进入默认分支、对市场可见的时间；按 git log 历史重放可能产生 look-ahead。
+- 结论：**timestamp-semantics blocked / 未看收益 / 需要 GH Archive PushEvent 或等价可审计 visibility-time 源后才能重开 / 不入库**。
+- 归档：strategy_templates/research/github-core-commit-activity/feasibility/。
+
+## 2026-09-30 — Binance Futures Index Constituent / Weight Adjustment：Feasibility
+- 完整扫描 Binance `Latest Binance News` 2023-2024 官方分页，固定标题关键词 `index price|constituent|weight|price index`，机械候选 **0篇**。
+- 结论：**coverage blocked / 未看收益 / 不从其它 futures update 手工猜 index 事件 / 不入库**。
+- 归档：strategy_templates/research/binance-futures-index-constituent-adjustment/feasibility/。
+
+## 2026-09-30 — Binance USD-M Minimum Notional Adjustment：Feasibility
+- 2023-2024 官方完整标题扫描只找到 **2篇** USD-M minimum-notional 公告，共 **6合约：BTC/ETH/LINK/BCH/ETC/LTC**；Spot/Margin minimum-order-size 明确排除。
+- 低于预设最低8 event-symbol coverage，因此**未看收益即冻结 / 不拼其它order-size规则凑样本 / 不入库**。
+- 归档：strategy_templates/research/binance-futures-minimum-notional-adjustment/feasibility/。
+
+## 2026-09-30 — Binance Margin Dynamic Interest Rate：Feasibility
+- 2023-2024 官方标题完整扫描中，真正 Margin 借币利率相关只有 2023-02-20 `Binance Margin Introduces Dynamic Interest Rate Updates` 一篇规则公告；其它命中均为已覆盖的 Futures funding-rate/leverage 事件。
+- 没有可审计的按资产历史 rate-change event series。结论：**event-history/data-definition blocked / 未看收益 / 不入库**。
+- 归档：strategy_templates/research/binance-margin-dynamic-interest-rate/feasibility/。
+
+## 2026-09-30 — DeFiLlama Chain USDT+USDC Share
+- 新机制：`(USDT + USDC nominal circulating) / all USD-stablecoin nominal circulating`；7日 share change 零上穿 LONG、零下穿 SHORT，下一UTC日open。数据全部同源 DeFiLlama，复用动态 USD-M 历史>=2年 + signal-day QV>=500万。
+- 看收益前 coverage 过门并冻结 discovery=2023-2024、7d endpoint 不越过2024-12-31；gate=7d signed mean >=+0.25% 且 >=60% 有事件币种均值为正。
+- canonical discovery：**754事件 / 10币**；1d **-0.1620%**、3d **-0.1229%**、7d **+0.2645%**，win7 51.33%；仅 **5/10币** 7d均值为正。
+- 年度：2023 7d **-0.2338%**，2024 **+0.7371%**；symbol-equal 7d +0.4906%。经济幅度门槛刚过，但 breadth=50% 未过，且跨年符号不稳定。
+- 结论：**discovery breadth gate失败 / 2025-2026 OOS保持未读 / 不删弱币、不调7d、不反向、不进exact / 不入库**。
+- 归档：strategy_templates/research/defillama-chain-bluechip-stablecoin-share/2023-2026/。

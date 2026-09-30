@@ -1,0 +1,13 @@
+{
+  "stage": "data_access_feasibility",
+  "required_minimum": {
+    "aggregate_daily_derivatives_volume": true,
+    "protocol_daily_derivatives_volume": true,
+    "auditable_history": true
+  },
+  "eligibility_if_unblocked": {
+    "usd_m_history_years": 2,
+    "prior_24h_quote_volume_min_usdt": 5000000
+  },
+  "returns_inspected": false
+}

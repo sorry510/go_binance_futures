@@ -1,0 +1,18 @@
+{
+  "TRXUSDT": {
+    "first_vision_month": "2020-01",
+    "eligible_all_2024": true
+  },
+  "ATOMUSDT": {
+    "first_vision_month": "2020-02",
+    "eligible_all_2024": true
+  },
+  "LTCUSDT": {
+    "first_vision_month": "2020-01",
+    "eligible_all_2024": true
+  },
+  "UNIUSDT": {
+    "first_vision_month": "2020-09",
+    "eligible_all_2024": true
+  }
+}

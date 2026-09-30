@@ -1,0 +1,8 @@
+{
+  "discovery": "2023-2024",
+  "source": "Binance public CMS catalogId=49",
+  "genuine_margin_interest_articles": 1,
+  "asset_level_rate_change_event_series": false,
+  "returns_inspected": false,
+  "decision": "event-history/data-definition blocked before returns"
+}

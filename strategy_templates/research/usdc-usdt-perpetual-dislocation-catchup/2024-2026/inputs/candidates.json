@@ -1,0 +1,198 @@
+[
+  {
+    "usdc": "1000BONKUSDC",
+    "usdt": "1000BONKUSDT",
+    "usdt_first": "2023-11",
+    "usdc_first": "2024-05",
+    "target_2y_month": "2025-11"
+  },
+  {
+    "usdc": "AAVEUSDC",
+    "usdt": "AAVEUSDT",
+    "usdt_first": "2020-10",
+    "usdc_first": "2025-06",
+    "target_2y_month": "2022-10"
+  },
+  {
+    "usdc": "ADAUSDC",
+    "usdt": "ADAUSDT",
+    "usdt_first": "2020-01",
+    "usdc_first": "2025-03",
+    "target_2y_month": "2022-01"
+  },
+  {
+    "usdc": "BCHUSDC",
+    "usdt": "BCHUSDT",
+    "usdt_first": "2020-01",
+    "usdc_first": "2024-04",
+    "target_2y_month": "2022-01"
+  },
+  {
+    "usdc": "1000SHIBUSDC",
+    "usdt": "1000SHIBUSDT",
+    "usdt_first": "2021-05",
+    "usdc_first": "2024-03",
+    "target_2y_month": "2023-05"
+  },
+  {
+    "usdc": "AVAXUSDC",
+    "usdt": "AVAXUSDT",
+    "usdt_first": "2020-09",
+    "usdc_first": "2024-03",
+    "target_2y_month": "2022-09"
+  },
+  {
+    "usdc": "1000PEPEUSDC",
+    "usdt": "1000PEPEUSDT",
+    "usdt_first": "2023-05",
+    "usdc_first": "2024-03",
+    "target_2y_month": "2025-05"
+  },
+  {
+    "usdc": "ARBUSDC",
+    "usdt": "ARBUSDT",
+    "usdt_first": "2023-03",
+    "usdc_first": "2024-04",
+    "target_2y_month": "2025-03"
+  },
+  {
+    "usdc": "BNBUSDC",
+    "usdt": "BNBUSDT",
+    "usdt_first": "2020-02",
+    "usdc_first": "2024-01",
+    "target_2y_month": "2022-02"
+  },
+  {
+    "usdc": "DOGEUSDC",
+    "usdt": "DOGEUSDT",
+    "usdt_first": "2020-07",
+    "usdc_first": "2024-01",
+    "target_2y_month": "2022-07"
+  },
+  {
+    "usdc": "BTCUSDC",
+    "usdt": "BTCUSDT",
+    "usdt_first": "2020-01",
+    "usdc_first": "2024-01",
+    "target_2y_month": "2022-01"
+  },
+  {
+    "usdc": "CRVUSDC",
+    "usdt": "CRVUSDT",
+    "usdt_first": "2020-09",
+    "usdc_first": "2024-07",
+    "target_2y_month": "2022-09"
+  },
+  {
+    "usdc": "HBARUSDC",
+    "usdt": "HBARUSDT",
+    "usdt_first": "2021-03",
+    "usdc_first": "2025-03",
+    "target_2y_month": "2023-03"
+  },
+  {
+    "usdc": "FILUSDC",
+    "usdt": "FILUSDT",
+    "usdt_first": "2020-10",
+    "usdc_first": "2024-04",
+    "target_2y_month": "2022-10"
+  },
+  {
+    "usdc": "ETHUSDC",
+    "usdt": "ETHUSDT",
+    "usdt_first": "2020-01",
+    "usdc_first": "2024-01",
+    "target_2y_month": "2022-01"
+  },
+  {
+    "usdc": "LTCUSDC",
+    "usdt": "LTCUSDT",
+    "usdt_first": "2020-01",
+    "usdc_first": "2024-04",
+    "target_2y_month": "2022-01"
+  },
+  {
+    "usdc": "MATICUSDC",
+    "usdt": "MATICUSDT",
+    "usdt_first": "2020-10",
+    "usdc_first": "2024-04",
+    "target_2y_month": "2022-10"
+  },
+  {
+    "usdc": "LINKUSDC",
+    "usdt": "LINKUSDT",
+    "usdt_first": "2020-01",
+    "usdc_first": "2024-02",
+    "target_2y_month": "2022-01"
+  },
+  {
+    "usdc": "NEARUSDC",
+    "usdt": "NEARUSDT",
+    "usdt_first": "2020-10",
+    "usdc_first": "2024-04",
+    "target_2y_month": "2022-10"
+  },
+  {
+    "usdc": "NEOUSDC",
+    "usdt": "NEOUSDT",
+    "usdt_first": "2020-02",
+    "usdc_first": "2024-04",
+    "target_2y_month": "2022-02"
+  },
+  {
+    "usdc": "ORDIUSDC",
+    "usdt": "ORDIUSDT",
+    "usdt_first": "2023-11",
+    "usdc_first": "2024-02",
+    "target_2y_month": "2025-11"
+  },
+  {
+    "usdc": "SOLUSDC",
+    "usdt": "SOLUSDT",
+    "usdt_first": "2020-09",
+    "usdc_first": "2024-01",
+    "target_2y_month": "2022-09"
+  },
+  {
+    "usdc": "TIAUSDC",
+    "usdt": "TIAUSDT",
+    "usdt_first": "2023-10",
+    "usdc_first": "2024-04",
+    "target_2y_month": "2025-10"
+  },
+  {
+    "usdc": "SUIUSDC",
+    "usdt": "SUIUSDT",
+    "usdt_first": "2023-05",
+    "usdc_first": "2024-02",
+    "target_2y_month": "2025-05"
+  },
+  {
+    "usdc": "UNIUSDC",
+    "usdt": "UNIUSDT",
+    "usdt_first": "2020-09",
+    "usdc_first": "2025-06",
+    "target_2y_month": "2022-09"
+  },
+  {
+    "usdc": "ZECUSDC",
+    "usdt": "ZECUSDT",
+    "usdt_first": "2020-02",
+    "usdc_first": "2025-11",
+    "target_2y_month": "2022-02"
+  },
+  {
+    "usdc": "WLDUSDC",
+    "usdt": "WLDUSDT",
+    "usdt_first": "2023-07",
+    "usdc_first": "2024-03",
+    "target_2y_month": "2025-07"
+  },
+  {
+    "usdc": "XRPUSDC",
+    "usdt": "XRPUSDT",
+    "usdt_first": "2020-01",
+    "usdc_first": "2024-01",
+    "target_2y_month": "2022-01"
+  }
+]

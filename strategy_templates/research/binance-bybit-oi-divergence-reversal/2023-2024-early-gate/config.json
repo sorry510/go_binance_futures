@@ -1,0 +1,17 @@
+{
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "signal": "log(Binance USD-M OI / Bybit linear OI)",
+  "zscore_lookback_hours": 720,
+  "trigger_abs_z_gte": 3,
+  "rearm_abs_z_lt": 1,
+  "direction": "Binance OI dominance -> SHORT; Bybit OI dominance -> LONG",
+  "period": [
+    2023,
+    2024
+  ]
+}

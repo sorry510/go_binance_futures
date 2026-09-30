@@ -1,0 +1,22 @@
+{
+  "metric": "CoinMetrics Community FeeTotNtv",
+  "assets": [
+    "btc",
+    "eth",
+    "xrp",
+    "ada",
+    "bch",
+    "ltc",
+    "doge",
+    "zec"
+  ],
+  "signal": "log(mean latest 7d / mean previous 7d) zero-cross",
+  "positive_cross": "LONG",
+  "negative_cross": "SHORT",
+  "entry": "next UTC day open",
+  "horizons_days": [
+    1,
+    3,
+    7
+  ]
+}

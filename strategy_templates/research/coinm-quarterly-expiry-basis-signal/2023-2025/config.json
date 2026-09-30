@@ -1,0 +1,8 @@
+{
+  "event": "COIN-M quarterly expiry at 08:00 UTC",
+  "signal": "sign of log(quarterly close / COIN-M perpetual close) on last full 1h bar before expiry",
+  "pre_registered_direction": "positive basis -> SHORT USD-M; negative basis -> LONG USD-M",
+  "generated_mirror": "positive basis -> LONG; negative basis -> SHORT; OOS only",
+  "entry": "08:00 UTC USD-M open",
+  "eligibility": ">=730d USD-M history and prior-24h QuoteVolume >=5M USDT"
+}

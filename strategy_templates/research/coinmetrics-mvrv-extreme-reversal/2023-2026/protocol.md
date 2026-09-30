@@ -1,0 +1,1 @@
+Normalize daily log MVRV against the prior 90 completed days. First z>=2 is SHORT and z<=-2 LONG; |z|<1 rearms. Same rule across all assets. Do not reinterpret negative discovery as momentum after results.

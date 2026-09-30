@@ -1,0 +1,7 @@
+{
+  "source": "Gate API v4 /futures/usdt/insurance",
+  "research_date": "2026-09-29",
+  "required_history": "2023-2026 discovery/OOS",
+  "observed_history_days": 31,
+  "decision": "historical-data blocked"
+}

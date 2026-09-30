@@ -1,0 +1,1 @@
+Use standard 14-period Money Flow Index based on typical price and QuoteVolume. Trigger only 50 centerline crosses. No trend confirmation, alternative period, 20/80 threshold or neighboring oscillator search.

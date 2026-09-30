@@ -1,0 +1,30 @@
+{
+  "discovery_2023_2024": {
+    "n": 198,
+    "mean1": -0.0007543289,
+    "mean4": -0.0008195072,
+    "mean12": -0.0009529872,
+    "win12": 0.540404,
+    "positive_symbols12": 5,
+    "symbols": 10
+  },
+  "oos1_2025": {
+    "n": 102,
+    "mean1": 9.29206e-05,
+    "mean4": 0.0022638683,
+    "mean12": -0.0033423556,
+    "win12": 0.45098,
+    "positive_symbols12": 3,
+    "symbols": 10
+  },
+  "oos2_2026": {
+    "n": 59,
+    "mean1": -0.0004977068,
+    "mean4": 0.0016880181,
+    "mean12": -0.0001539931,
+    "win12": 0.457627,
+    "positive_symbols12": 5,
+    "symbols": 10
+  },
+  "decision": "freeze; fixed reversal direction fails discovery and OOS"
+}

@@ -1,0 +1,12 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": [
+    "Binance Vision Spot 1h klines",
+    "go_bn_test market_klines_1h futures_usdt (read-only)"
+  ],
+  "notes": [
+    "No database writes performed.",
+    "Spot ZIP retrieval used curl HTTP/1.1 with retries due local TLS instability."
+  ]
+}

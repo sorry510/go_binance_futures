@@ -1,0 +1,114 @@
+[
+  {
+    "symbol": "ETHUSDT",
+    "chain": "Ethereum",
+    "aligned_days": 793,
+    "events": 108,
+    "share_nonzero_days": 793,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "chain": "BSC",
+    "aligned_days": 793,
+    "events": 132,
+    "share_nonzero_days": 793,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "SOLUSDT",
+    "chain": "Solana",
+    "aligned_days": 793,
+    "events": 163,
+    "share_nonzero_days": 793,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "chain": "Avalanche",
+    "aligned_days": 793,
+    "events": 80,
+    "share_nonzero_days": 793,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "chain": "Cardano",
+    "aligned_days": 793,
+    "events": 0,
+    "share_nonzero_days": 0,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "chain": "Near",
+    "aligned_days": 793,
+    "events": 70,
+    "share_nonzero_days": 792,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "chain": "Tron",
+    "aligned_days": 793,
+    "events": 0,
+    "share_nonzero_days": 0,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "MATICUSDT",
+    "chain": "Polygon",
+    "aligned_days": 651,
+    "events": 55,
+    "share_nonzero_days": 651,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "FTMUSDT",
+    "chain": "Fantom",
+    "aligned_days": 793,
+    "events": 157,
+    "share_nonzero_days": 793,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "OPUSDT",
+    "chain": "OP Mainnet",
+    "aligned_days": 793,
+    "events": 35,
+    "share_nonzero_days": 793,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "APTUSDT",
+    "chain": "Aptos",
+    "aligned_days": 793,
+    "events": 9,
+    "share_nonzero_days": 793,
+    "share_first": "2022-12-01"
+  },
+  {
+    "symbol": "ARBUSDT",
+    "chain": "Arbitrum",
+    "aligned_days": 681,
+    "events": 0,
+    "share_nonzero_days": 681,
+    "share_first": "2023-03-23"
+  },
+  {
+    "symbol": "SUIUSDT",
+    "chain": "Sui",
+    "aligned_days": 375,
+    "events": 0,
+    "share_nonzero_days": 351,
+    "share_first": "2024-01-23"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "chain": "XRPL",
+    "aligned_days": 0,
+    "events": 0,
+    "share_nonzero_days": 0,
+    "share_first": null
+  }
+]

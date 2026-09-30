@@ -1,0 +1,8 @@
+{
+  "research_date": "2026-09-29",
+  "repository_revision": "09c651d209ccab84391d2d63f1f8b14557ef2062",
+  "sources": ["DeFiLlama /overview/fees methodology metadata", "DeFiLlama /protocols token identity metadata", "DeFiLlama /summary/fees/{slug}?dataType=dailyHoldersRevenue", "Binance Vision USD-M 1d klines"],
+  "data_quality": ["DYDX excluded because dydx-v3 holder-revenue summary returned HTTP 400, making token history incomplete.", "FLM excluded because flamingo-finance fee summary returned HTTP 400.", "LIT, CHR, FLOW and LUNA excluded as ticker identity collisions.", "Current methodology descriptions were audited before return inspection to exclude supply-side/protocol-only revenue adapters."],
+  "boundary_correction": "Initial discovery used some 7d outcomes from 2025-01-01..07. Legacy outputs are preserved; canonical discovery requires full 7d endpoint <= 2024-12-31 and now fails breadth.",
+  "database_write": false
+}

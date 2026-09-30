@@ -1,0 +1,9 @@
+{
+  "interval": "1h",
+  "window_hours": 24,
+  "feature": "max ordered trough-to-peak log runup / max ordered peak-to-trough log drawdown",
+  "natural_threshold": 1,
+  "cross_above": "LONG",
+  "cross_below": "SHORT",
+  "entry": "next 1h open"
+}
