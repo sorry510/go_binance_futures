@@ -2515,3 +2515,615 @@
 - 本研究主机对 `us.okx.com/app.okx.com/eea.okx.com/www.okx.com` 官方API域名均 TLS EOF，当前无法用API直接校验完整分页；这是当前环境访问限制，不代表OKX API普遍不可用。
 - 结论：**archive-consistency/data-access blocked / 未看收益 / 不用搜索引擎结果补事件 / 不入库**。只有拿到稳定官方API或可重放完整Help Center快照后再重开。
 - 归档：strategy_templates/research/okx-announcement-event-archive/feasibility/。
+
+## 2026-09-30 — v62：1h Inside-Bar + 4h Trend Breakout
+- 目标：只用现有 DSL/行情数据构造可直接回测与实盘运行的新 Setup；无外部数据、无 MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v62/01-inside-bar-trend-breakout.json`。
+- 固定结构：已完成1h inside bar，4h EMA20/50 + ADX14/DMI 同向，当前15m首次穿越 mother-bar 高/低触发；LONG/SHORT/CLOSE_LONG/CLOSE_SHORT 完整。Engine 固定 4x / TP8 / SL6 / fee0.0005 / slippage5bps。
+- BTC：100笔 PF **1.113**；ETH：100笔 **1.021**；BNB：99笔 **0.973**；XRP：14笔 **0.757**。
+- 四核心币：**313笔，标准化 PF 1.017，2/4正，0.409次/币/周**；LONG 148 / SHORT 165。
+- 年度 PF：2023 **0.854**、2024 **0.994**、2025 **1.036**、2026 **1.520**。220 SL / 90 TP / 3 end_of_data。
+- 结论：频率达到阶段要求，但 expectancy 与跨币/跨年一致性明显不足；**冻结 v62 / 不调 inside-bar、EMA、ADX 或确认周期 / 不入库**。
+
+## 2026-09-30 — v63：1h Engulfing + 4h Trend Confirmation
+- 目标：继续寻找完全可由当前项目 DSL/Engine 直接运行的独立 Setup；无外部数据、无 MarketCondition/Benchmark/NowTime%。最终可运行版本：`temp_strategy/v63/03-engulfing-trend-native-trigger.json`。
+- 结构冻结：4h EMA20/50 + ADX14/DMI 定方向；上一根完成1h K 对前一根形成 body engulfing；当前1h从内部实际突破 engulfing high/low 后按 `NowPrice` 触发。固定 4x / TP8 / SL6 / fee0.0005 / 5bps，四类规则完整。
+- 早期15m确认版本四核心币：372笔，PF 1.220，3/4正，0.486次/币/周；但 SOL 本地15m历史缺口，按“不擅自补库”原则停止扩展。
+- 最终 native-trigger 版本在原四币：372笔，PF **1.218**，3/4正；结果与15m版近似。BTC 1.171、ETH 1.041、BNB 0.975、XRP 1.836。
+- 参数冻结后在此前未见的 SOL/DOGE/LTC/AVAX/UNI/ZEC：**587笔，PF 1.464，4/6正，0.511次/币/周**；年度 2023/2024/2025/2026 = 1.703/1.261/1.686/0.998。
+- 合并老10币：**959笔，标准化 PF 约1.383，7/10正，约0.501次/币/周**；年度约 1.421/1.352/1.491/1.139，达到进入symbol holdout的预设门槛。
+- 最终动态>=2年 symbol holdout：ADA/NEAR/1000PEPE/SUI/ONDO 共 **204笔，PF 0.977，仅1/5正，0.369次/币/周**。ADA 1.516；NEAR 0.925；1000PEPE 1笔全亏；SUI 0.868；ONDO 0.398。年度 2025 PF 0.306、2026 0.713。
+- 结论：老币样本表现很强，但新 symbol 泛化明确失败；**冻结整个 v63 family / 不按holdout删币、不删方向、不改engulfing或趋势参数 / 不入库**。
+
+## 2026-09-30 — v64：1h KDJ(9,3,3) Cross + 4h Trend
+- 目标：项目原生独立 Setup；只用现有 KDJ/EMA/ADX/Kline DSL，无外部数据、无 MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v64/01-kdj-cross-4h-trend.json`。
+- 固定结构：4h EMA20/50 + ADX14/DMI 定方向；1h 标准 KDJ(9,3,3) K/D 实时交叉并要求当前1h candle同向；不加 J 阈值、MFI、volume 或参数搜索。固定 4x / TP8 / SL6 / fee0.0005 / 5bps，四类规则完整。
+- 四核心币：BTC 111笔 PF 1.145；ETH 113笔 1.006；BNB 118笔 0.874；XRP 115笔 1.476。
+- 合计：**457笔，标准化 PF 1.135，3/4正，0.597次/币/周**；LONG 226 / SHORT 231。
+- 年度 PF：2023 1.068、2024 1.417、2025 **0.815**、2026 1.314；322 SL / 131 TP / 4 end_of_data。
+- 结论：频率很好但整体PF低于预设 early gate≈1.15，且2025出现明显负期望；**冻结 v64 / 不调KDJ周期、J阈值、EMA/ADX或增加过滤器 / 不扩币 / 不入库**。
+
+## 2026-09-30 — v65：1h Doji/窄实体突破 + 4h Trend
+- 项目原生 Setup；只用 Kline/EMA/ADX/NowPrice，无外部数据、无 MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v65/01-doji-breakout-4h-trend.json`。
+- 固定定义：上一根完整1h实体 <= 全振幅20%；当前1h从该K内部向4h EMA20/50 + ADX/DMI趋势方向突破高/低触发。固定4x / TP8 / SL6 / fee0.0005 / 5bps，四类规则完整。
+- BTC 112笔 PF 1.164；ETH 108笔 1.075；BNB 111笔 0.881；XRP 114笔 1.380。
+- 四核心币：**445笔，标准化 PF 1.136，3/4正，0.582次/币/周**；年度 PF 2023 1.044、2024 1.401、2025 **0.892**、2026 1.151。
+- 结论：低于预设 early gate≈1.15，且2025负期望；**冻结 v65 / 不调20%阈值、不加volume/ATR过滤、不扩币 / 不入库**。
+
+## 2026-09-30 — v66：1h Outside-Bar Continuation + 4h Trend
+- 项目原生 Setup；只用 Kline/EMA/ADX/NowPrice，无外部数据、无 MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v66/01-outside-bar-continuation.json`。
+- 固定定义：上一根完整1h high>前一根high 且 low<前一根low，实体方向与4h EMA20/50+ADX/DMI趋势一致；当前1h从 outside-bar 内部继续突破其高/低触发。固定4x / TP8 / SL6 / fee0.0005 / 5bps。
+- BTC 88笔 PF 1.288；ETH 94笔 0.959；BNB 85笔 1.075；XRP 97笔 1.136。
+- 合计：**364笔，标准化 PF 1.102，3/4正，0.476次/币/周**；年度 PF 2023 1.003、2024 1.587、2025 **0.719**、2026 1.041。
+- 结论：整体与2025均不过门；**冻结 v66 / 不反向、不加body/volume阈值、不扩币 / 不入库**。
+
+## 2026-09-30 — v67：1h TakerBuyRatio 0.5 Cross + QPS + 4h Trend
+- 项目原生 Setup；只用 Futures Kline `TakerBuyRatio/Qps`、EMA、ADX、NowPrice，无外部数据、无 MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v67/01-taker-flow-cross-4h-trend.json`。
+- 固定规则：上一根完整1h TakerBuyRatio 穿越0.5，QPS>=此前8h均值；当前1h再突破该信号K高/低，且4h EMA20/50+ADX/DMI同向。固定4x / TP8 / SL6 / fee0.0005 / 5bps。
+- 四核心币：304笔，PF **1.265**，3/4正，0.397次/币/周；年度 2023/2024/2025/2026 = 0.996/1.623/0.921/1.488。
+- 参数冻结后未见6币 SOL/DOGE/LTC/AVAX/UNI/ZEC：539笔，PF **1.560**，5/6正，0.470次/币/周；年度 1.768/1.404/1.830/0.856。
+- 合并老10币：**843笔，标准化PF约1.465，8/10正**；年度约1.482/1.481/1.602/1.029，达到holdout门槛。
+- 动态>=2年 holdout ADA/NEAR/1000PEPE/SUI/ONDO：**256笔，PF 0.960，仅1/5正，0.463次/币/周**。ADA 1.543；NEAR 0.951；1000PEPE 0.777；SUI 0.812；ONDO 0.311。年度2025 PF 0.474、2026 0.655。
+- 结论：老币样本强，但新symbol泛化明确失败；**冻结整个v67 family / 不调0.5、QPS、趋势条件、不删弱币 / 不入库**。
+
+## 2026-09-30 — v68：Two-Bar Pullback Resume + 4h Trend
+- 项目原生 Setup；两根连续1h逆趋势实体作为回踩，当前1h突破最近一根回踩K高/低恢复4h EMA20/50+ADX/DMI主趋势；无外部数据、无MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v68/01-two-bar-pullback-resume.json`。
+- 四核心币：BTC 102笔 PF 1.326；ETH 109笔 1.014；BNB 111笔 0.955；XRP 15笔 0.809。
+- 合计：**337笔，标准化PF 1.065，2/4正，0.440次/币/周**；年度PF 2023 0.951、2024 0.993、2025 1.123、2026 1.391。
+- 结论：整体/breadth均不过early gate；**冻结v68 / 不改成1根或3根回踩、不加EMA-touch/volume过滤、不扩币 / 不入库**。
+
+## 2026-09-30 — v69：1h QPS Climax Failure Reversal
+- 项目原生 Setup；上一根1h为此前8h最高QPS方向K，下一小时若从不利一侧重新穿越其振幅中点则反向；无外部数据、无MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v69/01-qps-climax-failure-reversal.json`。
+- 四核心币：BTC 724笔 PF 0.748；ETH 825笔 0.881；BNB 756笔 0.858；XRP 1014笔 0.843。
+- 合计：**3319笔，标准化PF 0.835，0/4正，4.338次/币/周**；年度PF 2023 0.931、2024 0.708、2025 0.916、2026 0.798。
+- 结论：高频但稳定负期望；**冻结v69 / 不事后反向成continuation、不调8h窗口或中点定义 / 不入库**。
+
+## 2026-09-30 — v70：1h QPS Dry-Up Breakout + 4h Trend
+- 项目原生 Setup；最近3个完整1h QPS均低于更早12h均值，当前小时向4h EMA20/50+ADX/DMI主趋势方向突破这3小时高/低区间。无外部数据、无MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v70/01-qps-dryup-breakout.json`。
+- 四核心币：BTC 108笔 PF 1.213；ETH 113笔 1.030；BNB 111笔 0.935；XRP 16笔 0.741。
+- 合计：**348笔，标准化PF 1.032，2/4正，0.455次/币/周**；年度PF 2023 **0.854**、2024 1.059、2025 1.013、2026 1.437。
+- 结论：整体/breadth/2023均不过门；**冻结v70 / 不调3h或12h窗口、不加当前QPS阈值、不扩币 / 不入库**。
+
+## 2026-09-30 — v71：1h NR4 Breakout + 4h Trend
+- 项目原生 Setup；上一根完整1h振幅为最近4根最窄，当前小时从NR4 K内部向4h EMA20/50+ADX/DMI趋势方向突破高/低触发。无外部数据、无MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v71/01-nr4-breakout-4h-trend.json`。
+- 四核心币：BTC 110笔 PF 1.166；ETH 111笔 1.105；BNB 118笔 0.886；XRP 16笔 0.835。
+- 合计：**355笔，标准化PF 1.036，2/4正，0.464次/币/周**；年度PF 2023 0.929、2024 1.050、2025 1.029、2026 1.241。
+- 结论：整体/breadth不过门；**冻结v71 / 不改NR7、不加ATR/volume过滤、不扩币 / 不入库**。
+
+## 2026-09-30 — v72：1h 12h Liquidity Sweep Reversal
+- 项目原生纯价格行为 Setup；上一根1h刺破此前12h极值但收回区间内，当前小时重新穿越 sweep K 中点确认反转；无趋势/量/外部数据/MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v72/01-liquidity-sweep-reversal.json`。
+- 四核心币：BTC 523笔 PF 0.879；ETH 624笔 0.836；BNB 581笔 0.849；XRP 656笔 0.729。
+- 合计：**2384笔，标准化PF 0.817，0/4正，3.116次/币/周**；年度PF 2023 0.763、2024 0.780、2025 0.887、2026 0.832。
+- 结论：跨币/跨年稳定负期望；**冻结v72 / 不事后反向成continuation、不调12h或中点确认 / 不入库**。
+
+## 2026-09-30 — v73：1h Three-Bar Market-Structure Continuation
+- 项目原生纯价格结构 Setup；最近3根完整1h形成连续 higher-high+higher-low 或 lower-high+lower-low，当前小时继续突破最近高/低触发；无趋势/量/外部数据/MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v73/01-three-bar-market-structure.json`。
+- 四核心币：BTC 965笔 PF 0.841；ETH 1242笔 0.830；BNB 1157笔 0.867；XRP 1378笔 0.906。
+- 合计：**4742笔，标准化PF 0.864，0/4正，6.198次/币/周**；年度PF 2023 1.012、2024 0.809、2025 0.776、2026 0.972。
+- 结论：高频但跨币稳定负期望；**冻结v73 / 不事后反向、不改变3-bar长度、不加趋势过滤 / 不入库**。
+
+## 2026-09-30 — v74：1h Confirmed Pivot Breakout + 4h Trend
+- 项目原生 Setup；5-bar confirmed pivot，`[3]` 高/低点分别高于/低于两侧各2根后确认，当前小时向4h EMA20/50+ADX/DMI趋势方向突破 pivot。无外部数据、MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v74/01-confirmed-pivot-breakout.json`。
+- 四核心币：BTC 84笔 PF 1.276；ETH 80笔 0.993；BNB 73笔 1.189；XRP 50笔 1.392。
+- 合计：**287笔，标准化PF 1.210，3/4正，0.375次/币/周**；年度PF 2023 **0.888**、2024 1.552、2025 **0.853**、2026 1.942。
+- 结论：总PF/breadth过线但两个完整年份明显负期望，跨regime不稳定；**冻结v74 / 不调pivot宽度、不加volume/ATR过滤、不扩币 / 不入库**。
+
+## 2026-09-30 — v75：1h Effort-vs-Result Breakout
+- 项目原生 Wyckoff 风格 Setup；上一根1h QPS高于此前8h均值而振幅低于此前8h平均振幅，当前小时从其内部突破高/低，方向即交易方向。无外部数据、MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v75/01-effort-result-breakout.json`。
+- 四核心币：BTC 716笔 PF 0.828；ETH 879笔 0.859；BNB 862笔 0.747；XRP 1030笔 0.855。
+- 合计：**3487笔，标准化PF 0.824，0/4正，4.557次/币/周**；年度PF 2023 0.933、2024 0.718、2025 0.838、2026 0.857。
+- 结论：跨币/跨年稳定负期望；**冻结v75 / 不事后反向、不调8h基线或QPS/range倍率 / 不入库**。
+
+## 2026-09-30 — v76：Funding Crowding × Taker-Flow Reversal
+- 项目原生 Setup；负funding下1h TakerBuyRatio由<=0.5上穿做LONG，正funding下由>=0.5下穿做SHORT，并要求当前小时突破信号K高/低确认。无外部数据、MarketCondition/Benchmark/NowTime%。JSON：`temp_strategy/v76/01-funding-taker-reversal.json`。
+- BTC 3笔 PF 0.190；ETH 1笔 PF 0；BNB 51笔 PF 1.290；XRP 176笔 PF 0.538。
+- 合计：**231笔，标准化PF 0.688，仅1/4正，0.302次/币/周**；年度PF 2023 1.171、2024 0.438、2025 0.709，2026无有效交易。
+- 结论：总体负期望且跨币事件密度极不均衡；**冻结v76 / 不调funding或0.5阈值、不扩币 / 不入库**。
+
+## 2026-09-30 — v77：Previous-Day Range Acceptance Continuation
+- 项目原生 Setup；前一完整日收盘突破前前一日高/低并同向收盘，当前日继续突破前一日高/低，且4h EMA20/50+ADX/DMI同向。无外部数据、MarketCondition/Benchmark/NowTime%。
+- 四核心币：BTC 91笔 PF 1.240；ETH 83笔 1.111；BNB 89笔 0.953；XRP 10笔 0.638。
+- 合计：**273笔，标准化PF 1.071，2/4正，0.357次/币/周**；年度PF 2023 0.984、2024 0.929、2025 1.144、2026 1.487。
+- 结论：early gate失败；**冻结v77 / 不调接受定义、EMA/ADX或增加过滤器 / 不扩币 / 不入库**。
+- 审计归档：`strategy_templates/research/previous-day-range-acceptance/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v78：Legacy-Derived 3m Exhaustion Wick Reversal
+- 项目原生 JSON，可由现代 DSL 表达；核心为 3m 连续方向 run + 20-bar 新极值 + 长反向影线 + 当前3m确认突破。
+- 在任何收益产生前，DatasetBuilder 加载 BTCUSDT 3m 即报历史缺口：`[[1672495200000 1756619999999]]`。
+- **未评估收益 / 不是 alpha 失败**；按“不擅自补历史、不写DB”原则，标记 data-path blocked。
+- 结论：冻结当前3m family；不自动下载/回填、不改成别的周期后冒充同一测试。
+- 审计归档：`strategy_templates/research/legacy-3m-exhaustion-wick-reversal/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v79：1h Exhaustion Wick Reversal
+- 项目原生 Setup；20-bar 新极值 + 前9根至少7根同向 + 反向影线/body>0.66 + 当前1h突破反转K确认。
+- 四核心币：BTC 120笔 PF 0.607；ETH 100笔 0.734；BNB 139笔 0.701；XRP 136笔 0.589。
+- 合计：**495笔，标准化PF 0.652，0/4正，0.647次/币/周**；年度PF 2023 0.881、2024 0.516、2025 0.652、2026 0.676。
+- 结论：跨币/跨年稳定负期望；**冻结v79 / 不调20-bar、7/9、0.66或时间周期 / 不入库**。
+- 审计归档：`strategy_templates/research/1h-exhaustion-wick-reversal/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v80：3h Price-Taker Flow Divergence Reversal
+- 项目原生 Setup；连续3个完整1h价格收盘向一侧，而 TakerBuyRatio 连续向相反方向变化，当前1h突破上一根高/低确认反转。
+- 四核心币：BTC 329笔 PF 0.848；ETH 370笔 0.704；BNB 330笔 1.080；XRP 367笔 0.869。
+- 合计：**1396笔，标准化PF 0.863，仅1/4正，1.824次/币/周**；年度PF 2023 0.931、2024 0.925、2025 0.788、2026 0.820。
+- 结论：跨币/跨年稳定负期望；**冻结v80 / 不反向、不改2h/4h窗口、不加阈值或过滤器 / 不入库**。
+- 审计归档：`strategy_templates/research/price-taker-multihour-divergence/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v80：Previous-Week Range Acceptance
+- 项目代码支持 `1w` interval，但当前本地历史库缺完整1w序列；BTC DatasetBuilder 在收益计算前即报 historical K-line gaps。
+- **未查看任何收益/PF，data-blocked 冻结**；不自动补库、不改引擎。
+- 归档：`strategy_templates/research/previous-week-range-acceptance/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v81：Keltner Wide-Excursion Re-entry
+- 项目原生 4h/1d Setup；KC(50,3.75) 宽通道极端后，最新完成4h仍在 KC(50,2.75) 窄通道外，当前价格重入，且前一完整日方向同向。
+- 四核心币合计仅 **4笔，0.005次/币/周**；远低于最低频率要求。四笔结果不作为alpha证据解释。
+- 结论：**按频率冻结v81 / 不调2.75/3.75、period50、10-bar窗口或日线过滤 / 不入库**。
+- 审计归档：`strategy_templates/research/keltner-wide-excursion-reentry/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v81：Rolling-7d Range Acceptance
+- 项目原生1d+1h Setup；过去7个完整日线区间被完整1h接受突破后，下一小时继续确认。
+- 四核心币：819笔，标准化PF **0.867**，**0/4正**，1.070次/币/周；2025 PF **0.590**。
+- **early gate失败并冻结**；不调5d/10d、不加过滤器、不反向。
+- 归档：`strategy_templates/research/rolling-7d-range-acceptance/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v82：4h Triple-EMA Trend Start
+- 项目原生 4h 现代版本；EMA3/7 与 EMA7/15 最近4根内完成层级交叉，EMA3继续同向，RSI6/14不过热/过冷；固定 TP8/SL6。
+- 四核心币总共仅 **4笔，0.005次/币/周**。aggregate PF 2.035 由4笔构成，不作为正alpha证据。
+- 结论：**按频率冻结v82 / 不调EMA周期、交叉窗口或RSI阈值 / 不入库**。
+- 审计归档：`strategy_templates/research/triple-ema-trend-start/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v82：ATR Term-Structure Expansion
+- 项目原生1h/1d ATR结构；ATR14(1h)*sqrt(24)/ATR14(1d) 从<=1上穿>1，按触发1h方向并由下一小时突破确认。
+- 四核心币：758笔，PF **1.090**，3/4正，0.991次/币/周；年度PF 1.034/1.080/1.161/1.077。
+- breadth/年度方向尚可，但未达到预注册PF>=1.15；**early gate失败并冻结**，不调ATR周期/倍率/阈值。
+- 归档：`strategy_templates/research/atr-term-structure-expansion/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v83：Hourly Trend Strength Breakout / Standard Exit
+- 复核现有 `hourly-trend-strength-breakout-v2.json`：入场逻辑原样保留，原非标准 CLOSE 禁用，退出统一固定 TP8/SL6。
+- 四核心币总共仅 **4笔，0.005次/币/周**；PF 1.880、3/4正均不具统计意义。
+- 结论：**按频率冻结v83 / 不调ADX/DI/ATR/Donchian/Supertrend入场阈值 / 不入库**。
+- 审计归档：`strategy_templates/research/hourly-trend-strength-breakout-standard-exit/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v83：Low-Activity Taker Accumulation Breakout
+- 连续2个完整1h主动流同向偏置且QPS均低于更早8h均值，随后突破两小时区间。
+- 四核心币：3800笔，PF **0.846**，**0/4正**，4.966次/币/周；四个年份PF全部<1。
+- **early gate明确失败并冻结**；不调0.5、2h/3h或QPS阈值，不反向。
+- 归档：`strategy_templates/research/low-activity-taker-accumulation/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v84：ADX20 Trend Start
+- 1h ADX14 从<=20上穿>20，DI方向决定多空，当前小时突破触发K极值确认。
+- 四核心币：779笔，PF **1.080**，3/4正，1.018次/币/周；2024 PF **0.759**。
+- **early gate失败并冻结**；不调ADX18/25、不加EMA/volume/funding过滤。
+- 归档：`strategy_templates/research/adx20-trend-start/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v85：Rolling-4h VWAP Reclaim
+- **DSL-blocked before returns**：KLinePrice 仅暴露 QuoteAssetVolume(`Amount`) 与 quote-volume-per-second(`Qps`)，没有 base volume，无法表达真实 VWAP。
+- 未查看收益，不改引擎、不写DB。
+- 归档：`strategy_templates/research/rolling-4h-vwap-reclaim/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v86：Daily Taker Regime Transition
+- 前一完整日线TakerBuyRatio跨0.5后，当前日只做同方向1h突破确认。
+- 四核心币：1367笔，PF **0.852**，**0/4正**，1.787次/币/周；四个年份PF全部<1。
+- **early gate明确失败并冻结**；不调0.5、不加EMA/ADX/QPS/funding过滤。
+- 归档：`strategy_templates/research/daily-taker-regime-transition/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v81/v82/v83/v84/v86 Fixed TP8/SL6 Exit Audit Correction
+- 发现 Backtest `RunConfig` 的 TP/SL 是 close-rule ROI gate，不会在 close expression 为 false 时强制退出；因此此前这5个 family 的条件 CLOSE 不是严格固定 TP8/SL6。
+- 已保留旧结果到各 research bundle 的 `legacy/conditional-exit/`，并保持 entry 规则完全不变，统一用 `ROI >= 8 || ROI <= -6` 重跑。
+- canonical strict-exit：v81 Rolling-7d 1069笔 PF **0.891** 0/4正；v82 ATR Term 936笔 **0.853** 0/4正；v83 Low-Activity Taker 5401笔 **0.792** 0/4正；v84 ADX20 852笔 **1.011** 3/4正；v86 Daily Taker 3710笔 **0.789** 0/4正。
+- 结论：五个 family 均继续冻结；此前条件退出下的弱正结果不再作为研究证据。后续新研究统一显式写固定 TP8/SL6 CLOSE。
+
+## 2026-09-30 — v87：QPS Term-Structure Expansion
+- 1h QPS 从<=前一完整日线QPS切到>日线QPS，按触发1h方向并由下一小时突破确认。
+- 严格固定 TP8/SL6：4777笔，PF **0.829**，**0/4正**，6.243次/币/周；四年全部PF<1。
+- **early gate明确失败并冻结**；不调baseline倍率、不加过滤器、不反向。
+- 归档：`strategy_templates/research/qps-term-structure-expansion/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v88：Record Net Aggressor Flow Continuation
+- 1h净主动成交额 `2*TakerBuyAmount-Amount` 的绝对值创此前8h新高，按flow符号并由下一小时突破确认。
+- 严格固定TP8/SL6：4902笔，PF **0.827**，**0/4正**，6.407次/币/周；四年全部<1。
+- **early gate明确失败并冻结**；不反向、不调lookback/倍率、不加过滤器。
+- 归档：`strategy_templates/research/record-net-aggressor-flow/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v89：1h Full-ATR Displacement Continuation
+- 完整1h实体幅度>=信号发生前ATR14[2]，按实体方向，下一小时突破信号K极值入场。
+- 严格固定TP8/SL6：5570笔，PF **0.825**，**0/4正**，7.280次/币/周；四年全部<1。
+- **early gate明确失败并冻结**；不反向、不调ATR倍率、不加过滤器。
+- 归档：`strategy_templates/research/1h-full-atr-displacement/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v90：Rolling-24h Return Zero-Cross
+- 因果重建 `NowSymbolPercentChange` 的滚动24h收益穿越0轴，并由上一完整1h极值突破确认。
+- 严格固定TP8/SL6：4295笔，PF **0.822**，**0/4正**，5.613次/币/周；四年全部<1。
+- **early gate明确失败并冻结**；不调±1/2%阈值、不改窗口、不加过滤器。
+- 归档：`strategy_templates/research/rolling-24h-return-zero-cross/2026-09-30-early-gate/`。
+
+## 2026-09-30 — Hourly Volume Retest / Strict TP8-SL6 Early Gate
+- 复用既有 `hourly-volume-retest-strength-v4` entry：1h volume/OBV impulse → 缩量受控回踩 → reclaim，配合4h EMA34与1h ADX/DMI；不改任何 entry 参数。
+- 结果前完成退出语义审计，canonical CLOSE 明确写为 `ROI >= 8 || ROI <= -6`。
+- 四核心币：1771笔，标准化PF **0.853**，**0/4正**，2.315次/币/周；年度PF 2023/2024/2025/2026 = 0.754/0.947/0.903/0.784。
+- **early gate明确失败并冻结**；不调volume/ATR/ADX/EMA34/retest阈值，不扩六币。
+- 归档：`strategy_templates/research/hourly-volume-retest-standard-exit/2026-09-30-early-gate/`。
+
+## 2026-09-30 — Remaining Conditional-Exit Audit Correction
+- 对今天剩余已有收益的条件退出 family 做固定 TP8/SL6 审计；entry 规则完全不变，旧证据保存到各 bundle 的 `legacy/conditional-exit/`。
+- `1h-exhaustion-wick-reversal`：516笔，PF **0.682**，0/4正，0.674次/币/周。
+- `previous-day-range-acceptance`：2856笔，PF **0.860**，0/4正，3.733次/币/周。
+- `price-taker-multihour-divergence`：1517笔，PF **0.828**，0/4正，1.983次/币/周。
+- 结论：三条在 canonical strict TP8/SL6 下均明确失败，继续冻结；今天所有已有收益的 `2026-09-30-early-gate` bundle 退出语义已统一审计。
+
+## 2026-09-30 — Strict TP8/SL6 Exit Audit Correction
+- Engine语义确认：RunConfig TP/SL 只是 close-rule ROI gate，不会在 CLOSE=false 或不满足时强平。
+- 以下此前条件CLOSE结果作废，canonical 全部改为 `ROI >= 8 || ROI <= -6`：v81 Rolling-7d PF **0.891**(0/4正)；v82 ATR Term PF **0.853**(0/4正)；v83 Low-Activity Taker PF **0.792**(0/4正)；v84 ADX20 PF **1.011**(3/4正)；v86 Daily Taker PF **0.789**(0/4正)。
+- 原结果保存在各自 research bundle 的 `legacy/conditional-exit/`；这些方向均维持冻结。
+
+## 2026-09-30 — v87：QPS Term-Structure Expansion
+- canonical 严格 TP8/SL6 (`ROI >= 8 || ROI <= -6`)：4777笔，PF **0.829**，0/4正，6.243次/币/周；年度 PF 0.763/0.884/0.848/0.790。
+- 四币与四年均稳定负期望，冻结；不调 baseline multiplier/window、不加过滤器。
+- 归档：`strategy_templates/research/qps-term-structure-expansion/2026-09-30-early-gate/`。
+
+## 2026-09-30 — Strict TP8/SL6 Audit Correction (v77-v80)
+- v77 Previous-Day Range Acceptance canonical：**2856笔，PF 0.860，0/4正**；四年全部<1，冻结。
+- v78 Legacy 3m Exhaustion：旧条件退出结果作废；strict rerun 因 BTCUSDT 3m 本地历史大缺口而 **data-blocked**，未查看严格收益，不补库。
+- v79 1h Exhaustion Wick Reversal canonical：**516笔，PF 0.682，0/4正**，冻结。
+- v80 Price-Taker Multi-hour Divergence canonical：**1517笔，PF 0.828，0/4正**，冻结。
+- 原条件退出结果均保存在各 research bundle 的 `legacy/conditional-exit/`。
+
+## 2026-09-30 — v88：1h DMI Crossover Breakout
+- +DI/-DI 标准交叉，下一小时突破触发K极值确认；strict TP8/SL6。
+- 四核心币：2990笔，PF **0.774**，0/4正，3.908次/币/周；年度PF 0.701/0.808/0.826/0.727。
+- **early gate明确失败并冻结**；不加ADX/EMA过滤，不调周期，不反向。
+- 归档：`strategy_templates/research/dmi-crossover-breakout/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v89：1h EMA Spread Re-acceleration
+- EMA20>EMA50 时 spread 增量由<=0转>0做LONG，SHORT镜像；下一小时突破触发K确认；strict TP8/SL6。
+- 四核心币：3376笔，PF **0.870**，0/4正，4.412次/币/周；年度PF 0.757/0.924/0.950/0.808。
+- **early gate明确失败并冻结**；不调EMA周期、不加过滤器、不反向。
+- 归档：`strategy_templates/research/ema-spread-reacceleration/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v90：3h Price-OBV Divergence Reversal
+- 3h价格与OBV方向背离，下一小时突破最近1h极值确认；strict TP8/SL6。
+- 四核心币：4224笔，PF **0.795**，0/4正，5.521次/币/周；年度PF 0.802/0.840/0.776/0.732。
+- **early gate明确失败并冻结**；不改3h窗口、不加过滤器、不反向。
+- 归档：`strategy_templates/research/price-obv-3h-divergence/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v63/v67/v74 Strict TP8/SL6 Audit Correction
+- 发现早期 v62–v76 测试时误把 RunConfig TP8/SL6 当成强制退出；实际它只 gate CLOSE 规则。按用户要求不补旧 research bundle，仅对曾出现阶段性正结果的 v63/v67/v74 做一次 strict 复核。
+- v63 Engulfing Native Trigger strict：**2451笔，PF 0.843，0/4正**；年度PF 0.796/0.815/0.916/0.854。旧老10币 PF≈1.38 阶段结论作废。
+- v67 Taker Flow Cross strict：**1986笔，PF 0.902，0/4正**；年度PF 0.854/0.956/0.958/0.797。旧老10币 PF≈1.47 阶段结论作废。
+- v74 Confirmed Pivot strict：**976笔，PF 0.882，0/4正**；年度PF 0.874/0.843/0.883/0.952。旧 core4 PF1.210 结论作废。
+- 三个 family 全部冻结；后续所有新研究统一显式 CLOSE=`ROI >= 8 || ROI <= -6`。
+
+## 2026-09-30 — v100：4h Quote-Volume-Weighted Return Pressure
+- 4个完整1h的 return×QuoteAssetVolume 求和穿越0轴，下一小时突破确认；strict TP8/SL6。
+- 四核心币：6967笔，PF **0.824**，0/4正，9.105次/币/周；年度PF 0.805/0.859/0.833/0.765。
+- **early gate明确失败并冻结**；不改窗口、不加过滤器、不反向。
+- 归档：`strategy_templates/research/quote-volume-weighted-return-pressure/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v101：ADX20 × ATR-Term Expansion Confluence
+- Discovery仅用 SOL/DOGE/LTC/AVAX/UNI/ZEC；strict TP8/SL6。
+- **485笔，PF 0.763，0/6正，0.423次/币/周**；年度PF 0.689/0.679/0.933/0.751。
+- discovery明确失败，冻结；**fresh holdout ALGO/INJ/LDO/PENDLE/PYTH 未评估，保持干净**。
+- 归档：`strategy_templates/research/adx-volatility-expansion-confluence/2026-09-30-discovery/`。
+
+## 2026-09-30 — Strict TP8/SL6 Exit Audit Correction (v77-v80)
+- v77 Previous-Day Range Acceptance canonical：2856笔，PF **0.860**，0/4正，四年均<1，冻结。
+- v78 Legacy 3m Exhaustion：旧条件退出结果作废；严格版本因本地3m历史缺口在收益计算前失败，标记 **data-blocked**，不补库。
+- v79 1h Exhaustion Wick Reversal canonical：516笔，PF **0.682**，0/4正，冻结。
+- v80 Price-Taker Multihour Divergence canonical：1517笔，PF **0.828**，0/4正，冻结。
+- 以上旧条件CLOSE结果仅保留在各自 research 的 `legacy/conditional-exit/`，不再作为策略证据。
+
+## 2026-09-30 — v88：Daily Open Reclaim
+- 严格 TP8/SL6：5700笔，PF **0.777**，0/4正，7.450次/币/周；年度 PF 0.708/0.798/0.831/0.730。
+- 四币/四年均稳定负期望，冻结；不反向、不加过滤器。
+- 归档：`strategy_templates/research/daily-open-reclaim/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v89：TTM Squeeze Release
+- Bollinger(20,2) 收进 Keltner(20,1.5) 后释放，严格 TP8/SL6。
+- 四核心币：1438笔，PF **0.876**，0/4正，1.879次/币/周；年度 PF 0.966/0.775/0.954/0.821。
+- early gate 明确失败，冻结，不调参数/不加过滤器。
+- 归档：`strategy_templates/research/ttm-squeeze-release/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v102：Daily Inside-Day 4h Acceptance
+- 新6币 discovery（SOL/DOGE/LTC/AVAX/UNI/ZEC），严格 TP8/SL6：975笔，PF **0.858**，0/6正，0.850次/币/周；年度 PF 0.988/0.841/0.838/0.721。
+- discovery 失败，fresh holdout ALGO/INJ/LDO/PENDLE/PYTH 未读取；冻结。
+- 归档：`strategy_templates/research/daily-inside-day-4h-acceptance/2026-09-30-discovery/`。
+
+## 2026-09-30 — v103：Daily Outside-Day 4h Continuation
+- 新6币 discovery，严格 TP8/SL6：323笔，PF **0.907**，2/6正，0.281次/币/周；年度 PF 1.367/0.910/0.626/0.696。
+- PF/breadth/frequency均未过门，fresh holdout未读取；冻结。
+- 归档：`strategy_templates/research/daily-outside-day-4h-continuation/2026-09-30-discovery/`。
+
+## 2026-09-30 — v104：Daily NR4 4h Acceptance
+- 新6币 discovery，严格 TP8/SL6：1435笔，PF **0.878**，1/6正，1.250次/币/周；年度 PF 1.081/0.846/0.860/0.692。
+- discovery失败，fresh holdout未读取；冻结，不改NR7、不加过滤器。
+- 归档：`strategy_templates/research/daily-nr4-4h-acceptance/2026-09-30-discovery/`。
+
+## 2026-09-30 — v105：Daily 20d Liquidity Sweep Reversal
+- 新6币 discovery，严格 TP8/SL6：345笔，PF **0.796**，0/6正，0.301次/币/周；年度 PF 0.815/0.601/0.946/0.902。
+- discovery明确失败，fresh holdout未读取；冻结，不调20d窗口。
+- 归档：`strategy_templates/research/daily-20d-liquidity-sweep-reversal/2026-09-30-discovery/`。
+
+## 2026-09-30 — v88：Daily Open Reclaim
+- canonical 严格 TP8/SL6：5700笔，PF **0.777**，0/4正，7.450次/币/周；年度 PF 0.708/0.798/0.831/0.730。
+- 四币与四年均稳定负期望，冻结；不反向、不加过滤器。
+- 归档：`strategy_templates/research/daily-open-reclaim/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v89：TTM Squeeze Release
+- canonical 严格 TP8/SL6：1690笔，PF **0.842**，0/4正，2.209次/币/周；年度 PF 0.955/0.783/0.850/0.763。
+- 标准1h Bollinger(20,2) inside Keltner(20,1.5) squeeze-release 明确失败，冻结，不扫参数。
+- 归档：`strategy_templates/research/ttm-squeeze-release/2026-09-30-early-gate/`。
+
+## 2026-09-30 — v106：Classic Daily Pivot R1/S1 Acceptance
+- 新6币 discovery，strict TP8/SL6：4846笔，PF **0.815**，0/6正，4.222次/币/周；年度 PF 0.819/0.790/0.820/0.857。
+- discovery明确失败，fresh holdout ALGO/INJ/LDO/PENDLE/PYTH 未读取；冻结，不改R2/S2/Camarilla/过滤器。
+- 归档：`strategy_templates/research/classic-daily-pivot-r1s1-acceptance/2026-09-30-discovery/`。
+
+## 2026-09-30 — v107：Daily Full-ATR Displacement Continuation
+- 新6币 discovery，strict TP8/SL6：550笔，PF **0.743**，1/6正，0.479次/币/周；年度 PF 0.895/0.837/0.583/0.690。
+- frequency通过但expectancy/breadth明确失败，fresh holdout未读取；冻结，不调ATR倍率、不加过滤器、不反向。
+- 归档：`strategy_templates/research/daily-full-atr-displacement-continuation/2026-09-30-discovery/`。
+
+## 2026-09-30 — v108：Funding-Price 8h Divergence Transition
+- 新6币 discovery，strict TP8/SL6：6671笔，PF **0.815**，0/6正，5.812次/币/周；年度 PF 0.822/0.800/0.864/0.744。
+- discovery明确失败，fresh holdout未读取；冻结，不调8h窗口/funding阈值、不加过滤器、不反向。
+- 归档：`strategy_templates/research/funding-price-8h-divergence-transition/2026-09-30-discovery/`。
+
+## 2026-09-30 — v109：Funding Crowding Acceleration Fade
+- 新6币 discovery，strict TP8/SL6：1091笔，PF **0.796**，0/6正，0.951次/币/周；年度 PF 0.745/0.868/0.793/0.715。
+- discovery明确失败，fresh holdout未读取；Funding新变体路线暂停。
+- 归档：`strategy_templates/research/funding-crowding-acceleration-fade/2026-09-30-discovery/`。
+
+## 2026-09-30 — v106：Classic Daily Pivot R1/S1 Acceptance
+- 新6币 discovery（SOL/DOGE/LTC/AVAX/UNI/ZEC），严格 TP8/SL6：4846笔，PF **0.815**，**0/6正**，4.222次/币/周；年度 PF 0.819/0.790/0.820/0.857。
+- discovery 明确失败；fresh holdout ALGO/INJ/LDO/PENDLE/PYTH 未读取。冻结，不做 R2/S2、Camarilla/Fibonacci pivot 或过滤器变体。
+- 归档：`strategy_templates/research/classic-daily-pivot-r1s1-acceptance/2026-09-30-discovery/`。
+
+## 2026-09-30 — v107：Previous-Day Midpoint Reclaim
+- 新6币 discovery，严格 TP8/SL6：7106笔，PF **0.826**，**0/6正**，6.191次/币/周；年度 PF 0.804/0.793/0.903/0.782。
+- discovery 明确失败；fresh holdout 未读取。冻结，不改 midpoint、不加 25%/75% levels 或过滤器。
+- 归档：`strategy_templates/research/previous-day-midpoint-reclaim/2026-09-30-discovery/`。
+
+## 2026-09-30 — v108：Three-Hour Same-Sign Streak Continuation
+- 新6币 discovery，严格 TP8/SL6：13874笔，PF **0.779**，**0/6正**，12.088次/币/周；年度 PF 0.799/0.745/0.810/0.751。
+- discovery 明确失败；fresh holdout 未读取。冻结，不改2-bar/4-bar streak、不加过滤器、不反向。
+- 归档：`strategy_templates/research/three-hour-same-sign-streak/2026-09-30-discovery/`。
+
+## 2026-09-30 — ID121 / v54 Exact TP8-SL6 Candidate Audit
+- 重要语义修正：Engine 的 RunConfig TP/SL 是 CLOSE gate，不是无条件强平；原 ID121/v54 条件 CLOSE 因此不等于固定 TP8/SL6。此次仅将 CLOSE_LONG/CLOSE_SHORT 改为 `ROI >= 8 || ROI <= -6`，entry、universe、eligibility、费用/滑点均不变。
+- **ID121 canonical**：773笔，标准化 PF **1.211**，**12/15正**，频率 **0.533次/币/周**；2024/2025/2026 PF = **1.241 / 1.179 / 1.246**。LONG PF 1.232，SHORT PF 1.188。**保留为正式候选**。
+- **v54 canonical**：830笔，标准化 PF **1.163**，11/15正，频率 **0.572次/币/周**；年度 PF = 1.157 / 1.128 / 1.214。
+- 配对归因：共同770笔 PF **1.214**；ID121-only 3笔 PF 0.568（样本极小）；**v54-only 60笔 PF 0.653**，2024/2025/2026 = 0.650/0.543/0.825，三个年份均负期望。
+- 结论：v54 的增频来自明显负 expectancy 的新增 cohort，并把总 PF 从 1.211 拉低到 1.163；按“不为频率接受负 expectancy”约束，**v54 从正式候选降级/冻结**。旧 ID121≈1.395 / v54≈1.396 的候选 PF 不再作为 exact TP8/SL6 证据。
+- 归档：`strategy_templates/research/id121-v54-exact-exit/2026-09-30-audit/`。
+
+## 2026-09-30 — ID121 Exact TP8-SL6 Early OOT (2021H2–2022)
+- 使用 canonical ID121 exact-exit entry，严格 CLOSE=`ROI >= 8 || ROI <= -6`；只读本地历史，不改参数。
+- BTC：42笔，PF **0.604**；ETH：37笔，PF **0.569**。
+- 合计：79笔，PF **0.587**，**0/2正**，0.522次/币/周；2021H2 PF **0.303**，2022 PF **0.698**。
+- 结论：退出语义修正没有修复 pre-2023 失效。**ID121 保留为当前 2024+ regime 候选，但不能视为跨全周期稳定策略**；不根据早期 OOT 反调参数。
+- 归档：`strategy_templates/research/id121-exact-exit-early-oot/2021h2-2022-audit/`。
+
+## 2026-09-30 — v110：Donchian 20h Midpoint Regime Cross
+- 新6币 discovery，严格 TP8/SL6：10146笔，PF **0.815**，0/6正，8.840次/币/周；年度 PF 0.829/0.810/0.852/0.738。
+- discovery 明确失败；fresh holdout ALGO/INJ/LDO/PENDLE/PYTH 未读取。冻结，不改20h lookback、不加过滤器、不反向。
+- 归档：strategy_templates/research/donchian-20h-midpoint-regime-cross/2026-09-30-discovery/。
+
+## 2026-09-30 — v111：Daily Quote-Volume Expansion Continuation
+- 新6币 discovery，严格 TP8/SL6：2743笔，PF **0.814**，0/6正，2.390次/币/周；年度 PF 0.759/0.930/0.741/0.790。
+- discovery 明确失败；reserved holdout 未读取。冻结，不改20d volume baseline、不加过滤器、不反向。
+- 归档：strategy_templates/research/daily-quote-volume-expansion-continuation/2026-09-30-discovery/。
+
+## 2026-10-01 — v107：Donchian 20h Midpoint Regime Cross
+- 新6币 discovery，严格 TP8/SL6：10146笔，PF **0.815**，0/6正，8.840次/币/周；年度 PF 0.829/0.810/0.852/0.738。
+- discovery 明确失败，fresh holdout ALGO/INJ/LDO/PENDLE/PYTH 未读取；冻结，不调10h/40h或加过滤器。
+- 归档：`strategy_templates/research/donchian-20h-midpoint-regime-cross/2026-09-30-discovery/`。
+
+## 2026-10-01 — v108：4h Directional Excursion Imbalance
+- 新6币 discovery，严格 TP8/SL6：15268笔，PF **0.811**，0/6正，13.303次/币/周；年度 PF 0.788/0.784/0.861/0.802。
+- discovery 明确失败，fresh holdout 未读取；冻结，不调2h/8h窗口、不改1.0阈值、不反向。
+- 归档：`strategy_templates/research/directional-excursion-imbalance/2026-10-01-discovery/`。
+
+## 2026-10-01 — v34 Pullback Exact-Exit Attribution
+- 同一15币 exact TP8/SL6：BASE禁用pullback 372笔 PF **1.006**、0.256次/币/周；FULL启用pullback 718笔 PF **0.922**、0.495次/币/周。
+- paired FULL-only：356笔，PF **0.843**，normalized net -0.565；2024/2025/2026 PF = 0.718/0.746/1.208。
+- 结论：`funding_pullback_resume_short_v34` 是**负 expectancy 增频**，正式冻结；不调Funding/EMA/ADX/触发阈值。
+- 归档：`strategy_templates/research/v34-pullback-exact-exit-attribution/2026-10-01-audit/`。
+
+## 2026-10-01 — Daily Full-ATR Displacement Continuation
+- 新6币 discovery，严格 TP8/SL6：550笔，PF **0.743**，1/6正，0.479次/币/周；年度PF 0.895/0.837/0.583/0.690。
+- discovery明确失败，fresh holdout未读取；冻结。
+- 归档：`strategy_templates/research/daily-full-atr-displacement-continuation/2026-09-30-discovery/`。
+
+## 2026-10-01 — v112 Daily First-4h Opening Range Breakout
+- 新6币 discovery，严格 TP8/SL6：8807笔，PF **0.799**，0/6正，7.674次/币/周；年度PF 0.809/0.771/0.842/0.762。
+- discovery明确失败，fresh holdout未读取；冻结，不改opening-range长度。
+- 归档：`strategy_templates/research/daily-first-4h-opening-range-breakout/2026-10-01-discovery/`。
+
+## 2026-10-01 — v107：Donchian 20h Midpoint Regime Cross
+- 新6币 discovery，严格 TP8/SL6：10146笔，PF **0.815**，0/6正，8.840次/币/周；年度 PF 0.829/0.810/0.852/0.738。
+- discovery 明确失败；fresh holdout ALGO/INJ/LDO/PENDLE/PYTH 未读取。冻结，不调10h/40h、不加过滤器、不反向。
+- 归档：`strategy_templates/research/donchian-20h-midpoint-regime-cross/2026-09-30-discovery/`。
+
+## 2026-10-01 — v108：v67 Entry Strict TP8/SL6 Audit
+- 复用 v67 entry，不改任何入场参数，只把 CLOSE 纠正为固定 `ROI >= 8 || ROI <= -6`。
+- 新6币 discovery：3830笔，PF **0.854**，0/6正，3.337次/币/周；年度 PF 0.842/0.888/0.823/0.868。
+- 原 v67 条件退出版本的强表现没有在严格 TP8/SL6 下保留；fresh holdout 未读取，冻结该 entry。
+- 归档：`strategy_templates/research/v67-entry-strict-exit-audit/2026-10-01-discovery/`。
+
+## 2026-10-01 — v113：v63 Entry Strict TP8/SL6 Audit
+- 复用 v63c entry，仅将 CLOSE 改为固定 `ROI >= 8 || ROI <= -6`。
+- 新6币 discovery：4864笔，PF **0.824**，0/6正，4.238次/币/周；年度 PF 0.790/0.823/0.854/0.828。
+- 原 v63 条件退出版本的高 PF 不可保留；fresh holdout 未读取，冻结。
+- 归档：`strategy_templates/research/v63-entry-strict-exit-audit/2026-10-01-discovery/`。
+
+## 2026-10-01 — v114：Bollinger Band-Walk Continuation
+- 新6币 discovery，strict TP8/SL6：4366笔，PF **0.875**，0/6正，3.804次/币/周；年度 PF 0.887/0.826/0.872/0.960。
+- discovery明确失败，fresh holdout未读取；冻结，不改1/3根带外收盘，不扫Boll参数。
+- 归档：`strategy_templates/research/bollinger-band-walk-continuation/2026-10-01-discovery/`。
+
+## 2026-10-01 — v115：Keltner 20/2 First-Breakout Continuation
+- 新6币 discovery，strict TP8/SL6：4597笔，PF **0.832**，0/6正，4.005次/币/周；年度 PF 0.839/0.811/0.864/0.810。
+- discovery明确失败，fresh holdout未读取；冻结，不扫 Keltner multiplier、不加过滤器、不反向。
+- 归档：`strategy_templates/research/keltner-20-2-first-breakout-continuation/2026-10-01-discovery/`。
+
+## 2026-10-01 — ID121 Exact TP8/SL6 September Forward OOS
+- canonical ID121 exact-exit，保持 production eligibility/state，从原起点连续回放，只统计 2026-09-01~09-12 15:59 UTC 新 entry。
+- **9笔，PF 0.533，7 SL / 2 TP，1/15正，全部LONG；0.360次/币/周**。ZEC 3笔 PF1.312；UNI 3笔 PF0.518；AVAX/BNB/ONDO各1笔亏损。
+- canonical历史773笔的连续9笔窗口共765个：PF<=0.533 有119个（**15.56%**）；<=2胜/9笔占 **13.20%**；PF q10=0.331、q25=0.585、median=1.066。
+- 结论：这是需要持续记录的 forward warning，但仍属于历史中并不罕见的坏窗口；**ID121继续保留为2024+正式候选，不针对这9笔调参**。
+- 归档：strategy_templates/research/id121-exact-exit-forward/2026-09-01_2026-09-12-1559z/。
+
+## 2026-10-01 — v116：12h Breakout Retest Resume
+- 新6币 discovery，strict TP8/SL6：2914笔，PF **0.786**，0/6正，2.539次/币/周；年度 PF 0.755/0.779/0.797/0.813。
+- breakout→1h retest hold→resume 明确失败，fresh holdout未读取；冻结，不调lookback/retest长度、不加过滤器。
+- 归档：`strategy_templates/research/12h-breakout-retest-resume/2026-10-01-discovery/`。
+
+## 2026-10-01 — ID121 Canonical Exact-Exit Robustness Audit
+- 773笔 canonical exact-exit，PF **1.211**。leave-one-symbol-out PF 范围 **1.148~1.258**；去掉最大贡献 XRP 后仍 PF1.148。
+- 25个月中15个月净正；9个季度中8个净正，唯一负季度 2026-Q2 PF **0.858**。
+- XRP/ETH/BTC 占正贡献约 **61.6%**、占组合总 normalized net 约 **69.6%**，存在头部贡献集中但不是单币依赖。
+- 10,000次自然月 block bootstrap：PF q05 **1.015**、q10 1.057、median 1.207；PF<=1 仅 **3.71%**。
+- 结论：支持 ID121 在 **2024+ regime** 存在 block-level edge；但早期 OOT 2021H2-2022 PF0.587 仍禁止宣称 all-regime 稳定。
+- 归档：`strategy_templates/research/id121-exact-exit-robustness/2026-10-01-audit/`。
+
+## 2026-10-01 — ID121 Fresh-Symbol Holdout
+- canonical ID121 exact TP8/SL6，首次对未参与其调参/验证的 ALGO/INJ/LDO/PENDLE/PYTH 做一次性 symbol holdout。
+- **238笔，PF 0.848，0/5正，0.629次/币/周**；2025 PF 0.746，2026 PF 0.968。
+- LONG 117笔 PF **0.851**；SHORT 121笔 PF **0.845**，两侧均失败，不是单边拖累。
+- 结论：ID121 只能保留为原15币/2024+ cohort 候选，**不能再视为跨新币通用策略**；不使用此 holdout 反调参数。
+- 归档：`strategy_templates/research/id121-fresh-symbol-holdout/2026-10-01-audit/`。
+
+## 2026-10-01 — v117：Daily Volume Shock One-Day Lag
+- 新6币 discovery，严格 TP8/SL6：2490笔，PF **0.818**，0/6正，2.170次/币/周；年度 PF 0.690/0.856/0.781/0.971。
+- 1日滞后 continuation 明确失败；不再扫2d/3d lag，不加过滤器、不反向。
+- 归档：`strategy_templates/research/daily-volume-shock-one-day-lag/2026-10-01-discovery/`。
+
+## 2026-10-01 — v117：Daily Volume Shock One-Day Lag
+- 新6币 discovery，严格 TP8/SL6：2490笔，PF **0.818**，0/6正，2.170次/币/周；年度 PF 0.690/0.856/0.781/0.971。
+- 1日滞后 continuation 明确失败；不再扫2d/3d lag，不加过滤器、不反向。
+- 归档：`strategy_templates/research/daily-volume-shock-one-day-lag/2026-10-01-discovery/`。
+
+## 2026-10-01 — v118：Daily 3-Bar Streak Reversal
+- 新6币 discovery，strict TP8/SL6：3629笔，PF **0.792**，0/6正，3.162次/币/周；年度 PF 0.732/0.779/0.831/0.826。
+- discovery明确失败，fresh holdout未读取；冻结，不改2日/4日 streak、不加过滤器、不反向。
+- 归档：`strategy_templates/research/daily-three-bar-streak-reversal/2026-10-01-discovery/`。
+
+## 2026-10-01 — v29 Entry Strict TP8/SL6 Audit
+- 旧 v29/ID114 entry 不变，仅 CLOSE 改为固定 `ROI >= 8 || ROI <= -6`。
+- 新6币 discovery：242笔，PF **0.989**，4/6正，但仅 **0.211次/币/周**；年度 PF 1.404/0.865/0.726/1.188。
+- expectancy 与频率均不过门，正式冻结；fresh holdout未读取。
+- 归档：`strategy_templates/research/v29-entry-strict-exit-audit/2026-10-01-discovery/`。
+
+## 2026-10-01 — v119：Daily Engulfing + 4h Reversal Confirmation
+- 2023–2024 discovery only，strict TP8/SL6：1716笔，PF **0.809**，0/6正，2.739次/币/周；2023/2024 PF 0.760/0.845。
+- discovery失败；2025 OOS1、2026 OOS2均未读取。冻结，不加过滤器、不改确认周期。
+- 归档：`strategy_templates/research/daily-engulfing-4h-reversal/2026-10-01-discovery/`。
+
+## 2026-10-01 — v120：Daily + 4h ROC Alignment
+- 2023–2024 discovery only，strict TP8/SL6：1181笔，PF **0.837**，1/6正，1.885次/币/周；2023/2024 PF 0.828/0.843。
+- discovery失败；2025 OOS1、2026 OOS2均未读取。冻结，不扫ROC周期、不加过滤器。
+- 归档：`strategy_templates/research/daily-4h-roc-alignment/2026-10-01-discovery/`。
+
+## 2026-10-01 — v122：Daily 20d Turtle Breakout + 4h Acceptance
+- 2023–2024 discovery only，strict TP8/SL6：657笔，PF **0.844**，1/6正，1.049次/币/周；2023/2024 PF 0.909/0.796。
+- discovery失败；2025 OOS1、2026 OOS2未读取。冻结，不改20d窗口、不加过滤器。
+- 归档：`strategy_templates/research/daily-20d-turtle-breakout-4h-acceptance/2026-10-01-discovery/`。
+
+## 2026-10-01 — v123：1h EMA20/50 Crossover
+- 2023–2024 discovery only，strict TP8/SL6：1015笔，PF **0.851**，1/6正，1.620次/币/周；2023/2024 PF 0.832/0.867。
+- discovery失败；2025 OOS1、2026 OOS2未读取。冻结，不扫EMA周期、不加过滤器。
+- 归档：`strategy_templates/research/ema20-50-1h-crossover/2026-10-01-discovery/`。
+
+## 2026-10-01 — v118：Daily 3-Bar Streak Reversal
+- 新6币 discovery，严格 TP8/SL6：3629笔，PF **0.792**，0/6正，3.162次/币/周；年度 PF 0.732/0.779/0.831/0.826。
+- discovery 明确失败；fresh holdout 未读取。冻结，不改2日/4日 streak、不加过滤器、不反向。
+- 归档：strategy_templates/research/daily-three-bar-streak-reversal/2026-10-01-discovery/。
+
+## 2026-10-01 — v124：1h MACD(12,26,9) Signal-Line Cross
+- 2023–2024 discovery only，strict TP8/SL6：4362笔，PF **0.797**，0/6正，6.962次/币/周；2023/2024 PF 0.824/0.778。
+- discovery 明确失败；2025 OOS1、2026 OOS2未读取。冻结，不扫MACD周期、不加过滤器。
+- 归档：strategy_templates/research/macd-1h-signal-cross/2026-10-01-discovery/。
+
+## 2026-10-01 — v50 Entry Strict TP8/SL6 Audit
+- 原 entry 不变，仅 CLOSE 改为固定 TP8/SL6；2023–2024 新6币 discovery：142笔，PF **1.066**，4/6正，但仅 **0.227次/币/周**。
+- 2023 PF 0.785、2024 PF 1.263；expectancy/频率/跨年稳定性均不过门。2025/2026 OOS未读取，冻结。
+- 归档：strategy_templates/research/v50-entry-strict-exit-audit/2026-10-01-discovery/。
+
+## 2026-10-01 — v52 Entry Strict TP8/SL6 Audit
+- 原 entry 不变，仅 CLOSE 改为固定 TP8/SL6；2023–2024 新6币 discovery：151笔，PF **1.298**，4/6正，但仅 **0.241次/币/周**。
+- 2023 PF 0.978、2024 PF 1.533；LONG 38笔 PF **1.483**，SHORT 113笔 PF **1.240**。正 expectancy 并非单侧假象，但频率/跨年稳定性不过门。
+- 2025/2026 OOS未读取；冻结，不调2–3 ATR定义或其它 entry 参数。
+- 归档：strategy_templates/research/v52-entry-strict-exit-audit/2026-10-01-discovery/。
+
+## 2026-10-01 — v125：1h 1-2-3 Swing Reversal
+- 2023–2024 新6币 discovery，strict TP8/SL6：1608笔，PF **0.779**，0/6正，2.566次/币/周；2023/2024 PF 0.839/0.727。
+- discovery 明确失败；2025/2026 OOS未读取。冻结，不改pivot几何、不加过滤器、不反向。
+- 归档：strategy_templates/research/one-two-three-swing-reversal/2026-10-01-discovery/。
+
+## 2026-10-01 — v125：Funding Zero-Cross Momentum
+- 2023–2024 discovery only，strict TP8/SL6：369笔，PF **0.718**，0/6正，0.589次/币/周；2023/2024 PF 0.520/0.932。
+- funding settle 后仅1h~2h事件窗口，避免同一funding周期重复触发；discovery明确失败。2025/2026 OOS未读取。
+- 冻结，不调funding幅度、不反向成crowding trade、不改事件窗口。
+- 归档：strategy_templates/research/funding-zero-cross-momentum/2026-10-01-discovery/。
+
+## 2026-10-01 — ID121 Second Fresh-Symbol Holdout Feasibility
+- 预注册第二批 untouched 5币 cohort：排除原15币+第一批5币；QuoteVolume>=500万；本地1m历史<=2023-01-01起且覆盖到2026-08-31 23:59；禁止按收益挑币。
+- 当前本地缓存仅 **LITUSDT 1个**满足：QuoteVolume约5303万，历史44个月。
+- **coverage-blocked before returns**：不足5币，不运行单币伪holdout，不读取LIT的ID121收益，不擅自补历史/写DB。
+- 归档：strategy_templates/research/id121-second-fresh-symbol-holdout/2026-10-01-feasibility/。
+
+## 2026-10-01 — v128：1h Body Compression -> Expansion Release
+- 2023–2024 discovery only，strict TP8/SL6：6433笔，PF **0.758**，0/6正，10.267次/币/周；2023/2024 PF 0.744/0.769。
+- discovery明确失败；OOS未读取。冻结，不调body倍率/压缩长度、不加过滤器。
+- 归档：strategy_templates/research/body-compression-expansion-release/2026-10-01-discovery/。
+
+## 2026-10-01 — v125：Funding Zero-Cross Momentum
+- 仅在 funding settle 后 1h~<2h 触发，避免同一结算周期重复事件；NowTime 仅用于 event age，不使用 modulo。
+- 2023–2024 discovery，strict TP8/SL6：369笔，PF **0.718**，0/6正，0.589次/币/周；2023/2024 PF 0.520/0.932。
+- discovery 明确失败；2025 OOS1、2026 OOS2未读取。冻结，不调 funding 阈值/事件窗、不反向。
+- 归档：strategy_templates/research/funding-zero-cross-momentum/2026-10-01-discovery/。
+
+## 2026-10-01 — v129：1h Three-Return Acceleration
+- 2023–2024 discovery only，strict TP8/SL6：2166笔，PF **0.810**，0/6正，3.457次/币/周；2023/2024 PF 0.898/0.745。
+- discovery失败；2025/2026 OOS未读取。冻结，不改2/4-return、不加幅度阈值、不反向。
+- 归档：strategy_templates/research/1h-three-return-acceleration/2026-10-01-discovery/。
+
+## 2026-10-01 — v130：4h Double-Inside Compression Breakout
+- 2023–2024 discovery only，strict TP8/SL6：49笔，PF **0.441**，0/6正，仅0.078次/币/周；2023/2024 PF 0.479/0.407。
+- expectancy 与频率同时失败；2025/2026 OOS未读取。冻结，不改inside-bar数量、母K参考或确认逻辑。
+- 归档：strategy_templates/research/4h-double-inside-compression-breakout/2026-10-01-discovery/。
+
+## 2026-10-01 — v131：OI Expansion × Taker Alignment Early Gate
+- Binance USD-M metrics，同一4h窗口：OI从<=0转为扩张，方向取4h mean log taker long/short ratio。
+- 固定 quarterly 24 target-days / 6币：870事件；1h **+0.0479%**、4h **+0.0786%**、12h **+0.2470%**；4/6币4h为正。
+- breadth通过但预注册4h经济门槛要求>=+0.10%，因此 **early gate失败**；不因12h更高而改gate，完整2023-2024未下载。
+- 冻结，不调OI/taker阈值、窗口、方向或币种。
+- 归档：strategy_templates/research/oi-expansion-taker-alignment/2026-10-01-early-gate/。
+
+## 2026-10-01 — v65 Entry Strict TP8/SL6 Audit
+- 原 v65 LONG/SHORT entry 完全不变，仅将 CLOSE_LONG/CLOSE_SHORT 改为固定 `ROI >= 8 || ROI <= -6`。
+- 2023–2024 新6币 discovery：3557笔，PF **0.861**，0/6正，5.677次/币/周；2023/2024 PF 0.792/0.921。
+- 旧 PF1.136 的接近候选表现未能保留；2025/2026 OOS未读取，正式冻结。
+- 归档：strategy_templates/research/v65-entry-strict-exit-audit/2026-10-01-discovery/。
+
+## 2026-10-01 — v130：4h Double-Inside Compression Breakout
+- 2023–2024 discovery only，strict TP8/SL6：49笔，PF **0.441**，0/6正，0.078次/币/周；2023/2024 PF 0.479/0.407。
+- expectancy 与频率均明显失败；2025/2026 OOS未读取。冻结，不改inside-bar数量/压缩定义、不加过滤器、不反向。
+- 归档：strategy_templates/research/4h-double-inside-compression-breakout/2026-10-01-discovery/。
+
+## 2026-10-01 — v64 Entry Strict TP8/SL6 Audit
+- 原 v64 LONG/SHORT entry 完全不变，仅将两条 CLOSE 修正为固定 `ROI >= 8 || ROI <= -6`。
+- 2023–2024 新6币 discovery：4479笔，PF **0.788**，0/6正，7.148次/币/周；2023/2024 PF 0.735/0.835。
+- 旧 PF1.135 的近门槛表现未保留；2025/2026 OOS未读取，正式冻结。
+- 归档：strategy_templates/research/v64-entry-strict-exit-audit/2026-10-01-discovery/。
+
+## 2026-10-01 — ID121 vs v52 Precompression Attribution（新6币）
+- 同一 SOL/DOGE/LTC/AVAX/UNI/ZEC、2023–2024、strict TP8/SL6：ID121 211笔 PF **1.059**、0.337次/币/周；v52 151笔 PF **1.298**、0.241次/币/周。
+- exact common 150笔 PF **1.316**；被 v52 过滤掉的 ID121-only 61笔全部LONG，PF **0.613**；其中2024被过滤31笔 PF **0.382**。
+- 说明固定2–3ATR pre-range在该6币样本确实删除负expectancy LONG，但v52仍因频率0.241与2023 PF0.978不过原gate；不解锁OOS、不调参数。
+- 归档：strategy_templates/research/id121-v52-precompression-attribution/2026-10-01-audit/。
+
+## 2026-10-01 — ID121 vs v52 Original-Cohort Attribution
+- 原15币 canonical cohort：ID121 773笔 PF **1.211**、12/15正、0.533次/币/周；v52 509笔 PF **1.213**、10/15正、0.351次/币/周。
+- exact common 500笔 PF **1.217**；ID121-only 273笔全部LONG，PF **1.200**。
+- 被过滤 cohort 年度：2024 PF **0.845**（过滤有帮助）、2025 PF **1.481**（过滤反而删掉大量好交易）、2026 PF **1.006**。
+- 结论：2–3ATR pre-range 效果明显 regime-dependent，不能作为稳定过滤器；v52继续冻结。ID121 fresh-symbol holdout失败结论不变。
+- 归档：strategy_templates/research/id121-v52-original-cohort-attribution/2026-10-01-audit/。

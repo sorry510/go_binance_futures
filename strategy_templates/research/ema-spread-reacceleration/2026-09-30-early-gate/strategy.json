@@ -1,0 +1,16 @@
+{
+  "name":"v89 1h EMA Spread Re-acceleration",
+  "technology":{
+    "ma":[],"ema":[
+      {"name":"ema_1h_20","enable":true,"kline_interval":"1h","period":20},
+      {"name":"ema_1h_50","enable":true,"kline_interval":"1h","period":50}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v89_long","type":"long","code":"let s1 = ema_1h_20.Data[1] - ema_1h_50.Data[1];\nlet s2 = ema_1h_20.Data[2] - ema_1h_50.Data[2];\nlet s3 = ema_1h_20.Data[3] - ema_1h_50.Data[3];\nlet accel = s1 > 0 && (s1 - s2) > 0 && (s2 - s3) <= 0;\nlet confirm = NowPrice > kline_1h.High[1];\naccel && confirm","fullScreen":false,"enable":true},
+    {"name":"v89_short","type":"short","code":"let s1 = ema_1h_20.Data[1] - ema_1h_50.Data[1];\nlet s2 = ema_1h_20.Data[2] - ema_1h_50.Data[2];\nlet s3 = ema_1h_20.Data[3] - ema_1h_50.Data[3];\nlet accel = s1 < 0 && (s1 - s2) < 0 && (s2 - s3) >= 0;\nlet confirm = NowPrice < kline_1h.Low[1];\naccel && confirm","fullScreen":false,"enable":true},
+    {"name":"v89_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v89_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

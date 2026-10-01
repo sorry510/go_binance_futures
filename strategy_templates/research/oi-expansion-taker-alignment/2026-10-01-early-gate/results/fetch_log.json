@@ -1,0 +1,1682 @@
+[
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-01-01",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-01-02",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-01-03",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-01-04",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-01-05",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-01-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-04-02",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-04-03",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-04-04",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-04-05",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-04-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-04-06",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-04-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-07-02",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-07-03",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-07-04",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-07-05",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-07-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-07-06",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-07-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-10-01",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-10-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-10-02",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-10-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-10-03",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-10-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-10-04",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-10-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-10-05",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-10-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2023-12-31",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2023-12-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-01-01",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-01-02",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-01-03",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-01-04",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-03-31",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-03-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-04-01",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-04-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-04-02",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-04-03",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-04-04",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-06-30",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-06-30.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-07-01",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-07-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-07-02",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-07-03",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-07-04",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-10-06",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-10-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-10-07",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-10-07.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-10-08",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-10-08.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-10-09",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-10-09.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "day": "2024-10-10",
+    "path": "/tmp/oi_taker_metrics_early/AVAXUSDT-metrics-2024-10-10.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-01-01",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-01-02",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-01-03",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-01-04",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-01-05",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-01-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-04-02",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-04-03",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-04-04",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-04-05",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-04-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-04-06",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-04-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-07-02",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-07-03",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-07-04",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-07-05",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-07-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-07-06",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-07-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-10-01",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-10-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-10-02",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-10-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-10-03",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-10-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-10-04",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-10-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-10-05",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-10-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2023-12-31",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2023-12-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-01-01",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-01-02",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-01-03",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-01-04",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-03-31",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-03-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-04-01",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-04-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-04-02",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-04-03",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-04-04",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-06-30",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-06-30.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-07-01",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-07-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-07-02",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-07-03",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-07-04",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-10-06",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-10-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-10-07",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-10-07.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-10-08",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-10-08.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-10-09",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-10-09.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "day": "2024-10-10",
+    "path": "/tmp/oi_taker_metrics_early/DOGEUSDT-metrics-2024-10-10.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-01-01",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-01-02",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-01-03",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-01-04",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-01-05",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-01-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-04-02",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-04-03",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-04-04",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-04-05",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-04-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-04-06",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-04-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-07-02",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-07-03",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-07-04",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-07-05",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-07-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-07-06",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-07-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-10-01",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-10-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-10-02",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-10-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-10-03",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-10-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-10-04",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-10-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-10-05",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-10-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2023-12-31",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2023-12-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-01-01",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-01-02",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-01-03",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-01-04",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-03-31",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-03-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-04-01",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-04-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-04-02",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-04-03",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-04-04",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-06-30",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-06-30.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-07-01",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-07-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-07-02",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-07-03",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-07-04",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-10-06",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-10-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-10-07",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-10-07.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-10-08",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-10-08.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-10-09",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-10-09.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "LTCUSDT",
+    "day": "2024-10-10",
+    "path": "/tmp/oi_taker_metrics_early/LTCUSDT-metrics-2024-10-10.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-01-01",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-01-02",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-01-03",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-01-04",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-01-05",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-01-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-04-02",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-04-03",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-04-04",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-04-05",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-04-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-04-06",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-04-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-07-02",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-07-03",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-07-04",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-07-05",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-07-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-07-06",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-07-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-10-01",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-10-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-10-02",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-10-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-10-03",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-10-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-10-04",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-10-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-10-05",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-10-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2023-12-31",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2023-12-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-01-01",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-01-02",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-01-03",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-01-04",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-03-31",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-03-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-04-01",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-04-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-04-02",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-04-03",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-04-04",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-06-30",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-06-30.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-07-01",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-07-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-07-02",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-07-03",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-07-04",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-10-06",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-10-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-10-07",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-10-07.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-10-08",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-10-08.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-10-09",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-10-09.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "SOLUSDT",
+    "day": "2024-10-10",
+    "path": "/tmp/oi_taker_metrics_early/SOLUSDT-metrics-2024-10-10.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-01-01",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-01-02",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-01-03",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-01-04",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-01-05",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-01-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-04-02",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-04-03",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-04-04",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-04-05",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-04-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-04-06",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-04-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-07-02",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-07-03",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-07-04",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-07-05",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-07-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-07-06",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-07-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-10-01",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-10-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-10-02",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-10-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-10-03",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-10-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-10-04",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-10-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-10-05",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-10-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2023-12-31",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2023-12-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-01-01",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-01-02",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-01-03",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-01-04",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-03-31",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-03-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-04-01",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-04-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-04-02",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-04-03",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-04-04",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-06-30",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-06-30.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-07-01",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-07-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-07-02",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-07-03",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-07-04",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-10-06",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-10-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-10-07",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-10-07.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-10-08",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-10-08.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-10-09",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-10-09.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "UNIUSDT",
+    "day": "2024-10-10",
+    "path": "/tmp/oi_taker_metrics_early/UNIUSDT-metrics-2024-10-10.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-01-01",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-01-02",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-01-03",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-01-04",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-01-05",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-01-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-04-02",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-04-03",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-04-04",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-04-05",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-04-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-04-06",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-04-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-07-02",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-07-03",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-07-04",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-07-05",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-07-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-07-06",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-07-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-10-01",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-10-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-10-02",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-10-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-10-03",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-10-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-10-04",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-10-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-10-05",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-10-05.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2023-12-31",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2023-12-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-01-01",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-01-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-01-02",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-01-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-01-03",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-01-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-01-04",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-01-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-03-31",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-03-31.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-04-01",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-04-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-04-02",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-04-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-04-03",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-04-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-04-04",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-04-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-06-30",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-06-30.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-07-01",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-07-01.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-07-02",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-07-02.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-07-03",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-07-03.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-07-04",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-07-04.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-10-06",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-10-06.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-10-07",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-10-07.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-10-08",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-10-08.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-10-09",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-10-09.csv",
+    "cached": false,
+    "error": null
+  },
+  {
+    "symbol": "ZECUSDT",
+    "day": "2024-10-10",
+    "path": "/tmp/oi_taker_metrics_early/ZECUSDT-metrics-2024-10-10.csv",
+    "cached": false,
+    "error": null
+  }
+]

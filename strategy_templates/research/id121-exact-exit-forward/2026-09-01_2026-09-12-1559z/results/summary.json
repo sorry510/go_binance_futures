@@ -1,0 +1,33 @@
+{
+  "status":"forward_warning_small_sample",
+  "strategy":"ID121 canonical exact TP8/SL6",
+  "forward_start":"2026-09-01T00:00:00Z",
+  "forward_end_exclusive":"2026-09-12T16:00:00Z",
+  "trades":9,
+  "normalized_pf":0.532989,
+  "normalized_net":-0.059170824,
+  "positive_symbols":"1/15",
+  "total_trades_per_week":5.4,
+  "trades_per_symbol_week":0.36,
+  "long":9,
+  "short":0,
+  "exits":{"stop_loss":7,"take_profit":2},
+  "by_symbol":{
+    "AVAXUSDT":{"trades":1,"pf":0.0,"net":-0.016541565},
+    "BNBUSDT":{"trades":1,"pf":0.0,"net":-0.016726813},
+    "UNIUSDT":{"trades":3,"pf":0.517884,"net":-0.018063199},
+    "ZECUSDT":{"trades":3,"pf":1.311580,"net":0.011433074},
+    "ONDOUSDT":{"trades":1,"pf":0.0,"net":-0.019272320}
+  },
+  "historical_9_trade_window_benchmark":{
+    "rolling_windows":765,
+    "windows_pf_le_forward":119,
+    "fraction_pf_le_forward":0.1555555556,
+    "windows_wins_le_2":101,
+    "fraction_wins_le_2":0.1320261438,
+    "pf_q10":0.330856731,
+    "pf_q25":0.584994423,
+    "pf_median":1.065985668
+  },
+  "decision":"retain_ID121_as_2024plus_candidate_continue_untouched_forward"
+}

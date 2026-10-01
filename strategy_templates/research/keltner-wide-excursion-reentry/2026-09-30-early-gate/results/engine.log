@@ -1,0 +1,1 @@
+BTCUSDT trades=1\nETHUSDT trades=1\nBNBUSDT trades=1\nXRPUSDT trades=1\nALL trades=4 long=0 short=4 PF=0 freq=0.005228\nAll exits end_of_data. Frequency gate failed; return statistics not treated as alpha evidence.\n

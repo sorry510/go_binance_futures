@@ -1,0 +1,23 @@
+{
+  "name":"v124 Funding Sign Flip + 12h Breakout",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v124_long","type":"long",
+      "code":"let funding_flip = len(FundingRate.Data) >= 2 && FundingRate.Data[0] > 0 && FundingRate.Data[1] <= 0;\nlet boundary = max(kline_1h.High[2:14]);\nlet cross = kline_1h.Open[1] <= boundary && kline_1h.Close[1] > boundary;\nlet confirm = NowPrice > kline_1h.High[1];\nfunding_flip && cross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v124_short","type":"short",
+      "code":"let funding_flip = len(FundingRate.Data) >= 2 && FundingRate.Data[0] < 0 && FundingRate.Data[1] >= 0;\nlet boundary = min(kline_1h.Low[2:14]);\nlet cross = kline_1h.Open[1] >= boundary && kline_1h.Close[1] < boundary;\nlet confirm = NowPrice < kline_1h.Low[1];\nfunding_flip && cross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v124_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v124_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

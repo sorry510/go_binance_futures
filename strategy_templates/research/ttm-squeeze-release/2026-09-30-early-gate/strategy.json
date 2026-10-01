@@ -1,0 +1,25 @@
+{
+  "name":"v89 TTM Squeeze Release",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[{"name":"kc_1h_20_15","enable":true,"kline_interval":"1h","period":20,"multiplier":1.5}],
+    "boll":[{"name":"boll_1h_20_2","enable":true,"kline_interval":"1h","period":20,"std_dev_multiplier":2}],
+    "donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v89_long","type":"long",
+      "code":"let squeeze_on_prev = boll_1h_20_2.High[2] < kc_1h_20_15.High[2] && boll_1h_20_2.Low[2] > kc_1h_20_15.Low[2];\nlet squeeze_off_now = boll_1h_20_2.High[1] >= kc_1h_20_15.High[1] || boll_1h_20_2.Low[1] <= kc_1h_20_15.Low[1];\nlet release = squeeze_on_prev && squeeze_off_now;\nlet dir = kline_1h.Close[1] > kline_1h.Open[1];\nlet confirm = NowPrice > kline_1h.High[1];\nrelease && dir && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v89_short","type":"short",
+      "code":"let squeeze_on_prev = boll_1h_20_2.High[2] < kc_1h_20_15.High[2] && boll_1h_20_2.Low[2] > kc_1h_20_15.Low[2];\nlet squeeze_off_now = boll_1h_20_2.High[1] >= kc_1h_20_15.High[1] || boll_1h_20_2.Low[1] <= kc_1h_20_15.Low[1];\nlet release = squeeze_on_prev && squeeze_off_now;\nlet dir = kline_1h.Close[1] < kline_1h.Open[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nrelease && dir && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v89_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v89_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

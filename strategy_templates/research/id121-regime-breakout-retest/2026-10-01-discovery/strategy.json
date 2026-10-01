@@ -1,0 +1,36 @@
+{
+  "name":"v113 ID121-Regime Breakout Retest",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_1d_20","enable":true,"kline_interval":"1d","period":20},
+      {"name":"ema_1d_50","enable":true,"kline_interval":"1d","period":50},
+      {"name":"ema_4h_20","enable":true,"kline_interval":"4h","period":20},
+      {"name":"ema_4h_50","enable":true,"kline_interval":"4h","period":50}
+    ],
+    "macd":[],
+    "adx":[
+      {"name":"adx_1d_14","enable":true,"kline_interval":"1d","period":14},
+      {"name":"adx_4h_14","enable":true,"kline_interval":"4h","period":14}
+    ],
+    "mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],
+    "rsi":[{"name":"rsi_1h_14","enable":true,"kline_interval":"1h","period":14}],
+    "kc":[],"boll":[],"donchian":[],
+    "atr":[{"name":"atr_1h_14","enable":true,"kline_interval":"1h","period":14}],
+    "supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v113_breakout_retest_long","type":"long",
+      "code":"let funding_ready = len(FundingRate.Data) >= 1;\nlet funding_falling = len(FundingRate.Data) >= 2 && FundingRate.Data[0] > 0 && FundingRate.Data[0] <= FundingRate.Data[1];\nlet funding_supportive = funding_ready && (FundingRate.Data[0] <= 0 || (funding_falling && adx_4h_14.ADX[1] >= 25));\nlet atr = atr_1h_14.Data[2];\nlet atr_prev = atr_1h_14.Data[3];\nlet daily_regime = ema_1d_20.Data[1] >= ema_1d_20.Data[4] && adx_1d_14.PlusDI[1] > adx_1d_14.MinusDI[1];\nlet trend = kline_4h.Close[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] >= ema_4h_20.Data[4];\nlet strength = adx_4h_14.ADX[1] >= 20 && adx_4h_14.ADX[1] >= adx_4h_14.ADX[3] && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1];\nlet level = max(kline_1h.High[3:15]) + atr * 0.10;\nlet prev_level = max(kline_1h.High[4:16]) + atr_prev * 0.10;\nlet breakout = atr > 0 && kline_1h.Close[2] > level;\nlet previous_breakout = atr_prev > 0 && kline_1h.Close[3] > prev_level;\nlet fresh_breakout = breakout && !previous_breakout;\nlet body = kline_1h.Close[2] - kline_1h.Open[2];\nlet impulse = atr > 0 && kline_1h.Close[2] > kline_1h.Open[2] && rsi_1h_14.Data[2] >= 55 && adx_4h_14.ADX[1] - adx_4h_14.ADX[3] >= 2 && body >= atr * 0.15 && body <= atr * 2.0;\nlet retest_hold = kline_1h.Low[1] <= level && kline_1h.Close[1] >= level;\nlet confirm = NowPrice > kline_1h.High[1];\nfunding_supportive && daily_regime && trend && strength && fresh_breakout && impulse && retest_hold && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v113_breakdown_retest_short","type":"short",
+      "code":"let funding_ready = len(FundingRate.Data) >= 1;\nlet funding_not_negative = funding_ready && FundingRate.Data[0] >= 0;\nlet atr = atr_1h_14.Data[2];\nlet daily_regime = ema_1d_20.Data[1] < ema_1d_50.Data[1] && ema_1d_20.Data[1] <= ema_1d_20.Data[4] && ema_1d_50.Data[1] <= ema_1d_50.Data[4] && kline_1d.Close[1] < ema_1d_20.Data[1] && kline_1d.Close[1] < kline_1d.Open[1] && kline_1d.Close[1] <= kline_1d.Close[2] && adx_1d_14.ADX[1] >= 20 && adx_1d_14.MinusDI[1] > adx_1d_14.PlusDI[1];\nlet trend = kline_4h.Close[1] < ema_4h_20.Data[1] && kline_4h.Close[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] <= ema_4h_20.Data[4];\nlet strength = adx_4h_14.ADX[1] >= 20 && adx_4h_14.ADX[1] >= adx_4h_14.ADX[3] && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1];\nlet level = min(kline_1h.Low[3:15]);\nlet prev_level = min(kline_1h.Low[4:16]);\nlet breakdown = kline_1h.Close[2] < level;\nlet previous_breakdown = kline_1h.Close[3] < prev_level;\nlet fresh_breakdown = breakdown && !previous_breakdown;\nlet body = kline_1h.Open[2] - kline_1h.Close[2];\nlet impulse = atr > 0 && kline_1h.Close[2] < kline_1h.Open[2] && rsi_1h_14.Data[2] <= 45 && body >= atr * 0.15 && body <= atr * 2.0;\nlet retest_hold = kline_1h.High[1] >= level && kline_1h.Close[1] <= level;\nlet confirm = NowPrice < kline_1h.Low[1];\nfunding_not_negative && daily_regime && trend && strength && fresh_breakdown && impulse && retest_hold && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v113_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v113_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

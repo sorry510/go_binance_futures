@@ -1,0 +1,22 @@
+{
+  "name":"v109 Funding Crowding Acceleration Fade",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v109_long","type":"long",
+      "code":"let ready = len(FundingRate.Data) >= 3;\nlet accelerating = ready && FundingRate.Data[0] < 0 && FundingRate.Data[1] < 0 && FundingRate.Data[2] < 0 && FundingRate.Data[0] < FundingRate.Data[1] && FundingRate.Data[1] < FundingRate.Data[2];\nlet price_rejects = kline_4h.Close[1] > kline_4h.Open[1];\nlet confirm = NowPrice > kline_4h.High[1];\naccelerating && price_rejects && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v109_short","type":"short",
+      "code":"let ready = len(FundingRate.Data) >= 3;\nlet accelerating = ready && FundingRate.Data[0] > 0 && FundingRate.Data[1] > 0 && FundingRate.Data[2] > 0 && FundingRate.Data[0] > FundingRate.Data[1] && FundingRate.Data[1] > FundingRate.Data[2];\nlet price_rejects = kline_4h.Close[1] < kline_4h.Open[1];\nlet confirm = NowPrice < kline_4h.Low[1];\naccelerating && price_rejects && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v109_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v109_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

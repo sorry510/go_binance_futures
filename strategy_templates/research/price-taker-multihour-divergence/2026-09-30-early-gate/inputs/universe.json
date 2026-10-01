@@ -1,0 +1,1 @@
+{"symbols":["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT"],"source":"existing go_bn_test 1h futures kline including TakerBuyRatio; read-only"}

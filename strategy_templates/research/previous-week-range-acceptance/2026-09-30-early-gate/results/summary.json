@@ -1,0 +1,7 @@
+{
+  "status":"data_blocked_before_returns",
+  "reason":"existing historical store has no complete 1w series; BTCUSDT build failed before Engine.Run",
+  "error":"historical K-line gaps remain for BTCUSDT 1w",
+  "returns_inspected":false,
+  "db_backfill_performed":false
+}

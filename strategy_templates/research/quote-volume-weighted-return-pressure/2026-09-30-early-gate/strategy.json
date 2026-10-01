@@ -1,0 +1,13 @@
+{
+  "name":"v100 4h Quote-Volume-Weighted Return Pressure",
+  "technology":{
+    "ma":[],"ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v100_long","type":"long","code":"let f1 = ((kline_1h.Close[1]-kline_1h.Close[2])/kline_1h.Close[2])*kline_1h.Amount[1] + ((kline_1h.Close[2]-kline_1h.Close[3])/kline_1h.Close[3])*kline_1h.Amount[2] + ((kline_1h.Close[3]-kline_1h.Close[4])/kline_1h.Close[4])*kline_1h.Amount[3] + ((kline_1h.Close[4]-kline_1h.Close[5])/kline_1h.Close[5])*kline_1h.Amount[4];\nlet f2 = ((kline_1h.Close[2]-kline_1h.Close[3])/kline_1h.Close[3])*kline_1h.Amount[2] + ((kline_1h.Close[3]-kline_1h.Close[4])/kline_1h.Close[4])*kline_1h.Amount[3] + ((kline_1h.Close[4]-kline_1h.Close[5])/kline_1h.Close[5])*kline_1h.Amount[4] + ((kline_1h.Close[5]-kline_1h.Close[6])/kline_1h.Close[6])*kline_1h.Amount[5];\nlet cross = f1 > 0 && f2 <= 0;\nlet confirm = NowPrice > kline_1h.High[1];\ncross && confirm","fullScreen":false,"enable":true},
+    {"name":"v100_short","type":"short","code":"let f1 = ((kline_1h.Close[1]-kline_1h.Close[2])/kline_1h.Close[2])*kline_1h.Amount[1] + ((kline_1h.Close[2]-kline_1h.Close[3])/kline_1h.Close[3])*kline_1h.Amount[2] + ((kline_1h.Close[3]-kline_1h.Close[4])/kline_1h.Close[4])*kline_1h.Amount[3] + ((kline_1h.Close[4]-kline_1h.Close[5])/kline_1h.Close[5])*kline_1h.Amount[4];\nlet f2 = ((kline_1h.Close[2]-kline_1h.Close[3])/kline_1h.Close[3])*kline_1h.Amount[2] + ((kline_1h.Close[3]-kline_1h.Close[4])/kline_1h.Close[4])*kline_1h.Amount[3] + ((kline_1h.Close[4]-kline_1h.Close[5])/kline_1h.Close[5])*kline_1h.Amount[4] + ((kline_1h.Close[5]-kline_1h.Close[6])/kline_1h.Close[6])*kline_1h.Amount[5];\nlet cross = f1 < 0 && f2 >= 0;\nlet confirm = NowPrice < kline_1h.Low[1];\ncross && confirm","fullScreen":false,"enable":true},
+    {"name":"v100_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v100_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

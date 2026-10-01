@@ -1,0 +1,24 @@
+{
+  "name":"v114 Bollinger Band-Walk Continuation",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],
+    "boll":[{"name":"boll_1h_20_2","enable":true,"kline_interval":"1h","period":20,"std_dev_multiplier":2}],
+    "donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v114_long","type":"long",
+      "code":"let walk = kline_1h.Close[2] > boll_1h_20_2.High[2] && kline_1h.Close[1] > boll_1h_20_2.High[1];\nlet confirm = NowPrice > kline_1h.High[1];\nwalk && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v114_short","type":"short",
+      "code":"let walk = kline_1h.Close[2] < boll_1h_20_2.Low[2] && kline_1h.Close[1] < boll_1h_20_2.Low[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nwalk && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v114_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v114_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

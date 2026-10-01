@@ -1,0 +1,57 @@
+{
+  "name": "v79 1h Exhaustion Wick Reversal",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      }
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v79_exhaustion_long",
+      "type": "long",
+      "code": "let body = abs(kline_1h.Open[1] - kline_1h.Close[1]);\nlet new_low = kline_1h.Low[1] < min(kline_1h.Low[2:21]);\nlet bearish_count = (kline_1h.Close[2] < kline_1h.Open[2] ? 1 : 0) + (kline_1h.Close[3] < kline_1h.Open[3] ? 1 : 0) + (kline_1h.Close[4] < kline_1h.Open[4] ? 1 : 0) + (kline_1h.Close[5] < kline_1h.Open[5] ? 1 : 0) + (kline_1h.Close[6] < kline_1h.Open[6] ? 1 : 0) + (kline_1h.Close[7] < kline_1h.Open[7] ? 1 : 0) + (kline_1h.Close[8] < kline_1h.Open[8] ? 1 : 0) + (kline_1h.Close[9] < kline_1h.Open[9] ? 1 : 0) + (kline_1h.Close[10] < kline_1h.Open[10] ? 1 : 0);\nlet wick = body > 0 && (kline_1h.Close[1] - kline_1h.Low[1]) / body > 0.66;\nlet reversal_bar = kline_1h.Close[1] < kline_1h.Open[1];\nlet confirm = kline_1h.Open[0] <= kline_1h.High[1] && NowPrice > kline_1h.High[1];\nnew_low && bearish_count >= 7 && wick && reversal_bar && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v79_exhaustion_short",
+      "type": "short",
+      "code": "let body = abs(kline_1h.Open[1] - kline_1h.Close[1]);\nlet new_high = kline_1h.High[1] > max(kline_1h.High[2:21]);\nlet bullish_count = (kline_1h.Close[2] > kline_1h.Open[2] ? 1 : 0) + (kline_1h.Close[3] > kline_1h.Open[3] ? 1 : 0) + (kline_1h.Close[4] > kline_1h.Open[4] ? 1 : 0) + (kline_1h.Close[5] > kline_1h.Open[5] ? 1 : 0) + (kline_1h.Close[6] > kline_1h.Open[6] ? 1 : 0) + (kline_1h.Close[7] > kline_1h.Open[7] ? 1 : 0) + (kline_1h.Close[8] > kline_1h.Open[8] ? 1 : 0) + (kline_1h.Close[9] > kline_1h.Open[9] ? 1 : 0) + (kline_1h.Close[10] > kline_1h.Open[10] ? 1 : 0);\nlet wick = body > 0 && (kline_1h.High[1] - kline_1h.Close[1]) / body > 0.66;\nlet reversal_bar = kline_1h.Close[1] > kline_1h.Open[1];\nlet confirm = kline_1h.Open[0] >= kline_1h.Low[1] && NowPrice < kline_1h.Low[1];\nnew_high && bullish_count >= 7 && wick && reversal_bar && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v79_exhaustion_close_long",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v79_exhaustion_close_short",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

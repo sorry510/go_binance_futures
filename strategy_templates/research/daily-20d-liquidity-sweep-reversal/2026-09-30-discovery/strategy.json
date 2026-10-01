@@ -1,0 +1,16 @@
+{
+  "name":"v105 Daily 20d Liquidity Sweep Reversal",
+  "technology":{
+    "ma":[],"ema":[
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v105_long","type":"long","code":"let prior_low = min(kline_1d.Low[2:22]);\nlet sweep = kline_1d.Low[1] < prior_low && kline_1d.Close[1] > prior_low;\nlet midpoint = (kline_1d.High[1] + kline_1d.Low[1]) / 2;\nlet accept = kline_4h.Open[1] <= midpoint && kline_4h.Close[1] > midpoint;\nlet confirm = NowPrice > kline_4h.High[1];\nsweep && accept && confirm","fullScreen":false,"enable":true},
+    {"name":"v105_short","type":"short","code":"let prior_high = max(kline_1d.High[2:22]);\nlet sweep = kline_1d.High[1] > prior_high && kline_1d.Close[1] < prior_high;\nlet midpoint = (kline_1d.High[1] + kline_1d.Low[1]) / 2;\nlet accept = kline_4h.Open[1] >= midpoint && kline_4h.Close[1] < midpoint;\nlet confirm = NowPrice < kline_4h.Low[1];\nsweep && accept && confirm","fullScreen":false,"enable":true},
+    {"name":"v105_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v105_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name":"v85 Rolling-4h VWAP Reclaim",
+  "technology":{
+    "ma":[],"ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v85_long","type":"long","code":"let q1 = kline_1h.Qps[1]+kline_1h.Qps[2]+kline_1h.Qps[3]+kline_1h.Qps[4];\nlet v1 = kline_1h.Amount[1]+kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4];\nlet q2 = kline_1h.Qps[2]+kline_1h.Qps[3]+kline_1h.Qps[4]+kline_1h.Qps[5];\nlet v2 = kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4]+kline_1h.Amount[5];\nlet vw1 = v1>0 ? q1/v1 : 0;\nlet vw2 = v2>0 ? q2/v2 : 0;\nlet reclaim = vw1>0 && vw2>0 && kline_1h.Close[1] > vw1 && kline_1h.Close[2] <= vw2;\nlet confirm = NowPrice > kline_1h.High[1];\nreclaim && confirm","fullScreen":false,"enable":true},
+    {"name":"v85_short","type":"short","code":"let q1 = kline_1h.Qps[1]+kline_1h.Qps[2]+kline_1h.Qps[3]+kline_1h.Qps[4];\nlet v1 = kline_1h.Amount[1]+kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4];\nlet q2 = kline_1h.Qps[2]+kline_1h.Qps[3]+kline_1h.Qps[4]+kline_1h.Qps[5];\nlet v2 = kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4]+kline_1h.Amount[5];\nlet vw1 = v1>0 ? q1/v1 : 0;\nlet vw2 = v2>0 ? q2/v2 : 0;\nlet reclaim = vw1>0 && vw2>0 && kline_1h.Close[1] < vw1 && kline_1h.Close[2] >= vw2;\nlet confirm = NowPrice < kline_1h.Low[1];\nreclaim && confirm","fullScreen":false,"enable":true},
+    {"name":"v85_close_long","type":"close_long","code":"let q = kline_1h.Qps[1]+kline_1h.Qps[2]+kline_1h.Qps[3]+kline_1h.Qps[4];\nlet v = kline_1h.Amount[1]+kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4];\nlet vw = v>0 ? q/v : 0;\nlet failed = vw>0 && kline_1h.Close[1] < vw;\nfailed","fullScreen":false,"enable":true},
+    {"name":"v85_close_short","type":"close_short","code":"let q = kline_1h.Qps[1]+kline_1h.Qps[2]+kline_1h.Qps[3]+kline_1h.Qps[4];\nlet v = kline_1h.Amount[1]+kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4];\nlet vw = v>0 ? q/v : 0;\nlet failed = vw>0 && kline_1h.Close[1] > vw;\nfailed","fullScreen":false,"enable":true}
+  ]
+}

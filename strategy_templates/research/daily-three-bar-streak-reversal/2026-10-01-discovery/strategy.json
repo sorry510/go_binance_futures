@@ -1,0 +1,27 @@
+{
+  "name":"v118 Daily 3-Bar Streak Reversal",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v118_long","type":"long",
+      "code":"let streak_down = kline_1d.Close[1] < kline_1d.Open[1] && kline_1d.Close[2] < kline_1d.Open[2] && kline_1d.Close[3] < kline_1d.Open[3];\nlet reversal_bar = kline_4h.Close[1] > kline_4h.Open[1];\nlet confirm = NowPrice > kline_4h.High[1];\nstreak_down && reversal_bar && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v118_short","type":"short",
+      "code":"let streak_up = kline_1d.Close[1] > kline_1d.Open[1] && kline_1d.Close[2] > kline_1d.Open[2] && kline_1d.Close[3] > kline_1d.Open[3];\nlet reversal_bar = kline_4h.Close[1] < kline_4h.Open[1];\nlet confirm = NowPrice < kline_4h.Low[1];\nstreak_up && reversal_bar && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v118_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v118_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name":"v110 Donchian 20h Midpoint Regime Cross",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v110_long","type":"long",
+      "code":"let hi = max(kline_1h.High[2:22]);\nlet lo = min(kline_1h.Low[2:22]);\nlet mid = (hi + lo) / 2;\nlet cross = kline_1h.Open[1] <= mid && kline_1h.Close[1] > mid;\nlet confirm = NowPrice > kline_1h.High[1];\ncross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v110_short","type":"short",
+      "code":"let hi = max(kline_1h.High[2:22]);\nlet lo = min(kline_1h.Low[2:22]);\nlet mid = (hi + lo) / 2;\nlet cross = kline_1h.Open[1] >= mid && kline_1h.Close[1] < mid;\nlet confirm = NowPrice < kline_1h.Low[1];\ncross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v110_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v110_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "v80 Previous-Week Range Acceptance",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},
+      {"name":"ema_1w_2","enable":true,"kline_interval":"1w","period":2}
+    ],
+    "macd": [], "adx": [], "mfi": [], "obv": [], "cci": [], "roc": [], "kdj": [], "rsi": [],
+    "kc": [], "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name":"v80_week_accept_long",
+      "type":"long",
+      "code":"let boundary = kline_1w.High[1];\nlet accept = kline_1h.Open[1] <= boundary && kline_1h.Close[1] > boundary;\nlet confirm = NowPrice > kline_1h.High[1];\naccept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v80_week_accept_short",
+      "type":"short",
+      "code":"let boundary = kline_1w.Low[1];\nlet accept = kline_1h.Open[1] >= boundary && kline_1h.Close[1] < boundary;\nlet confirm = NowPrice < kline_1h.Low[1];\naccept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v80_week_accept_close_long",
+      "type":"close_long",
+      "code":"let failed = kline_1h.Close[1] < kline_1w.High[1];\nfailed",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v80_week_accept_close_short",
+      "type":"close_short",
+      "code":"let failed = kline_1h.Close[1] > kline_1w.Low[1];\nfailed",
+      "fullScreen":false,"enable":true
+    }
+  ]
+}

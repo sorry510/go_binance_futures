@@ -1,0 +1,8 @@
+{
+  "research_date":"2026-09-30",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "engine":"service/backtest current working tree",
+  "data":"existing go_bn_test / historicalmarket replay only",
+  "predecessor":"v80 calendar-week version was data-blocked before returns due missing 1w history",
+  "notes":["1d path chosen because it is already supported by local historical replay","no app.conf modification","no DB writes intended"]
+}

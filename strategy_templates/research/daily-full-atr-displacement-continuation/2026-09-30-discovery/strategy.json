@@ -1,0 +1,24 @@
+{
+  "name":"v107 Daily Full-ATR Displacement Continuation",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},{"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],
+    "atr":[{"name":"atr_1d_14","enable":true,"kline_interval":"1d","period":14}],
+    "supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v107_long","type":"long",
+      "code":"let atr = atr_1d_14.Data[2];\nlet body = kline_1d.Close[1] - kline_1d.Open[1];\nlet impulse = atr > 0 && body >= atr;\nlet accept = kline_4h.Open[1] <= kline_1d.High[1] && kline_4h.Close[1] > kline_1d.High[1];\nlet confirm = NowPrice > kline_4h.High[1];\nimpulse && accept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v107_short","type":"short",
+      "code":"let atr = atr_1d_14.Data[2];\nlet body = kline_1d.Open[1] - kline_1d.Close[1];\nlet impulse = atr > 0 && body >= atr;\nlet accept = kline_4h.Open[1] >= kline_1d.Low[1] && kline_4h.Close[1] < kline_1d.Low[1];\nlet confirm = NowPrice < kline_4h.Low[1];\nimpulse && accept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v107_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v107_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

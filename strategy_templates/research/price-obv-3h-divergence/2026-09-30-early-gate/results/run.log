@@ -1,0 +1,21 @@
+[Reading 17 lines from start (total: 17 lines, 0 remaining)]
+
+2026/09/30 19:09:32.879 [1;34m[I][0m  use lang: zh
+BUILD 1/4 BTCUSDT
+SYM BTCUSDT trades=862 long=452 short=410 normPF=0.822141 normNet=-1.553021
+BUILD 2/4 ETHUSDT
+SYM ETHUSDT trades=1108 long=545 short=563 normPF=0.754589 normNet=-2.913254
+BUILD 3/4 BNBUSDT
+SYM BNBUSDT trades=1020 long=525 short=495 normPF=0.813784 normNet=-1.927081
+BUILD 4/4 XRPUSDT
+SYM XRPUSDT trades=1234 long=585 short=649 normPF=0.798927 normNet=-2.584752
+ALL trades=4224 long=2107 short=2117 normPF=0.795049 normNet=-8.978109 positive=0/4 freq=5.520538
+YEAR 2023 trades=980 normPF=0.801569 normNet=-2.065502
+YEAR 2024 trades=1356 normPF=0.840378 normNet=-2.181185
+YEAR 2025 trades=1204 normPF=0.776456 normNet=-2.797899
+YEAR 2026 trades=684 normPF=0.732058 normNet=-1.933522
+EXIT end_of_data 2
+EXIT stop_loss 2473
+EXIT take_profit 1749
+
+[executed on device: sorry510 (715fc246-cfb8-4384-b67f-225e7f07bdc3)]

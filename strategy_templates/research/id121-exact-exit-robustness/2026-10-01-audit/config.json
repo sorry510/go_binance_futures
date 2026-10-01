@@ -1,0 +1,1 @@
+{"family":"id121-exact-exit-robustness","run_id":"2026-10-01-audit","source":"strategy_templates/research/id121-v54-exact-exit/2026-09-30-audit/results/trades.csv","strategy":"ID121","bootstrap_block":"UTC calendar month","bootstrap_replicates":10000,"bootstrap_seed":121,"db_write":false}

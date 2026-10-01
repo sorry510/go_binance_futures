@@ -1,0 +1,25 @@
+{
+  "family":"oi-expansion-taker-alignment",
+  "run_id":"2026-10-01-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "target_blocks":[
+    ["2023-01-02","2023-01-03","2023-01-04"],
+    ["2023-04-03","2023-04-04","2023-04-05"],
+    ["2023-07-03","2023-07-04","2023-07-05"],
+    ["2023-10-02","2023-10-03","2023-10-04"],
+    ["2024-01-01","2024-01-02","2024-01-03"],
+    ["2024-04-01","2024-04-02","2024-04-03"],
+    ["2024-07-01","2024-07-02","2024-07-03"],
+    ["2024-10-07","2024-10-08","2024-10-09"]
+  ],
+  "oi_lookback_hours":4,
+  "taker_lookback_hours":4,
+  "future_horizons_hours":[1,4,12],
+  "max_asof_gap_minutes":30,
+  "data_source":"Binance Vision USD-M daily metrics",
+  "required_columns":["create_time","sum_open_interest","sum_open_interest_value","sum_taker_long_short_vol_ratio"],
+  "signal":"4h OI change crosses <=0 to >0; direction = sign(mean log taker long/short volume ratio over trailing 4h)",
+  "early_gate":{"min_signed_mean_4h":0.001,"min_positive_symbols_4h":4},
+  "full_discovery_if_promoted":"2023-01-01..2024-12-31",
+  "db_write":false
+}

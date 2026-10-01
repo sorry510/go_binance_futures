@@ -1,0 +1,15 @@
+{
+  "family":"v34-pullback-exact-exit-attribution",
+  "run_id":"2026-10-01-audit",
+  "source_strategy":"strategy_templates/daily-regime-breakout/daily-dmi-breakout-plus-pullback-resume-bidirectional-v34.json",
+  "symbols":["ADAUSDT","AVAXUSDT","BNBUSDT","BTCUSDT","DOGEUSDT","ETHUSDT","LTCUSDT","NEARUSDT","SOLUSDT","UNIUSDT","XRPUSDT","ZECUSDT","1000PEPEUSDT","SUIUSDT","ONDOUSDT"],
+  "eligibility":{"mature_start":"2024-08-15T00:00:00Z","1000PEPEUSDT":"2025-05-05T00:00:00Z","SUIUSDT":"2025-05-03T00:00:00Z","ONDOUSDT":"2026-01-20T00:00:00Z","end":"2026-09-01T00:00:00Z"},
+  "full_variant":"all original v34 entry rules",
+  "base_variant":"funding_pullback_resume_short_v34 disabled only",
+  "leverage":4,
+  "fee_rate_per_side":0.0005,
+  "slippage_bps_per_side":5,
+  "single_position":true,
+  "close_rule":"ROI >= 8 || ROI <= -6",
+  "db_write":false
+}

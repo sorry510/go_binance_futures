@@ -1,0 +1,2 @@
+Canonical strategy source: strategy_templates/research/id121-v54-exact-exit/2026-09-30-audit/strategy/id121-exact-exit.json
+No strategy content was modified for this audit.

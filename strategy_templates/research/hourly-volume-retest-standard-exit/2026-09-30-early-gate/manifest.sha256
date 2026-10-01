@@ -1,0 +1,12 @@
+9628e3690bb07d1359e118e7b2ce79b91897d5b1d3dfaa50fda664794524b7bc  ./README.md
+4b658fb983effe18f54b477fd5d9cd4e19bb085560ccb110aeebc81a575fb9be  ./config.json
+f22ecb6c5e1f2a60886b8c83bd98c3d5bac29f751caeb1786dd4c9e227bd8022  ./inputs/universe.json
+f4c7ebdb12b311b86502b709265db75cce3651d5e46c62ca4593a8aa7a6ed162  ./legacy/invalid-false-close/README.md
+050a117e5ddc98af31c6b85f6a27332fc483c4216bcc1463d8428776f252bd8f  ./legacy/invalid-false-close/raw-run.log
+56cf7c92d70d29a1e654dd9b16c0b807e178331e48b6bc4fb9ef0e28e7fbbad6  ./legacy/invalid-false-close/strategy.json
+aad003a922e7766f5bb135a2261e49b9185738d3606195df24657adbc075f5ee  ./protocol.md
+03cbcef4982a7def5575cb4888e00c4a6daa7126aecfff873dacae32f4ca6e24  ./provenance.json
+589adcc81daf3636e390362026c0ad63b13728d3605dae454ee3e16019b83f17  ./results/run.log
+b09a8e8337ace89da5cdb938f3562413e2326fbb36d951e0697a5da5d363a461  ./results/summary.json
+1d9aad2f02f3790e57b8eefed2c6bcb5ef8510392fff1d33a3a2f44a73a2cd17  ./run_gate.go
+d13951fe7195737311528fdc9dad7dd5f87b7236941b3815ff2a01c913a9122a  ./strategy.json

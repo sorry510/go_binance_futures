@@ -1,0 +1,1 @@
+{"status":"frozen_frequency","gate_pass":false,"overall":{"trades":4,"long":0,"short":4,"pf":0,"net":-5.370377,"positive_symbols":"0/4","frequency_per_symbol_week":0.005228},"symbols":{"BTCUSDT":{"trades":1},"ETHUSDT":{"trades":1},"BNBUSDT":{"trades":1},"XRPUSDT":{"trades":1}},"decision":"freeze for insufficient frequency; do not tune KC parameters"}

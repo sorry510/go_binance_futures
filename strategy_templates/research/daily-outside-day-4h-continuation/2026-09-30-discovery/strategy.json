@@ -1,0 +1,16 @@
+{
+  "name":"v103 Daily Outside-Day 4h Continuation",
+  "technology":{
+    "ma":[],"ema":[
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v103_long","type":"long","code":"let outside = kline_1d.High[1] > kline_1d.High[2] && kline_1d.Low[1] < kline_1d.Low[2];\nlet directional = kline_1d.Close[1] > kline_1d.Open[1];\nlet accept = kline_4h.Open[1] <= kline_1d.High[1] && kline_4h.Close[1] > kline_1d.High[1];\nlet confirm = NowPrice > kline_4h.High[1];\noutside && directional && accept && confirm","fullScreen":false,"enable":true},
+    {"name":"v103_short","type":"short","code":"let outside = kline_1d.High[1] > kline_1d.High[2] && kline_1d.Low[1] < kline_1d.Low[2];\nlet directional = kline_1d.Close[1] < kline_1d.Open[1];\nlet accept = kline_4h.Open[1] >= kline_1d.Low[1] && kline_4h.Close[1] < kline_1d.Low[1];\nlet confirm = NowPrice < kline_4h.Low[1];\noutside && directional && accept && confirm","fullScreen":false,"enable":true},
+    {"name":"v103_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v103_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "name": "v80 3h Price-Taker Flow Divergence Reversal",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      }
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v80_divergence_long",
+      "type": "long",
+      "code": "let price_down = kline_1h.Close[1] < kline_1h.Close[2] && kline_1h.Close[2] < kline_1h.Close[3];\nlet flow_up = kline_1h.TakerBuyRatio[1] > kline_1h.TakerBuyRatio[2] && kline_1h.TakerBuyRatio[2] > kline_1h.TakerBuyRatio[3];\nlet confirm = kline_1h.Open[0] <= kline_1h.High[1] && NowPrice > kline_1h.High[1];\nprice_down && flow_up && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v80_divergence_short",
+      "type": "short",
+      "code": "let price_up = kline_1h.Close[1] > kline_1h.Close[2] && kline_1h.Close[2] > kline_1h.Close[3];\nlet flow_down = kline_1h.TakerBuyRatio[1] < kline_1h.TakerBuyRatio[2] && kline_1h.TakerBuyRatio[2] < kline_1h.TakerBuyRatio[3];\nlet confirm = kline_1h.Open[0] >= kline_1h.Low[1] && NowPrice < kline_1h.Low[1];\nprice_up && flow_down && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v80_divergence_close_long",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v80_divergence_close_short",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "name": "v81 Rolling-7d Range Acceptance",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      },
+      {
+        "name": "ema_1d_2",
+        "enable": true,
+        "kline_interval": "1d",
+        "period": 2
+      }
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v81_7d_accept_long",
+      "type": "long",
+      "code": "let boundary = max(kline_1d.High[1:8]);\nlet accept = kline_1h.Open[1] <= boundary && kline_1h.Close[1] > boundary;\nlet confirm = NowPrice > kline_1h.High[1];\naccept && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v81_7d_accept_short",
+      "type": "short",
+      "code": "let boundary = min(kline_1d.Low[1:8]);\nlet accept = kline_1h.Open[1] >= boundary && kline_1h.Close[1] < boundary;\nlet confirm = NowPrice < kline_1h.Low[1];\naccept && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v81_7d_accept_close_long",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v81_7d_accept_close_short",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name":"v115 Keltner 20/2 First-Breakout Continuation",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[{"name":"kc_1h_20_2","enable":true,"kline_interval":"1h","period":20,"multiplier":2}],
+    "boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v115_long","type":"long",
+      "code":"let first_breakout = kline_1h.Close[2] <= kc_1h_20_2.High[2] && kline_1h.Close[1] > kc_1h_20_2.High[1];\nlet confirm = NowPrice > kline_1h.High[1];\nfirst_breakout && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v115_short","type":"short",
+      "code":"let first_breakout = kline_1h.Close[2] >= kc_1h_20_2.Low[2] && kline_1h.Close[1] < kc_1h_20_2.Low[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nfirst_breakout && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v115_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v115_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

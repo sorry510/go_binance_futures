@@ -1,0 +1,16 @@
+{
+  "name":"v104 Daily NR4 4h Acceptance",
+  "technology":{
+    "ma":[],"ema":[
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v104_long","type":"long","code":"let r1 = kline_1d.High[1]-kline_1d.Low[1];\nlet r2 = kline_1d.High[2]-kline_1d.Low[2];\nlet r3 = kline_1d.High[3]-kline_1d.Low[3];\nlet r4 = kline_1d.High[4]-kline_1d.Low[4];\nlet nr4 = r1 > 0 && r1 <= r2 && r1 <= r3 && r1 <= r4;\nlet accept = kline_4h.Open[1] <= kline_1d.High[1] && kline_4h.Close[1] > kline_1d.High[1];\nlet confirm = NowPrice > kline_4h.High[1];\nnr4 && accept && confirm","fullScreen":false,"enable":true},
+    {"name":"v104_short","type":"short","code":"let r1 = kline_1d.High[1]-kline_1d.Low[1];\nlet r2 = kline_1d.High[2]-kline_1d.Low[2];\nlet r3 = kline_1d.High[3]-kline_1d.Low[3];\nlet r4 = kline_1d.High[4]-kline_1d.Low[4];\nlet nr4 = r1 > 0 && r1 <= r2 && r1 <= r3 && r1 <= r4;\nlet accept = kline_4h.Open[1] >= kline_1d.Low[1] && kline_4h.Close[1] < kline_1d.Low[1];\nlet confirm = NowPrice < kline_4h.Low[1];\nnr4 && accept && confirm","fullScreen":false,"enable":true},
+    {"name":"v104_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v104_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

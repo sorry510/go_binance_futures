@@ -1,0 +1,9 @@
+{
+  "status":"coverage_blocked_before_returns",
+  "eligible_count":1,
+  "eligible_symbols":[{"symbol":"LITUSDT","quote_volume":53029498,"earliest":1669852800000,"latest":1788220740000,"months":44}],
+  "required_count":5,
+  "id121_returns_inspected":false,
+  "db_write":false,
+  "decision":"do not run single-symbol pseudo-holdout"
+}

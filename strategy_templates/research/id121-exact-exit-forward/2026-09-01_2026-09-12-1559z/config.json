@@ -1,0 +1,13 @@
+{
+  "family":"id121-exact-exit-forward",
+  "run_id":"2026-09-01_2026-09-12-1559z",
+  "source_strategy":"strategy_templates/research/id121-v54-exact-exit/2026-09-30-audit/strategy/id121-exact-exit.json",
+  "forward_start":"2026-09-01T00:00:00Z",
+  "forward_end_exclusive":"2026-09-12T16:00:00Z",
+  "common_data_last_open":"2026-09-12T15:59:00Z",
+  "symbols":["ADAUSDT","AVAXUSDT","BNBUSDT","BTCUSDT","DOGEUSDT","ETHUSDT","LTCUSDT","NEARUSDT","SOLUSDT","UNIUSDT","XRPUSDT","ZECUSDT","1000PEPEUSDT","SUIUSDT","ONDOUSDT"],
+  "production_starts":{"mature":"2024-08-15T00:00:00Z","1000PEPEUSDT":"2025-05-05T00:00:00Z","SUIUSDT":"2025-05-03T00:00:00Z","ONDOUSDT":"2026-01-20T00:00:00Z"},
+  "execution":{"leverage":4,"take_profit_pct":8,"stop_loss_pct":6,"fee_rate_per_side":0.0005,"slippage_bps_per_side":5,"single_position":true},
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "db_write":false
+}

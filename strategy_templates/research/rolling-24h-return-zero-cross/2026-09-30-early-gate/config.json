@@ -1,0 +1,28 @@
+{
+  "family": "rolling-24h-return-zero-cross",
+  "run_id": "2026-09-30-early-gate",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT"
+  ],
+  "start": "2023-01-01T00:00:00Z",
+  "end": "2026-09-01T00:00:00Z",
+  "execution_interval": "1m",
+  "signal_interval": "1h",
+  "rolling_hours": 24,
+  "cross_level_pct": 0,
+  "leverage": 4,
+  "take_profit_pct": 8,
+  "stop_loss_pct": 6,
+  "fee_rate_per_side": 0.0005,
+  "slippage_bps_per_side": 5,
+  "single_position": true,
+  "gate": {
+    "min_pf": 1.15,
+    "min_positive_symbols": 3,
+    "min_frequency_per_symbol_week": 0.3
+  },
+  "db_write": false
+}

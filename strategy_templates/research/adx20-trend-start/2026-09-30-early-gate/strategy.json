@@ -1,0 +1,64 @@
+{
+  "name": "v84 ADX20 Trend Start",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      }
+    ],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v84_long",
+      "type": "long",
+      "code": "let start = adx_1h_14.ADX[1] > 20 && adx_1h_14.ADX[2] <= 20;\nlet dir = adx_1h_14.PlusDI[1] > adx_1h_14.MinusDI[1];\nlet confirm = NowPrice > kline_1h.High[1];\nstart && dir && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v84_short",
+      "type": "short",
+      "code": "let start = adx_1h_14.ADX[1] > 20 && adx_1h_14.ADX[2] <= 20;\nlet dir = adx_1h_14.MinusDI[1] > adx_1h_14.PlusDI[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nstart && dir && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v84_close_long",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v84_close_short",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name":"v101 ADX20 x ATR-Term Expansion Confluence",
+  "technology":{
+    "ma":[],"ema":[],
+    "macd":[],
+    "adx":[{"name":"adx_1h_14","enable":true,"kline_interval":"1h","period":14}],
+    "mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],
+    "atr":[
+      {"name":"atr_1h_14","enable":true,"kline_interval":"1h","period":14},
+      {"name":"atr_1d_14","enable":true,"kline_interval":"1d","period":14}
+    ],
+    "supertrend":[]
+  },
+  "strategy":[
+    {"name":"v101_long","type":"long","code":"let trend_start = adx_1h_14.ADX[1] > 20 && adx_1h_14.ADX[2] <= 20;\nlet vol_expand = atr_1d_14.Data[1] > 0 && atr_1h_14.Data[1] * 4.898979486 / atr_1d_14.Data[1] > 1;\nlet direction = adx_1h_14.PlusDI[1] > adx_1h_14.MinusDI[1];\nlet confirm = NowPrice > kline_1h.High[1];\ntrend_start && vol_expand && direction && confirm","fullScreen":false,"enable":true},
+    {"name":"v101_short","type":"short","code":"let trend_start = adx_1h_14.ADX[1] > 20 && adx_1h_14.ADX[2] <= 20;\nlet vol_expand = atr_1d_14.Data[1] > 0 && atr_1h_14.Data[1] * 4.898979486 / atr_1d_14.Data[1] > 1;\nlet direction = adx_1h_14.MinusDI[1] > adx_1h_14.PlusDI[1];\nlet confirm = NowPrice < kline_1h.Low[1];\ntrend_start && vol_expand && direction && confirm","fullScreen":false,"enable":true},
+    {"name":"v101_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v101_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

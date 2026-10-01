@@ -1,0 +1,1 @@
+{"status":"frozen_frequency","gate_pass":false,"overall":{"trades":4,"long":2,"short":2,"pf":2.034644,"net":2.492227,"positive_symbols":"2/4","frequency_per_symbol_week":0.005228},"decision":"freeze for insufficient frequency; 4-trade PF is not treated as evidence"}

@@ -1,0 +1,39 @@
+{
+  "name": "v78 Legacy-Derived 3m Exhaustion Wick Reversal",
+  "technology": {
+    "ma": [],
+    "ema": [{"name":"ema_3m_2","enable":true,"kline_interval":"3m","period":2}],
+    "macd": [], "adx": [], "mfi": [], "obv": [], "cci": [], "roc": [], "kdj": [], "rsi": [],
+    "kc": [], "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name":"v78_exhaustion_long",
+      "type":"long",
+      "code":"let body = abs(kline_3m.Open[1] - kline_3m.Close[1]);\nlet new_low = kline_3m.Low[1] < min(kline_3m.Low[2:21]);\nlet bearish_count = (kline_3m.Close[2] < kline_3m.Open[2] ? 1 : 0) + (kline_3m.Close[3] < kline_3m.Open[3] ? 1 : 0) + (kline_3m.Close[4] < kline_3m.Open[4] ? 1 : 0) + (kline_3m.Close[5] < kline_3m.Open[5] ? 1 : 0) + (kline_3m.Close[6] < kline_3m.Open[6] ? 1 : 0) + (kline_3m.Close[7] < kline_3m.Open[7] ? 1 : 0) + (kline_3m.Close[8] < kline_3m.Open[8] ? 1 : 0) + (kline_3m.Close[9] < kline_3m.Open[9] ? 1 : 0) + (kline_3m.Close[10] < kline_3m.Open[10] ? 1 : 0);\nlet wick = body > 0 && (kline_3m.Close[1] - kline_3m.Low[1]) / body > 0.66;\nlet reversal_bar = kline_3m.Close[1] < kline_3m.Open[1];\nlet confirm = kline_3m.Open[0] <= kline_3m.High[1] && NowPrice > kline_3m.High[1];\nnew_low && bearish_count >= 7 && wick && reversal_bar && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name":"v78_exhaustion_short",
+      "type":"short",
+      "code":"let body = abs(kline_3m.Open[1] - kline_3m.Close[1]);\nlet new_high = kline_3m.High[1] > max(kline_3m.High[2:21]);\nlet bullish_count = (kline_3m.Close[2] > kline_3m.Open[2] ? 1 : 0) + (kline_3m.Close[3] > kline_3m.Open[3] ? 1 : 0) + (kline_3m.Close[4] > kline_3m.Open[4] ? 1 : 0) + (kline_3m.Close[5] > kline_3m.Open[5] ? 1 : 0) + (kline_3m.Close[6] > kline_3m.Open[6] ? 1 : 0) + (kline_3m.Close[7] > kline_3m.Open[7] ? 1 : 0) + (kline_3m.Close[8] > kline_3m.Open[8] ? 1 : 0) + (kline_3m.Close[9] > kline_3m.Open[9] ? 1 : 0) + (kline_3m.Close[10] > kline_3m.Open[10] ? 1 : 0);\nlet wick = body > 0 && (kline_3m.High[1] - kline_3m.Close[1]) / body > 0.66;\nlet reversal_bar = kline_3m.Close[1] > kline_3m.Open[1];\nlet confirm = kline_3m.Open[0] >= kline_3m.Low[1] && NowPrice < kline_3m.Low[1];\nnew_high && bullish_count >= 7 && wick && reversal_bar && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name":"v78_exhaustion_close_long",
+      "type":"close_long",
+      "code":"let failed = kline_3m.Close[1] < kline_3m.Low[2];\nfailed",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name":"v78_exhaustion_close_short",
+      "type":"close_short",
+      "code":"let failed = kline_3m.Close[1] > kline_3m.High[2];\nfailed",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

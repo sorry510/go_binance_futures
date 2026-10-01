@@ -1,0 +1,17 @@
+{
+  "name":"v111 Daily Quote-Volume Expansion Continuation",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v111_long","type":"long","code":"let avg1 = mean(kline_1d.Amount[2:22]);\nlet avg2 = mean(kline_1d.Amount[3:23]);\nlet expand = avg1 > 0 && avg2 > 0 && kline_1d.Amount[1] > avg1 && kline_1d.Amount[2] <= avg2;\nlet daily_dir = kline_1d.Close[1] > kline_1d.Open[1];\nlet aligned = kline_4h.Close[1] > kline_4h.Open[1];\nlet confirm = NowPrice > kline_4h.High[1];\nexpand && daily_dir && aligned && confirm","fullScreen":false,"enable":true},
+    {"name":"v111_short","type":"short","code":"let avg1 = mean(kline_1d.Amount[2:22]);\nlet avg2 = mean(kline_1d.Amount[3:23]);\nlet expand = avg1 > 0 && avg2 > 0 && kline_1d.Amount[1] > avg1 && kline_1d.Amount[2] <= avg2;\nlet daily_dir = kline_1d.Close[1] < kline_1d.Open[1];\nlet aligned = kline_4h.Close[1] < kline_4h.Open[1];\nlet confirm = NowPrice < kline_4h.Low[1];\nexpand && daily_dir && aligned && confirm","fullScreen":false,"enable":true},
+    {"name":"v111_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v111_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

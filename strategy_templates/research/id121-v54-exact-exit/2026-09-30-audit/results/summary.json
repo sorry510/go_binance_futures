@@ -1,0 +1,32 @@
+{
+  "status":"completed_exact_exit_audit",
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "universe_symbols":15,
+  "id121":{
+    "trades":773,
+    "normalized_pf":1.211221,
+    "normalized_net":1.420420,
+    "raw_pf":1.244230,
+    "raw_net_pnl":7935.09,
+    "positive_symbols":"12/15",
+    "frequency_per_symbol_week":0.532684,
+    "by_year":{"2024":1.241297,"2025":1.179101,"2026":1.245726},
+    "long":{"trades":415,"pf":1.231696},
+    "short":{"trades":358,"pf":1.188182},
+    "decision":"retain_formal_candidate"
+  },
+  "v54":{
+    "trades":830,
+    "normalized_pf":1.162986,
+    "normalized_net":1.200704,
+    "raw_pf":1.221988,
+    "raw_net_pnl":7529.54,
+    "positive_symbols":"11/15",
+    "frequency_per_symbol_week":0.571963,
+    "by_year":{"2024":1.157365,"2025":1.128126,"2026":1.214292},
+    "long":{"trades":472,"pf":1.144017},
+    "short":{"trades":358,"pf":1.188182},
+    "decision":"demote_freeze_negative_increment"
+  },
+  "old_pf_labels_superseded":true
+}

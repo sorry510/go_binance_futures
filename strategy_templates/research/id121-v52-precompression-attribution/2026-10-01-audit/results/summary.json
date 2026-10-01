@@ -1,0 +1,13 @@
+{
+  "status":"descriptive_filter_attribution",
+  "window":"2023-01-01..2025-01-01",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "id121":{"trades":211,"pf":1.058755,"net":0.114392761,"positive_symbols":"3/6","frequency":0.336753,"by_year":{"2023":0.958510,"2024":1.133964}},
+  "v52":{"trades":151,"pf":1.297779,"net":0.372610226,"positive_symbols":"4/6","frequency":0.240994,"by_year":{"2023":0.978071,"2024":1.532837}},
+  "exact_overlap":{"trades":150,"pf":1.316104,"net":0.390032},
+  "id121_only":{"trades":61,"pf":0.613443,"net":-0.275640,"all_long":true,"by_year":{"2023":{"trades":30,"pf":0.924437,"net":-0.023000},"2024":{"trades":31,"pf":0.381821,"net":-0.252640}}},
+  "v52_only":{"trades":1,"pf":0.0,"net":-0.017422},
+  "interpretation":"fixed 2-3ATR precompression filter removes a materially negative ID121-long cohort on this six-symbol sample, but v52 still fails preregistered frequency and year-stability gates",
+  "oos_unlocked":false,
+  "db_write":false
+}

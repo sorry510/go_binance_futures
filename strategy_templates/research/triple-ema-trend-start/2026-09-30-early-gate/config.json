@@ -1,0 +1,1 @@
+{"strategy":"v82 4h Triple-EMA Trend Start","symbols":["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT"],"start":"2023-01-01T00:00:00Z","end":"2026-09-01T00:00:00Z","ema_periods":[3,7,15],"cross_window_completed_4h_bars":4,"rsi_periods":[6,14],"leverage":4,"take_profit_pct":8,"stop_loss_pct":6,"fee_rate_per_side":0.0005,"slippage_bps_per_side":5}

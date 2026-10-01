@@ -1,0 +1,57 @@
+{
+  "name": "v88 Record Net Aggressor Flow Continuation",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      }
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v88_long",
+      "type": "long",
+      "code": "let f1 = 2*kline_1h.TakerBuyAmount[1]-kline_1h.Amount[1];\nlet a1 = abs(f1);\nlet a2 = abs(2*kline_1h.TakerBuyAmount[2]-kline_1h.Amount[2]);\nlet a3 = abs(2*kline_1h.TakerBuyAmount[3]-kline_1h.Amount[3]);\nlet a4 = abs(2*kline_1h.TakerBuyAmount[4]-kline_1h.Amount[4]);\nlet a5 = abs(2*kline_1h.TakerBuyAmount[5]-kline_1h.Amount[5]);\nlet a6 = abs(2*kline_1h.TakerBuyAmount[6]-kline_1h.Amount[6]);\nlet a7 = abs(2*kline_1h.TakerBuyAmount[7]-kline_1h.Amount[7]);\nlet a8 = abs(2*kline_1h.TakerBuyAmount[8]-kline_1h.Amount[8]);\nlet a9 = abs(2*kline_1h.TakerBuyAmount[9]-kline_1h.Amount[9]);\nlet record = a1 > a2 && a1 > a3 && a1 > a4 && a1 > a5 && a1 > a6 && a1 > a7 && a1 > a8 && a1 > a9;\nlet dir = f1 > 0;\nlet confirm = NowPrice > kline_1h.High[1];\nrecord && dir && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v88_short",
+      "type": "short",
+      "code": "let f1 = 2*kline_1h.TakerBuyAmount[1]-kline_1h.Amount[1];\nlet a1 = abs(f1);\nlet a2 = abs(2*kline_1h.TakerBuyAmount[2]-kline_1h.Amount[2]);\nlet a3 = abs(2*kline_1h.TakerBuyAmount[3]-kline_1h.Amount[3]);\nlet a4 = abs(2*kline_1h.TakerBuyAmount[4]-kline_1h.Amount[4]);\nlet a5 = abs(2*kline_1h.TakerBuyAmount[5]-kline_1h.Amount[5]);\nlet a6 = abs(2*kline_1h.TakerBuyAmount[6]-kline_1h.Amount[6]);\nlet a7 = abs(2*kline_1h.TakerBuyAmount[7]-kline_1h.Amount[7]);\nlet a8 = abs(2*kline_1h.TakerBuyAmount[8]-kline_1h.Amount[8]);\nlet a9 = abs(2*kline_1h.TakerBuyAmount[9]-kline_1h.Amount[9]);\nlet record = a1 > a2 && a1 > a3 && a1 > a4 && a1 > a5 && a1 > a6 && a1 > a7 && a1 > a8 && a1 > a9;\nlet dir = f1 < 0;\nlet confirm = NowPrice < kline_1h.Low[1];\nrecord && dir && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v88_close_long",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v88_close_short",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

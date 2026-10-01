@@ -1,0 +1,8 @@
+2026/09/30 18:57:15.519 [1;34m[I][0m  use lang: zh
+BUILD 1/4 BTCUSDT
+panic: load historical BTCUSDT 3m: historical K-line gaps remain for BTCUSDT 3m: [[1672495200000 1756619999999]]
+
+goroutine 1 [running]:
+main.main()
+	/Users/zhz/work/binance/go_binance_futures/strategy_templates/research/legacy-3m-exhaustion-wick-reversal/2026-09-30-early-gate/replay.go:42 +0x13e8
+exit status 2

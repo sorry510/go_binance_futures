@@ -1,0 +1,22 @@
+{
+  "name":"v106 Classic Daily Pivot R1/S1 Acceptance",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},{"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v106_long","type":"long",
+      "code":"let p = (kline_1d.High[1] + kline_1d.Low[1] + kline_1d.Close[1]) / 3;\nlet r1 = 2*p - kline_1d.Low[1];\nlet accept = kline_1h.Open[1] <= r1 && kline_1h.Close[1] > r1;\nlet confirm = NowPrice > kline_1h.High[1];\naccept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v106_short","type":"short",
+      "code":"let p = (kline_1d.High[1] + kline_1d.Low[1] + kline_1d.Close[1]) / 3;\nlet s1 = 2*p - kline_1d.High[1];\nlet accept = kline_1h.Open[1] >= s1 && kline_1h.Close[1] < s1;\nlet confirm = NowPrice < kline_1h.Low[1];\naccept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v106_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v106_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

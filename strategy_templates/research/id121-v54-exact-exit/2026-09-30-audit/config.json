@@ -1,0 +1,16 @@
+{
+  "family":"id121-v54-exact-exit",
+  "run_id":"2026-09-30-audit",
+  "source_bundle":"strategy_templates/research/id121-v54-strict-production/2026-09-24",
+  "exact_close_rule":"ROI >= 8 || ROI <= -6",
+  "execution":{"leverage":4,"fee_rate_per_side":0.0005,"slippage_bps_per_side":5,"single_position":true},
+  "eligibility":{
+    "mature_start":"2024-08-15T00:00:00Z",
+    "1000PEPEUSDT":"2025-05-05T00:00:00Z",
+    "SUIUSDT":"2025-05-03T00:00:00Z",
+    "ONDOUSDT":"2026-01-20T00:00:00Z",
+    "end":"2026-09-01T00:00:00Z"
+  },
+  "symbols":["ADAUSDT","AVAXUSDT","BNBUSDT","BTCUSDT","DOGEUSDT","ETHUSDT","LTCUSDT","NEARUSDT","SOLUSDT","UNIUSDT","XRPUSDT","ZECUSDT","1000PEPEUSDT","SUIUSDT","ONDOUSDT"],
+  "db_write":false
+}

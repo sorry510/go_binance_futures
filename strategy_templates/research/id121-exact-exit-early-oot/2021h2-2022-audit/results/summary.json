@@ -1,0 +1,21 @@
+{
+  "status":"completed_regime_audit",
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "symbols":["BTCUSDT","ETHUSDT"],
+  "start":"2021-07-20T00:00:00Z",
+  "end_exclusive":"2023-01-01T00:00:00Z",
+  "trades":79,
+  "long":28,
+  "short":51,
+  "normalized_pf":0.587214,
+  "normalized_net":-0.386871,
+  "positive_symbols":"0/2",
+  "frequency_per_symbol_week":0.521698,
+  "by_symbol":{
+    "BTCUSDT":{"trades":42,"long":12,"short":30,"pf":0.603733,"net":-0.193758},
+    "ETHUSDT":{"trades":37,"long":16,"short":21,"pf":0.569195,"net":-0.193113}
+  },
+  "by_year":{"2021":{"trades":19,"pf":0.303450},"2022":{"trades":60,"pf":0.697847}},
+  "exits":{"stop_loss":52,"take_profit":27},
+  "interpretation":"ID121 remains strongly regime-dependent; exact exit semantics do not repair the 2021H2-2022 weakness."
+}

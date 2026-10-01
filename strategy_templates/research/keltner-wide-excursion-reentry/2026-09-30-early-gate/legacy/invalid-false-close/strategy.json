@@ -1,0 +1,29 @@
+{
+  "name": "v81 Keltner Wide-Excursion Re-entry",
+  "technology": {
+    "ma": [],
+    "ema": [{"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}],
+    "macd": [], "adx": [], "mfi": [], "obv": [], "cci": [], "roc": [], "kdj": [], "rsi": [],
+    "kc": [
+      {"name":"kc_4h_50_275","enable":true,"kline_interval":"4h","period":50,"multiplier":2.75},
+      {"name":"kc_4h_50_375","enable":true,"kline_interval":"4h","period":50,"multiplier":3.75}
+    ],
+    "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name":"v81_kc_reentry_long",
+      "type":"long",
+      "code":"let daily_up = kline_1d.Close[1] > kline_1d.Close[2];\nlet wide_excursion = kline_4h.Low[2] < kc_4h_50_375.Low[2] || kline_4h.Low[3] < kc_4h_50_375.Low[3] || kline_4h.Low[4] < kc_4h_50_375.Low[4] || kline_4h.Low[5] < kc_4h_50_375.Low[5] || kline_4h.Low[6] < kc_4h_50_375.Low[6] || kline_4h.Low[7] < kc_4h_50_375.Low[7] || kline_4h.Low[8] < kc_4h_50_375.Low[8] || kline_4h.Low[9] < kc_4h_50_375.Low[9] || kline_4h.Low[10] < kc_4h_50_375.Low[10] || kline_4h.Low[11] < kc_4h_50_375.Low[11];\nlet prev_outside = kline_4h.Close[1] < kc_4h_50_275.Low[1];\nlet reentered = NowPrice > kc_4h_50_275.Low[0];\ndaily_up && wide_excursion && prev_outside && reentered",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v81_kc_reentry_short",
+      "type":"short",
+      "code":"let daily_down = kline_1d.Close[1] < kline_1d.Close[2];\nlet wide_excursion = kline_4h.High[2] > kc_4h_50_375.High[2] || kline_4h.High[3] > kc_4h_50_375.High[3] || kline_4h.High[4] > kc_4h_50_375.High[4] || kline_4h.High[5] > kc_4h_50_375.High[5] || kline_4h.High[6] > kc_4h_50_375.High[6] || kline_4h.High[7] > kc_4h_50_375.High[7] || kline_4h.High[8] > kc_4h_50_375.High[8] || kline_4h.High[9] > kc_4h_50_375.High[9] || kline_4h.High[10] > kc_4h_50_375.High[10] || kline_4h.High[11] > kc_4h_50_375.High[11];\nlet prev_outside = kline_4h.Close[1] > kc_4h_50_275.High[1];\nlet reentered = NowPrice < kc_4h_50_275.High[0];\ndaily_down && wide_excursion && prev_outside && reentered",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v81_close_long","type":"close_long","code":"false","fullScreen":false,"enable":true},
+    {"name":"v81_close_short","type":"close_short","code":"false","fullScreen":false,"enable":true}
+  ]
+}

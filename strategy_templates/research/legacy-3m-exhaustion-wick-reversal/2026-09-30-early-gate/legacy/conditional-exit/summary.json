@@ -1,0 +1,7 @@
+{
+  "status":"data_path_blocked",
+  "gate_pass":null,
+  "returns_evaluated":false,
+  "error":"BTCUSDT 3m historical K-line gaps remain: [[1672495200000 1756619999999]]",
+  "decision":"freeze without alpha conclusion; do not auto-fill 3m history or write DB"
+}

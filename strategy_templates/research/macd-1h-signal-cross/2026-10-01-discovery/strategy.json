@@ -1,0 +1,24 @@
+{
+  "name":"v124 1h MACD Signal Cross",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[{"name":"macd_1h_12_26_9","enable":true,"kline_interval":"1h","fast_period":12,"slow_period":26,"signal_period":9}],
+    "adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v124_long","type":"long",
+      "code":"let cross = macd_1h_12_26_9.DIF[1] > macd_1h_12_26_9.DEA[1] && macd_1h_12_26_9.DIF[2] <= macd_1h_12_26_9.DEA[2];\nlet confirm = NowPrice > kline_1h.High[1];\ncross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v124_short","type":"short",
+      "code":"let cross = macd_1h_12_26_9.DIF[1] < macd_1h_12_26_9.DEA[1] && macd_1h_12_26_9.DIF[2] >= macd_1h_12_26_9.DEA[2];\nlet confirm = NowPrice < kline_1h.Low[1];\ncross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v124_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v124_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

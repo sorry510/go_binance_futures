@@ -1,0 +1,8 @@
+{
+  "research_date": "2026-09-30",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "engine": "service/backtest current working tree",
+  "data": "existing 1h KLine Amount/TakerBuyAmount via historical replay",
+  "external_data": false,
+  "db_write": false
+}

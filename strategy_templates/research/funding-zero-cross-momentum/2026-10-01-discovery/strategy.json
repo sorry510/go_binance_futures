@@ -1,0 +1,23 @@
+{
+  "name":"v125 Funding Zero-Cross Momentum",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v125_long","type":"long",
+      "code":"let ready = len(FundingRate.Data) >= 2 && len(FundingRate.Time) >= 1;\nlet flip = ready && FundingRate.Data[0] > 0 && FundingRate.Data[1] <= 0;\nlet age = ready ? NowTime - FundingRate.Time[0] : 0;\nlet first_full_hour = age >= 3600000 && age < 7200000;\nlet aligned = kline_1h.Close[1] > kline_1h.Open[1];\nlet confirm = NowPrice > kline_1h.High[1];\nflip && first_full_hour && aligned && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v125_short","type":"short",
+      "code":"let ready = len(FundingRate.Data) >= 2 && len(FundingRate.Time) >= 1;\nlet flip = ready && FundingRate.Data[0] < 0 && FundingRate.Data[1] >= 0;\nlet age = ready ? NowTime - FundingRate.Time[0] : 0;\nlet first_full_hour = age >= 3600000 && age < 7200000;\nlet aligned = kline_1h.Close[1] < kline_1h.Open[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nflip && first_full_hour && aligned && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v125_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v125_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

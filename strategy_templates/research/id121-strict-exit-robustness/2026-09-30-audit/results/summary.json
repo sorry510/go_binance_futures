@@ -1,0 +1,32 @@
+{
+  "status":"completed",
+  "source":"strategy_templates/research/id121-v54-exact-exit/2026-09-30-audit/results/trades.csv",
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "baseline":{"trades":773,"pf":1.211221,"positive_symbols":"12/15","frequency_per_symbol_week":0.532684},
+  "symbol_robustness":{
+    "median_symbol_pf":1.162038,
+    "leave_out_xrp_pf":1.147744,
+    "leave_out_eth_pf":1.173490,
+    "leave_out_xrp_eth_pf":1.103143,
+    "xrp_share_of_positive_symbol_net":0.298,
+    "eth_share_of_positive_symbol_net":0.206
+  },
+  "time_robustness":{
+    "positive_months":"15/25",
+    "positive_quarters":"8/9",
+    "weak_quarter":{"period":"2026-Q2","pf":0.857713},
+    "leave_one_month_out_min_pf":1.154318,
+    "longest_losing_streak":8,
+    "max_additive_drawdown":0.497895
+  },
+  "rolling_pf":{
+    "50":{"min":0.489617,"median":1.151067},
+    "100":{"min":0.664279,"median":1.217045},
+    "150":{"min":0.703721,"median":1.186250}
+  },
+  "bootstrap_10000":{
+    "month_blocks":{"p05":1.020590,"median":1.211957,"prob_pf_gt_1":0.9655,"prob_pf_ge_1_15":0.7006},
+    "symbol_blocks":{"p05":1.077388,"median":1.209219,"prob_pf_gt_1":0.9989,"prob_pf_ge_1_15":0.7498}
+  },
+  "decision":"retain_formal_candidate_medium_thickness_edge"
+}

@@ -1,0 +1,22 @@
+{
+  "status":"frozen_failed_discovery",
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "trades":4846,
+  "long":2597,
+  "short":2249,
+  "normalized_pf":0.815244,
+  "normalized_net":-9.493896,
+  "positive_symbols":"0/6",
+  "frequency_per_symbol_week":4.222305,
+  "by_symbol":{
+    "SOLUSDT":{"trades":799,"pf":0.857050},
+    "DOGEUSDT":{"trades":789,"pf":0.890486},
+    "LTCUSDT":{"trades":707,"pf":0.781898},
+    "AVAXUSDT":{"trades":843,"pf":0.808133},
+    "UNIUSDT":{"trades":810,"pf":0.804210},
+    "ZECUSDT":{"trades":898,"pf":0.761308}
+  },
+  "by_year":{"2023":0.819051,"2024":0.790347,"2025":0.819823,"2026":0.857128},
+  "fresh_holdout_evaluated":false,
+  "gate_pass":false
+}

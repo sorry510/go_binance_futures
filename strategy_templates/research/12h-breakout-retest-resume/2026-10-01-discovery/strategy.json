@@ -1,0 +1,22 @@
+{
+  "name":"v116 12h Breakout Retest Resume",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v116_long","type":"long",
+      "code":"let level = max(kline_1h.High[3:15]);\nlet breakout = kline_1h.Close[2] > level;\nlet retest_hold = kline_1h.Low[1] <= level && kline_1h.Close[1] > level;\nlet resume = NowPrice > kline_1h.High[1];\nbreakout && retest_hold && resume",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v116_short","type":"short",
+      "code":"let level = min(kline_1h.Low[3:15]);\nlet breakout = kline_1h.Close[2] < level;\nlet retest_hold = kline_1h.High[1] >= level && kline_1h.Close[1] < level;\nlet resume = NowPrice < kline_1h.Low[1];\nbreakout && retest_hold && resume",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v116_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v116_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

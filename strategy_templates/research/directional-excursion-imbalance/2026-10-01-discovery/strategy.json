@@ -1,0 +1,22 @@
+{
+  "name":"v108 4h Directional Excursion Imbalance",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v108_long","type":"long",
+      "code":"let up1 = (kline_1h.High[1]-kline_1h.Open[1]) + (kline_1h.High[2]-kline_1h.Open[2]) + (kline_1h.High[3]-kline_1h.Open[3]) + (kline_1h.High[4]-kline_1h.Open[4]);\nlet dn1 = (kline_1h.Open[1]-kline_1h.Low[1]) + (kline_1h.Open[2]-kline_1h.Low[2]) + (kline_1h.Open[3]-kline_1h.Low[3]) + (kline_1h.Open[4]-kline_1h.Low[4]);\nlet up2 = (kline_1h.High[2]-kline_1h.Open[2]) + (kline_1h.High[3]-kline_1h.Open[3]) + (kline_1h.High[4]-kline_1h.Open[4]) + (kline_1h.High[5]-kline_1h.Open[5]);\nlet dn2 = (kline_1h.Open[2]-kline_1h.Low[2]) + (kline_1h.Open[3]-kline_1h.Low[3]) + (kline_1h.Open[4]-kline_1h.Low[4]) + (kline_1h.Open[5]-kline_1h.Low[5]);\nlet cross = dn1>0 && dn2>0 && up1/dn1 > 1 && up2/dn2 <= 1;\nlet confirm = NowPrice > kline_1h.High[1];\ncross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v108_short","type":"short",
+      "code":"let up1 = (kline_1h.High[1]-kline_1h.Open[1]) + (kline_1h.High[2]-kline_1h.Open[2]) + (kline_1h.High[3]-kline_1h.Open[3]) + (kline_1h.High[4]-kline_1h.Open[4]);\nlet dn1 = (kline_1h.Open[1]-kline_1h.Low[1]) + (kline_1h.Open[2]-kline_1h.Low[2]) + (kline_1h.Open[3]-kline_1h.Low[3]) + (kline_1h.Open[4]-kline_1h.Low[4]);\nlet up2 = (kline_1h.High[2]-kline_1h.Open[2]) + (kline_1h.High[3]-kline_1h.Open[3]) + (kline_1h.High[4]-kline_1h.Open[4]) + (kline_1h.High[5]-kline_1h.Open[5]);\nlet dn2 = (kline_1h.Open[2]-kline_1h.Low[2]) + (kline_1h.Open[3]-kline_1h.Low[3]) + (kline_1h.Open[4]-kline_1h.Low[4]) + (kline_1h.Open[5]-kline_1h.Low[5]);\nlet cross = dn1>0 && dn2>0 && up1/dn1 < 1 && up2/dn2 >= 1;\nlet confirm = NowPrice < kline_1h.Low[1];\ncross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v108_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v108_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

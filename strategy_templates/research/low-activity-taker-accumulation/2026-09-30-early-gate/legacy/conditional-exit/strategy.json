@@ -1,0 +1,13 @@
+{
+  "name":"v83 Low-Activity Taker Accumulation Breakout",
+  "technology":{
+    "ma":[],"ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v83_long","type":"long","code":"let avg_qps = mean(kline_1h.Qps[3:11]);\nlet flow = kline_1h.TakerBuyRatio[2] > 0.50 && kline_1h.TakerBuyRatio[1] > 0.50;\nlet quiet = avg_qps > 0 && kline_1h.Qps[2] < avg_qps && kline_1h.Qps[1] < avg_qps;\nlet high = max(kline_1h.High[1:3]);\nlet from_inside = kline_1h.Open[0] <= high;\nlet breakout = NowPrice > high;\nflow && quiet && from_inside && breakout","fullScreen":false,"enable":true},
+    {"name":"v83_short","type":"short","code":"let avg_qps = mean(kline_1h.Qps[3:11]);\nlet flow = kline_1h.TakerBuyRatio[2] < 0.50 && kline_1h.TakerBuyRatio[1] < 0.50;\nlet quiet = avg_qps > 0 && kline_1h.Qps[2] < avg_qps && kline_1h.Qps[1] < avg_qps;\nlet low = min(kline_1h.Low[1:3]);\nlet from_inside = kline_1h.Open[0] >= low;\nlet breakout = NowPrice < low;\nflow && quiet && from_inside && breakout","fullScreen":false,"enable":true},
+    {"name":"v83_close_long","type":"close_long","code":"let opposite = kline_1h.TakerBuyRatio[2] < 0.50 && kline_1h.TakerBuyRatio[1] < 0.50;\nopposite","fullScreen":false,"enable":true},
+    {"name":"v83_close_short","type":"close_short","code":"let opposite = kline_1h.TakerBuyRatio[2] > 0.50 && kline_1h.TakerBuyRatio[1] > 0.50;\nopposite","fullScreen":false,"enable":true}
+  ]
+}

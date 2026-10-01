@@ -1,0 +1,9 @@
+{
+  "research_date": "2026-09-30",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "engine": "service/backtest current working tree",
+  "data": "historically reconstructed NowSymbolPercentChange plus 1h Kline",
+  "external_data": false,
+  "db_write": false,
+  "causal_note": "service/backtest/environment.go tickerStats uses bars visible at asOf over the prior 24h"
+}

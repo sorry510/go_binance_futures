@@ -1,0 +1,22 @@
+{
+  "name":"v108 Three-Hour Same-Sign Streak Continuation",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v108_long","type":"long",
+      "code":"let streak = kline_1h.Close[3] > kline_1h.Open[3] && kline_1h.Close[2] > kline_1h.Open[2] && kline_1h.Close[1] > kline_1h.Open[1];\nlet confirm = NowPrice > kline_1h.High[1];\nstreak && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v108_short","type":"short",
+      "code":"let streak = kline_1h.Close[3] < kline_1h.Open[3] && kline_1h.Close[2] < kline_1h.Open[2] && kline_1h.Close[1] < kline_1h.Open[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nstreak && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v108_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v108_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

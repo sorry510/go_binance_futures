@@ -1,0 +1,1 @@
+NON-CANONICAL. This run used CLOSE rules = false due an implementation misunderstanding. In this Engine TP/SL is only a gate that then evaluates CLOSE rules, so positions did not close at TP8/SL6. Preserved only to explain the correction.

@@ -1,0 +1,26 @@
+{
+  "name":"v130 4h Double-Inside Compression Breakout",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v130_long","type":"long",
+      "code":"let nested = kline_4h.High[2] < kline_4h.High[3] && kline_4h.Low[2] > kline_4h.Low[3] && kline_4h.High[1] < kline_4h.High[2] && kline_4h.Low[1] > kline_4h.Low[2];\nlet mother_high = kline_4h.High[3];\nlet first_break = kline_1h.High[2] <= mother_high && kline_1h.Close[1] > mother_high;\nlet confirm = NowPrice > kline_1h.High[1];\nnested && first_break && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v130_short","type":"short",
+      "code":"let nested = kline_4h.High[2] < kline_4h.High[3] && kline_4h.Low[2] > kline_4h.Low[3] && kline_4h.High[1] < kline_4h.High[2] && kline_4h.Low[1] > kline_4h.Low[2];\nlet mother_low = kline_4h.Low[3];\nlet first_break = kline_1h.Low[2] >= mother_low && kline_1h.Close[1] < mother_low;\nlet confirm = NowPrice < kline_1h.Low[1];\nnested && first_break && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v130_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v130_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

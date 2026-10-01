@@ -1,0 +1,8 @@
+71da5397d2e5b2d2269bc86fc2bd80c2a636b7fcfcd9ae3d250a73a7d3c3588c  ./README.md
+90ed5ed05ef562e6dd38fb4ea0729b7259f871307be3712a9ae1de287e53a01d  ./config.json
+821e178fba81588e2b7eef4325a250e4a7ff4f29c8a0951ba800cc7bf7d5d954  ./protocol.md
+142a8b58fa586e0d52c4b4d8bf56cd83f9d3b68e21a0da52ecc520f98b7b3cae  ./provenance.json
+61588a7cf66ecfd574aff449ebc364668515492f20366e7da9c8959ee811e117  ./replay.go
+c1d7a61945da6f29d1a101d9b08f76f5b69abac22aabb7a20a86d0949a9e141e  ./results/run.log
+099dceaf5cad9aeaaf01cedaedd6ac2b8c7badbd049e80f5f5d040834da21c46  ./results/summary.json
+08a8fbd8fc0697c388ce4aab18d7e69d2f6eae08ca5d622f37d5674bed68ffda  ./strategy/v29-strict-exit.json

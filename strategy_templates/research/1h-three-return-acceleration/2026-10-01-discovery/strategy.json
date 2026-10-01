@@ -1,0 +1,23 @@
+{
+  "name":"v129 1h Three-Return Acceleration",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v129_long","type":"long",
+      "code":"let r1 = kline_1h.Close[1] / kline_1h.Close[2] - 1;\nlet r2 = kline_1h.Close[2] / kline_1h.Close[3] - 1;\nlet r3 = kline_1h.Close[3] / kline_1h.Close[4] - 1;\nlet accel = r1 > r2 && r2 > r3 && r3 > 0;\nlet confirm = NowPrice > kline_1h.High[1];\naccel && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v129_short","type":"short",
+      "code":"let r1 = kline_1h.Close[1] / kline_1h.Close[2] - 1;\nlet r2 = kline_1h.Close[2] / kline_1h.Close[3] - 1;\nlet r3 = kline_1h.Close[3] / kline_1h.Close[4] - 1;\nlet accel = r1 < r2 && r2 < r3 && r3 < 0;\nlet confirm = NowPrice < kline_1h.Low[1];\naccel && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v129_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v129_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "status":"frozen_failed_discovery",
+  "note":"positive expectancy but fails frequency and year-stability gates",
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "trades":151,
+  "long":38,
+  "short":113,
+  "normalized_pf":1.297779,
+  "normalized_net":0.372610,
+  "positive_symbols":"4/6",
+  "frequency_per_symbol_week":0.240994,
+  "by_symbol":{
+    "SOLUSDT":{"trades":22,"pf":0.984528},
+    "DOGEUSDT":{"trades":16,"pf":1.961549},
+    "LTCUSDT":{"trades":22,"pf":2.055056},
+    "AVAXUSDT":{"trades":30,"pf":0.727642},
+    "UNIUSDT":{"trades":26,"pf":1.127482},
+    "ZECUSDT":{"trades":35,"pf":1.764600}
+  },
+  "by_year":{"2023":0.978071,"2024":1.532837},
+  "by_side":{"long":{"trades":38,"pf":1.482913,"net":0.144498},"short":{"trades":113,"pf":1.239595,"net":0.228112}},
+  "oos1_evaluated":false,
+  "oos2_evaluated":false,
+  "gate_pass":false
+}

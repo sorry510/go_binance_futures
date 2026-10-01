@@ -1,0 +1,26 @@
+{
+  "name":"v126 20d Close-Channel Breakout 4h Acceptance",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v126_long","type":"long",
+      "code":"let level = max(kline_1d.Close[1:21]);\nlet accept = kline_4h.Open[1] <= level && kline_4h.Close[1] > level;\nlet confirm = NowPrice > kline_4h.High[1];\naccept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v126_short","type":"short",
+      "code":"let level = min(kline_1d.Close[1:21]);\nlet accept = kline_4h.Open[1] >= level && kline_4h.Close[1] < level;\nlet confirm = NowPrice < kline_4h.Low[1];\naccept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v126_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v126_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name":"v90 Rolling-24h Return Zero-Cross",
+  "technology":{
+    "ma":[],"ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v90_long","type":"long","code":"let anchor = kline_1h.Close[25];\nlet prev24 = anchor > 0 ? (kline_1h.Close[1]-anchor)/anchor*100 : 0;\nlet transition = NowSymbolPercentChange > 0 && prev24 <= 0;\nlet confirm = NowPrice > kline_1h.High[1];\ntransition && confirm","fullScreen":false,"enable":true},
+    {"name":"v90_short","type":"short","code":"let anchor = kline_1h.Close[25];\nlet prev24 = anchor > 0 ? (kline_1h.Close[1]-anchor)/anchor*100 : 0;\nlet transition = NowSymbolPercentChange < 0 && prev24 >= 0;\nlet confirm = NowPrice < kline_1h.Low[1];\ntransition && confirm","fullScreen":false,"enable":true},
+    {"name":"v90_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v90_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

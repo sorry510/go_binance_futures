@@ -1,0 +1,26 @@
+{
+  "name":"v122 Daily 20d Turtle Breakout + 4h Acceptance",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v122_long","type":"long",
+      "code":"let boundary = max(kline_1d.High[1:21]);\nlet fresh = kline_4h.Close[2] <= boundary && kline_4h.Close[1] > boundary;\nlet confirm = NowPrice > kline_4h.High[1];\nfresh && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v122_short","type":"short",
+      "code":"let boundary = min(kline_1d.Low[1:21]);\nlet fresh = kline_4h.Close[2] >= boundary && kline_4h.Close[1] < boundary;\nlet confirm = NowPrice < kline_4h.Low[1];\nfresh && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v122_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v122_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

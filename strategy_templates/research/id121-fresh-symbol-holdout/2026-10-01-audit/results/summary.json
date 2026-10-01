@@ -1,0 +1,25 @@
+{
+  "status":"fresh_symbol_holdout_failed",
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "trades":238,
+  "long":117,
+  "short":121,
+  "normalized_pf":0.847944,
+  "normalized_net":-0.376301,
+  "positive_symbols":"0/5",
+  "frequency_per_symbol_week":0.629154,
+  "by_symbol":{
+    "ALGOUSDT":{"trades":42,"long":21,"short":21,"pf":0.887324,"net":-0.046390},
+    "INJUSDT":{"trades":69,"long":37,"short":32,"pf":0.765585,"net":-0.175851},
+    "LDOUSDT":{"trades":49,"long":26,"short":23,"pf":0.992330,"net":-0.003739},
+    "PENDLEUSDT":{"trades":54,"long":26,"short":28,"pf":0.895886,"net":-0.056338},
+    "PYTHUSDT":{"trades":24,"long":7,"short":17,"pf":0.669323,"net":-0.093982}
+  },
+  "by_year":{
+    "2025":{"trades":123,"pf":0.745679,"net":-0.340155},
+    "2026":{"trades":115,"pf":0.968217,"net":-0.036146}
+  },
+  "exits":{"stop_loss":136,"take_profit":102},
+  "interpretation":"fails cross-symbol generalization on untouched cohort; do not retune",
+  "db_write":false
+}

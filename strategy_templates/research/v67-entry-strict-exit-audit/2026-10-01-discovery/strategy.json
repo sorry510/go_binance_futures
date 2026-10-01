@@ -1,0 +1,30 @@
+{
+  "name":"v108 v67 Entry Strict TP8/SL6 Audit",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},
+      {"name":"ema_4h_20","enable":true,"kline_interval":"4h","period":20},
+      {"name":"ema_4h_50","enable":true,"kline_interval":"4h","period":50}
+    ],
+    "macd":[],
+    "adx":[{"name":"adx_4h_14","enable":true,"kline_interval":"4h","period":14}],
+    "mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v108_long",
+      "type":"long",
+      "code":"let trend = ema_4h_20.Data[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] > ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1];\nlet avg_qps = mean(kline_1h.Qps[2:10]);\nlet flow_cross = kline_1h.TakerBuyRatio[1] > 0.50 && kline_1h.TakerBuyRatio[2] <= 0.50;\nlet active = avg_qps > 0 && kline_1h.Qps[1] >= avg_qps;\nlet from_inside = kline_1h.Open[0] <= kline_1h.High[1];\nlet confirm = NowPrice > kline_1h.High[1];\ntrend && flow_cross && active && from_inside && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v108_short",
+      "type":"short",
+      "code":"let trend = ema_4h_20.Data[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] < ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1];\nlet avg_qps = mean(kline_1h.Qps[2:10]);\nlet flow_cross = kline_1h.TakerBuyRatio[1] < 0.50 && kline_1h.TakerBuyRatio[2] >= 0.50;\nlet active = avg_qps > 0 && kline_1h.Qps[1] >= avg_qps;\nlet from_inside = kline_1h.Open[0] >= kline_1h.Low[1];\nlet confirm = NowPrice < kline_1h.Low[1];\ntrend && flow_cross && active && from_inside && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v108_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v108_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

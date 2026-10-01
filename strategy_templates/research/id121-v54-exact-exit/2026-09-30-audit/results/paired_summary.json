@@ -1,0 +1,7 @@
+{
+  "match_key":["symbol","entry_time","side"],
+  "common":{"trades":770,"pf":1.214441,"net":1.434888,"by_year":{"2024":1.266311,"2025":1.179194,"2026":1.245726}},
+  "id121_only":{"trades":3,"pf":0.568207,"net":-0.014468,"by_year":{"2024":0.0,"2025":1.159636}},
+  "v54_only":{"trades":60,"pf":0.653374,"net":-0.234184,"by_year":{"2024":0.649524,"2025":0.542524,"2026":0.824697}},
+  "interpretation":"v54 increases frequency by adding a clearly negative-expectancy marginal cohort and lowers aggregate PF versus ID121; under the no-negative-expectancy-for-frequency rule v54 is frozen."
+}

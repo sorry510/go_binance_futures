@@ -1,0 +1,24 @@
+{
+  "status":"frozen_failed_early_gate",
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "trades":4777,
+  "long":2316,
+  "short":2461,
+  "normalized_pf":0.828899,
+  "normalized_net":-8.413437,
+  "positive_symbols":"0/4",
+  "frequency_per_symbol_week":6.243279,
+  "by_symbol":{
+    "BTCUSDT":{"trades":962,"pf":0.808709},
+    "ETHUSDT":{"trades":1277,"pf":0.863137},
+    "BNBUSDT":{"trades":1151,"pf":0.781844},
+    "XRPUSDT":{"trades":1387,"pf":0.851149}
+  },
+  "by_year":{
+    "2023":0.762805,
+    "2024":0.884246,
+    "2025":0.847831,
+    "2026":0.790334
+  },
+  "gate_pass":false
+}

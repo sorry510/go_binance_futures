@@ -1,0 +1,41 @@
+{
+  "name": "v65 1h Doji Breakout 4h Trend",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},
+      {"name":"ema_4h_20","enable":true,"kline_interval":"4h","period":20},
+      {"name":"ema_4h_50","enable":true,"kline_interval":"4h","period":50}
+    ],
+    "macd": [],
+    "adx": [{"name":"adx_4h_14","enable":true,"kline_interval":"4h","period":14}],
+    "mfi": [], "obv": [], "cci": [], "roc": [], "kdj": [], "rsi": [],
+    "kc": [], "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name":"v65_doji_breakout_long",
+      "type":"long",
+      "code":"let trend = ema_4h_20.Data[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] > ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1];\nlet range = kline_1h.High[1] - kline_1h.Low[1];\nlet body = abs(kline_1h.Close[1] - kline_1h.Open[1]);\nlet indecision = range > 0 && body <= range * 0.20;\nlet from_inside = kline_1h.Open[0] >= kline_1h.Low[1] && kline_1h.Open[0] <= kline_1h.High[1];\nlet breakout = NowPrice > kline_1h.High[1];\ntrend && indecision && from_inside && breakout",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v65_doji_breakout_short",
+      "type":"short",
+      "code":"let trend = ema_4h_20.Data[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] < ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1];\nlet range = kline_1h.High[1] - kline_1h.Low[1];\nlet body = abs(kline_1h.Close[1] - kline_1h.Open[1]);\nlet indecision = range > 0 && body <= range * 0.20;\nlet from_inside = kline_1h.Open[0] >= kline_1h.Low[1] && kline_1h.Open[0] <= kline_1h.High[1];\nlet breakdown = NowPrice < kline_1h.Low[1];\ntrend && indecision && from_inside && breakdown",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v65_doji_close_long",
+      "type":"close_long",
+      "code":"ROI >= 8 || ROI <= -6",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v65_doji_close_short",
+      "type":"close_short",
+      "code":"ROI >= 8 || ROI <= -6",
+      "fullScreen":false,"enable":true
+    }
+  ]
+}

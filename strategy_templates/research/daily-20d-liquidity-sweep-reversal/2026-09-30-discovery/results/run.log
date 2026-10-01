@@ -1,0 +1,24 @@
+[Reading 20 lines from start (total: 20 lines, 0 remaining)]
+
+2026/09/30 19:56:04.620 [1;34m[I][0m  use lang: zh
+BUILD 1/6 SOLUSDT
+SYM SOLUSDT trades=58 long=24 short=34 normPF=0.635343 normNet=-0.242839
+BUILD 2/6 DOGEUSDT
+SYM DOGEUSDT trades=42 long=21 short=21 normPF=0.773025 normNet=-0.098183
+BUILD 3/6 LTCUSDT
+SYM LTCUSDT trades=56 long=24 short=32 normPF=0.907757 normNet=-0.050281
+BUILD 4/6 AVAXUSDT
+SYM AVAXUSDT trades=58 long=30 short=28 normPF=0.840067 normNet=-0.094759
+BUILD 5/6 UNIUSDT
+SYM UNIUSDT trades=60 long=33 short=27 normPF=0.915605 normNet=-0.050039
+BUILD 6/6 ZECUSDT
+SYM ZECUSDT trades=71 long=23 short=48 normPF=0.743509 normNet=-0.199018
+ALL trades=345 long=155 short=190 normPF=0.796080 normNet=-0.735120 positive=0/6 freq=0.300597
+YEAR 2023 trades=88 normPF=0.814699 normNet=-0.169509
+YEAR 2024 trades=99 normPF=0.600767 normNet=-0.462919
+YEAR 2025 trades=112 normPF=0.945762 normNet=-0.058889
+YEAR 2026 trades=46 normPF=0.901544 normNet=-0.043802
+EXIT stop_loss 203
+EXIT take_profit 142
+
+[executed on device: sorry510 (715fc246-cfb8-4384-b67f-225e7f07bdc3)]

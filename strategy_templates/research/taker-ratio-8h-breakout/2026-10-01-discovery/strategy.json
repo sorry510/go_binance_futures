@@ -1,0 +1,23 @@
+{
+  "name":"v127 1h TakerBuyRatio 8h Breakout",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v127_long","type":"long",
+      "code":"let flow_break = kline_1h.TakerBuyRatio[1] > 0.5 && kline_1h.TakerBuyRatio[1] > max(kline_1h.TakerBuyRatio[2:10]);\nlet confirm = NowPrice > kline_1h.High[1];\nflow_break && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v127_short","type":"short",
+      "code":"let flow_break = kline_1h.TakerBuyRatio[1] < 0.5 && kline_1h.TakerBuyRatio[1] < min(kline_1h.TakerBuyRatio[2:10]);\nlet confirm = NowPrice < kline_1h.Low[1];\nflow_break && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v127_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v127_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

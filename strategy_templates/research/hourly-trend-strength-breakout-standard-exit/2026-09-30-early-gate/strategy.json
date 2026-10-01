@@ -1,0 +1,79 @@
+{
+  "name": "v83 Hourly Trend Strength Breakout Standard Exit",
+  "technology": {
+    "ma": [],
+    "ema": [],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [
+      {
+        "name": "donchian_1h_20",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 20
+      }
+    ],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      }
+    ],
+    "supertrend": [
+      {
+        "name": "supertrend_4h_10_3",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 10,
+        "multiplier": 3
+      }
+    ]
+  },
+  "strategy": [
+    {
+      "name": "v83_hourly_trend_strength_long_open_v2",
+      "type": "long",
+      "code": "let atr = atr_1h_14.Data[1];\nlet htf_trend = supertrend_4h_10_3.Trend[1] == 1 && supertrend_4h_10_3.Trend[2] == 1 && kline_4h.Close[1] > supertrend_4h_10_3.Data[1];\nlet strength = adx_1h_14.ADX[1] >= 22 && adx_1h_14.ADX[1] >= adx_1h_14.ADX[2] && adx_1h_14.PlusDI[1] > adx_1h_14.MinusDI[1] * 1.15;\nlet breakout = kline_1h.Close[1] > donchian_1h_20.High[2] && kline_1h.Close[1] > kline_1h.Open[1];\nlet body = kline_1h.Close[1] - kline_1h.Open[1];\nlet candle_ok = atr > 0 && body >= atr * 0.20 && body <= atr * 1.40;\nlet live_hold = atr > 0 && kline_1h.Close[0] >= donchian_1h_20.High[2] - atr * 0.15 && kline_1h.Close[0] <= kline_1h.Close[1] + atr * 0.55;\n\nhtf_trend && strength && breakout && candle_ok && live_hold",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v83_hourly_trend_strength_short_open_v2",
+      "type": "short",
+      "code": "let atr = atr_1h_14.Data[1];\nlet htf_trend = supertrend_4h_10_3.Trend[1] == -1 && supertrend_4h_10_3.Trend[2] == -1 && kline_4h.Close[1] < supertrend_4h_10_3.Data[1];\nlet strength = adx_1h_14.ADX[1] >= 22 && adx_1h_14.ADX[1] >= adx_1h_14.ADX[2] && adx_1h_14.MinusDI[1] > adx_1h_14.PlusDI[1] * 1.15;\nlet breakdown = kline_1h.Close[1] < donchian_1h_20.Low[2] && kline_1h.Close[1] < kline_1h.Open[1];\nlet body = kline_1h.Open[1] - kline_1h.Close[1];\nlet candle_ok = atr > 0 && body >= atr * 0.20 && body <= atr * 1.40;\nlet live_hold = atr > 0 && kline_1h.Close[0] <= donchian_1h_20.Low[2] + atr * 0.15 && kline_1h.Close[0] >= kline_1h.Close[1] - atr * 0.55;\n\nhtf_trend && strength && breakdown && candle_ok && live_hold",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v83_close_long",
+      "type": "close_long",
+      "code": "true",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v83_close_short",
+      "type": "close_short",
+      "code": "true",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

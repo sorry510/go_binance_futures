@@ -1,0 +1,14 @@
+{
+  "strategy":"v77 Previous-Day Range Acceptance Continuation",
+  "symbols":["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT"],
+  "start":"2023-01-01T00:00:00Z",
+  "end":"2026-09-01T00:00:00Z",
+  "leverage":4,
+  "take_profit_pct":8,
+  "stop_loss_pct":6,
+  "fee_rate_per_side":0.0005,
+  "slippage_bps_per_side":5,
+  "single_position":true,
+  "lookback_days_max":100,
+  "early_gate":{"pf_min":1.15,"positive_symbols_min":3,"frequency_min_per_symbol_week":0.3}
+}

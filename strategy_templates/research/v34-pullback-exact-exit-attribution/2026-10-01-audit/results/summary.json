@@ -1,0 +1,8 @@
+{
+  "status":"completed_negative_marginal_pullback",
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "full":{"trades":718,"normalized_pf":0.922210,"normalized_net":-0.554736069,"positive_symbols":"6/15","frequency_per_symbol_week":0.494782,"by_year":{"2024":0.513067,"2025":0.797035,"2026":1.171669}},
+  "base_no_pullback":{"trades":372,"normalized_pf":1.006467,"normalized_net":0.023407105,"positive_symbols":"7/15","frequency_per_symbol_week":0.256350,"by_year":{"2024":0.203288,"2025":0.864309,"2026":1.196222}},
+  "paired":{"common":{"trades":362,"pf":1.003013},"full_only":{"trades":356,"pf":0.842817,"net":-0.565383147,"by_year":{"2024":0.717990,"2025":0.746190,"2026":1.207816}},"base_only":{"trades":10,"pf":1.149342,"net":0.012760028}},
+  "decision":"freeze_pullback_resume_negative_marginal_expectancy"
+}

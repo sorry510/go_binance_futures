@@ -1,0 +1,17 @@
+{
+  "family":"id121-exact-exit-early-oot",
+  "run_id":"2021h2-2022-audit",
+  "source_strategy":"strategy_templates/research/id121-v54-exact-exit/2026-09-30-audit/strategy/id121-exact-exit.json",
+  "symbols":["BTCUSDT","ETHUSDT"],
+  "start":"2021-07-20T00:00:00Z",
+  "end_exclusive":"2023-01-01T00:00:00Z",
+  "execution_interval":"1m",
+  "leverage":4,
+  "take_profit_pct":8,
+  "stop_loss_pct":6,
+  "fee_rate_per_side":0.0005,
+  "slippage_bps_per_side":5,
+  "single_position":true,
+  "close_rule":"ROI >= 8 || ROI <= -6",
+  "db_write":false
+}

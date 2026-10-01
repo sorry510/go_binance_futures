@@ -1,0 +1,16 @@
+2026/09/30 19:33:45.337 [1;34m[I][0m  use lang: zh
+BUILD 1/4 BTCUSDT
+SYM BTCUSDT trades=120 long=52 short=68 normPF=0.661422 normNet=-0.455347
+BUILD 2/4 ETHUSDT
+SYM ETHUSDT trades=103 long=48 short=55 normPF=0.662000 normNet=-0.394888
+BUILD 3/4 BNBUSDT
+SYM BNBUSDT trades=150 long=60 short=90 normPF=0.757040 normNet=-0.387751
+BUILD 4/4 XRPUSDT
+SYM XRPUSDT trades=143 long=63 short=80 normPF=0.640297 normNet=-0.578552
+ALL trades=516 long=223 short=293 normPF=0.682287 normNet=-1.816538 positive=0/4 freq=0.674384
+YEAR 2023 trades=83 normPF=0.920361 normNet=-0.066451
+YEAR 2024 trades=141 normPF=0.573741 normNet=-0.708693
+YEAR 2025 trades=183 normPF=0.634967 normNet=-0.757792
+YEAR 2026 trades=109 normPF=0.752225 normNet=-0.283602
+EXIT stop_loss 320
+EXIT take_profit 196

@@ -1,0 +1,1 @@
+{"status":"dsl_blocked_before_returns","reason":"KLinePrice exposes QuoteAssetVolume as Amount and quote-volume-per-second as Qps, but does not expose base volume; true VWAP=sum(quote)/sum(base) cannot be expressed","returns_inspected":false,"db_write":false}

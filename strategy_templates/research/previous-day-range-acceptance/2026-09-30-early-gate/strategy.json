@@ -1,0 +1,76 @@
+{
+  "name": "v77 Previous-Day Range Acceptance Continuation",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1d_2",
+        "enable": true,
+        "kline_interval": "1d",
+        "period": 2
+      },
+      {
+        "name": "ema_4h_20",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 20
+      },
+      {
+        "name": "ema_4h_50",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 50
+      }
+    ],
+    "macd": [],
+    "adx": [
+      {
+        "name": "adx_4h_14",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 14
+      }
+    ],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v77_prevday_accept_long",
+      "type": "long",
+      "code": "let trend = ema_4h_20.Data[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] > ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1];\nlet accepted = kline_1d.Close[1] > kline_1d.High[2] && kline_1d.Close[1] > kline_1d.Open[1];\nlet from_below = kline_1d.Open[0] <= kline_1d.High[1];\nlet continuation = NowPrice > kline_1d.High[1];\ntrend && accepted && from_below && continuation",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v77_prevday_accept_short",
+      "type": "short",
+      "code": "let trend = ema_4h_20.Data[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] < ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1];\nlet accepted = kline_1d.Close[1] < kline_1d.Low[2] && kline_1d.Close[1] < kline_1d.Open[1];\nlet from_above = kline_1d.Open[0] >= kline_1d.Low[1];\nlet continuation = NowPrice < kline_1d.Low[1];\ntrend && accepted && from_above && continuation",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v77_prevday_close_long",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v77_prevday_close_short",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

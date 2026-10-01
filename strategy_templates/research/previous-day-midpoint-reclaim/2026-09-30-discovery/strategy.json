@@ -1,0 +1,22 @@
+{
+  "name":"v107 Previous-Day Midpoint Reclaim",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},{"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v107_long","type":"long",
+      "code":"let mid = (kline_1d.High[1] + kline_1d.Low[1]) / 2;\nlet reclaim = kline_1h.Open[1] <= mid && kline_1h.Close[1] > mid;\nlet confirm = NowPrice > kline_1h.High[1];\nreclaim && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v107_short","type":"short",
+      "code":"let mid = (kline_1d.High[1] + kline_1d.Low[1]) / 2;\nlet reclaim = kline_1h.Open[1] >= mid && kline_1h.Close[1] < mid;\nlet confirm = NowPrice < kline_1h.Low[1];\nreclaim && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v107_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v107_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "family":"daily-volume-shock-one-day-lag",
+  "run_id":"2026-10-01-discovery",
+  "discovery_symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "start":"2023-01-01T00:00:00Z",
+  "end":"2026-09-01T00:00:00Z",
+  "execution_interval":"1m",
+  "signal_intervals":["4h","1d"],
+  "volume_baseline_days":20,
+  "lag_full_days":1,
+  "leverage":4,
+  "take_profit_pct":8,
+  "stop_loss_pct":6,
+  "fee_rate_per_side":0.0005,
+  "slippage_bps_per_side":5,
+  "single_position":true,
+  "close_rule":"ROI >= 8 || ROI <= -6",
+  "gate":{"min_pf":1.15,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30},
+  "db_write":false
+}

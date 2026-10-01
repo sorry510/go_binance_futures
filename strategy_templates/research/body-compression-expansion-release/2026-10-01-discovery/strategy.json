@@ -1,0 +1,23 @@
+{
+  "name":"v128 1h Body Compression Expansion Release",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],
+    "kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v128_long","type":"long",
+      "code":"let avg_body = (abs(kline_1h.Close[4]-kline_1h.Open[4]) + abs(kline_1h.Close[5]-kline_1h.Open[5]) + abs(kline_1h.Close[6]-kline_1h.Open[6]) + abs(kline_1h.Close[7]-kline_1h.Open[7]) + abs(kline_1h.Close[8]-kline_1h.Open[8]) + abs(kline_1h.Close[9]-kline_1h.Open[9]) + abs(kline_1h.Close[10]-kline_1h.Open[10]) + abs(kline_1h.Close[11]-kline_1h.Open[11])) / 8;\nlet compressed = avg_body > 0 && abs(kline_1h.Close[3]-kline_1h.Open[3]) < avg_body && abs(kline_1h.Close[2]-kline_1h.Open[2]) < avg_body;\nlet release = kline_1h.Close[1] > kline_1h.Open[1] && abs(kline_1h.Close[1]-kline_1h.Open[1]) > avg_body;\nlet confirm = NowPrice > kline_1h.High[1];\ncompressed && release && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v128_short","type":"short",
+      "code":"let avg_body = (abs(kline_1h.Close[4]-kline_1h.Open[4]) + abs(kline_1h.Close[5]-kline_1h.Open[5]) + abs(kline_1h.Close[6]-kline_1h.Open[6]) + abs(kline_1h.Close[7]-kline_1h.Open[7]) + abs(kline_1h.Close[8]-kline_1h.Open[8]) + abs(kline_1h.Close[9]-kline_1h.Open[9]) + abs(kline_1h.Close[10]-kline_1h.Open[10]) + abs(kline_1h.Close[11]-kline_1h.Open[11])) / 8;\nlet compressed = avg_body > 0 && abs(kline_1h.Close[3]-kline_1h.Open[3]) < avg_body && abs(kline_1h.Close[2]-kline_1h.Open[2]) < avg_body;\nlet release = kline_1h.Close[1] < kline_1h.Open[1] && abs(kline_1h.Close[1]-kline_1h.Open[1]) > avg_body;\nlet confirm = NowPrice < kline_1h.Low[1];\ncompressed && release && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v128_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v128_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "name": "v82 4h Triple-EMA Trend Start",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_4h_3",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 3
+      },
+      {
+        "name": "ema_4h_7",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 7
+      },
+      {
+        "name": "ema_4h_15",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 15
+      }
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [
+      {
+        "name": "rsi_4h_6",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 6
+      },
+      {
+        "name": "rsi_4h_14",
+        "enable": true,
+        "kline_interval": "4h",
+        "period": 14
+      }
+    ],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v82_triple_ema_long",
+      "type": "long",
+      "code": "let cross_fast = (ema_4h_3.Data[1] > ema_4h_7.Data[1] && ema_4h_3.Data[2] <= ema_4h_7.Data[2]) || (ema_4h_3.Data[2] > ema_4h_7.Data[2] && ema_4h_3.Data[3] <= ema_4h_7.Data[3]) || (ema_4h_3.Data[3] > ema_4h_7.Data[3] && ema_4h_3.Data[4] <= ema_4h_7.Data[4]);\nlet cross_slow = (ema_4h_7.Data[1] > ema_4h_15.Data[1] && ema_4h_7.Data[2] <= ema_4h_15.Data[2]) || (ema_4h_7.Data[2] > ema_4h_15.Data[2] && ema_4h_7.Data[3] <= ema_4h_15.Data[3]) || (ema_4h_7.Data[3] > ema_4h_15.Data[3] && ema_4h_7.Data[4] <= ema_4h_15.Data[4]);\nlet slope = ema_4h_3.Data[1] > ema_4h_3.Data[2] && ema_4h_3.Data[2] > ema_4h_3.Data[3];\nlet rsi_ok = rsi_4h_6.Data[1] < 80 && rsi_4h_14.Data[1] < 75;\ncross_fast && cross_slow && slope && rsi_ok",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v82_triple_ema_short",
+      "type": "short",
+      "code": "let cross_fast = (ema_4h_3.Data[1] < ema_4h_7.Data[1] && ema_4h_3.Data[2] >= ema_4h_7.Data[2]) || (ema_4h_3.Data[2] < ema_4h_7.Data[2] && ema_4h_3.Data[3] >= ema_4h_7.Data[3]) || (ema_4h_3.Data[3] < ema_4h_7.Data[3] && ema_4h_3.Data[4] >= ema_4h_7.Data[4]);\nlet cross_slow = (ema_4h_7.Data[1] < ema_4h_15.Data[1] && ema_4h_7.Data[2] >= ema_4h_15.Data[2]) || (ema_4h_7.Data[2] < ema_4h_15.Data[2] && ema_4h_7.Data[3] >= ema_4h_15.Data[3]) || (ema_4h_7.Data[3] < ema_4h_15.Data[3] && ema_4h_7.Data[4] >= ema_4h_15.Data[4]);\nlet slope = ema_4h_3.Data[1] < ema_4h_3.Data[2] && ema_4h_3.Data[2] < ema_4h_3.Data[3];\nlet rsi_ok = rsi_4h_6.Data[1] > 20 && rsi_4h_14.Data[1] > 25;\ncross_fast && cross_slow && slope && rsi_ok",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v82_close_long",
+      "type": "close_long",
+      "code": "true",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v82_close_short",
+      "type": "close_short",
+      "code": "true",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

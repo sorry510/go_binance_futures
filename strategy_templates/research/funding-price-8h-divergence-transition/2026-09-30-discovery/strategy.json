@@ -1,0 +1,22 @@
+{
+  "name":"v108 Funding-Price 8h Divergence Transition",
+  "technology":{
+    "ma":[],
+    "ema":[{"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v108_long","type":"long",
+      "code":"let funding_ready = len(FundingRate.Data) >= 1;\nlet crowded_short = funding_ready && FundingRate.Data[0] < 0;\nlet r1 = kline_4h.Close[1] / kline_4h.Close[3] - 1;\nlet r2 = kline_4h.Close[2] / kline_4h.Close[4] - 1;\nlet transition = r1 > 0 && r2 <= 0;\nlet confirm = NowPrice > kline_4h.High[1];\ncrowded_short && transition && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v108_short","type":"short",
+      "code":"let funding_ready = len(FundingRate.Data) >= 1;\nlet crowded_long = funding_ready && FundingRate.Data[0] > 0;\nlet r1 = kline_4h.Close[1] / kline_4h.Close[3] - 1;\nlet r2 = kline_4h.Close[2] / kline_4h.Close[4] - 1;\nlet transition = r1 < 0 && r2 >= 0;\nlet confirm = NowPrice < kline_4h.Low[1];\ncrowded_long && transition && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v108_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v108_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

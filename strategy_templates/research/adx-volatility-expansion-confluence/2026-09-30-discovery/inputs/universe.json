@@ -1,0 +1,18 @@
+{
+  "discovery":[
+    {"symbol":"SOLUSDT","start":"2023-01-01"},
+    {"symbol":"DOGEUSDT","start":"2023-01-01"},
+    {"symbol":"LTCUSDT","start":"2023-01-01"},
+    {"symbol":"AVAXUSDT","start":"2023-01-01"},
+    {"symbol":"UNIUSDT","start":"2023-01-01"},
+    {"symbol":"ZECUSDT","start":"2023-01-01"}
+  ],
+  "fresh_holdout_reserved":[
+    {"symbol":"ALGOUSDT","start":"2024-12-01"},
+    {"symbol":"INJUSDT","start":"2024-12-01"},
+    {"symbol":"LDOUSDT","start":"2024-12-01"},
+    {"symbol":"PENDLEUSDT","start":"2025-07-01"},
+    {"symbol":"PYTHUSDT","start":"2025-11-01"}
+  ],
+  "excluded_from_fresh_holdout":{"LITUSDT":"known local historical gap risk; reserve rather than select by performance"}
+}

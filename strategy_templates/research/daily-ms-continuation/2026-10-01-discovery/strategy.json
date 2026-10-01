@@ -1,0 +1,38 @@
+{
+  "name": "v119 Daily 3-Bar MS Continuation",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd": [], "adx": [], "mfi": [], "obv": [], "cci": [], "roc": [], "kdj": [], "rsi": [],
+    "kc": [], "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name":"v119_long",
+      "type":"long",
+      "code":"let structure = kline_1d.High[1] > kline_1d.High[2] && kline_1d.High[2] > kline_1d.High[3] && kline_1d.Low[1] > kline_1d.Low[2] && kline_1d.Low[2] > kline_1d.Low[3];\nlet aligned = kline_4h.Close[1] > kline_4h.Open[1];\nlet confirm = NowPrice > kline_4h.High[1];\nstructure && aligned && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v119_short",
+      "type":"short",
+      "code":"let structure = kline_1d.High[1] < kline_1d.High[2] && kline_1d.High[2] < kline_1d.High[3] && kline_1d.Low[1] < kline_1d.Low[2] && kline_1d.Low[2] < kline_1d.Low[3];\nlet aligned = kline_4h.Close[1] < kline_4h.Open[1];\nlet confirm = NowPrice < kline_4h.Low[1];\nstructure && aligned && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v119_close_long",
+      "type":"close_long",
+      "code":"ROI >= 8 || ROI <= -6",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v119_close_short",
+      "type":"close_short",
+      "code":"ROI >= 8 || ROI <= -6",
+      "fullScreen":false,"enable":true
+    }
+  ]
+}

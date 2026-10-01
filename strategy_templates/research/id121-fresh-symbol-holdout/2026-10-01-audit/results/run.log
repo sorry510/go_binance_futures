@@ -1,0 +1,20 @@
+[Reading 16 lines from start (total: 16 lines, 0 remaining)]
+
+2026/10/01 10:40:08.584 [1;34m[I][0m  use lang: zh
+BUILD 1/5 ALGOUSDT start=2024-12-01
+SYM ALGOUSDT trades=42 long=21 short=21 normPF=0.887324 normNet=-0.046390
+BUILD 2/5 INJUSDT start=2024-12-01
+SYM INJUSDT trades=69 long=37 short=32 normPF=0.765585 normNet=-0.175851
+BUILD 3/5 LDOUSDT start=2024-12-01
+SYM LDOUSDT trades=49 long=26 short=23 normPF=0.992330 normNet=-0.003739
+BUILD 4/5 PENDLEUSDT start=2025-07-01
+SYM PENDLEUSDT trades=54 long=26 short=28 normPF=0.895886 normNet=-0.056338
+BUILD 5/5 PYTHUSDT start=2025-11-01
+SYM PYTHUSDT trades=24 long=7 short=17 normPF=0.669323 normNet=-0.093982
+ALL trades=238 long=117 short=121 normPF=0.847944 normNet=-0.376301 positive=0/5 freq=0.629154
+YEAR 2025 trades=123 normPF=0.745679 normNet=-0.340155
+YEAR 2026 trades=115 normPF=0.968217 normNet=-0.036146
+EXIT stop_loss 136
+EXIT take_profit 102
+
+[executed on device: sorry510 (715fc246-cfb8-4384-b67f-225e7f07bdc3)]

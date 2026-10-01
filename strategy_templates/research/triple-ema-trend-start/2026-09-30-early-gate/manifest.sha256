@@ -1,0 +1,9 @@
+65fc575e0f50ef60ead89ace05874acbcfebdef3b3b433bd50344a33f7bcab97  ./README.md
+6161b283093e2d22cbeea47afccfbcaafdb93a7e3c94fdb7a9438e9894fb558a  ./config.json
+b4d65a58f19cb4c2a546bda52f2c47c2d1ddc67c4ecdbd164e97d0d4cf1bed7c  ./inputs/universe.json
+d125bd1c87e1e9e3faf7312ada325fb3bf1809b0deabbbb8c1e923889411783c  ./protocol.md
+cb2d9075ccca2cffa5e1d2f1bb6dbccbad9788ed4020f025ca63ca2916318efa  ./provenance.json
+8abd7bf8d35a23ff882c78aa0ad63a4d6579e5e4da002ad313f92185adedae63  ./replay.go
+94c34e9a14b9eef216ef366a7c55a55afa7e7a99a77e10ab66f1b381be9bea45  ./results/engine.log
+f5fe8496dacd192578379ee2ca0d222ea627c94e944e201e3939857268f5b920  ./results/summary.json
+7026e287243af9800fbd4ae24a8ddb3d0328b6a8a808aa2740b21f267bb41098  ./strategy.json

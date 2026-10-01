@@ -1,0 +1,15 @@
+{
+  "name":"v89 1h Full-ATR Displacement Continuation",
+  "technology":{
+    "ma":[],"ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],
+    "atr":[{"name":"atr_1h_14","enable":true,"kline_interval":"1h","period":14}],
+    "supertrend":[]
+  },
+  "strategy":[
+    {"name":"v89_long","type":"long","code":"let atr_prev = atr_1h_14.Data[2];\nlet body = kline_1h.Close[1]-kline_1h.Open[1];\nlet displacement = atr_prev > 0 && body >= atr_prev;\nlet confirm = NowPrice > kline_1h.High[1];\ndisplacement && confirm","fullScreen":false,"enable":true},
+    {"name":"v89_short","type":"short","code":"let atr_prev = atr_1h_14.Data[2];\nlet body = kline_1h.Open[1]-kline_1h.Close[1];\nlet displacement = atr_prev > 0 && body >= atr_prev;\nlet confirm = NowPrice < kline_1h.Low[1];\ndisplacement && confirm","fullScreen":false,"enable":true},
+    {"name":"v89_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v89_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

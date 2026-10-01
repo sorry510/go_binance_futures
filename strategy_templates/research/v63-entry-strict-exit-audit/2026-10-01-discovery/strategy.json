@@ -1,0 +1,30 @@
+{
+  "name":"v113 v63 Entry Strict TP8/SL6 Audit",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},
+      {"name":"ema_4h_20","enable":true,"kline_interval":"4h","period":20},
+      {"name":"ema_4h_50","enable":true,"kline_interval":"4h","period":50}
+    ],
+    "macd":[],
+    "adx":[{"name":"adx_4h_14","enable":true,"kline_interval":"4h","period":14}],
+    "mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v113_long",
+      "type":"long",
+      "code":"let trend = ema_4h_20.Data[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] > ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1];\nlet engulf = kline_1h.Close[2] < kline_1h.Open[2] && kline_1h.Close[1] > kline_1h.Open[1] && kline_1h.Open[1] <= kline_1h.Close[2] && kline_1h.Close[1] >= kline_1h.Open[2];\nlet confirm = kline_1h.Open[0] <= kline_1h.High[1] && NowPrice > kline_1h.High[1];\ntrend && engulf && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v113_short",
+      "type":"short",
+      "code":"let trend = ema_4h_20.Data[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] < ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1];\nlet engulf = kline_1h.Close[2] > kline_1h.Open[2] && kline_1h.Close[1] < kline_1h.Open[1] && kline_1h.Open[1] >= kline_1h.Close[2] && kline_1h.Close[1] <= kline_1h.Open[2];\nlet confirm = kline_1h.Open[0] >= kline_1h.Low[1] && NowPrice < kline_1h.Low[1];\ntrend && engulf && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v113_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v113_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

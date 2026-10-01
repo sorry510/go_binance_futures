@@ -1,0 +1,26 @@
+{
+  "name":"v112 Daily First-4h Opening Range Breakout",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v112_long","type":"long",
+      "code":"let dopen = kline_1d.Open[0];\nlet a1 = kline_4h.Open[1] == dopen && kline_1h.Open[1] <= kline_4h.High[1] && kline_1h.Close[1] > kline_4h.High[1];\nlet a2 = kline_4h.Open[2] == dopen && kline_1h.Open[1] <= kline_4h.High[2] && kline_1h.Close[1] > kline_4h.High[2];\nlet a3 = kline_4h.Open[3] == dopen && kline_1h.Open[1] <= kline_4h.High[3] && kline_1h.Close[1] > kline_4h.High[3];\nlet a4 = kline_4h.Open[4] == dopen && kline_1h.Open[1] <= kline_4h.High[4] && kline_1h.Close[1] > kline_4h.High[4];\nlet a5 = kline_4h.Open[5] == dopen && kline_1h.Open[1] <= kline_4h.High[5] && kline_1h.Close[1] > kline_4h.High[5];\nlet accept = a1 || a2 || a3 || a4 || a5;\nlet confirm = NowPrice > kline_1h.High[1];\naccept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v112_short","type":"short",
+      "code":"let dopen = kline_1d.Open[0];\nlet a1 = kline_4h.Open[1] == dopen && kline_1h.Open[1] >= kline_4h.Low[1] && kline_1h.Close[1] < kline_4h.Low[1];\nlet a2 = kline_4h.Open[2] == dopen && kline_1h.Open[1] >= kline_4h.Low[2] && kline_1h.Close[1] < kline_4h.Low[2];\nlet a3 = kline_4h.Open[3] == dopen && kline_1h.Open[1] >= kline_4h.Low[3] && kline_1h.Close[1] < kline_4h.Low[3];\nlet a4 = kline_4h.Open[4] == dopen && kline_1h.Open[1] >= kline_4h.Low[4] && kline_1h.Close[1] < kline_4h.Low[4];\nlet a5 = kline_4h.Open[5] == dopen && kline_1h.Open[1] >= kline_4h.Low[5] && kline_1h.Close[1] < kline_4h.Low[5];\nlet accept = a1 || a2 || a3 || a4 || a5;\nlet confirm = NowPrice < kline_1h.Low[1];\naccept && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v112_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v112_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "family":"id121-second-fresh-symbol-holdout",
+  "run_id":"2026-10-01-feasibility",
+  "min_cohort_size":5,
+  "quote_volume_min_usdt":5000000,
+  "history_start_lte":"2023-01-01T00:00:00Z",
+  "history_end_gte":"2026-08-31T23:59:00Z",
+  "excluded_original":["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT","SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT","ADAUSDT","NEARUSDT","1000PEPEUSDT","SUIUSDT","ONDOUSDT"],
+  "excluded_first_holdout":["ALGOUSDT","INJUSDT","LDOUSDT","PENDLEUSDT","PYTHUSDT"],
+  "db_backfill_allowed":false,
+  "returns_inspected":false
+}

@@ -1,0 +1,25 @@
+{
+  "source": "canonical ID121 exact-exit trades",
+  "historical_trade_count": 773,
+  "window_size_trades": 9,
+  "rolling_windows": 765,
+  "forward_pf": 0.532989,
+  "windows_pf_le_forward": 119,
+  "fraction_pf_le_forward": 0.15555555555555556,
+  "windows_wins_le_2": 101,
+  "fraction_wins_le_2": 0.13202614379084968,
+  "windows_both_pf_le_forward_and_wins_le_2": 101,
+  "fraction_both": 0.13202614379084968,
+  "pf_quantiles": {
+    "q01": 0.13589026185027758,
+    "q05": 0.3074371853164247,
+    "q10": 0.33085673075340705,
+    "q25": 0.5849944232925308,
+    "median": 1.0659856679036093,
+    "q75": 2.3315883078629205,
+    "q90": 4.177608032243205,
+    "q95": 8.66243192691932
+  },
+  "min_pf": 0.11995611284609245,
+  "max_pf": 999.0
+}

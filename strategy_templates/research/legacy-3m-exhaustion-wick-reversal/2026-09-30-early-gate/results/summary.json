@@ -1,0 +1,8 @@
+{
+  "status": "data_blocked_strict_exit_rerun",
+  "canonical_exit_rule": "ROI >= 8 || ROI <= -6",
+  "reason": "existing BTCUSDT 3m historical series has gaps for 2023-01-01..2026-09-01; DatasetBuilder failed before returns",
+  "returns_inspected": false,
+  "old_conditional_exit_result_valid": false,
+  "db_backfill_performed": false
+}

@@ -1,0 +1,16 @@
+{
+  "status": "frozen_failed_early_gate",
+  "canonical_exit": "ROI >= 8 || ROI <= -6",
+  "trades": 2856,
+  "normalized_pf": 0.859759,
+  "positive_symbols": "0/4",
+  "frequency_per_symbol_week": 3.732636,
+  "by_year_pf": {
+    "2023": 0.834642,
+    "2024": 0.903357,
+    "2025": 0.850932,
+    "2026": 0.809999
+  },
+  "gate_pass": false,
+  "legacy_conditional_exit_preserved": true
+}

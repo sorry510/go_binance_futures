@@ -1,0 +1,11 @@
+{
+  "status":"filter_effect_not_cross_cohort_stable",
+  "id121":{"trades":773,"pf":1.211221,"net":1.420420272,"positive_symbols":"12/15","frequency":0.532684,"by_year":{"2024":1.241297,"2025":1.179101,"2026":1.245726}},
+  "v52":{"trades":509,"pf":1.212544,"net":0.939895687,"positive_symbols":"10/15","frequency":0.350758,"by_year":{"2024":1.606243,"2025":1.035739,"2026":1.365512}},
+  "exact_overlap":{"trades":500,"pf":1.217470,"net":0.942912},
+  "id121_only":{"trades":273,"pf":1.199880,"net":0.477508,"all_long":true,"by_year":{"2024":{"trades":45,"pf":0.844762,"net":-0.069966},"2025":{"trades":143,"pf":1.481310,"net":0.542975},"2026":{"trades":85,"pf":1.005553,"net":0.004498}}},
+  "v52_only":{"trades":9,"pf":0.965051,"net":-0.003016},
+  "interpretation":"2-3ATR precompression improves 2024 selection but deletes strongly positive ID121 longs in 2025; aggregate PF is essentially unchanged while frequency and breadth decline. Filter is regime-dependent and v52 remains frozen.",
+  "fresh_symbol_failure_unchanged":true,
+  "db_write":false
+}

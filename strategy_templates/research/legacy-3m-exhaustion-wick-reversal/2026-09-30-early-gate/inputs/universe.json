@@ -1,0 +1,1 @@
+{"symbols":["BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT"],"source":"existing go_bn_test 1m history; read-only"}

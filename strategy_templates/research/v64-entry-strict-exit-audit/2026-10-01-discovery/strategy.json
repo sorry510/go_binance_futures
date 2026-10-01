@@ -1,0 +1,41 @@
+{
+  "name": "v64 1h KDJ Cross 4h Trend",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name":"ema_4h_20","enable":true,"kline_interval":"4h","period":20},
+      {"name":"ema_4h_50","enable":true,"kline_interval":"4h","period":50}
+    ],
+    "macd": [],
+    "adx": [{"name":"adx_4h_14","enable":true,"kline_interval":"4h","period":14}],
+    "mfi": [], "obv": [], "cci": [], "roc": [],
+    "kdj": [{"name":"kdj_1h_9_3_3","enable":true,"kline_interval":"1h","period":9,"k_period":3,"d_period":3}],
+    "rsi": [], "kc": [], "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name":"v64_kdj_long",
+      "type":"long",
+      "code":"let trend = ema_4h_20.Data[1] > ema_4h_50.Data[1] && ema_4h_20.Data[1] > ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.PlusDI[1] > adx_4h_14.MinusDI[1];\nlet turn = kdj_1h_9_3_3.K[0] > kdj_1h_9_3_3.D[0] && kdj_1h_9_3_3.K[1] <= kdj_1h_9_3_3.D[1];\nlet confirm = kline_1h.Close[0] > kline_1h.Open[0];\ntrend && turn && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v64_kdj_short",
+      "type":"short",
+      "code":"let trend = ema_4h_20.Data[1] < ema_4h_50.Data[1] && ema_4h_20.Data[1] < ema_4h_20.Data[2] && adx_4h_14.ADX[1] >= 20 && adx_4h_14.MinusDI[1] > adx_4h_14.PlusDI[1];\nlet turn = kdj_1h_9_3_3.K[0] < kdj_1h_9_3_3.D[0] && kdj_1h_9_3_3.K[1] >= kdj_1h_9_3_3.D[1];\nlet confirm = kline_1h.Close[0] < kline_1h.Open[0];\ntrend && turn && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v64_kdj_close_long",
+      "type":"close_long",
+      "code":"ROI >= 8 || ROI <= -6",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v64_kdj_close_short",
+      "type":"close_short",
+      "code":"ROI >= 8 || ROI <= -6",
+      "fullScreen":false,"enable":true
+    }
+  ]
+}

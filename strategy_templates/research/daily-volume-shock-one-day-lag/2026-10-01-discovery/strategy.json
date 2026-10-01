@@ -1,0 +1,25 @@
+{
+  "name":"v117 Daily Volume Shock One-Day Lag",
+  "technology":{
+    "ma":[],
+    "ema":[
+      {"name":"ema_4h_2","enable":true,"kline_interval":"4h","period":2},
+      {"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}
+    ],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v117_long","type":"long",
+      "code":"let avg_shock = mean(kline_1d.Amount[3:23]);\nlet avg_prev = mean(kline_1d.Amount[4:24]);\nlet shock = avg_shock > 0 && avg_prev > 0 && kline_1d.Amount[2] > avg_shock && kline_1d.Amount[3] <= avg_prev;\nlet shock_dir = kline_1d.Close[2] > kline_1d.Open[2];\nlet aligned = kline_4h.Close[1] > kline_4h.Open[1];\nlet confirm = NowPrice > kline_4h.High[1];\nshock && shock_dir && aligned && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v117_short","type":"short",
+      "code":"let avg_shock = mean(kline_1d.Amount[3:23]);\nlet avg_prev = mean(kline_1d.Amount[4:24]);\nlet shock = avg_shock > 0 && avg_prev > 0 && kline_1d.Amount[2] > avg_shock && kline_1d.Amount[3] <= avg_prev;\nlet shock_dir = kline_1d.Close[2] < kline_1d.Open[2];\nlet aligned = kline_4h.Close[1] < kline_4h.Open[1];\nlet confirm = NowPrice < kline_4h.Low[1];\nshock && shock_dir && aligned && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v117_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v117_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

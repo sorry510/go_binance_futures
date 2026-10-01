@@ -1,0 +1,1 @@
+{"research_date":"2026-09-30","repository":"/Users/zhz/work/binance/go_binance_futures","engine":"service/backtest current working tree","data":"existing go_bn_test / historicalmarket replay only","external_data":false,"db_write":false,"note":"fresh holdout candidates identified from read-only market_klines_1m_chunks coverage audit"}

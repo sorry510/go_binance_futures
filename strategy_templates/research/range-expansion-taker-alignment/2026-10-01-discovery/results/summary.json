@@ -1,0 +1,1 @@
+{"status":"frozen_failed_discovery","trades":11745,"long":5296,"short":6449,"pf":0.802924,"positive_symbols":"0/6","frequency_per_symbol_week":18.744870,"year_pf":{"2023":0.823800,"2024":0.788860},"oos1_evaluated":false,"oos2_evaluated":false,"close_rule":"ROI >= 8 || ROI <= -6"}

@@ -1,0 +1,13 @@
+{
+  "name":"v87 QPS Term-Structure Expansion",
+  "technology":{
+    "ma":[],"ema":[{"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2},{"name":"ema_1d_2","enable":true,"kline_interval":"1d","period":2}],
+    "macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {"name":"v87_long","type":"long","code":"let base = kline_1d.Qps[1];\nlet expand = base > 0 && kline_1h.Qps[1] > base && kline_1h.Qps[2] <= base;\nlet dir = kline_1h.Close[1] > kline_1h.Open[1];\nlet confirm = NowPrice > kline_1h.High[1];\nexpand && dir && confirm","fullScreen":false,"enable":true},
+    {"name":"v87_short","type":"short","code":"let base = kline_1d.Qps[1];\nlet expand = base > 0 && kline_1h.Qps[1] > base && kline_1h.Qps[2] <= base;\nlet dir = kline_1h.Close[1] < kline_1h.Open[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nexpand && dir && confirm","fullScreen":false,"enable":true},
+    {"name":"v87_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v87_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

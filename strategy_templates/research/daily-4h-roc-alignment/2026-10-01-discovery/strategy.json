@@ -1,0 +1,25 @@
+{
+  "name":"v120 Daily + 4h ROC Alignment",
+  "technology":{
+    "ma":[],"ema":[],"macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],
+    "roc":[
+      {"name":"roc_1d_14","enable":true,"kline_interval":"1d","period":14},
+      {"name":"roc_4h_14","enable":true,"kline_interval":"4h","period":14}
+    ],
+    "kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]
+  },
+  "strategy":[
+    {
+      "name":"v120_long","type":"long",
+      "code":"let daily_up = roc_1d_14.Data[1] > 0;\nlet cross = roc_4h_14.Data[1] > 0 && roc_4h_14.Data[2] <= 0;\nlet confirm = NowPrice > kline_4h.High[1];\ndaily_up && cross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {
+      "name":"v120_short","type":"short",
+      "code":"let daily_down = roc_1d_14.Data[1] < 0;\nlet cross = roc_4h_14.Data[1] < 0 && roc_4h_14.Data[2] >= 0;\nlet confirm = NowPrice < kline_4h.Low[1];\ndaily_down && cross && confirm",
+      "fullScreen":false,"enable":true
+    },
+    {"name":"v120_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v120_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

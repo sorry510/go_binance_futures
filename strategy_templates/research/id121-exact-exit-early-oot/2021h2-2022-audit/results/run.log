@@ -1,0 +1,9 @@
+BUILD 1/2 BTCUSDT
+SYM BTCUSDT trades=42 long=12 short=30 normPF=0.603733 normNet=-0.193758
+BUILD 2/2 ETHUSDT
+SYM ETHUSDT trades=37 long=16 short=21 normPF=0.569195 normNet=-0.193113
+ALL trades=79 long=28 short=51 normPF=0.587214 normNet=-0.386871 positive=0/2 freq=0.521698
+YEAR 2021 trades=19 normPF=0.303450 normNet=-0.183123
+YEAR 2022 trades=60 normPF=0.697847 normNet=-0.203748
+EXIT stop_loss 52
+EXIT take_profit 27

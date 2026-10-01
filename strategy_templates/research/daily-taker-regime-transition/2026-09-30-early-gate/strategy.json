@@ -1,0 +1,63 @@
+{
+  "name": "v86 Daily Taker Regime Transition",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      },
+      {
+        "name": "ema_1d_2",
+        "enable": true,
+        "kline_interval": "1d",
+        "period": 2
+      }
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v86_long",
+      "type": "long",
+      "code": "let regime = kline_1d.TakerBuyRatio[1] > 0.50 && kline_1d.TakerBuyRatio[2] <= 0.50;\nlet aligned = kline_1h.Close[1] > kline_1h.Open[1];\nlet confirm = NowPrice > kline_1h.High[1];\nregime && aligned && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v86_short",
+      "type": "short",
+      "code": "let regime = kline_1d.TakerBuyRatio[1] < 0.50 && kline_1d.TakerBuyRatio[2] >= 0.50;\nlet aligned = kline_1h.Close[1] < kline_1h.Open[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nregime && aligned && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v86_close_long",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v86_close_short",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}

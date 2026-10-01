@@ -1,0 +1,76 @@
+{
+  "name": "v82 ATR Term-Structure Expansion",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {
+        "name": "ema_1h_2",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 2
+      },
+      {
+        "name": "ema_1d_2",
+        "enable": true,
+        "kline_interval": "1d",
+        "period": 2
+      }
+    ],
+    "macd": [],
+    "adx": [],
+    "mfi": [],
+    "obv": [],
+    "cci": [],
+    "roc": [],
+    "kdj": [],
+    "rsi": [],
+    "kc": [],
+    "boll": [],
+    "donchian": [],
+    "atr": [
+      {
+        "name": "atr_1h_14",
+        "enable": true,
+        "kline_interval": "1h",
+        "period": 14
+      },
+      {
+        "name": "atr_1d_14",
+        "enable": true,
+        "kline_interval": "1d",
+        "period": 14
+      }
+    ],
+    "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v82_long",
+      "type": "long",
+      "code": "let r1 = atr_1h_14.Data[1] * 4.898979486 / atr_1d_14.Data[1];\nlet r2 = atr_1h_14.Data[2] * 4.898979486 / atr_1d_14.Data[2];\nlet expand = atr_1d_14.Data[1] > 0 && atr_1d_14.Data[2] > 0 && r1 > 1 && r2 <= 1;\nlet dir = kline_1h.Close[1] > kline_1h.Open[1];\nlet confirm = NowPrice > kline_1h.High[1];\nexpand && dir && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v82_short",
+      "type": "short",
+      "code": "let r1 = atr_1h_14.Data[1] * 4.898979486 / atr_1d_14.Data[1];\nlet r2 = atr_1h_14.Data[2] * 4.898979486 / atr_1d_14.Data[2];\nlet expand = atr_1d_14.Data[1] > 0 && atr_1d_14.Data[2] > 0 && r1 > 1 && r2 <= 1;\nlet dir = kline_1h.Close[1] < kline_1h.Open[1];\nlet confirm = NowPrice < kline_1h.Low[1];\nexpand && dir && confirm",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v82_close_long",
+      "type": "close_long",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    },
+    {
+      "name": "v82_close_short",
+      "type": "close_short",
+      "code": "ROI >= 8 || ROI <= -6",
+      "fullScreen": false,
+      "enable": true
+    }
+  ]
+}
