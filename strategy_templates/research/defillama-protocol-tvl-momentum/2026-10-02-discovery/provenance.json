@@ -1,0 +1,12 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "universe_source":"copied unchanged from defillama-protocol-tvl-shock/2023-2026/inputs/old_protocol_universe.json",
+  "tvl_source":"DeFiLlama public protocol endpoint, filtered immediately to dates <=2024-12-31 for this hypothesis",
+  "market_source_valid_run":"Binance Vision USD-M monthly 1d archives",
+  "invalid_preflight":"Initial REST-based loader completed but was invalid because current REST omitted delisted historical contracts such as CVX/SXP/BTCST. Its output is preserved under results/invalid_preflight_rest and is not decision-valid.",
+  "signal_or_gate_changed_after_invalid_preflight":false,
+  "oos_2025_2026_signal_or_returns_evaluated":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

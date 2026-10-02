@@ -1,0 +1,53 @@
+LOADED LDO tvl_days 1473 bars 740
+LOADED ANKR tvl_days 1495 bars 737
+LOADED RSR tvl_days 1186 bars 744
+LOADED BAKE tvl_days 1269 bars 744
+LOADED EOS tvl_days 1043 bars 755
+LOADED KEEP tvl_days 1522 bars 9
+LOADED SPELL tvl_days 1297 bars 756
+LOADED BTCST tvl_days 1110 bars 759
+LOADED API3 tvl_days 0 bars 0
+LOADED YFII tvl_days 1365 bars 28
+LOADED TLM tvl_days 142 bars 718
+LOADED ROSE tvl_days 1099 bars 732
+LOADED CVX tvl_days 1323 bars 740
+LOADED 1INCH tvl_days 1400 bars 738
+LOADED LRC tvl_days 1582 bars 744
+LOADED SXP tvl_days 1361 bars 742
+LOADED CELR tvl_days 1143 bars 734
+LOADED LINA tvl_days 1108 bars 744
+LOADED BEL tvl_days 1391 bars 744
+LOADED BTS tvl_days 554 bars 542
+LOADED GTC tvl_days 0 bars 0
+LOADED REN tvl_days 1463 bars 750
+LOADED ETH tvl_days 0 bars 0
+LOADED ANC tvl_days 706 bars 24
+LOADED APE tvl_days 0 bars 0
+LOADED ALICE tvl_days 0 bars 0
+LOADED ANT tvl_days 0 bars 0
+LOADED ATA tvl_days 30 bars 732
+LOADED ENS tvl_days 0 bars 0
+LOADED DEFI tvl_days 0 bars 0
+LOADED SAND tvl_days 0 bars 0
+LOADED BAT tvl_days 0 bars 0
+LOADED ARPA tvl_days 0 bars 0
+LOADED KSM tvl_days 1172 bars 749
+LOADED GRT tvl_days 0 bars 0
+LOADED AXS tvl_days 0 bars 0
+LOADED AKRO tvl_days 0 bars 0
+LOADED C98 tvl_days 0 bars 0
+LOADED LPT tvl_days 0 bars 0
+LOADED ONE tvl_days 533 bars 745
+{
+  "events": 1479,
+  "triggered_symbols": 17,
+  "positive_symbols": "4/17",
+  "frequency_per_symbol_week": 0.8331053351573188,
+  "mean_r1": -0.000639787417309296,
+  "mean_r3": -0.0044672307961495725,
+  "mean_r7": -0.00779268082458532,
+  "2023_r7": -0.004588366248546051,
+  "2024_r7": -0.010865427517370005,
+  "gate_pass": false,
+  "load_failures": 0
+}

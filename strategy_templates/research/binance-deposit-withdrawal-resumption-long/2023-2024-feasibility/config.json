@@ -1,0 +1,13 @@
+{
+  "family":"binance-deposit-withdrawal-resumption-long",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance official Maintenance Updates CMS catalogId=157",
+  "event_definition":"explicit present-tense resumption/reopening/restoration of token deposit or withdrawal service",
+  "direction_if_eligible":"LONG",
+  "minimum_events":8,
+  "minimum_unique_tokens":8,
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "post_event_returns_before_coverage_gate":false,
+  "db_write":false
+}

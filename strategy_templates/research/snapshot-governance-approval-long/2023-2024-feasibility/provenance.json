@@ -1,0 +1,10 @@
+{
+  "research_date":"2026-10-01",
+  "source":"archived Snapshot public GraphQL corpus",
+  "mapping":"DeFiLlama governanceID-safe mapping inherited from prior Snapshot audits",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "market_data_read":false,
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

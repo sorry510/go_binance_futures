@@ -1,0 +1,14 @@
+{
+  "family":"defillama-protocol-tvl-momentum",
+  "run_id":"2026-10-02-discovery",
+  "universe_source":"reuse exact old_protocol_universe.json from defillama-protocol-tvl-shock/2023-2026",
+  "discovery":{"start":"2023-01-01","end":"2024-12-31"},
+  "signal":"7 complete UTC day log TVL growth zero-cross",
+  "direction":"up-cross LONG; down-cross SHORT",
+  "entry":"next UTC day Binance USD-M open",
+  "forward_days":[1,3,7],
+  "eligibility":{"history_days_min":730,"signal_day_quote_volume_min_usdt":5000000},
+  "gate":{"min_mean_signed_return_7d":0.0025,"min_positive_symbol_fraction":0.60,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_7d_positive":true},
+  "oos_read_policy":"do not read 2025+ unless discovery gate passes",
+  "db_write":false
+}

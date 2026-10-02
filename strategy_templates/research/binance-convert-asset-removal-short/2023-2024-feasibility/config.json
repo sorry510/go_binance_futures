@@ -1,0 +1,1 @@
+{"family":"binance-convert-asset-removal-short","run_id":"2023-2024-feasibility","source":"Binance official CMS catalogId=49","event_definition":"explicit removal/cessation of Binance Convert support for a non-stablecoin crypto token","direction_if_eligible":"SHORT","minimum_eligible_events":8,"minimum_unique_tokens":8,"returns_inspected":false,"db_write":false}

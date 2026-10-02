@@ -227,3 +227,81 @@ Archived bundles currently include:
 
 - id121-v52-precompression-attribution/2026-10-01-audit/: six-symbol exact-entry attribution; v52 removes 61 ID121 longs at PF0.613 but fails frequency/year gate.
 - id121-v52-original-cohort-attribution/2026-10-01-audit/: original 15-symbol attribution; removed 273 ID121 longs are PF1.200 overall and strongly positive in 2025, proving regime-dependent filter effect; v52 frozen.
+
+- `intrahour-partial-qps-breakout/2026-10-01-discovery/`: current partial 1h QPS >= prior-8h completed baseline plus fresh previous-hour high/low 1m breakout; 7188 trades, PF0.833, 0/6 positive; OOS untouched, frozen.
+
+- `1m-qps-record-burst-continuation/2026-10-01-discovery/`: 1m quote-volume rate record over prior 60m, continuation by burst-minute direction; 17440 trades, PF0.813, 0/6 positive; OOS untouched, frozen.
+
+- `intrahour-taker-aligned-breakout/2026-10-01-discovery/`: current partial 1h taker-buy ratio aligned with fresh previous-hour high/low breakout; 13912 trades, PF0.822, 0/6 positive; OOS untouched, frozen.
+
+- `intrahour-range-expansion-breakout/2026-10-01-discovery/`: current partial 1h range exceeds previous completed 1h range plus fresh previous-hour breakout; 10446 trades, PF0.818, 0/6 positive; OOS untouched, frozen. v132/v134/v135 jointly pause intrahour-acceleration branch.
+
+- `binance-loan-asset-removal-short/2023-2024-feasibility/`: official 74-title Loan audit found 10 non-stablecoin removal token-events, but 0/10 had >=2y USD-M history at event time; post-event returns untouched, feasibility frozen.
+
+- `directional-price-impact-asymmetry/2026-10-01-early-gate/`: 24h upside-vs-downside quote-volume price-impact zero-cross; 9907 events, 12h signed mean +0.0004%, 3/6 positive, 2023/2024 sign flip; OOS untouched, frozen.
+
+- `binance-simple-earn-asset-removal-short/2023-2024-feasibility/`: exhaustive 40-title Simple Earn audit found 0 explicit asset-removal events; CYBER notice only discussed possible future removals. Returns untouched, coverage frozen.
+
+- `binance-deposit-withdrawal-resumption-long/2023-2024-feasibility/`: confirmed Binance service-restoration census found only one TORN deposit-resumption event; production eligibility and returns untouched, coverage frozen.
+
+- `token-unlock-supply-shock/2026-10-01-timestamp-recheck/`: fixed 9-event/8-symbol cohort re-audited; public paper CSV lacks the exact UTC timestamp its documentation claims, and complete old timestamp coverage remains unavailable. Exact replay untouched, blocker retained.
+
+- `binance-unplanned-transfer-suspension-short/2023-2024-feasibility/`: Multichain suspension produced 8 affected tokens but 0/8 met >=2y USD-M history at announcement; returns untouched, coverage frozen.
+
+- `binance-corporate-action-support-long/2023-2024-feasibility/`: 14 Binance-native first-support token swap/migration/rebranding events; only MATIC/TOMO/SXP meet >=2y USD-M history + liquidity, so returns untouched and coverage frozen.
+
+- `lagged-quote-volume-price-lead/2026-10-01-early-gate/`: causal 24h lagged quote-volume/next-return covariance predictor; 59539 events, 12h -0.009%, 1/6 positive; OOS untouched, frozen.
+
+- `signed-price-volume-imbalance-regime/2026-10-01-early-gate/`: 24h rolling signed taker quote-volume imbalance zero-cross; 4877 events, 12h +0.0356%, 5/6 positive but economic gate failed; OOS untouched, frozen.
+
+- `binance-convert-asset-removal-short/2023-2024-feasibility/`: 50-title Convert census; no qualifying non-stablecoin crypto asset-removal event, returns untouched, coverage frozen.
+
+- `lagged-taker-flow-price-lead/2026-10-01-early-gate/`: 24-pair causal taker-flow to next-hour-return covariance predictor; 50484 events, 12h +0.0007%, 3/6 positive with year sign flip; OOS untouched, frozen.
+
+- `binance-auto-invest-asset-addition-long/2023-2024-feasibility/`: 13-title Auto-Invest census leaves one 5-token asset-addition batch; market data/returns untouched, coverage frozen.
+
+- `binance-futures-position-limit-adjustment/2023-2024-feasibility/`: one platform-feature title but zero contract-specific position-cap adjustments; returns untouched, coverage frozen.
+
+- `binance-corporate-action-support-long/2023-2024-feasibility/`: 14 Binance first-support swap/migration/rebrand events, only SXP/TOMO/MATIC pass >=2y USD-M + QV; returns untouched, coverage frozen.
+
+- `binance-pay-asset-addition-long/2023-2024-feasibility/`: Binance Pay token-level asset-addition coverage audit; 3 Pay titles, 0 qualifying token events; no market data/returns read, frozen.
+
+- `directional-taker-flow-energy-asymmetry/2026-10-01-early-gate/`: v139 directional second-moment taker-flow energy; 4742 events, 12h -0.0024%, 2/6 positive; strict/OOS untouched, frozen.
+
+- `funding-sign-persistence-reversal/2026-10-01-early-gate/`: first 3-settlement regular-cadence same-sign funding streak, contrarian direction; 580 events, 12h +0.0168%, 3/6 positive, year sign flip; OOS untouched, frozen.
+
+- `conditional-return-sign-markov/2026-10-01-early-gate/`: v140 24-transition conditional sign model; 33866 events, 12h -0.0065%, 2/6 positive; strict/OOS untouched, frozen.
+
+- `range-overlap-value-migration/2026-10-01-early-gate/`: v141 fresh below-baseline 1h range-overlap migration; 26175 events, 12h -0.0266%, 2/6 positive; strict/OOS untouched, frozen.
+
+- `binance-holder-airdrop-support-long/2023-2024-feasibility/`: 12 Binance airdrop/distribution title candidates collapse to one qualifying external holder-airdrop event (CHZ); production eligibility/returns untouched, coverage frozen.
+
+- `binance-p2p-asset-addition-long/2023-2024-feasibility/`: 29 P2P titles collapse to one ordinary-crypto first-addition event (WLD); market eligibility/returns untouched, coverage frozen.
+
+- `binance-token-trading-fee-change/2023-2024-feasibility/`: eight raw independent token-level fee-policy batches; BETH batch lacks USD-M, so max eligible batches=7<8; no returns read, frozen.
+
+- `order-flow-coherence/2026-10-01-early-gate/`: trailing-60m net/gross taker-flow coherence cross; 33067 events, 12h -0.0751%, 0/6 positive; OOS untouched, frozen.
+
+- `binance-token-burn-support-long/2023-2024-feasibility/`: four burn-keyword titles are all completed recurring BNB Auto-Burn reports; zero qualifying first-support events, returns untouched, frozen.
+
+- `binance-staking-asset-addition-long/2023-2024-feasibility/`: 19 staking titles collapse to one qualifying legacy DeFi-Staking token addition (CVX); market eligibility/returns untouched, coverage frozen.
+
+- `binance-proof-of-reserves-asset-addition-long/2023-2024-feasibility/`: exact 2023-2024 PoR audit found one independent asset-addition batch; market eligibility/returns untouched, coverage frozen.
+
+- `snapshot-governance-approval-long/2023-2024-feasibility/`: 43 clean binary proposals; 41 positive wins but all are LDO in one Snapshot space, so cross-symbol/space coverage fails before market-data access; frozen.
+
+- `interpretable-two-split-fast-move/2026-10-01-discovery/`: fixed depth-2 symmetric tree on nine native features; best 2023 leaf reward +0.299 < +1.0 train gate, selected leaves=0; 2025/2026 unread, frozen.
+
+- `funding-volatility-expansion-fade/2026-10-01-early-gate/`: v143 recent-3 funding std vs prior-21 baseline cross; 863 events, 12h +0.2197%, 5/6 positive, but 2023 negative vs strong 2024; OOS unread, frozen as regime-dependent.
+
+- `binance-borrow-interest-rate-adjustment/2023-2024-feasibility/`: 1071-title official audit found only one generic dynamic-interest policy notice and zero token-level adjustment events; returns untouched, coverage frozen.
+
+- `confirmed-williams-fractal-breakout/2026-10-01-early-gate/`: v144 standard causal 5-bar swing breakout; 10035 events, 12h -0.0776%, 0/6 positive, both years negative; OOS unread, frozen.
+
+- `quote-ease-of-movement-14/2026-10-01-early-gate/`: v145 standard 14-bar quote-EOM zero-cross; 12085 events, 12h -0.0201%, 2/6 positive, annual sign flip; OOS unread, frozen.
+
+- `binance-portfolio-margin-collateral-asset-addition-long/2023-2024-feasibility/`: official 2023-2024 audit found zero qualifying ordinary-crypto Portfolio Margin asset additions; returns untouched, coverage frozen.
+
+- `defillama-protocol-tvl-momentum/2026-10-02-discovery/`: 7d protocol-TVL growth zero-cross; corrected Binance Vision discovery 1479 events, 7d -0.779%, 4/17 positive; OOS 2025+ unevaluated, frozen.
+
+- `quote-volume-weighted-close-20h-reclaim/2026-10-01-discovery/`: v146 QVWC20 reclaim + trigger-bar breakout; strict Engine 6202 trades, PF0.823, 0/6 positive; OOS unread, frozen.

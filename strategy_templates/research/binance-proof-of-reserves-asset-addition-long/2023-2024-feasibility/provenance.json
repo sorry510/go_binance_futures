@@ -1,0 +1,10 @@
+{
+  "research_date":"2026-10-01",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "event_source":"Binance official CMS catalogId=49",
+  "source_corpus":"reused archived exhaustive 2023-2024 1071-title corpus",
+  "market_data_read":false,
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

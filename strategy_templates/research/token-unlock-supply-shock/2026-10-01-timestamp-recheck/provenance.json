@@ -1,0 +1,14 @@
+{
+  "research_date":"2026-10-01",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "git_head":"8166dd4c59143158923f8bf93e2a4006a05d0f71",
+  "external_replication_repo":"https://github.com/fivetaku/vibe-investing-toss",
+  "external_csv_blob_sha":"1cf3447a4688d04457ea941e20d4309fa897b6bd",
+  "external_csv_commit":"1927dc6bf7938ed856a868d5eda469d91ffebc18",
+  "external_csv_commit_date":"2026-04-20T14:01:40Z",
+  "external_timestamp_provider_checked":"Tokenomist public pages/docs/pricing",
+  "market_replay_performed":false,
+  "database_read":false,
+  "database_write":false,
+  "app_conf_modified":false
+}

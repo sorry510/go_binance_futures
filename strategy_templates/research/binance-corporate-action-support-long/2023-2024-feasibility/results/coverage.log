@@ -1,0 +1,25 @@
+{
+  "raw_events": 14,
+  "raw_unique_tokens": 14,
+  "eligible_events": 3,
+  "eligible_unique_tokens": 3,
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false,
+  "excluded_by_reason": {
+    "history_lt_2y_or_missing": 11
+  }
+}
+ELIGIBLE SXP 12989807.340590002
+ELIGIBLE TOMO 38005324.9027
+ELIGIBLE MATIC 219030662.03210005
+EXCLUDED GTO history_lt_2y_or_missing 
+EXCLUDED BNX history_lt_2y_or_missing 
+EXCLUDED COCOS history_lt_2y_or_missing 
+EXCLUDED QUICK history_lt_2y_or_missing 
+EXCLUDED AVA history_lt_2y_or_missing 
+EXCLUDED MC history_lt_2y_or_missing 
+EXCLUDED TVK history_lt_2y_or_missing 
+EXCLUDED PLA history_lt_2y_or_missing 
+EXCLUDED STRAX history_lt_2y_or_missing 
+EXCLUDED RNDR history_lt_2y_or_missing 
+EXCLUDED FRONT history_lt_2y_or_missing 

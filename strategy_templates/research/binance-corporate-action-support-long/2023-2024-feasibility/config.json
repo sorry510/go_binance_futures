@@ -1,0 +1,14 @@
+{
+  "family":"binance-corporate-action-support-long",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance official CMS catalogId=49 (Latest Binance News)",
+  "event_definition":"first official support announcement for token swap, token migration, rebranding or redenomination",
+  "direction_if_eligible":"LONG",
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "minimum_eligible_events":8,
+  "minimum_unique_tokens":8,
+  "discovery_period":"2023-2024",
+  "return_evaluation_before_coverage_gate":false,
+  "db_write":false
+}

@@ -1,0 +1,19 @@
+2026/10/02 08:03:27.256 [1;34m[I][0m  use lang: zh
+BUILD 1/6 SOLUSDT
+SYM SOLUSDT trades=1101 long=579 short=522 normPF=0.816210 normNet=-2.122951
+BUILD 2/6 DOGEUSDT
+SYM DOGEUSDT trades=1001 long=526 short=475 normPF=0.860553 normNet=-1.453671
+BUILD 3/6 LTCUSDT
+SYM LTCUSDT trades=857 long=459 short=398 normPF=0.795315 normNet=-1.848724
+BUILD 4/6 AVAXUSDT
+SYM AVAXUSDT trades=1069 long=557 short=512 normPF=0.868835 normNet=-1.413795
+BUILD 5/6 UNIUSDT
+SYM UNIUSDT trades=1094 long=572 short=522 normPF=0.800061 normNet=-2.282386
+BUILD 6/6 ZECUSDT
+SYM ZECUSDT trades=1080 long=537 short=543 normPF=0.794654 normNet=-2.357167
+ALL trades=6202 long=3230 short=2972 normPF=0.822533 normNet=-11.478695 positive=0/6 freq=9.898313
+YEAR 2023 trades=2618 normPF=0.813249 normNet=-5.163842
+YEAR 2024 trades=3584 normPF=0.829465 normNet=-6.314853
+EXIT end_of_data 2
+EXIT stop_loss 3617
+EXIT take_profit 2583

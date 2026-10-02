@@ -1,0 +1,11 @@
+{
+  "raw_events": 10,
+  "raw_unique_tokens": 10,
+  "eligible_events": 0,
+  "eligible_unique_tokens": 0,
+  "coverage_gate_pass": false,
+  "excluded_by_reason": {
+    "history_lt_2y_or_missing": 10
+  },
+  "post_event_returns_read": false
+}

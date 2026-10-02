@@ -1,0 +1,12 @@
+{
+  "research_date": "2026-10-01",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "database": "go_bn_test read-only",
+  "data": [
+    "market_klines_1h"
+  ],
+  "oos_2025_2026_read": false,
+  "strict_engine_run": false,
+  "app_conf_modified": false,
+  "db_write": false
+}

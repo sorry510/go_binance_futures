@@ -1,0 +1,9 @@
+{
+  "symbols": ["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "window": {"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "execution_interval": "1m",
+  "signal_intervals": ["1m"],
+  "candidate_universe": "every completed Engine minute after 60m signal history and indicator warmup",
+  "event_exclusions": [],
+  "oos_symbols_or_periods_read": false
+}

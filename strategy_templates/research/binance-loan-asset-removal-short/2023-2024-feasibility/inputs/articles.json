@@ -1,0 +1,6 @@
+[
+  {"code":"edebf68609a6495886c349fe7cbc355f","title":"Binance Flexible Loan Has Delisted PEPE as a Borrowable Asset","release_time":1686889511376,"tokens":["PEPE"],"type":"loanable_removal"},
+  {"code":"bc7a137f8ef04f03a7b02f28858a6239","title":"Notice Regarding the Removal of Selected Loanable Assets on Binance Loans & VIP Loan (2023-09-15)","release_time":1694750404743,"tokens":["IRIS","IQ","OAX","JUV","MULTI","ARDR","ATM","MLN"],"type":"loanable_removal"},
+  {"code":"1d7b456160b349ecbb389b121996d00b","title":"Binance Loans (Flexible Rate) Will Close All BUSD Loan and Collateral Positions at 2023-10-25","release_time":1696298400861,"tokens":["BUSD"],"type":"loan_and_collateral_removal","excluded_reason":"stablecoin"},
+  {"code":"ee65a8ccbd694a448167f44c415213c8","title":"Notice on the Removal of PLA from Binance Margin & VIP Loan","release_time":1707985206125,"tokens":["PLA"],"type":"vip_loan_removal"}
+]

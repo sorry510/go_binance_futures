@@ -1,0 +1,53 @@
+LOADED ANKR tvl_days 1495 bars 1436
+LOADED LDO tvl_days 1473 bars 832
+LOADED EOS tvl_days 1043 bars 1820
+LOADED SPELL tvl_days 1297 bars 848
+LOADED CVX tvl_days 1323 bars 0
+LOADED CELR tvl_days 1143 bars 1374
+LOADED RSR tvl_days 1186 bars 1535
+LOADED KEEP tvl_days 1522 bars 239
+LOADED API3 tvl_days 0 bars 1044
+LOADED BAKE tvl_days 1269 bars 1323
+LOADED YFII tvl_days 1365 bars 587
+LOADED KSM tvl_days 1172 bars 1540
+LOADED TLM tvl_days 142 bars 643
+LOADED ROSE tvl_days 1099 bars 1097
+LOADED 1INCH tvl_days 1400 bars 1468
+LOADED ONE tvl_days 533 bars 1385
+LOAD_FAIL BTCST HTTP Error 400: Bad Request
+LOADED LRC tvl_days 1582 bars 1535
+LOADED BEL tvl_days 1391 bars 1505
+LOADED BTS tvl_days 554 bars 1213
+LOADED LINA tvl_days 1108 bars 1384
+LOADED GTC tvl_days 0 bars 1300
+LOADED ANC tvl_days 706 bars 67
+LOADED REN tvl_days 1463 bars 1541
+LOADED ALICE tvl_days 0 bars 1387
+LOADED ETH tvl_days 0 bars 1862
+LOADED ATA tvl_days 30 bars 1219
+LOADED APE tvl_days 0 bars 1021
+LOADED ANT tvl_days 0 bars 884
+LOADED ARPA tvl_days 0 bars 1170
+LOADED ENS tvl_days 0 bars 1128
+LOAD_FAIL SXP HTTP Error 400: Bad Request
+LOADED SAND tvl_days 0 bars 1437
+LOADED DEFI tvl_days 0 bars 1587
+LOADED GRT tvl_days 0 bars 1474
+LOADED BAT tvl_days 0 bars 1784
+LOADED AKRO tvl_days 0 bars 494
+LOADED LPT tvl_days 0 bars 1147
+LOADED AXS tvl_days 0 bars 1503
+LOADED C98 tvl_days 0 bars 1226
+{
+  "events": 1362,
+  "triggered_symbols": 15,
+  "positive_symbols": "3/15",
+  "frequency_per_symbol_week": 0.8694938440492476,
+  "mean_r1": -0.0006938044479968558,
+  "mean_r3": -0.005114809665639216,
+  "mean_r7": -0.007734619056263416,
+  "2023_r7": -0.004346997879953164,
+  "2024_r7": -0.011004920018675488,
+  "gate_pass": false,
+  "load_failures": 2
+}

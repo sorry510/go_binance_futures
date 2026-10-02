@@ -1,0 +1,10 @@
+{
+  "events": 59539,
+  "frequency_per_symbol_week": 95.0234838121295,
+  "mean_r1": -0.00006084526863544299,
+  "mean_r12": -0.0000903179233582835,
+  "mean_r4": -0.00006014194592409614,
+  "oos_evaluated": false,
+  "positive_symbols": "1/6",
+  "strict_engine_run": false
+}

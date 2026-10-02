@@ -1,0 +1,11 @@
+{
+  "candidate_events": 14,
+  "candidate_unique_tokens": 14,
+  "eligible_events": 3,
+  "eligible_unique_tokens": 3,
+  "coverage_gate_pass": false,
+  "excluded_by_reason": {
+    "history_lt_2y_or_missing": 11
+  },
+  "post_event_returns_read": false
+}

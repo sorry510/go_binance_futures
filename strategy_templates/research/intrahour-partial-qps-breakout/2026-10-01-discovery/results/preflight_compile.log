@@ -1,0 +1,10 @@
+2026/10/01 16:19:52.080 [1;34m[I][0m  use lang: zh
+BUILD 1/6 SOLUSDT
+panic: compile strategy v132_long: unknown name kline_1m (4:19)
+	 | let fresh_break = kline_1m.Close[1] <= level && kline_1m.Close[0] > level;
+	 | ..................^
+
+goroutine 1 [running]:
+main.main()
+	/Users/zhz/work/binance/go_binance_futures/strategy_templates/research/intrahour-partial-qps-breakout/2026-10-01-discovery/replay.go:118 +0x1ab0
+exit status 2

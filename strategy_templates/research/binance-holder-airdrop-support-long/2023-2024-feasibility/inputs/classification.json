@@ -1,0 +1,63 @@
+[
+  {
+    "title": "Binance Will Support the Pepper (1000PEPPER) Airdrop for Chiliz (CHZ) Holders",
+    "holder_token": "CHZ",
+    "qualifies": true,
+    "reason": "external_project_holder_airdrop"
+  },
+  {
+    "title": "Binance to Airdrop USDC to FRONT and SLF Holders",
+    "qualifies": false,
+    "reason": "stablecoin_distribution_excluded"
+  },
+  {
+    "title": "Introducing MANTRA (OM) on BNSOL Super Stake: HODL BNSOL to Get OM APR Boost Airdrop Rewards",
+    "qualifies": false,
+    "reason": "Binance_staking_reward_product"
+  },
+  {
+    "title": "Introducing WOO (WOO) on BNSOL Super Stake: HODL BNSOL to Get WOO APR Boost Airdrop Rewards",
+    "qualifies": false,
+    "reason": "Binance_staking_reward_product"
+  },
+  {
+    "title": "Introducing Pyth Network (PYTH) on BNSOL Super Stake: HODL BNSOL to Get PYTH APR Boost Airdrop Rewards",
+    "qualifies": false,
+    "reason": "Binance_staking_reward_product"
+  },
+  {
+    "title": "Introducing BNSOL Super Stake: HODL BNSOL to Get APR Boost Airdrop Rewards",
+    "qualifies": false,
+    "reason": "Binance_staking_reward_product"
+  },
+  {
+    "title": "Launching the $5M Airdrop Carnival: Experience the Revamped Binance Wallet via the Largest Airdrop Platform",
+    "qualifies": false,
+    "reason": "promotional_campaign"
+  },
+  {
+    "title": "Binance Launches HODLer Airdrops to BNB Holders!",
+    "qualifies": false,
+    "reason": "HODLer_Airdrops_excluded"
+  },
+  {
+    "title": "Binance Earn Completes the Starknet (STRK) Distribution Plan for ETH Staking Users",
+    "qualifies": false,
+    "reason": "completion_notice"
+  },
+  {
+    "title": "Binance Pool Will Temporarily Suspend Distribution of DASH Mining Rewards",
+    "qualifies": false,
+    "reason": "mining_reward_suspension_not_airdrop"
+  },
+  {
+    "title": "Binance Launches the Airdrop Portal",
+    "qualifies": false,
+    "reason": "platform_announcement_no_token_event"
+  },
+  {
+    "title": "Binance Simple Earn Flexible Products: New APR and Rewards Distribution Policies",
+    "qualifies": false,
+    "reason": "generic_reward_policy"
+  }
+]

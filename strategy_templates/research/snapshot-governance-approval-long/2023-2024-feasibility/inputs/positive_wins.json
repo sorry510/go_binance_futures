@@ -1,0 +1,699 @@
+[
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x969f9a3b3f52742b9763d8e128f2418a0ce888433e130a60f7fef809787ffdb4",
+    "end": 1734969600,
+    "year": 2024,
+    "title": "Update Lido on Ethereum Standard Node Operator Protocol - Validator Exits",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      55637417.1413252,
+      86.22004983859667
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x8736420fd3ebecc1aae603c3a49d6805899c38b142c92525169e5bfa95f53b26",
+    "end": 1734969600,
+    "year": 2024,
+    "title": "[EGG] Multi-EGG Continuity Grant Funding",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      57239113.693147,
+      199277.17349733616
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x7569e4487b7737fa8e98fe708843deb014a61d0dbfeeb6e57ad1f4dba5494598",
+    "end": 1734969600,
+    "year": 2024,
+    "title": "Lido Alliance Grant Proposal",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      57849735.175725035,
+      86.02004983859666
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x7cbd5e9cb95bda9581831daf8b0e72d1ad0b068d2cbd3bda2a2f6ae378464f26",
+    "end": 1734969600,
+    "year": 2024,
+    "title": "CSM: Enable Permissionless Phase and Increase the Share Limit",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      58129305.48016954,
+      86.02004983859666
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x8fb167fd8b923fb50627d959a603a95135ca05e18da9fd105d17079c14fba702",
+    "end": 1732809600,
+    "year": 2024,
+    "title": "Should Nansen continue in SDVT following the acquisition of Stakewithus?",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      57629647.3496927,
+      86.02004983859666
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x89bf9f39d623ae2e6d1f876f345f59aaecb2cc4c6eec613e3385a5342dc08fa5",
+    "end": 1732809600,
+    "year": 2024,
+    "title": "Should Alchemy continue in SDVT and LoP following the acquisition of Bware Labs?",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      55589034.93649286,
+      86.26085767934443
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x7fd7879a945ebf95709bb0f5d0679370a06d6d0289b832ef8a100f983373e242",
+    "end": 1732809600,
+    "year": 2024,
+    "title": "Should Pier Two continue in the Curated Module Set following the acquisition of Numic?",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      57629538.75622548,
+      86.02004983859666
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xcd79470a62c5531cb090baa02b65674697c1098451b654c7e26565293d18bb6e",
+    "end": 1726429373,
+    "year": 2024,
+    "title": "✅LayerZero ($ZRO) x Lido airdrop✅",
+    "choices": [
+      "YES",
+      "NO"
+    ],
+    "scores": [
+      1015.78,
+      0
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x0ec9ab354316501d6699f9299e3d0fc76b878cb40437b96770f3ef6c21221c3d",
+    "end": 1726429373,
+    "year": 2024,
+    "title": "✅LayerZero ($ZRO) x Lido airdrop✅",
+    "choices": [
+      "YES",
+      "NO"
+    ],
+    "scores": [
+      1015.78,
+      0
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x3ea7817705c8c00a603995784864318865a4878554034876d78ef2da11c02bff",
+    "end": 1726417784,
+    "year": 2024,
+    "title": "✅LayerZero ($ZRO) x Lido airdrop✅",
+    "choices": [
+      "YES",
+      "NO"
+    ],
+    "scores": [
+      14.78,
+      0
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xf4f1b1994448c5bcf3b969f3bf1e9ebe8322bce3659948c9adb62068bc6cdaa5",
+    "end": 1726417061,
+    "year": 2024,
+    "title": "✅LayerZero ($ZRO) x Lido airdrop✅",
+    "choices": [
+      "YES",
+      "NO"
+    ],
+    "scores": [
+      1015.78,
+      0
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xc094053b14a03a753792be19ba7b632f71fccc7ab668804538f9e1da1b34b37b",
+    "end": 1726934460,
+    "year": 2024,
+    "title": "✅LayerZero ($ZRO) x Lido airdrop✅",
+    "choices": [
+      "YES",
+      "NO"
+    ],
+    "scores": [
+      1015.78,
+      0
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xd8222e979e92ef049b7f0a1984192781b065b24b6dc82aa9f889cbb2308fae5a",
+    "end": 1725552000,
+    "year": 2024,
+    "title": "Should Galaxy continue in the Curated Module set following the acquisition of CryptoManufaktur?",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      50119251.20994479,
+      87.32004983859666
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xaca2da3c932542e030db8bf5b6e4420bf4aa98bd57bd62b9b8008a4b7398abb2",
+    "end": 1717686000,
+    "year": 2024,
+    "title": "Expanding the Simple DVT Module ",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      60748252.58503634,
+      89.10979802537153
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x3bdf528b31956e029e867ebf79b02ee07e9a973987b34c5cffc14392e8b4480c",
+    "end": 1714060800,
+    "year": 2024,
+    "title": "Dual Governance: design and path towards implementation",
+    "choices": [
+      "Approve",
+      "No action"
+    ],
+    "scores": [
+      50408535.735471584,
+      22287.94535457011
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xa8ae592b09200c70629f3c5f4363d06dae9d8afb00c8910272319fc7fdb4e10a",
+    "end": 1713538800,
+    "year": 2024,
+    "title": "Renew GateSeal for the Withdrawal Queue and Validator Exit Bus Oracle",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      56132234.9465704,
+      89.72485983859666
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x74eaaca973a0a2f3b661e344b64d953e6061eb35d119faf396f348a484c9948f",
+    "end": 1711036800,
+    "year": 2024,
+    "title": "InfStones Return to Active Status Proposal",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      54031801.69647651,
+      140.0484401769437
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xa39815519107002997769f0b79a9e3957c3bf793166ab948fc6413ce5b3def55",
+    "end": 1702569600,
+    "year": 2023,
+    "title": "Lido Community Staking Module",
+    "choices": [
+      "Approve",
+      "No action"
+    ],
+    "scores": [
+      65192143.55217794,
+      11.237928829334088
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xbf8aeac93bbdcc4246ffbb127574d22010327f9c0d5cdf085c240fb1e0df05c4",
+    "end": 1696984869,
+    "year": 2023,
+    "title": "💎LIDO Airdrop ✅",
+    "choices": [
+      "Yes",
+      "No"
+    ],
+    "scores": [
+      23.035671802553185,
+      1.0000000000000009
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xfe2a6a6506a642b616118363bc29aa83dd9ef2ec80447bb607a8f52c0a96aed0",
+    "end": 1695405600,
+    "year": 2023,
+    "title": "Emergency Brakes signer rotation",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      50097949.06963061,
+      1425.526189621983
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x780d8397c4325757f3506c35274da47c87727fb15dd592e8c4455de92bf2de27",
+    "end": 1695045600,
+    "year": 2023,
+    "title": "Should the Lido DAO add the 7 shortlisted Ethereum operators to the Lido on Ethereum operator set?",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      62319593.42753226,
+      4198.413243651098
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x4a9de95f99b92159450236a74013ed7f4c60885a234fbb14bb18234c157bf357",
+    "end": 1694700000,
+    "year": 2023,
+    "title": "Emergency Brakes signer rotation",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      45857002.49822184,
+      3811.819891320063
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x85ebbe2cb80334c60e160ff267118489e17281046757561e91c5b22dae35e577",
+    "end": 1690480800,
+    "year": 2023,
+    "title": "Should the Lido DAO add the 2 shortlisted Ethereum operators to the Lido on Ethereum operator set?",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      53930978.25686703,
+      303.48766094988184
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x2a990d0266910e14c21360e3902c64f2a68971b1a51aaaeb94978e1513effcfd",
+    "end": 1688061600,
+    "year": 2023,
+    "title": "LEGO grant to Launchnodes for Lido Impact Staking initiative",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      56615132.786910266,
+      91157.7719059701
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x739fbe56425d355b5e41c22bb346b7a8217afd9e84aa49863648b1c641a482e3",
+    "end": 1688061600,
+    "year": 2023,
+    "title": "Align Lido’s Vibe (Purpose, Mission, Vision)",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      64998246.43288158,
+      216.55257408072413
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x9279cd4addefdd9185d024f471f1a29561f61556ae209cdda5dffb1fd73b181e",
+    "end": 1688061600,
+    "year": 2023,
+    "title": "Tiered Rewards Share Program: A Sustainable Approach to stETH Growth",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      62604120.20862925,
+      189687.56649029104
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xf36f00fb44644a24fb75889b5f92496b7f36eef70185bcff5b7ecfa2a781db6f",
+    "end": 1685642400,
+    "year": 2023,
+    "title": "Lido Community Lifeguards Initiative",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      55252094.3139549,
+      832.8889094330552
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x5e9ffb74b7f0e026a898301a65302345fb6dc2e09f724b9c9bec2f35902c1324",
+    "end": 1685642400,
+    "year": 2023,
+    "title": "Launchnodes - Impact Staking with Lido",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      30281779.42867759,
+      119565.96836937376
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xbfecc75c45bca53d3c5786f099d46559ac597bc3fae802d5f599b60f10b4bd4a",
+    "end": 1685642400,
+    "year": 2023,
+    "title": "Nominate the Gas Supply Committee as a supervisor for gas expenditure",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      55242300.26774405,
+      17.526738116190735
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x57cee570cec459a4b441d4f71682824fe69c83babb6896d06164bd437de856b4",
+    "end": 1684443540,
+    "year": 2023,
+    "title": "Proposal to claim stolen LDO tokens due to hack ",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      2594.512724306428,
+      737.6425901364317
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xa4eb1220a15d46a1825d5a0f44de1b34644d4aa6bb95f910b86b29bb7654e330",
+    "end": 1683828000,
+    "year": 2023,
+    "title": "Lido on Ethereum Validator Exits Policy V1.0",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      54530321.69089401,
+      192.25694589104157
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xdf57d5600ca8c0485a17de035afffe3b918e6059a6ba10bec71fb04f4041b41d",
+    "end": 1683828000,
+    "year": 2023,
+    "title": "[LIDO-v2] May 1, 2023 - December 31, 2023 | Lido Ongoing Grant Request",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      53622740.23144256,
+      10115.81125117636
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xd460ea50072deb6bc428064a118dfd499714d4a7865552b4047eba3199663596",
+    "end": 1683828000,
+    "year": 2023,
+    "title": "Nominating reWARDS committee as a Lido DAO representative for airdrops",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      56186554.28552466,
+      8.187886674147776
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x78bbc81011457ffcc0d2183de2a813869708d4f9996f4af3df8b669510950cf3",
+    "end": 1682614800,
+    "year": 2023,
+    "title": "RockLogic Slashing Incident Staker Compensation",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      55211750.30747312,
+      26.591859809775105
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xac31f800288c68e32d1eb3cea7a525022faae3eb3bf805d1b3d248cda5375a13",
+    "end": 1682614800,
+    "year": 2023,
+    "title": "Proposal to approve Lido DAO Treasury Management Principles and authorize the formation of a Treasury Management Committee",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      55225178.95459894,
+      37.00783040486227
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xc017c451cd1ec85bf259d1f866844da296bb0f3209fd58297ccf07f7e91fa690",
+    "end": 1681495200,
+    "year": 2023,
+    "title": "Retire Ethereum and Solana Referral Programs",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      52919339.471890315,
+      50.02641553618453
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xb28fe954f7b86f37a771b674da7578c1593414624fa02f09d87247ae2273c1d9",
+    "end": 1679425200,
+    "year": 2023,
+    "title": "A proposal for partnering with Nethermind to design a mechanism for a good validator set maintenance. Phase II (restart)",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      51716152.67054191,
+      58.14439878009759
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x4208b8d791cbf36721aa1e0776f9a96e305ceb0117b34265b376812e75cb0b2d",
+    "end": 1678212000,
+    "year": 2023,
+    "title": "A proposal for partnering with Nethermind to design a mechanism for a good validator set maintenance. Phase II.",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      45582640.163234174,
+      46.00994021814837
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0xc00b48275e268f26b6cebf82322f281a44acaf679f6381dd612e278174671daf",
+    "end": 1676574000,
+    "year": 2023,
+    "title": "Request to authorise a 22M LDO ceiling for a four year contributor Token Reward Plan (TRP)",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      53110155.922251984,
+      186.31883219548305
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x3436b98afacec300ec2c0f79bb8dfd16685ececeeb7a45a18754d43b710179e8",
+    "end": 1674054000,
+    "year": 2023,
+    "title": "Improving the incentive structure for the Lido on Polygon team (restart)",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      55128136.00051019,
+      2048522.1629295892
+    ]
+  },
+  {
+    "asset": "LDO",
+    "symbol": "LDOUSDT",
+    "space": "lido-snapshot.eth",
+    "proposal_id": "0x32f6f095dc4f7b97665b560781d6e6795da11f9c8218936a505575040038d70f",
+    "end": 1674054000,
+    "year": 2023,
+    "title": "Lido on Polygon V2 upgrade (restart)",
+    "choices": [
+      "For",
+      "Against"
+    ],
+    "scores": [
+      57167414.97513632,
+      7676.631850223936
+    ]
+  }
+]

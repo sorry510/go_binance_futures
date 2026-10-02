@@ -1,0 +1,47 @@
+{
+  "feature": "ret12_side",
+  "feature_index": 2,
+  "leaf": false,
+  "left": {
+    "feature": "ret1_side",
+    "feature_index": 0,
+    "leaf": false,
+    "left": {
+      "leaf": true,
+      "mean_reward": 0.29931972789115646,
+      "n": 4116
+    },
+    "mean_reward": 0.11906325235281243,
+    "n": 9138,
+    "right": {
+      "leaf": true,
+      "mean_reward": -0.02867383512544803,
+      "n": 5022
+    },
+    "score": 372.8909370199693,
+    "threshold": -0.00364252482954655
+  },
+  "mean_reward": -0.24948839448888693,
+  "n": 91379,
+  "right": {
+    "feature": "ret4_side",
+    "feature_index": 1,
+    "leaf": false,
+    "left": {
+      "leaf": true,
+      "mean_reward": 0.03068450039339103,
+      "n": 5084
+    },
+    "mean_reward": -0.29043907540034775,
+    "n": 82241,
+    "right": {
+      "leaf": true,
+      "mean_reward": -0.31159842917687314,
+      "n": 77157
+    },
+    "score": 7496.236216331753,
+    "threshold": -0.01658931913147696
+  },
+  "score": 7066.968573572566,
+  "threshold": -0.029733933976355428
+}

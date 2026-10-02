@@ -1,0 +1,8 @@
+{
+  "family": "binance-borrow-interest-rate-adjustment",
+  "period": "2023-2024",
+  "source": "Binance CMS catalogId=49 frozen 1071-title corpus",
+  "minimum_events": 8,
+  "minimum_unique_tokens": 8,
+  "db_write": false
+}

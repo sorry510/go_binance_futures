@@ -1,0 +1,17 @@
+{
+  "version":"v144",
+  "family":"confirmed-williams-fractal-breakout",
+  "run_id":"2026-10-01-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "fractal_definition":"standard 5-bar Williams fractal, center strictly above/below two completed bars on each side",
+  "search_horizon_hours":24,
+  "level_choice":"most recent confirmed fractal within trailing 24 completed 1h bars",
+  "signal":"fresh 1h close cross above latest confirmed fractal high -> LONG; below latest confirmed fractal low -> SHORT",
+  "entry":"next complete 1h open",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless early gate passes",
+  "strict_exit_if_promoted":"ROI >= 8 || ROI <= -6",
+  "db_write":false
+}

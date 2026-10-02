@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-01",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "database":"go_bn_test read-only",
+  "market_data":"project-native USD-M 1h ReplayKline",
+  "lookback_hours":24,
+  "strict_engine_run":false,
+  "oos_evaluated":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

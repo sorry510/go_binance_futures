@@ -1,5 +1,5 @@
 {
-  "name": "v124 20h Quote-Volume-Weighted Close Reclaim",
+  "name": "v146 20h Quote-Volume-Weighted Close Reclaim",
   "technology": {
     "ma": [],
     "ema": [
@@ -26,28 +26,28 @@
   },
   "strategy": [
     {
-      "name": "v124_long",
+      "name": "v146_long",
       "type": "long",
       "code": "let den1 = kline_1h.Amount[1]+kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4]+kline_1h.Amount[5]+kline_1h.Amount[6]+kline_1h.Amount[7]+kline_1h.Amount[8]+kline_1h.Amount[9]+kline_1h.Amount[10]+kline_1h.Amount[11]+kline_1h.Amount[12]+kline_1h.Amount[13]+kline_1h.Amount[14]+kline_1h.Amount[15]+kline_1h.Amount[16]+kline_1h.Amount[17]+kline_1h.Amount[18]+kline_1h.Amount[19]+kline_1h.Amount[20];\nlet den2 = kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4]+kline_1h.Amount[5]+kline_1h.Amount[6]+kline_1h.Amount[7]+kline_1h.Amount[8]+kline_1h.Amount[9]+kline_1h.Amount[10]+kline_1h.Amount[11]+kline_1h.Amount[12]+kline_1h.Amount[13]+kline_1h.Amount[14]+kline_1h.Amount[15]+kline_1h.Amount[16]+kline_1h.Amount[17]+kline_1h.Amount[18]+kline_1h.Amount[19]+kline_1h.Amount[20]+kline_1h.Amount[21];\nlet qvwc1 = den1 > 0 ? (kline_1h.Close[1]*kline_1h.Amount[1]+kline_1h.Close[2]*kline_1h.Amount[2]+kline_1h.Close[3]*kline_1h.Amount[3]+kline_1h.Close[4]*kline_1h.Amount[4]+kline_1h.Close[5]*kline_1h.Amount[5]+kline_1h.Close[6]*kline_1h.Amount[6]+kline_1h.Close[7]*kline_1h.Amount[7]+kline_1h.Close[8]*kline_1h.Amount[8]+kline_1h.Close[9]*kline_1h.Amount[9]+kline_1h.Close[10]*kline_1h.Amount[10]+kline_1h.Close[11]*kline_1h.Amount[11]+kline_1h.Close[12]*kline_1h.Amount[12]+kline_1h.Close[13]*kline_1h.Amount[13]+kline_1h.Close[14]*kline_1h.Amount[14]+kline_1h.Close[15]*kline_1h.Amount[15]+kline_1h.Close[16]*kline_1h.Amount[16]+kline_1h.Close[17]*kline_1h.Amount[17]+kline_1h.Close[18]*kline_1h.Amount[18]+kline_1h.Close[19]*kline_1h.Amount[19]+kline_1h.Close[20]*kline_1h.Amount[20]) / den1 : 0;\nlet qvwc2 = den2 > 0 ? (kline_1h.Close[2]*kline_1h.Amount[2]+kline_1h.Close[3]*kline_1h.Amount[3]+kline_1h.Close[4]*kline_1h.Amount[4]+kline_1h.Close[5]*kline_1h.Amount[5]+kline_1h.Close[6]*kline_1h.Amount[6]+kline_1h.Close[7]*kline_1h.Amount[7]+kline_1h.Close[8]*kline_1h.Amount[8]+kline_1h.Close[9]*kline_1h.Amount[9]+kline_1h.Close[10]*kline_1h.Amount[10]+kline_1h.Close[11]*kline_1h.Amount[11]+kline_1h.Close[12]*kline_1h.Amount[12]+kline_1h.Close[13]*kline_1h.Amount[13]+kline_1h.Close[14]*kline_1h.Amount[14]+kline_1h.Close[15]*kline_1h.Amount[15]+kline_1h.Close[16]*kline_1h.Amount[16]+kline_1h.Close[17]*kline_1h.Amount[17]+kline_1h.Close[18]*kline_1h.Amount[18]+kline_1h.Close[19]*kline_1h.Amount[19]+kline_1h.Close[20]*kline_1h.Amount[20]+kline_1h.Close[21]*kline_1h.Amount[21]) / den2 : 0;\nlet cross = qvwc1 > 0 && qvwc2 > 0 && kline_1h.Close[1] > qvwc1 && kline_1h.Close[2] <= qvwc2;\nlet confirm = NowPrice > kline_1h.High[1];\ncross && confirm",
       "fullScreen": false,
       "enable": true
     },
     {
-      "name": "v124_short",
+      "name": "v146_short",
       "type": "short",
       "code": "let den1 = kline_1h.Amount[1]+kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4]+kline_1h.Amount[5]+kline_1h.Amount[6]+kline_1h.Amount[7]+kline_1h.Amount[8]+kline_1h.Amount[9]+kline_1h.Amount[10]+kline_1h.Amount[11]+kline_1h.Amount[12]+kline_1h.Amount[13]+kline_1h.Amount[14]+kline_1h.Amount[15]+kline_1h.Amount[16]+kline_1h.Amount[17]+kline_1h.Amount[18]+kline_1h.Amount[19]+kline_1h.Amount[20];\nlet den2 = kline_1h.Amount[2]+kline_1h.Amount[3]+kline_1h.Amount[4]+kline_1h.Amount[5]+kline_1h.Amount[6]+kline_1h.Amount[7]+kline_1h.Amount[8]+kline_1h.Amount[9]+kline_1h.Amount[10]+kline_1h.Amount[11]+kline_1h.Amount[12]+kline_1h.Amount[13]+kline_1h.Amount[14]+kline_1h.Amount[15]+kline_1h.Amount[16]+kline_1h.Amount[17]+kline_1h.Amount[18]+kline_1h.Amount[19]+kline_1h.Amount[20]+kline_1h.Amount[21];\nlet qvwc1 = den1 > 0 ? (kline_1h.Close[1]*kline_1h.Amount[1]+kline_1h.Close[2]*kline_1h.Amount[2]+kline_1h.Close[3]*kline_1h.Amount[3]+kline_1h.Close[4]*kline_1h.Amount[4]+kline_1h.Close[5]*kline_1h.Amount[5]+kline_1h.Close[6]*kline_1h.Amount[6]+kline_1h.Close[7]*kline_1h.Amount[7]+kline_1h.Close[8]*kline_1h.Amount[8]+kline_1h.Close[9]*kline_1h.Amount[9]+kline_1h.Close[10]*kline_1h.Amount[10]+kline_1h.Close[11]*kline_1h.Amount[11]+kline_1h.Close[12]*kline_1h.Amount[12]+kline_1h.Close[13]*kline_1h.Amount[13]+kline_1h.Close[14]*kline_1h.Amount[14]+kline_1h.Close[15]*kline_1h.Amount[15]+kline_1h.Close[16]*kline_1h.Amount[16]+kline_1h.Close[17]*kline_1h.Amount[17]+kline_1h.Close[18]*kline_1h.Amount[18]+kline_1h.Close[19]*kline_1h.Amount[19]+kline_1h.Close[20]*kline_1h.Amount[20]) / den1 : 0;\nlet qvwc2 = den2 > 0 ? (kline_1h.Close[2]*kline_1h.Amount[2]+kline_1h.Close[3]*kline_1h.Amount[3]+kline_1h.Close[4]*kline_1h.Amount[4]+kline_1h.Close[5]*kline_1h.Amount[5]+kline_1h.Close[6]*kline_1h.Amount[6]+kline_1h.Close[7]*kline_1h.Amount[7]+kline_1h.Close[8]*kline_1h.Amount[8]+kline_1h.Close[9]*kline_1h.Amount[9]+kline_1h.Close[10]*kline_1h.Amount[10]+kline_1h.Close[11]*kline_1h.Amount[11]+kline_1h.Close[12]*kline_1h.Amount[12]+kline_1h.Close[13]*kline_1h.Amount[13]+kline_1h.Close[14]*kline_1h.Amount[14]+kline_1h.Close[15]*kline_1h.Amount[15]+kline_1h.Close[16]*kline_1h.Amount[16]+kline_1h.Close[17]*kline_1h.Amount[17]+kline_1h.Close[18]*kline_1h.Amount[18]+kline_1h.Close[19]*kline_1h.Amount[19]+kline_1h.Close[20]*kline_1h.Amount[20]+kline_1h.Close[21]*kline_1h.Amount[21]) / den2 : 0;\nlet cross = qvwc1 > 0 && qvwc2 > 0 && kline_1h.Close[1] < qvwc1 && kline_1h.Close[2] >= qvwc2;\nlet confirm = NowPrice < kline_1h.Low[1];\ncross && confirm",
       "fullScreen": false,
       "enable": true
     },
     {
-      "name": "v124_close_long",
+      "name": "v146_close_long",
       "type": "close_long",
       "code": "ROI >= 8 || ROI <= -6",
       "fullScreen": false,
       "enable": true
     },
     {
-      "name": "v124_close_short",
+      "name": "v146_close_short",
       "type": "close_short",
       "code": "ROI >= 8 || ROI <= -6",
       "fullScreen": false,

@@ -1,0 +1,18 @@
+{
+  "family":"order-flow-coherence",
+  "run_id":"2026-10-01-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "lookback_minutes":60,
+  "signed_flow":"2*TakerBuyQuoteVolume - QuoteVolume",
+  "coherence":"abs(sum(signed_flow))/sum(abs(signed_flow))",
+  "threshold":0.5,
+  "trigger":"first cross from <=0.5 to >0.5",
+  "direction":"sign(sum(signed_flow)); positive LONG, negative SHORT",
+  "entry":"next 1m open",
+  "forward_horizons_minutes":[60,240,720],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless early gate passes",
+  "strict_engine_if_promoted":{"leverage":4,"take_profit_pct":8,"stop_loss_pct":6,"fee_rate_per_side":0.0005,"slippage_bps_per_side":5,"single_position":true,"close_rule":"ROI >= 8 || ROI <= -6"},
+  "db_write":false
+}

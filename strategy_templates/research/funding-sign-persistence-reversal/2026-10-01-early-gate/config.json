@@ -1,0 +1,16 @@
+{
+  "family":"funding-sign-persistence-reversal",
+  "run_id":"2026-10-01-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "streak_length":3,
+  "cadence":"three consecutive regular ~8h settlements; each adjacent gap 7.5h..8.5h",
+  "trigger":"first settlement that reaches a same-sign streak length of 3",
+  "direction":"positive streak -> SHORT; negative streak -> LONG",
+  "entry":"next full 1h open after the third funding settlement",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless early gate passes",
+  "strict_engine_if_promoted":{"leverage":4,"take_profit_pct":8,"stop_loss_pct":6,"fee_rate_per_side":0.0005,"slippage_bps_per_side":5,"single_position":true,"close_rule":"ROI >= 8 || ROI <= -6"},
+  "db_write":false
+}

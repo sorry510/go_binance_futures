@@ -1,0 +1,12 @@
+{
+  "family":"binance-unplanned-transfer-suspension-short",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance Maintenance Updates catalogId=157",
+  "event_definition":"explicit suspension/cessation of token deposit or withdrawal access caused by an already-occurring operational/security situation; planned upgrades excluded",
+  "direction_if_eligible":"SHORT",
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "minimum_eligible_tokens":8,
+  "post_event_returns_before_coverage_gate":false,
+  "db_write":false
+}

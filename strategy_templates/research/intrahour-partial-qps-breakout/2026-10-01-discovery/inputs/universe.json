@@ -1,0 +1,10 @@
+{
+  "symbols": ["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "window": {"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "execution_interval": "1m",
+  "signal_intervals": ["1m","1h"],
+  "candidate_universe": "every Engine minute in the fixed discovery window after indicator warmup",
+  "event_exclusions": [],
+  "oos_symbols_or_periods_read": false,
+  "selection_note": "Fixed new-6 discovery cohort already used by the current research protocol; not selected from v132 returns."
+}

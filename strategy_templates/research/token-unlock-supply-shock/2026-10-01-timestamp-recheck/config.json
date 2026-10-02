@@ -1,0 +1,12 @@
+{
+  "family":"token-unlock-supply-shock",
+  "run_id":"2026-10-01-timestamp-recheck",
+  "goal":"recheck whether the frozen 9-event production-eligible sample can obtain independently verifiable exact UTC unlock timestamps without outcome-based availability selection",
+  "required_coverage_events":9,
+  "required_unique_tokens":8,
+  "direction_if_unblocked":"SHORT",
+  "execution_if_unblocked":"exact 1m Engine with 4x, TP8, SL6, fee 0.0005/side, slippage 5bps/side, funding, single-position",
+  "partial_timestamp_coverage_allowed":false,
+  "post_event_exact_replay_before_timestamp_gate":false,
+  "db_write":false
+}

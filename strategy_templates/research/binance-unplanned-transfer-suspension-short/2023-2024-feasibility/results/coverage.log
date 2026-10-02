@@ -1,0 +1,19 @@
+{
+  "raw_events": 8,
+  "raw_unique_tokens": 8,
+  "eligible_events": 0,
+  "eligible_unique_tokens": 0,
+  "coverage_gate_pass": false,
+  "excluded_by_reason": {
+    "history_lt_2y_or_missing": 8
+  },
+  "post_event_returns_read": false
+}
+EXCLUDED POLS history_lt_2y_or_missing 
+EXCLUDED ACH history_lt_2y_or_missing 
+EXCLUDED BIFI history_lt_2y_or_missing 
+EXCLUDED SUPER history_lt_2y_or_missing 
+EXCLUDED AVA history_lt_2y_or_missing 
+EXCLUDED SPELL history_lt_2y_or_missing 
+EXCLUDED ALPACA history_lt_2y_or_missing 
+EXCLUDED FARM history_lt_2y_or_missing 

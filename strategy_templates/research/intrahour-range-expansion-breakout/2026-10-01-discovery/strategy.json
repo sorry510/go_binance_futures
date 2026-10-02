@@ -1,0 +1,24 @@
+{
+  "name": "v135 Intrahour Range-Expansion Previous-Hour Breakout",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name":"ema_1m_2","enable":true,"kline_interval":"1m","period":2},
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}
+    ],
+    "macd": [], "adx": [], "mfi": [], "obv": [], "cci": [], "roc": [],
+    "kdj": [], "rsi": [], "kc": [], "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v135_long", "type": "long", "enable": true, "fullScreen": false,
+      "code": "let prev_range = kline_1h.High[1] - kline_1h.Low[1];\nlet live_range = kline_1h.High[0] - kline_1h.Low[0];\nlet level = kline_1h.High[1];\nlet fresh_break = kline_1m.Close[1] <= level && kline_1m.Close[0] > level;\nprev_range > 0 && live_range > prev_range && fresh_break"
+    },
+    {
+      "name": "v135_short", "type": "short", "enable": true, "fullScreen": false,
+      "code": "let prev_range = kline_1h.High[1] - kline_1h.Low[1];\nlet live_range = kline_1h.High[0] - kline_1h.Low[0];\nlet level = kline_1h.Low[1];\nlet fresh_break = kline_1m.Close[1] >= level && kline_1m.Close[0] < level;\nprev_range > 0 && live_range > prev_range && fresh_break"
+    },
+    {"name":"v135_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v135_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

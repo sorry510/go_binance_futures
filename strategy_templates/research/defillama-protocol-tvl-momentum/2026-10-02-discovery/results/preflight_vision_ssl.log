@@ -1,0 +1,53 @@
+LOAD_FAIL EOS <urlopen error EOF occurred in violation of protocol (_ssl.c:1129)>
+LOADED LDO tvl_days 1473 bars 740
+LOADED ANKR tvl_days 1495 bars 737
+LOADED RSR tvl_days 1186 bars 744
+LOADED CELR tvl_days 1143 bars 734
+LOADED CVX tvl_days 1323 bars 740
+LOADED API3 tvl_days 0 bars 0
+LOAD_FAIL KSM <urlopen error EOF occurred in violation of protocol (_ssl.c:1129)>
+LOADED BAKE tvl_days 1269 bars 744
+LOADED SPELL tvl_days 1297 bars 756
+LOAD_FAIL ONE <urlopen error EOF occurred in violation of protocol (_ssl.c:1129)>
+LOADED KEEP tvl_days 1522 bars 9
+LOADED 1INCH tvl_days 1400 bars 738
+LOADED BTCST tvl_days 1110 bars 759
+LOADED YFII tvl_days 1365 bars 28
+LOADED ROSE tvl_days 1099 bars 732
+LOADED TLM tvl_days 142 bars 718
+LOADED LRC tvl_days 1582 bars 744
+LOAD_FAIL BEL <urlopen error EOF occurred in violation of protocol (_ssl.c:1129)>
+LOADED GTC tvl_days 0 bars 0
+LOADED ETH tvl_days 0 bars 0
+LOADED SXP tvl_days 1361 bars 742
+LOADED APE tvl_days 0 bars 0
+LOADED ALICE tvl_days 0 bars 0
+LOADED ANT tvl_days 0 bars 0
+LOADED SAND tvl_days 0 bars 0
+LOADED LINA tvl_days 1108 bars 744
+LOADED ENS tvl_days 0 bars 0
+LOADED DEFI tvl_days 0 bars 0
+LOADED ARPA tvl_days 0 bars 0
+LOADED BAT tvl_days 0 bars 0
+LOADED GRT tvl_days 0 bars 0
+LOADED C98 tvl_days 0 bars 0
+LOADED AKRO tvl_days 0 bars 0
+LOADED AXS tvl_days 0 bars 0
+LOADED LPT tvl_days 0 bars 0
+LOADED BTS tvl_days 554 bars 542
+LOADED ANC tvl_days 706 bars 24
+LOADED REN tvl_days 1463 bars 750
+LOADED ATA tvl_days 30 bars 732
+{
+  "events": 1069,
+  "triggered_symbols": 13,
+  "positive_symbols": "4/13",
+  "frequency_per_symbol_week": 0.7874355466694728,
+  "mean_r1": -0.001607370744674359,
+  "mean_r3": -0.00500856824091207,
+  "mean_r7": -0.008318180311688708,
+  "2023_r7": -0.005253460915405775,
+  "2024_r7": -0.011114257041750081,
+  "gate_pass": false,
+  "load_failures": 4
+}

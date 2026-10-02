@@ -1,0 +1,14 @@
+{
+  "paper_repository":"fivetaku/vibe-investing-toss",
+  "paper_file":"01.Trading Strategy/Token unlock 72h shock analysis /data/01_binance_token_unlock_events_2023_2025.csv",
+  "paper_file_blob_sha":"1cf3447a4688d04457ea941e20d4309fa897b6bd",
+  "paper_file_first_and_only_commit":"1927dc6bf7938ed856a868d5eda469d91ffebc18",
+  "paper_file_commit_date":"2026-04-20T14:01:40Z",
+  "actual_columns":["token_symbol","unlock_date","unlock_type","unlock_pct_of_supply","unlock_value_usd_m","recipient_category","price_at_unlock_usd","price_after_72h_usd","change_72h_pct","btc_change_72h_pct","relative_performance_vs_btc_pct","binance_listing_date","days_from_listing","notes"],
+  "actual_timestamp_columns_present":false,
+  "documentation_claim":"DATA_SOURCES.md says T is an on-chain block timestamp, UTC, hour-level; DATA_DOCUMENTATION.md says File01 contains unlock_timestamp_utc/timestamp and should be used to recollect prices.",
+  "documentation_vs_file_consistent":false,
+  "tokenomist_current_public_fact":"Unlock-event data can carry explicit timestamps, but currently accessible public/history coverage does not establish all fixed 2024-2025 events.",
+  "partial_external_timestamp_example":"SEI 2025-08-15 has third-party public references around a scheduled UTC time, but partial per-event discoverability is not accepted as cohort coverage.",
+  "selection_rule":"all 9 fixed events require independently verifiable timestamp coverage before exact replay"
+}

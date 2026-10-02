@@ -1,0 +1,16 @@
+{
+  "status":"coverage_blocked",
+  "source_proposals":626,
+  "clean_binary_proposals":43,
+  "positive_wins":41,
+  "negative_wins":2,
+  "ties":0,
+  "positive_win_assets":{"LDO":41},
+  "unique_positive_win_tokens":1,
+  "independent_positive_win_spaces":1,
+  "minimum_unique_tokens":4,
+  "minimum_independent_spaces":4,
+  "production_eligibility_read":false,
+  "market_data_read":false,
+  "post_event_returns_read":false
+}

@@ -1,0 +1,14 @@
+{
+  "family":"binance-proof-of-reserves-asset-addition-long",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance official CMS catalogId=49",
+  "event_definition":"first explicit announcement that a crypto asset is newly added to Binance Proof-of-Reserves",
+  "direction_if_eligible":"LONG",
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "minimum_eligible_token_events":8,
+  "minimum_unique_tokens":8,
+  "minimum_independent_batches":3,
+  "return_evaluation_before_coverage_gate":false,
+  "db_write":false
+}

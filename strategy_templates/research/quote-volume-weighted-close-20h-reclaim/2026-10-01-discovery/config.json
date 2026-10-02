@@ -37,5 +37,6 @@
     "min_positive_symbols": 4,
     "min_frequency_per_symbol_week": 0.3
   },
-  "db_write": false
+  "db_write": false,
+  "version": "v146"
 }

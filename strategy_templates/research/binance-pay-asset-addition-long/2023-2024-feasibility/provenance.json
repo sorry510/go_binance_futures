@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-01",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "source":"Binance official CMS 2023-2024 title census",
+  "official_pay_titles":3,
+  "qualifying_token_events":0,
+  "market_data_read":false,
+  "returns_inspected":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

@@ -1,0 +1,10 @@
+{
+  "events": 4877,
+  "frequency_per_symbol_week": 7.7836297309621525,
+  "mean_r1": -0.00003918081499470007,
+  "mean_r12": 0.00035642875893715655,
+  "mean_r4": -0.00011743172289224202,
+  "oos_evaluated": false,
+  "positive_symbols": "5/6",
+  "strict_engine_run": false
+}

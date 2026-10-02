@@ -1,0 +1,74 @@
+[
+  {
+    "article_code": "3c7d279dd37043bd8290ac718b5c08a4",
+    "article_title": "Updates on the Suspension of Deposits & Withdrawals for Multichain-Bridged Tokens",
+    "release_time": 1688540723656,
+    "ticker": "POLS",
+    "symbol": "POLSUSDT",
+    "network": "BNB Smart Chain",
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "article_code": "3c7d279dd37043bd8290ac718b5c08a4",
+    "article_title": "Updates on the Suspension of Deposits & Withdrawals for Multichain-Bridged Tokens",
+    "release_time": 1688540723656,
+    "ticker": "ACH",
+    "symbol": "ACHUSDT",
+    "network": "BNB Smart Chain",
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "article_code": "3c7d279dd37043bd8290ac718b5c08a4",
+    "article_title": "Updates on the Suspension of Deposits & Withdrawals for Multichain-Bridged Tokens",
+    "release_time": 1688540723656,
+    "ticker": "BIFI",
+    "symbol": "BIFIUSDT",
+    "network": "Fantom Network",
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "article_code": "3c7d279dd37043bd8290ac718b5c08a4",
+    "article_title": "Updates on the Suspension of Deposits & Withdrawals for Multichain-Bridged Tokens",
+    "release_time": 1688540723656,
+    "ticker": "SUPER",
+    "symbol": "SUPERUSDT",
+    "network": "BNB Smart Chain",
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "article_code": "3c7d279dd37043bd8290ac718b5c08a4",
+    "article_title": "Updates on the Suspension of Deposits & Withdrawals for Multichain-Bridged Tokens",
+    "release_time": 1688540723656,
+    "ticker": "AVA",
+    "symbol": "AVAUSDT",
+    "network": "Ethereum Network",
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "article_code": "3c7d279dd37043bd8290ac718b5c08a4",
+    "article_title": "Updates on the Suspension of Deposits & Withdrawals for Multichain-Bridged Tokens",
+    "release_time": 1688540723656,
+    "ticker": "SPELL",
+    "symbol": "SPELLUSDT",
+    "network": "Avalanche C-Chain",
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "article_code": "3c7d279dd37043bd8290ac718b5c08a4",
+    "article_title": "Updates on the Suspension of Deposits & Withdrawals for Multichain-Bridged Tokens",
+    "release_time": 1688540723656,
+    "ticker": "ALPACA",
+    "symbol": "ALPACAUSDT",
+    "network": "Fantom Network",
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "article_code": "3c7d279dd37043bd8290ac718b5c08a4",
+    "article_title": "Updates on the Suspension of Deposits & Withdrawals for Multichain-Bridged Tokens",
+    "release_time": 1688540723656,
+    "ticker": "FARM",
+    "symbol": "FARMUSDT",
+    "network": "BNB Smart Chain",
+    "reason": "history_lt_2y_or_missing"
+  }
+]

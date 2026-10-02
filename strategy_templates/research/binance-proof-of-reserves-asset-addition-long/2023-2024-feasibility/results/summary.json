@@ -1,0 +1,11 @@
+{
+  "status":"coverage_blocked",
+  "cms_titles_2023_2024":1071,
+  "exact_por_titles":3,
+  "qualifying_asset_addition_batches":1,
+  "minimum_independent_batches":3,
+  "coverage_gate_pass":false,
+  "production_eligibility_read":false,
+  "quote_volume_read":false,
+  "post_event_returns_read":false
+}

@@ -3127,3 +3127,283 @@
 - 被过滤 cohort 年度：2024 PF **0.845**（过滤有帮助）、2025 PF **1.481**（过滤反而删掉大量好交易）、2026 PF **1.006**。
 - 结论：2–3ATR pre-range 效果明显 regime-dependent，不能作为稳定过滤器；v52继续冻结。ID121 fresh-symbol holdout失败结论不变。
 - 归档：strategy_templates/research/id121-v52-original-cohort-attribution/2026-10-01-audit/。
+
+## 2026-10-01 — v132：Intrahour Partial-QPS Previous-Hour Breakout
+- 新机制：当前尚未完成的1h已经累积到 >= 前8个完整1h平均QPS，同时1m首次收盘突破上一完整1h高/低；利用 Engine 的 partial 1h 聚合，不用 NowTime%、趋势/资金费率/taker/外部数据。
+- 固定 discovery：SOL/DOGE/LTC/AVAX/UNI/ZEC，2023-2024；strict exit `ROI >= 8 || ROI <= -6`；gate PF>=1.15、>=4/6正、>=0.30次/币/周且2023/2024 PF都>1。
+- 结果：**7188笔，normalized PF 0.832938，0/6正，11.471956次/币/周**；LONG 3533笔 PF0.786282，SHORT 3655笔 PF0.879678。
+- 年度：2023 3131笔 PF0.834772；2024 4057笔 PF0.831508。逐币PF全部<0.865；4175 SL / 3013 TP。
+- 结论：频率充足但跨币/跨年稳定负期望，属于高频追逐过冲；**冻结v132 / 不反向、不调QPS倍率/8h窗口、不叠加taker/趋势过滤 / OOS未读 / 不入库**。
+- 归档：`strategy_templates/research/intrahour-partial-qps-breakout/2026-10-01-discovery/`。
+
+## 2026-10-01 — v133：1m QPS Record-Burst Continuation
+- 项目原生新机制：当前完整1m QPS严格创最近60分钟新高，按该分钟实体方向做 continuation；不用partial-hour、上一小时突破、trend/taker/funding/外部数据。
+- 固定 discovery：SOL/DOGE/LTC/AVAX/UNI/ZEC，2023-2024；strict exit `ROI >= 8 || ROI <= -6`；不扫描窗口/倍率。
+- 结果：**17440笔，normalized PF 0.812907，0/6正，27.834017次/币/周**；LONG PF0.810856，SHORT PF0.814634。
+- 年度：2023 PF0.807354；2024 PF0.816619；逐币PF 0.771215~0.846128。
+- 结论：quote-volume burst高频但稳定负期望；**冻结v133 / 不调30m/120m窗口、不加QPS倍率、不反向、不加趋势/taker过滤 / OOS未读 / 不入库**。
+- 归档：`strategy_templates/research/1m-qps-record-burst-continuation/2026-10-01-discovery/`。
+
+## 2026-10-01 — v134：Intrahour Taker-Aligned Previous-Hour Breakout
+- 项目原生新机制：使用当前尚未完成1h的 `TakerBuyRatio[0]` 作为实时主动流方向；LONG要求 >0.5 且1m首次收盘突破上一完整1h高点，SHORT镜像。仓库审计确认此前没有 LONG/SHORT entry 使用 `TakerBuyRatio[0]`。
+- 固定 discovery：SOL/DOGE/LTC/AVAX/UNI/ZEC，2023-2024；strict exit `ROI >= 8 || ROI <= -6`；不叠加 QPS/趋势/funding，不扫描0.5附近阈值。
+- 结果：**13912笔，normalized PF 0.821814，0/6正，22.203374次/币/周**；LONG 7153笔 PF0.803503，SHORT 6759笔 PF0.841424。
+- 年度：2023 5624笔 PF0.830443；2024 8288笔 PF0.815927。逐币PF 0.767462~0.901145。
+- 结论：实时主动流与突破同向仍是高频稳定负期望；**冻结v134 / 不扫0.52/0.48或0.55/0.45、不加QPS/趋势/funding过滤、不反向 / OOS未读 / 不入库**。
+- 归档：`strategy_templates/research/intrahour-taker-aligned-breakout/2026-10-01-discovery/`。
+
+## 2026-10-01 — v135：Intrahour Range-Expansion Previous-Hour Breakout
+- 项目原生新机制：当前尚未完成1h的实时 high-low range 已经大于上一完整1h range，同时1m首次收盘突破上一小时高/低；不用QPS/taker/funding/趋势/外部数据。
+- 固定 discovery：SOL/DOGE/LTC/AVAX/UNI/ZEC，2023-2024；strict exit `ROI >= 8 || ROI <= -6`；range ratio 只用自然1.0边界，不扫描倍率。
+- 结果：**10446笔，normalized PF 0.817519，0/6正，16.671683次/币/周**；LONG PF0.792320，SHORT PF0.840750。
+- 年度：2023 PF0.821409；2024 PF0.814619；逐币PF 0.791800~0.863969。
+- 结论：与v132 partial-QPS、v134 partial-taker一致，live intrahour acceleration 三种独立表征均高频稳定负期望；**冻结v135并暂停该子方向 / 不扫range倍率、不叠加过滤、不反向 / OOS未读 / 不入库**。
+- 归档：`strategy_templates/research/intrahour-range-expansion-breakout/2026-10-01-discovery/`。
+
+## 2026-10-01 — Binance Loan / VIP Loan Asset Removal → SHORT：Feasibility
+- Binance 官方 CMS catalogId=49 完整扫描 2023-2024：74篇 Loan 相关标题；明确 removal/forced-close 共4批。
+- 非稳定币事件：PEPE；IRIS/IQ/OAX/JUV/MULTI/ARDR/ATM/MLN；PLA，共 **10 token-events / 10币**。BUSD loan+collateral 全面退出按稳定币排除。
+- 在未读取任何事件后收益前执行 production eligibility：事件时 USD-M 历史>=730天 + 前24h QV>=500万。**10/10 全部在第一项失败**（合约不存在或历史不足2年），eligible=0。
+- 结论：**feasibility blocked / 未看收益 / 冻结**。不降低2年门槛、不用事后历史、不和 Margin/Spot removal 合并凑样本、不入库。
+- 归档：`strategy_templates/research/binance-loan-asset-removal-short/2023-2024-feasibility/`。
+
+## 2026-10-01 — Directional Price-Impact Asymmetry：Early Gate
+- 新机制：过去24个完整1h分别计算上涨/下跌方向的 `sum(|log return|)/sum(QuoteVolume)`，取 `log(upside impact/downside impact)`；零上穿LONG、零下穿SHORT，下一1h open。区别于总Amihud illiquidity与taker price-impact，不使用外部数据。
+- 固定 discovery：SOL/DOGE/LTC/AVAX/UNI/ZEC，2023-2024；gate=12h signed mean >=+0.20%、>=4/6正、>=0.30事件/币/周且两年均正。
+- 结果：**9907 events，12h signed mean +0.0004%，3/6正，15.811次/币/周**；1h +0.0097%，4h -0.0018%。
+- 年度12h：2023 **+0.0278%**，2024 **-0.0290%**；经济幅度几乎为零且跨年翻转。
+- 结论：**early gate失败 / 冻结 / 不扫12h/48h窗口、不加阈值或过滤、不反向、不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/directional-price-impact-asymmetry/2026-10-01-early-gate/`。
+
+## 2026-10-01 — Binance Simple Earn Asset Removal → SHORT：Feasibility
+- Binance 官方 CMS catalogId=49 完整扫描 2023-2024：共 **40篇** Simple Earn 标题；直接 removal/delist/cease/discontinue/close/suspend/redeem 标题 **0篇**。
+- 宽松 Update/Notice/Support/Migration 复核仅命中 `Notice Regarding CYBER Simple Earn Flexible Products`；正文只是解释 CYBER 赎回/流动性事件，并写未来低流动性 token **可能**被移除，没有宣布任何实际 Simple Earn removal。
+- 因此明确 asset-removal events = **0**，在 production eligibility 和任何事件后收益之前即 coverage fail。
+- 结论：**coverage blocked / 未看收益 / 冻结**。不把未来假设语句当事件、不用单币搜索补样本、不与 Spot/Margin/Loan delist 合并、不入库。
+- 归档：`strategy_templates/research/binance-simple-earn-asset-removal-short/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance Deposit/Withdrawal Resumption → LONG：Feasibility
+- Binance Maintenance Updates 官方目录 catalogId=157 完整扫描 2023-2024；只接受标题明确表示充值/提现/网络服务已经 resumed/reopened/restored 的确认事件，排除计划升级中“完成后将恢复”的语句。
+- 全部仅找到 **1事件 / 1币**：2023-05-29 TORN 恢复 Ethereum/BSC deposits。
+- 低于预注册最低8事件/8币，因此 production eligibility（>=2年 USD-M + QV>=500万）和任何事件后收益均未读取。
+- 结论：**coverage blocked / 冻结**。不把计划维护公告或其它交易所恢复事件并入凑样本、不入库。
+- 归档：`strategy_templates/research/binance-deposit-withdrawal-resumption-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — Token Unlock Supply-Shock：Exact-Timestamp Recheck
+- 复用此前冻结的 production-eligible cohort：9事件/8币（FTM、IMX、AXS、RON、APT×2、ID、FET、SEI），不改事件、不看新收益。
+- 公开 replication repo 的真实 `01_binance_token_unlock_events_2023_2025.csv` 只有 `unlock_date`，**没有 `unlock_timestamp_utc`/`timestamp`**；但同仓库 `DATA_SOURCES.md`/`DATA_DOCUMENTATION.md` 又声称 T 为链上 UTC 小时级时间戳并要求从 File01读取 timestamp，文档与文件不一致。
+- Git 历史确认该CSV自2026-04-20首次公开以来只有一个版本，不存在更早带timestamp的公开revision。Tokenomist虽提供 timestamped unlock-event 产品，但当前公开/可访问历史无法完整覆盖固定2024-2025 cohort。
+- 结论：**timestamp coverage仍blocked / 不用00:00 UTC假设、不按可搜到timestamp的事件缩样本、不从重复周期推断 / exact 1m replay未跑 / 无新收益读取 / 不入库**。
+- 归档：`strategy_templates/research/token-unlock-supply-shock/2026-10-01-timestamp-recheck/`。
+
+## 2026-10-01 — Binance Unplanned Transfer Suspension → SHORT：Feasibility
+- Binance Maintenance Updates 2023-2024完整扫描只找到1个非计划 suspension family：2023-07-05 Multichain incident，正文明确影响 POLS/ACH/BIFI/SUPER/AVA/SPELL/ALPACA/FARM 8币。
+- 在未读任何事件后收益前执行 production eligibility：公告时 USD-M 历史>=730天 + 前24h QV>=500万；**8/8 全部在历史门失败，eligible=0**。
+- 公告还说明部分 deposits 在2023-05-24已先暂停，因此不擅自把7月公告回填到5月作为可交易信号。
+- 结论：**feasibility blocked / 未看收益 / 不降低2年门槛、不混入计划维护、不回填不可审计早期时点 / 不入库**。
+- 归档：`strategy_templates/research/binance-unplanned-transfer-suspension-short/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance Corporate-Action Support → LONG：Feasibility
+- Binance 官方 CMS catalogId=49 完整扫描 2023-2024 共 **1071标题**；corporate-action 关键词候选30篇。
+- 按预注册规则只保留首次 `Binance Will Support...` token swap/migration/rebranding/redenomination，剔除 completed/update/BNB Beacon generic migration 后剩 **14事件/14币**：MATIC/FRONT/RNDR/STRAX/PLA/TVK/TOMO/MC/AVA/QUICK/COCOS/SXP/BNX/GTO。
+- 在未读取任何事件后收益前做 production eligibility：事件时 USD-M 历史>=730天 + 前24h QV>=500万。仅 **MATIC/TOMO/SXP 3/14** 合格；其余11个因合约不存在或历史不足2年排除。
+- 低于预注册最低8事件/8币，**coverage blocked / 未看收益 / 冻结**。不降低2年门槛、不把completed公告或新ticker事后并入、不与KuCoin family合并、不入库。
+- 归档：`strategy_templates/research/binance-corporate-action-support-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — v136：Lagged Quote-Volume → Price Lead
+- 新机制：过去24个完整历史pair估计 `Δlog QuoteVolume_t -> next-hour return` 的 centered covariance，用当前已完成小时 `Δlog QV` 乘该关系预测下一小时；predictor 零上穿LONG、零下穿SHORT。
+- 新6币 2023-2024 early gate：**59539 events，12h signed mean -0.0090%，仅1/6正，95.023次/币/周**；1h -0.0061%，4h -0.0060%。
+- 年度12h：2023 -0.0069%，2024 -0.0112%。事后 LONG/SHORT 分化不用于删方向救活。
+- 结论：**early gate失败 / 冻结 / 不扫12h/48h、不加阈值、不删SHORT、不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/lagged-quote-volume-price-lead/2026-10-01-early-gate/`。
+
+## 2026-10-01 — v137：24h Signed Price-Volume Imbalance Regime
+- 文献启发但不做跨币排序：每个完整1h定义 `2*TakerBuyQuoteVolume-QuoteVolume`，过去24h均值零上穿LONG、零下穿SHORT，下一1h open；单币自身信号，无Benchmark。
+- 新6币 2023-2024 early gate：**4877 events，12h signed mean +0.0356%，5/6正，7.784次/币/周**；1h -0.0039%，4h -0.0117%。
+- 年度12h：2023 +0.0073%，2024 +0.0665%；虽breadth/频率/年度符号通过，但远低于预注册 +0.20% economic gate。
+- 事后 LONG 12h +0.2064%、SHORT -0.1348%，但禁止据此删SHORT救活。
+- 结论：**early gate失败 / 冻结 / 不扫窗口或阈值、不做ratio normalization、不删方向、不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/signed-price-volume-imbalance-regime/2026-10-01-early-gate/`。
+
+## 2026-10-01 — Binance Convert Asset Removal → SHORT：Feasibility
+- Binance 官方 CMS 2023-2024 完整标题集中共有 **50篇 Convert 标题**；按 removal/cessation 语义复核得到4个非addition候选。
+- BIDR/RUB 为法币相关退出，BUSD为稳定币wind-down，NBS为其它生命周期事件后的余额转换；**明确普通crypto Convert-removal事件=0**。
+- 因此在production eligibility和任何收益读取之前即 coverage fail。
+- 结论：**coverage blocked / 未看收益 / 冻结**。不与Spot/Margin/Loan removal或普通delist合并凑样本、不入库。
+- 归档：`strategy_templates/research/binance-convert-asset-removal-short/2023-2024-feasibility/`。
+
+## 2026-10-01 — v138：Lagged Taker-Flow → Price Lead
+- 新机制：过去24个完整历史pair估计 `signed taker flow_t -> next-hour return` centered covariance，用当前完整1h主动流乘该关系预测下一小时；predictor零上穿LONG、零下穿SHORT。区别于既有flow autocorrelation与同小时price-flow divergence。
+- 新6币 2023-2024：**50484 events，12h signed mean +0.0007%，3/6正，80.572次/币/周**；1h -0.0004%，4h -0.0010%。
+- 年度12h：2023 -0.0063%，2024 +0.0076%，几乎无经济幅度且跨年翻转。事后LONG/SHORT分化不用于删方向。
+- 结论：**early gate失败 / 冻结 / 不扫窗口或阈值、不删方向、不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/lagged-taker-flow-price-lead/2026-10-01-early-gate/`。
+
+## 2026-10-01 — Binance Auto-Invest Asset Addition → LONG：Feasibility
+- Binance 官方 CMS 2023-2024 完整审计得到 **13篇 Auto-Invest/Recurring Buy 标题**。
+- 排除维护、支付选项、比赛、入口调整、指数计划再平衡后，真正新增非稳定币可定投资产只有2023-07-05一批：MAV/PENDLE/WBETH/COMBO/IQ，共 **5事件/5币**。
+- 原始 coverage 已低于预注册最低8/8，因此**未读取production eligibility或任何事件后收益**。
+- 结论：**coverage blocked / 冻结**。不与Earn/Convert/Spot listing或支付选项合并凑样本、不入库。
+- 归档：`strategy_templates/research/binance-auto-invest-asset-addition-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance Futures Position-Limit Adjustment：Feasibility
+- 官方CMS 2023-2024完整标题审计仅命中1篇 position-limit：2023-05-15 将 Position Limit Adjustment 功能扩展到 COIN-M；没有任何合约级before/after cap调整。
+- **qualifying token-events=0**，未读取行情或收益。
+- 结论：**coverage blocked / 冻结**。不把已研究的leverage-tier/notional-bracket调整重复包装成position-limit事件、不入库。
+- 归档：`strategy_templates/research/binance-futures-position-limit-adjustment/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance Corporate-Action First Support → LONG：Feasibility
+- Binance 官方 CMS catalogId=49 完整扫描2023-2024 **1071标题**；swap/migration/rebranding/redenomination 机械候选30篇。
+- 按预注册只保留首次 `Binance Will Support...`，排除 `Has Completed`、后续update与BNB全网迁移，得到 **14事件/14币**：GTO/BNX/SXP/COCOS/QUICK/AVA/MC/TOMO/TVK/PLA/STRAX/RNDR/FRONT/MATIC。
+- 未读收益前执行 production eligibility（事件时USD-M历史>=730天、前24h QV>=500万）：仅 **SXP/TOMO/MATIC 3/14** 通过，其余11个因合约不存在或历史不足2年排除。
+- 结论：**coverage gate失败 / 未看收益 / 冻结**。不降低2年门槛、不拿完成公告补事件、不与KuCoin/cross-exchange corporate action合并、不入库。
+- 归档：`strategy_templates/research/binance-corporate-action-support-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance Pay Asset Addition → LONG：Feasibility
+- Binance 官方 CMS 2023-2024 完整标题审计中仅 **3篇 Binance Pay 标题**：Pay ID迁移、选定Pay服务费更新、Binance Charity支持Binance Pay。
+- 没有任何标题明确宣布新增某个普通crypto作为 Binance Pay spending/payment asset；**qualifying token-events=0**。
+- 因原始事件覆盖已为0，未读取production eligibility、行情或任何事件后收益。
+- 结论：**coverage blocked / 冻结**。不把通用Pay产品变化解释为token级utility事件、不与Earn/Convert/Card/Spot事件合并凑样本、不入库。
+- 归档：`strategy_templates/research/binance-pay-asset-addition-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — v139：Directional Taker-Flow Energy Asymmetry
+- 新机制：每个完整1h定义 `flow=2*TakerBuyQuoteVolume/QuoteVolume-1`；过去24h分别平方累加正/负flow，取 `log(buy_energy/sell_energy)`；零上穿LONG、零下穿SHORT，下一1h open。
+- 新6币 2023-2024 early gate：**4742 events，12h signed mean -0.0024%，2/6正，7.568次/币/周**；1h -0.0276%，4h -0.0185%。
+- 年度12h：2023 -0.0076%，2024 +0.0029%。事后LONG +0.0531%、SHORT -0.0578%仅作审计，不允许删方向救活。
+- 结论：**early gate失败 / 冻结 / 不扫窗口、平方指数或阈值、不删方向、不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/directional-taker-flow-energy-asymmetry/2026-10-01-early-gate/`。
+
+## 2026-10-01 — Funding Sign Persistence Reversal：Early Gate
+- 新机制：仅正常约8h funding cadence；连续第3次同号settlement首次形成时做 crowding reversal：正funding streak→SHORT，负funding streak→LONG。3次固定为一个正常24h funding cycle，不看幅度。
+- 新6币 SOL/DOGE/LTC/AVAX/UNI/ZEC，2023-2024；下一完整1h open入场；2024年末会跨入2025的12h endpoint直接排除，OOS保持未读。
+- 结果：**580 events，12h signed mean +0.0168%，3/6正，0.9257次/币/周**；1h -0.0131%，4h +0.0424%。
+- 年度12h：2023 **-0.0253%**，2024 **+0.0697%**；LONG 143 events +0.0424%，SHORT 437 events +0.0084%（仅诊断，禁止删方向救活）。
+- 结论：频率过门，但经济幅度、breadth、跨年一致性均失败；**冻结 / 不扫2/4/5 streak、不加funding幅度阈值、不删方向、不加trend/taker/OI、不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/funding-sign-persistence-reversal/2026-10-01-early-gate/`。
+
+## 2026-10-01 — v140：Conditional Return-Sign Markov Predictor
+- 新机制：最近24个完整1h sign transition构造2×2状态转移矩阵；按当前sign估计下一小时条件期望，predictor零上穿LONG、零下穿SHORT，下一1h open。
+- 新6币 2023-2024：**33866 events，12h signed mean -0.0065%，2/6正，54.050次/币/周**；1h -0.0053%，4h -0.0032%。
+- 年度12h：2023 +0.0091%，2024 -0.0226%。事后LONG/SHORT分化仅作审计，不删方向。
+- 结论：**early gate失败 / 冻结 / 不扫transition窗口或概率阈值、不删方向、不反向、不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/conditional-return-sign-markov/2026-10-01-early-gate/`。
+
+## 2026-10-01 — v141：1h Range-Overlap Value Migration
+- 新机制：相邻完整1h high-low区间 overlap ratio 相对前24对均值首次下穿，视为price acceptance突然迁移；当前range midpoint上移LONG、下移SHORT，下一1h open。
+- 新6币 2023-2024：**26175 events，12h signed mean -0.0266%，2/6正，41.775次/币/周**；1h -0.0114%，4h -0.0373%。
+- 年度12h：2023 -0.0145%，2024 -0.0387%，两年均负。
+- 结论：**early gate失败 / 冻结 / 不扫overlap lookback或固定阈值、不加body/wick过滤、不删方向、不反向、不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/range-overlap-value-migration/2026-10-01-early-gate/`。
+
+## 2026-10-01 — Binance Holder Airdrop Support → LONG：Feasibility
+- Binance 官方 CMS catalogId=49 完整扫描2023-2024 **1071标题**；airdrop/distribution 标题候选12篇。
+- 按预注册排除 Launchpool/HODLer/BNSOL Super Stake/Wallet营销奖励、completion、稳定币分发、挖矿奖励与通用政策后，仅剩 **1个明确外部holder-airdrop事件：CHZ holders → 1000PEPPER**。
+- 原始语义 coverage 仅 **1事件/1 holder token**，低于最低8/8；因此 production eligibility、QV 与任何公告后收益均未读取。
+- 结论：**coverage blocked / 未看收益 / 冻结**。不把HODLer/Super Stake/稳定币补偿或cross-exchange airdrop并入凑样本、不入库。
+- 归档：`strategy_templates/research/binance-holder-airdrop-support-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance P2P Asset Addition → LONG：Feasibility
+- 复用已归档的 Binance CMS 2023-2024 完整1071-title corpus；其中 **29篇 P2P 标题**。
+- 按预注册只认“普通crypto首次加入P2P”，地区/法币corridor扩展不重复计token事件；USDC/FDUSD/TUSD按稳定币排除。最终只有 **WLD 1事件/1币**。
+- 原始语义coverage已低于最低8/8，因此production eligibility、QV和任何事件后收益均未读取。
+- 结论：**coverage blocked / 冻结**。不拆地区市场伪造样本、不加入稳定币、不与Spot/Convert/Pay事件合并、不入库。
+- 归档：`strategy_templates/research/binance-p2p-asset-addition-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance Token Trading-Fee Change：Feasibility
+- 2023-2024 Binance 官方 fee-title 审计按预注册定义保留 **8个独立普通crypto政策批次**；fee relief start/expand→LONG，fee relief end/reduce→SHORT；同一公告无论含多少token只计1批。
+- coverage gate 固定要求>=8个 production-eligible 独立批次。BETH zero-maker-fee 批次在事件月2023-04及2年前cutoff月2021-04均无 `BETHUSDT` Binance Vision USD-M 1h文件（404），因此最多只剩7批可能合格。
+- 结论：**coverage blocked / 未看任何事件后收益 / 冻结**。不拆公告伪造独立样本、不降低批次门槛、不并入P2P/法币/global fee政策、不入库。
+- 归档：`strategy_templates/research/binance-token-trading-fee-change/2023-2024-feasibility/`。
+
+## 2026-10-01 — Order-Flow Coherence：Early Gate
+- 新微观结构：过去60个完整1m，`signed_flow=2*TakerBuyQuoteVolume-QuoteVolume`，`coherence=|Σflow|/Σ|flow|`；首次由<=0.5上穿>0.5，净流正LONG、负SHORT。区别于小时净TakerBuyRatio和lag-1 flow autocorrelation。
+- 新6币2023-2024：**33067 events，12h signed mean -0.0751%，0/6正，52.7745次/币/周**；1h -0.0228%，4h -0.0359%。
+- 年度12h：2023 -0.0396%，2024 -0.1067%。事后方向拆分：LONG 9558 events +0.1007%，SHORT 23509 events -0.1466%，但禁止据此删SHORT救活。
+- 结论：combined frozen family 明确失败；**不扫30m/120m窗口、不扫0.4/0.6阈值、不删方向、不反向、不加trend/QPS/funding / 不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/order-flow-coherence/2026-10-01-early-gate/`。
+
+## 2026-10-01 — Binance Token-Burn Support → LONG：Feasibility
+- 复用 Binance CMS 2023-2024 完整1071-title corpus；burn关键词仅 **4篇**，全部为第22–25次 **BNB Auto-Burn 已完成报告**。
+- 按预注册只认“首次 Binance 将支持 protocol-level burn/supply reduction”，completion与同一BNB机制重复执行均排除；**qualifying events=0**。
+- coverage 在production eligibility和任何收益之前失败。
+- 结论：**coverage blocked / 未看收益 / 冻结**。不把BNB季度重复burn拆样本、不把完成报告改造成前瞻信号、不与外部治理/tokenomics burn合并、不入库。
+- 归档：`strategy_templates/research/binance-token-burn-support-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance Legacy Staking Asset Addition → LONG：Feasibility
+- Binance CMS 2023-2024 完整corpus中有19篇 staking 标题；按预注册只认 legacy Binance/Locked/DeFi Staking 的普通token首次新增，排除ETH/NFT/Loan、removal、Simple Earn、BNSOL/SOL liquid staking、Babylon BTC On-chain Yields。
+- 最终仅 **CVX 1事件/1币**（2023-06-14 DeFi Staking Adds Support for CVX）。
+- 原始coverage低于8/8，因此production eligibility、QV和任何事件后收益均未读取。
+- 结论：**coverage blocked / 冻结**。不合并新liquid/on-chain staking产品、不用APR促销或ETH/NFT事件凑样本、不入库。
+- 归档：`strategy_templates/research/binance-staking-asset-addition-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — Binance Proof-of-Reserves Asset Addition → LONG：Feasibility
+- Binance 官方 CMS catalogId=49 的 2023-2024 完整1071-title corpus中，精确 PoR 标题仅3篇：zk-SNARK方法升级、2023-03-08 Eleven New Tokens Supported、2024 collateral-info升级。
+- 按预注册定义，只有 **2023-03-08 一篇**属于“首次新增 PoR 资产”批次；其余2篇是方法/验证信息升级。
+- coverage gate要求 >=8合格token、>=8 unique且 **>=3独立批次**。独立批次仅1，因此在production eligibility、QV和任何收益读取前即失败；不会把一批11个token伪装成11个独立事件。
+- 结论：**coverage blocked / 未读市场数据与收益 / 冻结 / 不入库**。
+- 归档：`strategy_templates/research/binance-proof-of-reserves-asset-addition-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — Snapshot Governance Approval → LONG：Feasibility
+- 复用已归档的626个安全映射 Snapshot proposals；严格二元语法得到43个 clean binary proposals，其中正向选项胜出41、负向胜出2。
+- **41个 positive wins 全部来自 LDO / lido-snapshot.eth 单一token、单一space**（2023=24，2024=17）；预注册要求 >=4 token + >=4 independent spaces，因此在 production eligibility 前即失败。
+- 结论：**coverage blocked / 未读取 USD-M 历史资格、QV 或任何公告后收益 / 冻结 / 不入库**。不把大量LDO提案伪装成跨币证据，不放宽安全space映射。
+- 归档：`strategy_templates/research/snapshot-governance-approval-long/2023-2024-feasibility/`。
+
+## 2026-10-01 — v142：Interpretable Two-Split Fast-Move Discovery
+- 目的：在统一线性模型失败后，仅允许一个极小、可解释的非线性交互；2023 train、2024 validation，2025/2026保持未读。六币共用同一对称模型，无symbol特征；固定9个项目原生、DSL可翻译特征。
+- label严格围绕4x TP8/SL6 fast move：下一1m open按5bps adverse slippage入场，未来最多24h仅用1m close判TP/SL；TP先到reward +8，SL先到-6，未决样本不参与拟合/评估。
+- 2023 resolved **91,379/104,844**；固定depth-2 tree最终只使用 ret12_side / ret1_side / ret4_side。4个leaf的train mean reward分别 **+0.2993 / -0.0287 / +0.0307 / -0.3116**。
+- 最佳leaf仅+0.2993，低于预注册train selection阈值+1.0，因此 **selected leaves=0**；没有合法规则可进入2024 selected-validation。2024 pool虽已按冻结流程生成，但selected样本=0；2025/2026未读。
+- 结论：**冻结v142 / 不加树深、不扩quantile、不降reward gate、不减leaf size、不换特征、不改24h label / 不生成strict Engine策略 / 不入库**。
+- 归档：`strategy_templates/research/interpretable-two-split-fast-move/2026-10-01-discovery/`。
+
+## 2026-10-01 — v143：Funding Volatility Expansion Fade
+- 新机制：仅正常约8h funding cadence；最近3次settlement（约24h）funding标准差 / 此前21次（约7天）标准差首次由<=1上穿>1时，按最近3次funding合计符号做crowding fade：正→SHORT、负→LONG。为隔离已研究的interval-compression，参与当前/上一ratio的所有funding gap预先要求7.5h–8.5h。
+- 新6币 SOL/DOGE/LTC/AVAX/UNI/ZEC，2023-2024；下一完整1h open入场；2025/2026未读。
+- 结果：**863 events，12h signed mean +0.2197%，5/6正，1.3773次/币/周**；1h -0.0054%，4h -0.0069%。LONG 149 events +0.6627%，SHORT 714 events +0.1272%（方向拆分仅审计，不允许删方向）。
+- 年度12h：2023 **-0.0358%**，2024 **+0.4721%**。经济幅度/breadth/频率均过门，但预注册“两年均正”失败，判定明显regime-dependent。
+- 结论：**冻结v143 / 不扫3/21窗口、ratio阈值、cadence tolerance、不删方向、不反向、不加过滤 / 不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/funding-volatility-expansion-fade/2026-10-01-early-gate/`。
+
+## 2026-10-01 — Binance Borrow / Margin Interest-Rate Adjustment：Feasibility
+- 复用 Binance 官方 CMS catalogId=49 的2023-2024完整1071-title corpus；检索 interest rate / hourly interest / borrowing rate / loan rate。
+- 仅命中 **1篇**：2023-02-20 `Binance Margin Introduces Dynamic Interest Rate Updates`，属于通用动态利率机制公告，不是token级before/after利率调整。
+- **qualifying token-events=0**；因此production eligibility、行情和任何事件后收益均未读取。
+- 结论：**coverage blocked / 冻结**。不从当前动态利率规则反推历史token利率、不把Margin/Loan新增资产并入凑样本、不入库。
+- 归档：`strategy_templates/research/binance-borrow-interest-rate-adjustment/2023-2024-feasibility/`。
+
+## 2026-10-01 — v144：Confirmed 1h Williams-Fractal Breakout
+- 新OHLC结构：标准5-bar Williams fractal，只使用左右两侧都已完成后确认的局部swing；每个完整1h从过去24h选择最近已确认high/low fractal，fresh close上破LONG、下破SHORT，下一1h open。
+- 新6币2023-2024：**10035 events，12h signed mean -0.0776%，0/6正，16.0157次/币/周**；1h -0.0036%，4h -0.0418%。
+- 年度12h：2023 -0.0689%，2024 -0.0859%。LONG 5154 events +0.0171%、SHORT 4881 events -0.1776%仅作事后审计，禁止删SHORT救活。
+- 结论：**early gate明确失败 / 冻结 / 不扫12h/48h horizon、不改3/7-bar fractal、不加retest/trend/volume过滤、不删方向、不反向 / 不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/confirmed-williams-fractal-breakout/2026-10-01-early-gate/`。
+
+## 2026-10-01 — v145：Quote Ease of Movement(14) Zero-Cross
+- 新机制：每个完整1h计算 `EOM=(midpoint_t-midpoint_{t-1})*(High-Low)/QuoteVolume`，固定14根均值；零上穿LONG、零下穿SHORT，下一1h open。只用Engine已有High/Low/Amount，可直接DSL化。
+- 新6币2023-2024：**12085 events，12h signed mean -0.0201%，2/6正，19.2875次/币/周**；1h -0.0116%，4h -0.0355%。
+- 年度12h：2023 +0.0078%，2024 -0.0487%；LONG -0.0268%，SHORT -0.0134%。
+- 结论：**early gate失败 / 冻结 / 不扫EOM周期、阈值或平滑方式、不加过滤、不删方向、不反向 / 不进strict Engine / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/quote-ease-of-movement-14/2026-10-01-early-gate/`。
+
+## 2026-10-01 — Binance Portfolio Margin Collateral-Asset Addition → LONG：Feasibility
+- 复用 Binance 官方 CMS catalogId=49 的2023-2024完整1071-title corpus；Portfolio Margin / collateral asset 宽筛34篇，但绝大多数是collateral-ratio调整、Loan/VIP Loan collateral或通用program变化。
+- 真正直接“新增资产到Portfolio Margin支持”的标题只有 **1篇：2024-12-19 BFUSD**；BFUSD属于稳定币型margin/reward asset，不是目标普通crypto token。
+- 因此 qualifying ordinary-crypto events = **0**，低于8事件/8币门槛；production eligibility与任何收益均未读取。
+- 结论：**coverage blocked / 冻结**。不把ratio调整、Loan collateral、通用program变化或BFUSD类margin单位并入凑样本、不入库。
+- 归档：`strategy_templates/research/binance-portfolio-margin-collateral-asset-addition-long/2023-2024-feasibility/`。
+
+## 2026-10-02 — DeFiLlama Protocol TVL Momentum
+- 新基本面机制：复用既有 protocol→token 唯一映射 universe；每个协议的7个完整UTC日 TVL log-growth 零上穿 LONG、零下穿 SHORT，下一UTC日 USD-M open；动态资格仍为历史>=730天 + signal-day QV>=500万。
+- 初始 current-REST loader 因 CVX/SXP/BTCST 等历史/下架合约返回0/400产生survivorship bias，判为 invalid preflight 并单独保留；正式结果改用 Binance Vision 历史月档，**信号、universe、gate均未改变**。
+- corrected discovery 2023-2024：**1479 events / 17触发币，7d signed mean -0.7793%，4/17正，0.8331次/币/周**；1d -0.0640%，3d -0.4467%。
+- 年度7d：2023 **-0.4588%**，2024 **-1.0865%**；LONG 735 events -0.8306%，SHORT 744 events -0.7285%。
+- 结论：经济幅度、breadth、两年方向均明确失败；**冻结 / 不扫3d/14d/30d窗口、不加TVL-size/category过滤、不删方向、不residualize、不反向 / 2025+未评估 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/defillama-protocol-tvl-momentum/2026-10-02-discovery/`。
+
+## 2026-10-02 — v146：20h Quote-Volume-Weighted Close Reclaim
+- 项目原生机制：过去20个完整1h用 QuoteAssetVolume 加权 Close 得到 QVWC20；已完成1h close 新穿越 QVWC20 后，当前价再突破 trigger-bar 高/低确认；无EMA/ADX/funding/taker/time过滤，strict exit `ROI >= 8 || ROI <= -6`。
+- 新6币 2023-2024 strict Engine：**6202笔，normalized PF 0.822533，0/6正，9.8983次/币/周**；LONG 3230、SHORT 2972。
+- 年度：2023 2618笔 PF **0.813249**；2024 3584笔 PF **0.829465**。逐币PF全部0.795~0.869；3617 SL / 2583 TP。
+- 结论：高频但跨币/跨年稳定负期望；**冻结v146 / 不扫QVWC周期、不替换true VWAP、不加过滤、不删方向、不反向 / 2025+未读 / 不入库**。
+- 归档：`strategy_templates/research/quote-volume-weighted-close-20h-reclaim/2026-10-01-discovery/`。

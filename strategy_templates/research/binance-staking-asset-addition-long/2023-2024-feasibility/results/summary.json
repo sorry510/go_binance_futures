@@ -1,0 +1,10 @@
+{
+  "staking_titles": 19,
+  "qualifying_legacy_staking_additions": 1,
+  "qualifying_tokens": [
+    "CVX"
+  ],
+  "coverage_gate_pass": false,
+  "production_eligibility_read": false,
+  "post_event_returns_read": false
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "release_time": 1728374404774,
+    "code": "4f03ed5cff314855a4a906ae8614d731",
+    "title": "Proof of Reserves (PoR) Verification System Upgrade: Addition of Asset Collateral Information"
+  },
+  {
+    "release_time": 1678196166727,
+    "code": "5034cfa4b33d4b92bd583ed1c3edace3",
+    "title": "Proof of Reserves (PoR) System Upgrade: Eleven New Tokens Supported"
+  },
+  {
+    "release_time": 1676019604545,
+    "code": "d8e1e2ed54d343c1b40bf812f0914236",
+    "title": "Binance Proof of Reserves Verification System Upgrade: Introducing zk-SNARKs"
+  }
+]

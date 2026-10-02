@@ -1,0 +1,25 @@
+{
+  "candidate_events": 14,
+  "candidate_unique_tokens": 14,
+  "eligible_events": 3,
+  "eligible_unique_tokens": 3,
+  "coverage_gate_pass": false,
+  "excluded_by_reason": {
+    "history_lt_2y_or_missing": 11
+  },
+  "post_event_returns_read": false
+}
+ELIGIBLE MATIC QV=219030662.03
+ELIGIBLE TOMO QV=38005324.90
+ELIGIBLE SXP QV=12989807.34
+EXCLUDED FRONT history_lt_2y_or_missing 
+EXCLUDED RNDR history_lt_2y_or_missing 
+EXCLUDED STRAX history_lt_2y_or_missing 
+EXCLUDED PLA history_lt_2y_or_missing 
+EXCLUDED TVK history_lt_2y_or_missing 
+EXCLUDED MC history_lt_2y_or_missing 
+EXCLUDED AVA history_lt_2y_or_missing 
+EXCLUDED QUICK history_lt_2y_or_missing 
+EXCLUDED COCOS history_lt_2y_or_missing 
+EXCLUDED BNX history_lt_2y_or_missing 
+EXCLUDED GTO history_lt_2y_or_missing 

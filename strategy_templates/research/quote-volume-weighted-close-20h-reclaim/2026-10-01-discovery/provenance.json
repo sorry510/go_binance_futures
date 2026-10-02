@@ -1,1 +1,15 @@
-{"research_date":"2026-10-01","repository":"/Users/zhz/work/binance/go_binance_futures","engine":"service/backtest current working tree","data":"existing 1h Close + QuoteAssetVolume only","external_data":false,"db_write":false}
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "version":"v146",
+  "pre_outcome_identifier_correction":"Directory skeleton originally reused label v124, which conflicts with the existing MACD v124. Before any QVWC returns were run, identifier-only rename v124 -> v146 was applied; strategy logic and gates were unchanged.",
+  "engine":"service/backtest current working tree",
+  "database":"go_bn_test read-only",
+  "data":"existing project 1m execution data and 1h Close + QuoteAssetVolume",
+  "external_data":false,
+  "canonical_exit_rule":"ROI >= 8 || ROI <= -6",
+  "oos1_evaluated":false,
+  "oos2_evaluated":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

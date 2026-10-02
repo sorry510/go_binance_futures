@@ -1,0 +1,12 @@
+{
+  "research_date":"2026-10-01",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "database":"go_bn_test read-only",
+  "market_data":"project-local Binance USD-M funding + 1h Klines",
+  "repository_source":null,
+  "external_data":false,
+  "app_conf_modified":false,
+  "db_write":false,
+  "oos_2025_plus_read":false,
+  "strict_engine_run":false
+}

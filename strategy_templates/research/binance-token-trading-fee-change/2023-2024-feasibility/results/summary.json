@@ -1,0 +1,105 @@
+{
+  "raw_qualifying_batches": 8,
+  "production_eligible_batches": 7,
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false,
+  "batch_results": [
+    {
+      "code": "be13a645cca643d28eab5b9b34f2dc36",
+      "title": "Updates on Zero-Fee Bitcoin Trading & BUSD Zero Maker Fee Promotion",
+      "side": "SHORT",
+      "eligible_tokens": [
+        "BNB",
+        "ETH"
+      ],
+      "eligible_batch": true
+    },
+    {
+      "code": "be80aa20ded345f58e963951899e3eff",
+      "title": "Binance Launches BETH Zero Maker Fee Promotion",
+      "side": "LONG",
+      "eligible_tokens": [],
+      "eligible_batch": false
+    },
+    {
+      "code": "a376bf14673044e0a1fae8fe60cb0700",
+      "title": "Binance Launches TUSD Zero Maker Fee Promotion and Updates Fee Promotions for BUSD & USD Stablecoin Pairs",
+      "side": "LONG",
+      "eligible_tokens": [
+        "BNB",
+        "BTC",
+        "ETH"
+      ],
+      "eligible_batch": true
+    },
+    {
+      "code": "9f438c4249ff45deb34cb9f727f99f83",
+      "title": "Updates on Zero-Fee Bitcoin Trading (2023-09-07)",
+      "side": "SHORT",
+      "eligible_tokens": [
+        "BTC"
+      ],
+      "eligible_batch": true
+    },
+    {
+      "code": "3d8514bbc817423eba52fb23483bcbed",
+      "title": "Binance Updates the FDUSD Zero Trading Fee Promotion for Regular and VIP 1 Users",
+      "side": "SHORT",
+      "eligible_tokens": [
+        "BNB",
+        "BTC",
+        "DOGE",
+        "ETH",
+        "LINK",
+        "SOL",
+        "XRP"
+      ],
+      "eligible_batch": true
+    },
+    {
+      "code": "8fbe902e90ec477780c18b98a5544acb",
+      "title": "Binance Introduces Taker Fee Promotion for Spot and Margin Altcoin Trading Pairs",
+      "side": "LONG",
+      "eligible_tokens": [
+        "NEAR",
+        "LTC",
+        "BCH",
+        "LINK",
+        "ETC"
+      ],
+      "eligible_batch": true
+    },
+    {
+      "code": "215c30c2dae2483b98b2379dfe73abbe",
+      "title": "Updates on Taker Fee Promotion for Spot and Margin Altcoin Trading Pairs",
+      "side": "SHORT",
+      "eligible_tokens": [
+        "NEAR",
+        "OP",
+        "LTC",
+        "BCH",
+        "LINK",
+        "ETC"
+      ],
+      "eligible_batch": true
+    },
+    {
+      "code": "e47b316081a44aeca6e133b3e6c5a897",
+      "title": "Updates on Zero-Fee Trading for TUSD Spot and Margin Trading Pairs",
+      "side": "SHORT",
+      "eligible_tokens": [
+        "ADA",
+        "AVAX",
+        "BCH",
+        "BNB",
+        "BTC",
+        "DOGE",
+        "ETH",
+        "MATIC",
+        "SOL",
+        "XRP"
+      ],
+      "eligible_batch": true
+    }
+  ]
+}

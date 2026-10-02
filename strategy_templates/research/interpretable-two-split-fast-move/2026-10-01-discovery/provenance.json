@@ -1,0 +1,10 @@
+{
+  "research_date":"2026-10-01",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "database":"go_bn_test read-only",
+  "protocol_correction_before_returns":"trade_ratio_8h replaced by taker_delta_8h_side because KLinePrice/DSL does not expose trade_count",
+  "results_observed_before_correction":false,
+  "oos_2025_2026_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

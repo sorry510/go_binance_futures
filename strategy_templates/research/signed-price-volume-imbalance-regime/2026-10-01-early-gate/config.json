@@ -1,0 +1,15 @@
+{
+  "family":"signed-price-volume-imbalance-regime",
+  "version":"v137",
+  "run_id":"2026-10-01-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "lookback_hours":24,
+  "score":"mean over last 24 completed 1h bars of (2*TakerBuyQuoteVolume - QuoteVolume)",
+  "signal":"score zero-cross; up-cross LONG, down-cross SHORT",
+  "entry":"next complete 1h open",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless early gate passes",
+  "db_write":false
+}

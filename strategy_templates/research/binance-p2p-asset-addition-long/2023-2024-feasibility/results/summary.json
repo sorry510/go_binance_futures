@@ -1,0 +1,11 @@
+{
+  "all_titles": 1071,
+  "p2p_titles": 29,
+  "qualifying_ordinary_crypto_first_additions": 1,
+  "qualifying_tokens": [
+    "WLD"
+  ],
+  "coverage_gate_pass": false,
+  "production_eligibility_read": false,
+  "post_event_returns_read": false
+}

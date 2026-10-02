@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-01",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "event_source":"Binance official CMS catalogId=49",
+  "title_corpus":"saved 2023-2024 Latest Binance News census",
+  "market_eligibility_source":"Binance Vision USD-M monthly 1h",
+  "blocking_check":{"BETHUSDT_2021_04":404,"BETHUSDT_2023_04":404},
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

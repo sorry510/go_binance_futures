@@ -1,0 +1,11 @@
+[
+  {"symbol":"FTMUSDT","unlock_date":"2024-03-01","unlock_type":"cliff","unlock_pct_of_supply":1.5,"recipient_category":"ecosystem","days_from_listing":1628},
+  {"symbol":"IMXUSDT","unlock_date":"2024-02-14","unlock_type":"cliff","unlock_pct_of_supply":2.31,"recipient_category":"investor","days_from_listing":830},
+  {"symbol":"AXSUSDT","unlock_date":"2024-10-25","unlock_type":"linear","unlock_pct_of_supply":8.35,"recipient_category":"team+investor","days_from_listing":1451},
+  {"symbol":"RONUSDT","unlock_date":"2024-10-28","unlock_type":"cliff","unlock_pct_of_supply":9.89,"recipient_category":"investor+team","days_from_listing":1090},
+  {"symbol":"APTUSDT","unlock_date":"2024-11-12","unlock_type":"cliff","unlock_pct_of_supply":2.02,"recipient_category":"team+investor","days_from_listing":755},
+  {"symbol":"APTUSDT","unlock_date":"2025-01-12","unlock_type":"cliff","unlock_pct_of_supply":2.02,"recipient_category":"team+investor","days_from_listing":816},
+  {"symbol":"IDUSDT","unlock_date":"2025-03-22","unlock_type":"cliff","unlock_pct_of_supply":8.2,"recipient_category":"team+investor","days_from_listing":731},
+  {"symbol":"FETUSDT","unlock_date":"2025-03-14","unlock_type":"cliff","unlock_pct_of_supply":1.85,"recipient_category":"team+investor","days_from_listing":2162},
+  {"symbol":"SEIUSDT","unlock_date":"2025-08-15","unlock_type":"linear","unlock_pct_of_supply":2.45,"recipient_category":"team+investor","days_from_listing":732}
+]

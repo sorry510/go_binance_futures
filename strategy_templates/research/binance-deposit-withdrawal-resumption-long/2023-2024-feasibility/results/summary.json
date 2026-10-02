@@ -1,0 +1,9 @@
+{
+  "status":"frozen_coverage_blocked",
+  "raw_events":1,
+  "unique_tokens":1,
+  "candidate_tokens":["TORN"],
+  "raw_coverage_gate_pass":false,
+  "production_eligibility_evaluated":false,
+  "post_event_returns_read":false
+}

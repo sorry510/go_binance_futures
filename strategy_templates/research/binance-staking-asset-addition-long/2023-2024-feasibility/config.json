@@ -1,0 +1,15 @@
+{
+  "family":"binance-staking-asset-addition-long",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance official CMS catalogId=49 complete 2023-2024 corpus",
+  "event_definition":"first explicit addition/launch of ordinary crypto staking support on legacy Binance Staking / Locked Staking / DeFi Staking product",
+  "direction_if_eligible":"LONG",
+  "exclusions":["Simple Earn","ETH Staking generic updates","Launchpool","promotional APR-only offers","removals","completion notices","BNB-only generic staking platform changes"],
+  "deduplication":"one first-support event per token",
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "minimum_eligible_events":8,
+  "minimum_unique_tokens":8,
+  "return_evaluation_before_coverage_gate":false,
+  "db_write":false
+}

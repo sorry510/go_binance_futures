@@ -1,0 +1,10 @@
+[
+  {
+    "release_time": 1734595216057,
+    "article_code": "a373a20da4de43cca7b84a60e481f31b",
+    "title": "Binance Futures to Support BFUSD on Portfolio Margin Accounts",
+    "asset": "BFUSD",
+    "classification": "stablecoin_like_margin_asset",
+    "qualifying_ordinary_crypto": false
+  }
+]

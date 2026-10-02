@@ -1,0 +1,100 @@
+[
+  {
+    "release_time": 1673849404583,
+    "code": "2300adb470e54d4ba8db292e54e85a93",
+    "title": "Binance Will Support the Gifto (GTO) Token Swap to Gifto (GFT)",
+    "ticker": "GTO",
+    "symbol": "GTOUSDT"
+  },
+  {
+    "release_time": 1676003403357,
+    "code": "4d23ada51a2e4fa182835c77d51ba1a9",
+    "title": "Binance Will Support the BinaryX (BNX) Token Swap and Redenomination Plan",
+    "ticker": "BNX",
+    "symbol": "BNXUSDT"
+  },
+  {
+    "release_time": 1679972707972,
+    "code": "73bded28e8dc48e081c5e577a5436c55",
+    "title": "Binance Will Support the Swipe (SXP) Mainnet Swap & Rebranding Plan to Solar (SXP)",
+    "ticker": "SXP",
+    "symbol": "SXPUSDT"
+  },
+  {
+    "release_time": 1684385704452,
+    "code": "45852dc155b641bc9e1c23bc41d8ded6",
+    "title": "Binance Will Support the Cocos-BCX (COCOS) Token Swap & Rebranding Plan to COMBO (COMBO)",
+    "ticker": "COCOS",
+    "symbol": "COCOSUSDT"
+  },
+  {
+    "release_time": 1688996402375,
+    "code": "50b38ae7b25a45a7854c94ab67a1e7d0",
+    "title": "Binance Will Support the QuickSwap (QUICK) Token Swap and Redenomination Plan",
+    "ticker": "QUICK",
+    "symbol": "QUICKUSDT"
+  },
+  {
+    "release_time": 1692846310311,
+    "code": "f2abc33b6b2c4b1489173a077f883277",
+    "title": "Binance Will Support the Travala.com (AVA) Contract Swap and Rebranding Plan to AVA (AVA)",
+    "ticker": "AVA",
+    "symbol": "AVAUSDT"
+  },
+  {
+    "release_time": 1698210303314,
+    "code": "0b171519f1824ee288af7343ec91ce33",
+    "title": "Binance Will Support the Merit Circle (MC) Token Swap, Redenomination and Rebranding to Beam (BEAMX)",
+    "ticker": "MC",
+    "symbol": "MCUSDT"
+  },
+  {
+    "release_time": 1699263014259,
+    "code": "034eee2293964e26b915b1ec5c42972a",
+    "title": "Binance Will Support the TomoChain (TOMO) Rebranding to Viction (VIC)",
+    "ticker": "TOMO",
+    "symbol": "TOMOUSDT"
+  },
+  {
+    "release_time": 1700191803293,
+    "code": "1493a2222fa549ce93f7101abe0941bf",
+    "title": "Binance Will Support the Virtua (TVK) Token Swap and Rebranding to Vanar (VANRY)",
+    "ticker": "TVK",
+    "symbol": "TVKUSDT"
+  },
+  {
+    "release_time": 1708580405142,
+    "code": "f0fafa66fedf4e058aaacb57c206c597",
+    "title": "Binance Will Support the PlayDapp (PLA) Token Swap to PlayDapp (PDA)",
+    "ticker": "PLA",
+    "symbol": "PLAUSDT"
+  },
+  {
+    "release_time": 1709886631005,
+    "code": "2e6eb8e644664a6ca7b6659a226c41b0",
+    "title": "Binance Will Support the Stratis (STRAX) Token Swap and Redenomination Plan",
+    "ticker": "STRAX",
+    "symbol": "STRAXUSDT"
+  },
+  {
+    "release_time": 1720593003071,
+    "code": "d1f2ae8d99b24439a7a900caa9bb6b3b",
+    "title": "Binance Will Support the Render (RNDR) Token Swap and Rebranding to Render (RENDER)",
+    "ticker": "RNDR",
+    "symbol": "RNDRUSDT"
+  },
+  {
+    "release_time": 1724065220299,
+    "code": "3ab5488a00e04d4fb338c77ea28326a8",
+    "title": "Binance Will Support the Frontier (FRONT) Token Swap and Rebranding to Self Chain (SLF)",
+    "ticker": "FRONT",
+    "symbol": "FRONTUSDT"
+  },
+  {
+    "release_time": 1724835607402,
+    "code": "6a6de383727f4659a3050f7982e1620f",
+    "title": "Binance Will Support the Polygon (MATIC) Token Swap to Polygon (POL)",
+    "ticker": "MATIC",
+    "symbol": "MATICUSDT"
+  }
+]

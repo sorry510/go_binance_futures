@@ -1,0 +1,144 @@
+[
+  {
+    "code": "be13a645cca643d28eab5b9b34f2dc36",
+    "release_time": 1678860602973,
+    "title": "Updates on Zero-Fee Bitcoin Trading & BUSD Zero Maker Fee Promotion",
+    "side": "SHORT",
+    "tokens": [
+      "BNB",
+      "ETH"
+    ],
+    "note": "mixed article; only unambiguous BNB/ETH BUSD fee-relief removal retained, BTC excluded"
+  },
+  {
+    "code": "be80aa20ded345f58e963951899e3eff",
+    "release_time": 1681099204332,
+    "title": "Binance Launches BETH Zero Maker Fee Promotion",
+    "side": "LONG",
+    "tokens": [
+      "BETH"
+    ],
+    "note": "BETH zero maker fee starts"
+  },
+  {
+    "code": "a376bf14673044e0a1fae8fe60cb0700",
+    "release_time": 1687348211953,
+    "title": "Binance Launches TUSD Zero Maker Fee Promotion and Updates Fee Promotions for BUSD & USD Stablecoin Pairs",
+    "side": "LONG",
+    "tokens": [
+      "BNB",
+      "BTC",
+      "ETH"
+    ],
+    "note": "TUSD fee relief starts; explicit ordinary crypto bases"
+  },
+  {
+    "code": "9f438c4249ff45deb34cb9f727f99f83",
+    "release_time": 1692849648993,
+    "title": "Updates on Zero-Fee Bitcoin Trading (2023-09-07)",
+    "side": "SHORT",
+    "tokens": [
+      "BTC"
+    ],
+    "note": "BTC/TUSD taker zero-fee relief reduced"
+  },
+  {
+    "code": "3d8514bbc817423eba52fb23483bcbed",
+    "release_time": 1713344409179,
+    "title": "Binance Updates the FDUSD Zero Trading Fee Promotion for Regular and VIP 1 Users",
+    "side": "SHORT",
+    "tokens": [
+      "BNB",
+      "BTC",
+      "DOGE",
+      "ETH",
+      "LINK",
+      "SOL",
+      "XRP"
+    ],
+    "note": "FDUSD taker fee relief reduced for explicit pairs"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "release_time": 1715670028686,
+    "title": "Binance Introduces Taker Fee Promotion for Spot and Margin Altcoin Trading Pairs",
+    "side": "LONG",
+    "tokens": [
+      "PEPE",
+      "STRK",
+      "ENA",
+      "SUI",
+      "WIF",
+      "NEAR",
+      "OP",
+      "BONK",
+      "LTC",
+      "FET",
+      "ORDI",
+      "BCH",
+      "W",
+      "ARB",
+      "LINK",
+      "TIA",
+      "ETC",
+      "APT",
+      "RNDR",
+      "WLD"
+    ],
+    "note": "altcoin taker-fee promotion starts"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "release_time": 1718784032941,
+    "title": "Updates on Taker Fee Promotion for Spot and Margin Altcoin Trading Pairs",
+    "side": "SHORT",
+    "tokens": [
+      "PEPE",
+      "STRK",
+      "ENA",
+      "SUI",
+      "WIF",
+      "NEAR",
+      "OP",
+      "BONK",
+      "LTC",
+      "FET",
+      "ORDI",
+      "BCH",
+      "W",
+      "ARB",
+      "LINK",
+      "TIA",
+      "ETC",
+      "APT",
+      "RNDR",
+      "WLD"
+    ],
+    "note": "same altcoin promotion ends"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "release_time": 1720512015036,
+    "title": "Updates on Zero-Fee Trading for TUSD Spot and Margin Trading Pairs",
+    "side": "SHORT",
+    "tokens": [
+      "ADA",
+      "ARB",
+      "ARKM",
+      "AVAX",
+      "BCH",
+      "BNB",
+      "BTC",
+      "CYBER",
+      "DOGE",
+      "ETH",
+      "MATIC",
+      "MAV",
+      "PEPE",
+      "SOL",
+      "SUI",
+      "XRP"
+    ],
+    "note": "TUSD zero-maker relief ends on explicit pairs"
+  }
+]

@@ -1,0 +1,9 @@
+TOTAL train_resolved=91379 validation_resolved=99827 candidates2023=104844 candidates2024=105132 unresolved2023=13465 unresolved2024=5305
+LEAF 1 n=4116 meanReward=0.299320 selected=false path= ret12_side<=-0.02973393 ret1_side<=-0.00364252
+LEAF 2 n=5022 meanReward=-0.028674 selected=false path= ret12_side<=-0.02973393 ret1_side>-0.00364252
+LEAF 3 n=5084 meanReward=0.030685 selected=false path= ret12_side>-0.02973393 ret4_side<=-0.01658932
+LEAF 4 n=77157 meanReward=-0.311598 selected=false path= ret12_side>-0.02973393 ret4_side>-0.01658932
+TREE leaves=4 selected_leaves=0
+TRAIN_SELECTED n=0 meanReward=0
+VALID_SELECTED n=0 meanReward=0 positive=0/6
+GATE pass=false

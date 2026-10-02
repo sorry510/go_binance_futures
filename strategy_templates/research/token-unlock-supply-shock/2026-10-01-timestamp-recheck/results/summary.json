@@ -1,0 +1,16 @@
+{
+  "status":"frozen_timestamp_coverage_blocked",
+  "fixed_events":9,
+  "fixed_unique_symbols":8,
+  "paper_csv_has_exact_timestamp":false,
+  "paper_csv_public_versions_checked":1,
+  "paper_csv_public_history_has_older_timestamped_version":false,
+  "paper_documentation_claims_exact_timestamp":true,
+  "documentation_file_mismatch":true,
+  "single_public_source_with_complete_exact_timestamp_coverage_found":false,
+  "partial_event_timestamp_discoverability_accepted":false,
+  "exact_1m_replay_run":false,
+  "new_post_event_returns_read":false,
+  "oos_or_parameter_tuning":false,
+  "reopen_condition":"obtain independently verifiable exact UTC timestamps for all 9 frozen events without outcome- or availability-based event selection"
+}

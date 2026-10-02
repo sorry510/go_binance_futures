@@ -1,0 +1,13 @@
+{
+  "research_date":"2026-10-01",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "git_head":"8166dd4c59143158923f8bf93e2a4006a05d0f71",
+  "event_source":"Binance official CMS catalogId=49",
+  "title_count_2023_2024":1071,
+  "keyword_title_candidates":30,
+  "first_support_candidates":14,
+  "market_data_source":"Binance Vision USD-M monthly 1h klines",
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

@@ -1,0 +1,21 @@
+{
+  "name": "v133 1m QPS Record-Burst Continuation",
+  "technology": {
+    "ma": [],
+    "ema": [{"name":"ema_1m_64","enable":true,"kline_interval":"1m","period":64}],
+    "macd": [], "adx": [], "mfi": [], "obv": [], "cci": [], "roc": [],
+    "kdj": [], "rsi": [], "kc": [], "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name":"v133_long","type":"long","enable":true,"fullScreen":false,
+      "code":"let burst = all(kline_1m.Qps[1:61], # < kline_1m.Qps[0]);\nlet direction = kline_1m.Close[0] > kline_1m.Open[0];\nburst && direction"
+    },
+    {
+      "name":"v133_short","type":"short","enable":true,"fullScreen":false,
+      "code":"let burst = all(kline_1m.Qps[1:61], # < kline_1m.Qps[0]);\nlet direction = kline_1m.Close[0] < kline_1m.Open[0];\nburst && direction"
+    },
+    {"name":"v133_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v133_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

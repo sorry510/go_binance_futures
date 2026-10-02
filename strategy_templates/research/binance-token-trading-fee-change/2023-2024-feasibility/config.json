@@ -1,0 +1,12 @@
+{
+  "family":"binance-token-trading-fee-change",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance official CMS catalogId=49",
+  "event":"explicit token-level Spot/Margin trading-fee relief start/expansion or end/reduction",
+  "direction":"fee relief start/expansion LONG; fee relief end/reduction SHORT",
+  "minimum_independent_batches":8,
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "returns_before_coverage_gate":false,
+  "db_write":false
+}

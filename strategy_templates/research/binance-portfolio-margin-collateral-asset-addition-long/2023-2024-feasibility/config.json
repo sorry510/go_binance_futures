@@ -1,0 +1,10 @@
+{
+  "family": "binance-portfolio-margin-collateral-asset-addition-long",
+  "period": "2023-2024",
+  "source": "Binance CMS catalogId=49 frozen 1071-title corpus",
+  "direction_if_eligible": "LONG",
+  "minimum_events": 8,
+  "minimum_unique_tokens": 8,
+  "ordinary_crypto_only": true,
+  "db_write": false
+}

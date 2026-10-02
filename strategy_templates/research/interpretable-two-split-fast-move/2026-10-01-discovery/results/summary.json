@@ -1,0 +1,74 @@
+{
+  "gate": {
+    "min_positive_symbols": 4,
+    "min_validation_mean_reward": 0.5,
+    "min_validation_samples": 1000,
+    "pass": false
+  },
+  "oos_2025_2026_read": false,
+  "selected_leaf_count": 0,
+  "status": "frozen_failed_validation",
+  "strict_engine_run": false,
+  "train_candidates": 104844,
+  "train_resolved_samples": 91379,
+  "train_selected_mean_reward": 0,
+  "train_selected_n": 0,
+  "train_unresolved": 13465,
+  "train_year": 2023,
+  "tree_leaf_count": 4,
+  "validation_by_leaf": {},
+  "validation_by_symbol": {
+    "AVAXUSDT": {
+      "long": 0,
+      "mean_reward": 0,
+      "n": 0,
+      "short": 0
+    },
+    "DOGEUSDT": {
+      "long": 0,
+      "mean_reward": 0,
+      "n": 0,
+      "short": 0
+    },
+    "LTCUSDT": {
+      "long": 0,
+      "mean_reward": 0,
+      "n": 0,
+      "short": 0
+    },
+    "SOLUSDT": {
+      "long": 0,
+      "mean_reward": 0,
+      "n": 0,
+      "short": 0
+    },
+    "UNIUSDT": {
+      "long": 0,
+      "mean_reward": 0,
+      "n": 0,
+      "short": 0
+    },
+    "ZECUSDT": {
+      "long": 0,
+      "mean_reward": 0,
+      "n": 0,
+      "short": 0
+    }
+  },
+  "validation_candidates": 105132,
+  "validation_long": {
+    "mean_reward": 0,
+    "n": 0
+  },
+  "validation_positive_symbols": "0/6",
+  "validation_resolved_samples": 99827,
+  "validation_selected_mean_reward": 0,
+  "validation_selected_n": 0,
+  "validation_short": {
+    "mean_reward": 0,
+    "n": 0
+  },
+  "validation_unresolved": 5305,
+  "validation_year": 2024,
+  "version": "v142"
+}

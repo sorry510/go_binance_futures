@@ -1,0 +1,12 @@
+[
+  {
+    "asset": "BTCST",
+    "slug": "btcst",
+    "error": "HTTP Error 400: Bad Request"
+  },
+  {
+    "asset": "SXP",
+    "slug": "swipe",
+    "error": "HTTP Error 400: Bad Request"
+  }
+]

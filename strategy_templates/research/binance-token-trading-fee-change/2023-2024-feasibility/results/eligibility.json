@@ -1,0 +1,666 @@
+[
+  {
+    "code": "be13a645cca643d28eab5b9b34f2dc36",
+    "ticker": "BNB",
+    "symbol": "BNBUSDT",
+    "side": "SHORT",
+    "release_time": 1678860602973,
+    "quote_volume_24h": 809609591.66917,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "be13a645cca643d28eab5b9b34f2dc36",
+    "ticker": "ETH",
+    "symbol": "ETHUSDT",
+    "side": "SHORT",
+    "release_time": 1678860602973,
+    "quote_volume_24h": 15346730110.298843,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "be80aa20ded345f58e963951899e3eff",
+    "ticker": "BETH",
+    "symbol": "BETHUSDT",
+    "side": "LONG",
+    "release_time": 1681099204332,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "a376bf14673044e0a1fae8fe60cb0700",
+    "ticker": "BNB",
+    "symbol": "BNBUSDT",
+    "side": "LONG",
+    "release_time": 1687348211953,
+    "quote_volume_24h": 711169118.6602103,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "a376bf14673044e0a1fae8fe60cb0700",
+    "ticker": "BTC",
+    "symbol": "BTCUSDT",
+    "side": "LONG",
+    "release_time": 1687348211953,
+    "quote_volume_24h": 25769894206.776653,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "a376bf14673044e0a1fae8fe60cb0700",
+    "ticker": "ETH",
+    "symbol": "ETHUSDT",
+    "side": "LONG",
+    "release_time": 1687348211953,
+    "quote_volume_24h": 7681633274.1359,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "9f438c4249ff45deb34cb9f727f99f83",
+    "ticker": "BTC",
+    "symbol": "BTCUSDT",
+    "side": "SHORT",
+    "release_time": 1692849648993,
+    "quote_volume_24h": 10695771204.83927,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "3d8514bbc817423eba52fb23483bcbed",
+    "ticker": "BNB",
+    "symbol": "BNBUSDT",
+    "side": "SHORT",
+    "release_time": 1713344409179,
+    "quote_volume_24h": 616911704.9770399,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "3d8514bbc817423eba52fb23483bcbed",
+    "ticker": "BTC",
+    "symbol": "BTCUSDT",
+    "side": "SHORT",
+    "release_time": 1713344409179,
+    "quote_volume_24h": 22546101008.707542,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "3d8514bbc817423eba52fb23483bcbed",
+    "ticker": "DOGE",
+    "symbol": "DOGEUSDT",
+    "side": "SHORT",
+    "release_time": 1713344409179,
+    "quote_volume_24h": 1397878767.4422,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "3d8514bbc817423eba52fb23483bcbed",
+    "ticker": "ETH",
+    "symbol": "ETHUSDT",
+    "side": "SHORT",
+    "release_time": 1713344409179,
+    "quote_volume_24h": 8749590882.431858,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "3d8514bbc817423eba52fb23483bcbed",
+    "ticker": "LINK",
+    "symbol": "LINKUSDT",
+    "side": "SHORT",
+    "release_time": 1713344409179,
+    "quote_volume_24h": 215097376.69215,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "3d8514bbc817423eba52fb23483bcbed",
+    "ticker": "SOL",
+    "symbol": "SOLUSDT",
+    "side": "SHORT",
+    "release_time": 1713344409179,
+    "quote_volume_24h": 4159292122.085,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "3d8514bbc817423eba52fb23483bcbed",
+    "ticker": "XRP",
+    "symbol": "XRPUSDT",
+    "side": "SHORT",
+    "release_time": 1713344409179,
+    "quote_volume_24h": 690632813.5422398,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "PEPE",
+    "symbol": "1000PEPEUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "STRK",
+    "symbol": "STRKUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "ENA",
+    "symbol": "ENAUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "SUI",
+    "symbol": "SUIUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "WIF",
+    "symbol": "WIFUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "NEAR",
+    "symbol": "NEARUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "quote_volume_24h": 427884436.2199999,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "OP",
+    "symbol": "OPUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "BONK",
+    "symbol": "1000BONKUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "LTC",
+    "symbol": "LTCUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "quote_volume_24h": 166662265.10473993,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "ORDI",
+    "symbol": "ORDIUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "BCH",
+    "symbol": "BCHUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "quote_volume_24h": 157729439.77468,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "W",
+    "symbol": "WUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "ARB",
+    "symbol": "ARBUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "LINK",
+    "symbol": "LINKUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "quote_volume_24h": 148963550.21252003,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "TIA",
+    "symbol": "TIAUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "ETC",
+    "symbol": "ETCUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "quote_volume_24h": 170584922.59623003,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "APT",
+    "symbol": "APTUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "RNDR",
+    "symbol": "RNDRUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "8fbe902e90ec477780c18b98a5544acb",
+    "ticker": "WLD",
+    "symbol": "WLDUSDT",
+    "side": "LONG",
+    "release_time": 1715670028686,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "PEPE",
+    "symbol": "1000PEPEUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "STRK",
+    "symbol": "STRKUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "ENA",
+    "symbol": "ENAUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "SUI",
+    "symbol": "SUIUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "WIF",
+    "symbol": "WIFUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "NEAR",
+    "symbol": "NEARUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "quote_volume_24h": 230269851.927,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "OP",
+    "symbol": "OPUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "quote_volume_24h": 195179878.43184,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "BONK",
+    "symbol": "1000BONKUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "LTC",
+    "symbol": "LTCUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "quote_volume_24h": 181662973.48000997,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "FET",
+    "symbol": "FETUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "ORDI",
+    "symbol": "ORDIUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "BCH",
+    "symbol": "BCHUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "quote_volume_24h": 174163888.34012994,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "W",
+    "symbol": "WUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "ARB",
+    "symbol": "ARBUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "LINK",
+    "symbol": "LINKUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "quote_volume_24h": 244215977.72759,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "TIA",
+    "symbol": "TIAUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "ETC",
+    "symbol": "ETCUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "quote_volume_24h": 171829210.08709002,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "APT",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "RNDR",
+    "symbol": "RNDRUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "215c30c2dae2483b98b2379dfe73abbe",
+    "ticker": "WLD",
+    "symbol": "WLDUSDT",
+    "side": "SHORT",
+    "release_time": 1718784032941,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "ADA",
+    "symbol": "ADAUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 263640283.1876,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "ARB",
+    "symbol": "ARBUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "ARKM",
+    "symbol": "ARKMUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "AVAX",
+    "symbol": "AVAXUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 286281797.37200004,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "BCH",
+    "symbol": "BCHUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 182339282.80058,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "BNB",
+    "symbol": "BNBUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 549719797.3797,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "BTC",
+    "symbol": "BTCUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 23167990661.34876,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "CYBER",
+    "symbol": "CYBERUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "DOGE",
+    "symbol": "DOGEUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 484544640.89478993,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "ETH",
+    "symbol": "ETHUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 11845602917.881,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "MATIC",
+    "symbol": "MATICUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 186640902.11339998,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "MAV",
+    "symbol": "MAVUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "PEPE",
+    "symbol": "1000PEPEUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "SOL",
+    "symbol": "SOLUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 3435973846.273999,
+    "eligible": true,
+    "reason": "ok"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "SUI",
+    "symbol": "SUIUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "eligible": false,
+    "reason": "history_lt_2y_or_missing"
+  },
+  {
+    "code": "e47b316081a44aeca6e133b3e6c5a897",
+    "ticker": "XRP",
+    "symbol": "XRPUSDT",
+    "side": "SHORT",
+    "release_time": 1720512015036,
+    "quote_volume_24h": 448359886.60718983,
+    "eligible": true,
+    "reason": "ok"
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "name": "v134 Intrahour Taker-Aligned Previous-Hour Breakout",
+  "technology": {
+    "ma": [],
+    "ema": [
+      {"name":"ema_1m_2","enable":true,"kline_interval":"1m","period":2},
+      {"name":"ema_1h_2","enable":true,"kline_interval":"1h","period":2}
+    ],
+    "macd": [], "adx": [], "mfi": [], "obv": [], "cci": [], "roc": [],
+    "kdj": [], "rsi": [], "kc": [], "boll": [], "donchian": [], "atr": [], "supertrend": []
+  },
+  "strategy": [
+    {
+      "name": "v134_long", "type": "long", "enable": true, "fullScreen": false,
+      "code": "let flow = kline_1h.TakerBuyRatio[0];\nlet level = kline_1h.High[1];\nlet fresh_break = kline_1m.Close[1] <= level && kline_1m.Close[0] > level;\nflow > 0.5 && fresh_break"
+    },
+    {
+      "name": "v134_short", "type": "short", "enable": true, "fullScreen": false,
+      "code": "let flow = kline_1h.TakerBuyRatio[0];\nlet level = kline_1h.Low[1];\nlet fresh_break = kline_1m.Close[1] >= level && kline_1m.Close[0] < level;\nflow < 0.5 && fresh_break"
+    },
+    {"name":"v134_close_long","type":"close_long","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true},
+    {"name":"v134_close_short","type":"close_short","code":"ROI >= 8 || ROI <= -6","fullScreen":false,"enable":true}
+  ]
+}

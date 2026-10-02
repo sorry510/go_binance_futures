@@ -1,0 +1,26 @@
+[
+  {
+    "article_code": "6a6de383727f4659a3050f7982e1620f",
+    "article_title": "Binance Will Support the Polygon (MATIC) Token Swap to Polygon (POL)",
+    "release_time": 1724835607402,
+    "ticker": "MATIC",
+    "symbol": "MATICUSDT",
+    "quote_volume_24h": 219030662.03210005
+  },
+  {
+    "article_code": "034eee2293964e26b915b1ec5c42972a",
+    "article_title": "Binance Will Support the TomoChain (TOMO) Rebranding to Viction (VIC)",
+    "release_time": 1699263014259,
+    "ticker": "TOMO",
+    "symbol": "TOMOUSDT",
+    "quote_volume_24h": 38005324.9027
+  },
+  {
+    "article_code": "73bded28e8dc48e081c5e577a5436c55",
+    "article_title": "Binance Will Support the Swipe (SXP) Mainnet Swap & Rebranding Plan to Solar (SXP)",
+    "release_time": 1679972707972,
+    "ticker": "SXP",
+    "symbol": "SXPUSDT",
+    "quote_volume_24h": 12989807.340590002
+  }
+]

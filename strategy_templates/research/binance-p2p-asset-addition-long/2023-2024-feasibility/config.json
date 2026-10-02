@@ -1,0 +1,15 @@
+{
+  "family":"binance-p2p-asset-addition-long",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance official CMS catalogId=49",
+  "event_definition":"first announcement that Binance P2P supports buying/selling an ordinary crypto asset",
+  "direction_if_eligible":"LONG",
+  "deduplication":"one first-support event per crypto token; later fiat/region corridor additions are not new events",
+  "exclusions":["fiat/stablecoin-only additions","payment-method changes","merchant promotions","fee campaigns","region-only expansion for already-supported token"],
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "minimum_eligible_events":8,
+  "minimum_unique_tokens":8,
+  "return_evaluation_before_coverage_gate":false,
+  "db_write":false
+}
