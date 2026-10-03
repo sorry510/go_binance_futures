@@ -75,6 +75,12 @@ func runResearch() error {
 	confPath := flag.String("conf", "conf/app.conf", "configuration containing the commented ARM block")
 	fileList := flag.String("strategy-files", "", "comma-separated portable strategy JSON paths")
 	extraIntervals := flag.String("extra-intervals", "", "comma-separated intervals to retain for a shared cached dataset")
+	executionSource := flag.String("execution-source", "arm", "minute data source: arm or public-archive")
+	indicatorSource := flag.String("indicator-source", "arm", "indicator-bar source: arm or public-archive")
+	archiveProxy := flag.String("archive-proxy", "", "optional proxy for official archive requests")
+	archiveTimeout := flag.Duration("archive-timeout", 45*time.Second, "per-request official archive timeout")
+	archiveCacheRoot := flag.String("archive-cache-root", "", "optional shared verified archive directory, independent of dataset cache")
+	minuteRepairPolicy := flag.String("minute-repair", "none", "minute repair policy: none or verified-archive")
 	symbolList := flag.String("symbols", "BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT", "comma-separated symbol names")
 	startText := flag.String("start", "2022-09-01", "first UTC trade date")
 	endText := flag.String("end", "2026-08-31", "last UTC trade date")
@@ -83,6 +89,9 @@ func runResearch() error {
 	flag.Parse()
 	if strings.TrimSpace(*fileList) == "" || strings.TrimSpace(*outputPath) == "" {
 		return errors.New("-strategy-files and -output are required")
+	}
+	if *archiveTimeout <= 0 {
+		return errors.New("-archive-timeout must be positive")
 	}
 	startDate, err := time.Parse("2006-01-02", *startText)
 	if err != nil {
@@ -153,6 +162,24 @@ func runResearch() error {
 				return errors.New("existing output has different candidate snapshots")
 			}
 		}
+		for _, run := range previous.Runs {
+			priorExecution, priorIndicator, priorRepair := run.DatasetSource.ExecutionSource, run.DatasetSource.IndicatorSource, run.DatasetSource.MinuteRepairPolicy
+			if priorExecution == "" {
+				priorExecution = "arm"
+			}
+			if priorIndicator == "" {
+				priorIndicator = "arm"
+			}
+			if priorRepair == "" {
+				priorRepair = "none"
+			}
+			if priorExecution != *executionSource || priorIndicator != *indicatorSource || priorRepair != *minuteRepairPolicy {
+				return errors.New("existing output uses different data sources/repair policy; select a separate -output")
+			}
+			if *minuteRepairPolicy != "none" && run.DatasetSource.RepairVersion != researchArchiveRepairVersion {
+				return errors.New("existing output uses a different repair version; select a separate -output")
+			}
+		}
 		study = *previous
 	}
 	armCfg, err := parseArmResearchConfig(*confPath)
@@ -170,7 +197,10 @@ func runResearch() error {
 		return fmt.Errorf("connect go_binance: %w", err)
 	}
 	archiveDir := filepath.Join(*cacheRoot, "archives")
-	client, err := historicalmarket.NewPublicDataClient(historicalmarket.PublicDataClientConfig{CacheDir: archiveDir, Timeout: 5 * time.Minute, MaxRetries: 3})
+	if *archiveCacheRoot != "" {
+		archiveDir = *archiveCacheRoot
+	}
+	client, err := historicalmarket.NewPublicDataClient(historicalmarket.PublicDataClientConfig{CacheDir: archiveDir, ProxyURL: *archiveProxy, Timeout: *archiveTimeout, MaxRetries: 2})
 	if err != nil {
 		return err
 	}
@@ -180,7 +210,7 @@ func runResearch() error {
 			fmt.Printf("%s all runs already recorded\n", symbol)
 			continue
 		}
-		dataset, source, err := buildResearchDataset(ctx, db, client, symbol, start, end, intervals, *cacheRoot)
+		dataset, source, err := buildResearchDataset(ctx, db, client, symbol, start, end, intervals, *cacheRoot, *executionSource, *indicatorSource, *minuteRepairPolicy, archiveDir)
 		if err != nil {
 			return fmt.Errorf("dataset %s: %w", symbol, err)
 		}
