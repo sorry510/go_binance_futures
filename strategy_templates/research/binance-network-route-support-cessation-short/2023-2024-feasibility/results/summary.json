@@ -1,0 +1,10 @@
+{
+  "qualifying_token_events": 12,
+  "unique_tokens": 12,
+  "independent_batches": 3,
+  "excluded_generic_bep2_batch": 1,
+  "excluded_stablecoin_batches": 1,
+  "coverage_gate_pass": false,
+  "market_eligibility_read": false,
+  "post_event_returns_read": false
+}

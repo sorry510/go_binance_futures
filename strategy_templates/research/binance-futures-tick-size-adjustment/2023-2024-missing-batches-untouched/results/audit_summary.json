@@ -1,0 +1,11 @@
+{
+  "missing_articles": 9,
+  "parsed_articles": 9,
+  "parse_errors": 0,
+  "raw_events": 54,
+  "raw_unique_symbols": 53,
+  "independent_articles": 9,
+  "long": 52,
+  "short": 2,
+  "returns_read": false
+}

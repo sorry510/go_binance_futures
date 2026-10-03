@@ -1,0 +1,34 @@
+{
+  "version": "v151",
+  "family": "spot-perp-turnover-dominance-emergence",
+  "run_id": "2026-10-02-early-gate",
+  "symbols": [
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "discovery": {
+    "start": "2023-01-01T00:00:00Z",
+    "end": "2025-01-01T00:00:00Z"
+  },
+  "feature": "trailing24h Spot QuoteVolume / USD-M QuoteVolume",
+  "trigger": "ratio crosses from <=1 to >1",
+  "direction": "sign of trailing24h Spot log return; positive LONG, negative SHORT",
+  "entry": "next complete 1h USD-M open",
+  "forward_horizons_hours": [
+    1,
+    4,
+    12
+  ],
+  "gate": {
+    "min_mean_signed_return_12h": 0.002,
+    "min_positive_symbols": 4,
+    "min_frequency_per_symbol_week": 0.3,
+    "require_2023_and_2024_mean_12h_positive": true
+  },
+  "oos_read_policy": "do not read 2025+ unless early gate passes",
+  "db_write": false
+}

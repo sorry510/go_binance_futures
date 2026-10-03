@@ -1,0 +1,14 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "supersedes":"strategy_templates/research/binance-spot-step-size-adjustment/2021-feasibility/",
+  "official_articles":3,
+  "raw_events":229,
+  "raw_unique_tokens":223,
+  "eligible_events":3,
+  "eligible_unique_tokens":3,
+  "eligible_articles":2,
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

@@ -1,0 +1,428 @@
+{
+  "version": "v174",
+  "status": "frozen_failed_discovery",
+  "gate_pass": false,
+  "events": 756,
+  "symbols": 10,
+  "positive_symbols": "6/10",
+  "frequency_per_eligible_symbol_week": 0.8769957640925382,
+  "overall": {
+    "n": 756,
+    "mean_r1": 0.0007806939566045082,
+    "mean_r3": 0.0008375623920129809,
+    "mean_r7": 0.0022285591736284534,
+    "win_r7": 0.49867724867724866,
+    "long": 378,
+    "short": 378
+  },
+  "by_year": {
+    "2023": {
+      "n": 367,
+      "mean_r1": -0.00033579826786344074,
+      "mean_r3": -0.0021644905484775774,
+      "mean_r7": -0.0006510772522459902,
+      "win_r7": 0.4768392370572207,
+      "long": 184,
+      "short": 183
+    },
+    "2024": {
+      "n": 389,
+      "mean_r1": 0.0018340426619508786,
+      "mean_r3": 0.003669833418131329,
+      "mean_r7": 0.004945336984157811,
+      "win_r7": 0.519280205655527,
+      "long": 194,
+      "short": 195
+    }
+  },
+  "by_side": {
+    "LONG": {
+      "n": 378,
+      "mean_r1": 0.0013538957968099526,
+      "mean_r3": 0.009211936500165878,
+      "mean_r7": 0.015153104063847128,
+      "win_r7": 0.5132275132275133,
+      "long": 378,
+      "short": 0
+    },
+    "SHORT": {
+      "n": 378,
+      "mean_r1": 0.0002074921163990676,
+      "mean_r3": -0.0075368117161399165,
+      "mean_r7": -0.010695985716590225,
+      "win_r7": 0.48412698412698413,
+      "long": 0,
+      "short": 378
+    }
+  },
+  "by_symbol": {
+    "ADA": {
+      "n": 86,
+      "mean_r1": 0.005237354190440204,
+      "mean_r3": 0.009085434730055027,
+      "mean_r7": 0.001150725354633478,
+      "win_r7": 0.5232558139534884,
+      "long": 41,
+      "short": 45
+    },
+    "APT": {
+      "n": 8,
+      "mean_r1": -0.02042797710569551,
+      "mean_r3": -0.014446617386500542,
+      "mean_r7": -0.04176389832467566,
+      "win_r7": 0.375,
+      "long": 4,
+      "short": 4
+    },
+    "AVAX": {
+      "n": 90,
+      "mean_r1": 0.0062658479324935725,
+      "mean_r3": 0.008442449200638398,
+      "mean_r7": 0.004285942857142456,
+      "win_r7": 0.5111111111111111,
+      "long": 46,
+      "short": 44
+    },
+    "BNB": {
+      "n": 75,
+      "mean_r1": 0.0020756921933607884,
+      "mean_r3": -0.01068351515758494,
+      "mean_r7": -0.014536529469734844,
+      "win_r7": 0.41333333333333333,
+      "long": 39,
+      "short": 36
+    },
+    "BTC": {
+      "n": 96,
+      "mean_r1": -0.004158059477166124,
+      "mean_r3": -0.003656246642890902,
+      "mean_r7": -7.039452190812851e-05,
+      "win_r7": 0.5416666666666666,
+      "long": 46,
+      "short": 50
+    },
+    "ETH": {
+      "n": 97,
+      "mean_r1": 0.00039857081471010824,
+      "mean_r3": 0.0008342154631277436,
+      "mean_r7": 0.0017029102890729281,
+      "win_r7": 0.4948453608247423,
+      "long": 48,
+      "short": 49
+    },
+    "NEAR": {
+      "n": 80,
+      "mean_r1": -0.004190446501452181,
+      "mean_r3": -0.0020567054652502323,
+      "mean_r7": 0.013061718533139699,
+      "win_r7": 0.5,
+      "long": 40,
+      "short": 40
+    },
+    "OP": {
+      "n": 28,
+      "mean_r1": 0.0017913977898326454,
+      "mean_r3": 0.00682505687248012,
+      "mean_r7": 0.009354050624025471,
+      "win_r7": 0.42857142857142855,
+      "long": 14,
+      "short": 14
+    },
+    "TRX": {
+      "n": 99,
+      "mean_r1": -0.0017931847116904656,
+      "mean_r3": 0.0004915952808442676,
+      "mean_r7": -0.004236152832116216,
+      "win_r7": 0.46464646464646464,
+      "long": 49,
+      "short": 50
+    },
+    "XRP": {
+      "n": 97,
+      "mean_r1": 0.004193061530654837,
+      "mean_r3": 0.0021001404042436116,
+      "mean_r7": 0.016273692791423204,
+      "win_r7": 0.5567010309278351,
+      "long": 51,
+      "short": 46
+    }
+  },
+  "by_repo": {
+    "IntersectMBO/cardano-node": {
+      "n": 86,
+      "mean_r1": 0.005237354190440204,
+      "mean_r3": 0.009085434730055027,
+      "mean_r7": 0.001150725354633478,
+      "win_r7": 0.5232558139534884,
+      "long": 41,
+      "short": 45
+    },
+    "XRPLF/rippled": {
+      "n": 97,
+      "mean_r1": 0.004193061530654837,
+      "mean_r3": 0.0021001404042436116,
+      "mean_r7": 0.016273692791423204,
+      "win_r7": 0.5567010309278351,
+      "long": 51,
+      "short": 46
+    },
+    "aptos-labs/aptos-core": {
+      "n": 8,
+      "mean_r1": -0.02042797710569551,
+      "mean_r3": -0.014446617386500542,
+      "mean_r7": -0.04176389832467566,
+      "win_r7": 0.375,
+      "long": 4,
+      "short": 4
+    },
+    "ava-labs/avalanchego": {
+      "n": 90,
+      "mean_r1": 0.0062658479324935725,
+      "mean_r3": 0.008442449200638398,
+      "mean_r7": 0.004285942857142456,
+      "win_r7": 0.5111111111111111,
+      "long": 46,
+      "short": 44
+    },
+    "bitcoin/bitcoin": {
+      "n": 96,
+      "mean_r1": -0.004158059477166124,
+      "mean_r3": -0.003656246642890902,
+      "mean_r7": -7.039452190812851e-05,
+      "win_r7": 0.5416666666666666,
+      "long": 46,
+      "short": 50
+    },
+    "bnb-chain/bsc": {
+      "n": 75,
+      "mean_r1": 0.0020756921933607884,
+      "mean_r3": -0.01068351515758494,
+      "mean_r7": -0.014536529469734844,
+      "win_r7": 0.41333333333333333,
+      "long": 39,
+      "short": 36
+    },
+    "ethereum-optimism/optimism": {
+      "n": 28,
+      "mean_r1": 0.0017913977898326454,
+      "mean_r3": 0.00682505687248012,
+      "mean_r7": 0.009354050624025471,
+      "win_r7": 0.42857142857142855,
+      "long": 14,
+      "short": 14
+    },
+    "ethereum/go-ethereum": {
+      "n": 97,
+      "mean_r1": 0.00039857081471010824,
+      "mean_r3": 0.0008342154631277436,
+      "mean_r7": 0.0017029102890729281,
+      "win_r7": 0.4948453608247423,
+      "long": 48,
+      "short": 49
+    },
+    "near/nearcore": {
+      "n": 80,
+      "mean_r1": -0.004190446501452181,
+      "mean_r3": -0.0020567054652502323,
+      "mean_r7": 0.013061718533139699,
+      "win_r7": 0.5,
+      "long": 40,
+      "short": 40
+    },
+    "tronprotocol/java-tron": {
+      "n": 99,
+      "mean_r1": -0.0017931847116904656,
+      "mean_r3": 0.0004915952808442676,
+      "mean_r7": -0.004236152832116216,
+      "win_r7": 0.46464646464646464,
+      "long": 49,
+      "short": 50
+    }
+  },
+  "replay_errors": [
+    {
+      "asset": "BTC",
+      "symbol": "BTCUSDT",
+      "repo": "bitcoin/bitcoin",
+      "signal_date": "2024-12-25",
+      "signal_complete_at": "2024-12-26T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 0.03571428571428581,
+      "score_now": -0.25,
+      "issue_count_signal_day": 1,
+      "qv24": 12284101310.066198,
+      "eligible_from": "2021-12-31T00:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "ETH",
+      "symbol": "ETHUSDT",
+      "repo": "ethereum/go-ethereum",
+      "signal_date": "2024-12-25",
+      "signal_complete_at": "2024-12-26T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 0.07142857142857162,
+      "score_now": -0.25,
+      "issue_count_signal_day": 0,
+      "qv24": 5907497938.82275,
+      "eligible_from": "2021-12-31T00:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "BNB",
+      "symbol": "BNBUSDT",
+      "repo": "bnb-chain/bsc",
+      "signal_date": "2023-12-25",
+      "signal_complete_at": "2023-12-26T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 0.5714285714285714,
+      "score_now": -0.0714285714285714,
+      "issue_count_signal_day": 0,
+      "qv24": 220166336.73860005,
+      "eligible_from": "2022-02-09T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "BNB",
+      "symbol": "BNBUSDT",
+      "repo": "bnb-chain/bsc",
+      "signal_date": "2023-12-27",
+      "signal_complete_at": "2023-12-28T00:00:00Z",
+      "side": "SHORT",
+      "score_prev": -0.14285714285714302,
+      "score_now": 0.1785714285714286,
+      "issue_count_signal_day": 3,
+      "qv24": 1194848166.3124602,
+      "eligible_from": "2022-02-09T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "BNB",
+      "symbol": "BNBUSDT",
+      "repo": "bnb-chain/bsc",
+      "signal_date": "2024-12-28",
+      "signal_complete_at": "2024-12-29T00:00:00Z",
+      "side": "SHORT",
+      "score_prev": 0.0,
+      "score_now": 0.0357142857142857,
+      "issue_count_signal_day": 0,
+      "qv24": 604270071.3529,
+      "eligible_from": "2022-02-09T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "XRP",
+      "symbol": "XRPUSDT",
+      "repo": "XRPLF/rippled",
+      "signal_date": "2023-12-27",
+      "signal_complete_at": "2023-12-28T00:00:00Z",
+      "side": "SHORT",
+      "score_prev": 0.0,
+      "score_now": 0.03571428571428571,
+      "issue_count_signal_day": 0,
+      "qv24": 626974457.4638001,
+      "eligible_from": "2022-01-05T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "XRP",
+      "symbol": "XRPUSDT",
+      "repo": "XRPLF/rippled",
+      "signal_date": "2023-12-28",
+      "signal_complete_at": "2023-12-29T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 0.03571428571428571,
+      "score_now": -0.10714285714285714,
+      "issue_count_signal_day": 0,
+      "qv24": 856447793.8388603,
+      "eligible_from": "2022-01-05T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "ADA",
+      "symbol": "ADAUSDT",
+      "repo": "IntersectMBO/cardano-node",
+      "signal_date": "2023-12-28",
+      "signal_complete_at": "2023-12-29T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 2.9285714285714284,
+      "score_now": -1.1785714285714286,
+      "issue_count_signal_day": 0,
+      "qv24": 792586375.8168999,
+      "eligible_from": "2022-01-30T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "AVAX",
+      "symbol": "AVAXUSDT",
+      "repo": "ava-labs/avalanchego",
+      "signal_date": "2023-12-25",
+      "signal_complete_at": "2023-12-26T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 0.0,
+      "score_now": -0.32142857142857145,
+      "issue_count_signal_day": 0,
+      "qv24": 761011094.1309999,
+      "eligible_from": "2022-09-23T07:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "AVAX",
+      "symbol": "AVAXUSDT",
+      "repo": "ava-labs/avalanchego",
+      "signal_date": "2024-12-25",
+      "signal_complete_at": "2024-12-26T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 0.0357142857142857,
+      "score_now": -0.2857142857142857,
+      "issue_count_signal_day": 0,
+      "qv24": 262749876.283,
+      "eligible_from": "2022-09-23T07:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "NEAR",
+      "symbol": "NEARUSDT",
+      "repo": "near/nearcore",
+      "signal_date": "2023-12-26",
+      "signal_complete_at": "2023-12-27T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 0.4642857142857144,
+      "score_now": -0.9285714285714286,
+      "issue_count_signal_day": 0,
+      "qv24": 664597274.501,
+      "eligible_from": "2022-10-15T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "TRX",
+      "symbol": "TRXUSDT",
+      "repo": "tronprotocol/java-tron",
+      "signal_date": "2024-12-25",
+      "signal_complete_at": "2024-12-26T00:00:00Z",
+      "side": "SHORT",
+      "score_prev": 0.0,
+      "score_now": 0.0357142857142857,
+      "issue_count_signal_day": 1,
+      "qv24": 119927046.89399,
+      "eligible_from": "2022-01-14T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    },
+    {
+      "asset": "TRX",
+      "symbol": "TRXUSDT",
+      "repo": "tronprotocol/java-tron",
+      "signal_date": "2024-12-26",
+      "signal_complete_at": "2024-12-27T00:00:00Z",
+      "side": "LONG",
+      "score_prev": 0.0357142857142857,
+      "score_now": -0.1428571428571429,
+      "issue_count_signal_day": 0,
+      "qv24": 155760039.86883003,
+      "eligible_from": "2022-01-14T08:00:00+00:00",
+      "reason": "7d_endpoint_crosses_signal_year"
+    }
+  ],
+  "oos_2025_plus_evaluated": false,
+  "strict_engine_run": false
+}

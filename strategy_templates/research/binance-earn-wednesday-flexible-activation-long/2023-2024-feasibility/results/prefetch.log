@@ -1,0 +1,16 @@
+NEEDED 736
+PREFETCH 50 736 {'404': 32, 'ok': 12, 'cached': 6}
+PREFETCH 100 736 {'404': 54, 'ok': 34, 'cached': 12}
+PREFETCH 150 736 {'404': 70, 'ok': 61, 'cached': 19}
+PREFETCH 200 736 {'404': 76, 'ok': 98, 'cached': 26}
+PREFETCH 250 736 {'404': 92, 'ok': 128, 'cached': 30}
+PREFETCH 300 736 {'404': 115, 'ok': 149, 'cached': 36}
+PREFETCH 350 736 {'404': 125, 'ok': 185, 'cached': 40}
+PREFETCH 400 736 {'404': 143, 'ok': 209, 'cached': 48}
+PREFETCH 450 736 {'404': 156, 'ok': 235, 'cached': 59}
+PREFETCH 500 736 {'404': 192, 'ok': 247, 'cached': 61}
+PREFETCH 550 736 {'404': 218, 'ok': 264, 'cached': 68}
+PREFETCH 600 736 {'404': 239, 'ok': 281, 'cached': 80}
+PREFETCH 650 736 {'404': 251, 'ok': 315, 'cached': 84}
+PREFETCH 700 736 {'404': 266, 'ok': 345, 'cached': 89}
+PREFETCH 736 736 {'404': 289, 'ok': 355, 'cached': 92}

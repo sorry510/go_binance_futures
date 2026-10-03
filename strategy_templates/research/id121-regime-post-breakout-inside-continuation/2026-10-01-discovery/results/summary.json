@@ -1,0 +1,83 @@
+{
+  "by_symbol": {
+    "AVAXUSDT": {
+      "long": 4,
+      "net": -0.0007902957816136764,
+      "pf": 0.9927196306806448,
+      "short": 7,
+      "trades": 11
+    },
+    "DOGEUSDT": {
+      "long": 2,
+      "net": -0.015983312900236423,
+      "pf": 0.5439025564837107,
+      "short": 1,
+      "trades": 3
+    },
+    "LTCUSDT": {
+      "long": 4,
+      "net": 0.07089011440427684,
+      "pf": 3.10372111270927,
+      "short": 3,
+      "trades": 7
+    },
+    "SOLUSDT": {
+      "long": 0,
+      "net": 0.0011225688736148896,
+      "pf": 1.0296143045635182,
+      "short": 4,
+      "trades": 4
+    },
+    "UNIUSDT": {
+      "long": 1,
+      "net": 0.06425612976788352,
+      "pf": 999,
+      "short": 2,
+      "trades": 3
+    },
+    "ZECUSDT": {
+      "long": 13,
+      "net": -0.034636704594836684,
+      "pf": 0.825613368876619,
+      "short": 5,
+      "trades": 18
+    }
+  },
+  "by_year": {
+    "2023": {
+      "net": -0.016945446537614543,
+      "pf": 0.6877144829869208,
+      "trades": 5
+    },
+    "2024": {
+      "net": 0.0037701708676772493,
+      "pf": 1.0296033508938032,
+      "trades": 13
+    },
+    "2025": {
+      "net": 0.03341340404105864,
+      "pf": 1.1685594138446107,
+      "trades": 21
+    },
+    "2026": {
+      "net": 0.06462037139796711,
+      "pf": 2.9022166932747444,
+      "trades": 7
+    }
+  },
+  "exit_reasons": {
+    "stop_loss": 23,
+    "take_profit": 23
+  },
+  "frequency_per_symbol_week": 0.04007966143888474,
+  "fresh_holdout_evaluated": false,
+  "gate_pass": false,
+  "long": 24,
+  "net": 0.08485849976908846,
+  "pf": 1.2050617665607324,
+  "positive_symbols": "3/6",
+  "short": 22,
+  "status": "frozen_failed_discovery",
+  "trades": 46,
+  "version": "v114"
+}

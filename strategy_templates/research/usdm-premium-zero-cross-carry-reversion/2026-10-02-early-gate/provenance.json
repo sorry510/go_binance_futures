@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v148",
+  "source":"Binance Vision USD-M monthly premiumIndexKlines 1h + klines 1h",
+  "discovery":"2023-2024",
+  "download_failures":0,
+  "oos_2025_plus_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

@@ -1,0 +1,16 @@
+{
+  "research_date":"2026-10-03",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "version":"v174",
+  "github_source":"GitHub official Search API is:issue; created_at only",
+  "github_transport":"anonymous API with official search-rate-limit waits; resumable yearly files; SSL/URLError retry only",
+  "raw_signals":936,
+  "eligible_signals":769,
+  "replayed_events":756,
+  "replay_exclusions":{"7d_endpoint_crosses_signal_year":13},
+  "market_source":"existing Binance Vision USD-M 1h cache",
+  "oos_2025_plus_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

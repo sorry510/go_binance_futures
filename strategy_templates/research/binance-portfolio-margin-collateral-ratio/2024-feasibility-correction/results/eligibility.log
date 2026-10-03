@@ -1,0 +1,28 @@
+CHECK 10 / 55
+CHECK 20 / 55
+CHECK 30 / 55
+CHECK 40 / 55
+CHECK 50 / 55
+CHECK 55 / 55
+{
+  "raw_events": 55,
+  "eligible_events": 8,
+  "eligible_unique_assets": 8,
+  "eligible_articles": 4,
+  "eligible_long": 3,
+  "eligible_short": 5,
+  "excluded_by_reason": {
+    "no_event_month": 9,
+    "history_lt_2y": 38
+  },
+  "coverage_gate_pass": true,
+  "post_event_returns_read": false
+}
+ELIGIBLE 2024-06-10T06:00:00+00:00 AAVE 90.0 -> 80.0 SHORT 12750357
+ELIGIBLE 2024-06-10T06:00:00+00:00 DOT 90.0 -> 80.0 SHORT 73144642
+ELIGIBLE 2024-06-10T06:00:00+00:00 LINK 90.0 -> 80.0 SHORT 100277231
+ELIGIBLE 2024-06-10T06:00:00+00:00 MATIC 85.0 -> 80.0 SHORT 78320586
+ELIGIBLE 2024-06-10T06:00:00+00:00 WOO 70.0 -> 40.0 SHORT 8916664
+ELIGIBLE 2024-07-30T06:00:00+00:00 NEAR 45.0 -> 75.0 LONG 112858494
+ELIGIBLE 2024-11-29T06:00:00+00:00 APT 45.0 -> 50.0 LONG 268290016
+ELIGIBLE 2024-12-17T06:00:00+00:00 RSR 10.0 -> 20.0 LONG 66040085

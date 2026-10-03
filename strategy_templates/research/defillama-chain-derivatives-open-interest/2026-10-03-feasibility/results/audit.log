@@ -1,0 +1,33 @@
+overview 137 mapped-chain protocols 34
+FETCH 10 / 34
+FETCH 20 / 34
+FETCH 30 / 34
+CHAIN {'chain': 'Ethereum', 'symbol': 'ETH', 'oi_days_2023_2024': 731, 'first_oi_date': '2021-02-25', 'last_oi_date': '2026-10-02', 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': True, 'passes_binance_proxy': True, 'eligible': True}
+CHAIN {'chain': 'BSC', 'symbol': 'BNB', 'oi_days_2023_2024': 374, 'first_oi_date': '2023-12-24', 'last_oi_date': '2026-10-02', 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': True, 'passes_binance_proxy': True, 'eligible': True}
+CHAIN {'chain': 'Solana', 'symbol': 'SOL', 'oi_days_2023_2024': 489, 'first_oi_date': '2023-07-19', 'last_oi_date': '2026-10-02', 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': True, 'passes_binance_proxy': True, 'eligible': True}
+CHAIN {'chain': 'Avalanche', 'symbol': 'AVAX', 'oi_days_2023_2024': 731, 'first_oi_date': '2021-12-22', 'last_oi_date': '2026-10-02', 'binance_2022_12': True, 'binance_2024_12': False, 'passes_oi_history': True, 'passes_binance_proxy': False, 'eligible': False}
+CHAIN {'chain': 'Fantom', 'symbol': 'FTM', 'oi_days_2023_2024': 0, 'first_oi_date': '2026-08-12', 'last_oi_date': '2026-10-02', 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': False, 'passes_binance_proxy': True, 'eligible': False}
+CHAIN {'chain': 'Injective', 'symbol': 'INJ', 'oi_days_2023_2024': 332, 'first_oi_date': '2024-01-28', 'last_oi_date': '2026-10-01', 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': True, 'passes_binance_proxy': True, 'eligible': True}
+CHAIN {'chain': 'NEAR', 'symbol': 'NEAR', 'oi_days_2023_2024': 0, 'first_oi_date': None, 'last_oi_date': None, 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': False, 'passes_binance_proxy': True, 'eligible': False}
+CHAIN {'chain': 'Kava', 'symbol': 'KAVA', 'oi_days_2023_2024': 0, 'first_oi_date': None, 'last_oi_date': None, 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': False, 'passes_binance_proxy': True, 'eligible': False}
+CHAIN {'chain': 'Celo', 'symbol': 'CELO', 'oi_days_2023_2024': 0, 'first_oi_date': None, 'last_oi_date': None, 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': False, 'passes_binance_proxy': True, 'eligible': False}
+CHAIN {'chain': 'Moonbeam', 'symbol': 'GLMR', 'oi_days_2023_2024': 0, 'first_oi_date': None, 'last_oi_date': None, 'binance_2022_12': False, 'binance_2024_12': True, 'passes_oi_history': False, 'passes_binance_proxy': False, 'eligible': False}
+CHAIN {'chain': 'Cronos', 'symbol': 'CRO', 'oi_days_2023_2024': 0, 'first_oi_date': '2025-04-30', 'last_oi_date': '2026-10-02', 'binance_2022_12': False, 'binance_2024_12': False, 'passes_oi_history': False, 'passes_binance_proxy': False, 'eligible': False}
+CHAIN {'chain': 'Cardano', 'symbol': 'ADA', 'oi_days_2023_2024': 0, 'first_oi_date': None, 'last_oi_date': None, 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': False, 'passes_binance_proxy': True, 'eligible': False}
+CHAIN {'chain': 'Tron', 'symbol': 'TRX', 'oi_days_2023_2024': 0, 'first_oi_date': None, 'last_oi_date': None, 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': False, 'passes_binance_proxy': True, 'eligible': False}
+CHAIN {'chain': 'Bitcoin', 'symbol': 'BTC', 'oi_days_2023_2024': 0, 'first_oi_date': None, 'last_oi_date': None, 'binance_2022_12': True, 'binance_2024_12': True, 'passes_oi_history': False, 'passes_binance_proxy': True, 'eligible': False}
+{
+  "overview_protocols": 137,
+  "mapped_chain_protocols": 34,
+  "summary_errors": 0,
+  "mapped_chains": 14,
+  "eligible_chains": 4,
+  "eligible_tokens": [
+    "ETH",
+    "BNB",
+    "SOL",
+    "INJ"
+  ],
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false
+}

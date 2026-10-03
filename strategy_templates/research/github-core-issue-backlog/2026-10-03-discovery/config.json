@@ -1,0 +1,19 @@
+{
+  "version":"v174",
+  "family":"github-core-issue-arrival-pressure",
+  "run_id":"2026-10-03-discovery",
+  "repo_map_source":"unchanged 10-core-repo map from GitHub release family",
+  "issue_warmup_start":"2022-01-01",
+  "discovery":{"start":"2023-01-01","end":"2024-12-31"},
+  "signal_series":"daily count of GitHub is:issue creations by created_at UTC date",
+  "current_window_days":7,
+  "baseline_window_days":28,
+  "score":"mean(latest 7 complete UTC-day issue creations) - mean(previous 28 complete UTC-day issue creations)",
+  "signal":"zero up-cross -> SHORT; zero down-cross -> LONG",
+  "market_eligibility":{"same_name_usdm_history_days":730,"prior_24h_quote_volume_min_usdt":5000000},
+  "entry":"next UTC-day Binance USD-M open",
+  "forward_horizons_days":[1,3,7],
+  "gate":{"min_mean_signed_return_7d":0.0025,"min_positive_symbols":6,"min_events_per_eligible_symbol_week":0.30,"require_2023_and_2024_mean_7d_positive":true},
+  "oos_read_policy":"do not read 2025+ unless discovery passes",
+  "db_write":false
+}

@@ -1,0 +1,16 @@
+{
+  "articles_audited": 25,
+  "qualifying_token_events": 0,
+  "qualifying_unique_tokens": 0,
+  "qualifying_batches": 0,
+  "coverage_gate_pass": false,
+  "production_eligibility_read": false,
+  "post_event_returns_read": false,
+  "excluded_by_reason": {
+    "excluded_locked_product_or_launch": 15,
+    "excluded_promotion_or_first_product_support": 5,
+    "excluded_bonus_tiered_promotion": 3,
+    "excluded_recurring_promotion_bundle": 1,
+    "excluded_global_policy_no_token_specific_numeric_direction": 1
+  }
+}

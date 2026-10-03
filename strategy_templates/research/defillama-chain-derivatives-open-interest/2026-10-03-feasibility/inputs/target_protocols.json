@@ -1,0 +1,276 @@
+[
+  {
+    "slug": "dydx-v3",
+    "chains": [
+      "Ethereum"
+    ],
+    "name": "dYdX V3"
+  },
+  {
+    "slug": "gmx-v1-perps",
+    "chains": [
+      "Arbitrum",
+      "Avalanche"
+    ],
+    "name": "GMX V1 Perps"
+  },
+  {
+    "slug": "drift-trade",
+    "chains": [
+      "Solana"
+    ],
+    "name": "Drift Trade"
+  },
+  {
+    "slug": "apex-pro",
+    "chains": [
+      "Ethereum"
+    ],
+    "name": "ApeX Pro"
+  },
+  {
+    "slug": "mux-perps",
+    "chains": [
+      "Avalanche",
+      "Arbitrum",
+      "BSC",
+      "OP Mainnet",
+      "Fantom"
+    ],
+    "name": "MUX Perps"
+  },
+  {
+    "slug": "aevo-perps",
+    "chains": [
+      "Ethereum"
+    ],
+    "name": "Aevo Perps"
+  },
+  {
+    "slug": "rabbitx",
+    "chains": [
+      "Ethereum"
+    ],
+    "name": "RabbitX"
+  },
+  {
+    "slug": "holdstation-defutures",
+    "chains": [
+      "BSC"
+    ],
+    "name": "HoldStation DeFutures"
+  },
+  {
+    "slug": "kiloex",
+    "chains": [
+      "Base",
+      "Manta",
+      "opBNB",
+      "BSC"
+    ],
+    "name": "KiloEx"
+  },
+  {
+    "slug": "gmx-v2-perps",
+    "chains": [
+      "Arbitrum",
+      "Avalanche",
+      "MegaETH"
+    ],
+    "name": "GMX V2 Perps"
+  },
+  {
+    "slug": "thena-perps",
+    "chains": [
+      "BSC"
+    ],
+    "name": "THENA PERPS"
+  },
+  {
+    "slug": "contango-v2",
+    "chains": [
+      "Arbitrum",
+      "Ethereum",
+      "OP Mainnet",
+      "Polygon",
+      "Gnosis",
+      "Base",
+      "Avalanche",
+      "Linea",
+      "BSC",
+      "Scroll"
+    ],
+    "name": "Contango V2"
+  },
+  {
+    "slug": "fwx-derivatives",
+    "chains": [
+      "Avalanche",
+      "BSC",
+      "Base"
+    ],
+    "name": "FWX Derivatives"
+  },
+  {
+    "slug": "jupiter-perpetual-exchange",
+    "chains": [
+      "Solana"
+    ],
+    "name": "Jupiter Perpetual Exchange"
+  },
+  {
+    "slug": "flashtrade",
+    "chains": [
+      "Solana"
+    ],
+    "name": "FlashTrade"
+  },
+  {
+    "slug": "myx-finance",
+    "chains": [
+      "BSC",
+      "Arbitrum",
+      "Linea",
+      "opBNB"
+    ],
+    "name": "MYX Finance"
+  },
+  {
+    "slug": "apex-omni",
+    "chains": [
+      "Ethereum"
+    ],
+    "name": "Apex Omni"
+  },
+  {
+    "slug": "aevo-options",
+    "chains": [
+      "Ethereum"
+    ],
+    "name": "Aevo Options"
+  },
+  {
+    "slug": "helix-perp",
+    "chains": [
+      "Injective"
+    ],
+    "name": "Helix Perp"
+  },
+  {
+    "slug": "moonlander",
+    "chains": [
+      "Cronos zkEVM",
+      "Cronos"
+    ],
+    "name": "Moonlander"
+  },
+  {
+    "slug": "extended-perps",
+    "chains": [
+      "Ethereum",
+      "Starknet"
+    ],
+    "name": "Extended Perps"
+  },
+  {
+    "slug": "injective-perps",
+    "chains": [
+      "Injective"
+    ],
+    "name": "Injective Perps"
+  },
+  {
+    "slug": "symmio",
+    "chains": [
+      "Mode",
+      "Mantle",
+      "BSC",
+      "Sonic",
+      "Coti",
+      "Berachain",
+      "Base",
+      "Arbitrum"
+    ],
+    "name": "SYMMIO"
+  },
+  {
+    "slug": "rho-x",
+    "chains": [
+      "Ethereum"
+    ],
+    "name": "Rho X"
+  },
+  {
+    "slug": "opinion",
+    "chains": [
+      "BSC"
+    ],
+    "name": "OPINION"
+  },
+  {
+    "slug": "gmx-solana",
+    "chains": [
+      "Solana"
+    ],
+    "name": "GMX Solana"
+  },
+  {
+    "slug": "phoenix-perp",
+    "chains": [
+      "Solana"
+    ],
+    "name": "Phoenix Perp"
+  },
+  {
+    "slug": "gameclub",
+    "chains": [
+      "BSC"
+    ],
+    "name": "GameClub"
+  },
+  {
+    "slug": "tristero-margin",
+    "chains": [
+      "Arbitrum",
+      "Base",
+      "Ethereum"
+    ],
+    "name": "Tristero Margin"
+  },
+  {
+    "slug": "bullet-perps",
+    "chains": [
+      "Solana",
+      "Bullet"
+    ],
+    "name": "Bullet Perps"
+  },
+  {
+    "slug": "synthetix-v4",
+    "chains": [
+      "Ethereum"
+    ],
+    "name": "Synthetix V4"
+  },
+  {
+    "slug": "primit-perps",
+    "chains": [
+      "Avalanche"
+    ],
+    "name": "Primit Perps"
+  },
+  {
+    "slug": "hertzflow",
+    "chains": [
+      "BSC"
+    ],
+    "name": "HertzFlow"
+  },
+  {
+    "slug": "velocity",
+    "chains": [
+      "Solana"
+    ],
+    "name": "Velocity"
+  }
+]

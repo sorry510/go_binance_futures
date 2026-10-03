@@ -1,0 +1,13 @@
+{
+  "family":"binance-earn-wednesday-flexible-activation-long",
+  "run_id":"2023-2024-discovery",
+  "direction":"LONG",
+  "eligible_events":74,
+  "eligible_unique_tokens":38,
+  "eligible_batches":43,
+  "entry":"first UTC whole-hour USD-M open strictly after official article publishDate",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_event_mean_12h":0.005,"min_batch_equal_mean_12h":0.005,"min_positive_token_fraction":0.60,"min_positive_batch_fraction":0.60,"require_2023_mean_12h_positive":true,"require_2024_mean_12h_positive":true},
+  "oos_policy":"do not read 2025+ unless discovery gate passes",
+  "db_write":false
+}

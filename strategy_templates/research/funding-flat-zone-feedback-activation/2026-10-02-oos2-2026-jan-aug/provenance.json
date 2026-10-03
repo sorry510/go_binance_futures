@@ -1,0 +1,14 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v154",
+  "stage":"OOS2-2026-jan-aug",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "rule_changed_from_discovery":false,
+  "gate_changed_from_discovery":false,
+  "period":"2026-01-01..2026-09-01",
+  "september_2026_kline_monthly_available_at_freeze":false,
+  "gate_pass":false,
+  "strict_engine_run":false,
+  "db_write":false,
+  "app_conf_modified":false
+}

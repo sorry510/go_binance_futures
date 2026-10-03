@@ -1,0 +1,12 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v156",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "database":"go_bn_test read-only",
+  "indicator_formula":"same mathematical formula as feature/strategy/line.CalculateCCI",
+  "discovery":"2023-2024",
+  "oos_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

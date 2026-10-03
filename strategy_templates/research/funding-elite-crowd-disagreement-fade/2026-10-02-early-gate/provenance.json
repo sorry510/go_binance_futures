@@ -1,0 +1,12 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v159",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "sources":["go_bn_test market_funding_rates read-only","Binance Vision USD-M 5m metrics raw cache","go_bn_test market_klines_1h read-only"],
+  "discovery":"2023-2024",
+  "gate_pass":false,
+  "oos_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

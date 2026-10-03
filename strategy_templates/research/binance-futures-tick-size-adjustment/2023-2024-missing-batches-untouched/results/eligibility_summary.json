@@ -1,0 +1,16 @@
+{
+  "raw_events": 54,
+  "raw_unique_symbols": 53,
+  "raw_articles": 9,
+  "eligible_events": 10,
+  "eligible_unique_symbols": 10,
+  "eligible_articles": 5,
+  "eligible_long": 9,
+  "eligible_short": 1,
+  "excluded_by_reason": {
+    "history_lt_2y": 43,
+    "qv_lt_5m": 1
+  },
+  "feasibility_gate_pass": true,
+  "returns_read": false
+}

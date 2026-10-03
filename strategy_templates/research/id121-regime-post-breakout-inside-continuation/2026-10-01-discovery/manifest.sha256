@@ -1,0 +1,9 @@
+93e980cf1a3dc24af8df2d379fdaa8ead5183f95ab16488ca39aceb789c2a9cf  ./README.md
+71d93c7e5a5c35ef3d356f41bfd6f392d67707431e7d072667b2e8f4e24d69ee  ./config.json
+1043bced92374a1b9d71075cd628ffced16f5742ef86362a17d0f9fcc4d2738e  ./protocol.md
+c630fab1c27202fce8c36d8df903b2fe00aa474aacb71fb57405124c8d045bbe  ./provenance.json
+1aa1f739d5d48f5932be501d38f7e7479e8028af6922672cf3295f46db56dbd5  ./replay.go
+065e5841bbfd236946d652dade6bd8170827d97b199e28b6de08ea36dfad088f  ./results/run.log
+c703dffe01a55dd2b0f2dd34d0babf5237162a152867400e1112ef0e14d331d6  ./results/summary.json
+deedd0af397bdd3738c15dc29c54efb968f4f0a896c2aee520d4c8dfb132a152  ./results/trades.json
+7e55ddcbf3dd5aabfce54f840466b36f2e5f924cb656322f6560277cb050fcc1  ./strategy.json

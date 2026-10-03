@@ -1,0 +1,10 @@
+{
+  "family":"binance-spot-tick-size-increase-short",
+  "stage":"2021-2022-untouched-oot",
+  "source_articles":18,
+  "direction":"SHORT only for tick-size increases",
+  "eligibility":{"usd_m_history_days":730,"prior_24h_quote_volume_min_usdt":5000000},
+  "exact":{"leverage":4,"tp_pct":8,"sl_pct":6,"fee_per_side":0.0005,"slippage_bps_per_side":5,"max_hold_hours":72,"entry":"next 1m open after effective time"},
+  "validation_gate":{"pf_gt":1.0,"net_gt":0,"positive_batch_fraction_gte":0.60},
+  "db_write":false
+}

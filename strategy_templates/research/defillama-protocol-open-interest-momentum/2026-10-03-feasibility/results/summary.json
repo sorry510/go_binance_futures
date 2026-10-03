@@ -1,0 +1,11 @@
+{
+  "overview_protocols": 137,
+  "summary_errors": 0,
+  "symbols_with_2023_2024_oi": 10,
+  "plausible_same_name_2y_tokens": 1,
+  "coverage_gate_pass": false,
+  "tokens": [
+    "DYDX"
+  ],
+  "post_event_returns_read": false
+}

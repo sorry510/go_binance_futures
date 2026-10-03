@@ -1,0 +1,99 @@
+{
+  "metric": "SplyCur",
+  "assets": 10,
+  "variable_assets": 8,
+  "variable_asset_list": [
+    "btc",
+    "eth",
+    "xrp",
+    "ada",
+    "bch",
+    "ltc",
+    "doge",
+    "zec"
+  ],
+  "coverage_gate_pass": true,
+  "post_price_returns_read": false,
+  "by_asset": {
+    "btc": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 730,
+      "distinct_values": 731,
+      "variable": true
+    },
+    "eth": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 730,
+      "distinct_values": 731,
+      "variable": true
+    },
+    "xrp": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 730,
+      "distinct_values": 731,
+      "variable": true
+    },
+    "ada": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 730,
+      "distinct_values": 731,
+      "variable": true
+    },
+    "link": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 0,
+      "distinct_values": 1,
+      "variable": false
+    },
+    "bch": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 730,
+      "distinct_values": 731,
+      "variable": true
+    },
+    "ltc": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 730,
+      "distinct_values": 731,
+      "variable": true
+    },
+    "doge": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 730,
+      "distinct_values": 731,
+      "variable": true
+    },
+    "uni": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 0,
+      "distinct_values": 1,
+      "variable": false
+    },
+    "zec": {
+      "days": 731,
+      "first": "2023-01-01",
+      "last": "2024-12-31",
+      "nonzero_daily_changes": 730,
+      "distinct_values": 731,
+      "variable": true
+    }
+  }
+}

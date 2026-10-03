@@ -1,0 +1,19 @@
+SYMBOL SOLUSDT events 40 source {'oi_days': 735, 'price_days': 762, 'cap_days': 763, 'aligned_days': 735}
+SYMBOL DOGEUSDT events 26 source {'oi_days': 735, 'price_days': 762, 'cap_days': 763, 'aligned_days': 735}
+SYMBOL LTCUSDT events 39 source {'oi_days': 735, 'price_days': 762, 'cap_days': 763, 'aligned_days': 735}
+SYMBOL AVAXUSDT events 47 source {'oi_days': 735, 'price_days': 762, 'cap_days': 763, 'aligned_days': 735}
+SYMBOL UNIUSDT events 45 source {'oi_days': 735, 'price_days': 762, 'cap_days': 763, 'aligned_days': 735}
+SYMBOL ZECUSDT events 43 source {'oi_days': 734, 'price_days': 762, 'cap_days': 763, 'aligned_days': 734}
+{
+  "events": 240,
+  "mean_r1": -0.005897239120558586,
+  "mean_r3": -0.0052345148302451305,
+  "mean_r7": -0.017403294444762473,
+  "positive_symbols": "1/6",
+  "freq": 0.38303693570451436,
+  "2023": -0.01204235976135337,
+  "2024": -0.022764229128171568,
+  "long_r7": -0.017465823269339566,
+  "short_r7": -0.01735547828479176,
+  "gate_pass": false
+}

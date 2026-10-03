@@ -1,0 +1,12 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "stage":"2024-feasibility-correction",
+  "raw_events":55,
+  "eligible_events":8,
+  "eligible_unique_assets":8,
+  "eligible_articles":4,
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

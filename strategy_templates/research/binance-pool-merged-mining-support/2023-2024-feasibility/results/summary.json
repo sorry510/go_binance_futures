@@ -1,0 +1,9 @@
+{
+  "raw_support_batches": 4,
+  "known_mature_usdm_tokens": [
+    "LTC",
+    "DOGE"
+  ],
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false
+}

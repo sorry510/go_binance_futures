@@ -1,0 +1,10 @@
+{
+  "family":"binance-portfolio-margin-collateral-ratio",
+  "stage":"2024-corrected-exact-discovery",
+  "events":8,
+  "direction":{"increase":"LONG","decrease":"SHORT"},
+  "exact":{"leverage":4,"tp_pct":8,"sl_pct":6,"fee_per_side":0.0005,"slippage_bps_per_side":5,"max_hold_hours":72,"entry":"next 1m open after effective time"},
+  "gate":{"min_pf":1.15,"net_gt":0,"min_positive_article_batches":3},
+  "oos_policy":"do not read 2025+ unless discovery passes",
+  "db_write":false
+}

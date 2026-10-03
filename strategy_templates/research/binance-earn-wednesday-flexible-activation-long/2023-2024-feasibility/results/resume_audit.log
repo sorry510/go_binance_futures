@@ -1,0 +1,23 @@
+CHECKPOINT 75 of 88 missing [76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88]
+RESUMED 76 88 2024-10-02 ['ETH']
+RESUMED 77 88 2024-10-09 ['ENA', 'OG', 'TIA']
+RESUMED 78 88 2024-10-16 ['AVA', 'JUP', 'SXP']
+RESUMED 79 88 2024-10-23 ['API3', 'STORJ', 'TIA']
+RESUMED 80 88 2024-10-30 ['JUP', 'STPT', 'SXP']
+RESUMED 81 88 2024-11-06 ['ACH', 'OG', 'SXP']
+RESUMED 82 88 2024-11-13 ['ETH', 'PNUT', 'STPT']
+RESUMED 83 88 2024-11-20 ['AUCTION', 'ETH', 'HIVE', 'POWR']
+RESUMED 84 88 2024-11-27 ['ETH', 'GLM', 'POWR']
+RESUMED 85 88 2024-12-04 ['ETH', 'GMT', 'QI', 'SXP']
+RESUMED 86 88 2024-12-11 ['ETH', 'GMT', 'MOVE', 'TROY']
+RESUMED 87 88 2024-12-18 ['AXS', 'ETH', 'VANA']
+RESUMED 88 88 2024-12-25 ['AGLD', 'ENA', 'ETH', 'GMT']
+{
+  "earn_wednesday_articles_2023_2024": 88,
+  "warmup_date": "2022-12-28",
+  "raw_activation_events": 212,
+  "raw_unique_tokens": 113,
+  "independent_batches": 76,
+  "post_event_returns_read": false
+}
+TOKENS ['1000SATS', 'ACE', 'ACH', 'ADA', 'AERGO', 'AGLD', 'AMB', 'AMP', 'APE', 'API3', 'APT', 'ARKM', 'ARPA', 'ASR', 'ATOM', 'AUCTION', 'AUDIO', 'AVA', 'AVAX', 'AXS', 'BAND', 'BCH', 'BEAMX', 'BEL', 'BLUR', 'BLZ', 'BNB', 'BNT', 'BNX', 'BONK', 'C98', 'CHZ', 'COMP', 'COS', 'CTK', 'CTSI', 'CVX', 'CYBER', 'DAR', 'DODO', 'EDU', 'ELF', 'ENA', 'ENS', 'EOS', 'ETH', 'FIL', 'FLM', 'GHST', 'GLM', 'GMT', 'GMX', 'HIFI', 'HIVE', 'HOOK', 'ICX', 'INJ', 'IQ', 'JTO', 'JUP', 'KAVA', 'KNC', 'LAZIO', 'LINA', 'LPT', 'MAGIC', 'MATIC', 'MOVE', 'MTL', 'NMR', 'OAX', 'OG', 'OGN', 'ONG', 'OSMO', 'PENDLE', 'PEPE', 'PHB', 'PNUT', 'POWR', 'PROM', 'QI', 'QTUM', 'RAD', 'RARE', 'RDNT', 'REI', 'REQ', 'RONIN', 'RPL', 'RUNE', 'SAND', 'SEI', 'SFP', 'SLP', 'SOL', 'STMX', 'STORJ', 'STPT', 'SUI', 'SXP', 'SYN', 'TIA', 'TRB', 'TROY', 'UMA', 'UNFI', 'VAI', 'VANA', 'WBETH', 'WLD', 'XAI', 'ZRX']

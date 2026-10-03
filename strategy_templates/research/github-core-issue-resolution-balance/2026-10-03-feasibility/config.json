@@ -1,0 +1,11 @@
+{
+  "version":"v177",
+  "family":"github-core-issue-resolution-balance",
+  "stage":"feasibility",
+  "repo_map_source":"unchanged 10-core-repo map from GitHub Core Release / v174",
+  "audit_years":[2022,2023,2024],
+  "source":"GitHub Search API is:issue closed:<range>",
+  "coverage_gate":{"min_repos_with_100_closures_2023_2024":8},
+  "post_token_returns_read":false,
+  "db_write":false
+}

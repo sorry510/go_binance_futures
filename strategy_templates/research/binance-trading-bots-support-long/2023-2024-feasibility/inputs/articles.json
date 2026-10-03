@@ -1,0 +1,2145 @@
+[
+  {
+    "code": "6ff8d2ec712e4ac99d2bb04eba20c6f6",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-12-19",
+    "publish_ms": 1734512409815,
+    "publish": "2024-12-18T09:00:09.815000+00:00",
+    "bot_pairs": [
+      "1000CAT/USDC",
+      "PENGU/USDC"
+    ],
+    "new_pairs": [
+      "1000CAT/USDC",
+      "PENGU/USDC"
+    ],
+    "bot_bases": [
+      "1000CAT",
+      "PENGU"
+    ],
+    "new_pair_bases": [
+      "1000CAT",
+      "PENGU"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at 2024-12-19 08:00 (UTC): Spot Algo Orders: 1000CAT/USDC and PENGU/USDC "
+  },
+  {
+    "code": "0c818324015c433792de5049cd5d0f40",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-12-13",
+    "publish_ms": 1733994012484,
+    "publish": "2024-12-12T09:00:12.484000+00:00",
+    "bot_pairs": [
+      "HIVE/FDUSD",
+      "HIVE/USDC",
+      "IDEX/FDUSD",
+      "IDEX/USDC",
+      "TLM/FDUSD",
+      "TLM/USDC"
+    ],
+    "new_pairs": [
+      "HIVE/FDUSD",
+      "HIVE/USDC",
+      "IDEX/FDUSD",
+      "IDEX/USDC",
+      "TLM/FDUSD",
+      "TLM/USDC"
+    ],
+    "bot_bases": [
+      "HIVE",
+      "IDEX",
+      "TLM"
+    ],
+    "new_pair_bases": [
+      "HIVE",
+      "IDEX",
+      "TLM"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at 2024-12-13 08:00 (UTC): Spot Algo Orders: HIVE/FDUSD, HIVE/USDC, IDEX/FDUSD, IDEX/USDC, TLM/FDUSD and TLM/USDC "
+  },
+  {
+    "code": "051dfa3148cb43b5a607ca7a1346fbbf",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-12-11",
+    "publish_ms": 1733824810548,
+    "publish": "2024-12-10T10:00:10.548000+00:00",
+    "bot_pairs": [
+      "ACX/FDUSD",
+      "ACX/TRY",
+      "ACX/USDC",
+      "ADA/EUR",
+      "CELO/TRY",
+      "DOGE/EUR",
+      "KSM/TRY",
+      "LINK/FDUSD",
+      "ORCA/FDUSD",
+      "ORCA/TRY",
+      "ORCA/USDC"
+    ],
+    "new_pairs": [
+      "ACX/FDUSD",
+      "ACX/TRY",
+      "ACX/USDC",
+      "CELO/TRY",
+      "KSM/TRY",
+      "ORCA/FDUSD",
+      "ORCA/TRY",
+      "ORCA/USDC"
+    ],
+    "bot_bases": [
+      "ACX",
+      "ADA",
+      "CELO",
+      "DOGE",
+      "KSM",
+      "LINK",
+      "ORCA"
+    ],
+    "new_pair_bases": [
+      "ACX",
+      "CELO",
+      "KSM",
+      "ORCA"
+    ],
+    "clean_existing_bot_bases": [
+      "ADA",
+      "DOGE",
+      "LINK"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at 2024-12-11 08:00 (UTC): Spot Grid and Spot DCA: ADA/EUR, DOGE/EUR, G/USDT and LINK/FDUSD Rebalancing Bot: G/USDT Spot Algo Orders: ACX/USDC, ORCA/USDC, ACX/FDUSD, ORCA/FDUSD,&nbsp; ACX/TRY, ORCA/TRY, KSM/TRY and CELO/TRY "
+  },
+  {
+    "code": "aa40cb409c5444068432164c3c916f3a",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-12-06",
+    "publish_ms": 1733385601771,
+    "publish": "2024-12-05T08:00:01.771000+00:00",
+    "bot_pairs": [
+      "CHZ/USDC",
+      "PYTH/USDC",
+      "RSR/FDUSD",
+      "RSR/USDC",
+      "XTZ/USDC"
+    ],
+    "new_pairs": [
+      "CHZ/USDC",
+      "PYTH/USDC",
+      "RSR/FDUSD",
+      "RSR/USDC",
+      "XTZ/USDC"
+    ],
+    "bot_bases": [
+      "CHZ",
+      "PYTH",
+      "RSR",
+      "XTZ"
+    ],
+    "new_pair_bases": [
+      "CHZ",
+      "PYTH",
+      "RSR",
+      "XTZ"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at 2024-12-06 08:00 (UTC): Spot Algo Orders: CHZ/USDC, PYTH/USDC, RSR/USDC, RSR/FDUSD, W/USDC, and XTZ/USDC "
+  },
+  {
+    "code": "6be3b4cf73684f4a89be236abb0fe61f",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-12-04",
+    "publish_ms": 1733212803588,
+    "publish": "2024-12-03T08:00:03.588000+00:00",
+    "bot_pairs": [
+      "AVAX/USDC",
+      "ENA/BRL",
+      "EOS/FDUSD",
+      "KAIA/USDC",
+      "METIS/USDT",
+      "RONIN/USDT",
+      "SAND/USDC",
+      "XLM/FDUSD",
+      "XLM/USDC",
+      "XRP/EUR"
+    ],
+    "new_pairs": [
+      "ENA/BRL",
+      "EOS/FDUSD",
+      "KAIA/USDC",
+      "SAND/USDC",
+      "XLM/FDUSD",
+      "XLM/USDC"
+    ],
+    "bot_bases": [
+      "AVAX",
+      "ENA",
+      "EOS",
+      "KAIA",
+      "METIS",
+      "RONIN",
+      "SAND",
+      "XLM",
+      "XRP"
+    ],
+    "new_pair_bases": [
+      "ENA",
+      "EOS",
+      "KAIA",
+      "SAND",
+      "XLM"
+    ],
+    "clean_existing_bot_bases": [
+      "AVAX",
+      "METIS",
+      "RONIN",
+      "XRP"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at 2024-12-04 08:00 (UTC): Spot Grid and Spot DCA: AVAX/USDC , METIS/USDT, RONIN/USDT and XRP/EUR Rebalancing Bot: METIS/USDT and RONIN/USDT Spot Algo Orders: ENA/BRL, EOS/FDUSD, KAIA/USDC, SAND/USDC, XLM/FDUSD and XLM/USDC "
+  },
+  {
+    "code": "87748909170b4c0bada2aeac2447aa70",
+    "title": "Notice on New Trading Pairs and Trading Bots Services on Binance Spot - 2024-11-28 and 2024-11-29",
+    "publish_ms": 1732694432674,
+    "publish": "2024-11-27T08:00:32.674000+00:00",
+    "bot_pairs": [
+      "1MBABYDOGE/USDC",
+      "APE/USDC",
+      "BOME/EUR",
+      "CETUS/USDC",
+      "COW/USDC",
+      "DYDX/USDC",
+      "EIGEN/USDC",
+      "HBAR/FDUSD",
+      "HMSTR/USDC",
+      "MEME/USDC",
+      "SHIB/USDC",
+      "TROY/USDC",
+      "TURBO/USDC",
+      "WLD/EUR",
+      "ZK/FDUSD"
+    ],
+    "new_pairs": [
+      "1MBABYDOGE/USDC",
+      "APE/USDC",
+      "BOME/EUR",
+      "CETUS/USDC",
+      "COW/USDC",
+      "DYDX/USDC",
+      "EIGEN/USDC",
+      "HBAR/FDUSD",
+      "HMSTR/USDC",
+      "MEME/USDC",
+      "TROY/USDC",
+      "TURBO/USDC",
+      "WLD/EUR"
+    ],
+    "bot_bases": [
+      "1MBABYDOGE",
+      "APE",
+      "BOME",
+      "CETUS",
+      "COW",
+      "DYDX",
+      "EIGEN",
+      "HBAR",
+      "HMSTR",
+      "MEME",
+      "SHIB",
+      "TROY",
+      "TURBO",
+      "WLD",
+      "ZK"
+    ],
+    "new_pair_bases": [
+      "1MBABYDOGE",
+      "APE",
+      "BOME",
+      "CETUS",
+      "COW",
+      "DYDX",
+      "EIGEN",
+      "HBAR",
+      "HMSTR",
+      "MEME",
+      "TROY",
+      "TURBO",
+      "WLD"
+    ],
+    "clean_existing_bot_bases": [
+      "SHIB",
+      "ZK"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at:&nbsp; 2024-11-28 08:00 (UTC):&nbsp; Spot Algo Orders: APE/USDC, BOME/EUR, EIGEN/USDC, HBAR/FDUSD, MEME/USDC, TROY/USDC and WLD/EUR Spot Grid and Spot DCA: SHIB/USDC and ZK/FDUSD 2024-11-29 08:00 (UTC): Spot Algo Orders: 1MBABYDOGE/USDC, CETUS/USDC, COW/USDC, DYDX/USDC, HMSTR/USDC and TURBO/USDC "
+  },
+  {
+    "code": "72ba79e3212848bcb6aba53eb6e55d4c",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-11-22",
+    "publish_ms": 1732096809305,
+    "publish": "2024-11-20T10:00:09.305000+00:00",
+    "bot_pairs": [
+      "APE/FDUSD",
+      "FDUSD/USDC",
+      "HBAR/USDC",
+      "OM/USDC",
+      "RAY/USDC",
+      "TAO/USDC",
+      "TURBO/FDUSD"
+    ],
+    "new_pairs": [
+      "APE/FDUSD",
+      "FDUSD/USDC",
+      "HBAR/USDC",
+      "OM/USDC",
+      "RAY/USDC",
+      "TAO/USDC",
+      "TURBO/FDUSD"
+    ],
+    "bot_bases": [
+      "APE",
+      "HBAR",
+      "OM",
+      "RAY",
+      "TAO",
+      "TURBO"
+    ],
+    "new_pair_bases": [
+      "APE",
+      "FDUSD",
+      "HBAR",
+      "OM",
+      "RAY",
+      "TAO",
+      "TURBO"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at 2024-11-22 08:00 (UTC): Spot Algo Orders: APE/FDUSD, FDUSD/USDC, HBAR/USDC, OM/USDC, RAY/USDC, TAO/USDC, TURBO/FDUSD&nbsp; Furthermore, users will enjoy zero fees for the FDUSD/USDC trading pair from 2024-11-22 08:00 (UTC) until further notice. "
+  },
+  {
+    "code": "67e7da69b8e541c1bfacac7f43f75d78",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-11-20",
+    "publish_ms": 1732006802967,
+    "publish": "2024-11-19T09:00:02.967000+00:00",
+    "bot_pairs": [
+      "ACT/BRL",
+      "ACT/EUR",
+      "ADA/USDC",
+      "CATI/USDC",
+      "DOGE/USDC",
+      "ETH/EURI",
+      "LUMIA/TRY",
+      "PNUT/BRL",
+      "PNUT/EUR",
+      "SUI/USDC",
+      "XRP/USDC"
+    ],
+    "new_pairs": [
+      "ACT/BRL",
+      "ACT/EUR",
+      "CATI/USDC",
+      "ETH/EURI",
+      "LUMIA/TRY",
+      "PNUT/BRL",
+      "PNUT/EUR"
+    ],
+    "bot_bases": [
+      "ACT",
+      "ADA",
+      "CATI",
+      "DOGE",
+      "ETH",
+      "LUMIA",
+      "PNUT",
+      "SUI",
+      "XRP"
+    ],
+    "new_pair_bases": [
+      "ACT",
+      "CATI",
+      "ETH",
+      "LUMIA",
+      "PNUT"
+    ],
+    "clean_existing_bot_bases": [
+      "ADA",
+      "DOGE",
+      "SUI",
+      "XRP"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at 2024-11-20 08:00 (UTC): Spot Grid and Spot DCA: ADA/USDC, DOGE/USDC, SUI/USDC, and XRP/USDC Spot Algo Orders: ACT/BRL, ACT/EUR, CATI/USDC, ETH/EURI, LUMIA/TRY, PNUT/BRL and PNUT/EUR Furthermore, users will enjoy zero maker fees for the ETH/EURI trading pair from 2024-11-20 08:00 (UTC) until further notice. "
+  },
+  {
+    "code": "b50b0a2d80024a8b8765af2eb8560cd0",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-11-15",
+    "publish_ms": 1731574815563,
+    "publish": "2024-11-14T09:00:15.563000+00:00",
+    "bot_pairs": [
+      "ACT/FDUSD",
+      "ACT/USDC",
+      "NEIRO/USDC",
+      "PNUT/BTC",
+      "PNUT/FDUSD",
+      "PNUT/USDC"
+    ],
+    "new_pairs": [
+      "ACT/FDUSD",
+      "ACT/USDC",
+      "NEIRO/USDC",
+      "PNUT/BTC",
+      "PNUT/FDUSD",
+      "PNUT/USDC"
+    ],
+    "bot_bases": [
+      "ACT",
+      "NEIRO",
+      "PNUT"
+    ],
+    "new_pair_bases": [
+      "ACT",
+      "NEIRO",
+      "PNUT"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following pairs at 2024-11-15 08:00 (UTC): Spot Algo Orders: ACT/FDUSD, ACT/USDC, NEIRO/USDC, PNUT/BTC, PNUT/FDUSD and PNUT/USDC "
+  },
+  {
+    "code": "59687cb3396e469cb602d286e8d74088",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-11-13",
+    "publish_ms": 1731402006478,
+    "publish": "2024-11-12T09:00:06.478000+00:00",
+    "bot_pairs": [
+      "ACT/TRY",
+      "BNB/EUR",
+      "CETUS/TRY",
+      "COW/TRY",
+      "PNUT/TRY",
+      "TROY/TRY"
+    ],
+    "new_pairs": [
+      "ACT/TRY",
+      "CETUS/TRY",
+      "COW/TRY",
+      "PNUT/TRY",
+      "TROY/TRY"
+    ],
+    "bot_bases": [
+      "ACT",
+      "BNB",
+      "CETUS",
+      "COW",
+      "PNUT",
+      "TROY"
+    ],
+    "new_pair_bases": [
+      "ACT",
+      "CETUS",
+      "COW",
+      "PNUT",
+      "TROY"
+    ],
+    "clean_existing_bot_bases": [
+      "BNB"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-11-13 08:00 (UTC): Spot Grid and Spot DCA: BNB/EUR Spot Algo Orders: ACT/TRY, COW/TRY, CETUS/TRY, TROY/TRY and PNUT/TRY "
+  },
+  {
+    "code": "b1e67c2d4e8e4807a5592ccd6c559155",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot and Margin - 2024-10-17",
+    "publish_ms": 1729062001941,
+    "publish": "2024-10-16T07:00:01.941000+00:00",
+    "bot_pairs": [
+      "BNSOL/SOL",
+      "BNSOL/USDT"
+    ],
+    "new_pairs": [
+      "BNSOL/USDT"
+    ],
+    "bot_bases": [
+      "BNSOL"
+    ],
+    "new_pair_bases": [
+      "BNSOL"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pair at 2024-10-17 08:00 (UTC): Spot Algo Orders: BNSOL/USDT Margin Binance Margin will add BNSOL as an eligible collateral asset on Cross Margin, as well as the BNSOL/USDT pair on Cross and Isolated Margin and BNSOL/SOL on Cross Margin at 2024-10-17 10:00 (UTC). Please refer to Margin Data for a list of the most updated marginable assets and further information on specific limits, collateral ratio, and rates. "
+  },
+  {
+    "code": "60c0525da44448f9907322f23098c045",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-10-16",
+    "publish_ms": 1728979209984,
+    "publish": "2024-10-15T08:00:09.984000+00:00",
+    "bot_pairs": [
+      "SUI/BRL",
+      "TURBO/TRY"
+    ],
+    "new_pairs": [
+      "SUI/BRL",
+      "TURBO/TRY"
+    ],
+    "bot_bases": [
+      "SUI",
+      "TURBO"
+    ],
+    "new_pair_bases": [
+      "SUI",
+      "TURBO"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-10-16 08:00 (UTC): Spot Algo Orders: SUI/BRL and TURBO/TRY "
+  },
+  {
+    "code": "3e2d0a814a344e71b8e59e2e82bde6ab",
+    "title": "Notice on New Trading Bots Services on Binance Spot - 2024-10-11",
+    "publish_ms": 1728614289121,
+    "publish": "2024-10-11T02:38:09.121000+00:00",
+    "bot_pairs": [
+      "EIGEN/TRY",
+      "PEPE/FDUSD",
+      "SUI/FDUSD"
+    ],
+    "new_pairs": [],
+    "bot_bases": [
+      "EIGEN",
+      "PEPE",
+      "SUI"
+    ],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [
+      "EIGEN",
+      "PEPE",
+      "SUI"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-10-11 08:00 (UTC): Spot Grid and Spot DCA: EIGEN/TRY, PEPE/FDUSD, SUI/FDUSD&nbsp; "
+  },
+  {
+    "code": "c695fd51898341b0bfd6aa02a805015f",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-10-02",
+    "publish_ms": 1727776800000,
+    "publish": "2024-10-01T10:00:00+00:00",
+    "bot_pairs": [
+      "NEIRO/BRL",
+      "NEIRO/EUR"
+    ],
+    "new_pairs": [
+      "NEIRO/BRL",
+      "NEIRO/EUR"
+    ],
+    "bot_bases": [
+      "NEIRO"
+    ],
+    "new_pair_bases": [
+      "NEIRO"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-10-02 08:00 (UTC): Spot Algo Orders: NEIRO/BRL and NEIRO/EUR "
+  },
+  {
+    "code": "0ce0987bef4f4be0b9e63aa40b5a1b04",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-09-25",
+    "publish_ms": 1727172009113,
+    "publish": "2024-09-24T10:00:09.113000+00:00",
+    "bot_pairs": [
+      "1MBABYDOGE/FDUSD",
+      "1MBABYDOGE/TRY",
+      "BTC/EURI",
+      "CATI/BRL",
+      "NEIRO/FDUSD",
+      "NEIRO/TRY"
+    ],
+    "new_pairs": [
+      "1MBABYDOGE/FDUSD",
+      "1MBABYDOGE/TRY",
+      "BTC/EURI",
+      "CATI/BRL",
+      "NEIRO/FDUSD",
+      "NEIRO/TRY"
+    ],
+    "bot_bases": [
+      "1MBABYDOGE",
+      "BTC",
+      "CATI",
+      "NEIRO"
+    ],
+    "new_pair_bases": [
+      "1MBABYDOGE",
+      "BTC",
+      "CATI",
+      "NEIRO"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-09-25 11:00 (UTC): Spot Algo Orders: 1MBABYDOGE/FDUSD, 1MBABYDOGE/TRY, BTC/EURI, CATI/BRL, NEIRO/FDUSD, NEIRO/TRY Furthermore, for the BTC/EURI trading pair, users will enjoy zero maker fees from 2024-09-25 11:00 (UTC) until further notice. "
+  },
+  {
+    "code": "8ad95a9dd0c04b6fbe41beb7372175d9",
+    "title": "Notice on New Trading Bots Services on Binance Spot - 2024-09-13",
+    "publish_ms": 1726124406011,
+    "publish": "2024-09-12T07:00:06.011000+00:00",
+    "bot_pairs": [
+      "BTC/BRL",
+      "USDT/BRL"
+    ],
+    "new_pairs": [],
+    "bot_bases": [
+      "BTC"
+    ],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [
+      "BTC"
+    ],
+    "bot_excerpt": "enable Spot Grid and Spot DCA services for the following trading pairs at 2024-09-13 08:00 (UTC): Spot Grid and Spot DCA: BTC/BRL, USDT/BRL ",
+    "parser_fallback": "enable Spot Grid"
+  },
+  {
+    "code": "876b3108970d44d8925d005d624ff16b",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-09-04",
+    "publish_ms": 1725350404008,
+    "publish": "2024-09-03T08:00:04.008000+00:00",
+    "bot_pairs": [
+      "AAVE/USDC",
+      "DOGS/USDT",
+      "RENDER/USDT",
+      "REZ/USDT",
+      "STMX/TRY",
+      "SUN/TRY",
+      "TRX/USDC",
+      "ZK/USDT",
+      "ZRO/USDT"
+    ],
+    "new_pairs": [
+      "AAVE/USDC",
+      "STMX/TRY",
+      "SUN/TRY",
+      "TRX/USDC"
+    ],
+    "bot_bases": [
+      "AAVE",
+      "DOGS",
+      "RENDER",
+      "REZ",
+      "STMX",
+      "SUN",
+      "TRX",
+      "ZK",
+      "ZRO"
+    ],
+    "new_pair_bases": [
+      "AAVE",
+      "STMX",
+      "SUN",
+      "TRX"
+    ],
+    "clean_existing_bot_bases": [
+      "DOGS",
+      "RENDER",
+      "REZ",
+      "ZK",
+      "ZRO"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-09-04 08:00 (UTC): Spot Grid, Spot DCA and Rebalancing Bot: DOGS/USDT, RENDER/USDT, REZ/USDT, ZK/USDT, ZRO/USDT Spot Algo Orders: AAVE/USDC, STMX/TRY, SUN/TRY and TRX/USDC&nbsp; "
+  },
+  {
+    "code": "4d161380c70044f98a24bd23ae840b9c",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-08-28",
+    "publish_ms": 1724756404423,
+    "publish": "2024-08-27T11:00:04.423000+00:00",
+    "bot_pairs": [
+      "1000SATS/TRY",
+      "BONK/TRY",
+      "DOGS/BRL",
+      "DOGS/USDC",
+      "ETH/EUR",
+      "PEPE/TRY",
+      "RARE/BRL",
+      "RARE/USDC",
+      "SOL/EUR",
+      "USDC/USDT"
+    ],
+    "new_pairs": [
+      "DOGS/BRL",
+      "DOGS/USDC",
+      "RARE/BRL",
+      "RARE/USDC"
+    ],
+    "bot_bases": [
+      "1000SATS",
+      "BONK",
+      "DOGS",
+      "ETH",
+      "PEPE",
+      "RARE",
+      "SOL"
+    ],
+    "new_pair_bases": [
+      "DOGS",
+      "RARE"
+    ],
+    "clean_existing_bot_bases": [
+      "1000SATS",
+      "BONK",
+      "ETH",
+      "PEPE",
+      "SOL"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-08-28 13:00 (UTC): Spot Grid and Spot DCA: 1000SATS/TRY, BONK/TRY, ETH/EUR, PEPE/TRY, SOL/EUR, USDC/USDT Spot Algo Orders: DOGS/BRL, DOGS/USDC, RARE/BRL and RARE/USDC&nbsp; "
+  },
+  {
+    "code": "1d8ee71334c64195bee82d96f1f4ee47",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-08-22",
+    "publish_ms": 1724205602004,
+    "publish": "2024-08-21T02:00:02.004000+00:00",
+    "bot_pairs": [
+      "AAVE/FDUSD",
+      "BANANA/USDT",
+      "BTC/EUR",
+      "BTC/TRY",
+      "DOGE/JPY",
+      "LISTA/USDT",
+      "MATIC/JPY",
+      "NEAR/JPY",
+      "TAO/USDT",
+      "TON/USDC",
+      "TON/USDT"
+    ],
+    "new_pairs": [
+      "AAVE/FDUSD",
+      "DOGE/JPY",
+      "MATIC/JPY",
+      "NEAR/JPY",
+      "TON/USDC"
+    ],
+    "bot_bases": [
+      "AAVE",
+      "BANANA",
+      "BTC",
+      "DOGE",
+      "LISTA",
+      "MATIC",
+      "NEAR",
+      "TAO",
+      "TON"
+    ],
+    "new_pair_bases": [
+      "AAVE",
+      "DOGE",
+      "MATIC",
+      "NEAR",
+      "TON"
+    ],
+    "clean_existing_bot_bases": [
+      "BANANA",
+      "BTC",
+      "LISTA",
+      "TAO"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-08-22 08:00 (UTC): Spot Grid and Spot DCA: BANANA/USDT, BTC/EUR, BTC/TRY, LISTA/USDT, TAO/USDT, TON/USDT Rebalancing Bot: BANANA/USDT, LISTA/USDT, TAO/USDT, TON/USDT Spot Algo Orders: AAVE/FDUSD, DOGE/JPY, MATIC/JPY, NEAR/JPY, TON/USDC "
+  },
+  {
+    "code": "a9146c3d828b4caf978023bf9c169409",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-08-16",
+    "publish_ms": 1723597201352,
+    "publish": "2024-08-14T01:00:01.352000+00:00",
+    "bot_pairs": [
+      "BONK/BRL",
+      "NOT/EUR"
+    ],
+    "new_pairs": [
+      "BONK/BRL",
+      "NOT/EUR"
+    ],
+    "bot_bases": [
+      "BONK",
+      "NOT"
+    ],
+    "new_pair_bases": [
+      "BONK",
+      "NOT"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-08-16 08:00 (UTC): Spot Algo Orders: BONK/BRL, NOT/EUR "
+  },
+  {
+    "code": "3d90de1ef48149d0bb176879433b6856",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-07-18",
+    "publish_ms": 1721224018872,
+    "publish": "2024-07-17T13:46:58.872000+00:00",
+    "bot_pairs": [
+      "BNB/USDC",
+      "BNX/TRY",
+      "ETH/ARS",
+      "PEPE/USDC",
+      "SOL/USDC"
+    ],
+    "new_pairs": [
+      "BNX/TRY",
+      "ETH/ARS"
+    ],
+    "bot_bases": [
+      "BNB",
+      "BNX",
+      "ETH",
+      "PEPE",
+      "SOL"
+    ],
+    "new_pair_bases": [
+      "BNX",
+      "ETH"
+    ],
+    "clean_existing_bot_bases": [
+      "BNB",
+      "PEPE",
+      "SOL"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-07-18 14:00 (UTC): Spot Grid and Spot DCA: BNB/USDC, PEPE/USDC and SOL/USDC Spot Algo Orders: BNX/TRY and ETH/ARS&nbsp; "
+  },
+  {
+    "code": "1c535caf1d4b4df4abe14c50a85e3eac",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-07-12",
+    "publish_ms": 1720683003148,
+    "publish": "2024-07-11T07:30:03.148000+00:00",
+    "bot_pairs": [
+      "1000SATS/USDC",
+      "IO/USDC"
+    ],
+    "new_pairs": [
+      "1000SATS/USDC",
+      "IO/USDC"
+    ],
+    "bot_bases": [
+      "1000SATS",
+      "IO"
+    ],
+    "new_pair_bases": [
+      "1000SATS",
+      "IO"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-07-12 08:00 (UTC): Spot Algo Orders: 1000SATS/USDC and IO/USDC&nbsp; "
+  },
+  {
+    "code": "3e8e2c2f5a264d51aa9370bfc7c86479",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-07-03",
+    "publish_ms": 1719919686593,
+    "publish": "2024-07-02T11:28:06.593000+00:00",
+    "bot_pairs": [
+      "WIF/BRL",
+      "ZK/USDC",
+      "ZRO/USDC"
+    ],
+    "new_pairs": [
+      "WIF/BRL",
+      "ZK/USDC",
+      "ZRO/USDC"
+    ],
+    "bot_bases": [
+      "WIF",
+      "ZK",
+      "ZRO"
+    ],
+    "new_pair_bases": [
+      "WIF",
+      "ZK",
+      "ZRO"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-07-03 14:00 (UTC): Spot Algo Orders: WIF/BRL, ZK/USDC and ZRO/USDC&nbsp; "
+  },
+  {
+    "code": "40379d0ab5d74070b4f22a648d34b507",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-06-21",
+    "publish_ms": 1718892010510,
+    "publish": "2024-06-20T14:00:10.510000+00:00",
+    "bot_pairs": [
+      "BAKE/TRY",
+      "LISTA/BRL"
+    ],
+    "new_pairs": [
+      "BAKE/TRY",
+      "LISTA/BRL"
+    ],
+    "bot_bases": [
+      "BAKE",
+      "LISTA"
+    ],
+    "new_pair_bases": [
+      "BAKE",
+      "LISTA"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-06-21 14:00 (UTC): Spot Algo Orders: BAKE/TRY and LISTA/BRL "
+  },
+  {
+    "code": "f5aaef217151492fa27deff928fc9a89",
+    "title": "Notice on New Trading Bots Services on Binance Spot - 2024-06-20",
+    "publish_ms": 1718762409875,
+    "publish": "2024-06-19T02:00:09.875000+00:00",
+    "bot_pairs": [
+      "IO/USDT"
+    ],
+    "new_pairs": [],
+    "bot_bases": [
+      "IO"
+    ],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [
+      "IO"
+    ],
+    "bot_excerpt": "enable Spot Grid, Spot DCA &amp; Rebalancing Bot services for the IO/USDT trading pair at 2024-06-20 08:00 (UTC).&nbsp; ",
+    "parser_fallback": "enable Spot Grid"
+  },
+  {
+    "code": "e37f12aebb9d412ca22a5492bc76599c",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-06-13",
+    "publish_ms": 1718179211366,
+    "publish": "2024-06-12T08:00:11.366000+00:00",
+    "bot_pairs": [
+      "NOT/BRL",
+      "TRU/TRY",
+      "WIF/EUR"
+    ],
+    "new_pairs": [
+      "NOT/BRL",
+      "TRU/TRY",
+      "WIF/EUR"
+    ],
+    "bot_bases": [
+      "NOT",
+      "TRU",
+      "WIF"
+    ],
+    "new_pair_bases": [
+      "NOT",
+      "TRU",
+      "WIF"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-06-13 14:00 (UTC): Spot Algo Orders: NOT/BRL, TRU/TRY and WIF/EUR&nbsp; "
+  },
+  {
+    "code": "4ed662d670cd4ee7a49fbb62f410f2be",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-06-05",
+    "publish_ms": 1717493420530,
+    "publish": "2024-06-04T09:30:20.530000+00:00",
+    "bot_pairs": [
+      "HIGH/TRY",
+      "PEOPLE/FDUSD",
+      "TNSR/USDC"
+    ],
+    "new_pairs": [
+      "HIGH/TRY",
+      "PEOPLE/FDUSD",
+      "TNSR/USDC"
+    ],
+    "bot_bases": [
+      "HIGH",
+      "PEOPLE",
+      "TNSR"
+    ],
+    "new_pair_bases": [
+      "HIGH",
+      "PEOPLE",
+      "TNSR"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-06-05 08:00 (UTC): Spot Algo Orders: HIGH/TRY, PEOPLE/FDUSD and TNSR/USDC&nbsp; "
+  },
+  {
+    "code": "6dee757613ae487eba9df39c74818a99",
+    "title": "Binance Adds USDT/COP Spot Trading Pair with Trading Bots Services Enabled",
+    "publish_ms": 1717052402916,
+    "publish": "2024-05-30T07:00:02.916000+00:00",
+    "bot_pairs": [
+      "USDT/COP"
+    ],
+    "new_pairs": [],
+    "bot_bases": [],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "Trading Bots services for the USDT/COP spot trading pair at 2024-06-05 15:00 (UTC). "
+  },
+  {
+    "code": "98f9b9c9349647d191c87701d5ec03ef",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-05-30",
+    "publish_ms": 1716975423550,
+    "publish": "2024-05-29T09:37:03.550000+00:00",
+    "bot_pairs": [
+      "NEAR/BRL",
+      "NOT/USDC"
+    ],
+    "new_pairs": [
+      "NEAR/BRL",
+      "NOT/USDC"
+    ],
+    "bot_bases": [
+      "NEAR",
+      "NOT"
+    ],
+    "new_pair_bases": [
+      "NEAR",
+      "NOT"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-05-30 15:00 (UTC): Spot Algo Orders: NEAR/BRL, NOT/USDC "
+  },
+  {
+    "code": "fc696cf1f0824e67ba47c64b0257e8f2",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-05-29",
+    "publish_ms": 1716908402696,
+    "publish": "2024-05-28T15:00:02.696000+00:00",
+    "bot_pairs": [
+      "BTC/MXN",
+      "ENS/USDC",
+      "LDO/USDC",
+      "XRP/MXN"
+    ],
+    "new_pairs": [
+      "BTC/MXN",
+      "ENS/USDC",
+      "LDO/USDC",
+      "XRP/MXN"
+    ],
+    "bot_bases": [
+      "BTC",
+      "ENS",
+      "LDO",
+      "XRP"
+    ],
+    "new_pair_bases": [
+      "BTC",
+      "ENS",
+      "LDO",
+      "XRP"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-05-29 15:00 (UTC): Spot Algo Orders: BTC/MXN, XRP/MXN, ENS/USDC, LDO/USDC. "
+  },
+  {
+    "code": "8beda0700d01427b9290f88a275ecc79",
+    "title": "Binance Adds USDC/TRY Spot Trading Pair with Trading Bots Services Enabled",
+    "publish_ms": 1716516001720,
+    "publish": "2024-05-24T02:00:01.720000+00:00",
+    "bot_pairs": [
+      "USDC/TRY"
+    ],
+    "new_pairs": [],
+    "bot_bases": [],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "Trading Bots services for the USDC/TRY spot trading pair at 2024-05-29 08:00 (UTC). "
+  },
+  {
+    "code": "f7c6bd7931db40aa83931556b5a43565",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-05-23",
+    "publish_ms": 1716343210029,
+    "publish": "2024-05-22T02:00:10.029000+00:00",
+    "bot_pairs": [
+      "AR/FDUSD",
+      "BB/USDT",
+      "ENA/EUR",
+      "NOT/USDT",
+      "PEPE/EUR",
+      "REZ/USDC",
+      "TRB/FDUSD"
+    ],
+    "new_pairs": [
+      "AR/FDUSD",
+      "ENA/EUR",
+      "PEPE/EUR",
+      "REZ/USDC",
+      "TRB/FDUSD"
+    ],
+    "bot_bases": [
+      "AR",
+      "BB",
+      "ENA",
+      "NOT",
+      "PEPE",
+      "REZ",
+      "TRB"
+    ],
+    "new_pair_bases": [
+      "AR",
+      "ENA",
+      "PEPE",
+      "REZ",
+      "TRB"
+    ],
+    "clean_existing_bot_bases": [
+      "BB",
+      "NOT"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-05-23 08:00 (UTC): Spot Grid, Spot DCA, and Rebalancing Bot: BB/USDT, NOT/USDT Spot Algo Orders: AR/FDUSD, ENA/EUR, PEPE/EUR, REZ/USDC, TRB/FDUSD "
+  },
+  {
+    "code": "d670b4798af841be8bbc99ab832b89d8",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-05-17",
+    "publish_ms": 1715846408830,
+    "publish": "2024-05-16T08:00:08.830000+00:00",
+    "bot_pairs": [
+      "AR/USDC",
+      "ARKM/USDC",
+      "BB/USDC",
+      "CRV/USDC",
+      "PEOPLE/USDC"
+    ],
+    "new_pairs": [
+      "AR/USDC",
+      "ARKM/USDC",
+      "BB/USDC",
+      "CRV/USDC",
+      "PEOPLE/USDC"
+    ],
+    "bot_bases": [
+      "AR",
+      "ARKM",
+      "BB",
+      "CRV",
+      "PEOPLE"
+    ],
+    "new_pair_bases": [
+      "AR",
+      "ARKM",
+      "BB",
+      "CRV",
+      "PEOPLE"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-05-17 08:00 (UTC): Spot Algo Orders: ARKM/USDC, AR/USDC , BB/USDC , CRV/USDC and PEOPLE/USDC "
+  },
+  {
+    "code": "7dc77c7970b64299824baab0c9d51a90",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-05-15",
+    "publish_ms": 1715673606116,
+    "publish": "2024-05-14T08:00:06.116000+00:00",
+    "bot_pairs": [
+      "FRONT/USDC",
+      "PEOPLE/TRY",
+      "TRB/USDC"
+    ],
+    "new_pairs": [
+      "FRONT/USDC",
+      "PEOPLE/TRY",
+      "TRB/USDC"
+    ],
+    "bot_bases": [
+      "FRONT",
+      "PEOPLE",
+      "TRB"
+    ],
+    "new_pair_bases": [
+      "FRONT",
+      "PEOPLE",
+      "TRB"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-05-15 08:00 (UTC): Spot Algo Orders: FRONT/USDC, PEOPLE/TRY, and TRB/USDC "
+  },
+  {
+    "code": "fb150d24be2543229be84104258f8a2b",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-05-08",
+    "publish_ms": 1715066119590,
+    "publish": "2024-05-07T07:15:19.590000+00:00",
+    "bot_pairs": [
+      "EGLD/TRY",
+      "PHB/TRY",
+      "RSR/TRY"
+    ],
+    "new_pairs": [
+      "EGLD/TRY",
+      "PHB/TRY",
+      "RSR/TRY"
+    ],
+    "bot_bases": [
+      "EGLD",
+      "PHB",
+      "RSR"
+    ],
+    "new_pair_bases": [
+      "EGLD",
+      "PHB",
+      "RSR"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-05-08 08:00 (UTC):&nbsp; Spot Algo Orders: EGLD/TRY, PHB/TRY and RSR/TRY "
+  },
+  {
+    "code": "a6458369650445e4aebe208e1e14da89",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-04-30",
+    "publish_ms": 1714374014640,
+    "publish": "2024-04-29T07:00:14.640000+00:00",
+    "bot_pairs": [
+      "ADA/JPY",
+      "SHIB/JPY",
+      "SOL/JPY",
+      "XRP/JPY"
+    ],
+    "new_pairs": [
+      "ADA/JPY",
+      "SHIB/JPY",
+      "SOL/JPY",
+      "XRP/JPY"
+    ],
+    "bot_bases": [
+      "ADA",
+      "SHIB",
+      "SOL",
+      "XRP"
+    ],
+    "new_pair_bases": [
+      "ADA",
+      "SHIB",
+      "SOL",
+      "XRP"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-04-30 08:00 (UTC):&nbsp; Spot Algo Orders: ADA/JPY, SHIB/JPY, SOL/JPY, XRP/JPY "
+  },
+  {
+    "code": "62faed659e60433f9203e8d654a1d8ba",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-04-26",
+    "publish_ms": 1714032057557,
+    "publish": "2024-04-25T08:00:57.557000+00:00",
+    "bot_pairs": [
+      "ALGO/USDC",
+      "EOS/USDC"
+    ],
+    "new_pairs": [
+      "ALGO/USDC",
+      "EOS/USDC"
+    ],
+    "bot_bases": [
+      "ALGO",
+      "EOS"
+    ],
+    "new_pair_bases": [
+      "ALGO",
+      "EOS"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-04-26 08:00 (UTC):&nbsp; Spot Algo Orders: ALGO/USDC and EOS/USDC "
+  },
+  {
+    "code": "3741f1d3928b4da88b765d81f2ffd979",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-04-24",
+    "publish_ms": 1713855628868,
+    "publish": "2024-04-23T07:00:28.868000+00:00",
+    "bot_pairs": [
+      "ICP/USDC",
+      "OMNI/USDC",
+      "OMNI/USDT",
+      "ONT/USDC",
+      "PEPE/BRL",
+      "YGG/TRY"
+    ],
+    "new_pairs": [
+      "ICP/USDC",
+      "OMNI/USDC",
+      "ONT/USDC",
+      "PEPE/BRL",
+      "YGG/TRY"
+    ],
+    "bot_bases": [
+      "ICP",
+      "OMNI",
+      "ONT",
+      "PEPE",
+      "YGG"
+    ],
+    "new_pair_bases": [
+      "ICP",
+      "OMNI",
+      "ONT",
+      "PEPE",
+      "YGG"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-04-24 14:00 (UTC):&nbsp; Spot Grid, Spot DCA, and Rebalancing Bot: OMNI/USDT Spot Algo Orders: ICP/USDC, OMNI/USDC, ONT/USDC, PEPE/BRL, YGG/TRY "
+  },
+  {
+    "code": "d31b198db53844a9b4197c5ec24624dd",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-04-19",
+    "publish_ms": 1713423603192,
+    "publish": "2024-04-18T07:00:03.192000+00:00",
+    "bot_pairs": [
+      "APT/USDC",
+      "GALA/USDC",
+      "NEO/USDC",
+      "OMNI/BRL",
+      "STX/USDC"
+    ],
+    "new_pairs": [
+      "APT/USDC",
+      "GALA/USDC",
+      "NEO/USDC",
+      "OMNI/BRL",
+      "STX/USDC"
+    ],
+    "bot_bases": [
+      "APT",
+      "GALA",
+      "NEO",
+      "OMNI",
+      "STX"
+    ],
+    "new_pair_bases": [
+      "APT",
+      "GALA",
+      "NEO",
+      "OMNI",
+      "STX"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-04-19 14:00 (UTC):&nbsp; Spot Algo Orders: APT/USDC, GALA/USDC, NEO/USDC, OMNI/BRL, STX/USDC "
+  },
+  {
+    "code": "dd0fd6ed7c7947aea3b4d67dd3801a90",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-04-17",
+    "publish_ms": 1713252609016,
+    "publish": "2024-04-16T07:30:09.016000+00:00",
+    "bot_pairs": [
+      "ATOM/USDC",
+      "CFX/USDC",
+      "POLYX/TRY",
+      "RNDR/USDC",
+      "RUNE/USDC",
+      "SAGA/USDC",
+      "SAGA/USDT",
+      "TNSR/USDT"
+    ],
+    "new_pairs": [
+      "ATOM/USDC",
+      "CFX/USDC",
+      "POLYX/TRY",
+      "RNDR/USDC",
+      "RUNE/USDC",
+      "SAGA/USDC"
+    ],
+    "bot_bases": [
+      "ATOM",
+      "CFX",
+      "POLYX",
+      "RNDR",
+      "RUNE",
+      "SAGA",
+      "TNSR"
+    ],
+    "new_pair_bases": [
+      "ATOM",
+      "CFX",
+      "POLYX",
+      "RNDR",
+      "RUNE",
+      "SAGA"
+    ],
+    "clean_existing_bot_bases": [
+      "TNSR"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-04-17 08:00 (UTC):&nbsp; Spot Grid, Spot DCA, and Rebalancing Bot: SAGA/USDT, TNSR/USDT Spot Algo Orders: ATOM/USDC, CFX/USDC, POLYX/TRY, RNDR/USDC, RUNE/USDC, SAGA/USDC "
+  },
+  {
+    "code": "13fc02bf6f30438f848a5f73357356f1",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-04-11",
+    "publish_ms": 1712736004152,
+    "publish": "2024-04-10T08:00:04.152000+00:00",
+    "bot_pairs": [
+      "CKB/USDC",
+      "ENA/USDC",
+      "ENA/USDT",
+      "ETHFI/USDC",
+      "YGG/USDC"
+    ],
+    "new_pairs": [
+      "CKB/USDC",
+      "ENA/USDC",
+      "ETHFI/USDC",
+      "YGG/USDC"
+    ],
+    "bot_bases": [
+      "CKB",
+      "ENA",
+      "ETHFI",
+      "YGG"
+    ],
+    "new_pair_bases": [
+      "CKB",
+      "ENA",
+      "ETHFI",
+      "YGG"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-04-11 08:00 (UTC):&nbsp; Spot Grid, Spot DCA, and Rebalancing Bot: ENA/USDT, W/USDT Spot Algo Orders: CKB/USDC, ENA/USDC, ETHFI/USDC, YGG/USDC "
+  },
+  {
+    "code": "38ecd940af1f468ab4e2c65f67369ee4",
+    "title": "Binance Adds USDT/CZK Trading Pair on Spot, with Trading Bots Services Enabled",
+    "publish_ms": 1712570121077,
+    "publish": "2024-04-08T09:55:21.077000+00:00",
+    "bot_pairs": [
+      "USDT/CZK"
+    ],
+    "new_pairs": [],
+    "bot_bases": [],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "Trading Bots services for the USDT/CZK trading pair at 2024-04-11 10:00 (UTC). "
+  },
+  {
+    "code": "6dfb96852fc24202b105149d3ed191dd",
+    "title": "Binance Adds USDT/MXN Spot Trading Pair with Trading Bots Services Enabled",
+    "publish_ms": 1712268000000,
+    "publish": "2024-04-04T22:00:00+00:00",
+    "bot_pairs": [
+      "USDT/MXN"
+    ],
+    "new_pairs": [],
+    "bot_bases": [],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "Trading Bots services for the USDT/MXN spot trading pair at 2024-04-10 00:00 (UTC). "
+  },
+  {
+    "code": "e71d0476100548dd9646726cfd10843b",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-04-05",
+    "publish_ms": 1712223112512,
+    "publish": "2024-04-04T09:31:52.512000+00:00",
+    "bot_pairs": [
+      "BOME/USDC",
+      "JTO/USDC",
+      "WIF/USDC"
+    ],
+    "new_pairs": [],
+    "bot_bases": [
+      "BOME",
+      "JTO",
+      "WIF"
+    ],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [
+      "BOME",
+      "JTO",
+      "WIF"
+    ],
+    "bot_excerpt": "Trading Bots services for the BOME/USDC, JTO/USDC, and WIF/USDC trading pairs at 2024-04-05 08:00 (UTC). "
+  },
+  {
+    "code": "4415b0754bd343798f5391a4d212e923",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-04-03",
+    "publish_ms": 1712040305073,
+    "publish": "2024-04-02T06:45:05.073000+00:00",
+    "bot_pairs": [
+      "BCH/USDC",
+      "LQTY/FDUSD",
+      "LTC/USDC",
+      "MASK/TRY",
+      "PENDLE/USDC",
+      "RDNT/TRY"
+    ],
+    "new_pairs": [],
+    "bot_bases": [
+      "BCH",
+      "LQTY",
+      "LTC",
+      "MASK",
+      "PENDLE",
+      "RDNT"
+    ],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [
+      "BCH",
+      "LQTY",
+      "LTC",
+      "MASK",
+      "PENDLE",
+      "RDNT"
+    ],
+    "bot_excerpt": "Trading Bots services for the BCH/USDC, LQTY/FDUSD, LTC/USDC, MASK/TRY, PENDLE/USDC and RDNT/TRY trading pairs at 2024-04-03 08:00 (UTC). "
+  },
+  {
+    "code": "0f3ce0f5305e47659ca47d42d0c5cd91",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-03-27",
+    "publish_ms": 1711447990332,
+    "publish": "2024-03-26T10:13:10.332000+00:00",
+    "bot_pairs": [
+      "BONK/USDC",
+      "ETHFI/USDT",
+      "FLOKI/USDC",
+      "FTM/USDC",
+      "MKR/TRY",
+      "RAY/TRY",
+      "RNDR/BRL"
+    ],
+    "new_pairs": [
+      "BONK/USDC",
+      "FLOKI/USDC",
+      "FTM/USDC",
+      "MKR/TRY",
+      "RAY/TRY",
+      "RNDR/BRL"
+    ],
+    "bot_bases": [
+      "BONK",
+      "ETHFI",
+      "FLOKI",
+      "FTM",
+      "MKR",
+      "RAY",
+      "RNDR"
+    ],
+    "new_pair_bases": [
+      "BONK",
+      "FLOKI",
+      "FTM",
+      "MKR",
+      "RAY",
+      "RNDR"
+    ],
+    "clean_existing_bot_bases": [
+      "ETHFI"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-03-27 13:00 (UTC):&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: ETHFI/USDT Spot Algo Orders: BONK/USDC, FLOKI/USDC, FTM/USDC, MKR/TRY, RAY/TRY, RNDR/BRL "
+  },
+  {
+    "code": "b89e1973281648959d3477b3082b33bc",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-03-21",
+    "publish_ms": 1710904829478,
+    "publish": "2024-03-20T03:20:29.478000+00:00",
+    "bot_pairs": [
+      "AAVE/TRY",
+      "AEVO/USDT",
+      "ARKM/FDUSD",
+      "BOME/USDT",
+      "CRV/TRY",
+      "FET/BRL",
+      "RAY/FDUSD",
+      "RNDR/EUR"
+    ],
+    "new_pairs": [
+      "AAVE/TRY",
+      "ARKM/FDUSD",
+      "CRV/TRY",
+      "FET/BRL",
+      "RAY/FDUSD",
+      "RNDR/EUR"
+    ],
+    "bot_bases": [
+      "AAVE",
+      "AEVO",
+      "ARKM",
+      "BOME",
+      "CRV",
+      "FET",
+      "RAY",
+      "RNDR"
+    ],
+    "new_pair_bases": [
+      "AAVE",
+      "ARKM",
+      "CRV",
+      "FET",
+      "RAY",
+      "RNDR"
+    ],
+    "clean_existing_bot_bases": [
+      "AEVO",
+      "BOME"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-03-21 08:00 (UTC):&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: AEVO/USDT, BOME/USDT Spot Algo Orders: AAVE/TRY, ARKM/FDUSD, CRV/TRY, FET/BRL, RAY/FDUSD, RNDR/EUR "
+  },
+  {
+    "code": "7c2462b71eea403e8735731becd0208d",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-03-13 & 2024-03-14",
+    "publish_ms": 1710234930148,
+    "publish": "2024-03-12T09:15:30.148000+00:00",
+    "bot_pairs": [
+      "EUR/USDC",
+      "FET/USDC",
+      "FLOKI/FDUSD",
+      "GRT/FDUSD",
+      "IMX/TRY",
+      "NEAR/USDC",
+      "SNX/TRY",
+      "WIF/USDT",
+      "XRP/FDUSD"
+    ],
+    "new_pairs": [
+      "EUR/USDC",
+      "FET/USDC",
+      "FLOKI/FDUSD",
+      "GRT/FDUSD",
+      "IMX/TRY",
+      "NEAR/USDC",
+      "SNX/TRY"
+    ],
+    "bot_bases": [
+      "FET",
+      "FLOKI",
+      "GRT",
+      "IMX",
+      "NEAR",
+      "SNX",
+      "WIF",
+      "XRP"
+    ],
+    "new_pair_bases": [
+      "EUR",
+      "FET",
+      "FLOKI",
+      "GRT",
+      "IMX",
+      "NEAR",
+      "SNX"
+    ],
+    "clean_existing_bot_bases": [
+      "WIF",
+      "XRP"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs: At 2024-03-13 08:00 (UTC):&nbsp; Spot Algo Orders: FLOKI/FDUSD, GRT/FDUSD, NEAR/USDC, SNX/TRY At 2024-03-14 08:00 (UTC): Spot Grid &amp; Spot DCA: WIF/USDT, XRP/FDUSD Rebalancing Bot: WIF/USDT&nbsp; Spot Algo Orders: EUR/USDC, FET/USDC, IMX/TRY "
+  },
+  {
+    "code": "ecd5240ac636424a853875d97b53f30a",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-03-07",
+    "publish_ms": 1709725251502,
+    "publish": "2024-03-06T11:40:51.502000+00:00",
+    "bot_pairs": [
+      "AGIX/FDUSD",
+      "AR/TRY",
+      "AXL/USDT",
+      "DOGE/FDUSD",
+      "DOGE/USDC",
+      "PEPE/USDC",
+      "PORTAL/USDT",
+      "SHIB/USDC",
+      "THETA/FDUSD"
+    ],
+    "new_pairs": [
+      "AGIX/FDUSD",
+      "AR/TRY",
+      "DOGE/USDC",
+      "PEPE/USDC",
+      "SHIB/USDC",
+      "THETA/FDUSD"
+    ],
+    "bot_bases": [
+      "AGIX",
+      "AR",
+      "AXL",
+      "DOGE",
+      "PEPE",
+      "PORTAL",
+      "SHIB",
+      "THETA"
+    ],
+    "new_pair_bases": [
+      "AGIX",
+      "AR",
+      "DOGE",
+      "PEPE",
+      "SHIB",
+      "THETA"
+    ],
+    "clean_existing_bot_bases": [
+      "AXL",
+      "PORTAL"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-03-07 08:00 (UTC).&nbsp; Spot Grid &amp; Spot DCA : AXL/USDT, DOGE/FDUSD, PORTAL/USDT&nbsp; Rebalancing Bot: AXL/USDT, PORTAL/USDT&nbsp; Spot Algo Orders: AGIX/FDUSD, AR/TRY, DOGE/USDC, PEPE/USDC, SHIB/USDC, THETA/FDUSD "
+  },
+  {
+    "code": "3790dd23e35b4ad38a9fce412cbe301d",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-02-28",
+    "publish_ms": 1709024423609,
+    "publish": "2024-02-27T09:00:23.609000+00:00",
+    "bot_pairs": [
+      "CKB/TRY",
+      "COTI/TRY",
+      "LDO/TRY",
+      "PIXEL/USDT",
+      "STRK/USDT",
+      "UNI/USDC"
+    ],
+    "new_pairs": [
+      "CKB/TRY",
+      "COTI/TRY",
+      "LDO/TRY",
+      "UNI/USDC"
+    ],
+    "bot_bases": [
+      "CKB",
+      "COTI",
+      "LDO",
+      "PIXEL",
+      "STRK",
+      "UNI"
+    ],
+    "new_pair_bases": [
+      "CKB",
+      "COTI",
+      "LDO",
+      "UNI"
+    ],
+    "clean_existing_bot_bases": [
+      "PIXEL",
+      "STRK"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-02-28 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: PIXEL/USDT, STRK/USDT Spot Algo Orders: CKB/TRY, COTI/TRY, LDO/TRY and UNI/USDC "
+  },
+  {
+    "code": "a3a805c8038545098c34df652cd35d93",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-02-23",
+    "publish_ms": 1708596620824,
+    "publish": "2024-02-22T10:10:20.824000+00:00",
+    "bot_pairs": [
+      "BNB/FDUSD",
+      "DYM/USDT",
+      "ETH/FDUSD",
+      "FIL/USDC",
+      "HBAR/TRY",
+      "PENDLE/TRY",
+      "PYTH/USDT",
+      "SOL/FDUSD",
+      "WLD/USDC"
+    ],
+    "new_pairs": [
+      "FIL/USDC",
+      "HBAR/TRY",
+      "PENDLE/TRY",
+      "WLD/USDC"
+    ],
+    "bot_bases": [
+      "BNB",
+      "DYM",
+      "ETH",
+      "FIL",
+      "HBAR",
+      "PENDLE",
+      "PYTH",
+      "SOL",
+      "WLD"
+    ],
+    "new_pair_bases": [
+      "FIL",
+      "HBAR",
+      "PENDLE",
+      "WLD"
+    ],
+    "clean_existing_bot_bases": [
+      "BNB",
+      "DYM",
+      "ETH",
+      "PYTH",
+      "SOL"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-02-23 08:00 (UTC).&nbsp; Spot Grid &amp; Spot DCA: BNB/FDUSD, DYM/USDT, ETH/FDUSD, PYTH/USDT, SOL/FDUSD Rebalancing Bot: DYM/USDT, PYTH/USDT Spot Algo Orders: FIL/USDC, HBAR/TRY, PENDLE/TRY, WLD/USDC "
+  },
+  {
+    "code": "75f3297929f94cd1af9e378a775360a6",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-02-07",
+    "publish_ms": 1707199539841,
+    "publish": "2024-02-06T06:05:39.841000+00:00",
+    "bot_pairs": [
+      "JUP/USDC",
+      "PENDLE/FDUSD"
+    ],
+    "new_pairs": [
+      "JUP/USDC",
+      "PENDLE/FDUSD"
+    ],
+    "bot_bases": [
+      "JUP",
+      "PENDLE"
+    ],
+    "new_pair_bases": [
+      "JUP",
+      "PENDLE"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-02-07 08:00 (UTC).&nbsp; Spot Algo Orders: JUP/USDC, PENDLE/FDUSD "
+  },
+  {
+    "code": "3eb7a6881fda4aa795b8d415442d5e79",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-02-02",
+    "publish_ms": 1706771740937,
+    "publish": "2024-02-01T07:15:40.937000+00:00",
+    "bot_pairs": [
+      "ALT/USDC",
+      "ALT/USDT",
+      "MAGIC/FDUSD",
+      "SEI/USDC"
+    ],
+    "new_pairs": [
+      "ALT/USDC",
+      "MAGIC/FDUSD",
+      "SEI/USDC"
+    ],
+    "bot_bases": [
+      "ALT",
+      "MAGIC",
+      "SEI"
+    ],
+    "new_pair_bases": [
+      "ALT",
+      "MAGIC",
+      "SEI"
+    ],
+    "clean_existing_bot_bases": [],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-02-02 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: ALT/USDT Spot Algo Orders: ALT/USDC, MAGIC/FDUSD, SEI/USDC&nbsp; "
+  },
+  {
+    "code": "57f2350688e94131bdb225a1f8cd89a8",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-01-26",
+    "publish_ms": 1706155245970,
+    "publish": "2024-01-25T04:00:45.970000+00:00",
+    "bot_pairs": [
+      "APT/FDUSD",
+      "BLUR/USDC",
+      "MANTA/USDT"
+    ],
+    "new_pairs": [
+      "APT/FDUSD",
+      "BLUR/USDC"
+    ],
+    "bot_bases": [
+      "APT",
+      "BLUR",
+      "MANTA"
+    ],
+    "new_pair_bases": [
+      "APT",
+      "BLUR"
+    ],
+    "clean_existing_bot_bases": [
+      "MANTA"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-01-26 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: MANTA/USDT Spot Algo Orders: APT/FDUSD, BLUR/USDC&nbsp; "
+  },
+  {
+    "code": "41aa1f6328f546e39c298dd07e86a23c",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-01-24",
+    "publish_ms": 1705995609675,
+    "publish": "2024-01-23T07:40:09.675000+00:00",
+    "bot_pairs": [
+      "CHZ/FDUSD",
+      "LINK/USDC",
+      "MANTA/USDC"
+    ],
+    "new_pairs": [],
+    "bot_bases": [
+      "CHZ",
+      "LINK",
+      "MANTA"
+    ],
+    "new_pair_bases": [],
+    "clean_existing_bot_bases": [
+      "CHZ",
+      "LINK",
+      "MANTA"
+    ],
+    "bot_excerpt": "Trading Bots services for the CHZ/FDUSD, LINK/USDC and MANTA/USDC spot trading pairs at 2024-01-24 08:00 (UTC). "
+  },
+  {
+    "code": "2e222a57895942bfbecd0d4dadf2ae83",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-01-19",
+    "publish_ms": 1705547711039,
+    "publish": "2024-01-18T03:15:11.039000+00:00",
+    "bot_pairs": [
+      "ENS/FDUSD",
+      "ETC/FDUSD",
+      "SUI/USDC",
+      "TIA/USDC",
+      "XAI/USDT"
+    ],
+    "new_pairs": [
+      "ENS/FDUSD",
+      "ETC/FDUSD",
+      "SUI/USDC",
+      "TIA/USDC"
+    ],
+    "bot_bases": [
+      "ENS",
+      "ETC",
+      "SUI",
+      "TIA",
+      "XAI"
+    ],
+    "new_pair_bases": [
+      "ENS",
+      "ETC",
+      "SUI",
+      "TIA"
+    ],
+    "clean_existing_bot_bases": [
+      "XAI"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-01-19 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: XAI/USDT Spot Algo Orders: ENS/FDUSD, ETC/FDUSD, SUI/USDC, TIA/USDC "
+  },
+  {
+    "code": "ba8a13be212d4c4a97b18595217f5c16",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-01-11",
+    "publish_ms": 1704857735309,
+    "publish": "2024-01-10T03:35:35.309000+00:00",
+    "bot_pairs": [
+      "AI/USDT",
+      "NFP/USDT",
+      "SKL/TRY",
+      "STX/FDUSD",
+      "TIA/FDUSD"
+    ],
+    "new_pairs": [
+      "SKL/TRY",
+      "STX/FDUSD",
+      "TIA/FDUSD"
+    ],
+    "bot_bases": [
+      "AI",
+      "NFP",
+      "SKL",
+      "STX",
+      "TIA"
+    ],
+    "new_pair_bases": [
+      "SKL",
+      "STX",
+      "TIA"
+    ],
+    "clean_existing_bot_bases": [
+      "AI",
+      "NFP"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2024-01-11 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: AI/USDT, NFP/USDT Spot Algo Orders: SKL/TRY, STX/FDUSD, TIA/FDUSD&nbsp;&nbsp; "
+  },
+  {
+    "code": "e993090f69c44738bc8385e797d441a1",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2024-01-05",
+    "publish_ms": 1704355207494,
+    "publish": "2024-01-04T08:00:07.494000+00:00",
+    "bot_pairs": [
+      "ACE/USDT"
+    ],
+    "new_pairs": [
+      "ICP/FDUSD",
+      "LDO/FDUSD",
+      "MOVR/TRY"
+    ],
+    "bot_bases": [
+      "ACE"
+    ],
+    "new_pair_bases": [
+      "ICP",
+      "LDO",
+      "MOVR"
+    ],
+    "clean_existing_bot_bases": [
+      "ACE"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pair at 2024-01-05 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: ACE/USDT&nbsp; "
+  },
+  {
+    "code": "59e16f064d6549f3a2a3c3eb56a9c9fe",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2023-12-21",
+    "publish_ms": 1703039403058,
+    "publish": "2023-12-20T02:30:03.058000+00:00",
+    "bot_pairs": [
+      "1000SATS/USDT",
+      "BONK/USDT"
+    ],
+    "new_pairs": [
+      "BLZ/FDUSD",
+      "RARE/TRY",
+      "VANRY/TRY"
+    ],
+    "bot_bases": [
+      "1000SATS",
+      "BONK"
+    ],
+    "new_pair_bases": [
+      "BLZ",
+      "RARE",
+      "VANRY"
+    ],
+    "clean_existing_bot_bases": [
+      "1000SATS",
+      "BONK"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2023-12-21 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: 1000SATS/USDT, BONK/USDT "
+  },
+  {
+    "code": "0825589159a241d2af92fa61102ec0df",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2023-12-14",
+    "publish_ms": 1702450522628,
+    "publish": "2023-12-13T06:55:22.628000+00:00",
+    "bot_pairs": [
+      "BLUR/USDT",
+      "JTO/USDT",
+      "VANRY/USDT"
+    ],
+    "new_pairs": [
+      "FIDA/TRY",
+      "INJ/FDUSD",
+      "IOTA/TRY",
+      "MEME/ETH",
+      "SAND/FDUSD",
+      "SHIB/FDUSD"
+    ],
+    "bot_bases": [
+      "BLUR",
+      "JTO",
+      "VANRY"
+    ],
+    "new_pair_bases": [
+      "FIDA",
+      "INJ",
+      "IOTA",
+      "MEME",
+      "SAND",
+      "SHIB"
+    ],
+    "clean_existing_bot_bases": [
+      "BLUR",
+      "JTO",
+      "VANRY"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2023-12-14 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: BLUR/USDT, JTO/USDT, VANRY/USDT "
+  },
+  {
+    "code": "399c3f8b867141eebf84c86b3d66ae7b",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2023-11-23",
+    "publish_ms": 1700638507088,
+    "publish": "2023-11-22T07:35:07.088000+00:00",
+    "bot_pairs": [
+      "BEAMX/USDT"
+    ],
+    "new_pairs": [
+      "DOT/TUSD",
+      "GALA/FDUSD",
+      "GAS/TRY",
+      "NTRN/TRY",
+      "WLD/FDUSD"
+    ],
+    "bot_bases": [
+      "BEAMX"
+    ],
+    "new_pair_bases": [
+      "DOT",
+      "GALA",
+      "GAS",
+      "NTRN",
+      "WLD"
+    ],
+    "clean_existing_bot_bases": [
+      "BEAMX"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2023-11-23 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: BEAMX/USDT "
+  },
+  {
+    "code": "742c9bbb9ebf4f68b0ca372615e86ee7",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2023-11-09",
+    "publish_ms": 1699437614062,
+    "publish": "2023-11-08T10:00:14.062000+00:00",
+    "bot_pairs": [
+      "ORDI/USDT",
+      "TIA/USDT"
+    ],
+    "new_pairs": [
+      "EGLD/FDUSD",
+      "FET/FDUSD",
+      "GAS/FDUSD",
+      "INJ/ETH",
+      "INJ/TUSD",
+      "OP/FDUSD",
+      "ORDI/FDUSD",
+      "ORDI/TUSD",
+      "RNDR/FDUSD",
+      "SHIB/TUSD"
+    ],
+    "bot_bases": [
+      "ORDI",
+      "TIA"
+    ],
+    "new_pair_bases": [
+      "EGLD",
+      "FET",
+      "GAS",
+      "INJ",
+      "OP",
+      "ORDI",
+      "RNDR",
+      "SHIB"
+    ],
+    "clean_existing_bot_bases": [
+      "TIA"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2023-11-09 08:00 (UTC).&nbsp; Spot Grid, Spot DCA &amp; Rebalancing Bot: ORDI/USDT, TIA/USDT "
+  },
+  {
+    "code": "6cdb1faca0e44c188ab680494c3bfa11",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2023-10-26",
+    "publish_ms": 1698204603826,
+    "publish": "2023-10-25T03:30:03.826000+00:00",
+    "bot_pairs": [
+      "BTC/USDC",
+      "ETH/USDC",
+      "FLOKI/USDT",
+      "NTRN/USDT",
+      "PEPE/USDT"
+    ],
+    "new_pairs": [
+      "ALGO/FDUSD",
+      "DOT/FDUSD",
+      "FTM/FDUSD",
+      "LINK/FDUSD",
+      "NEAR/FDUSD",
+      "STRAX/TRY"
+    ],
+    "bot_bases": [
+      "BTC",
+      "ETH",
+      "FLOKI",
+      "NTRN",
+      "PEPE"
+    ],
+    "new_pair_bases": [
+      "ALGO",
+      "DOT",
+      "FTM",
+      "LINK",
+      "NEAR",
+      "STRAX"
+    ],
+    "clean_existing_bot_bases": [
+      "BTC",
+      "ETH",
+      "FLOKI",
+      "NTRN",
+      "PEPE"
+    ],
+    "bot_excerpt": "enable Trading Bots services for the following trading pairs at 2023-10-26 08:00 (UTC).&nbsp; Spot Grid &amp; Spot DCA: BTC/USDC, ETH/USDC, FLOKI/USDT Rebalancing Bot: FLOKI/USDT, NTRN/USDT, PEPE/USDT "
+  },
+  {
+    "code": "b68013d4a1b14c82bb019eabcc13391a",
+    "title": "Notice on New Trading Pairs & Trading Bots Services on Binance Spot - 2023-10-19",
+    "publish_ms": 1697612405894,
+    "publish": "2023-10-18T07:00:05.894000+00:00",
+    "bot_pairs": [
+      "NTRN/USDT",
+      "PENDLE/USDT"
+    ],
+    "new_pairs": [
+      "ATOM/FDUSD",
+      "AVAX/FDUSD",
+      "BAND/TRY",
+      "BCH/FDUSD",
+      "LOOM/TRY",
+      "MATIC/FDUSD"
+    ],
+    "bot_bases": [
+      "NTRN",
+      "PENDLE"
+    ],
+    "new_pair_bases": [
+      "ATOM",
+      "AVAX",
+      "BAND",
+      "BCH",
+      "LOOM",
+      "MATIC"
+    ],
+    "clean_existing_bot_bases": [
+      "NTRN",
+      "PENDLE"
+    ],
+    "bot_excerpt": "Trading Bots services for the NTRN/USDT and PENDLE/USDT trading pairs at 2023-10-19 08:00 (UTC).&nbsp;&nbsp; "
+  }
+]

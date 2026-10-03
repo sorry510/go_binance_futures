@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v154",
+  "stage":"OOS1-2025",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "rule_changed_from_discovery":false,
+  "gate_changed_from_discovery":false,
+  "gate_pass":true,
+  "db_write":false,
+  "app_conf_modified":false
+}

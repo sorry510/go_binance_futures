@@ -1,0 +1,173 @@
+FILES 10
+DOWNLOAD 5 / 10
+DOWNLOAD 10 / 10
+TRADE 1 / 10 OCEANUSDT SHORT SL -7.4599
+TRADE 2 / 10 OMGUSDT LONG SL -6.6665
+TRADE 3 / 10 SUSHIUSDT LONG SL -6.72
+TRADE 4 / 10 EGLDUSDT LONG SL -6.6671
+TRADE 5 / 10 ENJUSDT LONG SL -6.8472
+TRADE 6 / 10 GMTUSDT LONG SL -6.7829
+TRADE 7 / 10 LRCUSDT LONG SL -7.943
+TRADE 8 / 10 KSMUSDT LONG SL -7.3628
+TRADE 9 / 10 MASKUSDT LONG SL -6.4727
+TRADE 10 / 10 SANDUSDT LONG SL -6.829
+SUMMARY {
+  "status": "frozen_failed_untouched_exact",
+  "gate_pass": false,
+  "all": {
+    "n": 10,
+    "wins": 0,
+    "losses": 10,
+    "tp": 0,
+    "sl": 10,
+    "time": 0,
+    "eof": 0,
+    "pf": 0.0,
+    "net_pct": -69.7509517002858,
+    "avg_pct": -6.975095170028579,
+    "gp": 0,
+    "gl": 69.7509517002858
+  },
+  "by_side": {
+    "LONG": {
+      "n": 9,
+      "wins": 0,
+      "losses": 9,
+      "tp": 0,
+      "sl": 9,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -62.29109036544598,
+      "avg_pct": -6.921232262827331,
+      "gp": 0,
+      "gl": 62.29109036544598
+    },
+    "SHORT": {
+      "n": 1,
+      "wins": 0,
+      "losses": 1,
+      "tp": 0,
+      "sl": 1,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -7.459861334839814,
+      "avg_pct": -7.459861334839814,
+      "gp": 0,
+      "gl": 7.459861334839814
+    }
+  },
+  "by_year": {
+    "2023": {
+      "n": 3,
+      "wins": 0,
+      "losses": 3,
+      "tp": 0,
+      "sl": 3,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -20.846275107298815,
+      "avg_pct": -6.948758369099605,
+      "gp": 0,
+      "gl": 20.846275107298815
+    },
+    "2024": {
+      "n": 7,
+      "wins": 0,
+      "losses": 7,
+      "tp": 0,
+      "sl": 7,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -48.904676592986974,
+      "avg_pct": -6.9863823704267105,
+      "gp": 0,
+      "gl": 48.904676592986974
+    }
+  },
+  "by_article": {
+    "08f043a4f20d4f0290817ece13b3d7f4": {
+      "n": 2,
+      "wins": 0,
+      "losses": 2,
+      "tp": 0,
+      "sl": 2,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -13.835482685905708,
+      "avg_pct": -6.917741342952854,
+      "gp": 0,
+      "gl": 13.835482685905708,
+      "mean_net_pct": -6.917741342952854
+    },
+    "50df6c9af8f14d09937a01956779d2a3": {
+      "n": 4,
+      "wins": 0,
+      "losses": 4,
+      "tp": 0,
+      "sl": 4,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -28.24018315237279,
+      "avg_pct": -7.0600457880931975,
+      "gp": 0,
+      "gl": 28.24018315237279,
+      "mean_net_pct": -7.0600457880931975
+    },
+    "98315efae83841a2bb71046d4bbae204": {
+      "n": 1,
+      "wins": 0,
+      "losses": 1,
+      "tp": 0,
+      "sl": 1,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -7.459861334839814,
+      "avg_pct": -7.459861334839814,
+      "gp": 0,
+      "gl": 7.459861334839814,
+      "mean_net_pct": -7.459861334839814
+    },
+    "bdb9b2ed43524fe4afeeb41b19481900": {
+      "n": 2,
+      "wins": 0,
+      "losses": 2,
+      "tp": 0,
+      "sl": 2,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -13.386413772459004,
+      "avg_pct": -6.693206886229502,
+      "gp": 0,
+      "gl": 13.386413772459004,
+      "mean_net_pct": -6.693206886229502
+    },
+    "f9baa987cd944e75b3e06c297bca05f7": {
+      "n": 1,
+      "wins": 0,
+      "losses": 1,
+      "tp": 0,
+      "sl": 1,
+      "time": 0,
+      "eof": 0,
+      "pf": 0.0,
+      "net_pct": -6.829010754708474,
+      "avg_pct": -6.829010754708474,
+      "gp": 0,
+      "gl": 6.829010754708474,
+      "mean_net_pct": -6.829010754708474
+    }
+  },
+  "positive_batches": "0/5",
+  "positive_batch_fraction": 0.0,
+  "errors": [],
+  "old_seen_events_included": false,
+  "returns_were_unread_before_this_run": true
+}

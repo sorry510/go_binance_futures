@@ -1,0 +1,14 @@
+{
+  "family":"binance-earn-wednesday-flexible-activation-long",
+  "period":"2023-2024",
+  "source":"Binance official Earn Wednesday articles",
+  "event_definition":"ordinary crypto token enters current article Simple Earn Flexible Products set after being absent from immediately previous Earn Wednesday Flexible set",
+  "direction_if_eligible":"LONG",
+  "warmup":"last Earn Wednesday article before 2023-01-01; set-state only, no outcome",
+  "exclude_bases":["USDT","USDC","FDUSD","TUSD","USDP","BUSD","DAI","EUR","TRY","BRL","ARS","COP","MXN","CZK","PLN","RON","UAH","NGN","ZAR","GBP","AUD","JPY","RUB"],
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "coverage_gate":{"eligible_events_min":8,"unique_tokens_min":8,"independent_batches_min":8},
+  "post_event_returns_before_gate":false,
+  "db_write":false
+}

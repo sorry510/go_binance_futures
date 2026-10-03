@@ -1,0 +1,14 @@
+{
+  "version":"v154",
+  "stage":"OOS1",
+  "source_discovery":"../2026-10-02-early-gate",
+  "period":{"start":"2025-01-01T00:00:00Z","end":"2026-01-01T00:00:00Z"},
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "normal_funding_interval_hours":8,
+  "flat_funding_rate":0.0001,
+  "signal":"previous 8h settlement funding == 0.0001 and current 8h settlement funding != 0.0001",
+  "direction":"current > 0.0001 SHORT; current < 0.0001 LONG",
+  "entry":"next complete 1h open",
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30},
+  "db_write":false
+}

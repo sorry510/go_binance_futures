@@ -1,0 +1,10 @@
+{
+  "research_date":"2026-10-02",
+  "source":"Binance USD-M public REST GET /fapi/v1/insuranceBalance plus Binance developer changelog",
+  "endpoint_introduced":"2025-04-23",
+  "historical_parameters_tested":["startTime","timestamp","limit"],
+  "historical_parameters_effect":"none; endpoint returned current snapshot",
+  "returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

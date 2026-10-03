@@ -1,0 +1,49 @@
+{
+  "version": "v177",
+  "repos": {
+    "BTC": {
+      "repo": "bitcoin/bitcoin",
+      "closed_2023_2024": 1153
+    },
+    "ETH": {
+      "repo": "ethereum/go-ethereum",
+      "closed_2023_2024": 1330
+    },
+    "BNB": {
+      "repo": "bnb-chain/bsc",
+      "closed_2023_2024": 588
+    },
+    "XRP": {
+      "repo": "XRPLF/rippled",
+      "closed_2023_2024": 266
+    },
+    "ADA": {
+      "repo": "IntersectMBO/cardano-node",
+      "closed_2023_2024": 214
+    },
+    "AVAX": {
+      "repo": "ava-labs/avalanchego",
+      "closed_2023_2024": 279
+    },
+    "NEAR": {
+      "repo": "near/nearcore",
+      "closed_2023_2024": 773
+    },
+    "TRX": {
+      "repo": "tronprotocol/java-tron",
+      "closed_2023_2024": 478
+    },
+    "OP": {
+      "repo": "ethereum-optimism/optimism",
+      "closed_2023_2024": 904
+    },
+    "APT": {
+      "repo": "aptos-labs/aptos-core",
+      "closed_2023_2024": 1149
+    }
+  },
+  "repos_ge_100_closures_2023_2024": 10,
+  "required_repos": 8,
+  "coverage_gate_pass": true,
+  "post_token_returns_read": false
+}

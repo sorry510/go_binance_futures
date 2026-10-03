@@ -1,0 +1,10 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v155",
+  "sources":["Binance Vision USD-M fundingRate","Binance Vision USD-M premiumIndexKlines 1h","Binance Vision USD-M klines 1h"],
+  "discovery":"2023-2024",
+  "oos_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

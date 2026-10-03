@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-02",
+  "source":"Coin Metrics Community API /v4/timeseries/asset-metrics",
+  "direct_metric":"CapRealUSD",
+  "direct_metric_result":"HTTP 403 Forbidden",
+  "control_metrics":{"PriceUSD":"available","CapMVRVCur":"available","CapMrktCurUSD":"available"},
+  "returns_read":false,
+  "proxy_reconstruction_used":false,
+  "db_write":false,
+  "app_conf_modified":false
+}

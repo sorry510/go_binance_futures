@@ -1,0 +1,15 @@
+{
+  "raw_events": 229,
+  "raw_unique_tokens": 223,
+  "raw_articles": 3,
+  "eligible_events": 3,
+  "eligible_unique_tokens": 3,
+  "eligible_articles": 2,
+  "eligible_long": 2,
+  "eligible_short": 1,
+  "excluded_by_reason": {
+    "history_lt_2y": 226
+  },
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false
+}

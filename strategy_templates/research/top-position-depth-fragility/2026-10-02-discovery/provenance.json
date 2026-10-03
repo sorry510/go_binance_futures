@@ -1,0 +1,14 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "version":"v149",
+  "metrics_source":"Binance Vision USD-M daily metrics",
+  "depth_source":"Binance Vision USD-M daily bookDepth",
+  "price_source":"Binance USD-M 1h historical bars for forward returns",
+  "stage_a":"2023 only",
+  "data_gate_pass":true,
+  "stage_b_2024_evaluated":false,
+  "oos_2025_plus_evaluated":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

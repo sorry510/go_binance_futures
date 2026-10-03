@@ -1,0 +1,13 @@
+{
+  "research_date": "2026-10-02",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "version": "v151",
+  "source": "Binance Vision Spot and USD-M monthly 1h klines",
+  "coverage": "all 25 months from 2022-12 through 2024-12 present for all 6 symbols in both markets",
+  "discovery_events": 0,
+  "oos_evaluated": false,
+  "strict_engine_run": false,
+  "app_conf_modified": false,
+  "db_write": false,
+  "identifier_renumber_note": "Identifier-only renumber v149 -> v151 after discovering pre-existing versions; signal, data, gates and outcomes unchanged."
+}

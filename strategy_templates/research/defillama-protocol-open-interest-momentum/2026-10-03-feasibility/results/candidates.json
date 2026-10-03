@@ -1,0 +1,172 @@
+[
+  {
+    "symbol": "-",
+    "protocols": [
+      "apex-omni",
+      "helix-perp",
+      "kalshi",
+      "polymarket-international",
+      "sx-bet"
+    ],
+    "protocol_names": [
+      "Apex Omni",
+      "Helix Perp",
+      "Kalshi",
+      "Polymarket International",
+      "SX Bet"
+    ],
+    "first_oi_date": "2021-07-01",
+    "last_oi_date": "2026-10-01",
+    "days_2023": 365,
+    "days_2024": 366,
+    "binance_2022_12": false,
+    "binance_2024_12": false,
+    "plausible_2y_by_end_2024": false
+  },
+  {
+    "symbol": "APEX",
+    "protocols": [
+      "apex-pro"
+    ],
+    "protocol_names": [
+      "ApeX Pro"
+    ],
+    "first_oi_date": "2023-10-15",
+    "last_oi_date": "2025-09-03",
+    "days_2023": 78,
+    "days_2024": 366,
+    "binance_2022_12": false,
+    "binance_2024_12": false,
+    "plausible_2y_by_end_2024": false
+  },
+  {
+    "symbol": "B4FWX",
+    "protocols": [
+      "fwx-derivatives"
+    ],
+    "protocol_names": [
+      "FWX Derivatives"
+    ],
+    "first_oi_date": "2023-12-07",
+    "last_oi_date": "2026-02-24",
+    "days_2023": 25,
+    "days_2024": 328,
+    "binance_2022_12": false,
+    "binance_2024_12": false,
+    "plausible_2y_by_end_2024": false
+  },
+  {
+    "symbol": "BMX",
+    "protocols": [
+      "bmx-classic-perps"
+    ],
+    "protocol_names": [
+      "BMX Classic Perps"
+    ],
+    "first_oi_date": "2024-06-26",
+    "last_oi_date": "2026-01-03",
+    "days_2023": 0,
+    "days_2024": 176,
+    "binance_2022_12": false,
+    "binance_2024_12": false,
+    "plausible_2y_by_end_2024": false
+  },
+  {
+    "symbol": "DIME",
+    "protocols": [
+      "paradex-perps"
+    ],
+    "protocol_names": [
+      "Paradex Perps"
+    ],
+    "first_oi_date": "2024-10-03",
+    "last_oi_date": "2026-10-02",
+    "days_2023": 0,
+    "days_2024": 90,
+    "binance_2022_12": false,
+    "binance_2024_12": false,
+    "plausible_2y_by_end_2024": false
+  },
+  {
+    "symbol": "DYDX",
+    "protocols": [
+      "dydx-v3",
+      "dydx-v4"
+    ],
+    "protocol_names": [
+      "dYdX V3",
+      "dYdX V4"
+    ],
+    "first_oi_date": "2021-02-25",
+    "last_oi_date": "2026-10-02",
+    "days_2023": 365,
+    "days_2024": 366,
+    "binance_2022_12": true,
+    "binance_2024_12": true,
+    "plausible_2y_by_end_2024": true
+  },
+  {
+    "symbol": "GMX",
+    "protocols": [
+      "gmx-v1-perps"
+    ],
+    "protocol_names": [
+      "GMX V1 Perps"
+    ],
+    "first_oi_date": "2021-08-31",
+    "last_oi_date": "2025-11-22",
+    "days_2023": 365,
+    "days_2024": 366,
+    "binance_2022_12": false,
+    "binance_2024_12": true,
+    "plausible_2y_by_end_2024": false
+  },
+  {
+    "symbol": "JUP",
+    "protocols": [
+      "jupiter-perpetual-exchange"
+    ],
+    "protocol_names": [
+      "Jupiter Perpetual Exchange"
+    ],
+    "first_oi_date": "2023-07-19",
+    "last_oi_date": "2026-10-01",
+    "days_2023": 124,
+    "days_2024": 366,
+    "binance_2022_12": false,
+    "binance_2024_12": true,
+    "plausible_2y_by_end_2024": false
+  },
+  {
+    "symbol": "TANGO",
+    "protocols": [
+      "contango-v2"
+    ],
+    "protocol_names": [
+      "Contango V2"
+    ],
+    "first_oi_date": "2023-10-04",
+    "last_oi_date": "2026-10-01",
+    "days_2023": 89,
+    "days_2024": 360,
+    "binance_2022_12": false,
+    "binance_2024_12": false,
+    "plausible_2y_by_end_2024": false
+  },
+  {
+    "symbol": "THE",
+    "protocols": [
+      "thena-perps"
+    ],
+    "protocol_names": [
+      "THENA PERPS"
+    ],
+    "first_oi_date": "2023-12-24",
+    "last_oi_date": "2026-10-01",
+    "days_2023": 8,
+    "days_2024": 366,
+    "binance_2022_12": false,
+    "binance_2024_12": true,
+    "plausible_2y_by_end_2024": false
+  }
+]

@@ -1,0 +1,201 @@
+[
+  {
+    "article_code": "1319ace3b84e48a7b7909d1b5ec09efe",
+    "article_title": "Binance Completes Integration of Radiant Capital (RDNT) on Base Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1726030800000,
+    "publish": "2024-09-11T05:00:00+00:00",
+    "asset": "RDNT",
+    "symbol": "RDNTUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "ab9d973234b340bfbb330231364da868",
+    "article_title": "Binance Completes Integration of Coin98 (C98) on Viction Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1725247803249,
+    "publish": "2024-09-02T03:30:03.249000+00:00",
+    "asset": "C98",
+    "symbol": "C98USDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "qv_lt_5m",
+    "quote_volume_24h": 4554969.003299999
+  },
+  {
+    "article_code": "fa79d2c5158345f090d6efba1ad19486",
+    "article_title": "Binance Completes Integration of Yield Guild Games (YGG) on Ronin Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1724727602550,
+    "publish": "2024-08-27T03:00:02.550000+00:00",
+    "asset": "YGG",
+    "symbol": "YGGUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "6ef0ae0bdb0545be8455f677d2990fca",
+    "article_title": "Binance Completes Integration of DeXe (DEXE) on BNB Smart Chain, Opens Deposits and Withdrawals",
+    "publish_ms": 1718269201692,
+    "publish": "2024-06-13T09:00:01.692000+00:00",
+    "asset": "DEXE",
+    "symbol": "DEXEUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "46e0885c3cd948ed934da9ba974d565b",
+    "article_title": "Binance Completes Integration of IRISnet (IRIS) on BNB Smart Chain, Opens Deposits and Withdrawals",
+    "publish_ms": 1715050804922,
+    "publish": "2024-05-07T03:00:04.922000+00:00",
+    "asset": "IRIS",
+    "symbol": "IRISUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "2b83c106f9f0430793eb558a0da7a2ad",
+    "article_title": "Binance Completes Integration of AVA (AVA) on BNB Smart Chain (BEP20), Opens Deposits and Withdrawals",
+    "publish_ms": 1707103210050,
+    "publish": "2024-02-05T03:20:10.050000+00:00",
+    "asset": "AVA",
+    "symbol": "AVAUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "538343a202bb47cf97483b5e3104f3b5",
+    "article_title": "Binance Completes Integration of Tranchess (CHESS) on Ethereum Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1704939304970,
+    "publish": "2024-01-11T02:15:04.970000+00:00",
+    "asset": "CHESS",
+    "symbol": "CHESSUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "28072bfcccf844838d9f0b82b1b9496c",
+    "article_title": "Binance Completes Integration of Radiant Capital (RDNT) on Ethereum Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1703210410652,
+    "publish": "2023-12-22T02:00:10.652000+00:00",
+    "asset": "RDNT",
+    "symbol": "RDNTUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "af49699024764492b7089b957183a5c5",
+    "article_title": "Binance Completes Integration of Maverick Protocol (MAV) on Base Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1698207309371,
+    "publish": "2023-10-25T04:15:09.371000+00:00",
+    "asset": "MAV",
+    "symbol": "MAVUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "44d181b1e70f4f3bb4a04bf9a0a54497",
+    "article_title": "Binance Completes Integration of Maverick Protocol (MAV) on zkSync Era Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1695697509797,
+    "publish": "2023-09-26T03:05:09.797000+00:00",
+    "asset": "MAV",
+    "symbol": "MAVUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "f098594277374b699db6d70846f48af9",
+    "article_title": "Binance Completes Integration of Maverick Protocol (MAV) on BNB Smart Chain, Opens Deposits and Withdrawals",
+    "publish_ms": 1693800603043,
+    "publish": "2023-09-04T04:10:03.043000+00:00",
+    "asset": "MAV",
+    "symbol": "MAVUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "f0786a82f5b342128eab06172aa17bc9",
+    "article_title": "Binance Completes Integration of STEPN (GMT) on Polygon Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1690866602708,
+    "publish": "2023-08-01T05:10:02.708000+00:00",
+    "asset": "GMT",
+    "symbol": "GMTUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "414e0fbd2fa74ccdb406459e8f02314b",
+    "article_title": "Binance Completes Integration of Pendle (PENDLE) on BNB Smart Chain, Opens Deposits and Withdrawals",
+    "publish_ms": 1689909003498,
+    "publish": "2023-07-21T03:10:03.498000+00:00",
+    "asset": "PENDLE",
+    "symbol": "PENDLEUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "5eec6b8ab2f44ee5b86c33bae12a8c7e",
+    "article_title": "Binance Completes Integration of WOO Network (WOO) on Arbitrum One Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1688447209136,
+    "publish": "2023-07-04T05:06:49.136000+00:00",
+    "asset": "WOO",
+    "symbol": "WOOUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "f56f02b114874dbab2cf56c99ef4d7de",
+    "article_title": "Binance Completes Integration of Mdex (MDX) on Ethereum Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1686826831706,
+    "publish": "2023-06-15T11:00:31.706000+00:00",
+    "asset": "MDX",
+    "symbol": "MDXUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "296a025839014de1a4891e580e32d9ba",
+    "article_title": "Binance Completes Integration of PancakeSwap (CAKE) on Aptos Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1686713705305,
+    "publish": "2023-06-14T03:35:05.305000+00:00",
+    "asset": "CAKE",
+    "symbol": "CAKEUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "45063cf08d2044319688b80b38c61fd9",
+    "article_title": "Binance Completes Integration of Ooki Protocol (OOKI) on Polygon Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1685327437546,
+    "publish": "2023-05-29T02:30:37.546000+00:00",
+    "asset": "OOKI",
+    "symbol": "OOKIUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  },
+  {
+    "article_code": "ba43dd26ee09424bb10f425f57137ac6",
+    "article_title": "Binance Completes Integration of JOE (JOE) on Arbitrum One Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1677636050738,
+    "publish": "2023-03-01T02:00:50.738000+00:00",
+    "asset": "JOE",
+    "symbol": "JOEUSDT",
+    "side": "LONG",
+    "eligible": false,
+    "reason": "history_lt_730d_or_missing"
+  }
+]

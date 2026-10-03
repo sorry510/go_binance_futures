@@ -1,0 +1,13 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "event_universe":"copied unchanged from feasibility eligible.json",
+  "market_source":"Binance Vision USD-M monthly 1h klines",
+  "signal_time":"official article publishDate",
+  "direction":"SHORT",
+  "exact_tp_sl_run":false,
+  "later_oos_evaluated":false,
+  "app_conf_modified":false,
+  "db_write":false,
+  "io_note":"Two pre-result replay attempts were stopped only to eliminate redundant next-month downloads. Audit confirmed all 12h endpoints remained within the entry month; signal, event universe, entry and outcome definitions were unchanged."
+}

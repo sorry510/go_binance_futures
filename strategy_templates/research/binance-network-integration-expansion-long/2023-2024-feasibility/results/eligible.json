@@ -1,0 +1,98 @@
+[
+  {
+    "article_code": "c0975433aac14fdd8ad3f37c88c2c5b6",
+    "article_title": "Binance Completes Integration of Polkadot (DOT) on Asset Hub (Polkadot), Opens Deposits and Withdrawals",
+    "publish_ms": 1720666801177,
+    "publish": "2024-07-11T03:00:01.177000+00:00",
+    "asset": "DOT",
+    "symbol": "DOTUSDT",
+    "side": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 103818514.64199999
+  },
+  {
+    "article_code": "5af3fc32fe71451ba942799189ae4d0a",
+    "article_title": "Binance Completes Integration of Filecoin (FIL) on FILEVM Network, Opens Deposits",
+    "publish_ms": 1708668929730,
+    "publish": "2024-02-23T06:15:29.730000+00:00",
+    "asset": "FIL",
+    "symbol": "FILUSDT",
+    "side": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 1233028680.0439003
+  },
+  {
+    "article_code": "777567e6d96c40a7928c93404a4bb1ec",
+    "article_title": "Binance Completes Integration of BNB, FDUSD and USDT on opBNB Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1699441525842,
+    "publish": "2023-11-08T11:05:25.842000+00:00",
+    "asset": "BNB",
+    "symbol": "BNBUSDT",
+    "side": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 352173692.9107999
+  },
+  {
+    "article_code": "3ce3f190263e493d9ab376d8646bfc71",
+    "article_title": "Binance Completes Integration of Ethereum (ETH) on Base Network, Opens Deposits",
+    "publish_ms": 1695805505061,
+    "publish": "2023-09-27T09:05:05.061000+00:00",
+    "asset": "ETH",
+    "symbol": "ETHUSDT",
+    "side": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 1927859906.45089
+  },
+  {
+    "article_code": "ee1c87b20f2248618446bf21d72556ed",
+    "article_title": "Binance Completes Integration of Ethereum (ETH) on zkSync Era Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1694076313926,
+    "publish": "2023-09-07T08:45:13.926000+00:00",
+    "asset": "ETH",
+    "symbol": "ETHUSDT",
+    "side": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 3104467567.742339
+  },
+  {
+    "article_code": "8b90b4bb3baf406cb39f4193c590a1a5",
+    "article_title": "Binance Completes Integration of SafePal (SFP) on Ethereum Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1689753626834,
+    "publish": "2023-07-19T08:00:26.834000+00:00",
+    "asset": "SFP",
+    "symbol": "SFPUSDT",
+    "side": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 7473792.749299999
+  },
+  {
+    "article_code": "eefbfae2c0ae472d9e1e36f1a30bf340",
+    "article_title": "Binance Completes Integration of Bitcoin (BTC) on Lightning Network, Opens Deposits and Withdrawals",
+    "publish_ms": 1689562804475,
+    "publish": "2023-07-17T03:00:04.475000+00:00",
+    "asset": "BTC",
+    "symbol": "BTCUSDT",
+    "side": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 4813367786.989679
+  },
+  {
+    "article_code": "9660e516a35049f8a223346102a727db",
+    "article_title": "Binance Completes Integration of The Graph (GRT) on Arbitrum One and Polygon Networks, Opens Deposits and Withdrawals",
+    "publish_ms": 1683253812609,
+    "publish": "2023-05-05T02:30:12.609000+00:00",
+    "asset": "GRT",
+    "symbol": "GRTUSDT",
+    "side": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 24543408.13891
+  }
+]

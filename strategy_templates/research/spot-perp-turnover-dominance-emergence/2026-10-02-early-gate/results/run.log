@@ -1,0 +1,67 @@
+SYMBOL SOLUSDT events 0 spot 18287 perp 18288
+SYMBOL DOGEUSDT events 0 spot 18287 perp 18288
+SYMBOL LTCUSDT events 0 spot 18287 perp 18288
+SYMBOL AVAXUSDT events 0 spot 18287 perp 18288
+SYMBOL UNIUSDT events 0 spot 18287 perp 18288
+SYMBOL ZECUSDT events 0 spot 18287 perp 18288
+SUMMARY {
+  "version": "v149",
+  "status": "frozen_failed_early_gate",
+  "gate_pass": false,
+  "discovery_2023_2024": {
+    "n": 0
+  },
+  "2023": {
+    "n": 0
+  },
+  "2024": {
+    "n": 0
+  },
+  "frequency_per_symbol_week": 0,
+  "source_meta": {
+    "SOLUSDT": {
+      "spot_rows": 18287,
+      "perp_rows": 18288,
+      "spot_missing_months": [],
+      "perp_missing_months": [],
+      "events": 0
+    },
+    "DOGEUSDT": {
+      "spot_rows": 18287,
+      "perp_rows": 18288,
+      "spot_missing_months": [],
+      "perp_missing_months": [],
+      "events": 0
+    },
+    "LTCUSDT": {
+      "spot_rows": 18287,
+      "perp_rows": 18288,
+      "spot_missing_months": [],
+      "perp_missing_months": [],
+      "events": 0
+    },
+    "AVAXUSDT": {
+      "spot_rows": 18287,
+      "perp_rows": 18288,
+      "spot_missing_months": [],
+      "perp_missing_months": [],
+      "events": 0
+    },
+    "UNIUSDT": {
+      "spot_rows": 18287,
+      "perp_rows": 18288,
+      "spot_missing_months": [],
+      "perp_missing_months": [],
+      "events": 0
+    },
+    "ZECUSDT": {
+      "spot_rows": 18287,
+      "perp_rows": 18288,
+      "spot_missing_months": [],
+      "perp_missing_months": [],
+      "events": 0
+    }
+  },
+  "oos_evaluated": false,
+  "strict_engine_run": false
+}

@@ -305,3 +305,127 @@ Archived bundles currently include:
 - `defillama-protocol-tvl-momentum/2026-10-02-discovery/`: 7d protocol-TVL growth zero-cross; corrected Binance Vision discovery 1479 events, 7d -0.779%, 4/17 positive; OOS 2025+ unevaluated, frozen.
 
 - `quote-volume-weighted-close-20h-reclaim/2026-10-01-discovery/`: v146 QVWC20 reclaim + trigger-bar breakout; strict Engine 6202 trades, PF0.823, 0/6 positive; OOS unread, frozen.
+
+- `top-trader-capital-headcount-skew/2026-10-02-early-gate/`: v147 top-position/top-account skew zero-cross; 1562 events, 12h -0.027%, 4/6 positive, both years negative; OOS unread, frozen.
+
+- `usdm-premium-zero-cross-carry-reversion/2026-10-02-early-gate/`: v148 natural premium sign-cross carry/reversion; 14901 events, 12h +0.074%, 5/6 positive, both years positive but economic gate failed; OOS unread, frozen.
+
+- `top-trader-capital-headcount-skew/2026-10-02-early-gate/`: v147 hourly Top Position / Top Accounts skew zero-cross; 1563 events, 12h -0.0395%, 3/6 positive; OOS unread, frozen.
+
+- `defillama-chain-tvl-momentum/2026-10-02-discovery/`: v148 whole-chain 7d TVL-growth zero-cross; 1240 events, 7d -0.158%, 5/13 positive, 2023/2024 sign flip; OOS unread, frozen.
+
+- `spot-perp-turnover-dominance-emergence/2026-10-02-early-gate/`: v149 natural Spot QV24 > Perp QV24 dominance cross; complete data but 0/6 symbols ever trigger in 2023-2024; structural coverage failure, frozen.
+
+- `top-position-depth-fragility/2026-10-02-discovery/`: v149 Top-Position vs ±1% depth structural fragility; 2023 Stage A 10153 events, 12h +0.0146%, far below gate; 2024/2025+ unread, frozen.
+
+- `binance-usdm-insurance-fund-balance/2026-10-02-feasibility/`: current public insuranceBalance is snapshot-only; historical parameters do not recover 2023-2024 state; returns untouched, data-history blocked.
+
+- `top-trader-capital-headcount-skew/2026-10-02-early-gate/`: v147 hourly zero-cross of top-position vs top-account ratio; 1561 events, 12h -0.0365%, 4/6 positive; OOS unread, frozen.
+
+- `binance-trading-bots-support-long/`: existing-pair Trading Bots support isolated from new-pair announcements; 26 eligible events/13 tokens/13 batches, discovery 12h -1.425%, 4/13 tokens positive; frozen, OOS unread.
+
+- `binance-dual-investment-asset-addition-long/2023-2024-feasibility/`: 61 Dual Investment titles but only 4 true new-underlying batches; coverage blocked before market data/returns.
+
+- `binance-network-integration-expansion-long/2023-2024-feasibility/`: 26 official deposit-network integration events; strict eligibility leaves 8 events/8 batches but only 7 unique tokens, so coverage blocked before returns.
+
+- `binance-earn-wednesday-flexible-activation-long/`: 74 eligible events / 38 tokens; 12h -0.7768%, breadth failed, OOS unread, frozen.
+- `dollar-funding-burden-expansion-fade/2026-10-02-early-gate/`: v152 burden expansion fade; 3045 events, 12h +0.0892%, below +0.20% gate, frozen.
+
+- `binance-earn-wednesday-flexible-activation-long/`: state-based activation into weekly Simple Earn Flexible offers; 74 eligible events/38 tokens/43 batches, discovery 12h -0.777% and 15/38 token breadth; frozen, 2025+ unread.
+
+- `binance-liquid-swap-pool-removal-short/2023-2024-feasibility/`: 137 eligible events / 50 tokens / 11 batches, but Binance retired Liquid Swap in Jan-2024; no returns read, production-applicability blocked.
+
+- `oi-funding-crowding-build-fade/2026-10-02-early-gate/`: v153 8h OI expansion transition faded by funding sign; 3379 events, 12h -0.0805%, 1/6 positive; OOS unread, frozen.
+
+- `binance-network-route-support-cessation-short/2023-2024-feasibility/`: 12 token-events but only 3 independent batches; no market returns read, coverage blocked.
+
+- `funding-flat-zone-feedback-activation/`: v154 exchange-defined 0.01% funding flat-state exit; discovery +0.2058%, 2025 OOS1 +0.2317%, but 2026 OOS2 -0.1872% and 0/6 positive; frozen before strict Engine.
+
+- `binance-liquid-swap-pool-removal-short/`: 137 eligible events / 50 tokens; chronological Stage A 66 events, 12h -0.5128%, 1/6 batches positive; Stage B unread, frozen.
+
+- `funding-premium-feedback-failure-fade/2026-10-02-early-gate/`: v155 funding payment fails to remove basis sign; 1451 events, 12h +0.1232%, 5/6 positive, below +0.20% gate; OOS unread, frozen.
+
+- `cci20-classic-threshold-breakout/2026-10-02-early-gate/`: v156 classic CCI20 +/-100 cross; 9990 events, 12h -0.0312%, 2/6 positive; frozen.
+
+- `binance-liquid-swap-pool-removal-short/`: 137 eligible events / 50 tokens / 11 batches; event-weighted 12h +0.531% but batch-equal +0.482% and only 5/11 batches positive; exact/OOS not run, frozen.
+
+- `coinmetrics-realized-cap-growth/feasibility/`: direct CapRealUSD community access returns 403 while control metrics work; no returns read, blocked.
+
+- `premium-range-record-expansion-fade/2026-10-02-early-gate/`: v157 premium-range 24h record expansion fade; 3460 events, 12h +0.0359%, 3/6 positive, 2024 negative; frozen.
+
+- `binance-spot-tick-size-cross-market/2021-2022-increase-short-oot/`: 161 untouched increase events reconstructed, but 0 satisfy event-time >=2y USD-M eligibility; returns unread, validation unavailable.
+
+- `binance-spot-step-size-adjustment/2021-2024-feasibility-correction/`: corrected census finds 3 official articles / 229 raw events, but only SOL/LINA/TRB eligible across 2 articles; no returns read, coverage blocked.
+
+- `binance-futures-tick-size-adjustment/2023-2024-missing-batches-untouched/`: 10 production-eligible untouched events from 5 previously omitted articles; exact 10/10 SL, PF0, permanently frozen.
+
+- `elite-vs-crowd-account-skew/2026-10-02-early-gate/`: v158 TopTrader-account vs global-account zero-cross; 3917 events, 12h +0.0958%, 5/6 positive but below economic gate; frozen.
+
+- `funding-elite-crowd-disagreement-fade/2026-10-02-early-gate/`: v159 funding × elite/global account disagreement; 1282 events, 12h +0.1005%, 5/6 positive but below economic gate; frozen.
+
+- `binance-spot-tick-size-cross-market/2021-2022-increase-short-oot/`: untouched validation for generated increase→SHORT hypothesis; 161 raw events but 0 production-eligible under >=730d USD-M rule, returns unread, coverage blocked.
+
+- `binance-portfolio-margin-collateral-ratio/2024-feasibility-correction/`: corrected coverage 8 events / 8 assets / 4 articles, returns unread.
+- `binance-portfolio-margin-collateral-ratio/2024-corrected-exact-discovery/`: exact 8 trades PF1.356, net +9.81%, but only 2/4 positive article batches vs 3/4 gate; frozen.
+
+- `coinmetrics-net-supply-growth/2026-10-02-feasibility/`: SplyCur coverage 8/10 variable mature assets, returns unread, gate passed.
+- `coinmetrics-net-supply-growth/2026-10-02-discovery/`: 7d supply-growth acceleration zero-cross; 946 events, 7d -0.2094%, 3/8 positive, both years negative; frozen.
+
+- `binance-spot-tick-size-cross-market/2021-2022-increase-short-oot/`: untouched validation of increase->SHORT; 161 raw events but 0 satisfy >=730d USD-M history; no returns read, validation unavailable.
+
+- `binance-simple-earn-baseline-apr-adjustment/2023-2024-feasibility/`: 25 official APR/yield articles audited; 0 qualifying token-specific durable baseline APR changes; returns unread, frozen.
+
+- `record-arrival-imbalance/2026-10-02-early-gate/`: v160 24h new-high/new-low record-arrival zero-cross; 12931 events, 12h -0.0016%, 1/6 positive, frozen.
+
+- `binance-futures-copy-trading-symbol-support/2023-2024-feasibility/`: 10 official Copy Trading titles, 0 token-specific USD-M support changes; returns unread, frozen.
+
+- `id121-regime-post-breakout-inside-continuation/2026-10-01-discovery/`: v114 exact 46 trades, PF1.205 but 3/6 positive and 0.040/week; fresh holdout unread, frozen.
+
+- `binance-simple-earn-baseline-apr-adjustment/2023-2024-feasibility/`: 25 official APR/yield candidates audited; 0 token-specific durable baseline APR changes; no market returns read, frozen.
+
+- `id121-mechanism-ablation/2026-09-30-audit/`: single-component diagnostic ablation on original 15 symbols; removing daily regime/freshness/funding/impulse/4h strength materially degrades PF/breadth; no-chase least important but not promotable; canonical ID121 retained.
+
+- `spot-perp-basis-momentum/2026-10-02-early-gate/`: v161 24h spot-perp basis-change zero-cross continuation; 42,516 events, 12h -0.0159%, 0/6 positive; OOS unread, frozen.
+
+- `github-core-release-cadence/2026-10-02-discovery/`: v162 release-cadence zero-cross; 174 events/10 symbols, 12h +0.2268% but 2023 negative and below +0.25% gate; OOS unread, frozen.
+
+- `spot-perp-volume-share-expansion-confirmation/2026-10-02-early-gate/`: v163 derivatives-participation expansion confirmation; 2066 events, 12h -0.0602%, 1/6 positive; frozen.
+
+- `large-trade-tail-imbalance/feasibility/`: novel tail-trade imbalance idea blocked by zero local trade history and very large Binance Vision aggTrades archive requirement; no returns read.
+
+- `github-core-release-cadence/2026-10-02-discovery/`: v162 release-cadence zero-cross; 174 eligible events / 10 symbols, 12h +0.2268% but 2023 negative; OOS unread, frozen.
+
+- `perp-excess-volatility-fade/2026-10-02-early-gate/`: v164 fresh perp>spot realized-vol transition faded against 24h price direction; 3606 events, 12h +0.1082%, below +0.20% gate; OOS unread, frozen.
+
+- `id121-regime-liquidity-sweep-reclaim/2026-10-02-discovery/`: v164 opposite-side 12h sweep/reclaim inside fixed ID121 regime; 17 trades, PF0.356, 2/6 positive, very low frequency; frozen.
+
+- `binance-futures-price-protection-adjustment/feasibility/`: official 2023-2024 title corpus has 0 price-protection/price-band adjustment candidates; no returns read.
+
+- `spot-perp-tracking-error-expansion-fade/2026-10-03-early-gate/`: v166 fresh 24h residual-tracking-error expansion fade; 2893 events, 12h +0.0524%, 3/6 positive; OOS unread, frozen. Spot–Perp state branch paused.
+
+- `oi-market-cap-leverage-expansion-fade/2026-10-03-early-gate/`: v167 OI-notional/market-cap expansion fade; 240 events, 7d -1.7403%, 1/6 positive; OOS unread, frozen.
+
+- `futures-turnover-market-cap-expansion-confirmation/2026-10-03-early-gate/`: v168 turnover/market-cap expansion confirms 7d trend; 602 events, 7d +0.0103%, 2023/2024 sign flip; OOS unread, frozen.
+
+- `binance-spot-excess-volatility-fade/2026-10-03-early-gate/`: v169 Binance Spot vs composite Index Price RV up-cross fade; 3841 events, 12h +0.0273%, below gate; OOS unread, frozen.
+
+- `binance-deposit-withdrawal-support-cessation/2023-2024-feasibility/`: only 4 possible ordinary-token batches after stablecoin exclusion; no returns read, frozen.
+- `binance-pool-merged-mining-support/2023-2024-feasibility/`: only 4 independent merged-mining support batches; no returns read, frozen.
+
+- `quote-volume-persistence-emergence-momentum/2026-10-03-early-gate/`: v170 48h log-QV autocorrelation zero-up-cross; only 25 events / 0.0399 per symbol-week, frequency blocked; OOS unread, frozen.
+
+- `return-future-volatility-asymmetry-reversal/2026-10-03-early-gate/`: v171 rolling leverage-effect sign transitions; 4653 events, 12h +0.0764%, below gate; OOS unread, frozen.
+
+- `taker-top-position-skew/2026-10-03-early-gate/`: v172 hourly taker-vs-top-position skew zero-cross; 29336 events, 12h +0.0014%, no edge; OOS unread, frozen.
+
+- `volatility-growth-acceleration-regime/2026-10-03-early-gate/`: v173 second-difference of non-overlapping 12h realized volatility; 12184 events, 12h +0.0114%, no edge; OOS unread, frozen.
+
+- `defillama-protocol-open-interest-momentum/2026-10-03-feasibility/`: 137 free OI protocol histories audited; only DYDX plausibly satisfies same-name >=2y Binance USD-M coverage; no returns read, frozen.
+
+- `defillama-chain-derivatives-open-interest/2026-10-03-feasibility/`: historical chain OI rebuilt from protocol breakdowns; only ETH/BNB/SOL/INJ satisfy frozen coverage, no returns read, frozen.
+
+- `taker-flow-volatility-lead-asymmetry-reversal/2026-10-03-early-gate/`: v175 taker-flow to next-hour variance sign transitions; 4880 events, 12h -0.0156%, 2/6 positive; OOS unread, frozen.
+
+- `github-core-issue-backlog/2026-10-03-discovery/`: v174 issue-arrival pressure; 769 eligible signals, 756 replayed, 7d +0.2229% but 2023 negative; LONG-only split is post-hoc, OOS unread, frozen.
+
+- `aggressor-activity-coupling-regime/2026-10-03-early-gate/`: v176 taker-flow vs quote-volume-change correlation zero-cross; 4977 events, 12h +0.0466%, below gate; OOS unread, frozen.

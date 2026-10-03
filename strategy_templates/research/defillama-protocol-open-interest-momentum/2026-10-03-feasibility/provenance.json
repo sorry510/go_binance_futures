@@ -1,0 +1,15 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "source": "free api.llama.fi overview/open-interest + summary/open-interest endpoints",
+  "overview_protocols": 137,
+  "summary_errors": 0,
+  "symbols_with_2023_2024_oi": 10,
+  "plausible_same_name_2y_tokens": 1,
+  "tokens": [
+    "DYDX"
+  ],
+  "post_event_returns_read": false,
+  "app_conf_modified": false,
+  "db_write": false
+}

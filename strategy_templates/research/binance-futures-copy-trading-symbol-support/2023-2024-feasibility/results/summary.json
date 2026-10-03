@@ -1,0 +1,9 @@
+{
+  "copy_trading_titles_2023_2024": 10,
+  "qualifying_symbol_support_events": 0,
+  "qualifying_unique_symbols": 0,
+  "qualifying_batches": 0,
+  "coverage_gate_pass": false,
+  "market_eligibility_read": false,
+  "post_event_returns_read": false
+}

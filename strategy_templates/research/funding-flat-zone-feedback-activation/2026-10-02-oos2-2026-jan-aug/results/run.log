@@ -1,0 +1,23 @@
+DOWNLOAD 30 / 108
+DOWNLOAD 60 / 108
+DOWNLOAD 90 / 108
+DOWNLOAD 108 / 108
+SYMBOL SOLUSDT events 47
+SYMBOL DOGEUSDT events 56
+SYMBOL LTCUSDT events 53
+SYMBOL AVAXUSDT events 72
+SYMBOL UNIUSDT events 84
+SYMBOL ZECUSDT events 65
+SUMMARY {
+  "events": 377,
+  "mean1": -8.284092344954778e-06,
+  "mean4": -0.0008561459584945524,
+  "mean12": -0.0018716588978644707,
+  "positive_symbols": 0,
+  "frequency_per_symbol_week": 1.8100137174211248,
+  "long_n": 375,
+  "long_mean12": -0.0017892826262402028,
+  "short_n": 2,
+  "short_mean12": -0.017317209827414644,
+  "gate_pass": false
+}

@@ -1,0 +1,12 @@
+{
+  "status":"legacy_noncanonical_duplicate_result_md_entry",
+  "events":1562,
+  "mean_r1":0.000330,
+  "mean_r4":-0.000266,
+  "mean_r12":-0.000274,
+  "positive_symbols":"4/6",
+  "frequency_per_symbol_week":2.4929,
+  "2023_mean_r12":-0.000129,
+  "2024_mean_r12":-0.000339,
+  "reason":"A duplicate result.md entry appeared without a separate preserved replay bundle. The current archived replay.go reproducibly returns 1563 events, including after strict signal/12h close boundary recheck. This duplicate is retained only as an audit note and is not canonical."
+}

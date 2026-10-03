@@ -1,0 +1,27 @@
+btc {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 730, 'distinct_values': 731, 'variable': True}
+eth {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 730, 'distinct_values': 731, 'variable': True}
+xrp {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 730, 'distinct_values': 731, 'variable': True}
+ada {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 730, 'distinct_values': 731, 'variable': True}
+link {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 0, 'distinct_values': 1, 'variable': False}
+bch {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 730, 'distinct_values': 731, 'variable': True}
+ltc {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 730, 'distinct_values': 731, 'variable': True}
+doge {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 730, 'distinct_values': 731, 'variable': True}
+uni {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 0, 'distinct_values': 1, 'variable': False}
+zec {'days': 731, 'first': '2023-01-01', 'last': '2024-12-31', 'nonzero_daily_changes': 730, 'distinct_values': 731, 'variable': True}
+{
+  "metric": "SplyCur",
+  "assets": 10,
+  "variable_assets": 8,
+  "variable_asset_list": [
+    "btc",
+    "eth",
+    "xrp",
+    "ada",
+    "bch",
+    "ltc",
+    "doge",
+    "zec"
+  ],
+  "coverage_gate_pass": true,
+  "post_price_returns_read": false
+}

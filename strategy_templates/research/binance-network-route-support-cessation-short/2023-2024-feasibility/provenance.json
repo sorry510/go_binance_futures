@@ -1,0 +1,13 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "source":"Binance official 2023-2024 announcements",
+  "qualifying_token_events":12,
+  "unique_tokens":12,
+  "independent_batches":3,
+  "coverage_gate_pass":false,
+  "market_eligibility_read":false,
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

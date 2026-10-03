@@ -1,0 +1,18 @@
+LOADED AVAXUSDT premium 17520 price 17544 errors 0
+LOADED SOLUSDT premium 17520 price 17544 errors 0
+LOADED LTCUSDT premium 17520 price 17544 errors 0
+LOADED UNIUSDT premium 17544 price 17544 errors 0
+LOADED ZECUSDT premium 17520 price 17544 errors 0
+LOADED DOGEUSDT premium 17520 price 17544 errors 0
+{
+  "events": 14901,
+  "positive_symbols": "5/6",
+  "frequency_per_symbol_week": 23.781805745554035,
+  "mean_r1": 0.00010731908316241763,
+  "mean_r4": 0.0003329285297222483,
+  "mean_r12": 0.0007414915084065004,
+  "2023_r12": 0.0004933434853054315,
+  "2024_r12": 0.0010638810091796896,
+  "gate_pass": false,
+  "download_failures": 0
+}

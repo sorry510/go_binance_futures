@@ -1,0 +1,14 @@
+{
+  "version":"v159",
+  "family":"funding-elite-crowd-disagreement-fade",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "positioning_score":"log(count_toptrader_long_short_ratio / count_long_short_ratio)",
+  "state":"funding_rate * positioning_score < 0",
+  "direction":"positive funding + negative skew => SHORT; negative funding + positive skew => LONG",
+  "trigger":"false-to-true disagreement on consecutive normal settlements",
+  "entry":"next complete 1h open strictly after settlement",
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_policy":"do not read 2025+ unless gate passes",
+  "db_write":false
+}

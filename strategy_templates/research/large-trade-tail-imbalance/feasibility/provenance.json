@@ -1,0 +1,10 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "local_market_trades_counts":{"SOLUSDT":0,"DOGEUSDT":0,"LTCUSDT":0,"AVAXUSDT":0,"UNIUSDT":0,"ZECUSDT":0},
+  "binance_vision_probe":"SOLUSDT aggTrades 2023-01 compressed size 262724502 bytes",
+  "full_archive_downloaded":false,
+  "post_signal_returns_read":false,
+  "db_write":false,
+  "app_conf_modified":false
+}

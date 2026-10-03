@@ -1,0 +1,44 @@
+[
+  {
+    "article_code": "d2a7ae9f33d44bf085782269afd4ddfc",
+    "article_title": "Updates on Step Size for Spot Trading Pairs (2024-04-29)",
+    "effective_ms": 1714374000000,
+    "effective_utc": "2024-04-29T07:00:00+00:00",
+    "base": "SOL",
+    "symbol": "SOLUSDT",
+    "old_step": "0.01",
+    "new_step": "0.001",
+    "direction": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 1624548882.9759998
+  },
+  {
+    "article_code": "99bb1634643e454cae9246dc43236785",
+    "article_title": "Updates on Step Size for Spot Trading Pairs (2024-06-19)",
+    "effective_ms": 1718787600000,
+    "effective_utc": "2024-06-19T09:00:00+00:00",
+    "base": "LINA",
+    "symbol": "LINAUSDT",
+    "old_step": "0.01",
+    "new_step": "1",
+    "direction": "SHORT",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 39988818.65596
+  },
+  {
+    "article_code": "99bb1634643e454cae9246dc43236785",
+    "article_title": "Updates on Step Size for Spot Trading Pairs (2024-06-19)",
+    "effective_ms": 1718787600000,
+    "effective_utc": "2024-06-19T09:00:00+00:00",
+    "base": "TRB",
+    "symbol": "TRBUSDT",
+    "old_step": "0.01",
+    "new_step": "0.001",
+    "direction": "LONG",
+    "eligible": true,
+    "reason": "ok",
+    "quote_volume_24h": 167587821.2554
+  }
+]

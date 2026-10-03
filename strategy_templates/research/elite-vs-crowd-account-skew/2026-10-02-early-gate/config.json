@@ -1,0 +1,13 @@
+{
+  "version":"v158",
+  "family":"elite-vs-crowd-account-skew",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "score":"log(count_toptrader_long_short_ratio / count_long_short_ratio)",
+  "signal":"zero up-cross LONG; zero down-cross SHORT",
+  "hourly_sampling":"last completed 5m metrics row in each UTC hour; exact 1h continuity required",
+  "entry":"next 1h open",
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_policy":"do not read 2025+ unless gate passes",
+  "db_write":false
+}

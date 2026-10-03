@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v161",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "market_source":"Binance Vision Spot and USD-M monthly 1h klines",
+  "downloaded_period":"2022-12 warmup plus 2023-2024 discovery only",
+  "oos_2025_plus_read":false,
+  "strict_engine_run":false,
+  "db_write":false,
+  "app_conf_modified":false
+}

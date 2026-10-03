@@ -1,0 +1,230 @@
+{
+  "purpose": "diagnostic ablation only; not candidate selection",
+  "base": {
+    "by_year": {
+      "2024": {
+        "trades": 102,
+        "pf": 1.241297,
+        "net": 0.208746243
+      },
+      "2025": {
+        "trades": 389,
+        "pf": 1.179101,
+        "net": 0.613449464
+      },
+      "2026": {
+        "trades": 282,
+        "pf": 1.245726,
+        "net": 0.598224565
+      }
+    },
+    "trades": 773,
+    "long": 415,
+    "short": 358,
+    "pf": 1.211221,
+    "net": 1.420420272,
+    "positive_symbols": "12/15",
+    "frequency_per_symbol_week": 0.532684,
+    "delta_pf_vs_base": 0.0,
+    "delta_trades_vs_base": 0
+  },
+  "variants": {
+    "base": {
+      "by_year": {
+        "2024": {
+          "trades": 102,
+          "pf": 1.241297,
+          "net": 0.208746243
+        },
+        "2025": {
+          "trades": 389,
+          "pf": 1.179101,
+          "net": 0.613449464
+        },
+        "2026": {
+          "trades": 282,
+          "pf": 1.245726,
+          "net": 0.598224565
+        }
+      },
+      "trades": 773,
+      "long": 415,
+      "short": 358,
+      "pf": 1.211221,
+      "net": 1.420420272,
+      "positive_symbols": "12/15",
+      "frequency_per_symbol_week": 0.532684,
+      "delta_pf_vs_base": 0.0,
+      "delta_trades_vs_base": 0
+    },
+    "no_funding": {
+      "by_year": {
+        "2024": {
+          "trades": 161,
+          "pf": 1.044348,
+          "net": 0.066949266
+        },
+        "2025": {
+          "trades": 591,
+          "pf": 1.030667,
+          "net": 0.170479042
+        },
+        "2026": {
+          "trades": 509,
+          "pf": 1.095134,
+          "net": 0.449559219
+        }
+      },
+      "trades": 1261,
+      "long": 595,
+      "short": 666,
+      "pf": 1.058247,
+      "net": 0.686987527,
+      "positive_symbols": "8/15",
+      "frequency_per_symbol_week": 0.86897,
+      "delta_pf_vs_base": -0.15297400000000017,
+      "delta_trades_vs_base": 488
+    },
+    "no_daily_regime": {
+      "by_year": {
+        "2024": {
+          "trades": 257,
+          "pf": 0.925379,
+          "net": -0.186108848
+        },
+        "2025": {
+          "trades": 779,
+          "pf": 0.991654,
+          "net": -0.06195499
+        },
+        "2026": {
+          "trades": 466,
+          "pf": 1.120346,
+          "net": 0.510438576
+        }
+      },
+      "trades": 1502,
+      "long": 515,
+      "short": 987,
+      "pf": 1.018531,
+      "net": 0.262374738,
+      "positive_symbols": "6/15",
+      "frequency_per_symbol_week": 1.035046,
+      "delta_pf_vs_base": -0.19269000000000003,
+      "delta_trades_vs_base": 729
+    },
+    "no_4h_strength": {
+      "by_year": {
+        "2024": {
+          "trades": 124,
+          "pf": 0.969472,
+          "net": -0.036408674
+        },
+        "2025": {
+          "trades": 604,
+          "pf": 1.023107,
+          "net": 0.131010111
+        },
+        "2026": {
+          "trades": 393,
+          "pf": 1.195556,
+          "net": 0.674963718
+        }
+      },
+      "trades": 1121,
+      "long": 427,
+      "short": 694,
+      "pf": 1.074614,
+      "net": 0.769565155,
+      "positive_symbols": "7/15",
+      "frequency_per_symbol_week": 0.772495,
+      "delta_pf_vs_base": -0.13660700000000014,
+      "delta_trades_vs_base": 348
+    },
+    "no_freshness": {
+      "by_year": {
+        "2024": {
+          "trades": 143,
+          "pf": 1.039969,
+          "net": 0.054450625
+        },
+        "2025": {
+          "trades": 512,
+          "pf": 1.023352,
+          "net": 0.11295761
+        },
+        "2026": {
+          "trades": 379,
+          "pf": 1.035517,
+          "net": 0.128305739
+        }
+      },
+      "trades": 1034,
+      "long": 561,
+      "short": 473,
+      "pf": 1.030138,
+      "net": 0.295713974,
+      "positive_symbols": "6/15",
+      "frequency_per_symbol_week": 0.712542,
+      "delta_pf_vs_base": -0.1810830000000001,
+      "delta_trades_vs_base": 261
+    },
+    "no_impulse": {
+      "by_year": {
+        "2024": {
+          "trades": 189,
+          "pf": 1.084166,
+          "net": 0.14475729
+        },
+        "2025": {
+          "trades": 597,
+          "pf": 1.015589,
+          "net": 0.088635019
+        },
+        "2026": {
+          "trades": 407,
+          "pf": 1.133763,
+          "net": 0.494671968
+        }
+      },
+      "trades": 1193,
+      "long": 779,
+      "short": 414,
+      "pf": 1.065569,
+      "net": 0.728064277,
+      "positive_symbols": "9/15",
+      "frequency_per_symbol_week": 0.822111,
+      "delta_pf_vs_base": -0.14565200000000011,
+      "delta_trades_vs_base": 420
+    },
+    "no_no_chase": {
+      "by_year": {
+        "2024": {
+          "trades": 150,
+          "pf": 1.117128,
+          "net": 0.159866143
+        },
+        "2025": {
+          "trades": 548,
+          "pf": 1.112854,
+          "net": 0.570774255
+        },
+        "2026": {
+          "trades": 414,
+          "pf": 1.190812,
+          "net": 0.719125564
+        }
+      },
+      "trades": 1112,
+      "long": 608,
+      "short": 504,
+      "pf": 1.142255,
+      "net": 1.449765962,
+      "positive_symbols": "11/15",
+      "frequency_per_symbol_week": 0.766293,
+      "delta_pf_vs_base": -0.06896600000000008,
+      "delta_trades_vs_base": 339
+    }
+  },
+  "conclusion": "daily regime, freshness, funding, 4h strength and impulse materially contribute; no_chase contributes less but still improves PF/breadth. Do not use ablation to promote simplifications."
+}

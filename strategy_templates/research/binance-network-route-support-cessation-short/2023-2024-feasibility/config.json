@@ -1,0 +1,9 @@
+{
+  "family":"binance-network-route-support-cessation-short",
+  "run_id":"2023-2024-feasibility",
+  "direction_if_eligible":"SHORT",
+  "event_definition":"official token-specific cessation of Binance deposits/withdrawals on a named network while token trading remains available",
+  "coverage_gate":{"min_token_events":8,"min_unique_tokens":8,"min_independent_batches":4},
+  "post_event_returns_read":false,
+  "db_write":false
+}

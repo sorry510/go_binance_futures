@@ -1,0 +1,99 @@
+SIGNALS BTC 97 {'repo': 'bitcoin/bitcoin', 'issue_rows': 1680, 'y2022': 576, 'y2023': 513, 'y2024': 591, 'raw_signals': 97}
+SIGNALS ETH 98 {'repo': 'ethereum/go-ethereum', 'issue_rows': 2072, 'y2022': 831, 'y2023': 725, 'y2024': 516, 'raw_signals': 98}
+SIGNALS BNB 78 {'repo': 'bnb-chain/bsc', 'issue_rows': 834, 'y2022': 316, 'y2023': 323, 'y2024': 195, 'raw_signals': 78}
+SIGNALS XRP 99 {'repo': 'XRPLF/rippled', 'issue_rows': 356, 'y2022': 97, 'y2023': 155, 'y2024': 104, 'raw_signals': 99}
+SIGNALS ADA 87 {'repo': 'IntersectMBO/cardano-node', 'issue_rows': 881, 'y2022': 613, 'y2023': 183, 'y2024': 85, 'raw_signals': 87}
+SIGNALS AVAX 92 {'repo': 'ava-labs/avalanchego', 'issue_rows': 500, 'y2022': 122, 'y2023': 235, 'y2024': 143, 'raw_signals': 92}
+SIGNALS NEAR 81 {'repo': 'near/nearcore', 'issue_rows': 1745, 'y2022': 623, 'y2023': 596, 'y2024': 526, 'raw_signals': 81}
+SIGNALS TRX 101 {'repo': 'tronprotocol/java-tron', 'issue_rows': 610, 'y2022': 126, 'y2023': 261, 'y2024': 223, 'raw_signals': 101}
+SIGNALS OP 90 {'repo': 'ethereum-optimism/optimism', 'issue_rows': 1416, 'y2022': 205, 'y2023': 312, 'y2024': 899, 'raw_signals': 90}
+SIGNALS APT 113 {'repo': 'aptos-labs/aptos-core', 'issue_rows': 2421, 'y2022': 965, 'y2023': 777, 'y2024': 679, 'raw_signals': 113}
+{
+  "raw_signals": 936,
+  "raw_symbols": 10,
+  "long": 468,
+  "short": 468,
+  "source_coverage": {
+    "BTC": {
+      "repo": "bitcoin/bitcoin",
+      "issue_rows": 1680,
+      "y2022": 576,
+      "y2023": 513,
+      "y2024": 591,
+      "raw_signals": 97
+    },
+    "ETH": {
+      "repo": "ethereum/go-ethereum",
+      "issue_rows": 2072,
+      "y2022": 831,
+      "y2023": 725,
+      "y2024": 516,
+      "raw_signals": 98
+    },
+    "BNB": {
+      "repo": "bnb-chain/bsc",
+      "issue_rows": 834,
+      "y2022": 316,
+      "y2023": 323,
+      "y2024": 195,
+      "raw_signals": 78
+    },
+    "XRP": {
+      "repo": "XRPLF/rippled",
+      "issue_rows": 356,
+      "y2022": 97,
+      "y2023": 155,
+      "y2024": 104,
+      "raw_signals": 99
+    },
+    "ADA": {
+      "repo": "IntersectMBO/cardano-node",
+      "issue_rows": 881,
+      "y2022": 613,
+      "y2023": 183,
+      "y2024": 85,
+      "raw_signals": 87
+    },
+    "AVAX": {
+      "repo": "ava-labs/avalanchego",
+      "issue_rows": 500,
+      "y2022": 122,
+      "y2023": 235,
+      "y2024": 143,
+      "raw_signals": 92
+    },
+    "NEAR": {
+      "repo": "near/nearcore",
+      "issue_rows": 1745,
+      "y2022": 623,
+      "y2023": 596,
+      "y2024": 526,
+      "raw_signals": 81
+    },
+    "TRX": {
+      "repo": "tronprotocol/java-tron",
+      "issue_rows": 610,
+      "y2022": 126,
+      "y2023": 261,
+      "y2024": 223,
+      "raw_signals": 101
+    },
+    "OP": {
+      "repo": "ethereum-optimism/optimism",
+      "issue_rows": 1416,
+      "y2022": 205,
+      "y2023": 312,
+      "y2024": 899,
+      "raw_signals": 90
+    },
+    "APT": {
+      "repo": "aptos-labs/aptos-core",
+      "issue_rows": 2421,
+      "y2022": 965,
+      "y2023": 777,
+      "y2024": 679,
+      "raw_signals": 113
+    }
+  },
+  "post_token_returns_read": false
+}

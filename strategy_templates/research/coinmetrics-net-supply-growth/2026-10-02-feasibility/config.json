@@ -1,0 +1,10 @@
+{
+  "family":"coinmetrics-net-supply-growth",
+  "stage":"2026-10-02-feasibility",
+  "assets":["btc","eth","xrp","ada","link","bch","ltc","doge","uni","zec"],
+  "metric":"SplyCur",
+  "period":"2023-01-01 through 2024-12-31",
+  "coverage_gate":{"min_covered_days":700,"min_nonzero_daily_changes":30,"min_variable_assets":8},
+  "post_price_returns_read":false,
+  "db_write":false
+}

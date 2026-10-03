@@ -1,0 +1,16 @@
+{
+  "version":"v155",
+  "family":"funding-premium-feedback-failure-fade",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "funding_interval_hours":8,
+  "feedback_observation":"premiumIndexKlines first complete 1h bar after settlement",
+  "failure_state":"funding_rate * post_settlement_1h_premium_close > 0",
+  "signal":"failure_state false->true transition",
+  "direction":"positive premium -> SHORT; negative premium -> LONG",
+  "entry":"USD-M 1h open at the boundary immediately after the observed premium bar closes",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_policy":"do not read 2025+ unless early gate passes",
+  "db_write":false
+}

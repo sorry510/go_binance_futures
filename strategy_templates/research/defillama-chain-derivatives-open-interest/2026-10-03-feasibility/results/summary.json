@@ -1,0 +1,15 @@
+{
+  "overview_protocols": 137,
+  "mapped_chain_protocols": 34,
+  "summary_errors": 0,
+  "mapped_chains": 14,
+  "eligible_chains": 4,
+  "eligible_tokens": [
+    "ETH",
+    "BNB",
+    "SOL",
+    "INJ"
+  ],
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false
+}

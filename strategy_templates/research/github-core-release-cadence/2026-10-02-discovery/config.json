@@ -1,0 +1,16 @@
+{
+  "version":"v162",
+  "family":"github-core-release-cadence",
+  "run_id":"2026-10-02-discovery",
+  "repo_map_source":"github-core-release-catalyst/2023-2026/inputs/source_map.json unchanged",
+  "release_filter":{"draft":false,"prerelease":false,"published_at_required":true,"dedupe":"earliest published_at per symbol per UTC date"},
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "score":"log(previous_release_interval / current_release_interval)",
+  "signal":"score zero-cross; up-cross LONG, down-cross SHORT",
+  "entry":"next complete Binance USD-M 1h open after published_at",
+  "eligibility":{"futures_history_days":730,"trailing_24h_quote_volume_min_usdt":5000000},
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_events":80,"min_symbols":8,"min_mean_r12":0.0025,"min_positive_symbol_fraction":0.60,"require_2023_and_2024_positive":true},
+  "oos_read_policy":"do not read 2025+ price returns unless gate passes",
+  "db_write":false
+}

@@ -1,0 +1,14 @@
+{
+  "raw_events": 55,
+  "eligible_events": 8,
+  "eligible_unique_assets": 8,
+  "eligible_articles": 4,
+  "eligible_long": 3,
+  "eligible_short": 5,
+  "excluded_by_reason": {
+    "no_event_month": 9,
+    "history_lt_2y": 38
+  },
+  "coverage_gate_pass": true,
+  "post_event_returns_read": false
+}

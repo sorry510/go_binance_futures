@@ -1,0 +1,8 @@
+{
+  "qualifying_articles": 26,
+  "raw_events": 26,
+  "raw_unique_tokens": 22,
+  "independent_batches": 26,
+  "parse_errors": 0,
+  "post_event_returns_read": false
+}

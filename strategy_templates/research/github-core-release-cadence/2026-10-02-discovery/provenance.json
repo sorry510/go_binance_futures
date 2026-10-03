@@ -1,0 +1,13 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "version":"v162",
+  "repo_universe_source":"github-core-release-catalyst/2023-2026/inputs/source_map.json unchanged",
+  "release_source":"GitHub Releases API / archived release objects through 2024",
+  "market_source":"Binance Vision USD-M monthly 1h klines",
+  "coverage_before_returns":{"raw_signals":285,"eligible_signals":174,"symbols":10},
+  "oos_2025_plus_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

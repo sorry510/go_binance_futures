@@ -1,0 +1,11 @@
+{
+  "articles": 8,
+  "parsed_articles": 8,
+  "parse_errors": 0,
+  "raw_events": 55,
+  "raw_unique_assets": 44,
+  "independent_articles": 8,
+  "long": 47,
+  "short": 8,
+  "returns_read": false
+}

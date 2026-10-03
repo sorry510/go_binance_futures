@@ -1,0 +1,7 @@
+{
+  "raw_title_batches": 5,
+  "max_ordinary_token_batches": 4,
+  "coverage_gate_pass": false,
+  "article_bodies_parsed": false,
+  "post_event_returns_read": false
+}

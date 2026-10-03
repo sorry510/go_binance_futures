@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "source":"Binance official CMS archived 2023-2024 corpus + official article bodies",
+  "articles_audited":25,
+  "qualifying_token_events":0,
+  "production_eligibility_read":false,
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

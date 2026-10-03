@@ -1,0 +1,10 @@
+{
+  "family": "defillama-chain-derivatives-open-interest",
+  "stage": "feasibility",
+  "source": "free api.llama.fi open-interest endpoints",
+  "coverage_gate": {
+    "min_unique_tokens": 8
+  },
+  "post_event_returns_before_gate": false,
+  "db_write": false
+}

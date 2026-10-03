@@ -1,0 +1,73 @@
+{
+  "status": "coverage_passed_open_discovery",
+  "repos": {
+    "BTC": {
+      "repo": "bitcoin/bitcoin",
+      "total": 1104,
+      "y2023": 513,
+      "y2024": 591
+    },
+    "ETH": {
+      "repo": "ethereum/go-ethereum",
+      "total": 1241,
+      "y2023": 725,
+      "y2024": 516
+    },
+    "BNB": {
+      "repo": "bnb-chain/bsc",
+      "total": 518
+    },
+    "XRP": {
+      "repo": "XRPLF/rippled",
+      "total": 259
+    },
+    "ADA": {
+      "repo": "IntersectMBO/cardano-node",
+      "total": 268
+    },
+    "AVAX": {
+      "repo": "ava-labs/avalanchego",
+      "total": 378
+    },
+    "NEAR": {
+      "repo": "near/nearcore",
+      "total": 1122,
+      "y2023": 596,
+      "y2024": 526
+    },
+    "TRX": {
+      "repo": "tronprotocol/java-tron",
+      "total": 484
+    },
+    "OP": {
+      "repo": "ethereum-optimism/optimism",
+      "total": 1211,
+      "y2023": 312,
+      "y2024": 899
+    },
+    "APT": {
+      "repo": "aptos-labs/aptos-core",
+      "total": 1456,
+      "y2023": 777,
+      "y2024": 679
+    }
+  },
+  "repos_ge_100": 10,
+  "required_repos": 8,
+  "yearly_partition_verified_under_1000": [
+    "BTC",
+    "ETH",
+    "NEAR",
+    "OP",
+    "APT"
+  ],
+  "remaining_repos_two_year_total_under_1000": [
+    "BNB",
+    "XRP",
+    "ADA",
+    "AVAX",
+    "TRX"
+  ],
+  "coverage_gate_pass": true,
+  "post_token_returns_read": false
+}

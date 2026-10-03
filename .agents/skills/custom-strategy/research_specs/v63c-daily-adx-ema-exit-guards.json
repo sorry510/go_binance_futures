@@ -1,0 +1,4 @@
+{
+  "long_base": "adx_1d_14.ADX[1] >= 20 && adx_1d_14.ADX[1] >= adx_1d_14.ADX[3] && ema_1d_20.Data[1] > ema_1d_50.Data[1] && kline_1d.Close[1] > ema_1d_20.Data[1] && ema_1d_20.Data[1] >= ema_1d_20.Data[4] && adx_1d_14.PlusDI[1] > adx_1d_14.MinusDI[1] && len(FundingRate.Data) >= 1 && FundingRate.Data[0] <= 0.0001",
+  "short_base": "adx_1d_14.ADX[1] >= 20 && adx_1d_14.ADX[1] >= adx_1d_14.ADX[3] && ema_1d_20.Data[1] < ema_1d_50.Data[1] && ema_1d_20.Data[1] <= ema_1d_20.Data[4] && kline_1d.Close[1] < ema_1d_20.Data[1] && adx_1d_14.MinusDI[1] > adx_1d_14.PlusDI[1]"
+}

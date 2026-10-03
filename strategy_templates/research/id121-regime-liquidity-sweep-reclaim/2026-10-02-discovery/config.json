@@ -1,0 +1,36 @@
+{
+  "version": "v165",
+  "family": "id121-regime-liquidity-sweep-reclaim",
+  "run_id": "2026-10-02-discovery",
+  "symbols": [
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "discovery": {
+    "start": "2023-01-01T00:00:00Z",
+    "end": "2025-01-01T00:00:00Z"
+  },
+  "setup": "ID121 regime + first 1h opposite-side 12h liquidity sweep and reclaim",
+  "entry": "current execution after completed sweep/reclaim bar while canonical no-chase holds",
+  "exact": {
+    "leverage": 4,
+    "tp_pct": 8,
+    "sl_pct": 6,
+    "fee_per_side": 0.0005,
+    "slippage_bps_per_side": 5,
+    "single_position": true
+  },
+  "gate": {
+    "min_pf": 1.15,
+    "min_positive_symbols": 4,
+    "min_frequency_per_symbol_week": 0.3,
+    "require_2023_pf_gt_1": true,
+    "require_2024_pf_gt_1": true
+  },
+  "fresh_holdout_policy": "ALGO/INJ/LDO/PENDLE/PYTH remains unread unless discovery gate passes",
+  "db_write": false
+}

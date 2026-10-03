@@ -1,0 +1,13 @@
+{
+  "family":"binance-liquid-swap-pool-removal-short",
+  "run_id":"2023-2024-discovery",
+  "eligible_events":137,
+  "unique_tokens":50,
+  "independent_batches":11,
+  "direction":"SHORT",
+  "signal_time":"official publishDate",
+  "entry":"first UTC whole-hour USD-M open strictly after publishDate",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_event_mean_12h":0.005,"min_batch_equal_mean_12h":0.005,"min_positive_token_fraction":0.60,"min_positive_batch_fraction":0.60},
+  "db_write":false
+}

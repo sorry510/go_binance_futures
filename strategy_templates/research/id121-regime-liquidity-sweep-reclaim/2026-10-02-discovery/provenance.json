@@ -1,0 +1,17 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "version": "v165",
+  "source": "go_bn_test read-only via existing backtest DatasetBuilder",
+  "engine": "service/backtest strict Engine",
+  "discovery": "SOL/DOGE/LTC/AVAX/UNI/ZEC 2023-2024",
+  "fresh_holdout_evaluated": false,
+  "leverage": 4,
+  "tp_pct": 8,
+  "sl_pct": 6,
+  "fee_per_side": 0.0005,
+  "slippage_bps_per_side": 5,
+  "db_write": false,
+  "app_conf_modified": false,
+  "identifier_note": "Original run used temporary label v164; renamed to v165 after completion because v164 was already assigned to Perp-Excess-Volatility Fade. Logic, trades and metrics unchanged."
+}

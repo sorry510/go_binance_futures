@@ -1,0 +1,16 @@
+{
+  "version":"v156",
+  "family":"cci20-classic-threshold-breakout",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "interval":"1h",
+  "cci_period":20,
+  "long_signal":"CCI[prev] <= 100 and CCI[now] > 100",
+  "short_signal":"CCI[prev] >= -100 and CCI[now] < -100",
+  "entry":"next complete 1h open",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_policy":"do not read 2025+ unless early gate passes",
+  "strict_if_promoted":{"leverage":4,"tp":8,"sl":6,"fee_per_side":0.0005,"slippage_bps_per_side":5,"single_position":true,"close_rule":"ROI >= 8 || ROI <= -6"},
+  "db_write":false
+}

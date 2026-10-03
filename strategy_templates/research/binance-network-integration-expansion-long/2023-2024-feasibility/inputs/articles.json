@@ -1,0 +1,236 @@
+[
+  {
+    "code": "1319ace3b84e48a7b7909d1b5ec09efe",
+    "release_time": 1726030800000,
+    "publish": "2024-09-11T05:00:00+00:00",
+    "title": "Binance Completes Integration of Radiant Capital (RDNT) on Base Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "RDNT"
+    ]
+  },
+  {
+    "code": "ab9d973234b340bfbb330231364da868",
+    "release_time": 1725247803249,
+    "publish": "2024-09-02T03:30:03.249000+00:00",
+    "title": "Binance Completes Integration of Coin98 (C98) on Viction Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "C98"
+    ]
+  },
+  {
+    "code": "fa79d2c5158345f090d6efba1ad19486",
+    "release_time": 1724727602550,
+    "publish": "2024-08-27T03:00:02.550000+00:00",
+    "title": "Binance Completes Integration of Yield Guild Games (YGG) on Ronin Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "YGG"
+    ]
+  },
+  {
+    "code": "c0975433aac14fdd8ad3f37c88c2c5b6",
+    "release_time": 1720666801177,
+    "publish": "2024-07-11T03:00:01.177000+00:00",
+    "title": "Binance Completes Integration of Polkadot (DOT) on Asset Hub (Polkadot), Opens Deposits and Withdrawals",
+    "assets": [
+      "DOT"
+    ]
+  },
+  {
+    "code": "6ef0ae0bdb0545be8455f677d2990fca",
+    "release_time": 1718269201692,
+    "publish": "2024-06-13T09:00:01.692000+00:00",
+    "title": "Binance Completes Integration of DeXe (DEXE) on BNB Smart Chain, Opens Deposits and Withdrawals",
+    "assets": [
+      "DEXE"
+    ]
+  },
+  {
+    "code": "46e0885c3cd948ed934da9ba974d565b",
+    "release_time": 1715050804922,
+    "publish": "2024-05-07T03:00:04.922000+00:00",
+    "title": "Binance Completes Integration of IRISnet (IRIS) on BNB Smart Chain, Opens Deposits and Withdrawals",
+    "assets": [
+      "IRIS"
+    ]
+  },
+  {
+    "code": "5af3fc32fe71451ba942799189ae4d0a",
+    "release_time": 1708668929730,
+    "publish": "2024-02-23T06:15:29.730000+00:00",
+    "title": "Binance Completes Integration of Filecoin (FIL) on FILEVM Network, Opens Deposits",
+    "assets": [
+      "FIL"
+    ]
+  },
+  {
+    "code": "2b83c106f9f0430793eb558a0da7a2ad",
+    "release_time": 1707103210050,
+    "publish": "2024-02-05T03:20:10.050000+00:00",
+    "title": "Binance Completes Integration of AVA (AVA) on BNB Smart Chain (BEP20), Opens Deposits and Withdrawals",
+    "assets": [
+      "AVA"
+    ]
+  },
+  {
+    "code": "538343a202bb47cf97483b5e3104f3b5",
+    "release_time": 1704939304970,
+    "publish": "2024-01-11T02:15:04.970000+00:00",
+    "title": "Binance Completes Integration of Tranchess (CHESS) on Ethereum Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "CHESS"
+    ]
+  },
+  {
+    "code": "28072bfcccf844838d9f0b82b1b9496c",
+    "release_time": 1703210410652,
+    "publish": "2023-12-22T02:00:10.652000+00:00",
+    "title": "Binance Completes Integration of Radiant Capital (RDNT) on Ethereum Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "RDNT"
+    ]
+  },
+  {
+    "code": "777567e6d96c40a7928c93404a4bb1ec",
+    "release_time": 1699441525842,
+    "publish": "2023-11-08T11:05:25.842000+00:00",
+    "title": "Binance Completes Integration of BNB, FDUSD and USDT on opBNB Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "BNB"
+    ]
+  },
+  {
+    "code": "af49699024764492b7089b957183a5c5",
+    "release_time": 1698207309371,
+    "publish": "2023-10-25T04:15:09.371000+00:00",
+    "title": "Binance Completes Integration of Maverick Protocol (MAV) on Base Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "MAV"
+    ]
+  },
+  {
+    "code": "3ce3f190263e493d9ab376d8646bfc71",
+    "release_time": 1695805505061,
+    "publish": "2023-09-27T09:05:05.061000+00:00",
+    "title": "Binance Completes Integration of Ethereum (ETH) on Base Network, Opens Deposits",
+    "assets": [
+      "ETH"
+    ]
+  },
+  {
+    "code": "44d181b1e70f4f3bb4a04bf9a0a54497",
+    "release_time": 1695697509797,
+    "publish": "2023-09-26T03:05:09.797000+00:00",
+    "title": "Binance Completes Integration of Maverick Protocol (MAV) on zkSync Era Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "MAV"
+    ]
+  },
+  {
+    "code": "ee1c87b20f2248618446bf21d72556ed",
+    "release_time": 1694076313926,
+    "publish": "2023-09-07T08:45:13.926000+00:00",
+    "title": "Binance Completes Integration of Ethereum (ETH) on zkSync Era Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "ETH"
+    ]
+  },
+  {
+    "code": "f098594277374b699db6d70846f48af9",
+    "release_time": 1693800603043,
+    "publish": "2023-09-04T04:10:03.043000+00:00",
+    "title": "Binance Completes Integration of Maverick Protocol (MAV) on BNB Smart Chain, Opens Deposits and Withdrawals",
+    "assets": [
+      "MAV"
+    ]
+  },
+  {
+    "code": "f0786a82f5b342128eab06172aa17bc9",
+    "release_time": 1690866602708,
+    "publish": "2023-08-01T05:10:02.708000+00:00",
+    "title": "Binance Completes Integration of STEPN (GMT) on Polygon Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "GMT"
+    ]
+  },
+  {
+    "code": "414e0fbd2fa74ccdb406459e8f02314b",
+    "release_time": 1689909003498,
+    "publish": "2023-07-21T03:10:03.498000+00:00",
+    "title": "Binance Completes Integration of Pendle (PENDLE) on BNB Smart Chain, Opens Deposits and Withdrawals",
+    "assets": [
+      "PENDLE"
+    ]
+  },
+  {
+    "code": "8b90b4bb3baf406cb39f4193c590a1a5",
+    "release_time": 1689753626834,
+    "publish": "2023-07-19T08:00:26.834000+00:00",
+    "title": "Binance Completes Integration of SafePal (SFP) on Ethereum Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "SFP"
+    ]
+  },
+  {
+    "code": "eefbfae2c0ae472d9e1e36f1a30bf340",
+    "release_time": 1689562804475,
+    "publish": "2023-07-17T03:00:04.475000+00:00",
+    "title": "Binance Completes Integration of Bitcoin (BTC) on Lightning Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "BTC"
+    ]
+  },
+  {
+    "code": "5eec6b8ab2f44ee5b86c33bae12a8c7e",
+    "release_time": 1688447209136,
+    "publish": "2023-07-04T05:06:49.136000+00:00",
+    "title": "Binance Completes Integration of WOO Network (WOO) on Arbitrum One Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "WOO"
+    ]
+  },
+  {
+    "code": "f56f02b114874dbab2cf56c99ef4d7de",
+    "release_time": 1686826831706,
+    "publish": "2023-06-15T11:00:31.706000+00:00",
+    "title": "Binance Completes Integration of Mdex (MDX) on Ethereum Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "MDX"
+    ]
+  },
+  {
+    "code": "296a025839014de1a4891e580e32d9ba",
+    "release_time": 1686713705305,
+    "publish": "2023-06-14T03:35:05.305000+00:00",
+    "title": "Binance Completes Integration of PancakeSwap (CAKE) on Aptos Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "CAKE"
+    ]
+  },
+  {
+    "code": "45063cf08d2044319688b80b38c61fd9",
+    "release_time": 1685327437546,
+    "publish": "2023-05-29T02:30:37.546000+00:00",
+    "title": "Binance Completes Integration of Ooki Protocol (OOKI) on Polygon Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "OOKI"
+    ]
+  },
+  {
+    "code": "9660e516a35049f8a223346102a727db",
+    "release_time": 1683253812609,
+    "publish": "2023-05-05T02:30:12.609000+00:00",
+    "title": "Binance Completes Integration of The Graph (GRT) on Arbitrum One and Polygon Networks, Opens Deposits and Withdrawals",
+    "assets": [
+      "GRT"
+    ]
+  },
+  {
+    "code": "ba43dd26ee09424bb10f425f57137ac6",
+    "release_time": 1677636050738,
+    "publish": "2023-03-01T02:00:50.738000+00:00",
+    "title": "Binance Completes Integration of JOE (JOE) on Arbitrum One Network, Opens Deposits and Withdrawals",
+    "assets": [
+      "JOE"
+    ]
+  }
+]

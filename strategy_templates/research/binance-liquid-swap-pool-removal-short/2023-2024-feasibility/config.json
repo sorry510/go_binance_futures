@@ -1,0 +1,13 @@
+{
+  "family":"binance-liquid-swap-pool-removal-short",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance official CMS 2023-2024",
+  "event_definition":"official Notice Regarding the Removal of Selected Liquidity Pools on Binance Liquid Swap",
+  "asset_mapping":"all non-stablecoin/non-fiat assets present in removed pools, deduplicated per article",
+  "direction_if_eligible":"SHORT",
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "coverage_gate":{"min_eligible_events":8,"min_unique_tokens":8,"min_independent_batches":5},
+  "post_event_returns_before_gate":false,
+  "db_write":false
+}

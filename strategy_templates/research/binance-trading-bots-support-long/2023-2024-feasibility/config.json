@@ -1,0 +1,13 @@
+{
+  "family":"binance-trading-bots-support-long",
+  "run_id":"2023-2024-feasibility",
+  "source":"Binance official CMS catalogId=48",
+  "event_definition":"existing Spot base receives newly enabled Trading Bots service; exclude bases simultaneously present in same article's new Spot-pair opening section",
+  "direction_if_eligible":"LONG",
+  "stablecoin_fiat_bases_excluded":true,
+  "history_min_days":730,
+  "quote_volume_24h_min_usdt":5000000,
+  "coverage_gate":{"eligible_events_min":8,"unique_tokens_min":8,"independent_batches_min":5},
+  "post_event_returns_before_gate":false,
+  "db_write":false
+}

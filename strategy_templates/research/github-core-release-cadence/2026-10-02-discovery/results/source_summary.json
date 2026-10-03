@@ -1,0 +1,89 @@
+{
+  "raw_signals": 285,
+  "raw_symbols": 10,
+  "long": 142,
+  "short": 143,
+  "by_asset": {
+    "BTC": {
+      "repo": "bitcoin/bitcoin",
+      "objects_fetched": 68,
+      "stable_days_before_2025": 40,
+      "first": "2016-11-01T19:23:04Z",
+      "last": "2024-11-04T12:21:22Z",
+      "discovery_signals": 9
+    },
+    "ETH": {
+      "repo": "ethereum/go-ethereum",
+      "objects_fetched": 234,
+      "stable_days_before_2025": 179,
+      "first": "2015-05-16T11:05:44Z",
+      "last": "2024-11-19T13:53:28Z",
+      "discovery_signals": 26
+    },
+    "BNB": {
+      "repo": "bnb-chain/bsc",
+      "objects_fetched": 131,
+      "stable_days_before_2025": 68,
+      "first": "2020-08-28T02:36:44Z",
+      "last": "2024-11-26T09:42:13Z",
+      "discovery_signals": 31
+    },
+    "XRP": {
+      "repo": "XRPLF/rippled",
+      "objects_fetched": 144,
+      "stable_days_before_2025": 55,
+      "first": "2016-05-02T18:58:42Z",
+      "last": "2024-11-26T00:17:49Z",
+      "discovery_signals": 9
+    },
+    "ADA": {
+      "repo": "IntersectMBO/cardano-node",
+      "objects_fetched": 103,
+      "stable_days_before_2025": 54,
+      "first": "2020-02-12T16:57:50Z",
+      "last": "2024-11-30T13:53:10Z",
+      "discovery_signals": 13
+    },
+    "AVAX": {
+      "repo": "ava-labs/avalanchego",
+      "objects_fetched": 163,
+      "stable_days_before_2025": 116,
+      "first": "2020-09-22T02:58:15Z",
+      "last": "2024-12-17T23:21:23Z",
+      "discovery_signals": 29
+    },
+    "NEAR": {
+      "repo": "near/nearcore",
+      "objects_fetched": 263,
+      "stable_days_before_2025": 84,
+      "first": "2019-11-23T23:08:29Z",
+      "last": "2024-12-10T22:00:49Z",
+      "discovery_signals": 20
+    },
+    "TRX": {
+      "repo": "tronprotocol/java-tron",
+      "objects_fetched": 87,
+      "stable_days_before_2025": 70,
+      "first": "2017-12-28T05:47:37Z",
+      "last": "2024-11-29T06:24:24Z",
+      "discovery_signals": 5
+    },
+    "OP": {
+      "repo": "ethereum-optimism/optimism",
+      "objects_fetched": 1000,
+      "stable_days_before_2025": 94,
+      "first": "2022-08-25T21:45:49Z",
+      "last": "2024-12-20T21:55:46Z",
+      "discovery_signals": 49
+    },
+    "APT": {
+      "repo": "aptos-labs/aptos-core",
+      "objects_fetched": 390,
+      "stable_days_before_2025": 169,
+      "first": "2022-05-12T20:28:52Z",
+      "last": "2024-12-18T20:56:02Z",
+      "discovery_signals": 94
+    }
+  },
+  "post_event_returns_read": false
+}

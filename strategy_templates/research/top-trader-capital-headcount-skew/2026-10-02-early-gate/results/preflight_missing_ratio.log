@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/zhz/work/binance/go_binance_futures/strategy_templates/research/top-trader-capital-headcount-skew/2026-10-02-early-gate/replay.py", line 109, in <module>
+    hourly, failures = load_metrics()
+  File "/Users/zhz/work/binance/go_binance_futures/strategy_templates/research/top-trader-capital-headcount-skew/2026-10-02-early-gate/replay.py", line 73, in load_metrics
+    by[sym].extend(parse_metric_zip(data))
+  File "/Users/zhz/work/binance/go_binance_futures/strategy_templates/research/top-trader-capital-headcount-skew/2026-10-02-early-gate/replay.py", line 60, in parse_metric_zip
+    pp=float(x["sum_toptrader_long_short_ratio"])
+ValueError: could not convert string to float: ''

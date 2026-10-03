@@ -1,0 +1,12 @@
+{
+  "research_date": "2026-10-02",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "version": "v150",
+  "universe_source": "copied unchanged from defillama-chain-fee-tvl-yield/2023-2026/inputs/universe.json",
+  "tvl_source": "DeFiLlama historicalChainTvl, truncated immediately to <=2024-12-31",
+  "market_source": "Binance Vision USD-M monthly 1d archives, only 2023-01 through 2024-12",
+  "oos_2025_2026_evaluated": false,
+  "app_conf_modified": false,
+  "db_write": false,
+  "identifier_renumber_note": "Identifier-only renumber v148 -> v150 after discovering pre-existing versions; signal, data, gates and outcomes unchanged."
+}

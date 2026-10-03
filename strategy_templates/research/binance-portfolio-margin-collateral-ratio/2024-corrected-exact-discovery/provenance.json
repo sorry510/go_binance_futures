@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "stage":"2024-corrected-exact-discovery",
+  "eligible_events_frozen_before_returns":8,
+  "exact_semantics":"next 1m open; 4x; TP8/SL6; 0.0005 fee/side; 5bps/side; funding; max72h; minute-close trigger -> next-minute-open exit",
+  "gate_pass":false,
+  "oos_2025_plus_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

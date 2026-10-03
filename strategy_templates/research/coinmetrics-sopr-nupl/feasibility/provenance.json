@@ -1,0 +1,10 @@
+{
+  "research_date": "2026-10-02",
+  "source": "Coin Metrics Community API",
+  "PriceUSD": "available",
+  "SOPR": "HTTP 403 Forbidden",
+  "NUPL": "HTTP 403 Forbidden",
+  "returns_read": false,
+  "db_write": false,
+  "app_conf_modified": false
+}

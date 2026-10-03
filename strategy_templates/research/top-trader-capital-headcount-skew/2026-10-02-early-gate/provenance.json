@@ -1,0 +1,12 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "version":"v147",
+  "metrics_source":"Binance Vision USD-M daily/metrics 5m",
+  "price_source":"go_bn_test market_klines_1h read-only",
+  "discovery":"2023-2024",
+  "oos_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

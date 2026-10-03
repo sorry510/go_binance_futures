@@ -1,1 +1,12 @@
-{"research_date":"2026-10-01","repository":"/Users/zhz/work/binance/go_binance_futures","engine":"service/backtest current working tree","parent_mechanism":"canonical ID121 regime/fresh breakout","new_mechanism":"one-hour post-breakout inside-bar continuation","external_data":false,"db_write":false}
+{
+  "research_date":"2026-10-02",
+  "version":"v114",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "database":"go_bn_test read-only",
+  "engine":"service/backtest",
+  "discovery_symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery_period":"2023-01-01 through 2026-09-01",
+  "fresh_holdout_evaluated":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

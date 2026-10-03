@@ -1,0 +1,14 @@
+{
+  "version":"v153",
+  "family":"oi-funding-crowding-build-fade",
+  "run_id":"2026-10-02-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "signal":"8h OI-notional growth crosses from <=0 to >0 at a normal funding settlement",
+  "direction":"current funding >0 -> SHORT; current funding <0 -> LONG",
+  "entry":"next complete 1h open after triggering settlement",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless early gate passes",
+  "db_write":false
+}

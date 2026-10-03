@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-02",
+  "status":"invalid_post_freeze_exploratory",
+  "reason":"A pre-existing production-applicability audit had already frozen this family because Binance Liquid Swap was discontinued in January 2024. The later Stage A return replay should not have been run and is retained only for audit transparency.",
+  "stage_a_post_event_returns_read":true,
+  "stage_a_decision_valid":false,
+  "stage_b_post_event_returns_read":false,
+  "later_year_returns_read":false,
+  "exact_tp_sl_run":false,
+  "db_write":false
+}

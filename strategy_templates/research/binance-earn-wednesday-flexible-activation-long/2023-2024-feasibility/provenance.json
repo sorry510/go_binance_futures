@@ -1,0 +1,13 @@
+{
+  "research_date":"2026-10-02",
+  "source":"Binance official Earn Wednesday CMS articles + Binance Vision USD-M monthly 1h for eligibility only",
+  "warmup_date":"2022-12-28",
+  "articles_2023_2024":88,
+  "raw_activation_events":212,
+  "eligible_events":74,
+  "eligible_unique_tokens":38,
+  "eligible_batches":43,
+  "post_event_returns_read":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

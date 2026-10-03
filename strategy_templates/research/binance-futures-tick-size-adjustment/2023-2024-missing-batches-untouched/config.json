@@ -1,0 +1,11 @@
+{
+  "family":"binance-futures-tick-size-adjustment",
+  "stage":"2023-2024-missing-batches-untouched",
+  "official_missing_articles":9,
+  "mapping":{"finer_tick":"LONG","coarser_tick":"SHORT"},
+  "eligibility":{"usd_m_history_days":730,"prior_24h_quote_volume_min_usdt":5000000},
+  "feasibility_gate":{"min_eligible_events":8,"min_independent_articles":3},
+  "exact_if_pass":{"leverage":4,"tp_pct":8,"sl_pct":6,"fee_per_side":0.0005,"slippage_bps_per_side":5,"max_hold_hours":72,"entry":"next 1m open after effective time"},
+  "exact_gate":{"min_pf":1.15,"net_gt":0,"min_positive_batch_fraction":0.60},
+  "db_write":false
+}

@@ -1,0 +1,13 @@
+{
+  "articles": 19,
+  "parse_errors": 0,
+  "unique_explicit_underlyings": [
+    "BNB",
+    "BTC",
+    "ETH"
+  ],
+  "unique_underlying_count": 3,
+  "coverage_gate_min_unique_tokens": 8,
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false
+}

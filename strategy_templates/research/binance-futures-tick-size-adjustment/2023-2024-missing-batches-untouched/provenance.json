@@ -1,0 +1,14 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "source":"9 previously omitted official Binance Futures tick-size notices",
+  "raw_untouched_events":54,
+  "eligible_untouched_events":10,
+  "eligible_articles":5,
+  "old_seen_events_included":false,
+  "returns_unread_before_exact_run":true,
+  "exact_semantics":"next 1m open; 4x; ROI>=8 or ROI<=-6 at minute close; next-minute-open exit; fee 0.0005/side; 5bps/side; funding; 72h max hold",
+  "gate_pass":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

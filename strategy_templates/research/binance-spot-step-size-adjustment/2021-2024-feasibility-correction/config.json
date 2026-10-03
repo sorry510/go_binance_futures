@@ -1,0 +1,9 @@
+{
+  "family":"binance-spot-step-size-adjustment",
+  "run_id":"2021-2024-feasibility-correction",
+  "mapping":{"step_size_decrease":"LONG","step_size_increase":"SHORT"},
+  "eligibility":{"usd_m_history_days":730,"prior_24h_quote_volume_min_usdt":5000000},
+  "coverage_gate":{"min_eligible_events":8,"min_unique_tokens":8,"min_independent_articles":3},
+  "returns_before_gate":false,
+  "db_write":false
+}

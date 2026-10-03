@@ -1,0 +1,15 @@
+{
+  "research_date": "2026-10-02",
+  "source": "Binance official CMS article bodies",
+  "articles": 19,
+  "recurring_product_batches": 18,
+  "unique_underlyings": [
+    "BTC",
+    "ETH",
+    "BNB"
+  ],
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false,
+  "db_write": false,
+  "app_conf_modified": false
+}

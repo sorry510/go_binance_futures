@@ -1,0 +1,42 @@
+{
+  "BTC": {
+    "repo": "bitcoin/bitcoin",
+    "total_2022": 576
+  },
+  "ETH": {
+    "repo": "ethereum/go-ethereum",
+    "total_2022": 831
+  },
+  "BNB": {
+    "repo": "bnb-chain/bsc",
+    "total_2022": 316
+  },
+  "XRP": {
+    "repo": "XRPLF/rippled",
+    "total_2022": 97
+  },
+  "ADA": {
+    "repo": "IntersectMBO/cardano-node",
+    "total_2022": 613
+  },
+  "AVAX": {
+    "repo": "ava-labs/avalanchego",
+    "total_2022": 122
+  },
+  "NEAR": {
+    "repo": "near/nearcore",
+    "total_2022": 623
+  },
+  "TRX": {
+    "repo": "tronprotocol/java-tron",
+    "total_2022": 126
+  },
+  "OP": {
+    "repo": "ethereum-optimism/optimism",
+    "total_2022": 205
+  },
+  "APT": {
+    "repo": "aptos-labs/aptos-core",
+    "total_2022": 965
+  }
+}

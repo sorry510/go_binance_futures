@@ -1,0 +1,11 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v160",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "database":"go_bn_test read-only",
+  "data":"market_klines_1h",
+  "oos_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

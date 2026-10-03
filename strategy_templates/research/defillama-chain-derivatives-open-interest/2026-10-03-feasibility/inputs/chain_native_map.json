@@ -1,0 +1,16 @@
+{
+  "Ethereum": "ETH",
+  "BSC": "BNB",
+  "Solana": "SOL",
+  "Avalanche": "AVAX",
+  "Fantom": "FTM",
+  "Injective": "INJ",
+  "NEAR": "NEAR",
+  "Kava": "KAVA",
+  "Celo": "CELO",
+  "Moonbeam": "GLMR",
+  "Cronos": "CRO",
+  "Cardano": "ADA",
+  "Tron": "TRX",
+  "Bitcoin": "BTC"
+}

@@ -1,0 +1,24 @@
+PROGRESS 20 / 233
+PROGRESS 40 / 233
+PROGRESS 100 / 233
+PROGRESS 120 / 233
+PROGRESS 140 / 233
+PROGRESS 160 / 233
+PROGRESS 200 / 233
+{
+  "raw_events": 233,
+  "raw_unique_tokens": 120,
+  "raw_batches": 11,
+  "eligible_events": 137,
+  "eligible_unique_tokens": 50,
+  "eligible_batches": 11,
+  "excluded_by_reason": {
+    "no_event_month": 37,
+    "history_lt_2y": 55,
+    "qv_lt_5m": 4
+  },
+  "coverage_gate_pass": true,
+  "post_event_returns_read": false
+}
+TOKENS ['AAVE', 'ADA', 'ALGO', 'ALICE', 'ARPA', 'ATOM', 'AVAX', 'AXS', 'BAKE', 'BCH', 'BEL', 'BNB', 'BTC', 'CHR', 'CHZ', 'COMP', 'CRV', 'DOGE', 'DOT', 'DYDX', 'ETC', 'ETH', 'FIL', 'FTM', 'GALA', 'GRT', 'ICP', 'KSM', 'LINK', 'LIT', 'LTC', 'MANA', 'MATIC', 'MKR', 'NEAR', 'NEO', 'ONE', 'RUNE', 'SAND', 'SNX', 'SOL', 'SUSHI', 'SXP', 'THETA', 'TRX', 'UNI', 'VET', 'XMR', 'XRP', 'ZEN']
+BATCHES 11

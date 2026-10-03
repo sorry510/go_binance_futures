@@ -1,0 +1,41 @@
+EXCLUDED 1 26 RDNT history
+EXCLUDED 2 26 C98 qv 4554969.0
+EXCLUDED 3 26 YGG history
+ELIGIBLE 4 26 DOT 103818514.64
+EXCLUDED 5 26 DEXE history
+EXCLUDED 6 26 IRIS history
+ELIGIBLE 7 26 FIL 1233028680.04
+EXCLUDED 8 26 AVA history
+EXCLUDED 9 26 CHESS history
+EXCLUDED 10 26 RDNT history
+ELIGIBLE 11 26 BNB 352173692.91
+EXCLUDED 12 26 MAV history
+ELIGIBLE 13 26 ETH 1927859906.45
+EXCLUDED 14 26 MAV history
+ELIGIBLE 15 26 ETH 3104467567.74
+EXCLUDED 16 26 MAV history
+EXCLUDED 17 26 GMT history
+EXCLUDED 18 26 PENDLE history
+ELIGIBLE 19 26 SFP 7473792.75
+ELIGIBLE 20 26 BTC 4813367786.99
+EXCLUDED 21 26 WOO history
+EXCLUDED 22 26 MDX history
+EXCLUDED 23 26 CAKE history
+EXCLUDED 24 26 OOKI history
+ELIGIBLE 25 26 GRT 24543408.14
+EXCLUDED 26 26 JOE history
+{
+  "raw_events": 26,
+  "raw_unique_tokens": 22,
+  "raw_batches": 26,
+  "eligible_events": 8,
+  "eligible_unique_tokens": 7,
+  "eligible_batches": 8,
+  "excluded_by_reason": {
+    "history_lt_730d_or_missing": 17,
+    "qv_lt_5m": 1
+  },
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false
+}
+ELIGIBLE_TOKENS ['BNB', 'BTC', 'DOT', 'ETH', 'FIL', 'GRT', 'SFP']

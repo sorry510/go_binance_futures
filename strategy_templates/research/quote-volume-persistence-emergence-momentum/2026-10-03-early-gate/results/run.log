@@ -1,0 +1,19 @@
+SYMBOL SOLUSDT events 0
+SYMBOL DOGEUSDT events 2
+SYMBOL LTCUSDT events 3
+SYMBOL AVAXUSDT events 1
+SYMBOL UNIUSDT events 5
+SYMBOL ZECUSDT events 14
+{
+  "events": 25,
+  "mean_r1": -0.0006315280611792455,
+  "mean_r4": -0.0022530416331857928,
+  "mean_r12": 0.005417036213584299,
+  "positive_symbols": "4/6",
+  "freq": 0.03989968080255358,
+  "2023": -0.0015169860996774758,
+  "2024": 0.01424215552137201,
+  "long_r12": 0.009508283981767975,
+  "short_r12": -0.0007198354386912187,
+  "gate_pass": false
+}

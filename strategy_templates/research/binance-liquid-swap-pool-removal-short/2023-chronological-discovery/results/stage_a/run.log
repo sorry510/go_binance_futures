@@ -1,0 +1,12 @@
+{
+  "events": 66,
+  "tokens": 42,
+  "batches": 6,
+  "mean_r1": 0.00046022200378528723,
+  "mean_r4": -0.001829275457676754,
+  "mean_r12": -0.005127824210134086,
+  "batch_equal_r12": -0.005066886280103537,
+  "positive_tokens": "14/42",
+  "positive_batches": "1/6",
+  "gate_pass": false
+}

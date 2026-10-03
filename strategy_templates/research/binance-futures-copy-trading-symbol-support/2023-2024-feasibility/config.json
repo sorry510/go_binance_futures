@@ -1,0 +1,9 @@
+{
+  "family":"binance-futures-copy-trading-symbol-support",
+  "stage":"2023-2024-feasibility",
+  "source":"Binance official CMS archived 2023-2024 corpus",
+  "event_definition":"explicit addition or removal of an already-existing USD-M contract from Futures Copy Trading symbol support",
+  "coverage_gate":{"min_token_events":8,"min_unique_symbols":8,"min_independent_batches":5},
+  "returns_read":false,
+  "db_write":false
+}

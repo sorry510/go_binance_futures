@@ -1,0 +1,10 @@
+{
+  "articles": 18,
+  "parsed_articles": 18,
+  "parse_errors": 0,
+  "all_usdt_events": 241,
+  "increase_short_events": 161,
+  "increase_unique_symbols": 140,
+  "increase_batches": 4,
+  "returns_read": false
+}

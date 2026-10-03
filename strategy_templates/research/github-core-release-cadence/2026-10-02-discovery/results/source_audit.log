@@ -1,0 +1,16 @@
+BTC bitcoin/bitcoin days 40 signals 9
+ETH ethereum/go-ethereum days 179 signals 26
+BNB bnb-chain/bsc days 68 signals 31
+XRP XRPLF/rippled days 55 signals 9
+ADA IntersectMBO/cardano-node days 54 signals 13
+AVAX ava-labs/avalanchego days 116 signals 29
+NEAR near/nearcore days 84 signals 20
+TRX tronprotocol/java-tron days 70 signals 5
+OP ethereum-optimism/optimism days 94 signals 49
+APT aptos-labs/aptos-core days 169 signals 94
+{
+  "raw_signals": 285,
+  "raw_symbols": 10,
+  "long": 142,
+  "short": 143
+}

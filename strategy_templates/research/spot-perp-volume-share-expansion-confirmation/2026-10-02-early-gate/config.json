@@ -1,0 +1,18 @@
+{
+  "version":"v163",
+  "family":"spot-perp-volume-share-expansion-confirmation",
+  "run_id":"2026-10-02-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "data":"Binance Vision Spot + USD-M 1h klines, same symbol, timestamp aligned",
+  "current_window_hours":24,
+  "baseline_window_hours":168,
+  "score":"log((sum perp QV last24 / sum spot QV last24) / (sum perp QV previous168 / sum spot QV previous168))",
+  "signal":"score crosses from <=0 to >0 only",
+  "direction":"sign of trailing 24h USD-M close-to-close return; positive LONG, negative SHORT",
+  "entry":"next complete USD-M 1h open",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless early gate passes",
+  "db_write":false
+}

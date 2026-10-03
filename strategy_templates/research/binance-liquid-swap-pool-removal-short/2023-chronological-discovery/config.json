@@ -1,0 +1,26 @@
+{
+  "family":"binance-liquid-swap-pool-removal-short",
+  "run_id":"2023-chronological-discovery",
+  "direction":"SHORT",
+  "stage_a_batches":6,
+  "stage_b_batches":5,
+  "stage_a_events":66,
+  "stage_b_events":71,
+  "entry":"first whole-hour USD-M open strictly after official article publishDate",
+  "forward_horizons_hours":[1,4,12],
+  "stage_a_gate":{
+    "min_event_mean_12h":0.005,
+    "min_batch_equal_mean_12h":0.005,
+    "min_positive_token_fraction":0.60,
+    "min_positive_batch_fraction":0.60
+  },
+  "stage_b_gate":{
+    "min_event_mean_12h":0.005,
+    "min_batch_equal_mean_12h":0.005,
+    "min_positive_token_fraction":0.60,
+    "min_positive_batch_fraction":0.60
+  },
+  "stage_b_read_policy":"do not read any stage_b post-event price until stage_a gate passes",
+  "oos_2024_plus_policy":"do not inspect later event families or outcomes unless both stages pass",
+  "db_write":false
+}

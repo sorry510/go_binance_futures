@@ -1,0 +1,15 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "purpose":"diagnostic single-component ablation only",
+  "universe":"original ID121 15-symbol cohort",
+  "fresh_holdout_read":false,
+  "leverage":4,
+  "tp_pct":8,
+  "sl_pct":6,
+  "fee_per_side":0.0005,
+  "slippage_bps_per_side":5,
+  "db_write":false,
+  "app_conf_modified":false,
+  "candidate_promotion_from_audit":false
+}

@@ -1,0 +1,52 @@
+NET_RETRY URLError <urlopen error EOF occurred in violation of protocol (_ssl.c:1129)>
+DONE BTC 2022 771
+RATE_WAIT 37
+DONE BTC 2023 578
+DONE BTC 2024 575
+ASSET_DONE BTC {'repo': 'bitcoin/bitcoin', 'rows': 1924, 'y2022': 771, 'y2023': 578, 'y2024': 575}
+RATE_WAIT 35
+DONE ETH 2022 760
+RATE_WAIT 36
+DONE ETH 2023 761
+RATE_WAIT 36
+DONE ETH 2024 569
+ASSET_DONE ETH {'repo': 'ethereum/go-ethereum', 'rows': 2090, 'y2022': 760, 'y2023': 761, 'y2024': 569}
+DONE BNB 2022 281
+RATE_WAIT 34
+DONE BNB 2023 375
+DONE BNB 2024 213
+ASSET_DONE BNB {'repo': 'bnb-chain/bsc', 'rows': 869, 'y2022': 281, 'y2023': 375, 'y2024': 213}
+DONE XRP 2022 52
+DONE XRP 2023 197
+DONE XRP 2024 69
+ASSET_DONE XRP {'repo': 'XRPLF/rippled', 'rows': 318, 'y2022': 52, 'y2023': 197, 'y2024': 69}
+RATE_WAIT 25
+DONE ADA 2022 718
+DONE ADA 2023 131
+DONE ADA 2024 83
+ASSET_DONE ADA {'repo': 'IntersectMBO/cardano-node', 'rows': 932, 'y2022': 718, 'y2023': 131, 'y2024': 83}
+DONE AVAX 2022 95
+DONE AVAX 2023 189
+RATE_WAIT 39
+DONE AVAX 2024 90
+ASSET_DONE AVAX {'repo': 'ava-labs/avalanchego', 'rows': 374, 'y2022': 95, 'y2023': 189, 'y2024': 90}
+DONE NEAR 2022 360
+DONE NEAR 2023 320
+RATE_WAIT 38
+DONE NEAR 2024 453
+ASSET_DONE NEAR {'repo': 'near/nearcore', 'rows': 1133, 'y2022': 360, 'y2023': 320, 'y2024': 453}
+DONE TRX 2022 121
+DONE TRX 2023 246
+RATE_WAIT 39
+DONE TRX 2024 232
+ASSET_DONE TRX {'repo': 'tronprotocol/java-tron', 'rows': 599, 'y2022': 121, 'y2023': 246, 'y2024': 232}
+DONE OP 2022 198
+DONE OP 2023 277
+NET_RETRY URLError <urlopen error EOF occurred in violation of protocol (_ssl.c:1129)>
+DONE OP 2024 627
+ASSET_DONE OP {'repo': 'ethereum-optimism/optimism', 'rows': 1102, 'y2022': 198, 'y2023': 277, 'y2024': 627}
+RATE_WAIT 38
+DONE APT 2022 772
+RATE_WAIT 37
+DONE APT 2023 657
+RATE_WAIT 37

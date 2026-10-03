@@ -1,0 +1,19 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "source": "free api.llama.fi open-interest protocol summaries with historical chain breakdown",
+  "overview_protocols": 137,
+  "mapped_chain_protocols": 34,
+  "summary_errors": 0,
+  "mapped_chains": 14,
+  "eligible_chains": 4,
+  "eligible_tokens": [
+    "ETH",
+    "BNB",
+    "SOL",
+    "INJ"
+  ],
+  "post_event_returns_read": false,
+  "app_conf_modified": false,
+  "db_write": false
+}

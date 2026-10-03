@@ -1,0 +1,10 @@
+{
+  "family": "github-core-issue-backlog",
+  "stage": "feasibility",
+  "period": "2023-2024",
+  "min_repos": 8,
+  "min_issues_per_repo": 100,
+  "monthly_partition_max": 1000,
+  "post_event_returns_before_gate": false,
+  "db_write": false
+}

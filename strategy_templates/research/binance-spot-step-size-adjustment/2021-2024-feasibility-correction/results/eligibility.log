@@ -1,0 +1,26 @@
+CHECK 30 / 229
+CHECK 60 / 229
+CHECK 90 / 229
+CHECK 120 / 229
+CHECK 150 / 229
+CHECK 180 / 229
+CHECK 210 / 229
+CHECK 229 / 229
+{
+  "raw_events": 229,
+  "raw_unique_tokens": 223,
+  "raw_articles": 3,
+  "eligible_events": 3,
+  "eligible_unique_tokens": 3,
+  "eligible_articles": 2,
+  "eligible_long": 2,
+  "eligible_short": 1,
+  "excluded_by_reason": {
+    "history_lt_2y": 226
+  },
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false
+}
+ELIGIBLE 2024-04-29T07:00:00+00:00 SOL 0.01 -> 0.001 LONG 1624548883
+ELIGIBLE 2024-06-19T09:00:00+00:00 LINA 0.01 -> 1 SHORT 39988819
+ELIGIBLE 2024-06-19T09:00:00+00:00 TRB 0.01 -> 0.001 LONG 167587821

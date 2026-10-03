@@ -1,0 +1,13 @@
+{
+  "raw_increase_events": 161,
+  "raw_unique_symbols": 140,
+  "raw_batches": 4,
+  "eligible_events": 0,
+  "eligible_unique_symbols": 0,
+  "eligible_batches": 0,
+  "excluded_by_reason": {
+    "history_lt_730d": 104,
+    "no_event_month": 57
+  },
+  "returns_read": false
+}

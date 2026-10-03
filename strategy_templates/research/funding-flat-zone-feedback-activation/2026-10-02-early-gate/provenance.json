@@ -1,0 +1,12 @@
+{
+  "research_date":"2026-10-02",
+  "version":"v154",
+  "stage":"discovery",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "source":["Binance Vision USD-M monthly fundingRate","Binance Vision USD-M monthly 1h klines"],
+  "official_semantics":"standard 8h interest state 0.01%, clamp +/-0.05%",
+  "period":"2023-2024",
+  "gate_pass":true,
+  "db_write":false,
+  "app_conf_modified":false
+}

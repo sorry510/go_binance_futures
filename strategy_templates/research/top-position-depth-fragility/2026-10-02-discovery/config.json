@@ -1,0 +1,42 @@
+{
+  "version": "v149",
+  "family": "top-position-depth-fragility",
+  "run_id": "2026-10-02-discovery",
+  "symbols": [
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "stage_a": {
+    "period": "2023",
+    "role": "discovery_screen"
+  },
+  "stage_b_if_a_passes": {
+    "period": "2024",
+    "role": "discovery_validation"
+  },
+  "position_source": "Binance Vision USD-M daily metrics; sum_toptrader_long_short_ratio",
+  "depth_source": "Binance Vision USD-M daily bookDepth; cumulative notional at -1% bid and +1% ask",
+  "hourly_sampling": "last valid observation in each UTC hour for each source",
+  "score": "log(top_position_long_short_ratio * ask_depth_1pct / bid_depth_1pct)",
+  "direction": "score up-cross zero -> SHORT; score down-cross zero -> LONG",
+  "entry": "next USD-M 1h open",
+  "forward_horizons_hours": [
+    1,
+    4,
+    12
+  ],
+  "stage_gate": {
+    "min_mean_signed_return_12h": 0.002,
+    "min_positive_symbols": 4,
+    "min_frequency_per_symbol_week": 0.3
+  },
+  "oos_read_policy": "2024 unread unless 2023 passes; 2025+ unread unless both 2023 and 2024 pass",
+  "db_write": false,
+  "data_gate": {
+    "min_combined_hour_coverage_per_symbol": 0.95
+  }
+}

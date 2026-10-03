@@ -1,0 +1,222 @@
+REUSE BTC 2022 576
+REUSE BTC 2023 513
+REUSE BTC 2024 591
+ASSET_DONE BTC {'repo': 'bitcoin/bitcoin', 'rows': 1680, 'y2022': 576, 'y2023': 513, 'y2024': 591}
+REUSE ETH 2022 831
+DONE ETH 2023 725
+RATE_WAIT 35
+DONE ETH 2024 516
+ASSET_DONE ETH {'repo': 'ethereum/go-ethereum', 'rows': 2072, 'y2022': 831, 'y2023': 725, 'y2024': 516}
+RATE_WAIT 26
+DONE BNB 2022 316
+DONE BNB 2023 323
+DONE BNB 2024 195
+ASSET_DONE BNB {'repo': 'bnb-chain/bsc', 'rows': 834, 'y2022': 316, 'y2023': 323, 'y2024': 195}
+DONE XRP 2022 97
+DONE XRP 2023 155
+DONE XRP 2024 104
+ASSET_DONE XRP {'repo': 'XRPLF/rippled', 'rows': 356, 'y2022': 97, 'y2023': 155, 'y2024': 104}
+RATE_WAIT 35
+DONE ADA 2022 613
+DONE ADA 2023 183
+DONE ADA 2024 85
+ASSET_DONE ADA {'repo': 'IntersectMBO/cardano-node', 'rows': 881, 'y2022': 613, 'y2023': 183, 'y2024': 85}
+RATE_WAIT 39
+DONE AVAX 2022 122
+DONE AVAX 2023 235
+DONE AVAX 2024 143
+ASSET_DONE AVAX {'repo': 'ava-labs/avalanchego', 'rows': 500, 'y2022': 122, 'y2023': 235, 'y2024': 143}
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py", line 1346, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py", line 1257, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py", line 1303, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py", line 1252, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py", line 1012, in _send_output
+    self.send(msg)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py", line 952, in send
+    self.connect()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py", line 1426, in connect
+    self.sock = self._context.wrap_socket(self.sock,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+ssl.SSLEOFError: EOF occurred in violation of protocol (_ssl.c:1129)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/zhz/work/binance/go_binance_futures/strategy_templates/research/github-core-issue-backlog/2026-10-03-discovery/fetch_issues.py", line 72, in <module>
+    combined.extend(fetch_year(asset,repo,year))
+  File "/Users/zhz/work/binance/go_binance_futures/strategy_templates/research/github-core-issue-backlog/2026-10-03-discovery/fetch_issues.py", line 45, in fetch_year
+    o=req_json(API+"?"+urllib.parse.urlencode(params))
+  File "/Users/zhz/work/binance/go_binance_futures/strategy_templates/research/github-core-issue-backlog/2026-10-03-discovery/fetch_issues.py", line 14, in req_json
+    with urllib.request.urlopen(req,timeout=30) as r:
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py", line 214, in urlopen
+    return opener.open(url, data, timeout)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py", line 517, in open
+    response = self._open(req, data)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py", line 534, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py", line 494, in _call_chain
+    result = func(*args)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py", line 1389, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py", line 1349, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error EOF occurred in violation of protocol (_ssl.c:1129)>
+REUSE BTC 2022 576
+REUSE BTC 2023 513
+REUSE BTC 2024 591
+ASSET_DONE BTC {'repo': 'bitcoin/bitcoin', 'rows': 1680, 'y2022': 576, 'y2023': 513, 'y2024': 591}
+REUSE ETH 2022 831
+REUSE ETH 2023 725
+REUSE ETH 2024 516
+ASSET_DONE ETH {'repo': 'ethereum/go-ethereum', 'rows': 2072, 'y2022': 831, 'y2023': 725, 'y2024': 516}
+REUSE BNB 2022 316
+REUSE BNB 2023 323
+REUSE BNB 2024 195
+ASSET_DONE BNB {'repo': 'bnb-chain/bsc', 'rows': 834, 'y2022': 316, 'y2023': 323, 'y2024': 195}
+REUSE XRP 2022 97
+REUSE XRP 2023 155
+REUSE XRP 2024 104
+ASSET_DONE XRP {'repo': 'XRPLF/rippled', 'rows': 356, 'y2022': 97, 'y2023': 155, 'y2024': 104}
+REUSE ADA 2022 613
+REUSE ADA 2023 183
+REUSE ADA 2024 85
+ASSET_DONE ADA {'repo': 'IntersectMBO/cardano-node', 'rows': 881, 'y2022': 613, 'y2023': 183, 'y2024': 85}
+REUSE AVAX 2022 122
+REUSE AVAX 2023 235
+REUSE AVAX 2024 143
+ASSET_DONE AVAX {'repo': 'ava-labs/avalanchego', 'rows': 500, 'y2022': 122, 'y2023': 235, 'y2024': 143}
+RATE_WAIT 36
+REUSE BTC 2022 576
+REUSE BTC 2023 513
+REUSE BTC 2024 591
+ASSET_DONE BTC {'repo': 'bitcoin/bitcoin', 'rows': 1680, 'y2022': 576, 'y2023': 513, 'y2024': 591}
+REUSE ETH 2022 831
+REUSE ETH 2023 725
+REUSE ETH 2024 516
+ASSET_DONE ETH {'repo': 'ethereum/go-ethereum', 'rows': 2072, 'y2022': 831, 'y2023': 725, 'y2024': 516}
+REUSE BNB 2022 316
+REUSE BNB 2023 323
+REUSE BNB 2024 195
+ASSET_DONE BNB {'repo': 'bnb-chain/bsc', 'rows': 834, 'y2022': 316, 'y2023': 323, 'y2024': 195}
+REUSE XRP 2022 97
+REUSE XRP 2023 155
+REUSE XRP 2024 104
+ASSET_DONE XRP {'repo': 'XRPLF/rippled', 'rows': 356, 'y2022': 97, 'y2023': 155, 'y2024': 104}
+REUSE ADA 2022 613
+REUSE ADA 2023 183
+REUSE ADA 2024 85
+ASSET_DONE ADA {'repo': 'IntersectMBO/cardano-node', 'rows': 881, 'y2022': 613, 'y2023': 183, 'y2024': 85}
+REUSE AVAX 2022 122
+REUSE AVAX 2023 235
+REUSE AVAX 2024 143
+ASSET_DONE AVAX {'repo': 'ava-labs/avalanchego', 'rows': 500, 'y2022': 122, 'y2023': 235, 'y2024': 143}
+DONE NEAR 2022 623
+RATE_WAIT 37
+RATE_WAIT 35
+DONE NEAR 2022 623
+DONE NEAR 2023 596
+RATE_WAIT 49
+RATE_WAIT 48
+DONE NEAR 2023 596
+DONE NEAR 2024 526
+ASSET_DONE NEAR {'repo': 'near/nearcore', 'rows': 1745, 'y2022': 623, 'y2023': 596, 'y2024': 526}
+DONE TRX 2022 126
+DONE TRX 2023 261
+RATE_WAIT 38
+NET_RETRY URLError <urlopen error EOF occurred in violation of protocol (_ssl.c:1129)>
+DONE TRX 2024 223
+ASSET_DONE TRX {'repo': 'tronprotocol/java-tron', 'rows': 610, 'y2022': 126, 'y2023': 261, 'y2024': 223}
+DONE OP 2022 205
+RATE_WAIT 36
+DONE OP 2023 312
+DONE OP 2024 899
+ASSET_DONE OP {'repo': 'ethereum-optimism/optimism', 'rows': 1416, 'y2022': 205, 'y2023': 312, 'y2024': 899}
+RATE_WAIT 38
+RATE_WAIT 28
+DONE APT 2022 965
+DONE APT 2023 777
+RATE_WAIT 34
+DONE APT 2024 679
+ASSET_DONE APT {'repo': 'aptos-labs/aptos-core', 'rows': 2421, 'y2022': 965, 'y2023': 777, 'y2024': 679}
+{
+  "BTC": {
+    "repo": "bitcoin/bitcoin",
+    "rows": 1680,
+    "y2022": 576,
+    "y2023": 513,
+    "y2024": 591
+  },
+  "ETH": {
+    "repo": "ethereum/go-ethereum",
+    "rows": 2072,
+    "y2022": 831,
+    "y2023": 725,
+    "y2024": 516
+  },
+  "BNB": {
+    "repo": "bnb-chain/bsc",
+    "rows": 834,
+    "y2022": 316,
+    "y2023": 323,
+    "y2024": 195
+  },
+  "XRP": {
+    "repo": "XRPLF/rippled",
+    "rows": 356,
+    "y2022": 97,
+    "y2023": 155,
+    "y2024": 104
+  },
+  "ADA": {
+    "repo": "IntersectMBO/cardano-node",
+    "rows": 881,
+    "y2022": 613,
+    "y2023": 183,
+    "y2024": 85
+  },
+  "AVAX": {
+    "repo": "ava-labs/avalanchego",
+    "rows": 500,
+    "y2022": 122,
+    "y2023": 235,
+    "y2024": 143
+  },
+  "NEAR": {
+    "repo": "near/nearcore",
+    "rows": 1745,
+    "y2022": 623,
+    "y2023": 596,
+    "y2024": 526
+  },
+  "TRX": {
+    "repo": "tronprotocol/java-tron",
+    "rows": 610,
+    "y2022": 126,
+    "y2023": 261,
+    "y2024": 223
+  },
+  "OP": {
+    "repo": "ethereum-optimism/optimism",
+    "rows": 1416,
+    "y2022": 205,
+    "y2023": 312,
+    "y2024": 899
+  },
+  "APT": {
+    "repo": "aptos-labs/aptos-core",
+    "rows": 2421,
+    "y2022": 965,
+    "y2023": 777,
+    "y2024": 679
+  }
+}

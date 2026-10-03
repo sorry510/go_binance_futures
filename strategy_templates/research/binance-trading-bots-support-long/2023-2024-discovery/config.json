@@ -1,0 +1,14 @@
+{
+  "family":"binance-trading-bots-support-long",
+  "run_id":"2023-2024-discovery",
+  "direction":"LONG",
+  "eligible_events":26,
+  "eligible_unique_tokens":13,
+  "eligible_batches":13,
+  "entry":"first UTC whole-hour open strictly after Binance article publishDate",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_event_mean_12h":0.005,"min_batch_equal_mean_12h":0.005,"min_positive_token_fraction":0.60,"min_positive_batch_fraction":0.60,"require_2024_mean_12h_positive":true},
+  "2023_note":"2 events from one batch only; audit transparently but do not use as standalone annual gate",
+  "oos_policy":"do not read 2025+ unless discovery gate passes",
+  "db_write":false
+}

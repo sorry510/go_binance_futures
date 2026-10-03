@@ -1,0 +1,17 @@
+{
+  "version":"v164",
+  "family":"perp-excess-volatility-fade",
+  "run_id":"2026-10-02-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "source":"Binance Vision Spot + USD-M 1h klines, same symbol",
+  "window_hours":24,
+  "score":"log(realized_vol_perp_24h / realized_vol_spot_24h)",
+  "signal":"first zero up-cross only: score <= 0 to > 0",
+  "direction":"fade trailing 24h USD-M close-to-close return: positive -> SHORT, negative -> LONG",
+  "entry":"next complete USD-M 1h open",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless early gate passes",
+  "db_write":false
+}

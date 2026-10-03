@@ -1,0 +1,13 @@
+{
+  "raw_signals": 285,
+  "raw_symbols": 10,
+  "eligible_signals": 174,
+  "eligible_symbols": 10,
+  "eligible_long": 86,
+  "eligible_short": 88,
+  "coverage_gate_pass": true,
+  "skipped_by_reason": {
+    "history_lt_730d": 111
+  },
+  "post_event_returns_read": false
+}

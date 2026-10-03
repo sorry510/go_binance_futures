@@ -1,0 +1,19 @@
+ARTICLE 1 11 c86f104ccf204bae9fc80a884de6cfe7 pairs 10 assets ['ADA', 'BNB', 'BTC', 'DOGE', 'ETH', 'LINK', 'SHIB', 'XRP']
+ARTICLE 2 11 a2eaf4566af94cf98e0af790cb56d436 pairs 26 assets ['AAVE', 'ADA', 'ARB', 'BCH', 'BNB', 'BTC', 'DOT', 'ETH', 'FIL', 'LINK', 'LTC', 'MANA', 'MATIC', 'SAND', 'SOL', 'UNI', 'VET', 'XRP']
+ARTICLE 3 11 e7206c6f1e1c4c7b943c81fad4a73495 pairs 33 assets ['AAVE', 'AVAX', 'BCH', 'BNB', 'BTC', 'CAKE', 'CHZ', 'COMP', 'DOGE', 'DOT', 'DUSK', 'DYDX', 'EDU', 'ETH', 'FIL', 'FTM', 'GALA', 'GMT', 'HOOK', 'ICP', 'INJ', 'MANA', 'MATIC', 'NEAR', 'NEO', 'RUNE', 'SHIB', 'SOL', 'TRX', 'VET']
+ARTICLE 4 11 99340d9833e54d9e8a36193dca5cd280 pairs 25 assets ['ALICE', 'APE', 'APT', 'ARB', 'ARPA', 'ATOM', 'AVA', 'AXS', 'BAKE', 'BNB', 'BTC', 'EDU', 'ETC', 'FTM', 'HOOK', 'MAV', 'NEO', 'ONE', 'PHA', 'RDNT', 'SXP', 'THETA', 'WOO']
+ARTICLE 5 11 74b63de97d064123904581628c43be0e pairs 22 assets ['AGIX', 'ALGO', 'ANT', 'BNB', 'BTC', 'CFX', 'DAR', 'ETC', 'ETH', 'FET', 'GAL', 'GRT', 'LDO', 'MAGIC', 'NEAR', 'NEO', 'OP', 'SAND', 'SC', 'SUSHI', 'UNI', 'WRX']
+ARTICLE 6 11 eae22e293d7a430e93daee63423b13e6 pairs 17 assets ['ADA', 'BNB', 'BTC', 'DOGE', 'ETH', 'FIL', 'GMT', 'HOOK', 'LINK', 'LTC', 'MATIC', 'POND', 'SHIB', 'SOL', 'UNI']
+ARTICLE 7 11 a07e11c09b564b529e2a3f2aa18bb5a3 pairs 12 assets ['BEL', 'BNB', 'BTC', 'ETH', 'FTM', 'FUN', 'GMT', 'HFT', 'IDEX', 'LEVER', 'MAGIC', 'MANA', 'OP', 'XRP']
+ARTICLE 8 11 5d3bcf573ea242669b3775ccc169b952 pairs 8 assets ['ATOM', 'AVAX', 'BTC', 'ETC', 'JOE', 'KSM', 'OOKI', 'STG', 'SUI']
+ARTICLE 9 11 8b8e3721bc804c618c563e40cbe1ee2e pairs 39 assets ['ADA', 'ALICE', 'APE', 'AVA', 'AVAX', 'BNB', 'BTC', 'CHZ', 'CTSI', 'DOT', 'ENJ', 'ETH', 'FIL', 'FRONT', 'GALA', 'ICP', 'ID', 'KDA', 'LIT', 'MATIC', 'NEO', 'PAXG', 'PEPE', 'SANTOS', 'SUSHI', 'SXP', 'THETA', 'TKO', 'TLM', 'TRX', 'WBTC', 'XMR', 'XVS', 'ZEN']
+ARTICLE 10 11 8ae78c64b57a48e3b93018680b112e25 pairs 38 assets ['ALGO', 'ALPINE', 'ANT', 'ATA', 'ATOM', 'AXS', 'BDOT', 'BNB', 'BSW', 'BTC', 'CAKE', 'CHR', 'COS', 'CRV', 'DOT', 'ETH', 'HARD', 'HFT', 'IDEX', 'IOTX', 'KDA', 'MBOX', 'MDX', 'PROM', 'RPL', 'RUNE', 'SAND', 'SANTOS', 'STG', 'SUSHI', 'THETA', 'TRX', 'VET']
+ARTICLE 11 11 1b01b15e40054bc4868e4b9713cced80 pairs 31 assets ['APT', 'ATA', 'AXS', 'BAKE', 'BNB', 'BTC', 'DAR', 'ELF', 'FLOKI', 'FTM', 'GLMR', 'GMX', 'GNS', 'ID', 'ILV', 'KSM', 'LOKA', 'LQTY', 'MKR', 'MULTI', 'NEAR', 'PERP', 'SNX', 'STX', 'SUI', 'SYN', 'TLM']
+{
+  "articles": 11,
+  "parse_errors": 0,
+  "raw_events": 233,
+  "raw_unique_tokens": 120,
+  "independent_batches": 11,
+  "post_event_returns_read": false
+}

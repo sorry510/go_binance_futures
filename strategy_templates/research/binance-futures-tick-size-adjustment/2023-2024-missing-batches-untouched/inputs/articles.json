@@ -1,0 +1,47 @@
+[
+  {
+    "release_time": 1675416607776,
+    "code": "98315efae83841a2bb71046d4bbae204",
+    "title": "Updates on Tick Size for Multiple USDⓈ-M and COIN-M Perpetual Futures Contracts (2023-02-03)"
+  },
+  {
+    "release_time": 1682496932535,
+    "code": "33ddfb48e3f44c56a3131f9f0fd145a2",
+    "title": "Updates on Tick Size for USDⓈ-M BNXUSDT Perpetual Futures Contract (2023-04-26)"
+  },
+  {
+    "release_time": 1685092935205,
+    "code": "bdb9b2ed43524fe4afeeb41b19481900",
+    "title": "Updates on Tick Size for Multiple USDⓈ-M Perpetual Futures Contracts (2023-06-05)"
+  },
+  {
+    "release_time": 1706502316391,
+    "code": "cb9bf7716ffb4bbb944b2d858af5a639",
+    "title": "Updates on Tick Size for Multiple USDⓈ-M Perpetual Futures Contracts (2024-02-05)"
+  },
+  {
+    "release_time": 1718856001813,
+    "code": "50df6c9af8f14d09937a01956779d2a3",
+    "title": "Updates on Tick Size for Multiple USDⓈ-M Perpetual Futures Contracts (2024-06-20)"
+  },
+  {
+    "release_time": 1721804402210,
+    "code": "08f043a4f20d4f0290817ece13b3d7f4",
+    "title": "Updates on Tick Size for Multiple USDⓈ-M Perpetual Futures Contracts (2024-07-25)"
+  },
+  {
+    "release_time": 1726711212953,
+    "code": "fa192e78242d4d96be9562ab7d76a10a",
+    "title": "Updates on Tick Size for Multiple USDⓈ-M Perpetual Futures Contracts (2024-09-20)"
+  },
+  {
+    "release_time": 1730430001585,
+    "code": "f9baa987cd944e75b3e06c297bca05f7",
+    "title": "Updates on Tick Size for Multiple USDⓈ-M Perpetual Futures Contracts (2024-11-04)"
+  },
+  {
+    "release_time": 1732856401367,
+    "code": "0d330d9e556e44c68dacbc902306c907",
+    "title": "Updates on Tick Size for 1000WHYUSDT and 1000CHEEMSUSDT USDⓈ-M Perpetual Futures Contracts (2024-11-29)"
+  }
+]

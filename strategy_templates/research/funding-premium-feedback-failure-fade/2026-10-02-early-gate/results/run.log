@@ -1,0 +1,21 @@
+SYMBOL SOLUSDT events 257 states 2190
+SYMBOL DOGEUSDT events 303 states 2190
+SYMBOL LTCUSDT events 168 states 2190
+SYMBOL AVAXUSDT events 261 states 2190
+SYMBOL UNIUSDT events 207 states 2193
+SYMBOL ZECUSDT events 255 states 2190
+SUMMARY {
+  "events": 1451,
+  "mean1": 0.0005166631481036623,
+  "mean4": 0.0009627383359637158,
+  "mean12": 0.0012317968916654742,
+  "positive_symbols": 5,
+  "frequency_per_symbol_week": 2.31577747378021,
+  "2023_mean12": 0.0015476503380070256,
+  "2024_mean12": 0.0008348924054384546,
+  "long_n": 672,
+  "long_mean12": 0.003447907888387009,
+  "short_n": 779,
+  "short_mean12": -0.0006799188847104809,
+  "gate_pass": false
+}

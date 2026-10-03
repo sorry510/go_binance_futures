@@ -1,0 +1,12 @@
+{
+  "research_date":"2026-10-02",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "version":"v163",
+  "source":"Binance Vision Spot + USD-M monthly 1h klines",
+  "raw_zip_cache_reused_from":"v161 spot-perp-basis-momentum",
+  "signal_or_gate_changed_due_to_cache_reuse":false,
+  "oos_evaluated":false,
+  "strict_engine_run":false,
+  "app_conf_modified":false,
+  "db_write":false
+}

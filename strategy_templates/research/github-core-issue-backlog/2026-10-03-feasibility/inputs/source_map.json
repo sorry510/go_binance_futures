@@ -1,0 +1,12 @@
+{
+  "BTC": "bitcoin/bitcoin",
+  "ETH": "ethereum/go-ethereum",
+  "BNB": "bnb-chain/bsc",
+  "XRP": "XRPLF/rippled",
+  "ADA": "IntersectMBO/cardano-node",
+  "AVAX": "ava-labs/avalanchego",
+  "NEAR": "near/nearcore",
+  "TRX": "tronprotocol/java-tron",
+  "OP": "ethereum-optimism/optimism",
+  "APT": "aptos-labs/aptos-core"
+}

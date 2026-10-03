@@ -1,0 +1,15 @@
+{
+  "raw_events": 212,
+  "raw_unique_tokens": 113,
+  "raw_batches": 76,
+  "eligible_events": 74,
+  "eligible_unique_tokens": 38,
+  "eligible_batches": 43,
+  "excluded_by_reason": {
+    "history_lt_730d_or_missing": 136,
+    "missing_prior_24h": 1,
+    "qv_lt_5m": 1
+  },
+  "coverage_gate_pass": true,
+  "post_event_returns_read": false
+}

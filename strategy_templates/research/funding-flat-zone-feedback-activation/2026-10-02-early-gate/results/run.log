@@ -1,0 +1,21 @@
+SYMBOL SOLUSDT events 230 funding 2286 flat_prev_rows 867
+SYMBOL DOGEUSDT events 287 funding 2286 flat_prev_rows 1093
+SYMBOL LTCUSDT events 218 funding 2286 flat_prev_rows 1085
+SYMBOL AVAXUSDT events 232 funding 2286 flat_prev_rows 987
+SYMBOL UNIUSDT events 224 funding 2286 flat_prev_rows 1298
+SYMBOL ZECUSDT events 231 funding 2286 flat_prev_rows 1550
+SUMMARY {
+  "events": 1422,
+  "mean1": 0.0007774351452567598,
+  "mean4": 0.001404424753653968,
+  "mean12": 0.002057974524767629,
+  "positive_symbols": 4,
+  "frequency_per_symbol_week": 2.2694938440492476,
+  "2023_mean12": 0.0021206504209493903,
+  "2024_mean12": 0.0019800745150022874,
+  "long_n": 1046,
+  "long_mean12": 0.0019792549770533967,
+  "short_n": 376,
+  "short_mean12": 0.002276965606972651,
+  "gate_pass": true
+}

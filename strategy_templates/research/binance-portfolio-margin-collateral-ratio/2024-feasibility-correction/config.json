@@ -1,0 +1,10 @@
+{
+  "family":"binance-portfolio-margin-collateral-ratio",
+  "stage":"2024-feasibility-correction",
+  "official_articles":8,
+  "mapping":{"ratio_increase":"LONG","ratio_decrease":"SHORT"},
+  "eligibility":{"usd_m_history_days":730,"prior_24h_quote_volume_min_usdt":5000000},
+  "coverage_gate":{"min_eligible_events":8},
+  "returns_before_gate":false,
+  "db_write":false
+}

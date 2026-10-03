@@ -1,0 +1,12 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "version": "v175",
+  "source": "Binance Vision USD-M 1h klines",
+  "discovery": "2023-2024",
+  "oos_evaluated": false,
+  "strict_engine_run": false,
+  "app_conf_modified": false,
+  "db_write": false,
+  "identifier_note": "Original run used temporary label v172; renamed to v175 after completion because v172 was already assigned to Taker-vs-Top-Position Skew. Logic, event set and metrics unchanged."
+}

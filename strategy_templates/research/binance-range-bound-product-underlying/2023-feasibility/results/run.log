@@ -1,0 +1,32 @@
+8f7505d31a774731afbb84eee2b478dc ['BNB', 'BTC', 'ETH']
+9193259715c142ecbd3c60da9c2d5145 ['BNB', 'BTC', 'ETH']
+8c374703c65c434c97c28ec08aaaa9ca ['BNB', 'BTC', 'ETH']
+957a1905dac840eea797d80d47023f3e ['BNB', 'BTC', 'ETH']
+30c39d5a4b454d2db8e417d24cfb5f2f ['BNB', 'BTC', 'ETH']
+6d3316fb6ba843d7bbf3402502e4565d ['BNB', 'BTC', 'ETH']
+a2f6d4b1c1b042be95fd2ac2af5e564a ['BNB', 'BTC', 'ETH']
+e72688abd01c4d5a89640bc812b31a8f ['BNB', 'BTC', 'ETH']
+e9bc741f0f0a49f6ada31e6b78cf5f52 ['BNB', 'BTC', 'ETH']
+0b95699f24a5433f8057191f8907d008 ['BNB', 'BTC', 'ETH']
+8502f5bb423741549f4c520cf5322377 ['BNB', 'BTC', 'ETH']
+94ab60107cc0423fb9a41f64eb039f5b ['BNB', 'BTC', 'ETH']
+57d60e1cc33442959b9f5947f721ff8c ['BNB', 'BTC', 'ETH']
+a2d2a30c7d454a809f25d19016be7c7c ['BNB', 'BTC', 'ETH']
+334e47c312ba4c8ca60e9c3ed58c48b9 ['BNB', 'BTC', 'ETH']
+cb1ae8a8265240588719e5309f14d0fc ['BNB', 'BTC', 'ETH']
+366105bcb9964bceb88a20e68b8cf742 ['BNB', 'BTC', 'ETH']
+86cecdd0c1ad4b1b919d0c79c7434c7c ['BNB', 'BTC', 'ETH']
+4c4520bed74d4ad4939d06b16ed2e70a []
+{
+  "articles": 19,
+  "parse_errors": 0,
+  "unique_explicit_underlyings": [
+    "BNB",
+    "BTC",
+    "ETH"
+  ],
+  "unique_underlying_count": 3,
+  "coverage_gate_min_unique_tokens": 8,
+  "coverage_gate_pass": false,
+  "post_event_returns_read": false
+}
