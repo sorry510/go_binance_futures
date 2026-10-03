@@ -1,0 +1,14 @@
+2026/10/03 15:43:07.848 [1;34m[I][0m  use lang: zh
+COVERAGE 1/6 LINKUSDT
+BLOCK LINKUSDT load historical LINKUSDT 1m: historical K-line gaps remain for LINKUSDT 1m: [[1672519200000 1788220799999]]
+COVERAGE 2/6 BCHUSDT
+BLOCK BCHUSDT load historical BCHUSDT 1m: historical K-line gaps remain for BCHUSDT 1m: [[1672519200000 1788220799999]]
+COVERAGE 3/6 ETCUSDT
+BLOCK ETCUSDT load historical ETCUSDT 1m: historical K-line gaps remain for ETCUSDT 1m: [[1672519200000 1788220799999]]
+COVERAGE 4/6 TRXUSDT
+BLOCK TRXUSDT load historical TRXUSDT 1m: historical K-line gaps remain for TRXUSDT 1m: [[1672519200000 1788220799999]]
+COVERAGE 5/6 XLMUSDT
+BLOCK XLMUSDT load historical XLMUSDT 1m: historical K-line gaps remain for XLMUSDT 1m: [[1672519200000 1788220799999]]
+COVERAGE 6/6 AAVEUSDT
+BLOCK AAVEUSDT load historical AAVEUSDT 1m: historical K-line gaps remain for AAVEUSDT 1m: [[1672519200000 1788220799999]]
+ALL_PASS false RETURNS_READ false

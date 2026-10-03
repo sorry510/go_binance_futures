@@ -1,0 +1,112 @@
+DOWNLOAD 50 / 552
+DOWNLOAD 100 / 552
+DOWNLOAD 150 / 552
+DOWNLOAD 200 / 552
+DOWNLOAD 250 / 552
+DOWNLOAD 300 / 552
+DOWNLOAD 350 / 552
+DOWNLOAD 400 / 552
+DOWNLOAD 450 / 552
+DOWNLOAD 500 / 552
+DOWNLOAD 550 / 552
+DOWNLOAD 552 / 552
+SOURCE SOLUSDT 1h 33600 sig_hours 33598 rec_hours 33599
+SOURCE DOGEUSDT 1h 33600 sig_hours 33598 rec_hours 33599
+SOURCE LTCUSDT 1h 33600 sig_hours 33598 rec_hours 33599
+SOURCE AVAXUSDT 1h 33600 sig_hours 33598 rec_hours 33599
+SOURCE UNIUSDT 1h 33600 sig_hours 33598 rec_hours 33599
+SOURCE ZECUSDT 1h 33600 sig_hours 33598 rec_hours 33599
+{
+  "parity": {
+    "v190": {
+      "old": 3840,
+      "new": 3840,
+      "missing_from_new": 0,
+      "extra_in_new": 0,
+      "exact_key_parity": true
+    },
+    "v192": {
+      "old": 23871,
+      "new": 23876,
+      "missing_from_new": 0,
+      "extra_in_new": 5,
+      "exact_key_parity": false
+    },
+    "v194": {
+      "old": 18521,
+      "new": 18521,
+      "missing_from_new": 0,
+      "extra_in_new": 0,
+      "exact_key_parity": true
+    },
+    "v196": {
+      "old": 14267,
+      "new": 14269,
+      "missing_from_new": 0,
+      "extra_in_new": 2,
+      "exact_key_parity": false
+    }
+  },
+  "summary": {
+    "v190": {
+      "events": 7090,
+      "r12": 0.00037287144437717556,
+      "positive_symbols": "4/6",
+      "positive_years": "3/4",
+      "years": {
+        "2023": 0.0013305804798017017,
+        "2024": 0.001058180609226733,
+        "2025": 5.1324182960190684e-05,
+        "2026": -0.0014566484248013103
+      }
+    },
+    "v192": {
+      "events": 44973,
+      "r12": 0.00045109150311067333,
+      "positive_symbols": "6/6",
+      "positive_years": "3/4",
+      "years": {
+        "2023": 0.00042381197794294815,
+        "2024": 0.0011724732887938912,
+        "2025": 0.0001594614386930278,
+        "2026": -8.661391920083371e-05
+      }
+    },
+    "v194": {
+      "events": 35217,
+      "r12": -0.0003618482826030894,
+      "positive_symbols": "0/6",
+      "positive_years": "2/4",
+      "years": {
+        "2023": 0.0004148868241281635,
+        "2024": 0.00045322031747673875,
+        "2025": -0.0014156632984459634,
+        "2026": -0.0010055112109652435
+      }
+    },
+    "v196": {
+      "events": 27496,
+      "r12": 2.206282087556112e-05,
+      "positive_symbols": "4/6",
+      "positive_years": "2/4",
+      "years": {
+        "2023": 0.0007123210910767379,
+        "2024": 0.00020987498250231806,
+        "2025": -0.0005046366202054385,
+        "2026": -0.0003804167638608556
+      }
+    },
+    "v197": {
+      "events": 16718,
+      "r12": -4.423598974525102e-05,
+      "positive_symbols": "3/6",
+      "positive_years": "2/4",
+      "years": {
+        "2023": 0.0007829011043349265,
+        "2024": 0.00021303151361401962,
+        "2025": -0.00023543704030104146,
+        "2026": -0.0010948517759683263
+      }
+    }
+  }
+}

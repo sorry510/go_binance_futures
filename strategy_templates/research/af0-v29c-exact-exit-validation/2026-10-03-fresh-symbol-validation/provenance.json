@@ -1,0 +1,18 @@
+{
+  "research_date":"2026-10-03",
+  "repository":"/Users/zhz/work/binance/go_binance_futures",
+  "family":"af0-v29c-exact-exit-validation",
+  "hypothesis_source":"noncanonical 4-symbol diagnostic; 8x/dynamic-exit results used only for hypothesis generation",
+  "source_strategy_sha256":"b27cb840b0ee92bc165b64fed7b8e5574946d50cf7922f4e419b31aa78e6d04c",
+  "exact_strategy_sha256":"2a9e9695e131b17d5349236519836d8b9a6a2d04f8c6c681d48d453f0c9b6cb1",
+  "validation_symbols":["DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT","ADAUSDT"],
+  "validation_start":"2023-01-01T00:00:00Z",
+  "validation_end_exclusive":"2026-09-01T00:00:00Z",
+  "canonical_exit":"ROI >= 8 || ROI <= -6",
+  "leverage":4,
+  "fee_rate_per_side":0.0005,
+  "slippage_bps_per_side":5,
+  "repository_source":null,
+  "db_write":false,
+  "app_conf_modified":false
+}

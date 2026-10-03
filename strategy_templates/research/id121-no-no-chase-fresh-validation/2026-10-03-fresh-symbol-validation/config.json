@@ -1,0 +1,19 @@
+{
+  "family":"id121-no-no-chase-fresh-validation",
+  "run_id":"2026-10-03-fresh-symbol-validation",
+  "source_symbols":["ADAUSDT","AVAXUSDT","BNBUSDT","BTCUSDT","DOGEUSDT","ETHUSDT","LTCUSDT","NEARUSDT","SOLUSDT","UNIUSDT","XRPUSDT","ZECUSDT","1000PEPEUSDT","SUIUSDT","ONDOUSDT"],
+  "fresh_validation_symbols":["LINKUSDT","BCHUSDT","ETCUSDT","TRXUSDT","XLMUSDT","AAVEUSDT"],
+  "start":"2023-01-01T00:00:00Z",
+  "end_exclusive":"2026-09-01T00:00:00Z",
+  "strategy_sha256":"6398522cecdddc67acc2926034f79db3bdae7c44e1ba3c950310fcfa204d632e",
+  "leverage":4,
+  "fee_rate_per_side":0.0005,
+  "slippage_bps_per_side":5,
+  "take_profit_pct":8,
+  "stop_loss_pct":6,
+  "single_position":true,
+  "close_rule":"ROI >= 8 || ROI <= -6",
+  "gate":{"aggregate_pf_gte":1.15,"positive_symbols_gte":4,"frequency_per_symbol_week_gte":0.30,"year_pf_floor_with_material_sample":0.90},
+  "repository_source":null,
+  "db_write":false
+}

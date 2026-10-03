@@ -1,0 +1,28 @@
+{
+  "research_date": "2026-10-03",
+  "source_bundle": "strategy_templates/research/shared-native-feature-tree/2026-10-03-train2023-validate2024",
+  "model_sha256": "88289990d5a3936dfa0d11e4b5f11a8111f6b330a40a8319c7e1184b17526eaf",
+  "train_period": "2023",
+  "validation_periods": [
+    "2024",
+    "2025",
+    "2026-01..09"
+  ],
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT",
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "data_source": "Binance Vision USD-M monthly 1h Klines",
+  "db_write": false,
+  "app_conf_modified": false,
+  "commit": false,
+  "push": false
+}

@@ -1,0 +1,27 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "period_start": "2023-01-01T00:00:00Z",
+  "period_end_exclusive": "2026-10-01T00:00:00Z",
+  "symbols": [
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "data_sources": [
+    "Binance Vision USD-M monthly 1h klines",
+    "Binance Vision USD-M daily 5m Futures metrics (v187 only)"
+  ],
+  "later_year_downloads": {
+    "monthly_1h_archives": 132,
+    "daily_metrics_archives": 3828
+  },
+  "canonical_mode": "archived 2023-2024 events + original replay logic rerun for 2025-2026",
+  "db_write": false,
+  "app_conf_modified": false,
+  "commit": false,
+  "push": false
+}

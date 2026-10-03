@@ -1,0 +1,9 @@
+{
+  "fixed_events": 9,
+  "fixed_symbols": 8,
+  "exact_consistent_same_source_events": 0,
+  "complete_9_of_9_source_available": false,
+  "date_identity_conflicts_observed": true,
+  "post_event_returns_read": false,
+  "status": "blocked_exact_timestamp_and_event_identity"
+}

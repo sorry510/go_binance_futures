@@ -1,0 +1,20 @@
+{
+  "research_date": "2026-10-03",
+  "period_start": "2023-01-01T00:00:00Z",
+  "period_end_exclusive": "2026-10-01T00:00:00Z",
+  "extension_start": "2025-01-01T00:00:00Z",
+  "symbols": [
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "data_source": "Binance Vision USD-M monthly 1m + 1h Klines",
+  "canonical_mode": "archived 2023-2024 + unchanged-rule 2025-2026 extension",
+  "db_write": false,
+  "app_conf_modified": false,
+  "commit": false,
+  "push": false
+}

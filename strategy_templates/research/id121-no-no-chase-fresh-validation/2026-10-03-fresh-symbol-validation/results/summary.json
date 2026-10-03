@@ -1,0 +1,37 @@
+{
+  "status": "blocked_before_returns",
+  "strategy_sha256": "6398522cecdddc67acc2926034f79db3bdae7c44e1ba3c950310fcfa204d632e",
+  "initial_fresh_symbols": [
+    "LINKUSDT",
+    "BCHUSDT",
+    "ETCUSDT",
+    "TRXUSDT",
+    "XLMUSDT",
+    "AAVEUSDT"
+  ],
+  "initial_fresh_coverage_pass": 0,
+  "returns_read": false,
+  "local_non_source_cache": [
+    "ALGOUSDT",
+    "INJUSDT",
+    "LDOUSDT",
+    "LITUSDT",
+    "PENDLEUSDT",
+    "PYTHUSDT",
+    "MONUSDT",
+    "ZAMAUSDT",
+    "币安人生USDT"
+  ],
+  "contaminated_by_prior_id121_holdout": [
+    "ALGOUSDT",
+    "INJUSDT",
+    "LDOUSDT",
+    "PENDLEUSDT",
+    "PYTHUSDT"
+  ],
+  "uncontaminated_long_history_candidates": [
+    "LITUSDT"
+  ],
+  "validation_available": false,
+  "db_write": false
+}

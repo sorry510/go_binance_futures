@@ -1,0 +1,19 @@
+SYMBOL SOLUSDT events 1206 metric_hours 15336
+SYMBOL DOGEUSDT events 978 metric_hours 15336
+SYMBOL LTCUSDT events 2424 metric_hours 15336
+SYMBOL AVAXUSDT events 2134 metric_hours 15336
+SYMBOL UNIUSDT events 4783 metric_hours 15336
+SYMBOL ZECUSDT events 5403 metric_hours 15336
+{
+  "events": 16928,
+  "mean_r1": -3.3481761194942195e-05,
+  "mean_r4": 1.9472052463401895e-05,
+  "mean_r12": 9.085558712292272e-05,
+  "positive_symbols": "5/6",
+  "freq": 30.95506792058516,
+  "2023": 0.0,
+  "2024": 0.0,
+  "long_r12": 0.0006667154370068251,
+  "short_r12": -0.00048514035158288255,
+  "gate_pass": false
+}

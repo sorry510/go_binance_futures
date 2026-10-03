@@ -3986,3 +3986,161 @@
 - 年度12h：2023 **+0.0081%**，2024 **+0.0089%**。LONG +0.1022%、SHORT -0.0852%仅作后验审计。
 - 结论：频率/breadth/年度同号尚可，但经济幅度远低于+0.20%；**冻结v187，并关闭natural pairwise positioning审计空间 / 不继续换Top Position/Top Account组合、不加阈值、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
 - 归档：`strategy_templates/research/taker-global-account-skew/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v188：Corwin–Schultz Liquidity-Stress Reversal
+- Binance USD-M 1h OHLC 构造 Corwin–Schultz high-low spread estimator；最近24h平均 spread 相对此前非重叠24h首次由未扩大转为扩大时，反做已完成4h价格方向，下一1h open。
+- 新6币2023-2024：**4229 events，12h +0.0340%，5/6正，6.749次/币/周**；1h -0.0019%，4h +0.0201%。
+- 年度12h：2023 **+0.0044%**，2024 **+0.0628%**。LONG +0.1446%、SHORT -0.0716%仅作后验审计。
+- 结论：频率/breadth/年度同号通过，但经济幅度远低于+0.20%；**冻结v188 / 不扫block、不换Abdi-Ranaldo救参、不加spread阈值、不做contraction映射、不删方向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/corwin-schultz-liquidity-stress-reversal/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v189：Shared Depth-3 Native-Feature Tree
+- 10币共享、无symbol/time/MarketCondition/Benchmark；9个项目原生1h特征；纯Go CART squared-error，depth=3、min leaf=2000，不调参。**2023仅训练87,480 samples**；模型 SHA-256 `88289990d5a3936dfa0d11e4b5f11a8111f6b330a40a8319c7e1184b17526eaf` 在读取2024前锁定。
+- untouched 2024：**3747 events，12h +0.00038%，7/10正，7.166次/币/周**；1h +0.0061%，4h -0.0046%；H1 -0.00039%，H2 +0.00107%。
+- 结论：OOS经济幅度基本为0，raw gate远未通过；**冻结v189 / 不调tree depth/min-leaf、不删特征、不挑leaf、不加prediction阈值、不换黑盒模型救活 / strict 2024未跑 / 2025/2026未读 / 不入库**。
+- 归档：`strategy_templates/research/shared-native-feature-tree/2026-10-03-train2023-validate2024/`。
+
+## 2026-10-03 — v190：Trading-Invariant Stress Reversal
+- 理论固定量 `I = QuoteVolume × realized_vol / TradeCount^(3/2)`；最近24h相对此前非重叠24h首次上穿1时，视为单位交易风险转移压力上升，反做已完成4h方向，下一1h open。
+- 新6币2023-2024：**3840 events，12h +0.1196%，4/6正，6.129次/币/周**；1h +0.0264%，4h +0.0653%。
+- 年度12h：2023 **+0.1331%**，2024 **+0.1058%**。LONG +0.3251%、SHORT -0.0926%仅作后验审计。
+- 结论：频率、最低breadth、跨年同号过门，但低于预注册+0.20%经济gate；**冻结v190 / 不拟合3/2指数、不扫block、不改MDH residual、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/trading-invariant-stress-reversal/2026-10-03-early-gate/`。
+
+## 2026-10-03 — Token Unlock Supply-Shock：Exact-Source Recheck #2
+- 固定原9事件/8币 cohort不变；本轮只重查可审计 exact timestamp 源，**未读任何新收益**。
+- CryptoRank/Tokenomist 的专业数据模型确实提供 timestamp/time，但完整历史需认证/付费；公开页面只能覆盖部分事件。
+- 更关键：当前独立历史源与冻结作者CSV在部分**事件日期本身**出现冲突（例如AXS、APT），因此不能在旧日期上硬补00:00/12:00/某个小时制造伪精度。
+- 结论：**exact timestamp + event identity 仍blocked / 不缩样本、不逐事件混vendor、不推断周期时间、不改冻结日期后看收益**。只有未来获得同源9/9历史或prospective forward cohort才能重开。
+- 归档：`strategy_templates/research/token-unlock-supply-shock/2026-10-03-exact-source-recheck/`。
+
+## 2026-10-03 — CoinMetrics Transfer-Count Growth：Feasibility
+- CoinMetrics Community `TxTfrCnt`（asset transfer count）与旧`TxCnt`原始语义不同；机械审计成熟同名USD-M后，**18币**具备统一2023-2024历史 + 当前TRADING + 足够>=730天区间。
+- coverage本身明确通过，**未读任何signal后收益**。
+- 但旧 CoinMetrics activity 路线已冻结并明确“不继续枚举相邻 activity 指标”；TxTfrCnt仍属于activity-count邻近假设。
+- 结论：**只保留feasibility，不开discovery**；不因18币coverage好而违反已有family freeze。
+- 归档：`strategy_templates/research/coinmetrics-transfer-count-growth/2026-10-03-feasibility/`。
+
+## 2026-10-03 — v191：Intrahour 1m Realized-Skew Reversal
+- 每个完整小时用61个连续1m close构造60个分钟log return，计算该小时内部 sample skewness；零上穿SHORT、零下穿LONG，下一完整1h open。直接复用项目 `market_klines_1m_chunks` binary_v1+zstd 只读decoder。
+- 数据覆盖严格一致：新6币每币 **1,052,700条1m / 17,543个完整formation小时**；无单币coverage异常。
+- 2023-2024：**50,344 events，12h +0.00076%，3/6正，80.348次/币/周**；1h -0.00320%，4h -0.00210%。
+- 年度12h：2023 **+0.00489%**，2024 **-0.00334%**。LONG +0.08440%、SHORT -0.08289%仅作后验审计。
+- 结论：经济幅度等于0、breadth失败且跨年翻转；**冻结v191 / 不加skew阈值、不扫30m/120m、不改intrahour kurtosis救参、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/intrahour-1m-realized-skew-reversal/2026-10-03-early-gate/`。
+
+## 2026-10-03 — AF0 v29C：Formal Exact-Exit Fresh-Symbol Validation
+- 生成假设来源：BTC/ETH/SOL/XRP 的非正式8x+动态退出诊断中，AF0四币均PF>1；该结果只用于生成假设，**不算正式性能**。
+- AF0 相对旧v29的冻结entry差异：LONG funding上限从<=0放宽到<=0.0001；去掉明确的 `ADX[1]-ADX[3]>=2`，保留 `ADX[1]>=ADX[3]`；保留 `Amount[0]>0` 数据有效性检查。其余entry不调。
+- 在读取正式收益前固定 fresh 六币：**DOGE/LTC/AVAX/UNI/ZEC/ADA**；均未参加AF0诊断。正式参数为 **4x / fee0.0005/side / slippage5bps / exact `ROI>=8 || ROI<=-6`**，Repository Source=nil，不补数、不写DB。
+- 正式结果：**915笔，PF 0.891839，1/6正，0.797237次/币/周**；LONG580笔 PF0.853064，SHORT335笔 PF0.962215；517 SL / 398 TP。
+- 逐币PF：DOGE **0.8622**、LTC **0.7916**、AVAX **0.9194**、UNI **0.9132**、ZEC **0.8311**、ADA **1.0567**。
+- 年度PF：2023 **0.7167**、2024 **1.1152**、2025 **0.8624**、2026 Jan-Aug **0.9166**。
+- 结论：**AF0/v29C relaxed-funding + relaxed-ADX family fresh validation决定性失败并冻结**。此前4币诊断强势是cohort/退出语义依赖；不调0.0001 funding、不选择性恢复ADX acceleration、不删方向、不拿BTC/ETH/SOL/XRP救活、不入库。
+- 归档：`strategy_templates/research/af0-v29c-exact-exit-validation/2026-10-03-fresh-symbol-validation/`。
+
+## 2026-10-03 — v192：Intrahour Volatility-Signature Noise Reversal
+- 每个完整UTC小时用同一批1m closes计算 `RV1m` 与非重叠 `RV5m`，`score=log(RV1m/RV5m)`；fresh <=0→>0 时视为高频微结构噪声开始主导，反做刚完成1h方向，下一完整1h open。
+- 新6币2023-2024：**23871 events，12h +0.0800%，6/6正，38.098次/币/周**；1h +0.0134%，4h +0.0424%。
+- 年度12h：2023 **+0.0424%**，2024 **+0.1174%**。LONG +0.1656%、SHORT -0.0051%仅作后验审计，禁止删SHORT。
+- 结论：频率/breadth/年度同号均通过，但经济幅度仍远低于+0.20%；**冻结v192 / 不加ratio阈值、不试1m/10m或2m/5m、不做down-cross单独映射、不删方向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/intrahour-volatility-signature-noise-reversal/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v193：Intrahour Price-Staleness Activation Reversal
+- 每个完整UTC小时统计60个1m close-to-close return 中的零收益分钟；前一小时0个、当前首次出现>=1个时触发，反做刚完成1h方向，下一完整1h open。
+- 六币1m coverage一致，但zero-return基准率差异巨大：SOL 8494/17544小时，DOGE 15276，LTC 16989，AVAX 12090，UNI 16498，ZEC 17424，明显受tick/价格粒度影响。
+- 新6币2023-2024：**8207 events，12h +0.0264%，5/6正，13.098次/币/周**；1h +0.0216%，4h +0.0261%。
+- 年度12h：2023 **-0.0565%**，2024 **+0.0697%**。LONG +0.1491%、SHORT -0.0887%仅作后验审计。
+- 结论：经济幅度不足且跨年翻转；**冻结v193 / 不测试>=2/3/5个zeros、不换5m zeros、不加zero-volume条件、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/intrahour-price-staleness-activation-reversal/2026-10-03-early-gate/`。
+
+## 2026-10-03 — ID121 no-no-chase：Fresh-Symbol Formal Validation Coverage
+- 冻结 `no_no_chase` exact snapshot（SHA-256 `6398522c...`），初始fresh set在收益前固定为 LINK/BCH/ETC/TRX/XLM/AAVE。
+- `Repository(nil)` coverage阶段六币全部因本地无长期1m chunks被阻断，**Engine未运行、未读取任何no-no-chase trade/PF/PnL**。
+- 本地1m chunk inventory显示非原15币主要有 ALGO/INJ/LDO/LIT/PENDLE/PYTH 等；但 **ALGO/INJ/LDO/PENDLE/PYTH 已经在canonical ID121 fresh holdout中读取过结果**，不能重新伪装成untouched validation；LIT单币不足且存在已知特殊历史缺口。
+- 结论：**fresh-symbol validation unavailable / blocked before returns**。不REST补历史、不导入新币、不复用已看过的五币、不降低breadth。有效路径仍是等真正untouched temporal holdout本地数据完整后再验证。
+- 归档：`strategy_templates/research/id121-no-no-chase-fresh-validation/2026-10-03-fresh-symbol-validation/`。
+
+## 2026-10-03 — v194：3-Bar Fair-Value-Gap Fill Reversal
+- 完整1h三bar非重叠：`Low_t > High_(t-2)` 为bullish FVG→SHORT回补；`High_t < Low_(t-2)` 为bearish FVG→LONG；下一完整1h open，无gap-size/body过滤。
+- 新6币2023-2024：**18521 events，12h +0.0435%，5/6正，29.559次/币/周**；1h +0.0172%，4h +0.0298%。
+- 年度12h：2023 **+0.0415%**，2024 **+0.0453%**。LONG +0.1613%、SHORT -0.0648%仅作后验审计。
+- 结论：频率/breadth/年度同号通过，但经济幅度明显不足；**冻结v194 / 不加gap-size/body过滤、不换周期、不改continuation、不删方向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/three-bar-fair-value-gap-fill-reversal/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v192：Intrahour Volatility-Signature Noise Reversal
+- 每个完整UTC小时用同一条1m路径计算 `RV1m=sum(r_1m^2)` 与12个非重叠5m returns的 `RV5m`；`log(RV1m/RV5m)` fresh <=0→>0 时，反做刚完成1h方向，下一1h open。
+- 新6币2023-2024：**23871 events，12h +0.0800%，6/6正，38.098次/币/周**；1h +0.0134%，4h +0.0424%。
+- 年度12h：2023 **+0.0424%**，2024 **+0.1174%**。LONG +0.1656%、SHORT -0.0051%仅作后验审计。
+- 结论：breadth与跨年一致性很好，但经济幅度仍低于预注册+0.20%；**冻结v192 / 不加RV ratio阈值、不换1m/10m或2m/5m、不单测down-cross、不加过滤、不删方向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/intrahour-volatility-signature-noise-reversal/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v195：CoinMetrics Block-Production Regime
+- 12个成熟币 CoinMetrics Community `BlkCnt`；当前日 block count 相对前30完整UTC日均值 fresh 零上穿LONG、零下穿SHORT，下一UTC日 USD-M open。
+- outcomes前：3428 raw / **3426 eligible signals / 12币**；只排除1条 history<730d、1条 QV<500万，未提前读取收益。
+- discovery 有效 **3357 events**：1d -0.1548%，3d -0.0592%，7d **-0.1009%**，仅 **4/12正**，2.679次/币/周。
+- 年度7d：2023 **-0.0551%**，2024 **-0.1470%**。LONG +0.9283%、SHORT -1.1318%仅作后验归因，禁止删SHORT。
+- 结论：**冻结v195 / 不扫7/14/60d baseline、不加BlkCnt阈值、不分PoW/PoS、不删方向、不反向 / 2025+未读 / 不进strict TP8-SL6 / 不入库**。
+- 归档：`strategy_templates/research/coinmetrics-block-production-regime/2026-10-03-feasibility/` 与 `.../2026-10-03-discovery/`。
+
+## 2026-10-03 — v196：Intrahour Open-Reference Recross Activation Reversal
+- 每个完整小时以其开始前最后一个1m close为固定参考；统计随后60个1m closes围绕该参考价的方向穿越次数。前一小时0次、当前>=1次时触发，反做当前小时最终方向，下一1h open。
+- 新6币2023-2024：**14267 events，12h +0.0462%，4/6正，22.770次/币/周**；1h +0.0204%，4h +0.0608%。
+- 年度12h：2023 **+0.0712%**，2024 **+0.0212%**。LONG +0.1337%、SHORT -0.0402%仅作后验审计。
+- 结论：跨年同号但经济幅度远低于+0.20%；**冻结v196 / 不测>=2/3/5次recross、不换移动参考/VWAP、不换30m/120m、不删方向、不加过滤 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/intrahour-open-reference-recross-reversal/2026-10-03-early-gate/`。
+
+## 2026-10-03 — Dynamic Momentum Cycle：Faithful-Replication Source Audit
+- 重新审计 Borgards (2021) Dynamic Time-Series Momentum 及其引用的 Borgards & Czudaj (2020) turning-point 方法；论文可确认 momentum cycle 结构、formation/momentum period 与 `kappa=5`，但仍未得到可唯一编码的 moving-average smoothing-filter 递推/伪代码。
+- 后续 commodity 论文同样只描述 `kappa` 控制 turning-point 数量/重要性，并回引2020方法；作者学位论文归档已定位，但当前研究浏览器无法读取该 PDF attachment，也未找到作者代码仓库。
+- 结论：**SOURCE BLOCKED，不是alpha失败**。禁止复用旧SMA5 slope-flip近似、禁止从图反推算法、禁止另选ZigZag/centered extrema冒充论文机制；只有获得作者代码或精确 primary-source algorithm 后才能重开。
+- **未读任何新市场收益 / 不入库**。
+- 归档：`strategy_templates/research/dynamic-momentum-cycle-faithful-replication/2026-10-03-source-audit/`。
+
+## 2026-10-03 — v197：Multi-Mechanism Reversal Consensus
+- 明确作为2023-2024训练型meta hypothesis：固定 v190/v192/v194/v196；同币同小时至少2条同方向且0条反方向才触发；mixed hour直接丢弃，不做净票。
+- discovery：**8524 events，12h +0.0485%，4/6正，13.604次/币/周**；3379个mixed-direction hour丢弃；source forward-return一致性0 mismatch。
+- 年度12h：2023 **+0.0783%**，2024 **+0.0214%**；LONG +0.1809%、SHORT -0.0754%仅作后验审计。
+- 结论：共振没有把弱edge放大到+0.20%经济门槛；**冻结v197 / 不试1-of-4/3-of-4、不加权、不删source/方向、不做timestamp tolerance / 2025 OOS未读 / 不入库**。
+- 归档：`strategy_templates/research/multi-mechanism-reversal-consensus/2026-10-03-discovery/`。
+
+## 2026-10-03 — Research Protocol Update：Mandatory 2023–2026-09 Cycle Audit
+- 后续所有具备历史覆盖的策略/机制，统一必须测试 **2023-01-01 至 2026-09-30（end-exclusive 2026-10-01）**，并分别报告 2023 / 2024 / 2025 / 2026YTD 与全周期汇总。
+- 原“2023-2024 discovery 失败即可不读 2025+”规则取消；2025-2026 改为**强制 cycle/regime diagnostics**。
+- 防过拟合仍保留：参数、方向、window、threshold、universe/eligibility、执行语义必须在第一次读收益前冻结；读到 2025/2026 后禁止反向调参或删方向。
+- Fresh-symbol holdout、untouched forward 仍作为独立验证层，不被全周期审计替代。
+
+## 2026-10-03 — Mandatory 2023–2026-09 Cycle Audit Backfill：v190/v192/v194/v196/v197
+- 按新全局协议回补完整 **2023-01-01～2026-09-30**；固定原参数/方向/窗口，不用后两年结果调参。
+- 独立读取552个 Binance Vision USD-M 月档（6币×46个月×1h/1m）。v190/v194 对旧2023-2024事件 exact parity；v192/v196 旧事件全部复现，额外5/2条已定位为本地 `market_klines_1h` 缺失 2024-02-13 00:00 UTC 导致，官方1m聚合与官方1h完全一致。
+- canonical cycle summary 使用 **strict-parity**：2023-2024 保留原归档事件，新增2025-2026；v197 的旧8524事件也 exact parity。
+- **v190**：7090 events，全周期12h +0.0373%，4/6正；2023 +0.1331%、2024 +0.1058%、2025 +0.0051%、**2026 -0.1457%**。
+- **v192**：44968 events，全周期12h +0.0451%，6/6正；2023 +0.0424%、2024 +0.1174%、2025 +0.0159%、**2026 -0.0087%**。五条中最稳，但经济幅度仍很薄。
+- **v194**：35217 events，全周期12h **-0.0362%**，0/6正；2023/2024 +0.0415%/+0.0453%，2025/2026 **-0.1416%/-0.1006%**。
+- **v196**：27494 events，全周期12h +0.0023%，4/6正；2023/2024 +0.0712%/+0.0212%，2025/2026 **-0.0505%/-0.0380%**。
+- **v197**：16717 events，全周期12h **-0.0044%**，3/6正；2023/2024 +0.0783%/+0.0214%，2025/2026 **-0.0235%/-0.1095%**。
+- 结论：只看2023-2024确实会高估多条弱 reversal edge；跨接2025-2026后显著衰减/反向。五条全部维持冻结，不进strict Engine、不入库。
+- 归档：`strategy_templates/research/cycle-audit-backfill-v190-v197/2026-10-03/`。
+
+## 2026-10-03 — Mandatory 2023–2026-09 Cycle Audit Backfill：v179–v188
+- 按新全局协议回补完整 **2023-01-01～2026-09-30**；固定新6币 **SOL/DOGE/LTC/AVAX/UNI/ZEC**，所有旧 signal 定义、方向、window、threshold 与下一1h open语义不变。canonical 直接保留原2023-2024归档事件，并用原 replay 仅延伸2025-2026，避免数据源修正改变旧 discovery。
+- **v179**：17280 events，12h **-0.0278%**，1/6正，2/4年正；2023/2024/2025/2026 = +0.0287% / -0.0713% / -0.1132% / +0.0792%。
+- **v180**：16588 events，12h **-0.0317%**，2/6正，3/4年正；2025 **-0.1345%**，冻结。
+- **v181**：837 events，12h **+0.1144%**，4/6正，3/4年正；2023 +0.0508%、2024 **-0.0466%**、2025 +0.1997%、2026 +0.3733%。后半周期明显增强但跨年不稳定；LONG -0.1313%、SHORT +0.3514%仅后验归因，禁止删LONG。
+- **v182**：14903 events，12h **+0.0018%**，3/6正，3/4年正；经济幅度约0，冻结。
+- **v183**：8576 events，12h **+0.0947%**，**6/6正、4/4年正**；2023/2024/2025/2026 = +0.0149% / +0.1704% / +0.0411% / +0.1784%；LONG +0.0760%、SHORT +0.1133%。本批稳定性最好，但仍低于预注册 **+0.20% raw economic gate**，不进 strict TP8/SL6。
+- **v184**：1453 events，12h **-0.0584%**，3/6正；2023/2024均负，冻结。
+- **v185**：413 events，12h **+0.0030%**，3/6正、2/4年正；2026 -0.3857%，冻结。
+- **v186**：48841 events，12h **-0.0085%**，1/6正、1/4年正；高频但无alpha，冻结。
+- **v187**：30152 events，12h **+0.0088%**，5/6正、4/4年正；四年均约+0.008%～+0.010%，稳定但经济幅度近零，冻结。
+- **v188**：7842 events，12h **+0.0324%**，4/6正、4/4年正；幅度远低于gate，冻结。
+- 结论：**10条全部维持冻结，不进strict Engine、不入库**。full-cycle后 v183 的跨币/跨年一致性是真实可复现的阶段性成果，但 raw edge 只有 +0.0947%，不足以支撑固定4x+手续费/滑点结构；v181则暴露明显cycle依赖。
+- 归档：`strategy_templates/research/cycle-audit-backfill-v179-v188/2026-10-03/`。
+
+## 2026-10-03 — Mandatory Full-Cycle Backfill：v189 / v191 / v193
+- **v189 frozen shared tree**：2023仅训练，模型 SHA-256 `88289990d5a3936dfa0d11e4b5f11a8111f6b330a40a8319c7e1184b17526eaf` 原样冻结；10币不变。验证期 2024～2026-09 共 **9895 events**，12h **-0.01335%**，5/10正；2024 +0.00038%、2025 **-0.01191%**、2026 **-0.03992%**。LONG +0.04332%、SHORT -0.07005%仅作后验归因；**不删SHORT、不重训、不挑leaf、不加prediction threshold、不进strict Engine**。
+- **v191 Intrahour 1m Realized-Skew Reversal**：完整2023～2026-09共 **95534 events**，12h **-0.00359%**，1/6正、2/4年正，81.414次/币/周；2023 +0.00489%、2024 -0.00334%、2025 -0.01721%、2026 +0.00344%。无alpha，冻结。
+- **v193 Intrahour Price-Staleness Activation Reversal**：完整2023～2026-09共 **16152 events**，12h **+0.02188%**，3/6正、2/4年正，13.765次/币/周；2023 -0.05653%、2024 +0.06973%、2025 +0.06320%、2026 **-0.11974%**。2026明确反转，冻结；LONG +0.08908%、SHORT -0.04334%仅作后验归因，禁止删方向救活。
+- v191/v193 的2025～2026延伸使用 Binance Vision USD-M 月度 **1m + 1h**；每币延伸输入含Dec-2024 warmup共 **963360条1m**，覆盖完整至2026-09-30。
+- 结论：三条均不晋级、不入库。v189进一步确认固定模型跨周期失效；v191接近纯噪声；v193存在明显周期翻转。
+- 归档：`strategy_templates/research/cycle-audit-backfill-v189/2026-10-03/`、`strategy_templates/research/cycle-audit-backfill-v191-v193/2026-10-03/`。

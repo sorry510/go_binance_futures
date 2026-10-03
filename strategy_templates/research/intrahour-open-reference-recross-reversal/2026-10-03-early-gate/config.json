@@ -1,0 +1,17 @@
+{
+  "version":"v196",
+  "family":"intrahour-open-reference-recross-reversal",
+  "run_id":"2026-10-03-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "source":"existing read-only market_klines_1m_chunks binary_v1+zstd history",
+  "formation":"one fully completed UTC hour with prior hh:59 close as fixed reference plus 60 consecutive one-minute closes",
+  "recross_count":"number of sign changes in close-reference across consecutive nonzero deviations during the completed hour; exact equality carries no side and is skipped",
+  "signal":"previous completed hour recross_count=0 and current completed hour recross_count>0",
+  "direction":"fade completed-hour close-to-reference return: positive -> SHORT; negative -> LONG",
+  "entry":"next complete USD-M 1h open",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless gate passes",
+  "db_write":false
+}

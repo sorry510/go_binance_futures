@@ -2,6 +2,16 @@
 
 `strategy_templates/result.md` remains the human-readable research index. Each material research family should also keep a self-contained audit bundle under this directory so later work can verify the evidence without relying on `/tmp` files or conversation history.
 
+## Global time-span protocol (effective 2026-10-03)
+
+- Every new strategy/mechanism with sufficient historical coverage must be audited over **2023-01-01 through 2026-09-30 (end-exclusive 2026-10-01)** (2026 YTD cutoff), not only 2023-2024.
+- Always report **2023 / 2024 / 2025 / 2026YTD separately**, plus the full-period aggregate. This is required to expose crypto-cycle/regime dependence across the roughly four-year span.
+- Signal definition, direction mapping, windows, thresholds, universe rules and execution semantics must still be frozen before the first return read.
+- 2023-2024 may remain the discovery slice for attribution, but a failed 2023-2024 gate no longer permits stopping before 2025-2026. The later years are mandatory cycle diagnostics.
+- **No retuning after reading 2025/2026.** A mechanism that only works in one year/regime is reported as regime-dependent, not rescued with year-specific parameters.
+- For families blocked by source/history coverage, record the missing span explicitly rather than fabricating or relaxing eligibility.
+- Fresh-symbol holdouts and truly untouched forward windows remain valuable independent validation layers; the full-cycle audit does not replace them.
+
 Minimum bundle contents:
 
 - `README.md`: hypothesis, dataset split, final result, freeze/continue decision, and canonical evidence files.
@@ -459,3 +469,42 @@ Archived bundles currently include:
 - `rolling-4h-extreme-order-continuation/2026-10-03-early-gate/`: v186 rolling four-hour high/low order sign transitions; 26136 events, 12h -0.0124%, 1/6 positive; OOS unread, frozen.
 
 - `taker-global-account-skew/2026-10-03-early-gate/`: v187 Taker-vs-Global-account ratio zero-cross; 13224 events, 12h +0.0085%, 5/6 positive but far below economic gate; positioning pairwise audit closed.
+
+- `corwin-schultz-liquidity-stress-reversal/2026-10-03-early-gate/`: v188 Corwin-Schultz OHLC spread expansion fade; 4229 events, 12h +0.0340%, 5/6 positive but below economic gate; OOS unread, frozen.
+
+- `shared-native-feature-tree/2026-10-03-train2023-validate2024/`: v189 frozen shared depth-3 native-feature CART; 2023-only training, untouched 2024 3747 events with 12h +0.00038%; strict/OOS unread, frozen.
+
+- `trading-invariant-stress-reversal/2026-10-03-early-gate/`: v190 theory-fixed V*sigma/N^(3/2) stress up-cross fade; 3840 events, 12h +0.1196%, below +0.20% gate; OOS unread, frozen.
+
+- `token-unlock-supply-shock/2026-10-03-exact-source-recheck/`: fixed 9-event cohort exact-source recheck; public/commercial sources still cannot provide consistent auditable 9/9 exact timestamps and some event dates conflict; no returns read, blocked.
+
+- `coinmetrics-transfer-count-growth/2026-10-03-feasibility/`: Community TxTfrCnt has 18 mature same-name active USD-M symbols, but discovery intentionally not opened due existing CoinMetrics activity-family freeze; no returns read.
+
+- `intrahour-1m-realized-skew-reversal/2026-10-03-early-gate/`: v191 within-hour 60x1m realized-skew zero-cross reversal; 50,344 events, 12h +0.00076%, 3/6 positive; OOS unread, frozen.
+
+- `af0-v29c-exact-exit-validation/2026-10-03-fresh-symbol-validation/`: AF0 generated from noncanonical BTC/ETH/SOL/XRP diagnostic, then frozen and validated on unseen DOGE/LTC/AVAX/UNI/ZEC/ADA under canonical 4x TP8/SL6; 915 trades, PF 0.891839, 1/6 positive; frozen.
+
+- `intrahour-volatility-signature-noise-reversal/2026-10-03-early-gate/`: v192 1m-vs-5m realized-variance signature up-cross fade; 23871 events, 12h +0.0800%, 6/6 positive but below economic gate; OOS unread, frozen.
+
+- `intrahour-price-staleness-activation-reversal/2026-10-03-early-gate/`: v193 fresh hourly 1m zero-return activation fade; 8207 events, 12h +0.0264%, 5/6 positive but year sign flip; OOS unread, frozen.
+
+- `id121-no-no-chase-fresh-validation/2026-10-03-fresh-symbol-validation/`: frozen fresh set lacks local 1m history; cached alternatives are mostly contaminated by prior canonical ID121 holdout; no returns read, validation blocked.
+
+- `three-bar-fair-value-gap-fill-reversal/2026-10-03-early-gate/`: v194 3-bar FVG fill reversal; 18521 events, 12h +0.0435%, 5/6 positive but below economic gate; OOS unread, frozen.
+
+- `intrahour-volatility-signature-noise-reversal/2026-10-03-early-gate/`: v192 1m-vs-5m intrahour realized-variance signature up-cross fade; 23871 events, 12h +0.0800%, 6/6 positive, both years positive but below +0.20% gate; OOS unread, frozen.
+
+- `coinmetrics-block-production-regime/`: v195 Community BlkCnt zero-cross; 3426 eligible / 3357 replayed events across 12 symbols, 7d -0.1009%, 4/12 positive; OOS unread, frozen.
+
+- `intrahour-open-reference-recross-reversal/2026-10-03-early-gate/`: v196 fixed-open-reference recross activation fade; 14267 events, 12h +0.0462%, 4/6 positive, both years positive but below gate; OOS unread, frozen.
+
+- `dynamic-momentum-cycle-faithful-replication/2026-10-03-source-audit/`: Borgards exact turning-point smoothing algorithm still unrecovered; source-blocked before returns, old approximation remains frozen.
+
+- `multi-mechanism-reversal-consensus/2026-10-03-discovery/`: v197 fixed 2-of-4 same-hour reversal consensus over v190/v192/v194/v196; 8524 events, 12h +0.0485%, below economic gate; 2025 unread, frozen.
+
+- `cycle-audit-backfill-v190-v197/2026-10-03/`: mandatory 2023–2026-09 full-cycle backfill for v190/v192/v194/v196/v197; later-year reversal materially changes the 2023-2024-only reading; all remain frozen.
+
+- `cycle-audit-backfill-v179-v188/2026-10-03/`: mandatory 2023–2026-09 full-cycle extension for v179-v188; v183 remains 6/6-symbol and 4/4-year positive but only +0.0947% 12h raw mean, below the +0.20% economic gate; all ten families remain frozen.
+
+- `cycle-audit-backfill-v189/2026-10-03/`: frozen 2023-trained v189 tree extended through 2026-09; 2025/2026 turn negative and full validation mean is -0.01335%, so the model remains frozen.
+- `cycle-audit-backfill-v191-v193/2026-10-03/`: mandatory 2023–2026-09 extension for intrahour realized-skew and price-staleness families; v191 is noise/negative, while v193 reverses sharply in 2026; both remain frozen.

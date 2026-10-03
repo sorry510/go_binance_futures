@@ -1,0 +1,17 @@
+{
+  "version": "v189",
+  "training_completed_before_validation": true,
+  "train_year": 2023,
+  "train_samples": 87480,
+  "model_sha256": "88289990d5a3936dfa0d11e4b5f11a8111f6b330a40a8319c7e1184b17526eaf",
+  "validation_2024_read": true,
+  "oos_2025_read": false,
+  "oos_2026_read": false,
+  "implementation": "self-contained Go CART squared-error, depth=3, min_leaf=2000",
+  "app_conf_modified": false,
+  "db_write": false,
+  "validation_events": 3747,
+  "validation_mean_r12": 3.7741107006186236e-06,
+  "raw_gate_pass": false,
+  "strict_2024_run": false
+}

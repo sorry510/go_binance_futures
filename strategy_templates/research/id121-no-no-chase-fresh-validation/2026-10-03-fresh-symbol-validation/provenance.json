@@ -1,0 +1,10 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "family": "id121-no-no-chase-fresh-validation",
+  "source_strategy_sha256": "6398522cecdddc67acc2926034f79db3bdae7c44e1ba3c950310fcfa204d632e",
+  "coverage_source": "read-only local market_klines_1m_chunks + Repository(nil)",
+  "returns_read": false,
+  "app_conf_modified": false,
+  "db_write": false
+}

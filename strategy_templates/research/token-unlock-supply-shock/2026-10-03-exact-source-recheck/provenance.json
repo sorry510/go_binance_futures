@@ -1,0 +1,15 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "sources_checked": [
+    "CryptoRank unlock API documentation",
+    "Tokenomist API/history pages",
+    "CoinMarketCal historical event pages",
+    "Tokenomics.com historical schedules",
+    "public web event calendars"
+  ],
+  "cohort_changed": false,
+  "post_event_returns_read": false,
+  "db_write": false,
+  "app_conf_modified": false
+}

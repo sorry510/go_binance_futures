@@ -1,0 +1,19 @@
+{
+  "version":"v192",
+  "family":"intrahour-volatility-signature-noise-reversal",
+  "run_id":"2026-10-03-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "source":"existing read-only market_klines_1m_chunks binary_v1+zstd history",
+  "formation":"one fully completed UTC hour with exactly 61 consecutive 1m closes / 60 one-minute returns",
+  "rv1m":"sum of all 60 squared 1m log returns",
+  "rv5m":"sum of 12 squared 5m log returns formed from the same hour using minute endpoints 04,09,...,59 and the prior hour-end close",
+  "score":"log(RV1m/RV5m)",
+  "signal":"fresh zero up-cross only",
+  "direction":"fade completed 1h close-to-close return: positive -> SHORT; negative -> LONG",
+  "entry":"next complete USD-M 1h open",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless gate passes",
+  "db_write":false
+}

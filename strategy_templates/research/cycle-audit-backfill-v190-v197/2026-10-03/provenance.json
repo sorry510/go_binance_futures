@@ -1,0 +1,34 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "period_start": "2023-01-01T00:00:00Z",
+  "period_end_exclusive": "2026-10-01T00:00:00Z",
+  "symbols": [
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "data_source": "Binance Vision USD-M monthly klines 1h + 1m",
+  "archive_files_downloaded": 552,
+  "canonical_mode": "strict parity for archived 2023-2024 + complete 2025-2026 extension",
+  "coverage_correction": {
+    "local_missing_1h_time": "2024-02-13T00:00:00Z",
+    "affected_symbols": [
+      "DOGEUSDT",
+      "LTCUSDT",
+      "AVAXUSDT",
+      "UNIUSDT",
+      "ZECUSDT"
+    ],
+    "local_1m_complete": true,
+    "vision_1m_matches_local_1m": true,
+    "vision_1m_aggregate_matches_vision_1h": true
+  },
+  "db_write": false,
+  "app_conf_modified": false,
+  "commit": false,
+  "push": false
+}

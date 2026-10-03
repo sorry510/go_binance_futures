@@ -1,0 +1,39 @@
+PROGRESS 250 / 3428
+PROGRESS 500 / 3428
+PROGRESS 750 / 3428
+PROGRESS 1000 / 3428
+PROGRESS 1250 / 3428
+PROGRESS 1500 / 3428
+PROGRESS 1750 / 3428
+PROGRESS 2000 / 3428
+PROGRESS 2250 / 3428
+PROGRESS 2500 / 3428
+PROGRESS 2750 / 3428
+PROGRESS 3000 / 3428
+PROGRESS 3250 / 3428
+{
+  "raw_signals": 3428,
+  "eligible_signals": 3426,
+  "eligible_symbols": 12,
+  "signals_by_symbol": {
+    "ADAUSDT": 327,
+    "ALGOUSDT": 142,
+    "BCHUSDT": 355,
+    "BTCUSDT": 342,
+    "DOGEUSDT": 349,
+    "ETCUSDT": 432,
+    "ETHUSDT": 219,
+    "LTCUSDT": 327,
+    "TRXUSDT": 152,
+    "XLMUSDT": 160,
+    "XRPUSDT": 136,
+    "ZECUSDT": 485
+  },
+  "long": 1711,
+  "short": 1715,
+  "excluded_by_reason": {
+    "history_lt_730d": 1,
+    "qv_lt_5m": 1
+  },
+  "post_signal_returns_read": false
+}

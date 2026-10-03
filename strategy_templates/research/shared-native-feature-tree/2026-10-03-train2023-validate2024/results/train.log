@@ -1,0 +1,131 @@
+TRAIN_SOURCE BTCUSDT samples 8748
+TRAIN_SOURCE ETHUSDT samples 8748
+TRAIN_SOURCE BNBUSDT samples 8748
+TRAIN_SOURCE XRPUSDT samples 8748
+TRAIN_SOURCE SOLUSDT samples 8748
+TRAIN_SOURCE DOGEUSDT samples 8748
+TRAIN_SOURCE LTCUSDT samples 8748
+TRAIN_SOURCE AVAXUSDT samples 8748
+TRAIN_SOURCE UNIUSDT samples 8748
+TRAIN_SOURCE ZECUSDT samples 8748
+TRAIN_TOTAL 87480
+{
+  "version": "v189",
+  "features": [
+    "ret4",
+    "ret12",
+    "ret24",
+    "rv24",
+    "path_eff12",
+    "qv4_vs20",
+    "taker4",
+    "trade4_vs20",
+    "ticket4_vs20"
+  ],
+  "max_depth": 3,
+  "min_leaf": 2000,
+  "train_start": "2023-01-01T00:00:00Z",
+  "train_end": "2024-01-01T00:00:00Z",
+  "train_samples": 87480,
+  "root": {
+    "leaf": false,
+    "value": 0.0008916800521510655,
+    "n": 87480,
+    "sse": 54.66553077199702,
+    "feature": 3,
+    "feature_name": "rv24",
+    "threshold": 0.045211876389741876,
+    "gain": 0.1285540036548518,
+    "left": {
+      "leaf": false,
+      "value": 0.0003635786682529565,
+      "n": 73526,
+      "sse": 37.994444549612574,
+      "feature": 6,
+      "feature_name": "taker4",
+      "threshold": -0.0010673268994805113,
+      "gain": 0.024921070319100735,
+      "left": {
+        "leaf": false,
+        "value": -0.00008701226812742059,
+        "n": 45982,
+        "sse": 24.136211986476408,
+        "feature": 2,
+        "feature_name": "ret24",
+        "threshold": 0.02545925728250458,
+        "gain": 0.030319204770639097,
+        "left": {
+          "leaf": true,
+          "value": 0.00018460083150581897,
+          "n": 41355,
+          "sse": 21.443407916463045
+        },
+        "right": {
+          "leaf": true,
+          "value": -0.002514624054453866,
+          "n": 4627,
+          "sse": 2.6624848652426634
+        }
+      },
+      "right": {
+        "leaf": false,
+        "value": 0.001115795936501682,
+        "n": 27544,
+        "sse": 13.833311492816575,
+        "feature": 5,
+        "feature_name": "qv4_vs20",
+        "threshold": 0.3081728880600931,
+        "gain": 0.016105743053995702,
+        "left": {
+          "leaf": true,
+          "value": 0.0006910289827561461,
+          "n": 21049,
+          "sse": 10.199747508040884
+        },
+        "right": {
+          "leaf": true,
+          "value": 0.002492380941796459,
+          "n": 6495,
+          "sse": 3.6174582417217604
+        }
+      }
+    },
+    "right": {
+      "leaf": false,
+      "value": 0.003674336090025008,
+      "n": 13954,
+      "sse": 16.542532218729672,
+      "feature_name": "ret4",
+      "threshold": -0.011644135643605565,
+      "gain": 0.061471327595732816,
+      "left": {
+        "leaf": true,
+        "value": 0.007303109259012039,
+        "n": 3498,
+        "sse": 4.100217531192621
+      },
+      "right": {
+        "leaf": false,
+        "value": 0.0024603490447766764,
+        "n": 10456,
+        "sse": 12.380843359941407,
+        "feature": 2,
+        "feature_name": "ret24",
+        "threshold": 0.038463540778968415,
+        "gain": 0.022577147671550613,
+        "left": {
+          "leaf": true,
+          "value": 0.0035614774080180694,
+          "n": 6696,
+          "sse": 5.895798785507022
+        },
+        "right": {
+          "leaf": true,
+          "value": 0.0004994034276850934,
+          "n": 3760,
+          "sse": 6.462467426762798
+        }
+      }
+    }
+  }
+}

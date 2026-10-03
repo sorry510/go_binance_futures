@@ -1,0 +1,31 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "status": "source_blocked_before_returns",
+  "returns_read": false,
+  "db_write": false,
+  "app_conf_modified": false,
+  "sources": [
+    {
+      "title": "Dynamic time series momentum of cryptocurrencies",
+      "year": 2021,
+      "doi": "10.1016/j.najef.2021.101428"
+    },
+    {
+      "title": "The prevalence of price overreactions in the cryptocurrency market",
+      "year": 2020,
+      "doi": "10.1016/j.intfin.2020.101194"
+    },
+    {
+      "title": "Price overreactions in the commodity futures market: An intraday analysis of the Covid-19 pandemic impact",
+      "year": 2021,
+      "doi": "10.1016/j.resourpol.2020.101966"
+    },
+    {
+      "title": "Speculation driven overreaction and momentum effects in cryptocurrency and commodity markets",
+      "year": 2021,
+      "archive": "Qucosa / TU Chemnitz"
+    }
+  ],
+  "blocker": "Exact moving-average smoothing-filter recursion/pseudocode could not be recovered from publicly retrievable/searchable primary material; kappa behavior alone is insufficient for unique replication."
+}

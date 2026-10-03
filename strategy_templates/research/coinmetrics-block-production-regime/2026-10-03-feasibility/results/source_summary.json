@@ -1,0 +1,108 @@
+{
+  "candidate_assets": 12,
+  "coverage": {
+    "ada": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "algo": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "bch": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "btc": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "doge": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "etc": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "eth": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "ltc": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "trx": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "xlm": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "xrp": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    },
+    "zec": {
+      "rows": 768,
+      "first": "2022-11-25",
+      "last": "2024-12-31",
+      "rows_2023": 365,
+      "rows_2024": 366
+    }
+  },
+  "raw_signals": 3428,
+  "raw_symbols": 12,
+  "signals_by_symbol": {
+    "ADAUSDT": 327,
+    "ALGOUSDT": 142,
+    "BCHUSDT": 355,
+    "BTCUSDT": 342,
+    "DOGEUSDT": 349,
+    "ETCUSDT": 432,
+    "ETHUSDT": 219,
+    "LTCUSDT": 328,
+    "TRXUSDT": 152,
+    "XLMUSDT": 160,
+    "XRPUSDT": 136,
+    "ZECUSDT": 486
+  },
+  "long": 1711,
+  "short": 1717,
+  "post_signal_returns_read": false
+}

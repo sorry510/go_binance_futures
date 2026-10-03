@@ -1,0 +1,54 @@
+{
+  "version": "v189",
+  "family": "shared-native-feature-tree",
+  "run_id": "2026-10-03-train2023-validate2024",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "XRPUSDT",
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "train": {
+    "start": "2023-01-01T00:00:00Z",
+    "end": "2024-01-01T00:00:00Z"
+  },
+  "validation": {
+    "start": "2024-01-01T00:00:00Z",
+    "end": "2025-01-01T00:00:00Z"
+  },
+  "model": {
+    "type": "CARTSquaredErrorGo",
+    "max_depth": 3,
+    "min_samples_leaf": 2000,
+    "deterministic_tie_break": "feature order then lower threshold"
+  },
+  "features": [
+    "ret4",
+    "ret12",
+    "ret24",
+    "rv24",
+    "path_eff12",
+    "qv4_vs20",
+    "taker4",
+    "trade4_vs20",
+    "ticket4_vs20"
+  ],
+  "target": "next-12h log return from next complete 1h open to t+12h close",
+  "signal": "frozen-tree predicted return fresh zero-cross; >0 LONG, <0 SHORT",
+  "entry": "next complete USD-M 1h open",
+  "validation_gate": {
+    "min_mean_signed_return_12h": 0.002,
+    "min_positive_symbols": 6,
+    "min_frequency_per_symbol_week": 0.3,
+    "require_2024_h1_and_h2_positive": true
+  },
+  "post_validation": "if raw gate passes, run strict 4x TP8/SL6 fee/slippage/funding validation on 2024 before reading 2025",
+  "oos_policy": "2025 and 2026 remain unread until all 2024 gates pass",
+  "db_write": false
+}

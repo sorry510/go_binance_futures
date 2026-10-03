@@ -1,0 +1,117 @@
+{
+  "status": "frozen_failed_fresh_validation",
+  "gate_pass": false,
+  "canonical_exit_rule": "ROI \u003e= 8 || ROI \u003c= -6",
+  "symbols": [
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT",
+    "ADAUSDT"
+  ],
+  "overall": {
+    "trades": 915,
+    "long": 580,
+    "short": 335,
+    "pf": 0.8918393697953952,
+    "net": -0.9931079200112288
+  },
+  "positive_symbols": "1/6",
+  "frequency_per_symbol_week": 0.7972367438386856,
+  "by_symbol": {
+    "ADAUSDT": {
+      "trades": 151,
+      "long": 92,
+      "short": 59,
+      "pf": 1.0567295821640228,
+      "net": 0.07946523175523455
+    },
+    "AVAXUSDT": {
+      "trades": 159,
+      "long": 93,
+      "short": 66,
+      "pf": 0.9194310475894922,
+      "net": -0.12606448898145664
+    },
+    "DOGEUSDT": {
+      "trades": 150,
+      "long": 95,
+      "short": 55,
+      "pf": 0.8621972403988282,
+      "net": -0.20889375855237519
+    },
+    "LTCUSDT": {
+      "trades": 128,
+      "long": 83,
+      "short": 45,
+      "pf": 0.79162986676724,
+      "net": -0.2821744032777802
+    },
+    "UNIUSDT": {
+      "trades": 137,
+      "long": 79,
+      "short": 58,
+      "pf": 0.9131575941425615,
+      "net": -0.1161427377903354
+    },
+    "ZECUSDT": {
+      "trades": 190,
+      "long": 138,
+      "short": 52,
+      "pf": 0.8310987420671362,
+      "net": -0.33929776316451493
+    }
+  },
+  "by_year": {
+    "2023": {
+      "trades": 168,
+      "long": 118,
+      "short": 50,
+      "pf": 0.7166765307115555,
+      "net": -0.5218229183664376
+    },
+    "2024": {
+      "trades": 182,
+      "long": 116,
+      "short": 66,
+      "pf": 1.1152032914972883,
+      "net": 0.1874609010680477
+    },
+    "2025": {
+      "trades": 330,
+      "long": 228,
+      "short": 102,
+      "pf": 0.8624248481806486,
+      "net": -0.46265044229043867
+    },
+    "2026": {
+      "trades": 235,
+      "long": 118,
+      "short": 117,
+      "pf": 0.9165510276714208,
+      "net": -0.1960954604223992
+    }
+  },
+  "by_side": {
+    "LONG": {
+      "trades": 580,
+      "long": 580,
+      "short": 0,
+      "pf": 0.8530639703813075,
+      "net": -0.8698601636023884
+    },
+    "SHORT": {
+      "trades": 335,
+      "long": 0,
+      "short": 335,
+      "pf": 0.9622147469101026,
+      "net": -0.12324775640883953
+    }
+  },
+  "exits": {
+    "stop_loss": 517,
+    "take_profit": 398
+  },
+  "db_write": false
+}

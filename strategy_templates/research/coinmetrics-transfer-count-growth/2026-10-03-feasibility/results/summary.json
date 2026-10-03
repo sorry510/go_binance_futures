@@ -1,0 +1,28 @@
+{
+  "candidate_assets": 23,
+  "rows": 14620,
+  "passing_assets": 18,
+  "passing_symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "XRPUSDT",
+    "ADAUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "LINKUSDT",
+    "BCHUSDT",
+    "ETCUSDT",
+    "TRXUSDT",
+    "XLMUSDT",
+    "UNIUSDT",
+    "AAVEUSDT",
+    "ZECUSDT",
+    "MANAUSDT",
+    "ALGOUSDT",
+    "SNXUSDT",
+    "COMPUSDT"
+  ],
+  "coverage_gate_min_assets": 8,
+  "coverage_gate_pass": true,
+  "post_signal_returns_read": false
+}

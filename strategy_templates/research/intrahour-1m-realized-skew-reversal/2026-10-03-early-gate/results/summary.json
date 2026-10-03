@@ -1,0 +1,178 @@
+{
+  "version": "v191",
+  "status": "frozen_failed_early_gate",
+  "gate_pass": false,
+  "events": 50344,
+  "positive_symbols": "3/6",
+  "frequency_per_symbol_week": 80.3483812129503,
+  "overall": {
+    "n": 50344,
+    "mean_r1": -0.0000319689594055963,
+    "mean_r4": -0.000020966687008193422,
+    "mean_r12": 0.000007583949945574519,
+    "win_r12": 0.5002780867630701,
+    "long": 25174,
+    "short": 25170
+  },
+  "by_symbol": {
+    "AVAXUSDT": {
+      "n": 8284,
+      "mean_r1": 0.00008447095439033056,
+      "mean_r4": 0.000006970888582982955,
+      "mean_r12": 0.000037628082363578644,
+      "win_r12": 0.5018107194591984,
+      "long": 4143,
+      "short": 4141
+    },
+    "DOGEUSDT": {
+      "n": 8466,
+      "mean_r1": 0.00005934853542350439,
+      "mean_r4": -0.000005361881282364248,
+      "mean_r12": 0.0000870331643547445,
+      "win_r12": 0.4990550437042287,
+      "long": 4233,
+      "short": 4233
+    },
+    "LTCUSDT": {
+      "n": 8510,
+      "mean_r1": -0.00011750486791981695,
+      "mean_r4": -0.00004404749989770662,
+      "mean_r12": -0.000016476182139083576,
+      "win_r12": 0.5054054054054054,
+      "long": 4255,
+      "short": 4255
+    },
+    "SOLUSDT": {
+      "n": 8343,
+      "mean_r1": -0.000029720144009581932,
+      "mean_r4": 0.00003794654880286802,
+      "mean_r12": 0.00015353829984888356,
+      "win_r12": 0.5026968716289104,
+      "long": 4172,
+      "short": 4171
+    },
+    "UNIUSDT": {
+      "n": 8366,
+      "mean_r1": -0.00015801581455020264,
+      "mean_r4": -0.00003652844529662048,
+      "mean_r12": -0.00007792842598747112,
+      "win_r12": 0.4968921826440354,
+      "long": 4183,
+      "short": 4183
+    },
+    "ZECUSDT": {
+      "n": 8375,
+      "mean_r1": -0.000028867520881628618,
+      "mean_r4": -0.00008406530197095315,
+      "mean_r12": -0.00013797444077511768,
+      "win_r12": 0.49576119402985075,
+      "long": 4188,
+      "short": 4187
+    }
+  },
+  "by_year": {
+    "2023": {
+      "n": 25062,
+      "mean_r1": 0.00003050063422870458,
+      "mean_r4": 0.00007280542063226516,
+      "mean_r12": 0.00004891327828428851,
+      "win_r12": 0.501436437634666,
+      "long": 12531,
+      "short": 12531
+    },
+    "2024": {
+      "n": 25282,
+      "mean_r1": -0.00009389495243078609,
+      "mean_r4": -0.00011392280447062371,
+      "mean_r12": -0.00003338573705801927,
+      "win_r12": 0.49912981567913933,
+      "long": 12643,
+      "short": 12639
+    }
+  },
+  "by_side": {
+    "LONG": {
+      "n": 25174,
+      "mean_r1": 0.00007469530264879296,
+      "mean_r4": 0.00028903717057118605,
+      "mean_r12": 0.000843950316931134,
+      "win_r12": 0.5050051640581552,
+      "long": 25174,
+      "short": 0
+    },
+    "SHORT": {
+      "n": 25170,
+      "mean_r1": -0.00013865017247501296,
+      "mean_r4": -0.0003310198101986302,
+      "mean_r12": -0.0008289153318380773,
+      "win_r12": 0.4955502582439412,
+      "long": 0,
+      "short": 25170
+    }
+  },
+  "source_meta": {
+    "AVAXUSDT": {
+      "minute_rows": 1052700,
+      "hour_rows": 17543,
+      "minute_first": 1672527600000,
+      "minute_last": 1735689540000,
+      "hour_first": 1672531200000,
+      "hour_last": 1735686000000,
+      "candidate_hours": 17544,
+      "complete_formation_hours": 17543
+    },
+    "DOGEUSDT": {
+      "minute_rows": 1052700,
+      "hour_rows": 17543,
+      "minute_first": 1672527600000,
+      "minute_last": 1735689540000,
+      "hour_first": 1672531200000,
+      "hour_last": 1735686000000,
+      "candidate_hours": 17544,
+      "complete_formation_hours": 17543
+    },
+    "LTCUSDT": {
+      "minute_rows": 1052700,
+      "hour_rows": 17543,
+      "minute_first": 1672527600000,
+      "minute_last": 1735689540000,
+      "hour_first": 1672531200000,
+      "hour_last": 1735686000000,
+      "candidate_hours": 17544,
+      "complete_formation_hours": 17543
+    },
+    "SOLUSDT": {
+      "minute_rows": 1052700,
+      "hour_rows": 17544,
+      "minute_first": 1672527600000,
+      "minute_last": 1735689540000,
+      "hour_first": 1672531200000,
+      "hour_last": 1735686000000,
+      "candidate_hours": 17544,
+      "complete_formation_hours": 17543
+    },
+    "UNIUSDT": {
+      "minute_rows": 1052700,
+      "hour_rows": 17543,
+      "minute_first": 1672527600000,
+      "minute_last": 1735689540000,
+      "hour_first": 1672531200000,
+      "hour_last": 1735686000000,
+      "candidate_hours": 17544,
+      "complete_formation_hours": 17543
+    },
+    "ZECUSDT": {
+      "minute_rows": 1052700,
+      "hour_rows": 17543,
+      "minute_first": 1672527600000,
+      "minute_last": 1735689540000,
+      "hour_first": 1672531200000,
+      "hour_last": 1735686000000,
+      "candidate_hours": 17544,
+      "complete_formation_hours": 17543
+    }
+  },
+  "oos_2025_plus_evaluated": false,
+  "strict_engine_run": false,
+  "db_write": false
+}

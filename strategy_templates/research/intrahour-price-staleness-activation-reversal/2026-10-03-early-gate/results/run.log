@@ -1,0 +1,20 @@
+2026/10/03 15:36:59.936 [1;34m[I][0m  use lang: zh
+SYMBOL SOLUSDT minute_rows=1052700 complete_hours=17544 zero_hours=8494 events=2843
+SYMBOL DOGEUSDT minute_rows=1052700 complete_hours=17544 zero_hours=15276 events=1289
+SYMBOL LTCUSDT minute_rows=1052700 complete_hours=17544 zero_hours=16989 events=470
+SYMBOL AVAXUSDT minute_rows=1052700 complete_hours=17544 zero_hours=12090 events=2738
+SYMBOL UNIUSDT minute_rows=1052700 complete_hours=17544 zero_hours=16498 events=761
+SYMBOL ZECUSDT minute_rows=1052700 complete_hours=17544 zero_hours=17424 events=106
+{
+  "2023": -0.0005652654027846064,
+  "2024": 0.0006972876065361464,
+  "events": 8207,
+  "freq": 13.09826721386229,
+  "gate_pass": false,
+  "long_r12": 0.0014913686068123858,
+  "mean_r1": 0.00021623058147443274,
+  "mean_r12": 0.0002640782396240898,
+  "mean_r4": 0.0002612211015050271,
+  "positive_symbols": "5/6",
+  "short_r12": -0.0008869955120812007
+}

@@ -1,0 +1,11 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "source": "CoinMetrics Community TxTfrCnt + Binance USD-M exchangeInfo/earliest kline",
+  "passing_assets": 18,
+  "coverage_gate_pass": true,
+  "discovery_opened": false,
+  "post_signal_returns_read": false,
+  "db_write": false,
+  "app_conf_modified": false
+}

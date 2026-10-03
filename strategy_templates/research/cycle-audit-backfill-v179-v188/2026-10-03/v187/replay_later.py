@@ -1,0 +1,96 @@
+import csv,datetime,io,json,math,zipfile
+from collections import defaultdict
+from pathlib import Path
+
+ROOT=Path("strategy_templates/research/cycle-audit-backfill-v179-v188/2026-10-03/v187")
+SYMS=["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"]
+MC=Path("/tmp/v147-binance-metrics")
+KC=Path("/tmp/v179_v188_1h")
+UTC=datetime.timezone.utc
+H=3600000
+START=int(datetime.datetime(2025,1,1,tzinfo=UTC).timestamp()*1000)
+END=int(datetime.datetime(2026,10,1,tzinfo=UTC).timestamp()*1000)
+
+def metrics(sym):
+    last={}
+    d=datetime.date(2024,12,31); end=datetime.date(2026,9,30)
+    while d<=end:
+        p=MC/f"{sym}-{d.isoformat()}.zip"
+        if p.exists():
+            z=zipfile.ZipFile(p)
+            with z.open(z.namelist()[0]) as f:
+                cr=csv.DictReader(io.TextIOWrapper(f))
+                for r in cr:
+                    try:
+                        t=datetime.datetime.strptime(r["create_time"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=UTC)
+                        taker=float(r["sum_taker_long_short_vol_ratio"])
+                        pos=float(r["count_long_short_ratio"])
+                    except: continue
+                    if taker<=0 or pos<=0: continue
+                    h=int(t.timestamp()*1000)//H*H
+                    last[h]=math.log(taker/pos)
+        d+=datetime.timedelta(days=1)
+    return last
+
+def prices(sym):
+    out={}
+    months=["2024-12"]+[f"2025-{m:02d}" for m in range(1,13)]+[f"2026-{m:02d}" for m in range(1,10)]
+    for m in months:
+        p=KC/f"fut-{sym}-{m}.zip"
+        if not p.exists():continue
+        z=zipfile.ZipFile(p)
+        with z.open(z.namelist()[0]) as f:
+            for r in csv.reader(io.TextIOWrapper(f)):
+                if not r or not r[0].isdigit() or len(r)<5:continue
+                t=int(r[0]);t=t//1000 if t>10**15 else t
+                out[t]={"open":float(r[1]),"close":float(r[4])}
+    return out
+
+def mean(xs): return sum(xs)/len(xs) if xs else 0.0
+def sm(rows):
+    return {"n":len(rows),"mean_r1":mean([x["r1"] for x in rows]),"mean_r4":mean([x["r4"] for x in rows]),
+            "mean_r12":mean([x["r12"] for x in rows]),"win_r12":mean([1.0 if x["r12"]>0 else 0.0 for x in rows]),
+            "long":sum(x["side"]=="LONG" for x in rows),"short":sum(x["side"]=="SHORT" for x in rows)}
+
+events=[];source={}
+for sym in SYMS:
+    sc=metrics(sym); px=prices(sym); hours=sorted(sc)
+    source[sym]={"metric_hours":len(hours),"price_hours":len(px)}
+    n=0
+    for i in range(1,len(hours)):
+        t=hours[i]; prevt=hours[i-1]
+        if not(START<=t<END):continue
+        if t-prevt!=H:continue
+        prev=sc[prevt];now=sc[t]
+        if prev<=0<now: side=1.0
+        elif prev>=0>now: side=-1.0
+        else: continue
+        if t+H not in px:continue
+        y=datetime.datetime.fromtimestamp(t/1000,UTC).year
+        if datetime.datetime.fromtimestamp((t+12*H)/1000,UTC).year!=y:continue
+        entry=px[t+H]["open"]; vals={};ok=True
+        for h in (1,4,12):
+            tt=t+h*H
+            if tt not in px or px[tt]["close"]<=0:ok=False;break
+            vals[h]=side*math.log(px[tt]["close"]/entry)
+        if not ok:continue
+        events.append({"symbol":sym,"signal_time":t,"year":y,"side":"LONG" if side>0 else "SHORT",
+                       "score_prev":prev,"score_now":now,"r1":vals[1],"r4":vals[4],"r12":vals[12]});n+=1
+    print("SYMBOL",sym,"events",n,"metric_hours",len(hours),flush=True)
+
+by_sym={s:sm([e for e in events if e["symbol"]==s]) for s in SYMS}
+by_year={str(y):sm([e for e in events if e["year"]==y]) for y in (2023,2024,2025,2026)}
+by_side={q:sm([e for e in events if e["side"]==q]) for q in ("LONG","SHORT")}
+overall=sm(events);positive=sum(by_sym[s]["mean_r12"]>0 for s in SYMS)
+weeks=((datetime.date(2026,10,1)-datetime.date(2025,1,1)).days/7)*len(SYMS);freq=len(events)/weeks
+gate=(overall["mean_r12"]>=.002 and positive>=4 and freq>=.30 and by_year["2023"]["mean_r12"]>0 and by_year["2024"]["mean_r12"]>0)
+summary={"version":"v187","status":"promote_oos" if gate else "frozen_failed_early_gate","gate_pass":gate,
+         "events":len(events),"positive_symbols":f"{positive}/6","frequency_per_symbol_week":freq,
+         "overall":overall,"by_symbol":by_sym,"by_year":by_year,"by_side":by_side,"source_meta":source,
+         "oos_evaluated":False,"strict_engine_run":False}
+(ROOT/"results/events.json").write_text(json.dumps(events,indent=2))
+(ROOT/"results/summary.json").write_text(json.dumps(summary,indent=2))
+print(json.dumps({"events":len(events),"mean_r1":overall["mean_r1"],"mean_r4":overall["mean_r4"],"mean_r12":overall["mean_r12"],
+                  "positive_symbols":summary["positive_symbols"],"freq":freq,"2023":by_year["2023"]["mean_r12"],
+                  "2024":by_year["2024"]["mean_r12"],"long_r12":by_side["LONG"]["mean_r12"],
+                  "short_r12":by_side["SHORT"]["mean_r12"],"gate_pass":gate},indent=2),flush=True)

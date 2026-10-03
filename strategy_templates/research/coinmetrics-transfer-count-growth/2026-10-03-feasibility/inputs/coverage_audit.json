@@ -1,0 +1,232 @@
+[
+  {
+    "asset": "btc",
+    "symbol": "BTCUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1567900800000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "eth",
+    "symbol": "ETHUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1574812800000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "bnb",
+    "symbol": "BNBUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1581292800000,
+    "tx_tfr_nonzero_days_2023_2024": 0,
+    "tx_tfr_first": null,
+    "tx_tfr_last": null,
+    "days_meeting_730d_history": 0
+  },
+  {
+    "asset": "xrp",
+    "symbol": "XRPUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1578268800000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "ada",
+    "symbol": "ADAUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1580428800000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "doge",
+    "symbol": "DOGEUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1594339200000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-08-23",
+    "tx_tfr_last": "2023-08-22",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "ltc",
+    "symbol": "LTCUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1578528000000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "link",
+    "symbol": "LINKUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1579219200000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "bch",
+    "symbol": "BCHUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1576713600000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "etc",
+    "symbol": "ETCUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1579132800000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "trx",
+    "symbol": "TRXUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1579046400000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "xlm",
+    "symbol": "XLMUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1579478400000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "dot",
+    "symbol": "DOTUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1598054400000,
+    "tx_tfr_nonzero_days_2023_2024": 0,
+    "tx_tfr_first": null,
+    "tx_tfr_last": null,
+    "days_meeting_730d_history": 0
+  },
+  {
+    "asset": "uni",
+    "symbol": "UNIUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1600387200000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "aave",
+    "symbol": "AAVEUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1602806400000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "zec",
+    "symbol": "ZECUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1580860800000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "eos",
+    "symbol": "EOSUSDT",
+    "current_trading_usdm": false,
+    "earliest_usdm_ms": null,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 0
+  },
+  {
+    "asset": "mana",
+    "symbol": "MANAUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1615766400000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 658
+  },
+  {
+    "asset": "algo",
+    "symbol": "ALGOUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1592265600000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "xtz",
+    "symbol": "XTZUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1580947200000,
+    "tx_tfr_nonzero_days_2023_2024": 0,
+    "tx_tfr_first": null,
+    "tx_tfr_last": null,
+    "days_meeting_730d_history": 0
+  },
+  {
+    "asset": "snx",
+    "symbol": "SNXUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1597363200000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "comp",
+    "symbol": "COMPUSDT",
+    "current_trading_usdm": true,
+    "earliest_usdm_ms": 1593475200000,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 731
+  },
+  {
+    "asset": "mkr",
+    "symbol": "MKRUSDT",
+    "current_trading_usdm": false,
+    "earliest_usdm_ms": null,
+    "tx_tfr_nonzero_days_2023_2024": 731,
+    "tx_tfr_first": "2023-01-01",
+    "tx_tfr_last": "2024-12-31",
+    "days_meeting_730d_history": 0
+  }
+]

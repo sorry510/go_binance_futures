@@ -1,0 +1,19 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "version": "v197",
+  "training_period": "2023-2024",
+  "source_versions": [
+    "v190",
+    "v192",
+    "v194",
+    "v196"
+  ],
+  "events": 8524,
+  "mixed_direction_hours_discarded": 3379,
+  "return_mismatch_count": 0,
+  "oos_2025_evaluated": false,
+  "strict_engine_run": false,
+  "db_write": false,
+  "app_conf_modified": false
+}

@@ -1,0 +1,38 @@
+{
+  "version": "v197",
+  "family": "multi-mechanism-reversal-consensus",
+  "run_id": "2026-10-03-discovery",
+  "source_families": [
+    "v190 trading-invariant-stress-reversal",
+    "v192 intrahour-volatility-signature-noise-reversal",
+    "v194 three-bar-fair-value-gap-fill-reversal",
+    "v196 intrahour-open-reference-recross-reversal"
+  ],
+  "symbols": [
+    "SOLUSDT",
+    "DOGEUSDT",
+    "LTCUSDT",
+    "AVAXUSDT",
+    "UNIUSDT",
+    "ZECUSDT"
+  ],
+  "discovery": {
+    "start": "2023-01-01T00:00:00Z",
+    "end": "2025-01-01T00:00:00Z"
+  },
+  "rule": "same symbol+hour: >=2 source families emit same side AND zero source families emit opposite side",
+  "entry": "next complete USD-M 1h open, identical to source-event semantics",
+  "forward_horizons_hours": [
+    1,
+    4,
+    12
+  ],
+  "gate": {
+    "min_mean_signed_return_12h": 0.002,
+    "min_positive_symbols": 4,
+    "min_frequency_per_symbol_week": 0.3,
+    "require_2023_and_2024_mean_12h_positive": true
+  },
+  "oos_policy": "2025 unread unless discovery gate passes; if passes freeze four families and 2-of-4 rule before OOS",
+  "db_write": false
+}

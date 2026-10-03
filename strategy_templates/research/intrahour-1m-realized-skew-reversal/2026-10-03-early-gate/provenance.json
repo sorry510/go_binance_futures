@@ -1,0 +1,14 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "version": "v191",
+  "source": "read-only go_binance ARM market_klines_1m_chunks + market_klines_1h",
+  "minute_loader_snapshot_sha256": "a96e8d07cbf54846b435fbab672f91df7416bcf243e7e925620f1583d8f29f2d",
+  "minute_rows_per_symbol": 1052700,
+  "complete_formation_hours_per_symbol": 17543,
+  "events": 50344,
+  "oos_2025_plus_evaluated": false,
+  "strict_engine_run": false,
+  "app_conf_modified": false,
+  "db_write": false
+}

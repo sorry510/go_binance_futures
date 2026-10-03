@@ -1,0 +1,16 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "version": "v195",
+  "metric_source": "CoinMetrics Community BlkCnt 1d",
+  "price_source": "Binance Vision USD-M 1d klines",
+  "raw_signals": 3428,
+  "eligible_signals": 3426,
+  "replayed_events": 3357,
+  "replay_errors": 69,
+  "replay_error_reason": "7d_endpoint_crosses_signal_year",
+  "oos_2025_plus_evaluated": false,
+  "strict_engine_run": false,
+  "db_write": false,
+  "app_conf_modified": false
+}
