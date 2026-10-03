@@ -1,0 +1,13 @@
+{
+  "family":"id121-no-no-chase-forward",
+  "stage":"2026-09-untouched-temporal-holdout",
+  "start":"2026-09-01T00:00:00Z",
+  "end":"2026-10-01T00:00:00Z",
+  "strategies":["canonical_base","no_no_chase"],
+  "universe":"unchanged original ID121 15-symbol cohort",
+  "exact":{"leverage":4,"tp_pct":8,"sl_pct":6,"fee_per_side":0.0005,"slippage_bps_per_side":5,"single_position":true},
+  "requires_complete_local_coverage_before_returns":true,
+  "historical_backfill_allowed":false,
+  "promotion_from_this_stage":false,
+  "db_write":false
+}

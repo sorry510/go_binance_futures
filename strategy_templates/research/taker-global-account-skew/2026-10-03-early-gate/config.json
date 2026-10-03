@@ -1,0 +1,15 @@
+{
+  "version":"v187",
+  "family":"taker-global-account-skew",
+  "run_id":"2026-10-03-early-gate",
+  "symbols":["SOLUSDT","DOGEUSDT","LTCUSDT","AVAXUSDT","UNIUSDT","ZECUSDT"],
+  "discovery":{"start":"2023-01-01T00:00:00Z","end":"2025-01-01T00:00:00Z"},
+  "source":"Binance Vision USD-M 5m metrics + USD-M 1h klines",
+  "score":"log(sum_taker_long_short_vol_ratio / count_long_short_ratio), sampled from final completed 5m metrics row of each UTC hour",
+  "signal":"fresh zero up-cross -> LONG; fresh zero down-cross -> SHORT",
+  "entry":"next complete USD-M 1h open",
+  "forward_horizons_hours":[1,4,12],
+  "gate":{"min_mean_signed_return_12h":0.002,"min_positive_symbols":4,"min_frequency_per_symbol_week":0.30,"require_2023_and_2024_mean_12h_positive":true},
+  "oos_read_policy":"do not read 2025+ unless gate passes",
+  "db_write":false
+}

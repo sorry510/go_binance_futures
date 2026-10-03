@@ -1,0 +1,19 @@
+SYMBOL SOLUSDT events 1659 funding 2286
+SYMBOL DOGEUSDT events 1748 funding 2286
+SYMBOL LTCUSDT events 1767 funding 2286
+SYMBOL AVAXUSDT events 1602 funding 2286
+SYMBOL UNIUSDT events 1719 funding 2286
+SYMBOL ZECUSDT events 1792 funding 2286
+{
+  "events": 10287,
+  "mean_r1": 4.3248088784480104e-05,
+  "mean_r4": -0.000180679339593934,
+  "mean_r12": -0.00044801137834477023,
+  "positive_symbols": "0/6",
+  "freq": 16.41792065663475,
+  "2023": -0.00032474320507081526,
+  "2024": -0.0005785074032835766,
+  "long_r12": 0.0008764567753511944,
+  "short_r12": -0.001773252267252924,
+  "gate_pass": false
+}

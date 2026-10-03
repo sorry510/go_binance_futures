@@ -1,6 +1,8 @@
 # v175 Taker-Flow Volatility-Lead Asymmetry Reversal — Early Gate
 
-Mechanism: use completed Binance USD-M 1h klines. Signed taker flow is `2*TakerBuyQuoteVolume/QuoteAssetVolume - 1`. Over the latest 48 completed pairs compute Pearson correlation between signed taker flow at hour t and squared return at t+1. A fresh zero up-cross triggers SHORT; a fresh zero down-cross triggers LONG. Entry is the next complete 1h open.
+Mechanism: over the latest 48 completed one-hour pairs, compute Pearson correlation between signed taker flow `2*TakerBuyQuoteVolume/QuoteAssetVolume-1` and next-hour squared return. A fresh zero up-cross triggers SHORT; a fresh zero down-cross triggers LONG. Entry is the next complete USD-M 1h open.
+
+No flow-magnitude threshold, z-score, current-flow confirmation, funding, OI, QPS, ATR, time-of-day, trend confirmation or symbol-specific rule.
 
 ## 2023-2024 discovery
 
@@ -15,6 +17,6 @@ Mechanism: use completed Binance USD-M 1h klines. Signed taker flow is `2*TakerB
 - LONG audit: 12h **+0.0634%**.
 - SHORT audit: 12h **-0.0946%**.
 
-Frequency is abundant, but expectancy, breadth and annual gates all fail. The side split is audit-only and cannot be used to delete SHORT.
+The preregistered economic and breadth gates fail, and neither discovery year is positive. The side split is post-result audit only and cannot be used to delete SHORT.
 
-Decision: **freeze v175**. Do not scan windows, add correlation or flow thresholds, use absolute-return volatility, add current-flow sign confirmation, delete one side, invert the mapping, or inspect 2025+. No strict Engine run and no DB import.
+Decision: **freeze v175**. Do not scan windows, add correlation thresholds, use absolute return instead of squared return, add current-flow sign confirmation, delete one direction, invert the mapping, or inspect 2025+. No strict Engine run and no DB import.

@@ -1,0 +1,70 @@
+{
+  "version": "v177",
+  "raw_signals": 1035,
+  "raw_symbols": 10,
+  "long": 470,
+  "short": 565,
+  "source": {
+    "BTC": {
+      "repo": "bitcoin/bitcoin",
+      "created_rows": 1680,
+      "closed_rows": 1924,
+      "raw_signals": 119
+    },
+    "ETH": {
+      "repo": "ethereum/go-ethereum",
+      "created_rows": 2072,
+      "closed_rows": 2090,
+      "raw_signals": 117
+    },
+    "BNB": {
+      "repo": "bnb-chain/bsc",
+      "created_rows": 834,
+      "closed_rows": 869,
+      "raw_signals": 110
+    },
+    "XRP": {
+      "repo": "XRPLF/rippled",
+      "created_rows": 356,
+      "closed_rows": 318,
+      "raw_signals": 87
+    },
+    "ADA": {
+      "repo": "IntersectMBO/cardano-node",
+      "created_rows": 881,
+      "closed_rows": 932,
+      "raw_signals": 97
+    },
+    "AVAX": {
+      "repo": "ava-labs/avalanchego",
+      "created_rows": 500,
+      "closed_rows": 374,
+      "raw_signals": 102
+    },
+    "NEAR": {
+      "repo": "near/nearcore",
+      "created_rows": 1745,
+      "closed_rows": 1133,
+      "raw_signals": 79
+    },
+    "TRX": {
+      "repo": "tronprotocol/java-tron",
+      "created_rows": 610,
+      "closed_rows": 599,
+      "raw_signals": 142
+    },
+    "OP": {
+      "repo": "ethereum-optimism/optimism",
+      "created_rows": 1416,
+      "closed_rows": 1102,
+      "raw_signals": 89
+    },
+    "APT": {
+      "repo": "aptos-labs/aptos-core",
+      "created_rows": 2421,
+      "closed_rows": 1921,
+      "raw_signals": 93
+    }
+  },
+  "post_event_returns_read": false
+}

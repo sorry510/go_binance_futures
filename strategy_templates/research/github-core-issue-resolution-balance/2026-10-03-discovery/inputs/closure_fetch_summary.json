@@ -1,0 +1,72 @@
+{
+  "BTC": {
+    "repo": "bitcoin/bitcoin",
+    "rows": 1924,
+    "y2022": 771,
+    "y2023": 578,
+    "y2024": 575
+  },
+  "ETH": {
+    "repo": "ethereum/go-ethereum",
+    "rows": 2090,
+    "y2022": 760,
+    "y2023": 761,
+    "y2024": 569
+  },
+  "BNB": {
+    "repo": "bnb-chain/bsc",
+    "rows": 869,
+    "y2022": 281,
+    "y2023": 375,
+    "y2024": 213
+  },
+  "XRP": {
+    "repo": "XRPLF/rippled",
+    "rows": 318,
+    "y2022": 52,
+    "y2023": 197,
+    "y2024": 69
+  },
+  "ADA": {
+    "repo": "IntersectMBO/cardano-node",
+    "rows": 932,
+    "y2022": 718,
+    "y2023": 131,
+    "y2024": 83
+  },
+  "AVAX": {
+    "repo": "ava-labs/avalanchego",
+    "rows": 374,
+    "y2022": 95,
+    "y2023": 189,
+    "y2024": 90
+  },
+  "NEAR": {
+    "repo": "near/nearcore",
+    "rows": 1133,
+    "y2022": 360,
+    "y2023": 320,
+    "y2024": 453
+  },
+  "TRX": {
+    "repo": "tronprotocol/java-tron",
+    "rows": 599,
+    "y2022": 121,
+    "y2023": 246,
+    "y2024": 232
+  },
+  "OP": {
+    "repo": "ethereum-optimism/optimism",
+    "rows": 1102,
+    "y2022": 198,
+    "y2023": 277,
+    "y2024": 627
+  },
+  "APT": {
+    "repo": "aptos-labs/aptos-core",
+    "rows": 1921,
+    "y2022": 772,
+    "y2023": 657,
+    "y2024": 492
+  }
+}

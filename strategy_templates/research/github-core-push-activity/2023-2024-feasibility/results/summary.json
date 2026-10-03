@@ -1,0 +1,9 @@
+{
+  "source_semantics_valid": true,
+  "bigquery_cli_available": false,
+  "gcloud_available": false,
+  "server_side_historical_filter_available": false,
+  "bulk_archive_local_scan_acceptable": false,
+  "post_event_returns_read": false,
+  "status": "historical_access_storage_blocked"
+}

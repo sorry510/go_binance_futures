@@ -1,0 +1,27 @@
+{
+  "version": "v177",
+  "raw_signals": 1035,
+  "raw_symbols": 10,
+  "eligible_signals": 883,
+  "eligible_symbols": 10,
+  "eligible_long": 406,
+  "eligible_short": 477,
+  "eligible_symbol_days": {
+    "BTCUSDT": 731,
+    "ETHUSDT": 731,
+    "BNBUSDT": 731,
+    "XRPUSDT": 731,
+    "ADAUSDT": 731,
+    "AVAXUSDT": 731,
+    "NEARUSDT": 731,
+    "TRXUSDT": 731,
+    "OPUSDT": 215,
+    "APTUSDT": 75
+  },
+  "frequency_per_eligible_symbol_week": 1.0070055392636037,
+  "frequency_gate_pass": true,
+  "skipped_by_reason": {
+    "history_lt_730d": 152
+  },
+  "post_event_returns_read": false
+}

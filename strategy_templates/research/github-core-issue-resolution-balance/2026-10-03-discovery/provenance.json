@@ -1,0 +1,14 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "version": "v177",
+  "github_source": "GitHub Search API is:issue created_at/closed_at",
+  "repo_universe": "unchanged from v174",
+  "raw_signals": 1035,
+  "eligible_signals": 883,
+  "replayed_events": 865,
+  "oos_2025_plus_evaluated": false,
+  "strict_engine_run": false,
+  "app_conf_modified": false,
+  "db_write": false
+}

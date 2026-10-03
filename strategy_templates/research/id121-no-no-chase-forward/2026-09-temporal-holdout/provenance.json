@@ -1,0 +1,11 @@
+{
+  "research_date": "2026-10-03",
+  "repository": "/Users/zhz/work/binance/go_binance_futures",
+  "ablation_cutoff": "2026-09-01T00:00:00Z",
+  "intended_holdout": "2026-09-01T00:00:00Z/2026-10-01T00:00:00Z",
+  "all_15_complete": false,
+  "returns_read": false,
+  "historical_backfill": false,
+  "db_write": false,
+  "app_conf_modified": false
+}

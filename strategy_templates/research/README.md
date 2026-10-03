@@ -429,3 +429,33 @@ Archived bundles currently include:
 - `github-core-issue-backlog/2026-10-03-discovery/`: v174 issue-arrival pressure; 769 eligible signals, 756 replayed, 7d +0.2229% but 2023 negative; LONG-only split is post-hoc, OOS unread, frozen.
 
 - `aggressor-activity-coupling-regime/2026-10-03-early-gate/`: v176 taker-flow vs quote-volume-change correlation zero-cross; 4977 events, 12h +0.0466%, below gate; OOS unread, frozen.
+
+- `taker-flow-volatility-lead-asymmetry-reversal/2026-10-03-early-gate/`: v172 taker-flow to next-hour variance sign-transition reversal; 4880 events, 12h -0.0156%, 2/6 positive; OOS unread, frozen.
+
+- `github-core-issue-resolution-balance/`: v177 7d issue closures-minus-creations zero-cross; 883 eligible / 865 replayed events, 7d -0.1927%, 4/10 positive; OOS unread, frozen.
+
+- `carry-adjusted-momentum-zero-cross/2026-10-03-early-gate/`: v178 24h price return net of realized funding, zero-cross momentum; 10287 events, 12h -0.0448%, 0/6 positive; OOS unread, frozen.
+
+- `return-energy-concentration-regime/2026-10-03-early-gate/`: v179 24h squared-return HHI regime; 9361 events, 12h -0.0238%, 2/6 positive; OOS unread, frozen.
+
+- `github-core-push-activity/2023-2024-feasibility/`: GH Archive PushEvent fixes visibility-time semantics, but no server-side historical filter is available locally; bulk two-year archive scan is storage-blocked, no returns read.
+
+- `range-occupancy-regime-cross/2026-10-03-early-gate/`: v180 24h path-occupancy majority cross; 8808 events, 12h +0.0036%, 3/6 positive; OOS unread, frozen.
+
+- `activity-volatility-coupling-regime/2026-10-03-early-gate/`: v181 rolling activity-change vs squared-return coupling; 453 events, 12h -0.0021%, annual sign flip; OOS unread, frozen.
+
+- `per-trade-volatility-impact-regime/2026-10-03-early-gate/`: v182 24h realized variance per TradeCount regime; 8137 events, 12h +0.0327%, below +0.20% gate; OOS unread, frozen.
+
+- `price-monotonicity-regime-cross/2026-10-03-early-gate/`: v183 24h Spearman time-vs-close rank zero-cross; 4613 events, 12h +0.0906%, 5/6 positive, below +0.20% gate; OOS unread, frozen.
+
+- `notional-vs-trade-arrival-concentration/2026-10-03-early-gate/`: v184 QuoteVolume-HHI vs TradeCount-HHI regime; 1068 events, 12h -0.1091%, 3/6 positive; OOS unread, frozen.
+
+- `participation-ticket-size-coupling-regime/2026-10-03-early-gate/`: v185 TradeCount-change vs average-ticket-change coupling; 295 events, 12h +0.0239%, 3/6 positive; OOS unread, frozen.
+
+- `id121-no-no-chase-forward/2026-09-temporal-holdout/`: preregistered untouched Sep-2026 sanity window; local 1m/funding coverage ends around Sep 12-13, so no strategy returns were read and no backfill was performed.
+
+- `carry-adjusted-momentum-zero-cross/2026-10-03-early-gate/`: v178 24h price return net of realized funding zero-cross; 10287 events, 12h -0.0448%, 0/6 positive; OOS unread, frozen.
+
+- `rolling-4h-extreme-order-continuation/2026-10-03-early-gate/`: v186 rolling four-hour high/low order sign transitions; 26136 events, 12h -0.0124%, 1/6 positive; OOS unread, frozen.
+
+- `taker-global-account-skew/2026-10-03-early-gate/`: v187 Taker-vs-Global-account ratio zero-cross; 13224 events, 12h +0.0085%, 5/6 positive but far below economic gate; positioning pairwise audit closed.

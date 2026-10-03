@@ -3890,3 +3890,99 @@
 - 年度12h：2023 **+0.0271%**，2024 **+0.0669%**。LONG +0.2052%、SHORT -0.1117%仅作后验审计，禁止事后删SHORT。
 - 结论：频率/breadth/两年同号通过，但经济幅度远低于+0.20%；**冻结v176 / 不扫窗口、不加corr阈值、不改用QV level、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
 - 归档：`strategy_templates/research/aggressor-activity-coupling-regime/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v177：GitHub Core Issue-Resolution Balance
+- 固定复用v174的10个core repo；7日 `closures - creations` balance 零上穿LONG、零下穿SHORT，下一UTC日USD-M open。只用GitHub server-side created_at/closed_at，不读title/label/NLP。
+- outcomes前：**1035 raw signals / 10币**；动态USD-M历史>=730天 + 前24h QV>=500万后 **883 eligible / 10币，1.007次/eligible-symbol/week**，未提前读取收益。
+- discovery有效 **865 events**：1d +0.0666%，3d -0.1924%，7d **-0.1927%**，仅 **4/10正**；2023 **-0.4703%**，2024 +0.0854%。
+- LONG +0.9695%、SHORT -1.1695%仅作后验归因，禁止删SHORT。
+- 结论：**冻结v177 / 不改7日window、不加issue分类、不删repo/方向、不反向 / 2025+未读 / 不进strict TP8-SL6 / 不入库**。
+- 归档：`strategy_templates/research/github-core-issue-resolution-balance/2026-10-03-feasibility/` 与 `.../2026-10-03-discovery/`。
+
+## 2026-10-03 — v178：Carry-Adjusted Momentum Zero-Cross
+- 过去24h `score=log(C_t/C_(t-24))-Σrealized funding`；score零上穿LONG、零下穿SHORT，下一完整1h open。24h对应3个标准8h funding周期，零点为净持有收益自然break-even。
+- 新6币2023-2024：**10287 events，12h -0.0448%，0/6正，16.418次/币/周**；1h +0.0043%，4h -0.0181%。
+- 年度12h：2023 **-0.0325%**，2024 **-0.0579%**。LONG +0.0876%、SHORT -0.1773%仅作后验审计。
+- 结论：经济幅度/breadth/年度均失败；**冻结v178 / 不扫8h/48h、不按leverage放大funding、不加过滤、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/carry-adjusted-momentum-zero-cross/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v179：Return-Energy Concentration Regime
+- 最近24h平方收益的HHI与前一相邻24h块比较；集中度上升时反做已完成4h方向，集中度下降时顺做4h方向，下一1h open。
+- 新6币2023-2024：**9361 events，12h -0.0238%，2/6正，14.940次/币/周**；2023 +0.0287%，2024 **-0.0713%**。
+- 结论：经济/breadth失败且年度翻转；**冻结v179 / 不扫block、不加HHI阈值、不换Gini/entropy、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/return-energy-concentration-regime/2026-10-03-early-gate/`。
+
+## 2026-10-03 — GitHub Core Push Activity：Point-in-Time Feasibility Reopen
+- 旧 commit-activity family 的时间语义问题可以由 GH Archive `PushEvent.created_at` 正确解决；它记录public GitHub event visibility，而不是commit author/commit date。
+- 但当前Mac无 `bq` / `gcloud` / BigQuery身份，无法在服务端只过滤固定core repos；GH Archive直接路径需要先下载全站hourly JSON.gz再本地筛选，不符合当前存储/数据预算。
+- GitHub普通Events API只能做prospective采集，不能替代2023-2024两年历史。
+- 结论：**historical-access/storage blocked / 未读任何token收益**。只有未来获得可审计的服务端GH Archive查询路径时才允许重开；禁止退回commit timestamp或用近期partial feed替代。
+- 归档：`strategy_templates/research/github-core-push-activity/2023-2024-feasibility/`。
+
+## 2026-10-03 — v180：24h Range-Occupancy Regime Cross
+- 最近24个1h窗口定义high-low midpoint，统计24个close处于midpoint上方的比例；occupancy由<=0.5上穿>0.5做LONG，反向做SHORT，下一1h open。
+- 新6币2023-2024：**8808 events，12h +0.0036%，3/6正，14.057次/币/周**；2023 +0.0038%，2024 +0.0034%。
+- 结论：12h几乎为零且breadth失败；**冻结v180 / 不改0.5阈值、不扫窗口、不做volume-weight、不加连续acceptance/breakout、不删方向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/range-occupancy-regime-cross/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v181：Activity–Volatility Coupling Regime
+- 最近48个完整1h计算 `corr(Δlog QuoteVolume, r²)`；零上穿视为activity确认高波动并顺做已完成4h方向，零下穿反做，下一1h open。
+- 新6币2023-2024：**453 events，12h -0.0021%，3/6正，0.723次/币/周**；2023 +0.0508%，2024 **-0.0466%**。
+- LONG +0.1193%、SHORT -0.1188%几乎镜像，仅作后验审计。
+- 结论：经济/breadth失败且年度翻转；**冻结v181 / 不扫窗口、不加corr/volume阈值、不改abs-return、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/activity-volatility-coupling-regime/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v182：Per-Trade Volatility-Impact Regime
+- 相邻24h块比较 `Σr² / ΣTradeCount`；每笔成交对应波动冲击上升时反做已完成4h方向，下降时顺做，下一1h open。
+- 新6币2023-2024：**8137 events，12h +0.0327%，4/6正，12.987次/币/周**；2023 +0.0250%，2024 +0.0399%。
+- LONG +0.2164%、SHORT -0.1548%仅作后验归因，禁止删SHORT。
+- 结论：频率/breadth/年度同号通过，但经济幅度远低于+0.20%；**冻结v182 / 不扫block、不加impact阈值、不改range版本、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/per-trade-volatility-impact-regime/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v183：24h Price-Monotonicity Regime Cross
+- 最近24个完整1h Close 的时间序号与价格rank做 Spearman correlation；零上穿LONG、零下穿SHORT，下一1h open。利用完整24点排序路径，不同于Aroon/净收益/path efficiency。
+- 新6币2023-2024：**4613 events，12h +0.0906%，5/6正，7.362次/币/周**；1h +0.0176%，4h +0.0833%。
+- 年度12h：2023 +0.0149%，2024 +0.1704%；LONG +0.1203%、SHORT +0.0608%。
+- 结论：频率/breadth/年度同号通过，但未达到+0.20%经济门槛；**冻结v183 / 不扫窗口、不加Spearman阈值、不换regression slope、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/price-monotonicity-regime-cross/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v184：Notional-vs-Trade-Arrival Concentration Regime
+- 最近24h比较 QuoteVolume shares 与 TradeCount shares 的HHI，`score=log(HHI_QV/HHI_Count)`；零上穿顺做已完成4h方向，零下穿反做，下一1h open。
+- 新6币2023-2024：**1068 events，12h -0.1091%，3/6正，1.705次/币/周**；2023 -0.0728%，2024 -0.2218%。
+- LONG +0.2624%、SHORT -0.4962%仅作后验归因，禁止删SHORT。
+- 结论：经济/breadth/年度均失败；**冻结v184 / 不扫窗口、不加HHI ratio阈值、不换entropy/Gini、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/notional-vs-trade-arrival-concentration/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v185：Participation–Ticket-Size Coupling Regime
+- 最近48个完整1h计算 `corr(Δlog TradeCount, Δlog(QuoteVolume/TradeCount))`；零上穿顺做已完成4h方向，零下穿反做，下一1h open。
+- 新6币2023-2024：**295 events，12h +0.0239%，3/6正，0.471次/币/周**；2023 -0.0091%，2024 +0.1225%。
+- 结论：经济/breadth失败且2023为负；**冻结v185 / 不扫窗口、不加阈值、不换regression elasticity、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/participation-ticket-size-coupling-regime/2026-10-03-early-gate/`。
+
+## 2026-10-03 — ID121 no-no-chase：2026-09 Untouched Temporal Holdout Coverage
+- Ablation硬截止为2026-09-01，因此预注册整个2026-09作为 untouched temporal sanity window；原15币、canonical ID121与no-no-chase规则全部冻结。
+- **收益读取前**检查本地覆盖：完整9月每币应有43200根1m；多数币只有 **16800根**（至约9月12日15:59 UTC），BTC/ETH也仅约17800根；Funding多数仅36个settlement，September chunk不存在。
+- `all_15_complete=false`，所以按协议立即停止；**未读取canonical/no-no-chase任何trade/PF/PnL，未回填、未写DB**。
+- 结论：no-no-chase仍是未验证generated hypothesis；第二fresh-symbol holdout仍仅LITUSDT 1币可用，temporal holdout也coverage blocked。不得用partial September、挑覆盖更长的币、或未经明确授权回填来救验证。
+- 归档：`strategy_templates/research/id121-no-no-chase-forward/2026-09-temporal-holdout/`。
+
+## 2026-10-03 — v178：Carry-Adjusted Momentum Zero-Cross
+- 过去24h `score = log(C_t/C_(t-24)) - Σrealized funding`；净持有收益零上穿LONG、零下穿SHORT，下一完整1h open。24h对应3个标准8h funding周期，零为自然break-even。
+- 新6币2023-2024：**10287 events，12h -0.0448%，0/6正，16.418次/币/周**；1h +0.0043%，4h -0.0181%。
+- 年度12h：2023 **-0.0325%**，2024 **-0.0579%**。LONG +0.0876%、SHORT -0.1773%仅作后验审计。
+- 结论：频率高但 expectancy/breadth/两年均失败；**冻结v178 / 不扫8h/48h、不放大funding、不加threshold/filter、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/carry-adjusted-momentum-zero-cross/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v186：Rolling-4h Extreme-Order Continuation
+- 最近4个完整1h bar，`score=index(highest high)-index(lowest low)`；fresh <=0→>0 做LONG，>=0→<0 做SHORT；同bar出现两端极值时score=0。
+- 新6币2023-2024：**26136 events，12h -0.0124%，1/6正，41.713次/币/周**；1h +0.0024%，4h +0.0091%。
+- 年度12h：2023 **-0.0058%**，2024 **-0.0190%**。LONG +0.0377%、SHORT -0.0619%仅作后验审计。
+- 结论：极值先后路径拓扑没有稳定alpha；**冻结v186 / 不扫3h/6h/8h、不加range/amplitude过滤、不改tie处理、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/rolling-4h-extreme-order-continuation/2026-10-03-early-gate/`。
+
+## 2026-10-03 — v187：Taker-vs-Global-Account Skew
+- 每小时最后一条已完成5m metrics，`score=log(TakerLongShortVolRatio / GlobalAccountLongShortRatio)`；零上穿LONG、零下穿SHORT，下一完整1h open。
+- 新6币2023-2024：**13224 events，12h +0.0085%，5/6正，21.105次/币/周**；1h -0.0024%，4h +0.0067%。
+- 年度12h：2023 **+0.0081%**，2024 **+0.0089%**。LONG +0.1022%、SHORT -0.0852%仅作后验审计。
+- 结论：频率/breadth/年度同号尚可，但经济幅度远低于+0.20%；**冻结v187，并关闭natural pairwise positioning审计空间 / 不继续换Top Position/Top Account组合、不加阈值、不删方向、不反向 / 2025+未读 / 不进strict Engine / 不入库**。
+- 归档：`strategy_templates/research/taker-global-account-skew/2026-10-03-early-gate/`。
