@@ -1,0 +1,7 @@
+[
+  {
+    "op": "insert_after",
+    "target": "- Use `scripts/research_generate_variant.go` or `scripts/research_combine_entries.go` only for mechanical generation of full portable candidate JSON under `temp_strategy`; keep their specifications in `research_specs/`. Freeze candidate hash and the unseen coin universe before holdout replay.",
+    "content": "\n- For a single-variable entry comparison that must preserve v29/base exits, use `research_combine_entries.go -exit-source base` without `-entry-bound-exits` or `-conditional-exit-guards`. Assert exact selected close-object identity and unchanged base entry/technology; the helper orders base LONG, supplement LONG, base SHORT, supplement SHORT. Prove reachable entries, accurate match counts/first identities and disabled-rule exclusion with real Expr structs, labeling any local ordered-rule model as non-end-to-end. Even unchanged exits cannot preserve the old trade ledger under a single position: new entries block later base opportunities and change compounding. Fully rematch each complete strategy at identical costs/windows/source hashes; do not add, subtract, or filter ledger profits as a counterfactual result."
+  }
+]
