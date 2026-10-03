@@ -1,0 +1,7 @@
+[
+  {
+    "op": "insert_after",
+    "target": "- For ARM acquisition failures, differing current canonical bar values, source-preserving cache changes, and independent cross-interval volume discrepancies, read `references/arm-replay.md` before replay. It documents exact source/transport flags and checkpoint recovery; a data-source repair requires comparable development/holdout reruns, not a hidden relaxation of data checks.",
+    "content": "\n- Before accepting checksum-backed source corrections or real-cost results, use the verified-repair and execution-liquidity audits in `references/arm-replay.md`. Keep repaired studies separate, preserve source evidence, and verify the actual engine sizing base rather than assuming fixed starting equity."
+  }
+]

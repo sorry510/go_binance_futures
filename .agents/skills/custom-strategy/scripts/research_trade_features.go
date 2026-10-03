@@ -19,6 +19,14 @@ type featureTradeRow struct {
 	Symbol            string  `json:"symbol"`
 	Side              string  `json:"side"`
 	EntryTime         int64   `json:"entry_time"`
+	ExitTime          int64   `json:"exit_time"`
+	OpenStrategyName  string  `json:"open_strategy_name"`
+	CloseStrategyName string  `json:"close_strategy_name"`
+	EntryTradeCount   int64   `json:"entry_minute_trade_count"`
+	ExitTradeCount    int64   `json:"exit_minute_trade_count"`
+	EntryQuoteVolume  float64 `json:"entry_minute_quote_volume"`
+	ExitQuoteVolume   float64 `json:"exit_minute_quote_volume"`
+	ZeroLiquidityFill bool    `json:"zero_liquidity_fill"`
 	Cycle             int     `json:"cycle"`
 	NetPnL            float64 `json:"net_pnl"`
 	ExitReason        string  `json:"exit_reason"`
@@ -62,6 +70,7 @@ func writeTradeFeatures() error {
 		Runs      []struct {
 			CandidateVersion string           `json:"candidate_version"`
 			Symbol           string           `json:"symbol"`
+			DataHash         string           `json:"data_hash"`
 			Trades           []backtest.Trade `json:"trades"`
 		} `json:"runs"`
 	}
@@ -83,12 +92,24 @@ func writeTradeFeatures() error {
 		if !hit {
 			return fmt.Errorf("dataset cache missing for %s", run.Symbol)
 		}
+		if dataset.DataHash != run.DataHash {
+			return fmt.Errorf("trade ledger/dataset hash mismatch for %s", run.Symbol)
+		}
+		minutes := dataset.Bars[backtest.BarSeriesKey(run.Symbol, "1m")]
 		hours := dataset.Bars[backtest.BarSeriesKey(run.Symbol, "1h")]
 		fourHours := dataset.Bars[backtest.BarSeriesKey(run.Symbol, "4h")]
 		if len(hours) == 0 || len(fourHours) == 0 {
 			return fmt.Errorf("1h/4h bars missing for %s", run.Symbol)
 		}
 		for _, trade := range run.Trades {
+			entryMinute, err := featureExecutionMinute(minutes, trade.EntryTime)
+			if err != nil {
+				return fmt.Errorf("%s entry: %w", run.Symbol, err)
+			}
+			exitMinute, err := featureExecutionMinute(minutes, trade.ExitTime)
+			if err != nil {
+				return fmt.Errorf("%s exit: %w", run.Symbol, err)
+			}
 			i := sort.Search(len(hours), func(i int) bool { return hours[i].CloseTime >= trade.EntryTime }) - 1
 			j := sort.Search(len(fourHours), func(j int) bool { return fourHours[j].CloseTime >= trade.EntryTime }) - 1
 			if i < 8 || j < 30 {
@@ -125,7 +146,11 @@ func writeTradeFeatures() error {
 				cycle--
 			}
 			rows = append(rows, featureTradeRow{Symbol: run.Symbol, Side: trade.Side, EntryTime: trade.EntryTime, Cycle: cycle,
-				NetPnL: trade.NetPnL, ExitReason: trade.ExitReason, RelativeVolume: bar.QuoteVolume / meanVolume,
+				ExitTime: trade.ExitTime, OpenStrategyName: trade.OpenStrategyName, CloseStrategyName: trade.CloseStrategyName,
+				EntryTradeCount: entryMinute.TradeCount, ExitTradeCount: exitMinute.TradeCount,
+				EntryQuoteVolume: entryMinute.QuoteVolume, ExitQuoteVolume: exitMinute.QuoteVolume,
+				ZeroLiquidityFill: entryMinute.TradeCount == 0 || entryMinute.QuoteVolume <= 0 || exitMinute.TradeCount == 0 || exitMinute.QuoteVolume <= 0,
+				NetPnL:            trade.NetPnL, ExitReason: trade.ExitReason, RelativeVolume: bar.QuoteVolume / meanVolume,
 				SideTakerRatio: taker, ClosePosition: closePosition, AgainstWick: againstWick,
 				BodyRangeFraction: (max(bar.Open, bar.Close) - min(bar.Open, bar.Close)) / span,
 				FiveDayTrend:      trend, FourHourReturn: fourHours[j].Close/fourHours[j-6].Close - 1})
@@ -149,4 +174,12 @@ func writeTradeFeatures() error {
 	}
 	fmt.Printf("wrote %d feature rows to %s\n", len(rows), *outputPath)
 	return nil
+}
+
+func featureExecutionMinute(minutes []backtest.Bar, timestamp int64) (backtest.Bar, error) {
+	i := sort.Search(len(minutes), func(i int) bool { return minutes[i].CloseTime >= timestamp })
+	if i == len(minutes) || minutes[i].OpenTime > timestamp {
+		return backtest.Bar{}, fmt.Errorf("execution minute missing at %d", timestamp)
+	}
+	return minutes[i], nil
 }

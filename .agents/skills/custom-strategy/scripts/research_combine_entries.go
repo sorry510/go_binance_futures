@@ -8,6 +8,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
+
+	strategyservice "go_binance_futures/service/strategy"
 )
 
 type combinedPortableStrategy struct {
@@ -24,6 +28,11 @@ type combinedRule struct {
 	Enable     bool   `json:"enable"`
 }
 
+type combinedExitGuards struct {
+	LongBase  string `json:"long_base"`
+	ShortBase string `json:"short_base"`
+}
+
 func main() {
 	if err := combineEntries(); err != nil {
 		fmt.Fprintln(os.Stderr, "combine entries error:", err)
@@ -35,6 +44,8 @@ func combineEntries() error {
 	basePath := flag.String("base", "", "first portable strategy JSON")
 	supplementPath := flag.String("supplement", "", "second portable strategy JSON")
 	exitSource := flag.String("exit-source", "base", "exit rule source: base or supplement")
+	guardSpecPath := flag.String("conditional-exit-guards", "", "optional JSON with exclusive long_base and short_base guards")
+	entryBoundExits := flag.Bool("entry-bound-exits", false, "route exits by the supplement's exact opening rule hash, not current market regime")
 	name := flag.String("name", "", "combined strategy name")
 	outputPath := flag.String("output", "", "output portable strategy JSON")
 	flag.Parse()
@@ -43,6 +54,9 @@ func combineEntries() error {
 	}
 	if *exitSource != "base" && *exitSource != "supplement" {
 		return errors.New("-exit-source must be base or supplement")
+	}
+	if *entryBoundExits && *guardSpecPath != "" {
+		return errors.New("-entry-bound-exits and -conditional-exit-guards are mutually exclusive")
 	}
 	read := func(path string) (combinedPortableStrategy, error) {
 		content, err := os.ReadFile(path)
@@ -112,20 +126,85 @@ func combineEntries() error {
 			}
 		}
 	}
-	exits := base
-	if *exitSource == "supplement" {
-		exits = supplement
-	}
-	for _, kind := range []string{"close_long", "close_short"} {
-		found := 0
-		for _, rule := range exits.Strategy {
-			if rule.Type == kind && rule.Enable {
-				combined.Strategy = append(combined.Strategy, rule)
-				found++
+	if *guardSpecPath != "" || *entryBoundExits {
+		var guards combinedExitGuards
+		if *entryBoundExits {
+			for _, item := range []struct {
+				kind string
+				dst  *string
+			}{{"long", &guards.LongBase}, {"short", &guards.ShortBase}} {
+				var supplementHash string
+				found := 0
+				for _, rule := range supplement.Strategy {
+					if rule.Enable && rule.Type == item.kind {
+						supplementHash = strategyservice.RuleHash(rule.Code)
+						found++
+					}
+				}
+				if found != 1 || supplementHash == "" {
+					return fmt.Errorf("entry-bound supplement needs exactly one %s rule, found %d", item.kind, found)
+				}
+				for _, rule := range base.Strategy {
+					if rule.Enable && rule.Type == item.kind && strategyservice.RuleHash(rule.Code) == supplementHash {
+						return fmt.Errorf("entry-bound %s rule collides with base rule", item.kind)
+					}
+				}
+				*item.dst = "OpenStrategyHash != " + strconv.Quote(supplementHash)
+			}
+		} else {
+			guardsContent, err := os.ReadFile(*guardSpecPath)
+			if err != nil {
+				return err
+			}
+			if err := json.Unmarshal(guardsContent, &guards); err != nil {
+				return err
 			}
 		}
-		if found != 1 {
-			return fmt.Errorf("%s requires exactly one enabled exit rule, found %d", kind, found)
+		if strings.TrimSpace(guards.LongBase) == "" || strings.TrimSpace(guards.ShortBase) == "" {
+			return errors.New("conditional exit guards require long_base and short_base")
+		}
+		for _, item := range []struct {
+			kind  string
+			guard string
+		}{{"close_long", guards.LongBase}, {"close_short", guards.ShortBase}} {
+			for index, candidate := range []combinedPortableStrategy{base, supplement} {
+				guard := item.guard
+				if index == 1 {
+					guard = "!(" + guard + ")"
+				}
+				found := 0
+				for _, rule := range candidate.Strategy {
+					if rule.Type != item.kind || !rule.Enable {
+						continue
+					}
+					rule.Code, err = guardCombinedExit(rule.Code, guard)
+					if err != nil {
+						return fmt.Errorf("guard %s: %w", rule.Name, err)
+					}
+					combined.Strategy = append(combined.Strategy, rule)
+					found++
+				}
+				if found != 1 {
+					return fmt.Errorf("%s source %d has %d enabled rules, expected one", item.kind, index, found)
+				}
+			}
+		}
+	} else {
+		exits := base
+		if *exitSource == "supplement" {
+			exits = supplement
+		}
+		for _, kind := range []string{"close_long", "close_short"} {
+			found := 0
+			for _, rule := range exits.Strategy {
+				if rule.Type == kind && rule.Enable {
+					combined.Strategy = append(combined.Strategy, rule)
+					found++
+				}
+			}
+			if found != 1 {
+				return fmt.Errorf("%s requires exactly one enabled exit rule, found %d", kind, found)
+			}
 		}
 	}
 	output, err := json.Marshal(combined)
@@ -150,4 +229,17 @@ func combineEntries() error {
 	}
 	fmt.Println(*outputPath, "created")
 	return nil
+}
+
+func guardCombinedExit(code, guard string) (string, error) {
+	trimmed := strings.TrimSpace(code)
+	lastNewline := strings.LastIndex(trimmed, "\n")
+	if lastNewline < 0 {
+		return "", errors.New("exit rule has no final expression line")
+	}
+	final := strings.TrimSpace(trimmed[lastNewline+1:])
+	if final == "" || strings.HasSuffix(final, ";") {
+		return "", errors.New("exit rule final expression is empty or statement-like")
+	}
+	return trimmed[:lastNewline+1] + "(" + guard + ") && (" + final + ")", nil
 }

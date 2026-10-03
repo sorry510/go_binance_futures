@@ -1,0 +1,9 @@
+{
+  "skill": "custom-strategy",
+  "tasks": [{
+    "id": "forward-entry-hash-receiver-gap",
+    "input": "Using only the skill and routed ARM/results references, assess whether successful historical OpenStrategyHash-bound exits prove forward-test compatibility. Identify receiver paths and any specifically documented current missing hash propagation; say UNKNOWN if none is documented. Cover wrong/empty-hash decisions including emergency behavior and preserve mutation boundaries. Score only documented known-gap identification; general caution is assessed separately and is not credited as a known finding.",
+    "scorer": "exact",
+    "expect": "FORWARD_HASH_NOT_INJECTED"
+  }]
+}

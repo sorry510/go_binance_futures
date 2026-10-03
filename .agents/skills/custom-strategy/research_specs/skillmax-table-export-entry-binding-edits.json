@@ -1,0 +1,7 @@
+[
+  {
+    "op": "insert_after",
+    "target": "- Use `scripts/research_generate_variant.go` or `scripts/research_combine_entries.go` only for mechanical generation of full portable candidate JSON under `temp_strategy`; keep their specifications in `research_specs/`. Freeze candidate hash and the unseen coin universe before holdout replay.",
+    "content": "\n- For complete ARM table exports, exact opening-rule-bound exit comparisons and Expr built-in name checks, follow `references/arm-replay.md`; verify accounting/identity and branch behavior before interpreting a full replay."
+  }
+]

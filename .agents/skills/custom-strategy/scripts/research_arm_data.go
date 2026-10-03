@@ -8,9 +8,11 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"hash/crc32"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -26,6 +28,7 @@ import (
 )
 
 const researchMarket = historicalmarket.MarketFuturesUSDT
+const researchArchiveRepairVersion = "20261003-v2"
 
 type armResearchConfig struct {
 	host, port, username, password string
@@ -33,13 +36,48 @@ type armResearchConfig struct {
 }
 
 type datasetSource struct {
-	Database     string                    `json:"database"`
-	AsOfMS       int64                     `json:"as_of_ms"`
-	CacheHit     bool                      `json:"cache_hit"`
-	ArchiveCount int                       `json:"archive_count"`
-	RESTGapBars  map[string]int            `json:"rest_gap_bars,omitempty"`
-	BarCoverage  map[string]seriesCoverage `json:"bar_coverage"`
-	Funding      seriesCoverage            `json:"funding_coverage"`
+	Database           string                    `json:"database"`
+	AsOfMS             int64                     `json:"as_of_ms"`
+	CacheHit           bool                      `json:"cache_hit"`
+	ArchiveCount       int                       `json:"archive_count"`
+	ExecutionSource    string                    `json:"execution_source,omitempty"`
+	IndicatorSource    string                    `json:"indicator_source,omitempty"`
+	RESTGapBars        map[string]int            `json:"rest_gap_bars,omitempty"`
+	BarCoverage        map[string]seriesCoverage `json:"bar_coverage"`
+	Funding            seriesCoverage            `json:"funding_coverage"`
+	AggregateChecks    map[string]aggregateCheck `json:"aggregate_checks,omitempty"`
+	MinuteRepairPolicy string                    `json:"minute_repair_policy,omitempty"`
+	RepairVersion      string                    `json:"repair_version,omitempty"`
+	MinuteRepairs      []researchMinuteRepair    `json:"minute_repairs,omitempty"`
+	IndicatorRepairs   []researchIndicatorRepair `json:"indicator_repairs,omitempty"`
+}
+
+type researchIndicatorRepair struct {
+	Interval      string       `json:"interval"`
+	ArchiveURL    string       `json:"archive_url"`
+	ArchiveSHA256 string       `json:"archive_sha256"`
+	Verification  string       `json:"verification"`
+	Before        backtest.Bar `json:"before"`
+	After         backtest.Bar `json:"after"`
+}
+
+type researchMinuteRepair struct {
+	HourMS           int64        `json:"hour_ms"`
+	ChangedMinutes   int          `json:"changed_minutes"`
+	ArchiveURL       string       `json:"archive_url"`
+	ArchiveSHA256    string       `json:"archive_sha256"`
+	Verification     string       `json:"verification"`
+	TradeIDSpanHoles int64        `json:"trade_id_span_holes,omitempty"`
+	Before           backtest.Bar `json:"before"`
+	After            backtest.Bar `json:"after"`
+}
+
+type aggregateCheck struct {
+	MatchedPrices                int     `json:"matched_prices"`
+	CanonicalVolumeDifferences   int     `json:"canonical_volume_differences"`
+	FirstVolumeDifference        int64   `json:"first_volume_difference_ms,omitempty"`
+	MaximumQuoteVolumeDifference float64 `json:"maximum_relative_quote_volume_difference,omitempty"`
+	ZeroTradeMinutes             int     `json:"zero_trade_minutes"`
 }
 
 type seriesCoverage struct {
@@ -334,6 +372,300 @@ func sameResearchBar(left, right backtest.Bar) bool {
 	return true
 }
 
+func aggregateResearchMinutes(minutes []backtest.Bar, interval string) (backtest.Bar, int) {
+	if len(minutes) == 0 {
+		return backtest.Bar{}, 0
+	}
+	aggregate := minutes[0]
+	aggregate.Interval = interval
+	aggregate.CloseTime = minutes[len(minutes)-1].CloseTime
+	aggregate.Close = minutes[len(minutes)-1].Close
+	aggregate.Volume, aggregate.QuoteVolume = 0, 0
+	aggregate.TradeCount, aggregate.TakerBuyQuoteVolume = 0, 0
+	priceStarted, zeroMinutes := false, 0
+	for _, minute := range minutes {
+		// Empty carry bars are observations, not traded OHLC extremes.
+		if minute.TradeCount > 0 || minute.Volume > 0 || minute.QuoteVolume > 0 {
+			if !priceStarted {
+				aggregate.Open, aggregate.High, aggregate.Low = minute.Open, minute.High, minute.Low
+				priceStarted = true
+			} else {
+				aggregate.High = math.Max(aggregate.High, minute.High)
+				aggregate.Low = math.Min(aggregate.Low, minute.Low)
+			}
+			aggregate.Close = minute.Close
+		} else {
+			zeroMinutes++
+		}
+		aggregate.Volume += minute.Volume
+		aggregate.QuoteVolume += minute.QuoteVolume
+		aggregate.TradeCount += minute.TradeCount
+		aggregate.TakerBuyQuoteVolume += minute.TakerBuyQuoteVolume
+	}
+	return aggregate, zeroMinutes
+}
+
+func sameResearchPrices(left, right backtest.Bar) bool {
+	left.Volume, left.QuoteVolume = right.Volume, right.QuoteVolume
+	left.TradeCount, left.TakerBuyQuoteVolume = right.TradeCount, right.TakerBuyQuoteVolume
+	return sameResearchBar(left, right)
+}
+
+func researchArchiveKlines(ctx context.Context, client *historicalmarket.PublicDataClient, archive historicalmarket.PublicDataArchive, symbol, interval string, start, end int64) ([]backtest.Bar, error) {
+	rows, err := client.ParseKlines(ctx, archive, start, end)
+	if err != nil {
+		return nil, err
+	}
+	bars := make([]backtest.Bar, 0, len(rows))
+	for _, row := range rows {
+		bars = append(bars, backtest.Bar{Symbol: symbol, Interval: interval, OpenTime: row.OpenTime, CloseTime: row.CloseTime,
+			Open: row.Open, High: row.High, Low: row.Low, Close: row.Close, Volume: row.Volume, QuoteVolume: row.QuoteVolume,
+			TradeCount: row.TradeCount, TakerBuyQuoteVolume: row.TakerBuyQuoteVolume})
+	}
+	return bars, nil
+}
+
+func reconstructResearchMinutes(original []backtest.Bar, trades []historicalmarket.PublicDataTrade) ([]backtest.Bar, int64, error) {
+	if len(original) != 60 || len(trades) == 0 {
+		return nil, 0, fmt.Errorf("trade repair requires one complete hour and positive trade coverage")
+	}
+	bars := append([]backtest.Bar(nil), original...)
+	seenIDs := make(map[int64]bool, len(trades))
+	active := make([]bool, len(bars))
+	minimumID, maximumID := trades[0].TradeID, trades[0].TradeID
+	for _, trade := range trades {
+		if trade.TradeTime < original[0].OpenTime || trade.TradeTime > original[len(original)-1].CloseTime {
+			return nil, 0, fmt.Errorf("trade outside repair hour")
+		}
+		if seenIDs[trade.TradeID] || trade.Price <= 0 || trade.Quantity <= 0 || trade.QuoteQuantity <= 0 {
+			return nil, 0, fmt.Errorf("invalid/duplicate trade in minute repair")
+		}
+		seenIDs[trade.TradeID] = true
+		minimumID, maximumID = min(minimumID, trade.TradeID), max(maximumID, trade.TradeID)
+		i := int((trade.TradeTime - original[0].OpenTime) / 60_000)
+		if i < 0 || i >= len(bars) {
+			return nil, 0, fmt.Errorf("trade outside repair hour")
+		}
+		bar := &bars[i]
+		if !active[i] {
+			bar.Open, bar.High, bar.Low = trade.Price, trade.Price, trade.Price
+			bar.Volume, bar.QuoteVolume, bar.TradeCount, bar.TakerBuyQuoteVolume = 0, 0, 0, 0
+			active[i] = true
+		}
+		bar.High, bar.Low = max(bar.High, trade.Price), min(bar.Low, trade.Price)
+		bar.Close = trade.Price
+		bar.Volume += trade.Quantity
+		// USD-M turnover is price times base quantity; archive quoteQty may be stale.
+		quote := trade.Price * trade.Quantity
+		bar.QuoteVolume += quote
+		bar.TradeCount++
+		if !trade.IsBuyerMaker {
+			bar.TakerBuyQuoteVolume += quote
+		}
+	}
+	for i, bar := range original {
+		if !active[i] && (bar.TradeCount > 0 || bar.QuoteVolume > 0 || bar.Volume > 0) {
+			return nil, 0, fmt.Errorf("trade archive lacks an active minute at %d", bar.OpenTime)
+		}
+	}
+	return bars, maximumID - minimumID + 1 - int64(len(seenIDs)), nil
+}
+
+func repairResearchArchiveMinutes(ctx context.Context, db *sql.DB, client *historicalmarket.PublicDataClient, symbol string, series map[string][]backtest.Bar, start, end int64, cacheDir string) ([]researchMinuteRepair, int, error) {
+	minutes, hours := series["1m"], series["1h"]
+	if len(minutes) == 0 || len(hours) == 0 {
+		return nil, 0, fmt.Errorf("verified minute repair requires both 1m and 1h series")
+	}
+	repairs := make([]researchMinuteRepair, 0)
+	archives, changedTotal := 0, 0
+	for _, hour := range hours {
+		if hour.OpenTime < start || hour.CloseTime > end {
+			continue
+		}
+		first := sort.Search(len(minutes), func(i int) bool { return minutes[i].OpenTime >= hour.OpenTime })
+		if first+60 > len(minutes) || minutes[first].OpenTime != hour.OpenTime || minutes[first+59].CloseTime != hour.CloseTime {
+			return nil, archives, fmt.Errorf("minute repair hour is incomplete at %d", hour.OpenTime)
+		}
+		original := minutes[first : first+60]
+		before, _ := aggregateResearchMinutes(original, "1h")
+		// Independent canonical volume values are audited, not automatically repaired.
+		if sameResearchPrices(before, hour) {
+			continue
+		}
+		if len(repairs) >= 32 {
+			return nil, archives, fmt.Errorf("more than 32 anomalous hours for %s; stop for source audit", symbol)
+		}
+		date := time.UnixMilli(hour.OpenTime).UTC()
+		archive, err := fetchResearchArchive(ctx, client, historicalmarket.PublicDataArchiveSpec{Kind: historicalmarket.ArchiveKindKlines,
+			Period: historicalmarket.ArchivePeriodDaily, Symbol: symbol, Interval: "1m", Date: date}, cacheDir)
+		if err != nil {
+			return nil, archives, err
+		}
+		archives++
+		replacement, err := researchArchiveKlines(ctx, client, archive, symbol, "1m", hour.OpenTime, hour.CloseTime)
+		if err != nil {
+			return nil, archives, err
+		}
+		if err := validateResearchBars(symbol, "1m", replacement, hour.OpenTime, hour.CloseTime); err != nil {
+			return nil, archives, err
+		}
+		after, _ := aggregateResearchMinutes(replacement, "1h")
+		verification, holes := "daily_1m_exact_canonical_1h", int64(0)
+		if !sameResearchBar(after, hour) {
+			tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
+			if err != nil {
+				return nil, archives, err
+			}
+			armHours, readErr := readArmSeries(ctx, tx, symbol, "1h", hour.OpenTime, hour.CloseTime)
+			commitErr := tx.Commit()
+			if readErr != nil {
+				return nil, archives, readErr
+			}
+			if commitErr != nil {
+				return nil, archives, commitErr
+			}
+			// A stale higher bar must not force a valid minute stream to change.
+			if sameResearchBar(after, before) && len(armHours) == 1 && sameResearchBar(after, armHours[0]) {
+				continue
+			}
+			archive, err = fetchResearchArchive(ctx, client, historicalmarket.PublicDataArchiveSpec{Kind: historicalmarket.ArchiveKindTrades,
+				Period: historicalmarket.ArchivePeriodDaily, Symbol: symbol, Date: date}, cacheDir)
+			if err != nil {
+				return nil, archives, err
+			}
+			archives++
+			trades, err := client.ParseTrades(ctx, archive, hour.OpenTime, hour.CloseTime)
+			if err != nil {
+				return nil, archives, err
+			}
+			replacement, holes, err = reconstructResearchMinutes(original, trades)
+			if err != nil {
+				return nil, archives, err
+			}
+			after, _ = aggregateResearchMinutes(replacement, "1h")
+			verification = "daily_trades_exact_canonical_1h"
+			if !sameResearchBar(after, hour) {
+				if len(armHours) != 1 || !sameResearchBar(after, armHours[0]) {
+					return nil, archives, fmt.Errorf("trade reconstruction volume/count lacks independent 1h confirmation at %d", hour.OpenTime)
+				}
+				verification = "daily_trades_exact_arm_1h"
+			}
+		}
+		changed := 0
+		for i := range replacement {
+			if !sameResearchBar(original[i], replacement[i]) {
+				changed++
+			}
+		}
+		if changed == 0 {
+			return nil, archives, fmt.Errorf("verified minute repair made no change at %d", hour.OpenTime)
+		}
+		changedTotal += changed
+		if changedTotal > 1000 {
+			return nil, archives, fmt.Errorf("more than 1000 repaired minutes for %s; stop for source audit", symbol)
+		}
+		copy(original, replacement)
+		repairs = append(repairs, researchMinuteRepair{HourMS: hour.OpenTime, ChangedMinutes: changed, ArchiveURL: archive.URL,
+			ArchiveSHA256: archive.SHA256, Verification: verification, TradeIDSpanHoles: holes, Before: before, After: after})
+		fmt.Printf("%s minute_repair hour=%d changed=%d proof=%s trade_id_span_holes=%d\n", symbol, hour.OpenTime, changed, verification, holes)
+	}
+	return repairs, archives, nil
+}
+
+func repairResearchIndicatorPrices(ctx context.Context, db *sql.DB, client *historicalmarket.PublicDataClient, symbol string, series map[string][]backtest.Bar, start, end int64, cacheDir string) ([]researchIndicatorRepair, int, error) {
+	minutes := series["1m"]
+	repairs := make([]researchIndicatorRepair, 0)
+	archives := 0
+	for _, interval := range []string{"1h", "4h", "1d"} {
+		higher := series[interval]
+		duration, _ := researchIntervalMs(interval)
+		for i, bar := range higher {
+			if bar.OpenTime < start || bar.CloseTime > end {
+				continue
+			}
+			first := sort.Search(len(minutes), func(i int) bool { return minutes[i].OpenTime >= bar.OpenTime })
+			last := first + int(duration/60_000)
+			if last > len(minutes) || minutes[first].OpenTime != bar.OpenTime || minutes[last-1].CloseTime != bar.CloseTime {
+				return nil, archives, fmt.Errorf("indicator repair minute coverage missing at %d", bar.OpenTime)
+			}
+			aggregate, _ := aggregateResearchMinutes(minutes[first:last], interval)
+			if sameResearchPrices(aggregate, bar) {
+				continue
+			}
+			if len(repairs) >= 48 {
+				return nil, archives, fmt.Errorf("more than 48 indicator price anomalies for %s; stop for audit", symbol)
+			}
+			archive, err := fetchResearchArchive(ctx, client, historicalmarket.PublicDataArchiveSpec{Kind: historicalmarket.ArchiveKindKlines,
+				Period: historicalmarket.ArchivePeriodDaily, Symbol: symbol, Interval: interval, Date: time.UnixMilli(bar.OpenTime).UTC()}, cacheDir)
+			if err != nil {
+				return nil, archives, err
+			}
+			archives++
+			rows, err := researchArchiveKlines(ctx, client, archive, symbol, interval, bar.OpenTime, bar.CloseTime)
+			if err != nil {
+				return nil, archives, err
+			}
+			verification := "daily_archive_exact_minute_aggregate"
+			if len(rows) != 1 || !sameResearchBar(aggregate, rows[0]) {
+				if interval != "1h" {
+					return nil, archives, fmt.Errorf("daily %s archive cannot independently verify repaired aggregate at %d", interval, bar.OpenTime)
+				}
+				// Confirm a stale hourly archive against ARM plus an independent daily tape.
+				proofArchive, err := fetchResearchArchive(ctx, client, historicalmarket.PublicDataArchiveSpec{Kind: historicalmarket.ArchiveKindKlines,
+					Period: historicalmarket.ArchivePeriodDaily, Symbol: symbol, Interval: "1m", Date: time.UnixMilli(bar.OpenTime).UTC()}, cacheDir)
+				if err != nil {
+					return nil, archives, err
+				}
+				archives++
+				proofMinutes, err := researchArchiveKlines(ctx, client, proofArchive, symbol, "1m", bar.OpenTime, bar.CloseTime)
+				if err != nil {
+					return nil, archives, err
+				}
+				proof, _ := aggregateResearchMinutes(proofMinutes, interval)
+				verification = "daily_1m_and_arm_exact_minute_aggregate"
+				if !sameResearchBar(aggregate, proof) {
+					proofArchive, err = fetchResearchArchive(ctx, client, historicalmarket.PublicDataArchiveSpec{Kind: historicalmarket.ArchiveKindTrades,
+						Period: historicalmarket.ArchivePeriodDaily, Symbol: symbol, Date: time.UnixMilli(bar.OpenTime).UTC()}, cacheDir)
+					if err != nil {
+						return nil, archives, err
+					}
+					archives++
+					trades, err := client.ParseTrades(ctx, proofArchive, bar.OpenTime, bar.CloseTime)
+					if err != nil {
+						return nil, archives, err
+					}
+					proofMinutes, _, err = reconstructResearchMinutes(minutes[first:last], trades)
+					if err != nil {
+						return nil, archives, err
+					}
+					proof, _ = aggregateResearchMinutes(proofMinutes, interval)
+					verification = "daily_trades_and_arm_exact_minute_aggregate"
+				}
+				tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
+				if err != nil {
+					return nil, archives, err
+				}
+				arm, readErr := readArmSeries(ctx, tx, symbol, interval, bar.OpenTime, bar.CloseTime)
+				commitErr := tx.Commit()
+				if readErr != nil {
+					return nil, archives, readErr
+				}
+				if commitErr != nil {
+					return nil, archives, commitErr
+				}
+				if len(arm) != 1 || !sameResearchBar(aggregate, proof) || !sameResearchBar(aggregate, arm[0]) {
+					return nil, archives, fmt.Errorf("hourly source repair lacks exact daily/ARM confirmation at %d", bar.OpenTime)
+				}
+				rows, archive = arm, proofArchive
+			}
+			higher[i] = rows[0]
+			repairs = append(repairs, researchIndicatorRepair{Interval: interval, ArchiveURL: archive.URL, ArchiveSHA256: archive.SHA256, Verification: verification, Before: bar, After: rows[0]})
+			fmt.Printf("%s indicator_repair interval=%s at=%d proof=%s\n", symbol, interval, bar.OpenTime, verification)
+		}
+	}
+	return repairs, archives, nil
+}
+
 func mergeResearchBars(symbol, interval string, arm, prefix []backtest.Bar) ([]backtest.Bar, error) {
 	out := make([]backtest.Bar, 0, len(arm)+len(prefix))
 	i, j := 0, 0
@@ -358,7 +690,64 @@ func mergeResearchBars(symbol, interval string, arm, prefix []backtest.Bar) ([]b
 	return out, nil
 }
 
-func loadArchivePrefix(ctx context.Context, client *historicalmarket.PublicDataClient, symbol, interval string, start, end int64) ([]backtest.Bar, int, error) {
+func fetchResearchArchive(ctx context.Context, client *historicalmarket.PublicDataClient, spec historicalmarket.PublicDataArchiveSpec, cacheDir string) (historicalmarket.PublicDataArchive, error) {
+	url, err := client.ArchiveURL(spec)
+	if err != nil {
+		return historicalmarket.PublicDataArchive{}, err
+	}
+	key := sha256.Sum256([]byte(url))
+	manifest := filepath.Join(cacheDir, "research-manifests", hex.EncodeToString(key[:])+".json")
+	if content, err := os.ReadFile(manifest); err == nil {
+		var archive historicalmarket.PublicDataArchive
+		if err := json.Unmarshal(content, &archive); err != nil {
+			return archive, fmt.Errorf("read archive manifest: %w", err)
+		}
+		if archive.URL != url || !strings.HasPrefix(filepath.Clean(archive.Path), filepath.Clean(cacheDir)+string(os.PathSeparator)) || len(archive.SHA256) != 64 {
+			return archive, fmt.Errorf("archive manifest identity mismatch for %s", url)
+		}
+		file, err := os.Open(archive.Path)
+		if err != nil {
+			return archive, err
+		}
+		hash := sha256.New()
+		size, hashErr := io.Copy(hash, file)
+		closeErr := file.Close()
+		if hashErr != nil {
+			return archive, hashErr
+		}
+		if closeErr != nil {
+			return archive, closeErr
+		}
+		if size != archive.Size || !strings.EqualFold(hex.EncodeToString(hash.Sum(nil)), archive.SHA256) {
+			return archive, fmt.Errorf("verified archive cache hash/size changed for %s", url)
+		}
+		archive.FromCache = true
+		return archive, nil
+	} else if !os.IsNotExist(err) {
+		return historicalmarket.PublicDataArchive{}, err
+	}
+	fmt.Printf("%s %s archive_fetch=%s\n", spec.Symbol, spec.Interval, spec.Date.Format("2006-01"))
+	archive, err := client.FetchArchive(ctx, spec)
+	if err != nil {
+		return archive, err
+	}
+	content, err := json.Marshal(archive)
+	if err != nil {
+		return archive, err
+	}
+	if err := os.MkdirAll(filepath.Dir(manifest), 0o700); err != nil {
+		return archive, err
+	}
+	if err := os.WriteFile(manifest+".part", content, 0o600); err != nil {
+		return archive, err
+	}
+	if err := os.Rename(manifest+".part", manifest); err != nil {
+		return archive, err
+	}
+	return archive, nil
+}
+
+func loadArchivePrefix(ctx context.Context, client *historicalmarket.PublicDataClient, symbol, interval string, start, end int64, cacheDir string) ([]backtest.Bar, int, error) {
 	if end < start {
 		return nil, 0, nil
 	}
@@ -369,7 +758,7 @@ func loadArchivePrefix(ctx context.Context, client *historicalmarket.PublicDataC
 	archives := 0
 	for !month.After(last) {
 		spec := historicalmarket.PublicDataArchiveSpec{Kind: historicalmarket.ArchiveKindKlines, Period: historicalmarket.ArchivePeriodMonthly, Symbol: symbol, Interval: interval, Date: month}
-		archive, err := client.FetchArchive(ctx, spec)
+		archive, err := fetchResearchArchive(ctx, client, spec, cacheDir)
 		if err != nil {
 			return nil, archives, fmt.Errorf("fetch %s %s: %w", interval, month.Format("2006-01"), err)
 		}
@@ -383,9 +772,41 @@ func loadArchivePrefix(ctx context.Context, client *historicalmarket.PublicDataC
 				QuoteVolume: row.QuoteVolume, TradeCount: row.TradeCount, TakerBuyQuoteVolume: row.TakerBuyQuoteVolume})
 		}
 		archives++
+		fmt.Printf("%s %s archive=%s verified_sha256=%s rows=%d cache=%t\n", symbol, interval, month.Format("2006-01"), archive.SHA256[:12], len(rows), archive.FromCache)
 		month = month.AddDate(0, 1, 0)
 	}
 	return out, archives, nil
+}
+
+func loadResearchArchiveSeries(ctx context.Context, client *historicalmarket.PublicDataClient, symbol string, intervals []string, starts map[string]int64, end int64, cacheDir string) (map[string][]backtest.Bar, int, error) {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	type result struct {
+		interval string
+		bars     []backtest.Bar
+		archives int
+		err      error
+	}
+	results := make(chan result, len(intervals))
+	for _, interval := range intervals {
+		go func(interval string) {
+			bars, archives, err := loadArchivePrefix(ctx, client, symbol, interval, starts[interval], end, cacheDir)
+			results <- result{interval: interval, bars: bars, archives: archives, err: err}
+		}(interval)
+	}
+	series := make(map[string][]backtest.Bar, len(intervals))
+	count := 0
+	var firstErr error
+	for range intervals {
+		item := <-results
+		if item.err != nil && firstErr == nil {
+			firstErr = item.err
+			cancel()
+		}
+		series[item.interval] = item.bars
+		count += item.archives
+	}
+	return series, count, firstErr
 }
 
 func fillResearchBarGaps(ctx context.Context, symbol, interval string, bars []backtest.Bar, start, end int64) ([]backtest.Bar, int, error) {
@@ -537,11 +958,40 @@ func writeResearchDatasetCache(path string, dataset backtest.Dataset, source dat
 	return os.Rename(part, path)
 }
 
-func buildResearchDataset(ctx context.Context, db *sql.DB, client *historicalmarket.PublicDataClient, symbol string, start, end int64, intervals []string, cacheRoot string) (backtest.Dataset, datasetSource, error) {
+func buildResearchDataset(ctx context.Context, db *sql.DB, client *historicalmarket.PublicDataClient, symbol string, start, end int64, intervals []string, cacheRoot, executionSource, indicatorSource, minuteRepairPolicy, archiveDir string) (backtest.Dataset, datasetSource, error) {
+	if executionSource != "arm" && executionSource != "public-archive" {
+		return backtest.Dataset{}, datasetSource{}, fmt.Errorf("unsupported execution source %q", executionSource)
+	}
+	if indicatorSource != "arm" && indicatorSource != "public-archive" {
+		return backtest.Dataset{}, datasetSource{}, fmt.Errorf("unsupported indicator source %q", indicatorSource)
+	}
+	if minuteRepairPolicy != "none" && minuteRepairPolicy != "verified-archive" {
+		return backtest.Dataset{}, datasetSource{}, fmt.Errorf("unsupported minute repair policy %q", minuteRepairPolicy)
+	}
+	if minuteRepairPolicy != "none" && (executionSource != "public-archive" || indicatorSource != "public-archive") {
+		return backtest.Dataset{}, datasetSource{}, fmt.Errorf("verified minute repair requires full public-archive sources")
+	}
 	cachePath := researchCachePath(cacheRoot, symbol, start, end, intervals)
 	if dataset, source, hit, err := readResearchDatasetCache(cachePath, symbol, start, end, intervals); err != nil {
 		return backtest.Dataset{}, datasetSource{}, err
 	} else if hit {
+		priorExecution, priorIndicator := source.ExecutionSource, source.IndicatorSource
+		if priorExecution == "" {
+			priorExecution = "arm"
+		}
+		if priorIndicator == "" {
+			priorIndicator = "arm"
+		}
+		priorRepair := source.MinuteRepairPolicy
+		if priorRepair == "" {
+			priorRepair = "none"
+		}
+		if priorExecution != executionSource || priorIndicator != indicatorSource || priorRepair != minuteRepairPolicy {
+			return backtest.Dataset{}, datasetSource{}, fmt.Errorf("dataset cache source differs from request; select a separate -cache-root for the new source")
+		}
+		if minuteRepairPolicy != "none" && source.RepairVersion != researchArchiveRepairVersion {
+			return backtest.Dataset{}, datasetSource{}, fmt.Errorf("dataset cache repair version differs; select a separate -cache-root")
+		}
 		return dataset, source, nil
 	}
 	tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
@@ -549,7 +999,10 @@ func buildResearchDataset(ctx context.Context, db *sql.DB, client *historicalmar
 		return backtest.Dataset{}, datasetSource{}, err
 	}
 	defer tx.Rollback()
-	source := datasetSource{Database: "go_binance", RESTGapBars: make(map[string]int), BarCoverage: make(map[string]seriesCoverage)}
+	source := datasetSource{Database: "go_binance", ExecutionSource: executionSource, IndicatorSource: indicatorSource, MinuteRepairPolicy: minuteRepairPolicy, RESTGapBars: make(map[string]int), BarCoverage: make(map[string]seriesCoverage)}
+	if minuteRepairPolicy != "none" {
+		source.RepairVersion = researchArchiveRepairVersion
+	}
 	if err := tx.QueryRowContext(ctx, "SELECT CAST(UNIX_TIMESTAMP(CURRENT_TIMESTAMP(3))*1000 AS UNSIGNED)").Scan(&source.AsOfMS); err != nil {
 		return backtest.Dataset{}, datasetSource{}, err
 	}
@@ -566,6 +1019,11 @@ func buildResearchDataset(ctx context.Context, db *sql.DB, client *historicalmar
 		if requiredStart < warmupStart {
 			warmupStart = requiredStart
 		}
+		if (interval == "1m" && executionSource == "public-archive") || (interval != "1m" && indicatorSource == "public-archive") {
+			series[interval] = nil
+			fmt.Printf("%s %s source=Binance checksum-verified public monthly archives\n", symbol, interval)
+			continue
+		}
 		bars, err := readArmSeries(ctx, tx, symbol, interval, requiredStart, end)
 		if err != nil {
 			return backtest.Dataset{}, datasetSource{}, fmt.Errorf("read ARM %s %s: %w", symbol, interval, err)
@@ -581,6 +1039,14 @@ func buildResearchDataset(ctx context.Context, db *sql.DB, client *historicalmar
 	if err := tx.Commit(); err != nil {
 		return backtest.Dataset{}, datasetSource{}, err
 	}
+	if executionSource == "public-archive" && indicatorSource == "public-archive" {
+		publicSeries, archives, err := loadResearchArchiveSeries(ctx, client, symbol, intervals, starts, end, archiveDir)
+		if err != nil {
+			return backtest.Dataset{}, datasetSource{}, err
+		}
+		series = publicSeries
+		source.ArchiveCount += archives
+	}
 	for _, interval := range intervals {
 		arm := series[interval]
 		if len(arm) == 0 || arm[0].OpenTime > starts[interval] {
@@ -589,7 +1055,7 @@ func buildResearchDataset(ctx context.Context, db *sql.DB, client *historicalmar
 				// Keep a month of overlap to verify that public archives match ARM rows.
 				prefixEnd = arm[0].OpenTime + 31*86_400_000
 			}
-			prefix, archives, err := loadArchivePrefix(ctx, client, symbol, interval, starts[interval], prefixEnd)
+			prefix, archives, err := loadArchivePrefix(ctx, client, symbol, interval, starts[interval], prefixEnd, archiveDir)
 			if err != nil {
 				return backtest.Dataset{}, datasetSource{}, err
 			}
@@ -614,6 +1080,28 @@ func buildResearchDataset(ctx context.Context, db *sql.DB, client *historicalmar
 		bars := series[interval]
 		source.BarCoverage[interval] = seriesCoverage{Count: len(bars), First: bars[0].OpenTime, Last: bars[len(bars)-1].OpenTime}
 		fmt.Printf("%s %s verified rows=%d first=%d last=%d\n", symbol, interval, len(bars), bars[0].OpenTime, bars[len(bars)-1].OpenTime)
+	}
+	if minuteRepairPolicy == "verified-archive" {
+		repairs, archives, err := repairResearchArchiveMinutes(ctx, db, client, symbol, series, start, end, archiveDir)
+		if err != nil {
+			return backtest.Dataset{}, datasetSource{}, err
+		}
+		source.MinuteRepairs = repairs
+		source.ArchiveCount += archives
+		indicatorRepairs, indicatorArchives, err := repairResearchIndicatorPrices(ctx, db, client, symbol, series, start, end, archiveDir)
+		if err != nil {
+			return backtest.Dataset{}, datasetSource{}, err
+		}
+		source.IndicatorRepairs = indicatorRepairs
+		source.ArchiveCount += indicatorArchives
+	}
+	if executionSource == "public-archive" {
+		checks, archives, err := validateResearchMinuteAggregates(ctx, client, symbol, series, start, end, indicatorSource == "public-archive", archiveDir)
+		if err != nil {
+			return backtest.Dataset{}, datasetSource{}, err
+		}
+		source.AggregateChecks = checks
+		source.ArchiveCount += archives
 	}
 	if len(funding) == 0 || funding[0].FundingTime > start-24*3_600_000 {
 		prefixEnd := end
@@ -651,4 +1139,80 @@ func buildResearchDataset(ctx context.Context, db *sql.DB, client *historicalmar
 	}
 	fmt.Printf("%s dataset cached data_hash=%s\n", symbol, dataset.DataHash)
 	return dataset, source, nil
+}
+
+func validateResearchMinuteAggregates(ctx context.Context, client *historicalmarket.PublicDataClient, symbol string, series map[string][]backtest.Bar, start, end int64, indicatorsCanonical bool, cacheDir string) (map[string]aggregateCheck, int, error) {
+	minutes := series["1m"]
+	checks := make(map[string]aggregateCheck)
+	archives := 0
+	for interval, higher := range series {
+		if interval == "1m" {
+			continue
+		}
+		duration, err := researchIntervalMs(interval)
+		if err != nil {
+			return nil, archives, err
+		}
+		expected := make(map[int64]backtest.Bar, len(higher))
+		for _, bar := range higher {
+			expected[bar.OpenTime] = bar
+		}
+		check := aggregateCheck{}
+		canonicalMonths := make(map[int64]map[int64]backtest.Bar)
+		for first := 0; first < len(minutes); {
+			bucket := minutes[first].OpenTime / duration * duration
+			last := first + 1
+			for last < len(minutes) && minutes[last].OpenTime < bucket+duration {
+				last++
+			}
+			if bucket >= start && bucket+duration-1 <= end && int64(last-first) == duration/60_000 {
+				aggregate, zeroMinutes := aggregateResearchMinutes(minutes[first:last], interval)
+				check.ZeroTradeMinutes += zeroMinutes
+				bar, exists := expected[bucket]
+				priceOnly := aggregate
+				priceOnly.Volume, priceOnly.QuoteVolume = bar.Volume, bar.QuoteVolume
+				priceOnly.TradeCount, priceOnly.TakerBuyQuoteVolume = bar.TradeCount, bar.TakerBuyQuoteVolume
+				if !exists || !sameResearchBar(priceOnly, bar) {
+					return nil, archives, fmt.Errorf("minute/indicator price aggregate mismatch %s %s at %d: minute=%+v higher=%+v", symbol, interval, bucket, aggregate, bar)
+				}
+				if !sameResearchBar(aggregate, bar) {
+					date := time.UnixMilli(bucket).UTC()
+					month := time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, time.UTC)
+					canonical, ok := canonicalMonths[month.UnixMilli()]
+					if indicatorsCanonical {
+						canonical, ok = expected, true
+					}
+					if !ok {
+						items, fetched, err := loadArchivePrefix(ctx, client, symbol, interval, month.UnixMilli(), month.AddDate(0, 1, 0).UnixMilli()-1, cacheDir)
+						if err != nil {
+							return nil, archives, err
+						}
+						archives += fetched
+						canonical = make(map[int64]backtest.Bar, len(items))
+						for _, item := range items {
+							canonical[item.OpenTime] = item
+						}
+						canonicalMonths[month.UnixMilli()] = canonical
+					}
+					official, ok := canonical[bucket]
+					if !ok || !sameResearchBar(official, bar) {
+						return nil, archives, fmt.Errorf("ARM indicator differs from canonical archive %s %s at %d: official=%+v ARM=%+v", symbol, interval, bucket, official, bar)
+					}
+					check.CanonicalVolumeDifferences++
+					if check.FirstVolumeDifference == 0 {
+						check.FirstVolumeDifference = bucket
+					}
+					check.MaximumQuoteVolumeDifference = math.Max(check.MaximumQuoteVolumeDifference, math.Abs(aggregate.QuoteVolume-bar.QuoteVolume)/math.Max(1, math.Abs(bar.QuoteVolume)))
+				}
+				check.MatchedPrices++
+			}
+			first = last
+		}
+		if check.MatchedPrices == 0 {
+			return nil, archives, fmt.Errorf("no complete minute aggregates matched %s %s", symbol, interval)
+		}
+		checks[interval] = check
+		fmt.Printf("%s %s minute prices verified=%d canonical_volume_differences=%d max_quote_diff=%.6f\n", symbol, interval, check.MatchedPrices, check.CanonicalVolumeDifferences, check.MaximumQuoteVolumeDifference)
+	}
+	return checks, archives, nil
 }
