@@ -1,0 +1,32 @@
+{
+  "version": "RG26",
+  "parent": "whole RG25",
+  "parent_sha256": "d1cec654ad2a0e5dc6556e383805ddce64598a73f09d1bbd3074f4d396a30b06",
+  "change_dimension": "Only supplemental live trigger and same 0.35ATR cap shared anchor become the complete two-closed-bar same-side extreme. Not an equivalent compatibility fix, nested static removal or profit inference.",
+  "evidence": {
+    "geometry_sha256": "da3aaeaeeb0d17827cbcf7551e0f6bb5083c44e24a018dfd6cfe0872aaad7b1b",
+    "scope": "All407 canonical signals, no PnL grouping",
+    "not_yet_beyond_impulse_extreme": 131,
+    "old_cap_excludes_complete_crossing": 57
+  },
+  "outputs": [
+    "/Users/zhz/work/binance/go_binance_futures/temp_strategy/20261005-impulse-pullback-two-bar-extreme/00-impulse-pullback-two-bar-extreme-family.json",
+    "/Users/zhz/work/binance/go_binance_futures/temp_strategy/20261005-impulse-pullback-two-bar-extreme/01-v29c-impulse-pullback-two-bar-extreme.json"
+  ],
+  "hypothesis": "Require continuation beyond the entire closed impulse-pullback structure instead of only the pullback-local edge. A shifted cap can also admit later entries, so freeze full candidates and replay the entire path rather than deleting old trades. No parameter grid or coin/side-specific selection.",
+  "frozen_invariants": [
+    "all closed impulse/pullback/volume/aligned closed2 taker/current activity/regime/daily-veto conjunctions",
+    "whole AF0 base objects/order and uniform signal-confirmed RG4 closes",
+    "9 original indicator configs/no added indicator or interval",
+    "intentional live[0]/no forming taker",
+    "0.35 cap and 0.90 activity coefficients unchanged",
+    "49months/8x/outer5-5/currentcash sizing/fee/slip/actual funding",
+    "all percoin0.9/fouryear/realcost/unread crosscoin gates"
+  ],
+  "pending": [
+    "actual Go Expr version/shape and independent legal double-extreme boundary matrices",
+    "frontend/API, new actual signal audit and pre-return protocol",
+    "AF0/RG25/RG26 all12 full original replay/accounting/close/cost/regime/year audits",
+    "precise marks/orderbook/untouched crosscoin"
+  ]
+}
