@@ -53,7 +53,13 @@ jobs:
         export GOOS=linux
         export GOARCH=amd64
         export CGO_ENABLED=1
-        bee pack -exr='.*.tar.gz' -a linux_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
+        mkdir -p "$RUNNER_TEMP/linux-package"
+        bee pack \
+          -a go_binance_futures \
+          -o "$RUNNER_TEMP/linux-package" \
+          -exr='.*\.tar\.gz$|(^|/)(skills-lock\.json|AGENTS\.md|qrcode\.jpg)$|(^|/)(strategy_templates|doc)(/|$)' \
+          -be GOOS=$GOOS GOARCH=$GOARCH
+        mv "$RUNNER_TEMP/linux-package/go_binance_futures.tar.gz" linux_amd64_feature.tar.gz
 
     - name: Build and package for Windows
       run: |
@@ -62,7 +68,31 @@ jobs:
         export CGO_ENABLED=1
         export GOOS=windows
         export GOARCH=amd64
-        bee pack -exr='.*.tar.gz' -a windows_amd64_feature -be GOOS=$GOOS GOARCH=$GOARCH
+        mkdir -p "$RUNNER_TEMP/windows-package"
+        bee pack \
+          -a go_binance_futures \
+          -o "$RUNNER_TEMP/windows-package" \
+          -exr='.*\.tar\.gz$|(^|/)(skills-lock\.json|AGENTS\.md|qrcode\.jpg)$|(^|/)(strategy_templates|doc)(/|$)' \
+          -be GOOS=$GOOS GOARCH=$GOARCH
+        mv "$RUNNER_TEMP/windows-package/go_binance_futures.tar.gz" windows_amd64_feature.tar.gz
+
+    - name: Verify release packages
+      run: |
+        tar -tzf linux_amd64_feature.tar.gz > "$RUNNER_TEMP/linux-package-contents.txt"
+        tar -tzf windows_amd64_feature.tar.gz > "$RUNNER_TEMP/windows-package-contents.txt"
+
+        grep -Fx 'go_binance_futures' "$RUNNER_TEMP/linux-package-contents.txt"
+        grep -Fx 'go_binance_futures.exe' "$RUNNER_TEMP/windows-package-contents.txt"
+
+        forbidden='(^|/)(skills-lock\.json|AGENTS\.md|qrcode\.jpg|strategy_templates(/|$)|doc(/|$))'
+        if grep -Eq "$forbidden" "$RUNNER_TEMP/linux-package-contents.txt"; then
+          echo "Linux package contains excluded release-only files"
+          exit 1
+        fi
+        if grep -Eq "$forbidden" "$RUNNER_TEMP/windows-package-contents.txt"; then
+          echo "Windows package contains excluded release-only files"
+          exit 1
+        fi
         
     - name: Release Tag
       uses: softprops/action-gh-release@v2
