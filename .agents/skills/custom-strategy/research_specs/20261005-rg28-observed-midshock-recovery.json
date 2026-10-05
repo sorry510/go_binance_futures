@@ -1,0 +1,70 @@
+{
+  "version": "RG28",
+  "parent": "whole RG27",
+  "parent_sha256": "51f5055a310c5520a51783d0a4c2edb9af9cc269aa9b3db794fa5c6da5166db8",
+  "change_dimension": "Replace only supplemental family: test earlier observed recovery through latest closed opposing-shock BODY midpoint, rather than wait for a complete closed recovery bar followed by full two-bar extreme breakout. Not invert or filter old trades.",
+  "hypothesis": "RG27 closed recovery price was frequently already beyond the shock open before live full-extreme confirmation; the added family was weak across coins/years and too infrequent. Earlier within-shock-body recovery is a distinct frozen timing/formation hypothesis, not a proven explanation or inverse alpha.",
+  "outputs": [
+    "/Users/zhz/work/binance/go_binance_futures/temp_strategy/20261005-observed-midshock-recovery/00-observed-midshock-recovery-family.json",
+    "/Users/zhz/work/binance/go_binance_futures/temp_strategy/20261005-observed-midshock-recovery/01-v29c-observed-midshock-recovery.json"
+  ],
+  "mechanism": [
+    "closed1 opposing price body/prior close and legal opposing aggressor quote majority, quote above prior8 closed mean2:10",
+    "live observed directional body and retained opposite low/high against shock, strict body-midpoint reclaim with original .35ATR cap",
+    "observed cumulative currentquote positive and less than closed shock quote plus unchanged literal QPS .90",
+    "forming currentquote is incomplete observed activity, not completed candle contraction or directional taker confirmation; no future minute or forming taker read"
+  ],
+  "frozen_invariants": [
+    "whole AF0 base objects/order, uniform whole signal-confirmed RG4 closes, original9 indicator configuration",
+    "original weak4h OR alignedstrong and dailystrongopposition veto, body.15..2ATR, cap.35/cumulativeactivity.90, intentionallive0",
+    "8x/outer5-5/currentcash10%/bothfees.0005/slip5bps/actualfunding/originalmarkfallback",
+    "49months/percoin>=.8 (171 each/213weeks)/fixed equal-capital combination fourcomplete positiveyears/realcost/unreadAAVE-ATOM-ETC-LINK; no eachcoin profit requirement",
+    "retain RG27 zeroactivity failure as evidence; no invalid-fill deletion, timestamp blacklists or unauthorized engine/data change"
+  ],
+  "close_matrix_scope": "Whole inherited close programs byte-identical to RG27, whose actual matrix passed; new RG28 runtime/canonical validation not yet performed.",
+  "close_matrix": [
+    {
+      "condition": "inside outer5/5 ordinary gate",
+      "result": "not evaluated"
+    },
+    {
+      "condition": "ordinary ROI5/-5/16/28/-12 alone without any signal",
+      "result": false
+    },
+    {
+      "condition": "ROI>=16 AND (trend failure OR (momentum failure AND opposing activity/body))",
+      "result": true
+    },
+    {
+      "condition": "ROI<=-12 AND (trend failure OR momentum failure)",
+      "result": true
+    },
+    {
+      "condition": "ROI>=28 AND (momentum failure OR opposing impulse)",
+      "result": true
+    },
+    {
+      "condition": "(ROI>=5 OR ROI<=-5) AND closed4hADX<20 AND live opposite hourly extreme break",
+      "result": true
+    },
+    {
+      "condition": "ROI<=-20 explicit catastrophic emergency",
+      "result": true,
+      "exception": "only unconfirmed branch"
+    }
+  ],
+  "pending": [
+    "actual new canonical observed-current OHLC/quote/midpoint receiver audit",
+    "six actual API calls code200/passfalse fixed-mock terminal0; no profit or live receiver claim",
+    "new pre-return protocol then twelve complete replays/all accounting close cost including failed RG27 control retained",
+    "precise settlement marks and orderbook fill capacity/slippage; untouched crosscoin"
+  ],
+  "status": "Go_Expr_12474_0_frontend_and_local_v29_passed_canonical_and_replay_pending",
+  "user_goal_update": {
+    "per_coin_frequency": 0.8,
+    "minimum_trades": 171,
+    "weeks": 213,
+    "individual_coin_profit_required": false,
+    "portfolio_rule": "Fixed same four independent 1000-USDT wallets; aggregate annual stability and total net, same-run control reproduction, no cherry-picking. Per-coin losses and years fully disclosed. Untouched holdout cohort remains frozen AAVE/ATOM/ETC/LINK."
+  }
+}

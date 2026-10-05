@@ -1,0 +1,59 @@
+{
+  "version": "RG27",
+  "parent": "whole RG26",
+  "parent_sha256": "16e0b90f1467551f44232a257e7be4c62dde9ad234483583b04730c528d0a1d0",
+  "change_dimension": "Replace only the supplemental entry family, not invert old trades: closed opposing above-average volume shock with opposing aggressor majority fails, next closed bar price and aggressor quote turn toward entry direction with meaningful recovery volume, then original complete two-bar live extreme/cap.",
+  "outputs": [
+    "/Users/zhz/work/binance/go_binance_futures/temp_strategy/20261005-counter-shock-flow-recovery/00-counter-shock-flow-recovery-family.json",
+    "/Users/zhz/work/binance/go_binance_futures/temp_strategy/20261005-counter-shock-flow-recovery/01-v29c-counter-shock-flow-recovery.json"
+  ],
+  "hypothesis": "Same-direction impulse/pullback continuation lacked shared cross-coin/year edge even after full price structure confirmation; a failed opposing shock plus closed buyer/seller initiative recovery is a distinct testable price-volume mechanism, not a guaranteed inverse edge.",
+  "frozen_invariants": [
+    "whole AF0 base objects/order and uniform signal-confirmed RG4 closes",
+    "nine original indicators/intervals, intentional live[0], no forming taker",
+    "original 4h weak OR aligned strong and daily opposition veto",
+    "original 0.35 cap, 0.90 cumulative activity, 0.15..2 closed shock ATR, structural half-body",
+    "8x/outer5-5/currentcash sizing/fee/slip/actual funding/original missing-mark policy",
+    "49months/percoin0.9/fouryear/realcost/unread AAVE-ATOM-ETC-LINK"
+  ],
+  "close_matrix_scope": "Declared identical inherited programs, not new RG27 validation. Both LONG/SHORT direction-aware confirmations.",
+  "close_matrix": [
+    {
+      "condition": "inside outer5/5 ordinary gate",
+      "result": "not evaluated"
+    },
+    {
+      "condition": "ordinary ROI zone alone without any signal",
+      "result": false
+    },
+    {
+      "condition": "ROI>=16 and trend reversal OR joint momentum and opposing activity-body",
+      "result": true
+    },
+    {
+      "condition": "ROI<=-12 and trend OR momentum failure",
+      "result": true
+    },
+    {
+      "condition": "ROI>=28 and momentum OR opposing impulse",
+      "result": true
+    },
+    {
+      "condition": "ROI>=5 OR ROI<=-5 and closed4hADX<20 and live opposing hourly extreme break",
+      "result": true
+    },
+    {
+      "condition": "ROI<=-20 explicit catastrophic emergency",
+      "result": true,
+      "exception": "only unconfirmed branch"
+    }
+  ],
+  "pending": [
+    "actual Go/Expr, legal OHLC dual-shock/recovery buyer-majority boundaries and independent oracle",
+    "whole parent/base/order/close/technology identity and exact project versions",
+    "frontend, API service currently unavailable, new actual canonical closed1/2 flow receiver audit",
+    "pre-return protocol and AF0/RG26/RG27 twelve full49month replays/accounting/close/cost/natural/annual analysis",
+    "precise settlement marks/orderbook capacity/untouched crosscoin"
+  ],
+  "status": "generated_only_not_compiled_or_replayed_no_return_claim"
+}
