@@ -155,7 +155,7 @@ func (ctrl *SpotController) UpdateEnable() {
 }
 
 func (ctrl *SpotController) BatchEdit() {
-	params := new(BatchEditParams)
+	params := new(SpotBatchEditParams)
 	ctrl.BindJSON(&params)
 	query := "UPDATE spot_symbols SET"
 	

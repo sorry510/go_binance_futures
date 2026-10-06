@@ -49,7 +49,6 @@ func StartTrade(systemConfig *models.Config) {
 	}
 
 	ctx := binanceapiusage.WithSource(context.Background(), "start_trade")
-	globalLineStrategy := GetLineStrategy(systemConfig.FutureStrategyTrade) // 交易策略
 
 	/************************************************寻找交易币种 start******************************************************************* */
 	allCoins, err := GetAllSymbols()
@@ -106,17 +105,12 @@ func StartTrade(systemConfig *models.Config) {
 		openBlockedSymbols[position.Symbol] = true // 后续开仓避过已经有 managed 持仓的币，但不影响另一方向的平仓检查
 
 		coin_profit_float64, coin_loss_float64 := resolveTradeROIThresholds("0", "0")
-		coin_line_strategy := globalLineStrategy // 默认为全局
+		coin_line_strategy := line.TradeLineCustom{}
 		var findCoin *models.Symbols
 		for _, coin := range allCoins {
 			if coin.Symbol == position.Symbol {
 				findCoin = coin
-				// 自定义可以覆盖全局
 				coin_profit_float64, coin_loss_float64 = resolveTradeROIThresholds(coin.Profit, coin.Loss)
-				if coin.StrategyType != "global" {
-					// 独立的策略
-					coin_line_strategy = GetLineStrategy(coin.StrategyType)
-				}
 				break
 			}
 		}
@@ -407,11 +401,7 @@ func StartTrade(systemConfig *models.Config) {
 		stepSize := coin.StepSize                            // 交易数量精度
 		usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64) // 交易金额
 		leverage_float64 := float64(coin.Leverage)           // 合约倍数
-		coin_line_strategy := globalLineStrategy             // 默认为全局
-		if coin.StrategyType != "global" {
-			// 独立的策略
-			coin_line_strategy = GetLineStrategy(coin.StrategyType)
-		}
+		coin_line_strategy := line.TradeLineCustom{}
 		openResult := coin_line_strategy.GetCanLongOrShort(strategy.OpenParams{
 			Symbols: coin,
 		})
@@ -749,7 +739,6 @@ func UpdateSymbolsTradePrecision() {
 						KlineInterval:  "1d",
 						Technology:     "",
 						Strategy:       "",
-						StrategyType:   "global",
 						Type:           symbolType,
 						PercentChange:  0.0,
 						Close:          "0",
@@ -852,7 +841,6 @@ type futuresSymbolInsert struct {
 	KlineInterval  string
 	Technology     string
 	Strategy       string
-	StrategyType   string
 	Type           string
 	PercentChange  float64
 	Close          string
@@ -908,9 +896,9 @@ func buildBatchInsertFuturesSymbolsSQL(items []futuresSymbolInsert) (string, []i
 	}
 
 	valueParts := make([]string, 0, len(items))
-	args := make([]interface{}, 0, len(items)*28)
+	args := make([]interface{}, 0, len(items)*27)
 	for _, item := range items {
-		valueParts = append(valueParts, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		valueParts = append(valueParts, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 		args = append(args,
 			item.Symbol,
 			item.PercentChange,
@@ -936,7 +924,6 @@ func buildBatchInsertFuturesSymbolsSQL(items []futuresSymbolInsert) (string, []i
 			item.KlineInterval,
 			item.Technology,
 			item.Strategy,
-			item.StrategyType,
 			item.Pin,
 			item.Sort,
 			item.Type,
@@ -945,7 +932,7 @@ func buildBatchInsertFuturesSymbolsSQL(items []futuresSymbolInsert) (string, []i
 
 	query := fmt.Sprintf(
 		"INSERT INTO `symbols` "+
-			"(`symbol`, `percentChange`, `close`, `open`, `low`, `high`, `enable`, `updateTime`, `lastClose`, `lastUpdateTime`, `baseVolume`, `quoteVolume`, `closeQty`, `tradeCount`, `leverage`, `marginType`, `tickSize`, `stepSize`, `usdt`, `profit`, `loss`, `kline_interval`, `technology`, `strategy`, `strategy_type`, `pin`, `sort`, `type`) "+
+			"(`symbol`, `percentChange`, `close`, `open`, `low`, `high`, `enable`, `updateTime`, `lastClose`, `lastUpdateTime`, `baseVolume`, `quoteVolume`, `closeQty`, `tradeCount`, `leverage`, `marginType`, `tickSize`, `stepSize`, `usdt`, `profit`, `loss`, `kline_interval`, `technology`, `strategy`, `pin`, `sort`, `type`) "+
 			"VALUES %s",
 		strings.Join(valueParts, ", "),
 	)
@@ -1025,31 +1012,6 @@ func GetCoinStrategy(name string) (coinStrategy strategy.CoinStrategy) {
 		coinStrategy = coin.TradeCoin1{}
 	}
 	return coinStrategy
-}
-
-// 获取交易策略
-func GetLineStrategy(name string) (lineStrategy strategy.LineStrategy) {
-	switch name {
-	case "custom":
-		lineStrategy = line.TradeLineCustom{}
-	case "line1":
-		lineStrategy = line.TradeLine1{}
-	case "line2":
-		lineStrategy = line.TradeLine2{}
-	case "line3":
-		lineStrategy = line.TradeLine3{}
-	case "line4":
-		lineStrategy = line.TradeLine4{}
-	case "line5":
-		lineStrategy = line.TradeLine5{}
-	case "line6":
-		lineStrategy = line.TradeLine6{}
-	case "line7":
-		lineStrategy = line.TradeLine7{}
-	default:
-		lineStrategy = line.TradeLine1{}
-	}
-	return lineStrategy
 }
 
 // 转换为统一格式的 positions

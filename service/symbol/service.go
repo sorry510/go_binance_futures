@@ -41,7 +41,7 @@ func (Service) List(ctx context.Context, opts ListOptions) (ListResult, error) {
 	driver, _ := config.String("database::driver")
 	selectedFields := []string{
 		"id", "symbol", "percentChange", "close", "open", "low", "high", "enable", "updateTime", "quoteVolume", "tradeCount", "leverage", "marginType",
-		"stepSize", "tickSize", "usdt", "profit", "loss", "strategy_type", "pin",
+		"stepSize", "tickSize", "usdt", "profit", "loss", "pin",
 	}
 
 	o := orm.NewOrm()

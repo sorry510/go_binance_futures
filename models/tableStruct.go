@@ -13,7 +13,6 @@ type Config struct {
 	FutureOrderType                            string  `orm:"column(future_order_type)" json:"future_order_type"`
 	FutureAllowLong                            int     `orm:"column(future_allow_long)" json:"future_allow_long"`
 	FutureAllowShort                           int     `orm:"column(future_allow_short)" json:"future_allow_short"`
-	FutureStrategyTrade                        string  `orm:"column(future_strategy_trade)" json:"future_strategy_trade"`
 	FutureStrategyCoin                         string  `orm:"column(future_strategy_coin)" json:"future_strategy_coin"`
 	FutureNewEnable                            int     `orm:"column(future_new_enable)" json:"future_new_enable"`
 	SpotNewEnable                              int     `orm:"column(spot_new_enable)" json:"spot_new_enable"`
@@ -118,7 +117,6 @@ type Symbols struct {
 	KlineInterval        string `orm:"column(kline_interval)" json:"kline_interval"`                                // 选定的k线周期 (废弃)
 	Technology           string `orm:"column(technology);type(text)" json:"technology"`                             // 技术指标配置 json
 	Strategy             string `orm:"column(strategy);type(text)" json:"strategy"`                                 // 策略 json
-	StrategyType         string `orm:"column(strategy_type)" json:"strategy_type"`                                  // 策略类型 // global, line_x, custom
 	StrategyTemplateID   int64  `orm:"column(strategy_template_id);index;default(0)" json:"strategy_template_id"`   // 策略模板来源 ID，0 表示自定义/未知
 	StrategyTemplateName string `orm:"column(strategy_template_name);size(128);null" json:"strategy_template_name"` // 策略模板名称快照
 	Pin                  int64  `orm:"column(pin)" json:"pin"`                                                      // 置顶
