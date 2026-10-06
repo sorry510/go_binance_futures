@@ -6,7 +6,120 @@
 
 阶段性总结至少包含：已测版本和完整回测次数、各硬门槛结果、失败原因、保留文件位置、是否有真实运行中的进程、下一步具体研究动作。不要只说“继续”，不要重复已完成回测，不要把合成检查通过称为盈利/发布通过。
 
-## 最新状态：实际goal paused；RG28主42234已安全终止，11/12完整run保留
+## 最新状态：goal active；RG32原5bps开发通过，10bps压力稳定性失败；所有主/后审计已实际结束
+
+- 压力opening8120/closing19414/all12cost17100于北京时间10:00:08实际观察全部terminal0，natural/phase10:00:59实际exit0；压力主47746及全部旧RG32句柄均已结束，不poll/restart。当前只读进程核验无owned主/审计，77freeze与原/压力全部phase输出引用SHA exact，old comparator两场景均完整RG20 SHA12a1a4c9。
+- 压力全12run/2220笔/八AF0-RG31source-data-engine controls preserved/errors[]；自身873=482supp+391in-combo base，开482/38560closed0失败；关873normal0forced/old828added55both10addedonly45相对pre-strong RG20/0失败，forming与oldnumeric全pass；allcost2220/4577funding/1388fallback/0zero0failed，自身873/1945/634/0/0。不能把压力source preservation称为5bps PnL精确复现，也不能把fallback减少称mark已补齐。
+- 压力组合net+1710.473499，四完整年正、逐币频率全过，但日历2025−86.23471611605807原guard失败，压力场景invalidated/releasefalse。原5bps+2889.674070/2025+90.205331/model-gates全过的完整证据保留，两不同RunConfig不混。成本余量不足，未达到真实成本/四年稳定/跨币泛化可用目标。
+- 完整2026-10-06-rg32-slippage10bps-summary.md SHA6d26bb87db971df29ab4923f6f153a5b0fc8daa9e634083df3b834ca9079a304已保存全年度/日历/方向/补充自然组/关闭矩阵/成本范围与下一动作；pressure mainSHA501ae31ef8da0302a96d4bb68202f5710516ebbe5ecbcd392ca6d7b3be13bfae/phaseSHAc64e4e59fb1597ad92eb3102c7efabedcfab99cb2a849c164b12eec917798917。原候选仍temp_strategy，无新参数JSON/发行/DB写/启用。
+- 下一具体动作：只读配对原5bps/压力10bps全部正常close环境及完整ledger，按old分支loss/profit资格与weak/strong结构确认归因，核实成本敏感的可重复逻辑；全49月四币两侧一起描述，不只看2025、筛掉负组、静态加回亏损或搜索刚好过线bp值。若证据指向单一结构问题，再完整新候选/独立矩阵/收益前协议及同5/10场景顺序回放。未阅AAVE/ATOM/ETC/LINK、精确venue mark与历史book仍pending。
+- 本轮是progress：保存原RG32完整总结，新增全2215配对容量证据、明确八451获取失败，实际完成单一10bps12run及全部新后审计，并把关闭谱系方法窄补到待审批草案r2。没有goal complete/paused/blocked调用；formal技能/生产/frontend/conf/_test.go/数据库/模板分配/交易/App/globalmemory和用户dirty保持，无新委派/技能晋级。下方运行中、尚未终止全部是历史。
+
+### RG32压力主结束与三后审计启动（历史）
+
+- 新压力主47746已实际于北京时间09:58:45观察terminal0，不再poll/restart。12完整run/2220交易新会计actualexit0，八AF0/RG31控制source-data-engine身份保留/errors[]，不称10bps复现5bps trade/PnL。压力原冻结77文件均exact。
+- 压力RG32自身873笔、214/227/225/207、freq1.004695/1.065728/1.056338/.971831全≥.8，组合net+1710.473499、四完整年+45.163153/+407.978628/+500.552691/+814.626586，但日历2025−86.23471611605807，原日历稳定性guard失败。原5bps+2889.674070/2025+90.205331事实保留；这不是静态扣费，不能按压力结果找刚好过线bp值或放宽guard。
+- 09:59:21.829–847实际启动压力opening8120、closing19414、all12cost17100，追踪同真实句柄；全部actualterminal才natural/phase/完整人类压力总结。原60518/63189/28001/51804与压力47746已terminal，不能poll旧句柄。精确mark/book和未阅AAVE-ATOM-ETC-LINK仍pending，不发布/写库/启用。
+- 依SkillMax，既有current-goal-gates待审批草案r2新增一段关闭谱系基准方法：SHAa08fd782aa5d67925710f3628b4068895c3df1d9db038da75e80200725c2260a，父690a5617保留、trusted:false，actualapply1/rejected0/quickvalidate用python3 actual0/唯一插入exact。--base4非行为分数；三现实只读请求输入全存在，行为比较pending，未score/gate/promote/批准/新委派；formal270d20不变。
+
+### RG32原完整开发、容量诊断与压力主启动（历史）
+
+- 原RG32主60518实际02:04:16 terminal0、opening63189/closing28001/all12cost51804实际02:10:21全部terminal0，natural/phase02:12:06实际exit0；所有旧句柄结束，不poll/restart。当前重新核61冻结SHA及七输出SHA全exact、只读owned-process检查无遗留主审计。phaseSHAc699329ec9bf3bccf8017212dd29fdc291fab56184e24449848dbb12f1de7a5b。
+- 原完整12run/2215笔/八AF0-RG31完整控制exact/errors[]；自身871=480补充+391在组合base，各币214/227/224/206、freq1.004695/1.065728/1.051643/.967136，固定四钱包net+2889.674070，四完整年+264.320477/+572.931254/+737.010045/+1303.257347，日历2025+90.205331，所有预声明数值gate true。promising under tested conditions但releasefalse；单币负年完整披露，不以逐币盈利否决。
+- 开480/38400closed0失败；关871normal0forced/added-only44相对完整pre-strong RG20（不是父RG31），forming/oldnumeric全部pass；allcost2215/4562funding/1404markfallback0零活动0失败，自身871/1940/642/0/0。精确mark/book及未阅AAVE-ATOM-ETC-LINK仍pending，不因模型自洽发布/写库/启用。完整总结2026-10-06-strong-hourly-joint-loss-structure-exit-summary.md已保存。
+- 新成交活动诊断actualexit0/11自检通过：2215全配对、自身871/控制1344/0缺行重复活动0；自身entry p95 .4252531114%、max8.0176312843% XRP，exit p95 .2316785744%、max1.1813687191% SOL。raw SHAa9e3e107ecf1211f2cd6c6552230bca50e9bfea9201601198dcfdda14579d6a9及完整summary保存。只是事后分钟容量风险描述，不证明盘口/slippage。
+- 2023边界funding-mark八预选GET均实际HTTP451/exit22，地点限制错误不是空mark或零funding；最后XRP49415已terminal22，不再poll。raw c97bc1e306905d023c965f595d855ca50915a7544e40e9b097a41e1a66740649/selection27ababaf及新summary保存；2022四HTTP200空mark原证据保留。不重试/换路由绕过限制、不改变cache/fallback。
+- 单一非适应性滑点加倍压力（5→10bps）已收益前冻结77文件：isolated Go副本仅SlippageBps literal变更，原engine/conf/data/strategy/risk/fee不变，build actual0/三Node syntax0。北京时间09:51:41.848主47746实际启动，AF0/RG31/RG32同四币49月12run，新独立输出20261006-rg32-slippage10bps-development4.json；必须同真实47746追踪，partial/timeout不是terminal、不重启。下一真实结束后新完整会计/八source-data-engine对照（不称5bps PnL复现）/全部压力实际开关/all12cost，再natural/phase/完整年度。
+- formal skill/生产/frontend/conf/DB/模板/分配/启用/订单/App/_test.go/globalmemory无改动；保留所有用户dirty/failed候选。前一goal轮属progress（完整RG32回放/审计与数值首次全过），本轮已有容量新证据并实际启动新成本检验，不是状态重述。下方旧“RG32尚未终止”均历史。
+
+### RG32原5bps主启动（历史）
+
+- 2026-10-06北京时间01:58:02.924实际Go日志启动RG32主60518，启动前61冻结SHA全exact/新主输出不存在/goal active，protocolSHA6d365401de7af9de5a7680f87553f73fcf2dd928ae46c4a6a346247d9fedf20c。唯一AF0/RG31/RG32×固定四币49月12run MAIN无overlay，只追踪同60518，partial/timeout不重启；尚未观察主终止。
+- RG32familySHA839c4d33e23ce0786cdd72ca705512ff468daf737bcd744ce1330b808acf4f7d/comboSHA51b182991491ef122942bc5f29a33f4a28e2439234da03da7359d31584112638，combo versionb38ad611ee214d7cad803337a9287a2eb03a2522af8d121a2e6dbeee8b94f8e7。仅新增strong亏损确认OR→AND，全部旧RG20关闭尤其loss12的OR保留、四entry顺序/9/riskcostdate不变。GoExpr50177 actualterminal0/91276passed0failed，明确单项false/联合true与主动价格缩放可达、完整父子集；frontend两null/9/四types/338portable695close0exactdup，closebuild及三Node syntax actual0。
+- 本地v29只读71161 actual0 ID114语义exact/0writes；API本轮actual7无法连接3333、rule响应[]，Go fallback，不自动开服务/App。全部预检旧句柄已terminal不poll。主真实终止后全会计/八AF0-RG31control整对象、全部actualrg20_入口/正常close/all12cost，再natural/phase/完整年度总结；不能用旧499/915交易数替代新ledger。精确mark/book与未阅四币仍pending，不发布、写库或启用。
+
+### RG31全部结束与RG32生成（历史）
+
+- RG31 opening2197/closing19813/all12cost53288已在01:29:50实际观察全部terminal0，natural/phase01:30:35实际exit0；旧main89784及全部旧审计不可重poll/restart。本轮实核37freeze exact/七结果SHA exact/phase f8ed65511e8facd2f83e399efb7bb5dc1f78adb8ce8c7e8b5945e363417b92d4；限定pgrep无遗留主审计进程。
+- 全12run/2276会计/八AF0-RG30control整对象exact/errors[]；全部499实际补充/39920closed0失败，915normal0forced/288相对完整pre-strong RG20 added-only0失败，allcost2276/4013funding/1206mark回退0零活动0失败，自身915/1529/494/0/0。AddedOnly不是相对立即父RG30；fresh形成指标/oldnumeric全部exact，不扩大为cache/private/live/forward或完整真实cost证明。
+- RG31固定组合net+2315.190660、每币频率1.089202/1.122066/1.093897/.990610、四完整年组合正，但日历2025−9.083993825184308，invalidated/releasefalse；不强求每币盈利、不round近零亏损或改guard。完整2026-10-06-strong-hourly-loss-structure-exit-summary.md SHA68f30d11d7df75cfe91742e7f60c16d31d6be426ec6f3998781e0bcc1e5ad5f1已保存全部年度/方向/自然组/成本/矩阵及下一假设。
+- RG32在上述总结先预声明后保存两完整JSON到temp_strategy/20261006-strong-hourly-joint-loss-structure-exit/；只把RG31新增strong亏损结构trend_fail OR momentum_fail改为AND，其ROI≤−5/closedADX≥20/strict反侧闭合极值/所有旧RG20完整关闭/四entry顺序/九/风险成本日期门槛全保留。尚未预检/主回放/读新收益；下一独立三模式全关闭矩阵、frontend/本地v29只读、收益前协议后AF0/RG31/RG32固定四币12全run。没有新DB写/启用、未阅币仍不读，精确mark/book仍pending。
+
+### RG31主终止与后审计启动（历史）
+
+- 2026-10-06北京时间01:27:05实poll89784返回actualexit0，12完整run，不再poll或restart；mainSHA21d555bd3d9933c24d129d2997ba2f75aff3a600d5060eb6b08e8f78b25f1915、37freeze exact。全会计actualexit0，12run/2276笔/八AF0-RG30完整controls exact/errors[]。
+- RG31四币232/239/233/211笔，频率1.089202/1.122066/1.093897/.990610全过.8；固定组合net+2315.190660，四完整年+226.653054/+412.740525/+622.886777/+1000.875639，但日历2025仍−9.083993825184308，数值稳定性失败，不修改guard或强求逐币盈利。
+- 01:28:17–18实际启动opening2197/closing19813/all12cost53288，同句柄追踪；全部actualterminal才natural/phase与完整human总结。旧RG31主、Expr98527、snapshot35607及closebuild已actualterminal，不重poll。下方“主尚未终止”是历史。
+- 新真实成本来源probe：RG30 all12审计每币第一个实际缺mark的2022时点，四GET实际terminal0/HTTP200/rate-time-symbol exact，但markPrice全为空；仅四例不推断全历史。raw和验证JSON SHAece86e6604bee4750aa84a690875545daa4cf50ceb4a26fb50b30251ea28ea30及2026-10-06-funding-mark-availability-probe.md保留。原cache/runtime/fallback/data/config未改，精确资金費/盘口仍pending，没有未阅币或新DB写。
+
+### RG31实际主启动（历史）
+
+- 2026-10-06北京时间01:20:43.002实际Go日志启动RG31主89784；37冻结SHA再次exact、protocol01314bc035edc90fd0c65f86a7d5bda31dce430cc51fdc49a03c0be856a5163b、新输出不存在/限定pgrep无主审计/goal active。唯一AF0/RG30/RG31×固定四币49月12run MAIN无overlay，必须只poll同89784，partial/timeout不restart。
+- RG31 familySHA6f625a8a/comboSHA9074f901，combo rawversionacb71d48c855252ce5c6dc9432347586b52aee5325ff2caf8bde8c7438156643，先于预检完整保存在temp_strategy/20261006-strong-hourly-loss-structure-exit/。只把RG30新增strong资格由±5改为≤−5，所有entry/9/旧RG20全部weak/profit/loss/emergency保持；不是2025填尾/ROI网格/删单。Go/Expr98527 actual0，91248/0、frontend两issue-null/9/四types/336portable691close0exactdup；closebuild actual0/三Node syntax0，本地v29只读35607 actual0 ID114语义exact0writes。API实际exit7服务未连接，无rule响应，Go fallback，不自动开服务/App。
+- 主actual terminal后新全会计/八AF0-RG30完整controls、所有actual rg20_入口/正常close/all12cost/natural/phase。关闭old comparator实参是pre-strong RG20全关闭，AddedOnly相对RG20不是立即父RG30；Go三模式已独立证明current是父子集。不可静态用旧506/932单。精确mark/book与未阅AAVE/ATOM/ETC/LINK仍pending，开发未全通过不读验证收益，无研究DB写/启用。
+- SkillMax current-goal草案690a5617528080158e9f7eb684857ae6352070ce59dd1fb02c09483eb89220cd实际apply1/rejected0/quickvalidate0/only-declared-insert exact、trusted:false；原formal270d20e8和父costdiagnosis2ee260ff不变，三行为请求pending，未score/gate/promote/批准或新委派。当前目标轮是progress（RG30完整审计/总结、新冻结RG31并实际启动），不是状态重述。下方下一RG31“未生成”均历史。
+
+### RG30全部完成（历史）
+
+- 2026-10-06北京时间01:03:47实际观察opening7312/closing24015/all12cost53110均terminal0，不再poll任何RG30旧句柄；natural/phase也actualexit0。506补充/40480closed0失败、932normal0forced/337added-only0失败；allcost2229/4466funding/1379markfallback/0零活动/0失败，own932/1391/444/0/0。完整2026-10-06-strong-hourly-structure-exit-summary.md保存全年度、侧、自然组、矩阵、成本范围和精确身份。
+- RG30 invalidated，日历2025−0.6560128038937307仍不静默放宽guard；四完整年和频率通过但精确mark/book/未阅跨币pending。新关闭增加频率却比原RG20少667.428929总净，不能静态删added-only交易声称改善。
+- 下一只把新增strong ROI资格由±5改为亏损侧≤−5，保留原全部确认profit/loss/weak/emergency/entry和riskcostdategates；检验早止损与过早兑现赢家是否应分开。RG31尚未生成/预检/冻结/主运行或读收益，不做ROI网格或2025补尾优化。先两完整JSON/独立全关闭矩阵/front/protocol，再AF0/RG30/新候选四币12全run。下方审计运行中为历史。
+
+### RG30主终止与后审计启动（历史）
+
+- 2026-10-06北京时间01:00:51实poll同6548返回actual exit0，不再poll或重启。RG30主SHA1e0e06693a190a20fde834978feb26cf9ab04cadf10f6a5fbb147f943aad7c48；36冻结SHA和protocol238e9c45再次exact。新全会计实际exit0：12run/2229笔/八AF0-RG20完整control exact/errors[]。
+- RG30四币238/245/236/213笔，频率1.117371/1.150235/1.107981/1.000000全过.8；固定四币组合net+1976.054796，四完整SepAug年+201.706795/+326.864823/+660.519134/+827.471015，日历2025仍−0.656013，不能因小亏四舍五入或放宽guard称全部通过；单币年度亏损不独立拒绝。完整裁决等待本轮实际开关和成本审计。
+- 01:02:48–49实际启动opening7312、closing24015、all12cost53110，只追踪这些真实句柄。开仓复用原RG20完整入口审计选择RG30新version，关闭old argument必须原RG20组合，MAIN无overlay。待三个actual terminal后运行natural/phase，保存全年度/侧/趋势和cost范围总结；未阅AAVE/ATOM/ETC/LINK和精确mark/book仍pending，不读收益或写库/启用。
+
+### RG30主启动（历史）
+
+- 2026-10-06北京时间00:49:18.700实际Go起始，主真实句柄6548。启动前36冻结SHA全exact/新输出不存在/限定pgrep无主审计/goal active；严格协议唯一AF0/RG20/RG30×四币49月12run无overlay命令。protocolSHA238e9c45cdc6d40a72db5db685a9d47aa894990c7e14df34d949136fd644bbaf。只poll同6548，partial或timeout不能restart。主实际终止后才全会计/八control/所有actual开关/all12cost/natural/phase；不能拿旧RG20收益当RG30。
+
+### RG30候选、预检和冻结（历史）
+
+- RG30两完整JSON已先保存在temp_strategy/20261006-strong-hourly-structure-exit/，familySHAb6616be9/comboSHAdbae210e，combo rawversionba1bb2000e297962525a766505bcec31f4ed9903c554a235d44cd4d05d3a1b05。唯一维度是RG20 uniform close追加：outer±5 AND closed4hADX≥20 AND严格破closed1反侧极值 AND原trend_fail OR momentum_fail；原四入口/顺序/9/所有旧RG4branches/−20唯一emergency/成本日期门槛保持，不绑定openinghash。
+- Expr36388 actualterminal0，56688/0；frontend两issue-null/9/四types/限定334portable687close0exactdup。APIactualexit7无3333listener、无rule响应，仅API未验；Go fallback继续不自动开App/服务。本地v29只读48993 actual0 ID114语义exact0writes；新closingaudit build26090 actual0，三个Node syntax0，均不可重poll。
+- 新收益前2026-10-06-strong-hourly-structure-exit-protocol.md已保存36SHA，主输出不存在/限定无活进程。尚未启动或读RG30收益，下一启动前再核goal/全部freeze后按唯一MAIN无overlay命令一次AF0/RG20/RG30×四币49月12run，保存真实句柄，实际结束后完整八control/开关/all12cost/natural/phase；原未阅四币和精确mark/book仍pending，不写库/启用。
+
+### RG29完整失败和当前目标回顾（历史）
+
+- 2026-10-06北京时间00:26再次实核goal active，限定pgrep无主/审计残留；RG29主89613、开58574、关75290、成本90182均actual terminal0，会计/natural/phase实际exit0，所有旧句柄不可poll/restart。完整总结2026-10-06-four-hour-cycle-fresh-breakout-summary.md已保存，全部年度/侧/自然组/关闭矩阵/费用与限制保留。
+- RG29全12run/2844笔/八AF0-RG28完整controls exact/errors[]；328补充/36736closed字段/0开仓失败，618normal0forced/5added-only0关闭失败；all成本2844/6124funding/1786原mark回退0零活动及失败，自身618/1566/441/0/0。算术与分钟活动通过不是精确mark/book或完整receiver证明，API先前exit7仍未验证，未阅四币未读。
+- RG29每币133/164/185/136笔、频率.624413/.769953/.868545/.638498，三币不达.8；固定组合+1513.131076但首完整年−314.252930和日历2025−275.516761，invalidated，不因SOL单币负独立拒绝。Goal没有合格策略。
+- 只读重审修正版20261006-current-goal-retrospective-rg0-rg28-v2.json（SHA ddce8ce4fe65a954d9c128a11cc344e683424fcaa4dc79ae542733a76788facb）29个RG0–28全部identity可比、excluded[]、全部当前数值通过[]。RG13使用已经存在的accounting-v2（12run/八controls/errors0），原v1和旧两个路径比较错误保留，不隐藏/删除。RG20日历2025−6.086969不静默放宽稳定性验收。
+- 下一核对RG20强趋势退出结构盲区，再只改一个确认关闭维度；RG30尚未生成或启动/读取新收益，不做lookback网格/选币/年份/删单，不读未阅验证币，不写库/分配/启用/App/生产/前端/conf/新_test.go/globalmemory或新委派。下方待确认审计与旧回顾范围均是历史。
+
+### RG29主结束与后审计启动（历史）
+
+- 北京时间2026-10-06 00:06:14实际观察主89613 terminal0，不再poll/restart；全12run/2844笔/八AF0-RG28完整控制exact/errors[]。RG29 BTC/ETH/SOL/XRP133/164/185/136笔，频率.624413/.769953/.868545/.638498，三币不达.8；净+710.317944/+238.144720/−14.564990/+579.233402，固定组合+1513.131076，四完整年−314.252930/+528.350115/+511.081585/+869.404829，首年和日历2025负，仍失败，不以SOL单币负独立拒绝。
+- 主actual终止后00:06:14–15启动新opening58574、closing75290、all12cost90182，追踪同句柄；结束后才natural/phase/全year/close与成本失败归属总结。API3333上一尝试actualexit7未验证/Go fallback，精确mark/book/未阅币仍pending。以下主运行中均历史。
+- 20261006-current-goal-retrospective-rg0-rg28.json只读29个原固定四币研究，原main/accounting/portable/config/data identity核对后28可比、RG13有原accounting异常排除；新.8/允许单币负但固定组合年度/集中门槛无全部通过版本，不凭旧逐币profit gate拒绝。RG20四SepAug年正且频率达标但完整日历年仍负；不根据结果静默放宽已声明稳定性门槛或读未阅币。旧RG13异常待查，不把excluded误说为策略失败。
+
+### RG29主实际启动（历史）
+
+- 2026-10-05北京时间23:57:28启动前32冻结SHA再次实核exact，新主输出不存在、限定pgrep无活主/审计；按唯一protocol命令启动主89613，实际Go起始日志23:57:29.468，MAIN无overlay。协议SHA22bfa1ce6d564e3db2d657a6afdf02e73f42e99a5f88e6fe0bedf8c81a9870d4。尚未观察终止，必须追踪同89613，partial/checkpoint/timeout不重启或补称结束；主实际终止后才全会计/八完整控制/所有actual开仓/正常关闭/all12成本/natural/phase及完整年度总结。
+
+### RG29生成、预检和冻结（历史）
+
+- RG29两完整JSON已先保存于temp_strategy/20261005-four-hour-cycle-fresh-breakout/；familySHAf1573b74/comboSHA723149a4，combo projectversionb45dd2bec4a70f5408e1d95c87818da409aa0e7af1b5bf8d7f06da4f7bce0930。只换两supplement为原v29方向/加速/实体/无追价的四闭合小时fresh结构；原12hbase/order/wholeRG4/九/日期风险成本全部不变，不加QPS90%门槛/主动量多数或弱趋势入口。
+- Expr53340实际terminal0，3562/0；frontend两issue-null9四types/332portable771entry0exactdup；新opening71333实际buildterminal0，三个Node syntax0。API实际terminal7，3333无法连接且无rule响应，仅API待恢复，按skill真实Go/Exprfallback继续，不自动开服务/App。所有这些预检句柄都已终止，不poll。
+- 收益前2026-10-05-four-hour-cycle-fresh-breakout-protocol.md已保存，32SHA冻结且protected source/config exact、main输出不存在/限定无活进程。AF0/RG28/RG29×原49月四币12run及≥.8/固定组合四完整年/真实成本/未阅门槛预声明。主尚未启动或读取新收益；下一再实核32SHA后按唯一无overlay命令启动一次，必须实际句柄追踪，结束再全会计/八控制/新actualreceiver开/全关/all12cost/natural/phase。
+
+### RG28完整失败结论（历史）
+
+- RG28主97136、开56439、关74147均实际terminal0，成本86260实际terminal1，natural/phase汇总exit0；限定pgrep无本轮活进程。所有旧句柄不可重poll。12run/2864笔/八AF0-RG27完整控制exact/errors[]；1430补充/114400closed/0开仓失败，1797normal/0forced/720added-only/0关闭失败。
+- RG28四频率1.910798/2.173709/2.183099/2.169014全≥.8，但固定四币净−363.599904、四完整年−205.006858/−461.218933/−87.802897/+405.794789、排除最大贡献ETH后−473.323890，invalidated。不是要求单币盈利。完整总结2026-10-05-observed-midshock-recovery-summary.md保存，原候选及所有失败保留。
+- 全成本2864/6057funding/1772原mark回退/1零活动/1失败仅旧RG27 XRP seq59，数值误差均精度内；自身1797/3465/1077/0零活动及失败。成本原模型算术/分钟打印通过不等于精确mark和盘口证明，all-study仍failed。精确mark/历史book/未阅AAVE-ATOM-ETC-LINK pending。
+- 下一已预声明仅替换补充入场为v29方向和加速条件下前4闭合小时（一个4h周期）的新鲜突破；保留原12小时base/order/fulluniformRG4/9参数和所有日期、风险、成本、门槛。不做lookback网格/选币/收益逆转。尚未生成RG29或读其收益，先完整JSON、独立预检及收益前协议，再AF0/RG28/新候选同次12全撮合。
+
+### RG28恢复后主结束和后审计启动（历史）
+
+- 用户明确继续active thread goal，实际get_goal active。恢复前32冻结hash/11run checkpointSHA191dbfc6 exact，本地v29只读新快照75165 terminal0，go_bn_test ID114两语义与冻结基线一致/0writes；原配置、成本/风险/datahash/source/参数/原闭合与forming语义不变。恢复记录2026-10-05-rg28-resume1-audit.md保留。
+- 新主97136于北京时间23:19:28.158启动，仅中断XRP/RG28重做，输出实际confirmed前11alreadyrecorded；北京时间23:20:42实际观察terminal0，12完整49月run。旧42234已terminated不可poll，新97136也不可再poll/restart。RG28四币407/463/465/462笔，freq1.910798/2.173709/2.183099/2.169014，全部≥.8；模型net−34.242286/+109.723987/−164.385248/−274.696左右，组合约−363.60失败。按当前目标，不以单币负为独立拒绝原因。
+- 全会计actualexit0，12run/2864笔/八AF0-RG27共享完整控制exact/errors[]。23:20:42实际启动opening56439、closing74147、all12cost86260，只追踪这些真实句柄；必须全部actualterminal后才natural/phase/完整年度失败总结。保留RG27控制已知XRP59零活动exit及本轮可能的新失败，按数值/活动分别分类，不静默改fill或删单。没有读未阅币、生成RG29或发布。
+- goal active；原每币≥.8、四年组合稳定/真实成本/未阅跨币、不强求逐币盈利门槛保持。未改生产/前端/conf/正式skill/数据库模板/分配/启用/下单/App/仓库_test.go/globalmemory、新委派或技能晋级。下方paused和11run未完成都是历史，不可据此暂停或重跑已完任务。
+
+### RG28安全暂停与11run保留（历史）
 
 - 本轮get_goal真实返回paused（最新用户目标每币≥.8、真实成本、四年稳定、跨币泛化、不强求逐币盈利），未调用update_goal自行暂停或恢复。后续必须先阶段性总结并确认明确恢复；不得因下方历史active/run字样继续。Goal不是complete或blocked，也尚无合格策略。
 - 已确认owned PID61805/精确RG28输出args后SIGTERM，42234实际terminal1(signal:terminated)，限定pgrep exit1无主进程，不能再poll42234。原XRP RG28最后真实80%，原输出11/12完整run保留，不删除重启或称完成。仅恢复获授权后核验协议/全SHA/原checkpoint身份，原harness同命令同输出跳过已完成11run，只完整重做中断XRP RG28。

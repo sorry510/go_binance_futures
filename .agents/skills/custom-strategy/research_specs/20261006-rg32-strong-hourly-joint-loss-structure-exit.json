@@ -1,0 +1,101 @@
+{
+  "research_id": "RG32",
+  "name": "RG32 v29C与扫边收回强趋势亏损侧趋势动量联合退出组合（研究候选）",
+  "parent_path": "temp_strategy/20261006-strong-hourly-loss-structure-exit/01-v29c-strong-hourly-loss-structure-exit.json",
+  "candidate_path": "temp_strategy/20261006-strong-hourly-joint-loss-structure-exit/01-v29c-strong-hourly-joint-loss-structure-exit.json",
+  "family_path": "temp_strategy/20261006-strong-hourly-joint-loss-structure-exit/00-strong-hourly-joint-loss-structure-exit-family.json",
+  "change_dimension": "Only final confirmation of RG31 added strong_structure_reversal: trend_fail OR momentum_fail becomes trend_fail AND momentum_fail; ROI<=-5, closedADX>=20, strict opposite-hourly break and all old RG20 close branches remain exact.",
+  "hypothesis": "Require joint four-hour direction failure and hourly momentum failure to confirm ordinary-gate structural loss exits inside a closed strong-trend regime. A single local failure may not invalidate the higher-timeframe setup. Both confirmations remain price-derived, not statistically independent alpha. Stricter exits may increase losses, costs, holding time and reduce frequency. No threshold/calendar/coin/side grid or static deletion of loss trades.",
+  "development_parent_selection": "Previously inspected RG20/RG30/RG31 development lineage, not untouched validation. RG31 calendar2025 -9.083993825184308 does not justify fitting a near-zero tail, changing year gates or rounding losses.",
+  "parameter_grid": false,
+  "entry_hash_binding": false,
+  "preserved": [
+    "all four RG31/RG20 entry objects and exact priority",
+    "nine indicator objects and parameters",
+    "old profit16/28 loss12 weakADX20 structural branch and catastrophe20 thresholds",
+    "intentional forming [0]; no forming taker/MarketCondition",
+    "original v7/standard_1m next-minute execution/current-cash sizing/actual funding/original mark fallback"
+  ],
+  "replay": {
+    "start_inclusive": "2022-09-01T00:00:00Z",
+    "end_exclusive": "2026-10-01T00:00:00Z",
+    "days": 1491,
+    "weeks": 213,
+    "initial_capital_per_coin": 1000,
+    "position_size_pct": 0.1,
+    "leverage": 8,
+    "profit": 5,
+    "loss": 5,
+    "fee_rate": 0.0005,
+    "slippage_bps": 5,
+    "funding": "actual historical timestamps/rates; original mark fallback explicitly audited"
+  },
+  "development_symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "XRPUSDT"
+  ],
+  "untouched_symbols": [
+    "AAVEUSDT",
+    "ATOMUSDT",
+    "ETCUSDT",
+    "LINKUSDT"
+  ],
+  "gates": {
+    "each_coin_trades_min": 171,
+    "each_coin_trades_per_full_week_min": 0.8,
+    "individual_coin_profit_required": false,
+    "fixed_equal_initial_capital_aggregate_net_positive": true,
+    "all_four_full_sep_aug_aggregate_years_positive": true,
+    "full_calendar_2023_2024_2025_aggregate_positive": true,
+    "positive_excluding_largest_positive_coin": true,
+    "precise_settlement_marks": "pending; cannot be replaced by arithmetic parity",
+    "historical_orderbook_capacity_and_slippage": "pending; clean activity is not proof",
+    "untouched_cross_coin_validation": "only after all development gates"
+  },
+  "close_decision_matrix": [
+    {
+      "case": "ordinary +/-5 ROI alone, all confirmations false",
+      "expected": false
+    },
+    {
+      "case": "ROI<=-5, closedADX>=20, strict opposite closed1 break, BOTH trend_fail and momentum_fail",
+      "expected": true
+    },
+    {
+      "case": "only trend OR only momentum failure at -12<ROI<=-5 and no old branch",
+      "expected": false
+    },
+    {
+      "case": "ROI<=-12 with only one failure satisfying old loss_reversal",
+      "expected": "old branch true; unchanged, not suppressed by new AND"
+    },
+    {
+      "case": "strong technical confirmation at positive ROI with no old branch",
+      "expected": false
+    },
+    {
+      "case": "no strict break or exact opposite-extreme equality, no old branch",
+      "expected": false
+    },
+    {
+      "case": "ROI inside (-5,5)",
+      "expected": "outer gate excludes"
+    },
+    {
+      "case": "all complete old RG20 weak/profit16/28/loss12 branches",
+      "expected": "preserved"
+    },
+    {
+      "case": "ROI<=-20",
+      "expected": "true; sole unconfirmed emergency"
+    },
+    {
+      "case": "blank/wrong opening hash",
+      "expected": "same decision; uniform hash-independent"
+    }
+  ],
+  "preflight_status": "not yet run; no RG32 returns read; no release/persistence/activation"
+}
+
