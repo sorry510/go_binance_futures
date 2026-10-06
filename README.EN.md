@@ -55,7 +55,7 @@ Normal startup **does not automatically synchronize the schema or run database v
 
 ### desc
 
-In the new UI, maintain indicators and strategy methods under **Futures Trade → Strategy Templates** (`合约交易 → 策略模板`), then assign a global or custom strategy to each symbol under **Futures Trade → Futures Trade** (`合约交易 → 合约交易`).
+In the new UI, maintain indicators and strategy methods under **Futures Trade → Strategy Templates** (`合约交易 → 策略模板`), then apply a template or edit the strategy configuration for each symbol under **Futures Trade → Futures Trade** (`合约交易 → 合约交易`). Futures symbols always use the custom-strategy engine; the `global / line_x / custom` strategy-type selector and the global trading strategy have been removed.
 
 <a href="./STRATEGY.md">custom strategy details</a>
 
@@ -77,7 +77,7 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 
 | Menu | Pages and purpose |
 | --- | --- |
-| Configuration Center (`配置中心`) | Non-AI global settings for futures trading, new-coin rush, price alerts, market monitoring, funding-rate monitoring, notifications, debug push, and external links. Core WebSocket streams are mandatory infrastructure and have no disable switch. |
+| Configuration Center (`配置中心`) | Uses the same Card/collapse pattern as AI Configuration for non-AI runtime settings. Card headers show only the name and a status tag; actual switches live inside each Card. Futures Trade, Fast Move, Liquidation, Market Condition, and Test Strategy are separate Cards, alongside new-coin rush, coin alerts, market monitoring, funding-rate monitoring, debug push, and external links. Core WebSocket streams are mandatory infrastructure and have no disable switch. |
 | AI → Chat (`AI → 对话`) | Unified Agent chat entry; choose chat-enabled Native/Portable Skills and optionally select a real futures Symbol from the contract list so natural-language aliases cannot select the wrong market |
 | AI → Symbol Analysis (`AI → 单币分析`) | Select a real USDT perpetual contract, start structured AI analysis, and review historical TradingPlans, direction, confidence, market regime, and subsequent price movement |
 | AI → Model Configuration (`AI → 模型配置`) | Add, edit, test, and switch database-backed LLM configurations; new tasks use the current model without a restart |
@@ -268,24 +268,23 @@ This command deletes only whitelist records older than 90 days from `agent_obser
 
 ## futures-trade
 
-The **Futures Trade → Futures Trade** page supports per-symbol settings for strategy type, indicators, strategy methods, margin mode, USDT amount, leverage, take-profit rate, stop-loss rate, and enabled status.
+The **Futures Trade → Futures Trade** page supports per-symbol indicators, strategy methods, strategy templates, margin mode, USDT amount, leverage, take-profit rate, stop-loss rate, and enabled status. Every futures symbol uses the custom-strategy engine, so there is no strategy-type selector.
 
 ### Enabling futures trading
 
-1. Under **Configuration Center → Futures Trade** (`配置中心 → 合约交易`), enable the futures master switch. Futures/Spot market WebSockets and Futures User Data WebSocket start automatically and have no disable switch. The futures master switch is saved immediately and no longer shows a second confirmation dialog.
-2. Enable `Allow Long` and/or `Allow Short`, then configure the global strategies, position limits, and order type.
-3. Open **Futures Trade → Futures Trade** and verify the target symbol's parameters and enabled status.
+1. Under **Configuration Center → Futures Trade** (`配置中心 → 合约交易`), enable `Enable Futures Trade` inside the Card. Futures/Spot market WebSockets and Futures User Data WebSocket start automatically and have no disable switch. The Card header shows only the current status tag; it does not contain the switch itself.
+2. Enable `Allow Long` and/or `Allow Short`, then configure the coin-selection strategy, position limits, and order type. `Position profit sign-change notification` is directly below `Order Type`.
+3. Open **Futures Trade → Futures Trade** and verify the target symbol's custom-strategy settings, trading parameters, and enabled status.
 
-### Global settings
+### Configuration Center Cards
 
-- **Fast-movement alerts:** configure the movement threshold, recovery threshold, cooldown, and monitoring windows. Review Signal analysis, triage, notifications, and fallback under **AI → Alert Pipeline History**.
-- **Position profit sign-change notification:** sends a notification when a position changes between profit and loss. Enabling it for many positions or symbols increases API traffic.
-- **Allow Long / Allow Short:** direction-level master switches; disabled directions will not open even when a strategy matches.
-- **Trading Strategy / Coin Selection Strategy:** used when a symbol's strategy type is `global`; custom symbols use their own configuration.
-- **Maximum Positions / Maximum Losing Positions:** prevent new automatic positions after a limit is reached. Automatic scaling can adjust the losing-position limit after consecutive wins or losses.
-- **Market Trend:** select it manually or enable automatic market-trend updates for strategy evaluation.
+- **Futures Trade:** contains the futures master switch, `Allow Long / Allow Short`, coin-selection strategy, maximum positions, maximum losing positions, automatic loss-limit scaling, and order type. `Position profit sign-change notification` is placed directly below `Order Type`; enabling it for many positions or symbols can increase API traffic.
+- **Fast Move:** a standalone Card for enable state, movement threshold, recovery threshold, cooldown, and monitoring windows. The header shows a status tag while the real switch is inside the Card. Review Signal analysis, triage, notifications, and fallback under **AI → Alert Pipeline History**.
+- **Liquidation:** a standalone Card for liquidation-order collection, BTC liquidation aggregation window, notional threshold, and cooldown. Its header is status-only and does not contain a switch.
+- **Market Condition:** a standalone Card for manual market-condition selection, automatic updates, AI update progress, and the latest analysis result. Its header shows `Auto / Manual` state.
+- **Test Strategy:** a standalone Card for paper-trading enable state, test-result navigation, automatic conversion count, and per-side test fee rate.
+- **Custom Strategy / Coin Selection Strategy:** there is no global trading strategy and no per-symbol strategy type. Every futures symbol always evaluates its own custom strategy configuration (indicators + strategy methods), which can be reused through **Futures Trade → Strategy Templates**. The `Coin Selection Strategy` in the Futures Trade Card controls only the automatic-trading candidate pool; it does not change the symbol's execution strategy.
 - **Ownership isolation:** the Excluded Symbols setting has been removed. Automatic futures trading only manages positions and orders created and registered by the corresponding owner. Manual positions, positions owned by other modules, and unknown account positions are not automatically claimed, closed, or canceled by `auto_strategy`.
-- **Order Type:** `LIMIT` places a limit order; `MARKET` executes a market order.
 
 ## Historical Backtest
 
@@ -335,7 +334,7 @@ The UI shows live stages for dataset building, normal replay, high-resolution ca
 
 ## real-time custom-strategy paper trading (separate from historical backtesting)
 
-Enable `Test Strategy` under **Configuration Center → Futures Trade**. Core WebSocket streams start automatically. Simulation follows the same strategies and limits as real automatic trading but does not operate the real futures account. Open the result from the `View Test Results` button or **Futures Trade → Test Results**.
+Enable paper trading in the standalone **Configuration Center → Test Strategy** Card. Core WebSocket streams start automatically. Simulation uses the same per-symbol custom strategies and trading limits as real automatic trading but does not operate the real futures account. Open results from the Card's `View Test Results` button or **Futures Trade → Test Results**.
 
 When the `Test Auto-Conversion Count Limit` is non-zero, consecutive simulated wins can switch to real trading; consecutive real-trading losses can switch back to test mode.
 
@@ -395,7 +394,7 @@ Enable the master switch under **Configuration Center → Funding Rate Monitorin
 
 ## system-config
 
-- **Configuration Center:** changes non-AI database-backed trading, monitoring, and alert runtime settings.
+- **Configuration Center:** changes non-AI database-backed trading, monitoring, and alert runtime settings. It uses Card/collapse sections with status tags in headers and actual switches inside the Card; Futures Trade, Fast Move, Liquidation, Market Condition, and Test Strategy are configured separately.
 - **AI → AI Configuration:** centralizes AI alerts, Schedulers, global Agent budgets, and controlled-trading Risk Policy.
 - **System Configuration:** edits `conf/app.conf` online. After `Save`, startup-time settings still require `Restart Service` or a manual application restart.
 - **Logs:** displays output from the command configured in `web.commend_log`.
@@ -417,7 +416,7 @@ The System Configuration page contains sensitive values such as API keys, databa
 ### FAQ (new UI)
 
 1. **Where do I enable automatic trading?** Open **Configuration Center → Futures Trade** and verify the futures master switch and `Allow Long/Allow Short`. Then verify the symbol's enabled status under **Futures Trade → Futures Trade**. Core WebSocket streams run automatically.
-2. **Where can I view simulated trades?** Enable `Test Strategy`, then use `View Test Results` or open **Futures Trade → Test Results**.
+2. **Where can I view simulated trades?** Enable it in the standalone **Configuration Center → Test Strategy** Card, then use `View Test Results` or open **Futures Trade → Test Results**.
 3. **Why did a configuration change not take effect?** Configuration Center updates runtime settings. System Configuration edits `conf/app.conf`; after `Save`, startup-time settings still require an application restart.
 4. **Why are futures prices delayed?** Prices are updated through mandatory WebSocket streams. Check WebSocket freshness/error state on the System Dashboard, network quality, and proxy stability.
 5. **Why can the account not open a position?** Check direction switches, maximum-position limits, maximum losing positions, symbol enabled status, available USDT, and whether the same Symbol/side already has a managed position or active controlled order. Binance may also restrict some IP regions.
@@ -491,8 +490,8 @@ Normal startup does not modify the database schema or run database version migra
 - Login credentials: `web.username` and `web.password` in `conf/app.conf`
 - After login, the UI opens **Configuration Center**. Use the left navigation menu; there is no need to manually build `#/...` routes
 
-### Trading Strategy
-> Refer to the `feature/strategy` folder and [Custom Strategy Details](./STRATEGY.md)
+### Custom Trading Strategy
+> Futures symbols always use the custom-strategy engine; there is no global trading strategy or strategy-type selector. See `feature/strategy/line/line_custom.go` and [Custom Strategy Details](./STRATEGY.md).
 
 ### Common actions in the new UI
 

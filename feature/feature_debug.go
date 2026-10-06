@@ -45,12 +45,6 @@ func GoTestLine() {
 	// logs.Info(line.BaseCheckCanLongOrShort())
 	// return
 	logs.Info("start test line")
-	systemConfig, err := utils.GetSystemConfig()
-	globalLineStrategy := GetLineStrategy(systemConfig.FutureStrategyTrade) // 选币策略
-	if err != nil {
-		logs.Error("GetSystemConfig:", err)
-		return
-	}
 
 	coins, _ := GetAllSymbols()
 	for _, coin := range coins {
@@ -82,10 +76,7 @@ func GoTestLine() {
 		// up, mb, dn, _ := line.CalculateBollingerBands(closePrices, 21, 2.0)
 		// logs.Info(up[0], mb[0], dn[0])
 
-		coin_line_strategy := globalLineStrategy
-		if coin.StrategyType != "global" {
-			coin_line_strategy = GetLineStrategy(coin.StrategyType)
-		}
+		coin_line_strategy := line.TradeLineCustom{}
 		openResult := coin_line_strategy.GetCanLongOrShort(strategy.OpenParams{
 			Symbols: coin,
 		})

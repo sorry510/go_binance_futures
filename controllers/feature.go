@@ -26,7 +26,6 @@ type BatchEditParams struct {
 	Loss               string `json:"loss"`
 	Leverage           string `json:"leverage"`
 	MarginType         string `json:"marginType"`
-	StrategyType       string `json:"strategyType"`
 	StrategyTemplateId int64  `json:"strategyTemplateId"`
 }
 type FeatureController struct {
@@ -200,10 +199,6 @@ func (ctrl *FeatureController) BatchEdit() {
 	if params.MarginType != "" {
 		query += " marginType = ?,"
 		bindData = append(bindData, params.MarginType)
-	}
-	if params.StrategyType != "" {
-		query += " strategy_type = ?,"
-		bindData = append(bindData, params.StrategyType)
 	}
 	if params.StrategyTemplateId != 0 {
 		var template models.StrategyTemplates

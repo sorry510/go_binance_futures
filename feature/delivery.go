@@ -49,7 +49,6 @@ func UpdateDeliverySymbolsTradePrecision() {
 						Usdt: "10",
 						Profit: "20",
 						Loss: "20",
-						StrategyType: "global",
 						Type: suffixType, // 永续合约
 					})
 				}

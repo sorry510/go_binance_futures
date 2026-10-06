@@ -26,7 +26,6 @@ type DeliverySymbols struct {
 	Loss string `orm:"column(loss)" json:"loss"` // 损失率
 	Technology string `orm:"column(technology);type(text)" json:"technology"` // 技术指标配置 json
 	Strategy string `orm:"column(strategy);type(text)" json:"strategy"` // 策略 json
-	StrategyType string `orm:"column(strategy_type)" json:"strategy_type"` // 策略类型 // global, line_x, custom
 	Pin int64 `orm:"column(pin)" json:"pin"` // 置顶
 	Sort int64 `orm:"column(sort)" json:"sort"` // 排序
 	Type string `orm:"column(type)" json:"type"` // USDT, USDC

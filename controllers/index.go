@@ -32,7 +32,6 @@ func (ctrl *IndexController) GetServiceConfig() {
 	var tradeFutureEnable = systemConfig.FutureEnable
 	var tradeSpotEnable = systemConfig.SpotEnable
 	var tradeDeliveryEnable = systemConfig.DeliveryEnable
-	var tradeStrategyTrade = systemConfig.FutureStrategyTrade
 	var tradeStrategyCoin = systemConfig.FutureStrategyCoin
 	var tradeNewEnable = systemConfig.FutureNewEnable
 
@@ -63,7 +62,6 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"tradeFutureEnable":             tradeFutureEnable,
 			"tradeSpotEnable":               tradeSpotEnable,
 			"tradeDeliveryEnable":           tradeDeliveryEnable,
-			"tradeStrategyTrade":            tradeStrategyTrade,
 			"tradeStrategyCoin":             tradeStrategyCoin,
 			"tradeNewEnable":                tradeNewEnable,
 

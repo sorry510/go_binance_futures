@@ -1093,7 +1093,7 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 	}
 
 	valueParts := make([]string, 0, len(tickers))
-	args := make([]interface{}, 0, len(tickers)*28)
+	args := make([]interface{}, 0, len(tickers)*27)
 	for _, ticker := range tickers {
 		// logs.Info("ws symbol:", ticker.Symbol, "closePrice:", ticker.ClosePrice)
 		symbolType := utils.FuturesSymbolType(ticker.Symbol, "")
@@ -1101,7 +1101,7 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 			continue
 		}
 
-		valueParts = append(valueParts, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		valueParts = append(valueParts, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 		args = append(args,
 			ticker.Symbol,
 			ticker.PriceChangePercent,
@@ -1127,7 +1127,6 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 			"1d",
 			"",
 			"",
-			"global",
 			0,
 			0,
 			symbolType,
@@ -1139,7 +1138,7 @@ func buildBatchUpdateSymbolsSQL(tickers []futures.WsMarketTickerEvent) (string, 
 
 	query := fmt.Sprintf(
 		"INSERT INTO `symbols` "+
-			"(`symbol`, `percentChange`, `close`, `open`, `low`, `high`, `enable`, `updateTime`, `lastClose`, `lastUpdateTime`, `baseVolume`, `quoteVolume`, `closeQty`, `tradeCount`, `leverage`, `marginType`, `tickSize`, `stepSize`, `usdt`, `profit`, `loss`, `kline_interval`, `technology`, `strategy`, `strategy_type`, `pin`, `sort`, `type`) "+
+			"(`symbol`, `percentChange`, `close`, `open`, `low`, `high`, `enable`, `updateTime`, `lastClose`, `lastUpdateTime`, `baseVolume`, `quoteVolume`, `closeQty`, `tradeCount`, `leverage`, `marginType`, `tickSize`, `stepSize`, `usdt`, `profit`, `loss`, `kline_interval`, `technology`, `strategy`, `pin`, `sort`, `type`) "+
 			"VALUES %s "+
 			"%s",
 		strings.Join(valueParts, ", "),
