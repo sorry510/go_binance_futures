@@ -1,7 +1,0 @@
-[
-  {
-    "op": "insert_after",
-    "target": "- For complete ARM table exports, exact opening-rule-bound exit comparisons and Expr built-in name checks, follow `references/arm-replay.md`; verify accounting/identity and branch behavior before interpreting a full replay.",
-    "content": "\n- Before releasing or forward-testing `OpenStrategyHash`-bound exits, trace the receiver in live `TradeLineCustom.CanOrderComplete`, historical `BuildMinuteClose`/environment construction, and forward `CheckTestResults` separately. On 2026-10-03 the first two populated the opening hash, but `CheckTestResults` saved it in the row without assigning it to the expression environment, leaving the `InitParseEnv` default empty. Therefore historical success did not prove forward routing: compare confirmed-family decisions with the recorded hash and with an empty hash, including the emergency branch. Recheck current code; keep affected candidates research-only until every intended receiver propagates the hash. Do not fix production code, switch strategy risk, or insert templates without the appropriate task authorization."
-  }
-]

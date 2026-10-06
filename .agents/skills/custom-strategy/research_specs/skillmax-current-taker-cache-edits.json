@@ -1,7 +1,0 @@
-[
-  {
-    "op": "insert_after",
-    "target": "- For complete ARM table exports, exact opening-rule-bound exit comparisons and Expr built-in name checks, follow `references/arm-replay.md`; verify accounting/identity and branch behavior before interpreting a full replay.",
-    "content": "\n- When a strategy reads current/forming `TakerBuyAmount[0]` or `TakerBuyRatio[0]`, verify the optimized historical receiver `cachedKlinePriceSeries`, not only `GetLineFloatValues` or uncached `klinePriceSeries`. On 2026-10-03 it refreshed OHLC/Amount/Qps within an interval but omitted both taker fields, leaving the first cached minute's values: independent signal-minute aggregation found 178 of 641 PV2 supplement entries violated the intended current ratio. Recheck current source and reconstruct observed quote/taker quote only through the prior-minute signal time; compare cached and uncached fields across consecutive minutes. Quarantine affected returns even if all synthetic Expr checks pass. Do not silently label a repaired research runtime as the original engine, merge its results, or repair production without task authorization; preserve failed evidence, record source/runtime hashes, and fully rerun controls on one verified runtime after repair. Closed-index-only taker expressions are not automatically affected by this specific `[0]` refresh defect."
-  }
-]
