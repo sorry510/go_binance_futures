@@ -1,0 +1,8 @@
+[
+  {
+    "op": "insert_after",
+    "target": "- Apply the user's frequency gate separately to every coin using the full requested calendar exposure, not just active weeks. Report net and gross PnL, fees, funding, profit factor, drawdown, and yearly/side/symbol concentration. Opposite-direction strategies can both lose after costs; do not infer a tradable inverse edge from net losses alone.",
+    "content": "\n- If the user changes acceptance criteria, re-state completed trials only after verifying their full snapshots, dates, config, datasets and ledger accounting under the new criteria; retain the original reports as historical evidence. Compute every coin's frequency from the full calendar exposure without rounding. Distinguish per-coin profitability from the explicitly declared fixed-wallet portfolio and stability requirements: disclose losing coins/years rather than carrying forward an obsolete individual-profit veto or removing losses. Freeze the aggregation and year definitions before the next trial, and do not silently relax a declared calendar-year guard after observing a near-zero loss. A changed frequency or profitability requirement does not waive cost, signal-receiver, full-duration or untouched-validation gates."
+  }
+]
+
