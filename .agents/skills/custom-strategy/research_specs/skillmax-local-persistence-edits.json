@@ -1,7 +1,0 @@
-[
-  {
-    "op": "insert_after",
-    "target": "1. Finish and validate the portable JSON file first.",
-    "content": "\n\nFor explicitly authorized programmatic local writes (not DBX), parse only the selected active `[database]` connection and verify the actual host/database before writing; do not silently substitute the commented ARM block. Keep credentials out of arguments/output and do not import application packages that can initialize trading, migrations or caches. Use parameterized SQL, an exact binary-name duplicate check, the live table schema and a supported transaction; never overwrite an existing template or alter assignment/trading settings.\n\nCompact the `technology` and `strategy` raw JSON values independently, preserving member order and escapes when snapshot identity depends on raw bytes. Validate actual database readback JSON, absence of literal CR/LF, byte equality, unique exact name, inserted ID and timestamps before commit and again after commit. Older local MySQL may lack `JSON_VALID`: use a real JSON parser on readback bytes plus exact-byte checks rather than upgrading the server, changing the schema or skipping validation. On a pre-commit validation error, roll back and confirm the exact name is absent before retrying. On an ambiguous commit or a post-commit readback error, perform a fresh exact-name lookup before any retry; never blindly repeat INSERT. These local transaction steps do not replace the separate DBX restrictions below."
-  }
-]

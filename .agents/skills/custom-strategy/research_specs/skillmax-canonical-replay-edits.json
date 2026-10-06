@@ -1,7 +1,0 @@
-[
-  {
-    "op": "insert_after",
-    "target": "- Use `scripts/research_generate_variant.go` or `scripts/research_combine_entries.go` only for mechanical generation of full portable candidate JSON under `temp_strategy`; keep their specifications in `research_specs/`. Freeze candidate hash and the unseen coin universe before holdout replay.",
-    "content": "\n- For ARM acquisition failures, differing current canonical bar values, source-preserving cache changes, and independent cross-interval volume discrepancies, read `references/arm-replay.md` before replay. It documents exact source/transport flags and checkpoint recovery; a data-source repair requires comparable development/holdout reruns, not a hidden relaxation of data checks."
-  }
-]

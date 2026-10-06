@@ -1,7 +1,0 @@
-[
-  {
-    "op": "insert_after",
-    "target": "Check the algebra of combined price/volume conditions. Adjacent-bar OBV change is the signed current bar's turnover: a rising close already implies rising OBV when turnover is positive. Do not count that as independent confirmation or combine a strictly rising close with non-increasing adjacent OBV as an exhaustion signal. Test indicator identities and reachable branches, not only syntax.",
-    "content": "\n\nWhen combining a strict live crossing of closed High[1]/Low[1] with a no-chase cap anchored to closed Close[1], derive their intersection on legal OHLC bars with positive ATR. With cap coefficient c, the same-side wick must be strictly less than c times ATR; equality is unreachable. Verify both directions, wick/cap boundaries and unaffected conjunctions with an independent numeric model. Moving the cap anchor changes admission and requires a newly frozen full candidate/replay; it is not an equivalent compatibility fix or evidence of guaranteed profits."
-  }
-]
