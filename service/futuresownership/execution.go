@@ -287,7 +287,52 @@ func newOwnedClientOrderID(owner string) (string, error) {
 	return prefix + "_" + hex.EncodeToString(buf), nil
 }
 
-type BinanceOrderBroker struct{}
+// BinanceOrderBroker can be bound to a specific account adapter. Nil Account
+// preserves the original main-only path for existing callers.
+type BinanceOrderBroker struct{ Account *binance.AccountClient }
+
+func (b BinanceOrderBroker) createOwned(ctx context.Context, p binance.OwnedOrderParams) (*futures.CreateOrderResponse, error) {
+	if b.Account != nil {
+		return b.Account.CreateOwnedOrder(ctx, p)
+	}
+	return binance.CreateOwnedOrder(ctx, p)
+}
+func (b BinanceOrderBroker) createAlgo(ctx context.Context, p binance.OwnedOrderParams) (*futures.CreateAlgoOrderResp, error) {
+	if b.Account != nil {
+		return b.Account.CreateOwnedAlgoOrder(ctx, p)
+	}
+	return binance.CreateOwnedAlgoOrder(ctx, p)
+}
+func (b BinanceOrderBroker) lookupOrder(ctx context.Context, symbol, id string) (*futures.Order, error) {
+	if b.Account != nil {
+		return b.Account.GetOrderByClientOrderID(ctx, symbol, id)
+	}
+	return binance.GetOrderByClientOrderID(ctx, symbol, id)
+}
+func (b BinanceOrderBroker) lookupByID(ctx context.Context, symbol string, id int64) (*futures.Order, error) {
+	if b.Account != nil {
+		return b.Account.GetOrderByOrderID(ctx, symbol, id)
+	}
+	return binance.GetOrderByOrderID(ctx, symbol, id)
+}
+func (b BinanceOrderBroker) lookupAlgo(ctx context.Context, id string) (*futures.GetAlgoOrderResp, error) {
+	if b.Account != nil {
+		return b.Account.GetAlgoOrderByClientOrderID(ctx, id)
+	}
+	return binance.GetAlgoOrderByClientOrderID(ctx, id)
+}
+func (b BinanceOrderBroker) cancelAlgo(ctx context.Context, id int64) (*futures.CancelAlgoOrderResp, error) {
+	if b.Account != nil {
+		return b.Account.CancelAlgoOrder(ctx, id)
+	}
+	return binance.CancelAlgoOrder(ctx, id)
+}
+func (b BinanceOrderBroker) cancelOrder(ctx context.Context, symbol string, id int64) (*futures.CancelOrderResponse, error) {
+	if b.Account != nil {
+		return b.Account.CancelOrderContext(ctx, symbol, id)
+	}
+	return binance.CancelOrderContext(ctx, symbol, id)
+}
 
 func isAlgoManagedOrderType(orderType string) bool {
 	switch strings.ToUpper(strings.TrimSpace(orderType)) {
@@ -298,7 +343,7 @@ func isAlgoManagedOrderType(orderType string) bool {
 	}
 }
 
-func (BinanceOrderBroker) Submit(ctx context.Context, request OrderRequest, clientOrderID string) (ExchangeOrder, error) {
+func (b BinanceOrderBroker) Submit(ctx context.Context, request OrderRequest, clientOrderID string) (ExchangeOrder, error) {
 	side := futures.SideTypeBuy
 	if strings.EqualFold(request.Side, "SELL") {
 		side = futures.SideTypeSell
@@ -309,7 +354,7 @@ func (BinanceOrderBroker) Submit(ctx context.Context, request OrderRequest, clie
 	}
 	orderType := strings.ToUpper(strings.TrimSpace(request.OrderType))
 	if isAlgoManagedOrderType(orderType) {
-		order, err := binance.CreateOwnedAlgoOrder(ctx, binance.OwnedOrderParams{
+		order, err := b.createAlgo(ctx, binance.OwnedOrderParams{
 			Symbol: request.Symbol, Quantity: request.Quantity, Price: request.Price, StopPrice: request.StopPrice,
 			Side: side, PositionSide: positionSide, OrderType: futures.OrderType(orderType), ClientOrderID: clientOrderID,
 		})
@@ -323,34 +368,34 @@ func (BinanceOrderBroker) Submit(ctx context.Context, request OrderRequest, clie
 	default:
 		return ExchangeOrder{}, fmt.Errorf("unsupported managed order type %q", request.OrderType)
 	}
-	order, err := binance.CreateOwnedOrder(ctx, binance.OwnedOrderParams{Symbol: request.Symbol, Quantity: request.Quantity, Price: request.Price, StopPrice: request.StopPrice, Side: side, PositionSide: positionSide, OrderType: futures.OrderType(orderType), ClientOrderID: clientOrderID})
+	order, err := b.createOwned(ctx, binance.OwnedOrderParams{Symbol: request.Symbol, Quantity: request.Quantity, Price: request.Price, StopPrice: request.StopPrice, Side: side, PositionSide: positionSide, OrderType: futures.OrderType(orderType), ClientOrderID: clientOrderID})
 	if err != nil {
 		return ExchangeOrder{}, err
 	}
 	return exchangeFromCreate(order), nil
 }
 
-func (BinanceOrderBroker) Lookup(ctx context.Context, symbol, clientOrderID, orderType string) (ExchangeOrder, error) {
+func (b BinanceOrderBroker) Lookup(ctx context.Context, symbol, clientOrderID, orderType string) (ExchangeOrder, error) {
 	if isAlgoManagedOrderType(orderType) {
-		algo, err := binance.GetAlgoOrderByClientOrderID(ctx, clientOrderID)
+		algo, err := b.lookupAlgo(ctx, clientOrderID)
 		if err != nil {
 			return ExchangeOrder{}, err
 		}
-		return exchangeFromAlgoLookup(ctx, algo)
+		return exchangeFromAlgoLookupWithOrderLookup(ctx, algo, b.lookupByID)
 	}
-	order, err := binance.GetOrderByClientOrderID(ctx, symbol, clientOrderID)
+	order, err := b.lookupOrder(ctx, symbol, clientOrderID)
 	if err != nil {
 		return ExchangeOrder{}, err
 	}
 	return exchangeFromOrder(order), nil
 }
 
-func (BinanceOrderBroker) Cancel(ctx context.Context, symbol string, orderID int64, orderType string) error {
+func (b BinanceOrderBroker) Cancel(ctx context.Context, symbol string, orderID int64, orderType string) error {
 	if isAlgoManagedOrderType(orderType) {
-		_, err := binance.CancelAlgoOrder(ctx, orderID)
+		_, err := b.cancelAlgo(ctx, orderID)
 		return err
 	}
-	_, err := binance.CancelOrderContext(ctx, symbol, orderID)
+	_, err := b.cancelOrder(ctx, symbol, orderID)
 	return err
 }
 
@@ -362,6 +407,9 @@ func exchangeFromAlgoCreate(order *futures.CreateAlgoOrderResp) ExchangeOrder {
 }
 
 func exchangeFromAlgoLookup(ctx context.Context, algo *futures.GetAlgoOrderResp) (ExchangeOrder, error) {
+	return exchangeFromAlgoLookupWithOrderLookup(ctx, algo, binance.GetOrderByOrderID)
+}
+func exchangeFromAlgoLookupWithOrderLookup(ctx context.Context, algo *futures.GetAlgoOrderResp, lookup func(context.Context, string, int64) (*futures.Order, error)) (ExchangeOrder, error) {
 	if algo == nil {
 		return ExchangeOrder{}, nil
 	}
@@ -373,7 +421,7 @@ func exchangeFromAlgoLookup(ctx context.Context, algo *futures.GetAlgoOrderResp)
 	if err != nil {
 		return result, fmt.Errorf("parse actual order id for algo %d: %w", algo.AlgoId, err)
 	}
-	actual, err := binance.GetOrderByOrderID(ctx, algo.Symbol, actualID)
+	actual, err := lookup(ctx, algo.Symbol, actualID)
 	if err != nil {
 		return result, err
 	}
