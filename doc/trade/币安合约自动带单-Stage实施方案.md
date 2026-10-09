@@ -2,7 +2,7 @@
 
 > 版本：v1.0（规划稿）  日期：2026-10-09
 >
-> 实施状态：Stage 0 官方文档与代码静态审计已完成（Gate 0-DOC 通过；Lead Key 实际能力 Gate 0-LIVE 尚未验证），Stage 1–7 未开始；尚无自动带单功能实现。
+> 实施状态：Stage 0 官方文档与代码静态审计完成；Stage 1 离线账户 Client、私有缓存与 Broker 路由已实现并通过 Mock 测试；Stage 2–7 未开始。Lead Key 实际能力 Gate 0-LIVE 尚未验证，未启用任何带单真实交易。
 >
 > 后端：`/Users/zhz/work/binance/go_binance_futures`
 > 前端：`/Users/zhz/work/binance/go_binance_futrues_new_ui`
@@ -106,6 +106,8 @@
 
 预计路径：`feature/api/binance/`、`binanceproxy/`、`service/binanceapiusage/`、`service/futuresaccount/`（新增建议）。  
 **验收 Gate 1**：注入两个 fake 客户端，交叉签名请求、cache、时钟重同步及 429 均不串账户；main 行为和测试通过；不调用真实下单。
+
+**2026-10-09 阶段结果**：已实现 AccountClient、Lead SAPI 只读接口、独立缓存、Broker 路由与带单本地保守下单限流；Mock 单元测试及竞态测试通过。详见 [Stage 1 实施记录](币安合约自动带单-Stage1-实施记录.md)。Main 原有 API/交易调用方式保持不变；Lead 暂不启用 Executor、数据库写入或 WS。
 
 ## Stage 2 — Account-scoped Ownership、镜像和历史订单
 
@@ -393,7 +395,7 @@ AccountID 必须显式贯穿交易和签名 IO 层。Main 的兼容封装只在�
 | Stage | 状态 | 开始/完成日期 | Gate 与测试 | 变更文件/说明 |
 |---|---|---|---|---|
 | 0 | 静态审计完成；真实账户能力待验证 | 2026-10-09 | Gate 0-DOC 通过；Gate 0-LIVE 阻塞；未执行测试网/真单 | 新增 `币安合约自动带单-Stage0-核查结果.md`；仅文档审计，未修改交易代码/DB |
-| 1 | 未开始 | — | — | — |
+| 1 | 离线完成；Lead 实盘权限待验证 | 2026-10-09 | API/缓存/交易配置/Broker/SAPI Mock 通过；竞态测试通过；无真单 | `account_client.go`、`account_state.go`、`lead_order_limiter.go`、`lead_readonly.go`、Broker 与相关测试；见 Stage 1 实施记录 |
 | 2 | 未开始 | — | — | — |
 | 3 | 未开始 | — | — | — |
 | 4 | 未开始 | — | — | — |
