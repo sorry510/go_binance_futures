@@ -2,7 +2,7 @@
 
 > 版本：v1.0（规划稿）  日期：2026-10-09
 >
-> 实施状态：Stage 0 官方文档与代码静态审计完成；Stage 1 离线账户 Client、私有缓存与 Broker 路由已实现并通过 Mock 测试；Stage 2–7 未开始。Lead Key 实际能力 Gate 0-LIVE 尚未验证，未启用任何带单真实交易。
+> 实施状态：Stage 0 官方文档审计、Stage 1 多账户 Client、Stage 2 账户级 Ownership/仓位订单镜像与历史查询的离线实现均已完成；Stage 2 真实 MySQL 8 升级仍未运行，Stage 3–7 未开始。Lead 实盘 Gate 未开放。
 >
 > 后端：`/Users/zhz/work/binance/go_binance_futures`
 > 前端：`/Users/zhz/work/binance/go_binance_futrues_new_ui`
@@ -120,10 +120,12 @@
 4. 所有账户更新应在有效 DB 约束/事务中实现：同账户同 `symbol/position_side` 不允许多个活动 Owner；只用全局 Go mutex 无法覆盖未来多实例；保持现有严格 fail-closed。
 5. 对 `ClientOrderID` 做全局唯一生成（带 account 前缀）及 DB 唯一约束；同账户订单提交结果 unknown 时只 reconcile；不同账户相同交易所 OrderID 不得串账。
 6. 统一 `syncStrategyExitPositions`、`ensureAccountOpenSlotAvailable`、`submitManagedStrategyClose`、`ownershipAccountQuantities` 作用域；先覆盖 main 既有全部 owner（auto_strategy/new_coin_rush/notice_auto_order/funding_rate/agent_trade），再接入 lead。
-7. 升级流程走 `./go_binance_futures sync db`；先备份、迁移、校验再启用，默认 lead disabled；迁移仅加字段/索引/表，避免破坏旧结构。
+7. 升级流程只走 `./go_binance_futures sync db`；先备份、迁移、校验再启用，默认 lead disabled。v19 迁移允许用 `UpdateDatabase` 中按版本门禁调用的 Go 函数执行条件 DDL / 数据回填 / 校验：失败不得升版本，重试须幂等；不会删除历史行或擅自合并重复记录。MySQL DDL 不支持事务回滚，需按已建索引跳过并继续。
 
 预计路径：`models/`、`service/futuresownership/`、`feature/ownership.go`、`feature/feature_userdata.go`、`feature/order.go`、`main.go`、`command/`、`appversion/`、`controllers/`。  
 **验收 Gate 2**：历史数据完整；两个账户可同币同方向；任何关闭/撤单都无法跨账户；断线清理不会删除另一账户镜像；所有已存在 owner 的行为与当前一致。
+
+**2026-10-09 阶段结果**：五张表添加账户维度及 Schema 19 迁移，Ownership 与订单执行账户绑定、事务、Main/Lead WS 事件镜像、历史/管理接口隔离均已完成，SQLite 迁移与 Mock WS 双账户测试通过。MySQL 5.6 使用带上限的复合前缀索引并对旧数据长度预校验；迁移失败/重试及 Main WS 清理隔离均有永久回归测试。**有意的 Main 行为改进**：`UpdateOrderStatus` 在持仓读取失败时保留历史订单，不再误删；其余旧 Main 调用语义保留。真实业务数据库升级及 Main 上线回归仍待验收。详见 [Stage 2 实施记录](币安合约自动带单-Stage2-实施记录.md)。
 
 ## Stage 3 — 提取并复用现有 StartTrade 交易流程（不复制策略）
 
@@ -396,7 +398,7 @@ AccountID 必须显式贯穿交易和签名 IO 层。Main 的兼容封装只在�
 |---|---|---|---|---|
 | 0 | 静态审计完成；真实账户能力待验证 | 2026-10-09 | Gate 0-DOC 通过；Gate 0-LIVE 阻塞；未执行测试网/真单 | 新增 `币安合约自动带单-Stage0-核查结果.md`；仅文档审计，未修改交易代码/DB |
 | 1 | 离线完成；Lead 实盘权限待验证 | 2026-10-09 | API/缓存/交易配置/Broker/SAPI Mock 通过；竞态测试通过；无真单 | `account_client.go`、`account_state.go`、`lead_order_limiter.go`、`lead_readonly.go`、Broker 与相关测试；见 Stage 1 实施记录 |
-| 2 | 未开始 | — | — | — |
+| 2 | 离线实现完成；真实 DB 迁移待执行 | 2026-10-09 | Schema 19 SQLite 迁移/幂等、Owner 双账户、WS 镜像模拟、相关后端 `-race` 通过；未实际升级 DB 或真单 | 新增 `account_scope_migration.go`、`futuresownership/account.go`、`user_data_mirror.go`、隔离测试；调整模型、历史接口及统计；见 Stage 2 实施记录 |
 | 3 | 未开始 | — | — | — |
 | 4 | 未开始 | — | — | — |
 | 5 | 未开始 | — | — | — |

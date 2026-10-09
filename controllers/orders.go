@@ -44,7 +44,7 @@ func orderOpenClause(alias string) string {
 	if alias != "" {
 		prefix = alias + "."
 	}
-	return prefix + "side = 'open'"
+	return prefix + "account_id = 'main' AND " + prefix + "side = 'open'"
 }
 
 func (params orderSearchParams) whereClause(alias string) (string, []interface{}, bool, error) {
@@ -153,7 +153,7 @@ func (ctrl *OrderController) Delete() {
 	}
 	o := orm.NewOrm()
 	var openOrder models.Order
-	if err := o.QueryTable("order").Filter("Id", id).Filter("Side", "open").One(&openOrder); err != nil {
+	if err := o.QueryTable("order").Filter("account_id", "main").Filter("Id", id).Filter("Side", "open").One(&openOrder); err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
@@ -251,7 +251,7 @@ func deleteOrderIDs(tx orm.TxOrmer, ids []int64) error {
 		for i, id := range chunk {
 			args[i] = id
 		}
-		if _, err := tx.Raw("DELETE FROM `order` WHERE side = 'close' AND id IN ("+placeholders+")", args...).Exec(); err != nil {
+		if _, err := tx.Raw("DELETE FROM `order` WHERE account_id = 'main' AND side = 'close' AND id IN ("+placeholders+")", args...).Exec(); err != nil {
 			return err
 		}
 	}

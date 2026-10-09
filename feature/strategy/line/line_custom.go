@@ -233,7 +233,7 @@ func (TradeLine TradeLineCustom) simpleCloseStrategy(closeParams strategy.CloseP
 func (TradeLine TradeLineCustom) getTransformPositions() (usePositions []types.FuturesPosition, err error) {
 	var positions []models.FuturesPosition
 	o := orm.NewOrm()
-	sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where 1 = 1"
+	sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where f.account_id = 'main' "
 	sql += ` and f.amount <> '0'`
 	_, err = o.Raw(sql).QueryRows(&positions)
 	if err != nil {

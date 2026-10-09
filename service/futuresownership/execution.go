@@ -55,6 +55,35 @@ func DefaultExecutor() Executor {
 	return Executor{Ownership: DefaultService(), Broker: BinanceOrderBroker{}}
 }
 
+// NewAccountExecutor constructs an account-bound executor. Caller must use
+// the same account for Ownership and Broker; Stage 2 does not schedule Lead.
+func NewAccountExecutor(account *binance.AccountClient) (Executor, error) {
+	if account == nil {
+		return Executor{}, fmt.Errorf("account client required")
+	}
+	ownership, err := BindAccount(account.ID())
+	if err != nil {
+		return Executor{}, err
+	}
+	return Executor{Ownership: ownership, Broker: BinanceOrderBroker{Account: account}}, nil
+}
+func (e Executor) validateAccountBinding() error {
+	id, err := e.Ownership.accountID()
+	if err != nil {
+		return err
+	}
+	if b, ok := e.Broker.(BinanceOrderBroker); ok {
+		if b.Account == nil {
+			if id != "main" {
+				return fmt.Errorf("lead executor requires bound account broker")
+			}
+		} else if string(b.Account.ID()) != id {
+			return fmt.Errorf("executor ownership account %s does not match broker account %s", id, b.Account.ID())
+		}
+	}
+	return nil
+}
+
 // validateOrderRequest keeps direction and quantity semantics independent from
 // every caller. Binance Hedge Mode always receives a positive quantity; Side
 // determines whether the LONG/SHORT leg is increased or reduced.
@@ -116,6 +145,9 @@ func deterministicSubmitRejection(err error) bool {
 }
 
 func (e Executor) Execute(ctx context.Context, request OrderRequest) (ExchangeOrder, error) {
+	if err := e.validateAccountBinding(); err != nil {
+		return ExchangeOrder{}, err
+	}
 	if err := ctx.Err(); err != nil {
 		return ExchangeOrder{}, err
 	}
@@ -129,7 +161,14 @@ func (e Executor) Execute(ctx context.Context, request OrderRequest) (ExchangeOr
 	clientID := strings.TrimSpace(request.ClientOrderID)
 	if clientID == "" {
 		var err error
+		accountID, accountErr := e.Ownership.accountID()
+		if accountErr != nil {
+			return ExchangeOrder{}, accountErr
+		}
 		clientID, err = newOwnedClientOrderID(request.Owner)
+		if accountID == "lead" {
+			clientID = "lead_" + clientID
+		}
 		if err != nil {
 			return ExchangeOrder{}, err
 		}
@@ -185,6 +224,9 @@ func (e Executor) Execute(ctx context.Context, request OrderRequest) (ExchangeOr
 }
 
 func (e Executor) Reconcile(ctx context.Context, symbol, clientOrderID string) (ExchangeOrder, error) {
+	if err := e.validateAccountBinding(); err != nil {
+		return ExchangeOrder{}, err
+	}
 	if e.Broker == nil {
 		return ExchangeOrder{}, fmt.Errorf("managed order broker is required")
 	}
@@ -201,6 +243,9 @@ func (e Executor) Reconcile(ctx context.Context, symbol, clientOrderID string) (
 }
 
 func (e Executor) ApplyObservedExchange(ctx context.Context, clientOrderID string, result ExchangeOrder) (ExchangeOrder, error) {
+	if err := e.validateAccountBinding(); err != nil {
+		return ExchangeOrder{}, err
+	}
 	return e.applyExchange(ctx, clientOrderID, result)
 }
 
@@ -240,6 +285,13 @@ func (e Executor) applyExchange(ctx context.Context, clientOrderID string, resul
 }
 
 func (e Executor) Cancel(ctx context.Context, owner string, order models.FuturesManagedOrder) error {
+	if err := e.validateAccountBinding(); err != nil {
+		return err
+	}
+	accountID, _ := e.Ownership.accountID()
+	if order.AccountID != accountID {
+		return fmt.Errorf("cannot cancel %s order belonging to account %s using %s", order.ClientOrderID, order.AccountID, accountID)
+	}
 	expectedOwner, err := normalizeOwner(owner)
 	if err != nil {
 		return err

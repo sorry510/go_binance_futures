@@ -46,7 +46,7 @@ func TestOrderSearchParamsWhereClauseUsesCloseOrderLink(t *testing.T) {
 
 func TestOrderOpenClauseOnlyFiltersOpenRows(t *testing.T) {
 	got := orderOpenClause("t")
-	want := "t.side = 'open'"
+	want := "t.account_id = 'main' AND t.side = 'open'"
 	if got != want {
 		t.Fatalf("clause=%q want=%q", got, want)
 	}

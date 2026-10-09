@@ -200,14 +200,14 @@ func (Service) Live(ctx context.Context, f Filter) (LiveSummary, error) {
 		return result, err
 	}
 	positionWhere, positionArgs := liveManagedWhere(f, "mp")
-	if err := o.Raw(`SELECT COUNT(*) FROM futures_managed_positions mp WHERE mp.owner='agent_trade' AND mp.status!='closed' AND mp.managed_qty>0`+positionWhere, positionArgs...).QueryRow(&result.OpenPositions); err != nil {
+	if err := o.Raw(`SELECT COUNT(*) FROM futures_managed_positions mp WHERE mp.account_id='main' AND mp.owner='agent_trade' AND mp.status!='closed' AND mp.managed_qty>0`+positionWhere, positionArgs...).QueryRow(&result.OpenPositions); err != nil {
 		return result, err
 	}
-	if err := o.Raw(`SELECT COUNT(*) FROM futures_managed_positions mp WHERE mp.owner='agent_trade' AND mp.status='closed'`+positionWhere, positionArgs...).QueryRow(&result.ClosedPositions); err != nil {
+	if err := o.Raw(`SELECT COUNT(*) FROM futures_managed_positions mp WHERE mp.account_id='main' AND mp.owner='agent_trade' AND mp.status='closed'`+positionWhere, positionArgs...).QueryRow(&result.ClosedPositions); err != nil {
 		return result, err
 	}
 	orderWhere, orderArgs := liveManagedWhere(f, "mo")
-	if err := o.Raw(`SELECT COUNT(*) FROM futures_managed_orders mo WHERE mo.owner='agent_trade'`+orderWhere, orderArgs...).QueryRow(&result.ManagedOrders); err != nil {
+	if err := o.Raw(`SELECT COUNT(*) FROM futures_managed_orders mo WHERE mo.account_id='main' AND mo.owner='agent_trade'`+orderWhere, orderArgs...).QueryRow(&result.ManagedOrders); err != nil {
 		return result, err
 	}
 	result.RecentProposals = make([]LiveProposalSummary, 0)

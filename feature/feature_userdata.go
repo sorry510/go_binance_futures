@@ -68,8 +68,8 @@ func futuresUserDataMirrorUsable() bool {
 // 删除数据表旧数据
 func deleteOldUserData() {
 	o := orm.NewOrm()
-	o.Raw("DELETE FROM futures_orders where 1=1 and (status = 'NEW' or status = 'PARTIALLY_FILLED')").Exec() // 只删除未成交的订单
-	o.Raw("DELETE FROM futures_positions where 1=1").Exec()
+	o.Raw("DELETE FROM futures_orders WHERE account_id = 'main' AND (status = 'NEW' OR status = 'PARTIALLY_FILLED')").Exec() // 只删除未成交的订单
+	o.Raw("DELETE FROM futures_positions WHERE account_id = 'main'").Exec()
 }
 
 // 查询 api 接口获取最新数据。
@@ -106,7 +106,8 @@ func getNowUserData() bool {
 		leverage, _ := strconv.ParseInt(position.Leverage, 10, 64)
 
 		var positionModel models.FuturesPosition
-		o.QueryTable("futures_positions").Filter("symbol", position.Symbol).Filter("side", position.PositionSide).One(&positionModel)
+		o.QueryTable("futures_positions").Filter("account_id", "main").Filter("symbol", position.Symbol).Filter("side", position.PositionSide).One(&positionModel)
+		positionModel.AccountID = "main"
 		positionModel.Symbol = position.Symbol
 		positionModel.Side = position.PositionSide
 		positionModel.Amount = position.PositionAmt
@@ -130,7 +131,8 @@ func getNowUserData() bool {
 	// open orders
 	for _, order := range allOpenOrders {
 		var orderModel models.FuturesOrder
-		o.QueryTable("futures_orders").Filter("order_id", order.OrderID).One(&orderModel)
+		o.QueryTable("futures_orders").Filter("account_id", "main").Filter("order_id", order.OrderID).One(&orderModel)
+		orderModel.AccountID = "main"
 		orderModel.Symbol = order.Symbol
 		orderModel.ClientOrderId = order.ClientOrderID
 		orderModel.OrderId = strconv.FormatInt(order.OrderID, 10)
@@ -153,11 +155,11 @@ func getNowUserData() bool {
 	// Remove active mirror rows that were not present in the successful REST
 	// snapshot. Rows updated by a concurrent WS event have updateTime >= nowTime
 	// and are deliberately preserved.
-	if _, err := o.Raw("DELETE FROM futures_positions WHERE updateTime < ?", nowTime).Exec(); err != nil {
+	if _, err := o.Raw("DELETE FROM futures_positions WHERE account_id = 'main' AND updateTime < ?", nowTime).Exec(); err != nil {
 		logs.Error("cleanup stale futures_positions after full sync:", err)
 		return false
 	}
-	if _, err := o.Raw("DELETE FROM futures_orders WHERE (status = 'NEW' OR status = 'PARTIALLY_FILLED') AND updateTime < ?", nowTime).Exec(); err != nil {
+	if _, err := o.Raw("DELETE FROM futures_orders WHERE account_id = 'main' AND (status = 'NEW' OR status = 'PARTIALLY_FILLED') AND updateTime < ?", nowTime).Exec(); err != nil {
 		logs.Error("cleanup stale futures_orders after full sync:", err)
 		return false
 	}

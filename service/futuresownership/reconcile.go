@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/adshao/go-binance/v2/futures"
 	binanceapi "go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
 	"go_binance_futures/service/binanceapiusage"
@@ -42,7 +43,49 @@ func DefaultReconciler() Reconciler {
 	return Reconciler{Ownership: ownership, Executor: Executor{Ownership: ownership, Broker: BinanceOrderBroker{}}, Account: BinanceAccountPositionSource{}}
 }
 
+// NewAccountReconciler binds positions, ownership writes and order brokerage
+// to exactly the same Binance account. A nil account never falls back to main.
+func NewAccountReconciler(client *binanceapi.AccountClient) (Reconciler, error) {
+	if client == nil {
+		return Reconciler{}, fmt.Errorf("account client required")
+	}
+	executor, err := NewAccountExecutor(client)
+	if err != nil {
+		return Reconciler{}, err
+	}
+	return Reconciler{Ownership: executor.Ownership, Executor: executor, Account: BinanceAccountPositionSource{Account: client}}, nil
+}
+func (r Reconciler) validateBoundAccount() error {
+	if err := r.Executor.validateAccountBinding(); err != nil {
+		return err
+	}
+	id, err := r.Ownership.accountID()
+	if err != nil {
+		return err
+	}
+	executorID, err := r.Executor.Ownership.accountID()
+	if err != nil {
+		return err
+	}
+	if id != executorID {
+		return fmt.Errorf("reconciler ownership account %s differs from executor account %s", id, executorID)
+	}
+	if source, ok := r.Account.(BinanceAccountPositionSource); ok {
+		if source.Account == nil {
+			if id != "main" {
+				return fmt.Errorf("lead reconciliation requires an explicit account position source")
+			}
+		} else if string(source.Account.ID()) != id {
+			return fmt.Errorf("reconciler position source account does not match ownership account")
+		}
+	}
+	return nil
+}
+
 func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (ReconcileSummary, error) {
+	if err := r.validateBoundAccount(); err != nil {
+		return ReconcileSummary{}, err
+	}
 	ctx = binanceapiusage.WithSource(ctx, "ownership_reconcile")
 	owner, err := normalizeOwner(owner)
 	if err != nil {
@@ -125,7 +168,17 @@ func (r Reconciler) cancelOrphanMutations(ctx context.Context, owner string, pos
 }
 
 func (r Reconciler) ReconcileAll(ctx context.Context) ([]ReconcileSummary, error) {
+	if err := r.validateBoundAccount(); err != nil {
+		return nil, err
+	}
 	owners := []string{OwnerAutoStrategy, OwnerNewCoinRush, OwnerNoticeAutoOrder, OwnerFundingRate, OwnerAgentTrade}
+	accountID, err := r.Ownership.accountID()
+	if err != nil {
+		return nil, err
+	}
+	if accountID == "lead" {
+		owners = []string{OwnerAutoStrategy}
+	}
 	out := make([]ReconcileSummary, 0, len(owners))
 	for _, owner := range owners {
 		summary, err := r.ReconcileOwner(ctx, owner)
@@ -137,13 +190,21 @@ func (r Reconciler) ReconcileAll(ctx context.Context) ([]ReconcileSummary, error
 	return out, nil
 }
 
-type BinanceAccountPositionSource struct{}
+type BinanceAccountPositionSource struct {
+	Account *binanceapi.AccountClient
+}
 
-func (BinanceAccountPositionSource) Positions(ctx context.Context) ([]AccountPosition, error) {
+func (source BinanceAccountPositionSource) Positions(ctx context.Context) ([]AccountPosition, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	rows, err := binanceapi.GetPositionContext(ctx, binanceapi.PositionParams{})
+	var rows []*futures.PositionRisk
+	var err error
+	if source.Account != nil {
+		rows, err = source.Account.GetPositionContext(ctx, binanceapi.PositionParams{})
+	} else {
+		rows, err = binanceapi.GetPositionContext(ctx, binanceapi.PositionParams{})
+	}
 	if err != nil {
 		return nil, err
 	}

@@ -34,12 +34,12 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	orm.RegisterModel(
 		new(models.Config),
 		new(models.Order),
-		new(models.FuturesOrder),
+		new(models.FuturesOrder), new(models.FuturesPosition),
 		new(models.StrategyTemplates),
 		new(models.TestStrategyResults),
 		new(models.Symbols),
 		new(models.SpotSymbols),
-		new(models.AgentSkill),
+		new(models.AgentConversation), new(models.AgentConversationSkill), new(models.AgentSkill),
 		new(models.AgentTask),
 		new(models.AgentTradeProposal),
 		new(models.AgentTradeExecution),
@@ -421,6 +421,154 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err := SyncDatabase(17); err != nil {
 		t.Fatalf("second version-17 sync should be idempotent: %v", err)
 	}
+	// Stage 2: verify the v18 -> v19 migration on an isolated SQLite database.
+	if err := SyncDatabase(18); err != nil {
+		t.Fatal(err)
+	}
+	for table, insert := range map[string]string{
+		"futures_managed_positions": "INSERT INTO futures_managed_positions(account_id,owner,symbol,position_side,managed_qty,status) VALUES('','auto_strategy','BTCUSDT','LONG',1,'active')",
+		"futures_managed_orders":    "INSERT INTO futures_managed_orders(account_id,owner,symbol,position_side,intent,client_order_id,status) VALUES('','auto_strategy','BTCUSDT','LONG','open','legacy-stage2-1','pending')",
+		"futures_positions":         "INSERT INTO futures_positions(id,account_id,symbol,side,amount) VALUES(123,'','BTCUSDT','LONG','1')",
+		"futures_orders":            "INSERT INTO futures_orders(id,account_id,order_id,symbol,status) VALUES(124,'','123','BTCUSDT','NEW')",
+		"order":                     "INSERT INTO `order`(id,account_id,symbol,side,order_id) VALUES(125,'','BTCUSDT','open',123)",
+	} {
+		if _, err := o.Raw(insert).Exec(); err != nil {
+			t.Fatalf("seed %s: %v", table, err)
+		}
+	}
+	if err := SyncDatabase(19); err != nil {
+		t.Fatalf("migrate 19: %v", err)
+	}
+	config, err = utils.GetSystemConfig()
+	if err != nil || config.Version != 19 {
+		t.Fatalf("unexpected v19 config=%+v err=%v", config, err)
+	}
+	for _, table := range []string{"futures_managed_positions", "futures_managed_orders", "futures_positions", "futures_orders", "order"} {
+		var wrong int
+		if err := o.Raw("SELECT COUNT(*) FROM `" + table + "` WHERE account_id != 'main' OR account_id IS NULL").QueryRow(&wrong); err != nil || wrong != 0 {
+			t.Fatalf("migration lost main scope on %s: wrong=%d err=%v", table, wrong, err)
+		}
+	}
+	if !sqliteHasIndexColumns(t, o, "futures_managed_positions", []string{"account_id", "symbol", "position_side"}) {
+		t.Fatal("missing managed position account index")
+	}
+	if !sqliteHasIndexColumns(t, o, "futures_orders", []string{"account_id", "order_id"}) {
+		t.Fatal("missing account order index")
+	}
+	if err := SyncDatabase(19); err != nil {
+		t.Fatalf("repeating 19: %v", err)
+	}
+	if !sqliteHasIndexColumns(t, o, "futures_positions", []string{"account_id", "symbol", "side"}) {
+		t.Fatal("missing account-scoped position unique/index access path")
+	}
+	// The same exchange order id may appear on a different account, but not twice on one.
+	if _, err := o.Raw("INSERT INTO futures_orders(id,account_id,order_id,symbol,status) VALUES(126,'lead','123','BTCUSDT','NEW')").Exec(); err != nil {
+		t.Fatalf("cross account same order id should be valid: %v", err)
+	}
+	if _, err := o.Raw("INSERT INTO futures_orders(id,account_id,order_id,symbol,status) VALUES(127,'main','123','BTCUSDT','NEW')").Exec(); err == nil {
+		t.Fatal("same account duplicate order id accepted")
+	}
+	if _, err := o.Raw("INSERT INTO futures_positions(id,account_id,symbol,side,amount) VALUES(128,'lead','BTCUSDT','LONG','1')").Exec(); err != nil {
+		t.Fatalf("cross account same position accepted: %v", err)
+	}
+	if _, err := o.Raw("INSERT INTO futures_positions(id,account_id,symbol,side,amount) VALUES(129,'main','BTCUSDT','LONG','1')").Exec(); err == nil {
+		t.Fatal("same account duplicate position accepted")
+	}
+
+	// Regression: a v19 retry must refuse unknown account identities without
+	// modifying the version, removing data, or silently recreating unique keys.
+	// These fixtures intentionally simulate the partially migrated schema
+	// that a MySQL DDL failure may leave behind.
+	for _, idx := range []string{"uq_fp_account_symbol_side", "uq_fo_account_order"} {
+		if _, err := o.Raw("DROP INDEX `" + idx + "`").Exec(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := o.Raw("UPDATE config SET version=18 WHERE id=1").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw("INSERT INTO futures_positions(id,account_id,symbol,side,amount) VALUES(201,'rogue','XRPUSDT','LONG','0.7')").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	mirrorTables := []string{"futures_managed_positions", "futures_managed_orders", "futures_positions", "futures_orders", "order"}
+	rowCounts := func() map[string]int64 {
+		t.Helper()
+		counts := make(map[string]int64, len(mirrorTables))
+		for _, table := range mirrorTables {
+			var count int64
+			if err := o.Raw("SELECT COUNT(*) FROM `" + table + "`").QueryRow(&count); err != nil {
+				t.Fatal(err)
+			}
+			counts[table] = count
+		}
+		return counts
+	}
+	assertCounts := func(want map[string]int64) {
+		t.Helper()
+		for table, n := range rowCounts() {
+			if n != want[table] {
+				t.Fatalf("failed v19 migration changed %s rows from %d to %d", table, want[table], n)
+			}
+		}
+	}
+	assertV18NoUnique := func() {
+		t.Helper()
+		version, err := utils.GetSystemConfig()
+		if err != nil || version.Version != 18 {
+			t.Fatalf("failed v19 migration advanced version: config=%+v err=%v", version, err)
+		}
+		for _, indexName := range []string{"uq_fp_account_symbol_side", "uq_fo_account_order"} {
+			var found int64
+			if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name=?", indexName).QueryRow(&found); err != nil || found != 0 {
+				t.Fatalf("failed v19 migration unexpectedly created index %s: found=%d err=%v", indexName, found, err)
+			}
+		}
+	}
+	before := rowCounts()
+	if err := SyncDatabase(19); err == nil || !strings.Contains(err.Error(), "unknown account_id") {
+		t.Fatalf("unknown account must reject migration, got %v", err)
+	}
+	assertV18NoUnique()
+	assertCounts(before)
+	if _, err := o.Raw("DELETE FROM futures_positions WHERE id=201 AND account_id='rogue'").Exec(); err != nil {
+		t.Fatal(err)
+	}
+
+	// Duplicates can predate the v19 unique keys. They must remain untouched
+	// until the operator resolves them; the migration may be safely retried.
+	if _, err := o.Raw("INSERT INTO futures_positions(id,account_id,symbol,side,amount) VALUES(202,'main','BTCUSDT','LONG','5')").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	before = rowCounts()
+	if err := SyncDatabase(19); err == nil || !strings.Contains(err.Error(), "duplicate account-scoped slots") {
+		t.Fatalf("duplicate mirror slot must reject migration, got %v", err)
+	}
+	assertV18NoUnique()
+	assertCounts(before)
+	var duplicateCount int64
+	if err := o.Raw("SELECT COUNT(*) FROM futures_positions WHERE account_id='main' AND symbol='BTCUSDT' AND side='LONG'").QueryRow(&duplicateCount); err != nil || duplicateCount != 2 {
+		t.Fatalf("failed v19 migration erased duplicates: n=%d err=%v", duplicateCount, err)
+	}
+	if _, err := o.Raw("DELETE FROM futures_positions WHERE id=202 AND account_id='main'").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if err := SyncDatabase(19); err != nil {
+		t.Fatalf("v19 migration must be retryable after resolving duplicates: %v", err)
+	}
+	versionAfterRecovery, err := utils.GetSystemConfig()
+	if err != nil || versionAfterRecovery.Version != 19 {
+		t.Fatalf("retry must advance to 19: config=%+v err=%v", versionAfterRecovery, err)
+	}
+	for _, indexName := range []string{"uq_fp_account_symbol_side", "uq_fo_account_order"} {
+		var found int64
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name=?", indexName).QueryRow(&found); err != nil || found != 1 {
+			t.Fatalf("retry did not recreate index %s: found=%d err=%v", indexName, found, err)
+		}
+	}
+	if err := SyncDatabase(19); err != nil {
+		t.Fatalf("repeating recovered v19 migration should be idempotent: %v", err)
+	}
+
 }
 
 func sqliteHasIndexColumns(t *testing.T, o orm.Ormer, table string, want []string) bool {

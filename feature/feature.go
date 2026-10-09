@@ -12,9 +12,11 @@ import (
 	"go_binance_futures/notify"
 	"go_binance_futures/scanner"
 	"go_binance_futures/service/binanceapiusage"
+	"go_binance_futures/service/mysqlretry"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -580,6 +582,7 @@ func cancelTimeoutOrder(buyTimeout int64) {
 
 func insertOpenOrder(symbol string, quantity float64, avg_price string, positionSide string, leverage int64, orderId int64) {
 	order := new(models.Order)
+	order.AccountID = "main"
 	order.Symbol = symbol
 	order.Amount = strconv.FormatFloat(quantity, 'f', -1, 64)
 	order.Avg_price = avg_price
@@ -597,6 +600,7 @@ func insertOpenOrder(symbol string, quantity float64, avg_price string, position
 func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64, systemConfig *models.Config) {
 	// 数据库写入订单
 	order := new(models.Order)
+	order.AccountID = "main"
 	order.Symbol = position.Symbol
 	order.Amount = strconv.FormatFloat(positionAmtFloat, 'f', -1, 64)
 	order.Avg_price = avg_price // 平仓价格
@@ -623,6 +627,7 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 	// 检查是否有相同的开仓订单,如果有则更新状态
 	var openOrder models.Order
 	o.QueryTable("order").
+		Filter("account_id", "main").
 		Filter("Side", "open").
 		Filter("Symbol", order.Symbol).
 		Filter("Amount", order.Amount).
@@ -776,6 +781,10 @@ func UpdateSymbolsTradePrecision() {
 			}
 		}
 
+		// Both the REST precision refresh and the independent 1s WS upsert
+		// write symbols. Stable input ordering reduces lock-order inversions;
+		// the SQL optimizer can still reorder locks, so retries remain necessary.
+		sort.Slice(updates, func(i, j int) bool { return updates[i].Symbol < updates[j].Symbol })
 		for start := 0; start < len(updates); start += 300 {
 			end := start + 300
 			if end > len(updates) {
@@ -786,8 +795,13 @@ func UpdateSymbolsTradePrecision() {
 			if query == "" {
 				continue
 			}
-			if _, err := o.Raw(query, args...).Exec(); err != nil {
-				logs.Error("update futures symbols trade precision error:", err)
+			// 1213/1205 are expected under simultaneous ticker WS upserts;
+			// each query is a single autocommit, idempotent precision update.
+			if err := mysqlretry.Do(context.Background(), func() error {
+				_, err := o.Raw(query, args...).Exec()
+				return err
+			}); err != nil {
+				logs.Error("update futures symbols trade precision error (after bounded retry):", err)
 				return
 			}
 		}
@@ -1024,7 +1038,7 @@ func GetTransformPositionsContext(ctx context.Context) (usePositions []types.Fut
 		binanceapiusage.RecordOptimization(binanceapiusage.SourceFromContext(ctx), "local_ws_hit", 1)
 		var positions []models.FuturesPosition
 		o := orm.NewOrm()
-		sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where 1 = 1"
+		sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where f.account_id = 'main' "
 		sql += ` and f.amount <> '0'`
 		_, err := o.Raw(sql).QueryRows(&positions)
 		if err != nil {
@@ -1103,8 +1117,8 @@ func getTransformOpenOrdersContext(ctx context.Context) (useOrders []types.Futur
 		binanceapiusage.RecordOptimization(binanceapiusage.SourceFromContext(ctx), "local_ws_hit", 1)
 		var orders []models.FuturesOrder
 		o := orm.NewOrm()
-		sql := "SELECT * FROM `futures_orders` as f where 1 = 1"
-		sql += ` and f.status = 'NEW' or f.status = 'PARTIALLY_FILLED'` // 下单类型
+		sql := "SELECT * FROM `futures_orders` as f WHERE f.account_id = 'main' "
+		sql += ` and (f.status = 'NEW' or f.status = 'PARTIALLY_FILLED')` // 下单类型
 		_, err := o.Raw(sql).QueryRows(&orders)
 		if err != nil {
 			logs.Error("GetLocalOrder err in StartTrade:", err.Error())

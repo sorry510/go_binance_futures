@@ -11,17 +11,22 @@ import (
 func UpdateOrderStatus() {
 	o := orm.NewOrm()
 	var openOrders []models.Order
-	sql := "SELECT * FROM `order` where side = 'open' and closeOrderId = 0 limit 200"
+	sql := "SELECT * FROM `order` where account_id = 'main' and side = 'open' and closeOrderId = 0 limit 200"
 	_, err := o.Raw(sql).QueryRows(&openOrders)
 	if err != nil {
 		logs.Error("Error fetching orders:", err)
 	}
 
-	positions, _ := GetTransformPositions()
+	positions, err := GetTransformPositions()
+	if err != nil {
+		logs.Error("cannot reconcile historical main orders: ", err)
+		return
+	}
 
 	for _, openOrder := range openOrders {
 		var closeOrder models.Order
 		o.QueryTable("order").
+			Filter("account_id", "main").
 			Filter("Side", "close").
 			Filter("Symbol", openOrder.Symbol).
 			Filter("Amount", openOrder.Amount).
