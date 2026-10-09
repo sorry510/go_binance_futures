@@ -1,6 +1,7 @@
 package feature
 
 import (
+	"sync"
 	"testing"
 
 	"go_binance_futures/models"
@@ -9,15 +10,29 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var featureTestORMOnce sync.Once
+var featureTestORMError error
+
+func setupFeatureTestORM(t *testing.T) {
+	t.Helper()
+	featureTestORMOnce.Do(func() {
+		_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
+		featureTestORMError = orm.RegisterDataBase("default", "sqlite3", "file:test_strategy_open_guard?mode=memory&cache=shared")
+		if featureTestORMError != nil {
+			return
+		}
+		// Register both legacy strategy fixtures and the account-scoped user-data
+		// mirrors before the ORM is bootstrapped.
+		orm.RegisterModel(new(models.TestStrategyResults), new(models.FuturesPosition), new(models.FuturesOrder))
+		featureTestORMError = orm.RunSyncdb("default", true, false)
+	})
+	if featureTestORMError != nil {
+		t.Fatal(featureTestORMError)
+	}
+}
+
 func TestCreateTestResultAllowsOnlyOneOpenRowPerSymbol(t *testing.T) {
-	_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
-	if err := orm.RegisterDataBase("default", "sqlite3", "file:test_strategy_open_guard?mode=memory&cache=shared"); err != nil {
-		t.Fatal(err)
-	}
-	orm.RegisterModel(new(models.TestStrategyResults))
-	if err := orm.RunSyncdb("default", true, false); err != nil {
-		t.Fatal(err)
-	}
+	setupFeatureTestORM(t)
 
 	coin := &models.Symbols{
 		Symbol: "GUARDUSDT", Leverage: 1, TickSize: "0.01", StepSize: "0.001",

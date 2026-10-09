@@ -18,7 +18,8 @@ const qtyEpsilon = 1e-12
 var mutationMu sync.Mutex
 
 type Service struct {
-	Now func() time.Time
+	AccountID string
+	Now       func() time.Time
 }
 
 func DefaultService() Service { return Service{} }
@@ -99,12 +100,21 @@ func (s Service) ClaimOrder(ctx context.Context, input ClaimOrderInput) (models.
 		return models.FuturesManagedOrder{}, fmt.Errorf("client order id and positive requested quantity are required")
 	}
 
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return models.FuturesManagedOrder{}, accountErr
+	}
 	mutationMu.Lock()
 	defer mutationMu.Unlock()
-	o := orm.NewOrm()
+	tx, beginErr := orm.NewOrm().Begin()
+	if beginErr != nil {
+		return models.FuturesManagedOrder{}, beginErr
+	}
+	defer tx.Rollback()
+	var o orm.QueryExecutor = tx
 	var existing models.FuturesManagedOrder
-	if err := o.QueryTable(new(models.FuturesManagedOrder)).Filter("client_order_id", clientID).One(&existing); err == nil {
-		if existing.Owner == owner && existing.Symbol == symbol && existing.PositionSide == side && existing.Intent == intent {
+	if err := o.QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", accountID).Filter("client_order_id", clientID).One(&existing); err == nil {
+		if existing.Owner == owner && existing.AccountID == accountID && existing.Symbol == symbol && existing.PositionSide == side && existing.Intent == intent {
 			return existing, nil
 		}
 		return models.FuturesManagedOrder{}, fmt.Errorf("client order id %q already belongs to another managed order", clientID)
@@ -112,13 +122,13 @@ func (s Service) ClaimOrder(ctx context.Context, input ClaimOrderInput) (models.
 		return models.FuturesManagedOrder{}, err
 	}
 	if intent == IntentOpen {
-		if err := ensureSlotAvailable(o, symbol, side, ""); err != nil {
+		if err := ensureSlotAvailable(o, accountID, symbol, side, ""); err != nil {
 			return models.FuturesManagedOrder{}, err
 		}
 	} else {
 		if intent == IntentClose {
 			var liveCloses []models.FuturesManagedOrder
-			if _, queryErr := o.QueryTable(new(models.FuturesManagedOrder)).Filter("owner", owner).Filter("symbol", symbol).Filter("position_side", side).Filter("intent", IntentClose).All(&liveCloses); queryErr != nil {
+			if _, queryErr := o.QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", accountID).Filter("owner", owner).Filter("symbol", symbol).Filter("position_side", side).Filter("intent", IntentClose).All(&liveCloses); queryErr != nil {
 				return models.FuturesManagedOrder{}, queryErr
 			}
 			for _, closeOrder := range liveCloses {
@@ -137,7 +147,8 @@ func (s Service) ClaimOrder(ctx context.Context, input ClaimOrderInput) (models.
 	}
 	now := s.nowMillis()
 	row := models.FuturesManagedOrder{
-		Owner: owner, Symbol: symbol, PositionSide: side, Intent: intent,
+		AccountID: accountID,
+		Owner:     owner, Symbol: symbol, PositionSide: side, Intent: intent,
 		ClientOrderID: clientID, RequestedQty: input.RequestedQty,
 		OrderType: strings.ToUpper(strings.TrimSpace(input.OrderType)), Status: OrderPending,
 		SourceRef: strings.TrimSpace(input.SourceRef), CreatedAt: now, UpdatedAt: now,
@@ -145,12 +156,15 @@ func (s Service) ClaimOrder(ctx context.Context, input ClaimOrderInput) (models.
 	if _, err := o.Insert(&row); err != nil {
 		return models.FuturesManagedOrder{}, err
 	}
+	if err := tx.Commit(); err != nil {
+		return models.FuturesManagedOrder{}, err
+	}
 	return row, nil
 }
 
-func ensureSlotAvailable(o orm.Ormer, symbol, side, ignoreClientOrderID string) error {
+func ensureSlotAvailable(o orm.QueryExecutor, accountID, symbol, side, ignoreClientOrderID string) error {
 	var positions []models.FuturesManagedPosition
-	if _, err := o.QueryTable(new(models.FuturesManagedPosition)).Filter("symbol", symbol).Filter("position_side", side).All(&positions); err != nil {
+	if _, err := o.QueryTable(new(models.FuturesManagedPosition)).Filter("account_id", accountID).Filter("symbol", symbol).Filter("position_side", side).All(&positions); err != nil {
 		return err
 	}
 	for _, row := range positions {
@@ -159,7 +173,7 @@ func ensureSlotAvailable(o orm.Ormer, symbol, side, ignoreClientOrderID string) 
 		}
 	}
 	var orders []models.FuturesManagedOrder
-	if _, err := o.QueryTable(new(models.FuturesManagedOrder)).Filter("symbol", symbol).Filter("position_side", side).Filter("intent", IntentOpen).All(&orders); err != nil {
+	if _, err := o.QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", accountID).Filter("symbol", symbol).Filter("position_side", side).Filter("intent", IntentOpen).All(&orders); err != nil {
 		return err
 	}
 	for _, row := range orders {
@@ -192,6 +206,10 @@ func (s Service) MarkOrderReconciled(ctx context.Context, clientOrderID string) 
 }
 
 func (s Service) updateOrder(ctx context.Context, clientOrderID string, params orm.Params) error {
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return accountErr
+	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -200,7 +218,7 @@ func (s Service) updateOrder(ctx context.Context, clientOrderID string, params o
 		return fmt.Errorf("client order id is required")
 	}
 	params["updated_at"] = s.nowMillis()
-	count, err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("client_order_id", clientOrderID).Update(params)
+	count, err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", accountID).Filter("client_order_id", clientOrderID).Update(params)
 	if err != nil {
 		return err
 	}
@@ -217,12 +235,24 @@ func (s Service) ApplyFill(ctx context.Context, clientOrderID string, cumulative
 	if cumulativeFilledQty < 0 {
 		return models.FuturesManagedPosition{}, fmt.Errorf("filled quantity cannot be negative")
 	}
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return models.FuturesManagedPosition{}, accountErr
+	}
 	mutationMu.Lock()
 	defer mutationMu.Unlock()
-	o := orm.NewOrm()
-	var order models.FuturesManagedOrder
-	if err := o.QueryTable(new(models.FuturesManagedOrder)).Filter("client_order_id", strings.TrimSpace(clientOrderID)).One(&order); err != nil {
+	tx, err := orm.NewOrm().Begin()
+	if err != nil {
 		return models.FuturesManagedPosition{}, err
+	}
+	defer tx.Rollback()
+	var o orm.QueryExecutor = tx
+	var order models.FuturesManagedOrder
+	if err := o.QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", accountID).Filter("client_order_id", strings.TrimSpace(clientOrderID)).One(&order); err != nil {
+		return models.FuturesManagedPosition{}, err
+	}
+	if order.AccountID != accountID {
+		return models.FuturesManagedPosition{}, fmt.Errorf("order account mismatch")
 	}
 	if cumulativeFilledQty+qtyEpsilon < order.FilledQty {
 		return models.FuturesManagedPosition{}, fmt.Errorf("cumulative filled quantity cannot decrease")
@@ -238,21 +268,30 @@ func (s Service) ApplyFill(ctx context.Context, clientOrderID string, cumulative
 	if _, err := o.Update(&order); err != nil {
 		return models.FuturesManagedPosition{}, err
 	}
+	var position models.FuturesManagedPosition
 	if delta <= qtyEpsilon {
-		return s.getPosition(o, order.Owner, order.Symbol, order.PositionSide)
+		position, err = s.getPosition(o, order.Owner, order.Symbol, order.PositionSide)
+	} else {
+		position, err = s.applyPositionDelta(o, order, delta, entryPrice)
 	}
-	return s.applyPositionDelta(o, order, delta, entryPrice)
+	if err != nil && !(err == orm.ErrNoRows && delta <= qtyEpsilon) {
+		return models.FuturesManagedPosition{}, err
+	}
+	if err = tx.Commit(); err != nil {
+		return models.FuturesManagedPosition{}, err
+	}
+	return position, nil
 }
 
-func (s Service) applyPositionDelta(o orm.Ormer, order models.FuturesManagedOrder, delta, entryPrice float64) (models.FuturesManagedPosition, error) {
+func (s Service) applyPositionDelta(o orm.QueryExecutor, order models.FuturesManagedOrder, delta, entryPrice float64) (models.FuturesManagedPosition, error) {
 	position, err := s.getPosition(o, order.Owner, order.Symbol, order.PositionSide)
 	if order.Intent == IntentOpen {
 		if err == orm.ErrNoRows {
-			if err := ensureSlotAvailable(o, order.Symbol, order.PositionSide, order.ClientOrderID); err != nil {
+			if err := ensureSlotAvailable(o, order.AccountID, order.Symbol, order.PositionSide, order.ClientOrderID); err != nil {
 				return models.FuturesManagedPosition{}, err
 			}
 			now := s.nowMillis()
-			position = models.FuturesManagedPosition{Owner: order.Owner, Symbol: order.Symbol, PositionSide: order.PositionSide, ManagedQty: delta, EntryPrice: entryPrice, Status: PositionActive, SourceRef: order.SourceRef, CreatedAt: now, UpdatedAt: now}
+			position = models.FuturesManagedPosition{AccountID: order.AccountID, Owner: order.Owner, Symbol: order.Symbol, PositionSide: order.PositionSide, ManagedQty: delta, EntryPrice: entryPrice, Status: PositionActive, SourceRef: order.SourceRef, CreatedAt: now, UpdatedAt: now}
 			_, err = o.Insert(&position)
 			return position, err
 		}
@@ -280,9 +319,13 @@ func (s Service) applyPositionDelta(o orm.Ormer, order models.FuturesManagedOrde
 	return position, err
 }
 
-func (s Service) getPosition(o orm.Ormer, owner, symbol, side string) (models.FuturesManagedPosition, error) {
+func (s Service) getPosition(o orm.QueryExecutor, owner, symbol, side string) (models.FuturesManagedPosition, error) {
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return models.FuturesManagedPosition{}, accountErr
+	}
 	var rows []models.FuturesManagedPosition
-	_, err := o.QueryTable(new(models.FuturesManagedPosition)).Filter("owner", owner).Filter("symbol", symbol).Filter("position_side", side).OrderBy("-id").All(&rows)
+	_, err := o.QueryTable(new(models.FuturesManagedPosition)).Filter("account_id", accountID).Filter("owner", owner).Filter("symbol", symbol).Filter("position_side", side).OrderBy("-id").All(&rows)
 	if err != nil {
 		return models.FuturesManagedPosition{}, err
 	}
@@ -314,6 +357,10 @@ func (s Service) GetPosition(ctx context.Context, owner, symbol, side string) (m
 }
 
 func (s Service) GetOrder(ctx context.Context, clientOrderID string) (models.FuturesManagedOrder, error) {
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return models.FuturesManagedOrder{}, accountErr
+	}
 	if err := ctx.Err(); err != nil {
 		return models.FuturesManagedOrder{}, err
 	}
@@ -322,11 +369,15 @@ func (s Service) GetOrder(ctx context.Context, clientOrderID string) (models.Fut
 		return models.FuturesManagedOrder{}, fmt.Errorf("client order id is required")
 	}
 	var row models.FuturesManagedOrder
-	err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("client_order_id", clientOrderID).One(&row)
+	err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", accountID).Filter("client_order_id", clientOrderID).One(&row)
 	return row, err
 }
 
 func (s Service) ActivePositions(ctx context.Context, owner string) ([]models.FuturesManagedPosition, error) {
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return nil, accountErr
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -335,7 +386,7 @@ func (s Service) ActivePositions(ctx context.Context, owner string) ([]models.Fu
 		return nil, err
 	}
 	var rows []models.FuturesManagedPosition
-	if _, err := orm.NewOrm().QueryTable(new(models.FuturesManagedPosition)).Filter("owner", owner).OrderBy("id").All(&rows); err != nil {
+	if _, err := orm.NewOrm().QueryTable(new(models.FuturesManagedPosition)).Filter("account_id", accountID).Filter("owner", owner).OrderBy("id").All(&rows); err != nil {
 		return nil, err
 	}
 	out := rows[:0]
@@ -348,6 +399,10 @@ func (s Service) ActivePositions(ctx context.Context, owner string) ([]models.Fu
 }
 
 func (s Service) ActiveOrders(ctx context.Context, owner string) ([]models.FuturesManagedOrder, error) {
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return nil, accountErr
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -356,7 +411,7 @@ func (s Service) ActiveOrders(ctx context.Context, owner string) ([]models.Futur
 		return nil, err
 	}
 	var rows []models.FuturesManagedOrder
-	if _, err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("owner", owner).OrderBy("id").All(&rows); err != nil {
+	if _, err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", accountID).Filter("owner", owner).OrderBy("id").All(&rows); err != nil {
 		return nil, err
 	}
 	out := rows[:0]
@@ -411,10 +466,14 @@ func (s Service) SuspendPosition(ctx context.Context, owner, symbol, side string
 }
 
 func (s Service) ListPositions(ctx context.Context, owner string, activeOnly bool) ([]models.FuturesManagedPosition, error) {
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return nil, accountErr
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	q := orm.NewOrm().QueryTable(new(models.FuturesManagedPosition))
+	q := orm.NewOrm().QueryTable(new(models.FuturesManagedPosition)).Filter("account_id", accountID)
 	if strings.TrimSpace(owner) != "" {
 		normalized, err := normalizeOwner(owner)
 		if err != nil {
@@ -439,10 +498,14 @@ func (s Service) ListPositions(ctx context.Context, owner string, activeOnly boo
 }
 
 func (s Service) ListOrders(ctx context.Context, owner string, limit int) ([]models.FuturesManagedOrder, error) {
+	accountID, accountErr := s.accountID()
+	if accountErr != nil {
+		return nil, accountErr
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	q := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder))
+	q := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", accountID)
 	if strings.TrimSpace(owner) != "" {
 		normalized, err := normalizeOwner(owner)
 		if err != nil {

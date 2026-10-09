@@ -343,6 +343,17 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 			return fmt.Errorf("migrate database version 17 1m chunk schema failed: %w", err)
 		}
 	}
+	if oldVersion < 19 && newVersion >= 19 {
+		if err := accountScopeMigration(o); err != nil {
+			return fmt.Errorf("migrate account scope v19: %w", err)
+		}
+		if err := ensureAccountScopeIndexes(o); err != nil {
+			return fmt.Errorf("migrate account indexes v19: %w", err)
+		}
+		if err := ensureAccountMirrorUniqueIndexes(o); err != nil {
+			return fmt.Errorf("migrate account mirror unique indexes v19: %w", err)
+		}
+	}
 	to, err := o.Begin()
 	if err != nil {
 		logs.Error("begin transaction error:", err)

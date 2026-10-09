@@ -6,9 +6,9 @@ import (
 	"fmt"
 	agentevent "go_binance_futures/agent/event"
 	"go_binance_futures/binanceproxy"
-	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/service/binanceapiusage"
+	"go_binance_futures/service/mysqlretry"
 	"go_binance_futures/utils"
 	"sort"
 	"strconv"
@@ -1060,6 +1060,10 @@ func flushLatestWsTickers() {
 	}
 	wsLatestTickerMu.Unlock()
 
+	// The source map iterates randomly. Stable ordering reduces inverted
+	// InnoDB row-lock acquisition against the precision-refresh UPDATE JOIN.
+	sort.Slice(tickers, func(i, j int) bool { return tickers[i].Symbol < tickers[j].Symbol })
+
 	o := orm.NewOrm()
 	for start := 0; start < len(tickers); start += futuresWsBatchSize {
 		end := start + futuresWsBatchSize
@@ -1074,11 +1078,19 @@ func flushLatestWsTickers() {
 		}
 		logs.Debug(fmt.Sprintf("futures ws batch update symbols: processing %d/%d", end, len(tickers)))
 
-		if _, err := o.Raw(query, args...).Exec(); err != nil {
-			logs.Error("futures ws batch update symbols error:", err)
+		// Each chunk is a single autocommit upsert. An InnoDB deadlock
+		// rolls it back entirely, so bounded retries cannot duplicate rows.
+		if err := mysqlretry.Do(context.Background(), func() error {
+			_, err := o.Raw(query, args...).Exec()
+			return err
+		}); err != nil {
+			logs.Error("futures ws batch update symbols error (after bounded retry):", err)
 			wsLatestTickerMu.Lock()
 			for _, ticker := range tickers[start:] {
-				wsLatestTickerMap[ticker.Symbol] = ticker
+				// Do not overwrite a newer tick that arrived during retries.
+				if latest, exists := wsLatestTickerMap[ticker.Symbol]; !exists || latest.Time < ticker.Time {
+					wsLatestTickerMap[ticker.Symbol] = ticker
+				}
 			}
 			wsLatestTickerMu.Unlock()
 			return
@@ -1372,79 +1384,16 @@ func WsUserData() {
 		return
 	}
 	logs.Info("futures_user_data ws start: auto update db futures position")
-	o := orm.NewOrm()
 	doneC, _, err := wsFuturesUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
-		if event.Event == "ACCOUNT_UPDATE" {
-			for _, v := range event.AccountUpdate.Positions {
-				InvalidateTradeConfig(v.Symbol)
-				floatAmount, _ := strconv.ParseFloat(v.Amount, 64)
-				var position models.FuturesPosition
-				var symbols models.Symbols
-				o.QueryTable("symbols").Filter("symbol", v.Symbol).One(&symbols)
-				o.QueryTable("futures_positions").Filter("symbol", v.Symbol).Filter("side", v.Side).One(&position)
-				position.Symbol = v.Symbol
-				position.Side = string(v.Side)
-				position.Amount = strconv.FormatFloat(floatAmount, 'f', -1, 64) // 清仓时推送持仓数量为 0
-				position.MarginType = string(v.MarginType)
-				position.Leverage = symbols.Leverage // 杠杆倍数没在这里推送(默认为1), 只能暂时调用接口获取 TODO
-				position.IsolatedWallet = v.IsolatedWallet
-				position.EntryPrice = v.EntryPrice
-				position.MarkPrice = v.MarkPrice
-				position.UnrealizedProfit = v.UnrealizedPnL
-				position.AccumulatedRealized = v.AccumulatedRealized
-				position.MaintenanceMarginRequired = v.MaintenanceMarginRequired
-				position.UpdateTime = event.Time
-				if position.ID == 0 {
-					position.CreateTime = event.Time
-					o.Insert(&position)
-				} else {
-					o.Update(&position)
-				}
-			}
-		} else if event.Event == "ORDER_TRADE_UPDATE" {
-			order := event.OrderTradeUpdate
-			var orderModel models.FuturesOrder
-			o.QueryTable("futures_orders").Filter("order_id", order.ID).One(&orderModel)
-			orderModel.Symbol = order.Symbol
-			orderModel.ClientOrderId = order.ClientOrderID
-			orderModel.OrderId = strconv.FormatInt(order.ID, 10)
-			orderModel.Side = string(order.Side)
-			orderModel.PositionSide = string(order.PositionSide)
-			orderModel.Type = string(order.Type)
-			orderModel.Status = string(order.Status)
-			orderModel.Price = order.OriginalPrice
-			orderModel.OrigQty = order.OriginalQty
-			orderModel.ExecutedQty = order.AccumulatedFilledQty
-			orderModel.AveragePrice = order.AveragePrice
-			orderModel.StopPrice = order.StopPrice
-			orderModel.CommissionAsset = order.CommissionAsset
-			orderModel.Commission = order.Commission
-			orderModel.RealizedPnL = order.RealizedPnL
-
-			orderModel.UpdateTime = event.Time
-			if orderModel.ID == 0 {
-				orderModel.CreateTime = event.Time
-				o.Insert(&orderModel)
-			} else {
-				o.Update(&orderModel)
-			}
-		} else if event.Event == "ACCOUNT_CONFIG_UPDATE" {
-			config := event.AccountConfigUpdate
-			InvalidateTradeConfig(config.Symbol)
-			if config.Leverage == 0 {
-				// 其它推送不处理
-				return
-			}
-			var positionModels []models.FuturesPosition
-			o.QueryTable("futures_positions").Filter("symbol", config.Symbol).All(&positionModels)
-			for _, positionModel := range positionModels {
-				positionModel.Leverage = config.Leverage
-				o.Update(&positionModel)
-			}
-		} else if event.Event == "listenKeyExpired" {
-			// 如果 listenKey 过期，重新获取 listenKey
+		if event.Event == "listenKeyExpired" {
 			logs.Info("futures_user_data ws listenKeyExpired")
-			UpdateListenKey(listenKey)
+			if err := UpdateListenKey(listenKey); err != nil {
+				logs.Error("futures user stream listenKey refresh:", err)
+			}
+			return
+		}
+		if err := persistFuturesAccountEvent(MainAccountID, nil, event); err != nil {
+			logs.Error("persist main futures user stream event:", err)
 		}
 	}, func(err error) {
 		futuresUserDataWSActiveGeneration.CompareAndSwap(generation, 0)
