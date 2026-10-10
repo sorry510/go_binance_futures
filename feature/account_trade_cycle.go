@@ -37,14 +37,17 @@ type accountTradeRunner struct {
 	EvaluateEntry  func(*models.Symbols, []types.FuturesPosition) strategy.OpenResult
 	Depth          func(context.Context, string, int) (float64, float64, error)
 	EnsureConfig   func(context.Context, *models.Symbols) error
-	SubmitOpen     func(*tradeCycleAccountSnapshot, string, float64, float64, futures.SideType, futures.PositionSideType, futures.OrderType, string) (*futures.CreateOrderResponse, error)
-	SubmitClose    func(string, string, string, float64, futures.PositionSideType) (*futures.CreateOrderResponse, error)
-	RecordOpen     func(string, float64, string, string, int64, int64)
-	RecordClose    func(types.FuturesPosition, float64, float64, string, int64, *models.Config)
-	NotifyOpen     func(notify.FuturesOrderParams)
-	NotifyClose    func(notify.FuturesOrderParams)
-	EvaluateExit   func(strategy.CloseParams, float64, float64) tradeExitReason
-	Sleep          func(time.Duration)
+	// Mandatory for Lead, absent for Main. The Stage 4-3 account-bound
+	// adapter must supply a fresh verified risk snapshot for every attempt.
+	PreflightOpen func(context.Context, *models.Symbols, futures.PositionSideType, float64, float64) error
+	SubmitOpen    func(*tradeCycleAccountSnapshot, string, float64, float64, futures.SideType, futures.PositionSideType, futures.OrderType, string) (*futures.CreateOrderResponse, error)
+	SubmitClose   func(string, string, string, float64, futures.PositionSideType) (*futures.CreateOrderResponse, error)
+	RecordOpen    func(string, float64, string, string, int64, int64)
+	RecordClose   func(types.FuturesPosition, float64, float64, string, int64, *models.Config)
+	NotifyOpen    func(notify.FuturesOrderParams)
+	NotifyClose   func(notify.FuturesOrderParams)
+	EvaluateExit  func(strategy.CloseParams, float64, float64) tradeExitReason
+	Sleep         func(time.Duration)
 }
 
 func mainTradeRunner(cfg *models.Config) *accountTradeRunner {
@@ -93,6 +96,9 @@ func (r *accountTradeRunner) validate() error {
 	}
 	if r.AccountID != binance.MainAccountID && r.AccountID != binance.LeadAccountID {
 		return fmt.Errorf("invalid trade account %q", r.AccountID)
+	}
+	if r.AccountID == binance.LeadAccountID && r.PreflightOpen == nil {
+		return fmt.Errorf("Lead requires an explicit risk preflight hook")
 	}
 	if r.AccountID == binance.LeadAccountID && (!r.Mock || r.LeadSymbols == nil || r.leadMockPermit == nil) {
 		return fmt.Errorf("Stage 3 lead runner requires a test-only mock permit and cached whitelist")
@@ -161,4 +167,23 @@ func evaluateTradeExitWithRules(roi, profit, loss float64, autoStop, canClose fu
 		return tradeExitProfit
 	}
 	return tradeExitHold
+}
+
+// Main keeps the original path unchanged. Lead cannot proceed unless its own
+// risk controller gives a positive pre-open decision for this exact intent.
+func (r *accountTradeRunner) riskAllowsOpen(ctx context.Context, coin *models.Symbols, side futures.PositionSideType, qty, price float64) bool {
+	if r.AccountID != binance.LeadAccountID {
+		return true
+	}
+	if r.PreflightOpen == nil {
+		logs.Warning("Lead risk preflight is missing; skip new open")
+		return false
+	}
+	if err := r.PreflightOpen(ctx, coin, side, qty, price); err != nil {
+		// Only category-like errors should be returned by the future Lead adapter,
+		// never raw HTTP credentials or signed URLs.
+		logs.Warning("Lead new open blocked by account risk preflight")
+		return false
+	}
+	return true
 }

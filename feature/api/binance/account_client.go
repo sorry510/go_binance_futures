@@ -97,6 +97,15 @@ func doAccountSigned[T any](a *AccountClient, ctx context.Context, window int64,
 	a.signedMu.Unlock()
 	return res, err
 }
+
+// GetPositionModeContext checks Hedge Mode without mutating the account.
+// Lead Stage 4-1 verifies the mode before any trading Gate is considered.
+func (a *AccountClient) GetPositionModeContext(ctx context.Context) (*futures.PositionMode, error) {
+	return doAccountSigned(a, ctx, futuresSignedReadRecvWindow, func(c *futures.Client, ctx context.Context, o ...futures.RequestOption) (*futures.PositionMode, error) {
+		return c.NewGetPositionModeService().Do(ctx, o...)
+	})
+}
+
 func (a *AccountClient) GetFuturesAccountContext(ctx context.Context) (*futures.Account, error) {
 	return doAccountSigned(a, ctx, futuresSignedReadRecvWindow, func(c *futures.Client, ctx context.Context, o ...futures.RequestOption) (*futures.Account, error) {
 		return c.NewGetAccountService().Do(ctx, o...)
