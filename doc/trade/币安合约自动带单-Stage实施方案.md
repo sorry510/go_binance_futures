@@ -134,12 +134,26 @@
 ### 3.1 拆分职责
 
 1. `LoadSharedTradeConfig`：每周期读取一次 `models.Config`、`models.Symbols`，保留当前所有选币参数和“默认使用自定义策略”机制。
-2. `SelectTradeCoins`：仍走 `selectConfiguredCoins(..., scanner.SmartLocalV2ModeTrade)`；维持 Top60/报价量/涨跌均可等现有筛选；同一快照支持两账户复用，不让账户数量决定选币顺序。
+2. `SelectTradeCoins`：**行情/指标/评分算法共享，但账户候选池及轮询、冷却独立**。Main 保持 `selectConfiguredCoins(..., scanner.SmartLocalV2ModeTrade)` 的原 Top60 与每轮 5 币行为；Lead 先用本账户已验证的 `leadSymbol` 本地白名单过滤 USDT 永续候选币，再在允许范围内应用相同 Top60 评分/流动性规则和每轮最多 5 币轮询。白名单中不足 60 个则取实际满足规则的数量；不能先选普通 Top60 再过滤 Lead（会漏掉普通 Top60 之外的可带单币）。Lead 使用独立轮询 key 与 `account_id` 冷却，不消费 Main 的轮询进度。
 3. `EvaluateEntry(symbol, marketSnapshot, strategyConfig)`：唯一实现 `GetCanLongOrShort`，沿用 current rule JSON、LONG/SHORT 的 hash/判断时点/指标缓存，绝不复制带单版规则。
 4. `EvaluateExit(position, strategyConfig)`：唯一实现 `AutoStopOrder` → 止损阈值 + `CanOrderComplete` → 止盈阈值 + `CanOrderComplete`，保持原先优先级和收益率定义；每账户持仓状态分别带入。
 5. `AccountTradeLoop(AccountContext)`：每账户独立执行顺序：可管理订单超时处理 → 仓位快照/Ownership 对账 → 所有已有受控仓位的退出检查 → 新开仓闸门与账户风控 → 对选中的币逐一应用共享开仓信号 → 记录和通知。
 6. `TradeExecutionAdapter`：对每账户独立做 depth 均价、精度/数量计算、杠杆与逐仓设置、MARKET/LIMIT 下单、pending slot 维护、ClientOrderID、超时撤单、成交同步。
 7. `TradeHistoryWriter` + `NotifyAdapter`：通过明确 account_id 记录信号、订单和执行结果。原 `order` 仍保持主交易历史兼容，带单记录不能影响主账户统计。
+
+### 3.1-A Lead 可交易合约白名单本地定时快照（Stage 3 必需）
+
+**目的**：`GET /sapi/v1/copyTrading/futures/leadSymbol` 是带单 Portfolio 专用的只读签名接口，**不能在每次 2 秒交易循环、每个币的策略判断或每次下单前远程调用**。复用 Stage 1 已实现的 `AccountClient.LeadTradingSymbols(ctx)`，额外封装账户独立的 `LeadSymbolCache` / 定时刷新服务，默认 **内存快照，无数据库迁移、不写 app.conf**。
+
+1. **主动刷新频率**：Lead 模拟/真实服务获得有效 Lead 客户端并启动时，尝试**一次初始拉取**；随后建议每 **1 小时**主动刷新一次（正常运行约 24 次/天，不随选币/交易次数增长）。允许后续调整常量，但不把刷新变成每轮 REST 请求。Lead 尚未配置/未启用时不发起无意义的白名单请求。
+2. **快照结构**：`allowedSymbols`（规范化、去重后的 `symbol -> metadata` Set/Map）、`fetchedAt`、`expiresAt`、`lastAttemptAt`、`lastErrorCategory`、`ready`；只存白名单和时间戳，**不保存 API Key/Secret**。缓存绑定具体 Lead 账户 Client/Portfolio 身份；密钥替换、身份变化、账户停用时失效，不得使用旧账户白名单。
+3. **有效期与异常处理**：建议最大快照有效期 **2 小时**，过期、从未成功加载、响应解析/身份校验异常或返回空白名单时 **禁止 Lead 新开仓（fail-closed）**。刷新短暂网络失败时保留上一次已验证的快照直到过期，后台按 **1/5/15 分钟**间隔限速重试；若鉴权失败、资格被撤销、明确被禁止访问，立即将快照标为不可用并报警，不得继续使用旧白名单。缓存空列表不是允许所有币。
+4. **交易热路径**：Lead 候选池生成和下单前白名单门禁只做 O(1) **本地快照查询**，不以缓存未命中触发同步网络请求；未命中只能跳过该币，缺失/过期则暂停 Lead 新开仓。既有受控仓位的对账、止盈止损、超时撤单不因开仓白名单失效而停止；如交易所禁平仓须提示人工处理。
+5. **并发与生命周期**：每个 Lead 账户最多一个刷新任务（互斥/singleflight）；调用需超时、context 取消、失败退避；停止/切换凭证必须取消旧刷新并清空旧代的快照，禁止旧请求晚返回覆盖新身份；不给 Main 增加 API 请求，也不影响公共行情 WS。
+6. **显示与可观测性（Stage 6 复用）**：记录白名单币数、上次成功/尝试刷新时间、缓存有效/过期状态、上次失败类别和因白名单跳过的候选数；将后续手动“刷新白名单”操作也走同一去重、限速刷新通道。只记录脱敏错误，不泄露签名 URL/凭证。
+7. **测试 Gate**：Mock SAPI 验证启动单次获取、1 小时定时刷新、2 秒扫描/逐币门禁 **零额外请求**、并发刷新仅一次、失败退避、过期后禁止新开仓、空列表禁止新开仓、资格/密钥变更立即失效、旧请求不能覆盖新代；两个账户不共用名单/轮询；Main Top60 金样回归不变。
+
+**实现边界**：Stage 3 使用注入式 Fetcher 和可控时钟进行离线测试，不启动真实 Lead 私有交易或擅自获取真实密钥。Stage 4 必须复用缓存的安全判定；Stage 5 接入独立刷新任务与告警；Stage 6 展示缓存状态和受控手动刷新入口。
 
 ### 3.2 与旧实现一一对应的规则表
 
@@ -160,11 +174,15 @@
 ### 3.3 策略一致性测试
 
 - 使用同一份行情、策略配置、账户初始仓位，old main path 与 refactored main path 的交易意图、选币顺序、方向、价格/数量精度、止盈止损、策略 hash 全部一致。
-- 同一时刻 `main` 和 `lead` 输入相同且都有开仓资格时产生相同策略信号，但仅以自己账户的实际仓位和风控决定是否下单。
+- 同一时刻 `main` 和 `lead` 对**双方均可交易的相同 symbol** 输入相同策略配置/行情时，产生相同策略信号；账户候选池因 Lead 白名单不同可以合法产生不同选币结果，后续仍由独立风控决定是否下单。
 - 默认暂停 lead、关闭主 `FutureEnable` 的组合，不可产生误触发；无论一方被暂停，另一方按自身开关执行。
 - Existing `service/backtest` 结果不因提取共享逻辑而变化（必要时增加 golden/snapshot tests）。
 
-**验收 Gate 3**：无重复交易策略实现；原主账户全量回归；所有交易语义与旧实现一致；lead 仍只在 mock Broker 下运行。
+**验收 Gate 3**：无重复交易策略实现；原主账户全量回归；所有交易语义与旧实现一致；Lead 白名单本地定时缓存（初始获取、单刷新、有效期、失效/失败退避、热路径无重复 API）与独立候选池/轮询测试通过；lead 仍只在 mock Broker 下运行。
+
+**2026-10-09 Stage 3 离线实施结果**：单一 `StartTrade` 共享运行器完成 Main 原交易路径适配，Lead 使用明确的 Mock IO，不接真实账户；共享退出优先级、策略的账户持仓注入、独立白名单 Top60 / 轮询 / 冷却、Lead 白名单 1 小时刷新和 2 小时失效保护已实现并建立定向测试。正式 Lead 定时任务需要安全凭证/身份 Gate 才能在 Stage 5/6 启动；真实 Main 运行回归仍需用户验收。详见 [Stage 3 实施记录](币安合约自动带单-Stage3-实施记录.md)。
+
+**Stage 3 审计 F2/F3/F4/F5 跟进（2026-10-09）**：Main 的 `SelectCoins` / `EnsureConfig` 兼容包装继续保持旧的无错误返回/best-effort 语义，Lead 适配器在选择/保证金杠杆检查失败时应 fail-closed；共享循环的 API source 已区分 main `start_trade` 与 lead `lead_trading`。Stage 3 生产构建不再包含 `leadMockTradeRunner`，Lead 测试运行器的许可只在 `_test.go` 中实现，禁止把 Main 真正的读写钩子冒充 Mock 注入；Stage 4 必须实现经授权的账户级真实执行工厂。LIMIT/方向开关/白名单不可用三条探针已固定为永久单测。**Main 实际业务运行验收仍是 Gate 3 未关闭项**，详见 Stage 3 实施记录 §3-A。
 
 ## Stage 4 — 带单账户执行层与账户风控
 

@@ -20,6 +20,8 @@ import (
 
 const leadSAPIBaseURL = "https://api.binance.com"
 
+var ErrLeadSAPIUnauthorized = errors.New("lead SAPI credentials or permissions rejected")
+
 type LeadTraderStatus struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
@@ -67,6 +69,9 @@ func (a *AccountClient) getLeadSAPI(ctx context.Context, baseURL, path string, t
 		return errors.New("lead SAPI network request failed")
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+		return ErrLeadSAPIUnauthorized
+	}
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("lead SAPI returned HTTP %d", resp.StatusCode)
 	}
@@ -88,7 +93,7 @@ func (a *AccountClient) LeadTraderStatus(ctx context.Context) (LeadTraderStatus,
 		return LeadTraderStatus{}, err
 	}
 	if v.Code != "000000" || !v.Success {
-		return LeadTraderStatus{}, errors.New("lead trader status request was not successful")
+		return LeadTraderStatus{}, ErrLeadSAPIUnauthorized
 	}
 	return v, nil
 }
@@ -99,7 +104,7 @@ func (a *AccountClient) LeadTradingSymbols(ctx context.Context) ([]LeadTradingSy
 		return nil, err
 	}
 	if v.Code != "000000" || (v.Success != nil && !*v.Success) {
-		return nil, errors.New("lead symbol whitelist request was not successful")
+		return nil, ErrLeadSAPIUnauthorized
 	}
 	if v.Data == nil {
 		return []LeadTradingSymbol{}, nil

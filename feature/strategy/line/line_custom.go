@@ -22,6 +22,17 @@ type TradeLineCustom struct {
 
 // 交易逻辑: 自定义逻辑
 func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParams) (openResult strategy.OpenResult) {
+	return TradeLine.evaluateEntryWithPositionLoader(openParams, TradeLine.getTransformPositions)
+}
+
+// GetCanLongOrShortWithPositions runs the exact same strategy DSL, hash,
+// indicators and signal ordering as Main, but injects the correct account
+// positions instead of accidentally reading Main's local futures mirror.
+func (TradeLine TradeLineCustom) GetCanLongOrShortWithPositions(openParams strategy.OpenParams, positions []types.FuturesPosition) strategy.OpenResult {
+	return TradeLine.evaluateEntryWithPositionLoader(openParams, func() ([]types.FuturesPosition, error) { return positions, nil })
+}
+
+func (TradeLine TradeLineCustom) evaluateEntryWithPositionLoader(openParams strategy.OpenParams, loadPositions func() ([]types.FuturesPosition, error)) (openResult strategy.OpenResult) {
 	coin := openParams.Symbols
 	openResult.CanLong = false
 	openResult.CanShort = false
@@ -37,7 +48,7 @@ func (TradeLine TradeLineCustom) GetCanLongOrShort(openParams strategy.OpenParam
 		return openResult
 	}
 	env := InitParseEnv(coin.Symbol, normalizeCustomTechnology(coin.Technology))
-	positions, _ := TradeLine.getTransformPositions()
+	positions, _ := loadPositions()
 	env["Positions"] = positions
 	for _, strategy := range strategyConfig {
 		if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
