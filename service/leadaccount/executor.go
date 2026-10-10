@@ -8,6 +8,7 @@ import (
 	"math"
 	"strings"
 	"sync"
+	"time"
 
 	binance "go_binance_futures/feature/api/binance"
 	"go_binance_futures/service/futuresownership"
@@ -36,6 +37,7 @@ type LeadExecutionAdapter struct {
 	simulateEvidence func(*RiskSnapshot)
 	simulateRules    func(RiskOpenOrder) (VerifiedOrderRules, error)
 	pendingReconcile bool // held until Stage 5 authoritative account resync
+	guard            *LeadRuntimeGuard
 }
 
 func NewLeadExecutionAdapter(client *binance.AccountClient, symbols *binance.LeadSymbolCache) (*LeadExecutionAdapter, error) {
@@ -61,7 +63,57 @@ func NewLeadExecutionAdapter(client *binance.AccountClient, symbols *binance.Lea
 	if !ok || broker.Account != client {
 		return nil, fmt.Errorf("Lead broker account binding invalid")
 	}
-	return &LeadExecutionAdapter{account: client, ownership: owned, risk: NewRiskController(), source: source, rules: rules, symbols: symbols}, nil
+	return &LeadExecutionAdapter{
+		account: client, ownership: owned, risk: NewRiskController(),
+		source: source, rules: rules, symbols: symbols,
+		guard: NewLeadRuntimeGuard(nil),
+	}, nil
+}
+
+// RuntimeStatus is a read-only diagnostic; open_ready is NOT permission to
+// replace the permanently read-only production Lead broker.
+func (a *LeadExecutionAdapter) RuntimeStatus() LeadStatusSnapshot {
+	if a == nil || a.guard == nil {
+		return NewLeadRuntimeGuard(nil).Status()
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.risk.mu.RLock()
+	state := a.risk.state
+	a.risk.mu.RUnlock()
+	a.guard.observeBoundState(state)
+	return a.guard.Status()
+}
+
+// PauseOpens is one-way in Stage 4-5: it cannot authorize resumption.
+func (a *LeadExecutionAdapter) PauseOpens() {
+	if a == nil {
+		return
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.guard != nil {
+		a.guard.Pause()
+	}
+	if a.risk != nil {
+		a.risk.Pause()
+	}
+}
+
+// ReportLeadFault accepts only fixed category codes. This is independent of
+// Main alerts and never forwards raw Binance HTTP error bodies.
+func (a *LeadExecutionAdapter) ReportLeadFault(code LeadFaultCode) {
+	if a == nil {
+		return
+	}
+	// Serialize fault observation with the intent check and Ownership claim.
+	// A fault reported between the final preflight and the broker submit must
+	// not be lost by a competing state transition.
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.guard != nil {
+		a.guard.RecordFault(binance.LeadAccountID, code)
+	}
 }
 
 // CheckOpen is a read-only diagnostic. The same per-adapter lock protects
@@ -89,6 +141,12 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 	a.risk.mu.RLock()
 	gates := a.risk.state
 	a.risk.mu.RUnlock()
+	if a.guard != nil {
+		a.guard.observeBoundState(gates)
+		if !a.guard.permitsOpen() {
+			return RiskDecision{BlockingReasons: []string{string(a.guard.Status().State)}}, ErrLeadOpenBlocked
+		}
+	}
 	if !gates.Enabled || !gates.AllowNewOpens || !gates.ReadOnlyVerified ||
 		!gates.PortfolioBound || !gates.WSHealthy || !gates.Stage7Authorized {
 		return RiskDecision{BlockingReasons: []string{"lead_execution_not_authorized"}}, ErrLeadOpenBlocked
@@ -97,6 +155,9 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 	// Ignore untrusted validation flags, notional limits and leverage tier.
 	// Recompute from public exchangeInfo and signed Lead portfolio reads.
 	if a.rules == nil {
+		if a.guard != nil {
+			a.guard.RecordFault(binance.LeadAccountID, FaultRulesUnavailable)
+		}
 		return RiskDecision{BlockingReasons: []string{"lead_exchange_rules_unavailable"}}, ErrLeadOpenBlocked
 	}
 	margin := futures.MarginType(strings.ToUpper(strings.TrimSpace(request.MarginType)))
@@ -111,6 +172,9 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 		verified, ruleErr = a.rules.Verify(ctx, request, margin)
 	}
 	if ruleErr != nil {
+		if a.guard != nil {
+			a.guard.RecordFault(binance.LeadAccountID, FaultRulesUnavailable)
+		}
 		return RiskDecision{BlockingReasons: []string{"lead_exchange_rules_unavailable"}}, ErrLeadOpenBlocked
 	}
 	request.BinanceMinNotionalUSDT = verified.MinNotionalUSDT
@@ -120,12 +184,21 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 	request.MarginModeVerified = true
 	snapshot, err := a.source.Snapshot(ctx)
 	if err != nil {
+		if a.guard != nil {
+			a.guard.RecordFault(binance.LeadAccountID, FaultSnapshotInvalid)
+		}
 		return RiskDecision{BlockingReasons: []string{"lead_risk_snapshot_unavailable"}}, ErrLeadOpenBlocked
 	}
 	if a.simulateEvidence != nil {
 		a.simulateEvidence(&snapshot)
 	}
+	if a.guard != nil {
+		a.guard.observeFreshEvidence(snapshot, time.Now().UTC(), gates.WSHealthy)
+	}
 	result := a.risk.CheckOpen(ctx, request, snapshot, a.symbols)
+	if a.guard != nil {
+		a.guard.recordRiskDecision(binance.LeadAccountID, result)
+	}
 	if !result.Allowed {
 		return result, ErrLeadOpenBlocked
 	}
@@ -177,6 +250,9 @@ func (a *LeadExecutionAdapter) ExecuteOpen(ctx context.Context, request futureso
 	// blocked, and there is no public unsafe reset in Stage 4-3. Successful
 	// Binance acceptance also requires fresh Stage 5 account reconciliation.
 	a.pendingReconcile = true
+	if a.guard != nil {
+		a.guard.RecordFault(binance.LeadAccountID, FaultPendingReconcile)
+	}
 	executed, execErr := a.ownership.Execute(ctx, request)
 	return executed, execErr
 }

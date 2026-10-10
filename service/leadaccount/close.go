@@ -26,6 +26,9 @@ func (a *LeadExecutionAdapter) ExecuteManagedClose(ctx context.Context, request 
 	if a.pendingReconcile {
 		return futuresownership.ExchangeOrder{}, ErrLeadPendingReconcile
 	}
+	if a.guard != nil && !a.guard.permitsExitWrite() {
+		return futuresownership.ExchangeOrder{}, ErrLeadOpenBlocked
+	}
 	a.risk.mu.RLock()
 	state := a.risk.state
 	a.risk.mu.RUnlock()
@@ -85,5 +88,8 @@ func (a *LeadExecutionAdapter) ExecuteManagedClose(ctx context.Context, request 
 	// Any returned uncertainty or fill requires account reconciliation before
 	// another write. Stage 5 must provide a dedicated verified release workflow.
 	a.pendingReconcile = true
+	if a.guard != nil {
+		a.guard.RecordFault(binance.LeadAccountID, FaultPendingReconcile)
+	}
 	return a.ownership.Execute(ctx, request)
 }

@@ -1,8 +1,8 @@
 # Binance Futures 自动带单（Traditional Lead Trading）Stage 实施方案
 
-> 版本：v1.0（规划稿）  日期：2026-10-09
+> 版本：v1.1（实施进度同步）  初稿日期：2026-10-09；进度更新：2026-10-10
 >
-> 实施状态：Stage 0 官方文档审计、Stage 1 多账户 Client、Stage 2 账户级 Ownership/仓位订单镜像与历史查询的离线实现均已完成；Stage 2 真实 MySQL 8 升级仍未运行，Stage 3–7 未开始。Lead 实盘 Gate 未开放。
+> 实施状态：Stage 0–3 已完成相应离线实现，Stage 3 的 Main 实际业务运行验收仍待确认；Stage 4-1～4-5 已完成离线实现及已有审计，**Stage 4-6 Mock 全流程验收完成，Gate 4 离线通过（Offline PASS）**。Stage 2 的真实 MySQL 8 升级状态仍须在获授权后单独确认。**Gate 4 仅离线通过，可以按规划进入 Stage 5；Lead 实盘 Gate 0-LIVE/5/6/7 尚未开放。**
 >
 > 后端：`/Users/zhz/work/binance/go_binance_futures`
 > 前端：`/Users/zhz/work/binance/go_binance_futrues_new_ui`
@@ -188,6 +188,19 @@
 
 **目标**：使用独立 Lead Portfolio Key 复用 Stage 3 同一执行链；第一版不需要独立的策略编辑或 AI 流程。
 
+**Stage 4 六个子阶段（2026-10-10 同步，按交付阶段而非下方技术分类 4.1/4.2/4.3 计）：**
+
+| 交付阶段 | 内容 | 当前状态 | 验收边界 |
+|---|---|---|---|
+| **4-1** | Lead 独立凭证配置及只读身份/资产校验 | **离线完成** | AES 加密、强制 Lead Client、成功读取不等于 Portfolio 已确认 |
+| **4-2** | Lead 独立账户开仓风控 | **离线完成** | 单笔/总敞口、保证金、日亏损、持仓数、白名单，默认拒绝 |
+| **4-3** | Lead 专属执行适配器及账户风险证据 | **离线完成** | 独立 Broker/Ownership，MARKET/LIMIT、受控平仓、未知结果保留 |
+| **4-4** | 普通/Algo 异常订单只读恢复、平仓交易所过滤器 | **离线完成且已审计** | 终态也不得释放 pending，零真实 Cancel/下单 |
+| **4-5** | 暂停、熔断与故障保护状态机 | **离线完成，待 4-6 联合验收** | Lead 账户故障分级、开仓暂停与安全退出隔离、告警/恢复条件 |
+| **4-6** | Mock 全链路及 Gate 4 离线验收 | **Offline PASS（2026-10-10）** | Main/Lead 并行、交易异常矩阵、拒绝绕过、Race/Vet/Build、验收记录 |
+
+**进度口径**：4-1～4-4“完成”仅指对应的**离线开发/测试**，不等于真实 Lead Portfolio 身份、资金隔离、WS、持久化重启恢复或小额实盘已验证。4-5 与 4-6 均完成，Gate 4 现已标为“离线通过”；实际交易授权仍归 Stage 7。
+
 ### 4.1 带单模式设置
 
 - 账户角色固定 `lead`；用户填写 Binance Lead Portfolio API Key、Secret 和可选 portfolio 显示名（用于 UI；真实 portfolio 身份须 API 校验，不信任用户填入的名称）。
@@ -232,7 +245,27 @@
 
 **2026-10-10 Stage 4-4 离线实施结果**：完成 Lead 普通/Algo 订单的只读安全恢复证据（实际触发单二次查询与身份/方向/成交量校验、未知/超时 fail-closed）、受控平仓 LOT_SIZE/PRICE_FILTER/最小名义额门禁与全平例外边界，新增 Mock HTTP/SQLite 幂等单测。仍未允许真实撤单/恢复，不解除 pending；跨进程/重启权威对账在 Stage 5，实盘验证需 Stage 7。详见 [Stage 4-4 实施记录](币安合约自动带单-Stage4-4-实施记录.md)。
 
-**验收 Gate 4**：mock / 真实只读检查覆盖 LONG/SHORT/CLOSE_LONG/CLOSE_SHORT、MARKET/LIMIT、TP/SL、拒单/未知提交/部分成交/保证金不足/精度错误；无可绕过风控的带单写入口；真单仍需 Stage 7 人工授权。
+### 4.4 交付阶段 4-5：暂停、熔断与故障保护（离线完成，待 4-6 验收）
+
+本节是**交付编号 4-5**，不同于上面的技术分类 4.1/4.2/4.3。具体设计见 [Stage 4-5 开发计划](币安合约自动带单-Stage4-5-开发计划.md)，实际交付结果见 [Stage 4-5 实施记录](币安合约自动带单-Stage4-5-实施记录.md)。
+
+- 明确 Lead 状态：`disabled`、`paused`、`open_ready`（仅表示运行条件满足，不是 Stage 7 实盘授权）、`risk_tripped`、`reconcile_required`、`account_unavailable`。状态仅属于 `account_id=lead`；原因、时间与数据证据保留，不因下一次交易循环悄悄重置。
+- **暂停只禁止新开仓**。已有受控持仓仍评估原策略 TP/SL、对账及受控平仓意图；若私有账户/持仓真实性无法确认，拒绝不确定的写操作并告警，不强制平仓，不把 unmanaged 仓位纳入受控。
+- 风险/故障触发：每日净亏损、总/单笔敞口、保证金、最大持仓数等 Stage 4-2 已有规则；凭证/Portfolio/白名单失效，快照过期，WS 失效，API 429/418、网络超时，订单 unknown/Algo 恢复证据不全等进入可诊断阻断类别。区分瞬时的单笔 `skip` 与需要保持阻断的 `trip`，不得把任何一次正常无信号当故障。
+- 解除条件：普通暂停需要后续显式授权；风控熔断必须有**新鲜且完整**的同账户风控证据和阈值恢复；未知订单/重启等 `reconcile_required` **仅 Stage 5 权威持久对账后**可解除。Stage 4-5 不引入通用 `reset/unlock` 后门，也不启用真实 Lead Runner。
+- 告警采用账户级原因码与可注入通知出口，要求首发、去重及恢复/升级事件；不得记录 API Secret、签名 URL。实际 per-key API 预算、生产 WS 订阅与重启恢复接线仍在 Stage 5。
+
+**2026-10-10 Stage 4-5 离线实施结果**：新增 Lead 专用状态/故障管理器、风险原因分类、单向开仓暂停、独立安全退出门禁、未知提交持续对账阻断与固定原因码告警事件接口；已接入 Lead 执行适配器，Main 执行链保持不变。Race Mock 验证了 UTC 换日不自动复位熔断、429/418 去重与升级、通知失败不解除阻断、身份/WS 不可用时不盲写、暂停后安全退出及 Main/Lead 隔离。**不提供**实盘授权或 `pendingReconcile` 解除入口，真实生产 notifier 与权威 WS/REST/DB 恢复仍属于后续 Stage，参见 [Stage 4-5 实施记录](币安合约自动带单-Stage4-5-实施记录.md)。
+
+### 4.5 交付阶段 4-6：Mock 全流程与 Gate 4 验收（Offline PASS）
+
+具体设计见 [Stage 4-6 验收计划](币安合约自动带单-Stage4-6-验收计划.md)。要求串起 4-1～4-5，使用 Mock Binance + Fake Broker + SQLite 内存库验证双账户 LONG/SHORT、MARKET/LIMIT、CLOSE_LONG/CLOSE_SHORT、TP/SL、部分成交、拒单/取消/超时/未知单、风控熔断、暂停/恢复条件与 Main 独立运行；必须证明所有 Lead 生产写路径仍处于未授权锁定状态。测试中不发真实私有 Binance 写请求、不使用真实 DB。
+
+**2026-10-10 Stage 4-6 Mock 联合验收结果**：已新增 Stage 4-1～4-5 联合 Fake Broker/SQLite 内存测试与全仓库生产 AST 安全入口扫描，覆盖 LONG/SHORT×MARKET/LIMIT、CLOSE/STOP/TP 双向、部分成交后取消、确定性拒单/超时/未知单、风控熔断、凭证轮换、Main/Lead 并行及未授权生产门禁；9 模块 Race/Vet 与 Go 生产 Build 均通过。已修复交易所规则不可用未进入状态机的可观测性问题（`FaultRulesUnavailable`）。仍无真实 Lead 下单入口。详见 [Stage 4-6 实施记录](币安合约自动带单-Stage4-6-实施记录.md)。
+
+**Gate 4 固定安全声明（所有后续阶段均必须保留）**：**“Gate 4 Offline PASS 仅代表 Mock/离线测试通过，不代表真实 Lead Portfolio 已验证，不构成真实交易、撤单、启用或恢复授权。”** 真实下单必须分别满足 Gate 0-LIVE、Stage 5/6 安全机制及 Stage 7 的明确授权。本轮 Stage 4-6 代码审计没有发现 P0/P1，但独立审计、离线测试和实际交易授权属于不同证据等级。
+
+**验收 Gate 4（2026-10-10：离线通过；真实交易未授权）**：Stage 4-6 全链路 Mock/Race/Vet/Build 和代码审计均通过；主要异常场景含受控仓位保护、状态变化与 Lead/Main 隔离，任何不确定状态 fail-closed 且有明确原因；无可绕过风控的生产 Lead 写入口。真实 Lead Key/Portfolio 只读能力与真实 TP/SL 行为仍需后续授权及 Gate 0-LIVE/Stage 7 验证。
 
 ## Stage 5 — Lead User Data WS、启动恢复、API 预算与告警
 
@@ -243,6 +276,8 @@
 - 公开 mark price / ticker / kline / market depth 继续共用现有 WS 或行情缓存；账户镜像、余额、授权私有请求不得跨账户共享。
 - 确保 lead 与 main 的 `ACCOUNT_UPDATE`/`ORDER_TRADE_UPDATE` 不交叉写 DB；同账户收到乱序/重复事件不能回退已确认成交数量。
 - Ownership 定期对账以 `account_id` 为隔离键；重启时先恢复上次 pending / uncertain order 再评估新信号，必要时本账户阻止新开仓。
+- **Stage 4-6 审计 F2：Ownership 查询语义必须进入重启恢复设计**：`futuresownership.Service.GetPosition(ctx, owner, symbol, side)` 只会返回**活动仓位**，仓位在正常平仓后可能返回 `orm.ErrNoRows`；**不得据此断言该仓位从未存在，也不得清除 pending/unknown**。重启/订单-仓位恢复必须同时通过 `ListPositions(ctx, owner, false)` 查询包含 CLOSED 的历史受控仓位，并核对 `account_id`、订单累计成交、已关闭状态与交易所实际仓位；只有完整权威对账可释放阻断。单独查到 Binance 订单终态同样不足以解除阻断。
+- **Stage 4-6 审计 F1：生产结构门禁**：当前 `go list -deps .` 无 `service/leadaccount` 依赖，且 `LeadExecutionAdapter`、`LeadRuntimeGuard` 的公开方法集合有固定白名单测试。Stage 5 如需将**只读** Lead 组件接入生产二进制，必须同步设计新的权限/不可写验证与更新这些门禁测试；禁止简单删除测试或因依赖变化自动放行下单。
 - REST 调用观测增加 `lead_trading` source、per-account weight/order 数、命中 WS 和 cache 的节约量；统一 IP 全局预算继续生效，账户自身 trade write 有独立限速，HTTP 429/418 降级、按既有三次/两分钟告警约定处理。
 - 超过下单限额、WS 断线超期、凭证失效、余额不足、无法对账、保护性平仓失败必须进入告警链路；解除阻塞前重新验证快照。
 - 并发压测覆盖“两账户 2s 循环 + 账户 WS + 手动 Reconcile + UI 刷新”；所有循环使用 context cancellation、明确运行状态并禁止遗留 Goroutine。
