@@ -416,69 +416,71 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				quantity := (usdt_float64 / buyPrice) * leverage_float64 // 购买数量
 				quantity = utils.GetTradePrecision(quantity, stepSize)   // 合理精度的价格
 
-				if err := runner.EnsureConfig(ctx, coin); err != nil {
-					logs.Error("account trade configuration rejected:", err)
-					continue
-				} // 更新倍率和仓位模式
+				if runner.riskAllowsOpen(ctx, coin, futures.PositionSideTypeLong, quantity, buyPrice) {
+					if err := runner.EnsureConfig(ctx, coin); err != nil {
+						logs.Error("account trade configuration rejected:", err)
+						continue
+					} // 更新倍率和仓位模式
 
-				if systemConfig.FutureOrderType == "MARKET" {
-					order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
-					if err == nil {
-						// 数据库写入订单
-						buyPrice := utils.GetTradePrecision(buyPrice*1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
-						runner.RecordOpen(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
-						isOpen = true
-						runner.NotifyOpen(notify.FuturesOrderParams{
-							Title:        lang.Lang("futures.open_notice_title"),
-							Symbol:       symbol,
-							Side:         "buy",
-							PositionSide: "long",
-							Price:        buyPrice,
-							Quantity:     quantity,
-							Leverage:     leverage_float64,
-							Status:       "success",
-						})
+					if systemConfig.FutureOrderType == "MARKET" {
+						order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
+						if err == nil {
+							// 数据库写入订单
+							buyPrice := utils.GetTradePrecision(buyPrice*1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
+							runner.RecordOpen(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
+							isOpen = true
+							runner.NotifyOpen(notify.FuturesOrderParams{
+								Title:        lang.Lang("futures.open_notice_title"),
+								Symbol:       symbol,
+								Side:         "buy",
+								PositionSide: "long",
+								Price:        buyPrice,
+								Quantity:     quantity,
+								Leverage:     leverage_float64,
+								Status:       "success",
+							})
+						} else {
+							runner.NotifyOpen(notify.FuturesOrderParams{
+								Title:        lang.Lang("futures.open_notice_title"),
+								Symbol:       symbol,
+								Side:         "buy",
+								PositionSide: "long",
+								Price:        buyPrice,
+								Quantity:     quantity,
+								Leverage:     leverage_float64,
+								Status:       "fail",
+								Error:        err.Error(),
+							})
+						}
 					} else {
-						runner.NotifyOpen(notify.FuturesOrderParams{
-							Title:        lang.Lang("futures.open_notice_title"),
-							Symbol:       symbol,
-							Side:         "buy",
-							PositionSide: "long",
-							Price:        buyPrice,
-							Quantity:     quantity,
-							Leverage:     leverage_float64,
-							Status:       "fail",
-							Error:        err.Error(),
-						})
-					}
-				} else {
-					order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, openResult.LongStrategyHash)
-					if err == nil {
-						// 数据库写入订单(可能没有买入)
-						runner.RecordOpen(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
-						isOpen = true
-						runner.NotifyOpen(notify.FuturesOrderParams{
-							Title:        lang.Lang("futures.open_notice_title"),
-							Symbol:       symbol,
-							Side:         "buy",
-							PositionSide: "long",
-							Price:        buyPrice,
-							Quantity:     quantity,
-							Leverage:     leverage_float64,
-							Status:       "success",
-						})
-					} else {
-						runner.NotifyOpen(notify.FuturesOrderParams{
-							Title:        lang.Lang("futures.open_notice_title"),
-							Symbol:       symbol,
-							Side:         "buy",
-							PositionSide: "long",
-							Price:        buyPrice,
-							Quantity:     quantity,
-							Leverage:     leverage_float64,
-							Status:       "fail",
-							Error:        err.Error(),
-						})
+						order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, openResult.LongStrategyHash)
+						if err == nil {
+							// 数据库写入订单(可能没有买入)
+							runner.RecordOpen(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
+							isOpen = true
+							runner.NotifyOpen(notify.FuturesOrderParams{
+								Title:        lang.Lang("futures.open_notice_title"),
+								Symbol:       symbol,
+								Side:         "buy",
+								PositionSide: "long",
+								Price:        buyPrice,
+								Quantity:     quantity,
+								Leverage:     leverage_float64,
+								Status:       "success",
+							})
+						} else {
+							runner.NotifyOpen(notify.FuturesOrderParams{
+								Title:        lang.Lang("futures.open_notice_title"),
+								Symbol:       symbol,
+								Side:         "buy",
+								PositionSide: "long",
+								Price:        buyPrice,
+								Quantity:     quantity,
+								Leverage:     leverage_float64,
+								Status:       "fail",
+								Error:        err.Error(),
+							})
+						}
 					}
 				}
 			}
@@ -491,69 +493,71 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				quantity := (usdt_float64 / sellPrice) * leverage_float64 // 购买数量
 				quantity = utils.GetTradePrecision(quantity, stepSize)    // 合理精度的价格
 
-				if err := runner.EnsureConfig(ctx, coin); err != nil {
-					logs.Error("account trade configuration rejected:", err)
-					continue
-				} // 更新倍率和仓位模式
+				if runner.riskAllowsOpen(ctx, coin, futures.PositionSideTypeShort, quantity, sellPrice) {
+					if err := runner.EnsureConfig(ctx, coin); err != nil {
+						logs.Error("account trade configuration rejected:", err)
+						continue
+					} // 更新倍率和仓位模式
 
-				if systemConfig.FutureOrderType == "MARKET" {
-					order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
-					if err == nil {
-						// 数据库写入订单
-						sellPrice := utils.GetTradePrecision(sellPrice*0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
-						runner.RecordOpen(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
-						isOpen = true
-						runner.NotifyOpen(notify.FuturesOrderParams{
-							Title:        lang.Lang("futures.open_notice_title"),
-							Symbol:       symbol,
-							Side:         "sell",
-							PositionSide: "short",
-							Price:        sellPrice,
-							Quantity:     quantity,
-							Leverage:     leverage_float64,
-							Status:       "success",
-						})
+					if systemConfig.FutureOrderType == "MARKET" {
+						order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
+						if err == nil {
+							// 数据库写入订单
+							sellPrice := utils.GetTradePrecision(sellPrice*0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
+							runner.RecordOpen(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
+							isOpen = true
+							runner.NotifyOpen(notify.FuturesOrderParams{
+								Title:        lang.Lang("futures.open_notice_title"),
+								Symbol:       symbol,
+								Side:         "sell",
+								PositionSide: "short",
+								Price:        sellPrice,
+								Quantity:     quantity,
+								Leverage:     leverage_float64,
+								Status:       "success",
+							})
+						} else {
+							runner.NotifyOpen(notify.FuturesOrderParams{
+								Title:        lang.Lang("futures.open_notice_title"),
+								Symbol:       symbol,
+								Side:         "sell",
+								PositionSide: "short",
+								Price:        sellPrice,
+								Quantity:     quantity,
+								Leverage:     leverage_float64,
+								Status:       "fail",
+								Error:        err.Error(),
+							})
+						}
 					} else {
-						runner.NotifyOpen(notify.FuturesOrderParams{
-							Title:        lang.Lang("futures.open_notice_title"),
-							Symbol:       symbol,
-							Side:         "sell",
-							PositionSide: "short",
-							Price:        sellPrice,
-							Quantity:     quantity,
-							Leverage:     leverage_float64,
-							Status:       "fail",
-							Error:        err.Error(),
-						})
-					}
-				} else {
-					order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit, openResult.ShortStrategyHash)
-					if err == nil {
-						// 数据库写入订单(可能没有买入)
-						runner.RecordOpen(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
-						isOpen = true
-						runner.NotifyOpen(notify.FuturesOrderParams{
-							Title:        lang.Lang("futures.open_notice_title"),
-							Symbol:       symbol,
-							Side:         "sell",
-							PositionSide: "short",
-							Price:        sellPrice,
-							Quantity:     quantity,
-							Leverage:     leverage_float64,
-							Status:       "success",
-						})
-					} else {
-						runner.NotifyOpen(notify.FuturesOrderParams{
-							Title:        lang.Lang("futures.open_notice_title"),
-							Symbol:       symbol,
-							Side:         "sell",
-							PositionSide: "short",
-							Price:        sellPrice,
-							Quantity:     quantity,
-							Leverage:     leverage_float64,
-							Status:       "fail",
-							Error:        err.Error(),
-						})
+						order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit, openResult.ShortStrategyHash)
+						if err == nil {
+							// 数据库写入订单(可能没有买入)
+							runner.RecordOpen(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
+							isOpen = true
+							runner.NotifyOpen(notify.FuturesOrderParams{
+								Title:        lang.Lang("futures.open_notice_title"),
+								Symbol:       symbol,
+								Side:         "sell",
+								PositionSide: "short",
+								Price:        sellPrice,
+								Quantity:     quantity,
+								Leverage:     leverage_float64,
+								Status:       "success",
+							})
+						} else {
+							runner.NotifyOpen(notify.FuturesOrderParams{
+								Title:        lang.Lang("futures.open_notice_title"),
+								Symbol:       symbol,
+								Side:         "sell",
+								PositionSide: "short",
+								Price:        sellPrice,
+								Quantity:     quantity,
+								Leverage:     leverage_float64,
+								Status:       "fail",
+								Error:        err.Error(),
+							})
+						}
 					}
 				}
 			}

@@ -196,6 +196,10 @@
 - Lead 每个新开仓都须检查：portfolio active、Key 权限、币种在白名单、数量/名义额/价格精度、保证金、杠杆及持仓模式、用户配置阈值、账户仓位冲突和当期冷却。
 - 按主系统现有规则使用杠杆和逐仓配置；不自动按所谓带单收益或粉丝数量放大仓位。超出币安专属杠杆/名义额限制时跳过并说明原因。
 
+**2026-10-10 Stage 4-1 实施结果**：已新增 Lead 专属配置管理器（无全局注册）、独立 AES-256-GCM 加密凭证仓库和只读身份/白名单/账户余额/仓位/挂单/Hedge Mode 验证能力；凭证必须经外部环境密钥和私有文件目录显式配置，不使用 Main API Key，不写 `app.conf`/业务 DB。认证只读检查与 Portfolio 真实账户绑定分离；默认 `enabled=false`、`allow_new_opens=false`，`TradingReady` 始终为 false，实盘 Gate 0-LIVE/4/7 仍未解除。详见 [Stage 4-1 实施记录](币安合约自动带单-Stage4-1-实施记录.md)。
+
+**2026-10-10 Stage 4-1 审计跟进**：修复验证的 Context 截止时间/取消契约，明确返回 `context.DeadlineExceeded` / `context.Canceled`，失败状态不会沿用旧成功快照；永久单测补齐加密路径、密文版本、残留文件、报告脱敏、白名单过滤与多资产边界。普通只读检查失败允许返回 `nil error` + `ReadOnlyChecksPassed=false`，Stage 6 必须同时检查报告状态，不能把 `nil error` 当作启用交易的许可。Portfolio 身份证明/安全凭证删除/API 用量展示仍在后续 Gate，详见 [Stage 4-1 实施记录](币安合约自动带单-Stage4-1-实施记录.md) §4-A。
+
 ### 4.2 最少必要的带单补充配置
 
 | 字段 | 默认 | 说明 |
@@ -212,6 +216,8 @@
 
 风险阈值只做**额外约束**，不是代替或重写当前策略的 TP/SL。阈值及默认值在 Stage 4 结合交易所最小名义额、你的实际 Portfolio 资金核定；禁止凭空自动启用。
 
+**2026-10-10 Stage 4-2 离线实施结果**：已实现 Lead 风控配置、单笔/总名义额、保证金缓冲、UTC 当日净已实现亏损、账户持仓/亏损仓位数、回撤、白名单与完整快照的 fail-closed 新开仓门禁；Stage 3 的 Lead LONG/SHORT 分支增加必填 `PreflightOpen`，Main 完全不增加风险 RPC。风控初始始终关闭，未提供生产启用入口。**真实 Portfolio 账户风险数据采集、跨请求幂等保留和授权交易仍属于后续 Stage 4-3/5/6/7 门禁**，未因离线 Mock 通过自动放行。详见 [Stage 4-2 实施记录](币安合约自动带单-Stage4-2-实施记录.md)。
+
 ### 4.3 执行与保护
 
 - 对外保持现有 `futuresownership.Executor` 的方向/数量验证、ClientOrderID 持久化、unknown response → reconcile、成交后改 managed_qty、手工减仓不回补等原则。
@@ -221,6 +227,10 @@
 - 平仓量不超过 `min(managed_qty, live_account_qty)`；人工加仓不并入受控仓位，人工减仓降低 managed_qty；绝不误平仓。
 - 手动“暂停”：停止新开仓，保持风险退出/同步；“停机/无法确认账户”：拒绝不确定写操作并报警，不强制市价清仓；如需“全部平仓”，须后续单独设计明确确认入口。
 - Binance 复制跟单人的执行结果不由系统保证；本项目只以带单 Portfolio 自己的交易订单与回报作为真相源。
+
+**2026-10-10 Stage 4-3 离线实施结果**：增加了只绑定 Lead 的只读风险证据/净 PNL 分页采集器、交易所过滤器和账户杠杆/保证金校验、默认关闭的 Lead Ownership Executor 适配器、单实例提交后待对账阻塞、受控平仓的真实/managed 数量双重上限；隔离 Fake Broker + SQLite 内存测试覆盖 MARKET/LIMIT、LONG/SHORT、unknown-result、重复请求和安全平仓。**Gate 4 尚未完全关闭**：跨进程持久化风险保留、账户 WS/恢复、真实 Portfolio 授权以及更多 Algo STOP/TP 异常仍在 Stage 4-4/5/6/7；无生产 Lead 运行入口。详见 [Stage 4-3 实施记录](币安合约自动带单-Stage4-3-实施记录.md)。
+
+**2026-10-10 Stage 4-4 离线实施结果**：完成 Lead 普通/Algo 订单的只读安全恢复证据（实际触发单二次查询与身份/方向/成交量校验、未知/超时 fail-closed）、受控平仓 LOT_SIZE/PRICE_FILTER/最小名义额门禁与全平例外边界，新增 Mock HTTP/SQLite 幂等单测。仍未允许真实撤单/恢复，不解除 pending；跨进程/重启权威对账在 Stage 5，实盘验证需 Stage 7。详见 [Stage 4-4 实施记录](币安合约自动带单-Stage4-4-实施记录.md)。
 
 **验收 Gate 4**：mock / 真实只读检查覆盖 LONG/SHORT/CLOSE_LONG/CLOSE_SHORT、MARKET/LIMIT、TP/SL、拒单/未知提交/部分成交/保证金不足/精度错误；无可绕过风控的带单写入口；真单仍需 Stage 7 人工授权。
 

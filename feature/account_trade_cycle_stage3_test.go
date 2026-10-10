@@ -86,6 +86,7 @@ func stage3MockRunner(t *testing.T, allowed []string) (*accountTradeRunner, *int
 		CancelExpired:  func(int64) {},
 		Depth:          func(context.Context, string, int) (float64, float64, error) { return 100, 100, nil },
 		EnsureConfig:   func(context.Context, *models.Symbols) error { return nil },
+		PreflightOpen:  func(context.Context, *models.Symbols, futures.PositionSideType, float64, float64) error { return nil },
 		SubmitOpen: func(snap *tradeCycleAccountSnapshot, symbol string, quantity, price float64, side futures.SideType, pSide futures.PositionSideType, typ futures.OrderType, hash string) (*futures.CreateOrderResponse, error) {
 			*openCount++
 			order := &futures.CreateOrderResponse{OrderID: int64(*openCount)}
