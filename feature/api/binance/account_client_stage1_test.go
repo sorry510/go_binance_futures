@@ -111,14 +111,15 @@ func TestStage1TradeConfigCacheNeverSharesAccounts(t *testing.T) {
 		t.Fatal("trade configuration caches are not isolated")
 	}
 }
-func TestStage1LeadOrderLimiterPerClientPreventsHTTPBeforeNineteenth(t *testing.T) {
+func TestStage1LeadOrderLimiterPerClientReservesSafetySlots(t *testing.T) {
 	var seen atomic.Int32
 	base := stage1Transport(func(r *http.Request) (*http.Response, error) {
 		seen.Add(1)
 		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: http.NoBody, Request: r}, nil
 	})
 	limiter := &leadOrderLimiter{base: base}
-	for i := 0; i < leadOrderLimitPerTenSeconds; i++ {
+	// Stage 5 reserves 2 extra slots for emergency close/cancel operations.
+	for i := 0; i < leadOpenLimitPerTenSeconds; i++ {
 		r, _ := http.NewRequest(http.MethodPost, "https://fapi.binance.com/fapi/v1/order", nil)
 		if _, err := limiter.RoundTrip(r); err != nil {
 			t.Fatalf("early limiter error at %d: %v", i, err)
@@ -128,7 +129,7 @@ func TestStage1LeadOrderLimiterPerClientPreventsHTTPBeforeNineteenth(t *testing.
 	if _, err := limiter.RoundTrip(r); err != binanceapiusage.ErrBudgetDeferred {
 		t.Fatalf("budget error=%v", err)
 	}
-	if seen.Load() != leadOrderLimitPerTenSeconds {
+	if seen.Load() != leadOpenLimitPerTenSeconds {
 		t.Fatalf("HTTP reached exchange %d times", seen.Load())
 	}
 	// Another credential has its own order bucket.

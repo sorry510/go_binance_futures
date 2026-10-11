@@ -93,6 +93,7 @@ type faultRecord struct {
 	at               time.Time
 	lastNotified     time.Time
 	notifiedSeverity LeadFaultSeverity
+	notifiedCount    int
 }
 type LeadRuntimeGuard struct {
 	mu            sync.RWMutex
@@ -156,9 +157,18 @@ func (g *LeadRuntimeGuard) RecordFault(account binance.AccountID, code LeadFault
 		g.lastChanged = now
 	}
 	eventNeeded := !exists || record.lastNotified.IsZero() || record.notifiedSeverity != severity || now.Sub(record.lastNotified) >= leadFaultNotificationInterval
+	// Binance 429/418 alert policy: at most three notifications for one
+	// continuous episode, no faster than once per two minutes. New recovery
+	// and a later recurrence get a fresh episode budget.
+	if code == FaultAPI429 || code == FaultAPI418 {
+		if record.notifiedCount >= 3 {
+			eventNeeded = false
+		}
+	}
 	if eventNeeded {
 		record.lastNotified = now
 		record.notifiedSeverity = severity
+		record.notifiedCount++
 	}
 	g.faults[code] = record
 	after := g.snapshotLocked().State
@@ -238,6 +248,22 @@ func (g *LeadRuntimeGuard) observeFreshEvidence(s RiskSnapshot, now time.Time, w
 	}
 }
 
+// Only the Stage 5 supervisor calls this after verified durable reconciliation
+// and a newer complete no-gap Lead REST/WS bootstrap. It cannot reset trips
+// or grant Stage 7 live authorization.
+func (g *LeadRuntimeGuard) clearReconciledFaults() {
+	if g == nil {
+		return
+	}
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	for _, code := range []LeadFaultCode{FaultPendingReconcile, FaultUnknownSubmission, FaultUnknownAlgo} {
+		if _, ok := g.faults[code]; ok {
+			delete(g.faults, code)
+			g.lastChanged = g.now().UTC()
+		}
+	}
+}
 func (g *LeadRuntimeGuard) statusLocked() LeadStatusSnapshot {
 	snapshot := LeadStatusSnapshot{AccountID: binance.LeadAccountID, Paused: g.paused, Enabled: !g.disabled, ObservedAt: g.now().UTC(), LastChangedAt: g.lastChanged, EvaluateExits: true}
 	if g.disabled {

@@ -187,6 +187,28 @@ func ensureSlotAvailable(o orm.QueryExecutor, accountID, symbol, side, ignoreCli
 	return nil
 }
 
+// ReserveSubmission is a durable, account-scoped compare-and-swap that runs
+// BEFORE any exchange request. It closes the cross-process window where two
+// workers could both claim the same still-pending clientOrderID and submit it.
+// A reservation survives restart; the next process may only reconcile.
+func (s Service) ReserveSubmission(ctx context.Context, clientOrderID string) (bool, error) {
+	id, err := s.accountID()
+	if err != nil {
+		return false, err
+	}
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	clientOrderID = strings.TrimSpace(clientOrderID)
+	if clientOrderID == "" {
+		return false, fmt.Errorf("client order id required")
+	}
+	n, err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).
+		Filter("account_id", id).Filter("client_order_id", clientOrderID).
+		Filter("status", OrderPending).Update(orm.Params{"status": OrderSubmitted, "updated_at": s.nowMillis()})
+	return n == 1, err
+}
+
 func (s Service) MarkOrderSubmitted(ctx context.Context, clientOrderID, exchangeOrderID string) error {
 	return s.updateOrder(ctx, clientOrderID, orm.Params{"status": OrderSubmitted, "exchange_order_id": strings.TrimSpace(exchangeOrderID)})
 }
@@ -396,6 +418,31 @@ func (s Service) ActivePositions(ctx context.Context, owner string) ([]models.Fu
 		}
 	}
 	return out, nil
+}
+
+// OutstandingOrders retrieves ALL account-scoped nonterminal orders, not
+// just the newest 200/500 records. Recovery must never silently miss older
+// unresolved submissions after a long outage or restart.
+func (s Service) OutstandingOrders(ctx context.Context) ([]models.FuturesManagedOrder, error) {
+	account, err := s.accountID()
+	if err != nil {
+		return nil, err
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	var rows []models.FuturesManagedOrder
+	_, err = orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).
+		Filter("account_id", account).
+		Filter("status__in", []string{OrderPending, OrderSubmitted, OrderPartiallyFilled, OrderReconcile}).
+		OrderBy("id").All(&rows)
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) > 10000 {
+		return nil, fmt.Errorf("outstanding orders exceed safe recovery scan limit")
+	}
+	return rows, nil
 }
 
 func (s Service) ActiveOrders(ctx context.Context, owner string) ([]models.FuturesManagedOrder, error) {

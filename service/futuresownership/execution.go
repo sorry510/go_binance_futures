@@ -185,6 +185,18 @@ func (e Executor) Execute(ctx context.Context, request OrderRequest) (ExchangeOr
 	if managed.Status != OrderPending {
 		return e.Reconcile(ctx, managed.Symbol, managed.ClientOrderID)
 	}
+	reserved, reserveErr := e.Ownership.ReserveSubmission(ctx, clientID)
+	if reserveErr != nil {
+		return ExchangeOrder{}, reserveErr
+	}
+	if !reserved {
+		// Another process may already have issued the request, or crashed
+		// after reserving and before HTTP. NEVER retry without lookup.
+		return e.Reconcile(ctx, managed.Symbol, managed.ClientOrderID)
+	}
+	if e.Ownership.AccountID == "lead" && request.Intent != IntentOpen {
+		ctx = binance.WithLeadSafetyExitPriority(ctx)
+	}
 	result, submitErr := e.Broker.Submit(ctx, request, clientID)
 	if submitErr != nil {
 		// The global V4-5 budget rejects before the base HTTP RoundTripper is

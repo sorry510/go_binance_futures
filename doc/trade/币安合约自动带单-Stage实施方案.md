@@ -269,6 +269,18 @@
 
 ## Stage 5 — Lead User Data WS、启动恢复、API 预算与告警
 
+**2026-10-10～11 Stage 5 离线实施进度**：已按顺序实现并通过定向 Mock 测试 Stage 5-1～5-6；各阶段分别有实施记录：
+- [5-1 Lead 私有 WS 生命周期](币安合约自动带单-Stage5-1-实施记录.md)
+- [5-2 实时账户镜像](币安合约自动带单-Stage5-2-实施记录.md)
+- [5-3 持久化订单预留与启动恢复](币安合约自动带单-Stage5-3-实施记录.md)
+- [5-4 API 预算与账户限速](币安合约自动带单-Stage5-4-实施记录.md)
+- [5-5 告警与状态接线](币安合约自动带单-Stage5-5-实施记录.md)
+- [5-6 联合并发 Mock](币安合约自动带单-Stage5-6-实施记录.md)
+
+**Gate 5 仅离线 Mock 已验证，真实环境 Gate 尚未通过**：生产根包不自动启动 Lead 私有 WS/下单、没有真实 ListenKey/Algo/Portfolio/WS 重连与 MySQL 8/高负载验证，不宣称 WS API 节省的实测值。继续保持 `enabled=false`、无实盘权限及 `pendingReconcile` 的 fail-closed 语义；实际启用须依原计划完成 Stage 6、Gate 0-LIVE、Stage 7 授权。
+
+
+
 **目标**：带单接入不增加不必要的市场行情订阅，不会因掉线错认仓位或越权重试。
 
 - 每账户 `UserDataStream` 生命周期独立：listenKey、WS generation、有效快照时间、keepalive、重连抖动、停止清理；移除账号不能中断 main WS。
@@ -284,9 +296,29 @@
 
 **验收 Gate 5**：WS 掉线/重连、listenKey 过期、系统重启、限速、请求超时、错序成交回报均不重复开仓、不跨账户误撤/误平；全局 Binance API 权重不因带单接入出现不可控增长。
 
+### Stage 5 代码审计收口（2026-10-11）
+
+见 [Stage 5 审计修复记录](币安合约自动带单-Stage5-审计修复记录.md)；原独立报告 `CODE_REVIEW_Stage5.md` 保持不变。F1 已统一为 **“离线实现、生产未接线”**，并增加监督器 `Run/Status` 导出方法白名单测试；F2 已为 `LeadSupervisor.Status()` 的用量指标增加队列容量、深度及严重级丢弃计数、固定安全日志；F3 已为 Lead 新开仓与受控退出的公共 `exchangeInfo` 增加 **5 分钟成功快照缓存、并发 singleflight、到期/失败 fail-closed**。这些改动**不意味着已在 System Dashboard 显示 Lead 区块**，那属于 Stage 6 鉴权 UI 接线。
+
+**Stage 6/7 生产接线清单（未开始，不得自动启用）：**
+- Stage 6：在强鉴权的 Lead 专用后端状态路由展示私有 WS generation、镜像新鲜度、运行状态、全局及 Lead API 用量、告警队列长度/丢弃及最近故障；连接通知的 Channel 配置必须经显式操作与鉴权。不得把密钥、签名 URL、未验证的 Portfolio 身份或 PnL 细节暴露给 Main/匿名用户。
+- Stage 6：审计生产入口与模块依赖闭包；若只读 Lead 监督器需要接入 Main 可执行程序，**先设计授权边界，再显式调整固定 AST/依赖/公开面测试**，禁止直接删除守卫。账号验证失败、密钥轮换、无 DB 权威对账或 WS 不健康时 fail-closed。
+- Stage 6/7：设计独立持久恢复审计流水（账户、订单、恢复证据源、审计时间、结果，严格去敏），补 MySQL 8 v19 Schema 迁移检查、真实 Main 在线 Gate、跨进程 CAS 验证；不能将仅回写 Ownership 误称为完整审计流水。
+- Stage 7：取得用户明确授权后才允许真实 Portfolio 身份/资产、私有 WS/Testnet 断线/Algo 触发与动态交易所过滤器、双账户 2s 负载、429/418 真实观测及受控最小额开平仓试验；**不得由 Gate 4/5 Offline PASS 推导出实盘启用许可**。
+- 后续审计仍需跟踪早期 P3：`RuntimeStatus()` 内部状态副作用、动态价格过滤器/Algo FINISHED 的权威证据、通知发送超时和旧阶段遗留问题。独立核验与用户授权不能由离线测试替代。
+
 ## Stage 6 — 前后端账户配置、持仓与监控页面
 
 **目标**：用最少页面提供真正可用的带单账户运维能力，沿用现有 Vue3/Element Plus、Beego Controller 和系统通知风格。
+
+**Stage 6-1～6-6 进度（2026-10-11）**：已完成独立 Lead 管理路由/JWT、独立安全文件配置及只读凭证、Lead-only 本地 Ownership/审计查询、Vue3 六卡片中英双语页面、5 分钟 API 源监控和对应离线安全测试；每项有单独的 [6-1](币安合约自动带单-Stage6-1-实施记录.md)、[6-2](币安合约自动带单-Stage6-2-实施记录.md)、[6-3](币安合约自动带单-Stage6-3-实施记录.md)、[6-4](币安合约自动带单-Stage6-4-实施记录.md)、[6-5](币安合约自动带单-Stage6-5-实施记录.md)、[6-6](币安合约自动带单-Stage6-6-实施记录.md) 实施记录。
+
+**2026-10-11 结果**：前端 TypeScript/ESLint/Build 与后端 10 个测试包 Race、Vet、Build、JWT/安全测试均通过；具体证据见 [Stage6-6 实施记录](币安合约自动带单-Stage6-6-实施记录.md)。目前 3333 上已有其他进程，本轮不覆盖运行服务的 `static/` 或重启后端，完成的是源代码交付，不是部署上线。
+
+**准确的验收口径**：Stage 6 UI/API **离线就绪**，不是实时带单管理可用或正式 Gate 6 生产 PASS。 前端系统看板新增只读 Lead 状态摘要与页面入口，API 源数据仍由已有 collector 供应；生产 Supervisor 未运行，因此不能展示实际 WS 健康/PnL。由于真实 Gate 5 未验收，生产私有 WS Supervisor 不启动，`/start`、`/reconcile`、`DELETE /credentials` 均安全拒绝；持仓与订单仅为 Lead 本地 Ownership 视图。真实 Portfolio/WS、鉴权端到端部署、MySQL 8/恢复审计完整性、实际订单模式、unmanaged/actual 对照及真实 PnL 仍待 Stage 7/正式 Gate 补验。**不得仅依据离线 UI 测试开启真实交易**。
+
+**部署所需独立安全环境变量**（未写入配置文件）：`BINANCE_LEAD_CREDENTIAL_KEY`（32 字节 base64）、`BINANCE_LEAD_CREDENTIAL_FILE`、`BINANCE_LEAD_CONFIG_FILE`、`BINANCE_LEAD_AUDIT_FILE`；后三个路径必须是仓库外绝对路径且父目录私有（0700）、文件私有（0600）。未配置时 fail-closed。用户需要在受控部署阶段自行提供，未自动创建任何生产文件。
+
 
 ### 6.1 后端 API 草案（本系统路由，不是币安原生接口）
 
@@ -329,6 +361,12 @@
 前端绝不提供“清空所有账户仓位”的无保护按钮；Stage 6 不实现 Binance 上分成比例修改或 Copy Trader 的管理操作。
 
 **验收 Gate 6**：常见响应空态、密钥缺失、连接失败、WS 降级、开启被拒、暂停有效、订单状态变化都显示清楚；页面只能操作 lead，不回显 Secret；中文/英文检查；构建 lint/typecheck 无新增问题。
+
+### Stage 6 CODE_REVIEW 审计修复收口（2026-10-11）
+
+独立报告 `CODE_REVIEW_Stage6.md` 审阅后，F1～F3 已加固、F4 已先前完成静态同步，F5 保留；详见 [Stage 6 审计修复记录](币安合约自动带单-Stage6-审计修复记录.md)。**本轮暂停语义变更**：在 JWT 通过后先立刻设置进程内 Lead 开仓硬停止，然后尽力写持久配置/审计；持久化失败返回 **202 + `pause_persisted=false`**，只表示本进程内拦截成功，重启及跨进程不保证保持；执行器也明确检查该闸。生产仍不允许真实 Lead 自动交易。生产系统看板在 Supervisor 未连接时的告警丢弃数显示 `-` 而非可误导的零值。
+
+本项离线审计和接口加固不等于 Gate 5/6/7 真实环境 PASS；恢复权限/真实 WS/启动恢复证据、运维与订单对账双审计流水、账户归属核查、静态文件受控部署与回滚等仍需 Stage 7 的独立方案和授权。
 
 ## Stage 7 — 集成验收、受控小额验证、上线与回滚
 

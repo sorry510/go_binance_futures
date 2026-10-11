@@ -24,11 +24,12 @@ const (
 )
 
 type AccountClient struct {
-	id       AccountID
-	client   *futures.Client
-	signedMu sync.RWMutex
-	reads    accountReadState
-	config   tradeConfigState
+	id           AccountID
+	client       *futures.Client
+	signedMu     sync.RWMutex
+	reads        accountReadState
+	config       tradeConfigState
+	leadObserver *leadRateLimitObserver
 }
 
 func (a *AccountClient) ID() AccountID {
@@ -65,9 +66,15 @@ func NewLeadAccountClient(apiKey, apiSecret string, httpClient *http.Client) (*A
 	if base == nil {
 		base = http.DefaultTransport
 	}
-	wrapped.Transport = &leadOrderLimiter{base: base}
+	observer := &leadRateLimitObserver{}
+	wrapped.Transport = &leadHTTPProbe{base: &leadOrderLimiter{base: base}, observer: observer}
 	c.HTTPClient = binanceapiusage.WrapClient(&wrapped, binanceapiusage.TransportConfig{Product: "futures", Environment: "mainnet", Source: "lead_trading"})
-	return NewAccountClient(LeadAccountID, c)
+	account, err := NewAccountClient(LeadAccountID, c)
+	if err != nil {
+		return nil, err
+	}
+	account.leadObserver = observer
+	return account, nil
 }
 
 func doAccountSigned[T any](a *AccountClient, ctx context.Context, window int64, call func(*futures.Client, context.Context, ...futures.RequestOption) (T, error)) (T, error) {
