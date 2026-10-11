@@ -155,6 +155,27 @@ func (s *LeadConfigStore) Save(value LeadSettings) error {
 	return nil
 }
 
+// LeadDurableOpenGate validates disk state on every attempted future live
+// entry. It never returns success in Stage 7-1..7-4: Stage7 human
+// authorization has not been implemented and any file/read error is denial.
+func LeadDurableOpenGate() error {
+	if LeadEmergencyPaused() {
+		return ErrLeadLiveGateLocked
+	}
+	store, err := LeadConfigStoreFromEnv()
+	if err != nil {
+		return ErrLeadConfigUnavailable
+	}
+	settings, err := store.Load()
+	if err != nil {
+		return ErrLeadConfigUnavailable
+	}
+	if settings.AccountID != "lead" || !settings.Enabled || !settings.AllowNewOpens {
+		return ErrLeadLiveGateLocked
+	}
+	return ErrLeadLiveGateLocked
+}
+
 type LeadDataView struct {
 	AccountID  string                          `json:"account_id"`
 	Positions  []models.FuturesManagedPosition `json:"positions"`

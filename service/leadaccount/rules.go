@@ -103,6 +103,10 @@ func ValidateLeadOrderRules(order RiskOpenOrder, public futures.Symbol, private 
 	for _, filter := range public.Filters {
 		kind, _ := filter["filterType"].(string)
 		switch kind {
+		case "PERCENT_PRICE", "PERCENT_PRICE_BY_SIDE":
+			// Dynamic mark-dependent bounds cannot be safely derived from
+			// static exchangeInfo or an untrusted requested LIMIT price.
+			return VerifiedOrderRules{}, fmt.Errorf("Lead dynamic price filter requires authoritative market evidence")
 		case "LOT_SIZE", "MARKET_LOT_SIZE":
 			if (order.OrderType == "MARKET") != (kind == "MARKET_LOT_SIZE") {
 				continue

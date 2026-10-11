@@ -57,6 +57,7 @@ func stage6AuditLeadFile(filePath, relative string) error {
 		"EncryptedFileStore": true, "Manager": true,
 		"MasterKeyEnv": true, "StorePathEnv": true,
 		"LatchLeadEmergencyPause": true, "LeadEmergencyPaused": true,
+		"StartConfiguredReadOnlyHost": true, "LeadReadOnlyStatus": true, "StopReadOnlyHost": true,
 	}
 	bannedCalls := map[string]bool{
 		"NewLeadSupervisor": true, "NewLeadUserStream": true,

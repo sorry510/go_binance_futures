@@ -6,6 +6,7 @@ import (
 	agentapp "go_binance_futures/agent/app"
 	"go_binance_futures/appversion"
 	"go_binance_futures/command"
+	"go_binance_futures/controllers"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/llm"
@@ -348,6 +349,10 @@ func main() {
 		return
 	}
 	initializeRuntimeDatabase()
+	// Only with BINANCE_LEAD_OBSERVER_MODE=read_only. Never submits/orders.
+	if err := controllers.StartLeadReadOnlyOnExplicitOptIn(); err != nil {
+		logs.Error("Lead read-only observer disabled:", err)
+	}
 
 	if manager, err := agentapp.DefaultManager(); err != nil {
 		logs.Error("initialize opportunity pipeline manager:", err)

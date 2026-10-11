@@ -42,7 +42,8 @@ func LeadAuditStoreFromEnv() (*LeadAuditStore, error) {
 func auditAction(v string) bool {
 	switch v {
 	case "credentials_saved", "credentials_deleted", "verify_requested", "verify_failed",
-		"settings_updated", "paused", "start_denied", "reconcile_denied":
+		"settings_updated", "paused", "start_denied", "reconcile_denied",
+		"recovery_inspection":
 		return true
 	}
 	return false
@@ -54,7 +55,9 @@ func auditReason(v string) bool {
 	switch v {
 	case "authorized_request", "rotation_or_initial_request", "authorized_read_only",
 		"blocked_pending_authoritative_evidence", "stage7_live_authorization_required",
-		"gate5_live_evidence_required":
+		"gate5_live_evidence_required",
+		"read_only_not_authoritative", "lead_outstanding_orders_require_reconciliation",
+		"read_only_inspection_failed":
 		return true
 	}
 	return false
