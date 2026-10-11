@@ -157,6 +157,13 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 	if LeadEmergencyPaused() {
 		return RiskDecision{BlockingReasons: []string{"lead_emergency_paused"}}, ErrLeadOpenBlocked
 	}
+	if a.simulateEvidence == nil {
+		// Re-read durable safety state, independent of HTTP handler memory.
+		// A zero/absent config can never act as authorization.
+		if err := LeadDurableOpenGate(); err != nil {
+			return RiskDecision{BlockingReasons: []string{"lead_durable_gate_locked"}}, ErrLeadOpenBlocked
+		}
+	}
 	// No Stage 7 authorization exists in production: refuse BEFORE any
 	// Lead SAPI, signed /fapi or public exchangeInfo fetch.
 	a.risk.mu.RLock()

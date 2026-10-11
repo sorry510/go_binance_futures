@@ -43,6 +43,10 @@ func ValidateLeadCloseRules(order futuresownership.OrderRequest, symbol futures.
 	for _, filter := range symbol.Filters {
 		kind, _ := filter["filterType"].(string)
 		switch kind {
+		case "PERCENT_PRICE", "PERCENT_PRICE_BY_SIDE":
+			if order.OrderType == "LIMIT" || order.OrderType == "STOP_MARKET" || order.OrderType == "TAKE_PROFIT_MARKET" {
+				return fmt.Errorf("Lead dynamic close price filter requires authoritative mark price")
+			}
 		case "LOT_SIZE", "MARKET_LOT_SIZE":
 			if (kind == "MARKET_LOT_SIZE") != marketExecution {
 				continue

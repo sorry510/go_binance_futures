@@ -98,6 +98,9 @@ func (c *LeadController) audit(ctx context.Context, action, reason string) bool 
 	}
 	return true
 }
+
+// Lead observer is an explicit read-only opt-in; no trade broker starts.
+func StartLeadReadOnlyOnExplicitOptIn() error { return leadaccount.StartConfiguredReadOnlyHost() }
 func (c *LeadController) Status() {
 	if !c.authorized() {
 		return
@@ -118,6 +121,13 @@ func (c *LeadController) Status() {
 		report["verification"] = verification
 	} else {
 		report["verification"] = map[string]any{"account_id": "lead", "blocking_reasons": []string{"credentials_unavailable"}}
+	}
+	observer := leadaccount.LeadReadOnlyStatus()
+	report["read_only_observer"] = observer
+	if observer.Running {
+		report["runtime_connected"] = true
+		report["ws_healthy"] = observer.Stream.Healthy
+		report["readiness"] = "read_only_observing"
 	}
 	c.reply(http.StatusOK, report, "success")
 }
@@ -187,6 +197,7 @@ func (c *LeadController) SaveCredentials() {
 	if !c.audit(c.Ctx.Request.Context(), "credentials_saved", "rotation_or_initial_request") {
 		return
 	}
+	leadaccount.StopReadOnlyHost()
 	if err = manager.SaveCredentials(leadaccount.Credentials{APIKey: data.APIKey, APISecret: data.APISecret, PortfolioLabel: data.PortfolioLabel}); err != nil {
 		c.reply(http.StatusServiceUnavailable, nil, "lead_credential_save_failed")
 		return
@@ -331,13 +342,19 @@ func (c *LeadController) Metrics() {
 	if !c.authorized() {
 		return
 	}
-	// Stage 5 Supervisor is deliberately not started in production yet.
-	// The existing global collector still yields an accurate lead-source
-	// breakdown, with no fabricated WebSocket/PnL data.
-	c.reply(http.StatusOK, map[string]any{"account_id": "lead", "data_source": "binance_api_usage",
-		"runtime_connected": false, "ws_healthy": false,
+	observer := leadaccount.LeadReadOnlyStatus()
+	metrics := leadaccount.LeadUsageSnapshot(nil, nil, time.Now().UTC())
+	if observer.Running {
+		metrics.WSUpdates = observer.Mirror.Metrics.WSUpdates
+		metrics.RESTSnapshots = observer.Mirror.Metrics.RestSnapshots
+	}
+	c.reply(http.StatusOK, map[string]any{
+		"account_id": "lead", "data_source": "binance_api_usage",
+		"runtime_connected": observer.Running, "ws_healthy": observer.Stream.Healthy,
+		"read_only_observer":  observer,
 		"alert_queue_present": false, "alert_queue_source": "supervisor_not_started",
-		"metrics": leadaccount.LeadUsageSnapshot(nil, nil, time.Now().UTC())}, "success")
+		"metrics": metrics,
+	}, "success")
 }
 func (c *LeadController) Symbols() {
 	if !c.authorized() {
