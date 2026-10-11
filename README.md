@@ -35,6 +35,8 @@
 ./go_binance_futures
 ```
 
+截至当前 Stage 7-1～7-4 代码，数据库要求 **Schema v19**；真实 MySQL 8 的版本与旧 Main 数据无损回归尚未验证，不能以本地 Mock/SQLite 测试代替。
+
 正常启动**不会再自动执行数据库 Schema 或版本迁移**。如果数据库尚未初始化，或数据库版本低于当前二进制要求，程序会提示先运行 `go_binance_futures sync db`。生产环境升级时建议先备份数据库，并在服务停止状态下执行同步命令。
 
 ## 功能
@@ -84,10 +86,11 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | AI → 业务 Workflow | 运行市场扫描、策略复盘、策略实验、报警归并和每日市场摘要等业务 Workflow，并查看父任务与子 Agent Task |
 | 合约交易 → 受控交易 | 将成功的单币分析转换为 Trade Proposal，经确定性 Risk Engine、人工审批和执行前复检后受控提交 Binance，并保留完整审计 |
 | AI → 任务中心 | 查看 Agent 治理、Scheduler、运行指标和 Agent Task 历史 |
-| 系统看板 | 顶级菜单；集中查看 Database、Binance、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime、Trade Safety 健康状态，并保留原长期 Trace、模型/Tool/Skill 指标和变更记录 |
+| 系统看板 | 顶级菜单；集中查看 Database、Binance、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime、Trade Safety 健康状态；增加 Lead 账户只读摘要（WS、5 分钟 REST 用量及告警队列观测状态），并保留原长期 Trace、模型/Tool/Skill 指标和变更记录 |
 | AI → 报警链路历史 | 查看 FastMove、爆仓等 Signal 从事件、AI 分析/归并到通知或 fallback 的完整链路 |
 | AI → AI 配置 | 集中管理 AI 报警、AI Scheduler、Agent 全局预算/治理参数和受控交易 Risk Policy |
 | 合约交易 → 合约交易 | 按 `自选`、`USDT`、`USDC` 查看币种；新增、查询、批量编辑、全部开启或全部关闭币种配置 |
+| 合约交易 → 合约带单 | 独立 Lead 账户的只读管理界面（`/futures/lead`）：凭证与只读验证、账户风控、暂停、受控持仓/订单、本地审计和 WS/API 状态；**当前不允许真实带单下单** |
 | 合约交易 → 合约订单 | 查询真实合约订单，可按币种和时间筛选 |
 | 合约交易 → 合约账户 | 查看币安合约资产、持仓和当前挂单 |
 | 合约交易 → 本地合约账户 | 查看程序记录的本地资产、持仓和挂单 |
@@ -100,6 +103,62 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | 抢新配置 | 配置现货、挖矿币和合约的新币抢购 |
 | 系统配置 | 在线编辑 `conf/app.conf`，并提供保存、重启服务和停止服务按钮 |
 | 日志 | 查看 `web.commend_log` 命令返回的服务日志 |
+
+### 合约带单（Lead 账户，Stage 6 / Stage 7-1～7-4）
+
+> **当前交付状态：管理界面和独立账户基础设施已完成代码与 Mock/Race 验证；真实 Lead Portfolio、MySQL 8 Schema v19、私有 WS、Algo 条件单和资金交易尚未完成真实环境 Gate。Lead 实盘执行仍锁定。** 这不是普通 AI 受控交易，也不是复制跟随者成交的保证。
+
+访问 `合约交易 → 合约带单`（`/futures/lead`）。页面采用六个 Card：
+
+| 区域 | 当前能力与数据边界 |
+| --- | --- |
+| 账户状态 | 查看禁用/阻断原因、Lead 凭证尾号、Portfolio *标签*、上次只读验证、私有 WS 状态；标签不等于真实 Portfolio 身份认证 |
+| 专用凭证 | 独立 API Key / Secret 的 AES-GCM 加密保存和人工触发的只读验证；Secret 不回显；轮换后撤销旧验证结果及已运行的旧观察器 |
+| 账户风控 | 独立的单笔/总名义金额、每日亏损、回撤、最大持仓数和最大亏损持仓数；策略和选币规则仍沿用原 Main 配置，不复制策略编辑器 |
+| 自动交易 | 查看被锁定的启用状态、执行**暂停新开仓**；真实启用按钮禁用，后端 `/start` 仍拒绝 |
+| 受控持仓 | 查询**本地 Lead Ownership**（包括已关闭的历史记录）；不等于 Binance 实时实际持仓、手动仓位或真实 PnL |
+| 订单与诊断 | 查看本地 Lead managed orders、固定原因码运维审计；`/reconcile` 仍拒绝未经真实 Gate 验证的写入式对账 |
+
+`系统看板`新增只读 Lead 状态摘要、WS 状态、五分钟 REST 请求/权重和进入带单页面的入口。**告警队列未接入运行时显示 `—` 而非 0**。页面约每 15 秒刷新本地状态；不会因查看管理页面而启动 Binance 真实订单。
+
+#### Lead 独立环境配置
+
+Lead 的密钥、风控设置、审计日志不写入 `conf/app.conf` 或前端代码。运行进程需要从受保护的环境/密钥管理器取得以下变量（示例仅为占位符，**不要复制真实 Secret 到 README、Git、日志或 shell history**）：
+
+```text
+BINANCE_LEAD_CREDENTIAL_KEY=<standard-base64-of-32-random-bytes>
+BINANCE_LEAD_CREDENTIAL_FILE=/private/lead/credentials.enc
+BINANCE_LEAD_CONFIG_FILE=/private/lead/risk.json
+BINANCE_LEAD_AUDIT_FILE=/private/lead/operations.jsonl
+# 默认不配置 BINANCE_LEAD_OBSERVER_MODE
+```
+
+- `BINANCE_LEAD_CREDENTIAL_KEY` 必须是**32 个随机字节的标准 Base64 编码**，由运维人员安全生成并长期保存。丢失或更换主密钥会导致旧加密凭证无法解密。
+- 三个文件路径均须为**仓库外的绝对路径**；父目录需由部署用户控制，权限建议 `0700`，目标文件为 `0600`，不允许符号链接。应用不会隐式创建私有目录或生成主密钥。
+- 配好上述环境并部署新版后端后，再通过 UI 保存 Lead 专用凭证、查看只读验证结果和保存独立风险限额。未配置存储时，凭证/配置保存会安全拒绝，**不应修改 `app.conf` 来绕过检查**。
+- 应在备份、停机并确认目标数据库版本/数据后，才由人工单独执行 `./go_binance_futures sync db`。当前代码要求 **Schema v19**；离线 SQLite/Mock PASS **不能证明实际 MySQL 8 已完成迁移**。
+
+#### 只读观察器：明确选择才会连接真实 Binance
+
+**默认不设置** `BINANCE_LEAD_OBSERVER_MODE`，Lead 私有观察器不会读取其凭证或建立私有 WS。完成独立密钥配置、Schema 检查并明确准备做**真实只读联调**后，才可在运行进程的安全环境中设置：
+
+```text
+BINANCE_LEAD_OBSERVER_MODE=read_only
+```
+
+这不是纯本地模拟：开启后新进程**真的会向 Binance 请求/续期/关闭 Lead listenKey、建立 User Data 私有 WebSocket，并读取真实账户、持仓及挂单快照**，因此要求有效的 Lead Key、权限、网络和代理。它只读检查 Ownership、更新内存镜像；**不提交/撤销订单，不修改 managed 成交账本，不解除真实交易门禁**。不要将 Testnet 的成功直接当成真实 Lead Portfolio 资格证明。
+
+关闭观察器需从部署环境移除该变量并重启/停止对应进程；凭证轮换会停止旧观察器。观察器当前没有网页上的启停开关，也不自动证明真实 Portfolio 身份。可以通过已鉴权的 `GET /futures/lead/status`、`GET /futures/lead/metrics` 查看 `read_only_observer`、WS generation、镜像健康、审计检查及实际观测到的 REST 数据。
+
+#### 安全手动验收与尚未开放的能力
+
+1. **先核对部署版本和数据库**：前端 `dist` 同步 `static` 只更新网页资源；新 `/futures/lead/*` 接口和 Stage 7 只读观察器还必须部署新二进制。不要以旧服务仍在监听端口来推断升级完成。
+2. **只做管理/权限测试**：打开六个 Card、切换中英、刷新；无 JWT 应拒绝 Lead API；合法 JWT 下仍应显示 `enabled=false`、`allow_new_opens=false`。保存风控后检查持久状态；跨账户、非法值及尝试开启交易应拒绝。
+3. **暂停测试放在最后**：`POST /futures/lead/pause` 会先设置**当前进程单向内存停止标志**，再尽力写入配置与审计；成功持久化返回 HTTP 200，**未能持久化返回 HTTP 202 和 `pause_persisted=false`**，此时重启/跨进程不保证暂停。没有网页恢复按钮。
+4. **只读连接单独验收**：仅获准时才配置 `read_only` 并重启新版后端；检查 WS/快照健康、异常订单的只读巡检、账户归属与 Binance Portfolio 官方页面数据的一致性。所有只读状态均不得显示 `live_trade_authorized=true`。
+5. **真实交易保持禁止**：`/start`、未经权威确认的 `/reconcile` 和不安全的凭证删除均返回 HTTP 423（若审计/存储未配置，也可能先返回安全的不可用错误）。STOP/TP Algo、动态价格过滤器、部分成交/手工减仓、跨进程重启恢复、双账户真实每 2 秒 API 负载和最小额真实开平仓必须另行完成 Gate 7-5/7-6，并取得人工明确授权。
+
+实现方案和剩余风险见 [合约自动带单 Stage 实施方案](./doc/trade/币安合约自动带单-Stage实施方案.md)；各阶段实施/代码审计记录位于 `doc/trade/`。**本功能仅供单用户自用研究和运维，不应以离线测试结果宣称已可实盘带单。**
 
 ### UI 页面截图
 
@@ -461,6 +520,7 @@ Adaptive Run 还会记录：
 8. **AI 的报警、Scheduler 和预算在哪里配置？** 统一进入 `AI → AI 配置`；这些设置已经不在配置中心。
 9. **AI 会不会直接下真实订单？** 不会。受控交易默认关闭，并且必须经过 Proposal、确定性 Risk、人工批准和执行前复检。
 10. **在哪里查看服务日志？** 打开左侧 `日志`；该页面执行 `web.commend_log`，请先在 `conf/app.conf` 中正确配置命令。
+11. **合约带单在哪里、可以直接实盘吗？** 进入 `合约交易 → 合约带单`。目前支持独立凭证、风险、暂停、只读观测与本地订单历史，**真实带单开仓仍锁定**；详见上文的安全配置与 Stage 7 Gate。
 
 ### 修改配置文件
 > 配置说明请参考 `app.conf.example` 中每一项的说明，复制修改文件名为 `app.conf`
@@ -663,7 +723,8 @@ bee pack -be GOOS=windows
 - [ ] api 重构，添加一层适配器用来统一支持其它交易所的接口
 - [ ] 替换现有的币安 sdk 换用官方的
 - [ ] 添加币本位合约
-- [ ] 添加跟单功能
+- [X] 自动带单 Stage 1～6、7-1～7-4：独立账户隔离、管理页面、风险控制和离线/只读测试
+- [ ] 自动带单 Stage 7-5/7-6：真实 Portfolio/WS/Algo、MySQL 8、Main 在线回归与授权后小额交易及回滚验收
 - [ ] 接入币安的订单接口(优点:精确化操控合约的每一次开仓，不再对当前仓位的合约全部平仓, 缺点:手动操作的合约，无法自动根据策略完成平仓)
 - [ ] 增加对冲功能，实现空投保值 (现货买入和x倍合约等值对冲)
 - [ ] 增加吃资金费率功能(币安有此内置功能)

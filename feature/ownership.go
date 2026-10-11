@@ -284,7 +284,7 @@ func cancelTimeoutAutoStrategyOrders(timeoutSec int64) error {
 
 func findManagedOrder(clientOrderID string) (models.FuturesManagedOrder, error) {
 	var row models.FuturesManagedOrder
-	err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("client_order_id", clientOrderID).One(&row)
+	err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", "main").Filter("client_order_id", clientOrderID).One(&row)
 	return row, err
 }
 

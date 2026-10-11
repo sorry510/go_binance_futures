@@ -447,11 +447,11 @@ func checkTrade(o orm.Ormer) TradeCheck {
 		}
 	}
 	var positions, orders int64
-	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_positions WHERE status='reconcile_required'").QueryRow(&positions); err != nil {
+	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_positions WHERE account_id='main' AND status='reconcile_required'").QueryRow(&positions); err != nil {
 		result.Status, result.Message, result.LastError = StatusError, "read managed position reconcile count failed", err.Error()
 		return result
 	}
-	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_orders WHERE status='reconcile_required'").QueryRow(&orders); err != nil {
+	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_orders WHERE account_id='main' AND status='reconcile_required'").QueryRow(&orders); err != nil {
 		result.Status, result.Message, result.LastError = StatusError, "read managed order reconcile count failed", err.Error()
 		return result
 	}

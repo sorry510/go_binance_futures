@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -23,6 +24,7 @@ type SmartLocalV2Mode string
 
 const (
 	SmartLocalV2ModeTrade SmartLocalV2Mode = "trade"
+	SmartLocalV2ModeLead  SmartLocalV2Mode = "lead"
 	SmartLocalV2ModeTest  SmartLocalV2Mode = "test"
 )
 
@@ -78,9 +80,12 @@ func smartLocalV2FromSymbolsWithOrm(ctx context.Context, o orm.Ormer, symbols []
 		cooldown map[string]bool
 		err      error
 	)
-	if mode == SmartLocalV2ModeTest {
+	switch mode {
+	case SmartLocalV2ModeTest:
 		cooldown, err = recentTestClosedSymbolsWithOrm(ctx, o, cooldownMinute)
-	} else {
+	case SmartLocalV2ModeLead:
+		cooldown, err = recentClosedSymbolsForAccountWithOrm(ctx, o, cooldownMinute, "lead")
+	default:
 		cooldown, err = recentClosedSymbolsWithOrm(ctx, o, cooldownMinute)
 	}
 	if err != nil {
@@ -108,6 +113,19 @@ func SmartLocalV2FromSymbols(symbols []*models.Symbols, cooldown map[string]bool
 		minQuoteVolume = DefaultSmartLocalV2MinQuoteVolume
 	}
 
+	// Expose a safe, local-only diagnostic for empty previews. Do not
+	// relax Enable: disabled symbols must never become tradable implicitly.
+	enabledCount, enabledUSDTCount := 0, 0
+	for _, item := range symbols {
+		if item == nil || item.Enable != 1 {
+			continue
+		}
+		enabledCount++
+		sym := strings.ToUpper(strings.TrimSpace(item.Symbol))
+		if strings.TrimSpace(item.Type) == "USDT" && strings.HasSuffix(sym, "USDT") {
+			enabledUSDTCount++
+		}
+	}
 	now := time.Now().UnixMilli()
 	eligible := make([]*models.Symbols, 0, len(symbols))
 	excluded := make([]PrefilterExclusion, 0)
@@ -163,6 +181,9 @@ func SmartLocalV2FromSymbols(symbols []*models.Symbols, cooldown map[string]bool
 	} else {
 		prefilter.Excluded = nil
 	}
+	prefilter.Meta["total_symbols"] = len(symbols)
+	prefilter.Meta["enabled_count"] = enabledCount
+	prefilter.Meta["enabled_usdt_count"] = enabledUSDTCount
 	prefilter.Meta["selector"] = "smart_local_v2"
 	prefilter.Meta["requested_limit"] = requestedLimit
 	prefilter.Meta["effective_limit"] = limit
@@ -184,6 +205,12 @@ func recentClosedSymbols(ctx context.Context, cooldownMinute int64) (map[string]
 }
 
 func recentClosedSymbolsWithOrm(ctx context.Context, o orm.Ormer, cooldownMinute int64) (map[string]bool, error) {
+	return recentClosedSymbolsForAccountWithOrm(ctx, o, cooldownMinute, "main")
+}
+func recentClosedSymbolsForAccountWithOrm(ctx context.Context, o orm.Ormer, cooldownMinute int64, accountID string) (map[string]bool, error) {
+	if accountID != "main" && accountID != "lead" {
+		return nil, fmt.Errorf("unsupported selector account %q", accountID)
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -193,6 +220,7 @@ func recentClosedSymbolsWithOrm(ctx context.Context, o orm.Ormer, cooldownMinute
 	startTime := time.Now().UnixMilli() - cooldownMinute*60*1000
 	var orders []models.Order
 	_, err := o.QueryTable("order").
+		Filter("account_id", accountID).
 		Filter("UpdateTime__gte", startTime).
 		Filter("Side", "close").
 		All(&orders, "Symbol")

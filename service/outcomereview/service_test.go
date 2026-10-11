@@ -154,16 +154,16 @@ func TestLiveSummaryIncludesTraceableRecentProposalsAndActiveQty(t *testing.T) {
 		}
 	}
 	positions := []models.FuturesManagedPosition{
-		{Owner: "agent_trade", Symbol: "ETHUSDT", PositionSide: "SHORT", ManagedQty: 2, Status: "open", SourceRef: "p-new", CreatedAt: 205, UpdatedAt: 205},
-		{Owner: "agent_trade", Symbol: "ETHUSDT", PositionSide: "SHORT", ManagedQty: 0, Status: "open", SourceRef: "p-new", CreatedAt: 206, UpdatedAt: 206},
-		{Owner: "agent_trade", Symbol: "BTCUSDT", PositionSide: "LONG", ManagedQty: 0, Status: "closed", SourceRef: "p-old", CreatedAt: 105, UpdatedAt: 130, ClosedAt: 130},
+		{AccountID: "main", Owner: "agent_trade", Symbol: "ETHUSDT", PositionSide: "SHORT", ManagedQty: 2, Status: "open", SourceRef: "p-new", CreatedAt: 205, UpdatedAt: 205},
+		{AccountID: "main", Owner: "agent_trade", Symbol: "ETHUSDT", PositionSide: "SHORT", ManagedQty: 0, Status: "open", SourceRef: "p-new", CreatedAt: 206, UpdatedAt: 206},
+		{AccountID: "main", Owner: "agent_trade", Symbol: "BTCUSDT", PositionSide: "LONG", ManagedQty: 0, Status: "closed", SourceRef: "p-old", CreatedAt: 105, UpdatedAt: 130, ClosedAt: 130},
 	}
 	for i := range positions {
 		if _, err := o.Insert(&positions[i]); err != nil {
 			t.Fatal(err)
 		}
 	}
-	order := models.FuturesManagedOrder{Owner: "agent_trade", Symbol: "ETHUSDT", PositionSide: "SHORT", Intent: "stop_loss", ClientOrderID: "client-p-new", RequestedQty: 2, Status: "submitted", SourceRef: "p-new", CreatedAt: 207, UpdatedAt: 207}
+	order := models.FuturesManagedOrder{AccountID: "main", Owner: "agent_trade", Symbol: "ETHUSDT", PositionSide: "SHORT", Intent: "stop_loss", ClientOrderID: "client-p-new", RequestedQty: 2, Status: "submitted", SourceRef: "p-new", CreatedAt: 207, UpdatedAt: 207}
 	if _, err := o.Insert(&order); err != nil {
 		t.Fatal(err)
 	}
