@@ -135,10 +135,10 @@ func TestReportUsesDeterministicHealthSignals(t *testing.T) {
 	if _, err := o.Insert(&models.AgentTradeProposal{ProposalID: "uncertain", SourceTaskID: "task-1", Symbol: "BTCUSDT", Side: "LONG", Status: "execution_uncertain", CreatedAt: now.UnixMilli(), UpdatedAt: now.UnixMilli()}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := o.Insert(&models.FuturesManagedPosition{Owner: "agent_trade", Symbol: "BTCUSDT", PositionSide: "LONG", ManagedQty: 1, Status: "reconcile_required", SourceRef: "uncertain", CreatedAt: now.UnixMilli(), UpdatedAt: now.UnixMilli()}); err != nil {
+	if _, err := o.Insert(&models.FuturesManagedPosition{AccountID: "main", Owner: "agent_trade", Symbol: "BTCUSDT", PositionSide: "LONG", ManagedQty: 1, Status: "reconcile_required", SourceRef: "uncertain", CreatedAt: now.UnixMilli(), UpdatedAt: now.UnixMilli()}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := o.Insert(&models.FuturesManagedOrder{Owner: "agent_trade", Symbol: "BTCUSDT", PositionSide: "LONG", Intent: "stop", ClientOrderID: "fixture-reconcile-order", OrderType: "STOP_MARKET", Status: "reconcile_required", SourceRef: "uncertain", CreatedAt: now.UnixMilli(), UpdatedAt: now.UnixMilli()}); err != nil {
+	if _, err := o.Insert(&models.FuturesManagedOrder{AccountID: "main", Owner: "agent_trade", Symbol: "BTCUSDT", PositionSide: "LONG", Intent: "stop", ClientOrderID: "fixture-reconcile-order", OrderType: "STOP_MARKET", Status: "reconcile_required", SourceRef: "uncertain", CreatedAt: now.UnixMilli(), UpdatedAt: now.UnixMilli()}); err != nil {
 		t.Fatal(err)
 	}
 	report, err = (Service{}).Report(context.Background(), Options{Now: now, BinanceBaseURL: server.URL, IgnoreConfiguredBinanceProxy: true, CheckBinanceREST: true, SchedulerRuntimeAvailable: true, SchedulerJobs: []scheduler.JobStatus{}})

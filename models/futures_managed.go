@@ -1,6 +1,7 @@
 package models
 
 type FuturesManagedPosition struct {
+	AccountID        string  `orm:"column(account_id);size(16);default(main);index" json:"account_id"`
 	ID               int64   `orm:"column(id);auto" json:"id"`
 	Owner            string  `orm:"column(owner);size(32);index" json:"owner"`
 	Symbol           string  `orm:"column(symbol);size(32);index" json:"symbol"`
@@ -18,6 +19,7 @@ type FuturesManagedPosition struct {
 func (*FuturesManagedPosition) TableName() string { return "futures_managed_positions" }
 
 type FuturesManagedOrder struct {
+	AccountID        string  `orm:"column(account_id);size(16);default(main);index" json:"account_id"`
 	ID               int64   `orm:"column(id);auto" json:"id"`
 	Owner            string  `orm:"column(owner);size(32);index" json:"owner"`
 	Symbol           string  `orm:"column(symbol);size(32);index" json:"symbol"`

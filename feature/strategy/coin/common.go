@@ -98,6 +98,7 @@ func getLimitMinLocalOrder(minute int64) (symbols map[string]bool) {
 	o := orm.NewOrm()
 	var orders []models.Order
 	_, _ = o.QueryTable("order").
+		Filter("account_id", "main").
 		Filter("UpdateTime__gte", startTime).
 		Filter("Side", "close").
 		All(&orders)

@@ -37,9 +37,9 @@ func TestRecentClosedSymbolsUsesLocalOrderTable(t *testing.T) {
 	o := setupSmartLocalV2DB(t)
 	now := time.Now().UnixMilli()
 	rows := []*models.Order{
-		{ID: 1, Symbol: "RECENTUSDT", Side: "close", UpdateTime: now - 60_000},
-		{ID: 2, Symbol: "OLDUSDT", Side: "close", UpdateTime: now - 10*60_000},
-		{ID: 3, Symbol: "OPENUSDT", Side: "open", UpdateTime: now - 60_000},
+		{AccountID: "main", ID: 1, Symbol: "RECENTUSDT", Side: "close", UpdateTime: now - 60_000},
+		{AccountID: "main", ID: 2, Symbol: "OLDUSDT", Side: "close", UpdateTime: now - 10*60_000},
+		{AccountID: "main", ID: 3, Symbol: "OPENUSDT", Side: "open", UpdateTime: now - 60_000},
 	}
 	for _, row := range rows {
 		if _, err := o.Insert(row); err != nil {
@@ -106,7 +106,7 @@ func TestSmartLocalV2DBEndToEndAndFailClosed(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := o.Insert(&models.Order{ID: 1, Symbol: "BBBUSDT", Side: "close", UpdateTime: now - 30_000}); err != nil {
+	if _, err := o.Insert(&models.Order{AccountID: "main", ID: 1, Symbol: "BBBUSDT", Side: "close", UpdateTime: now - 30_000}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -169,7 +169,7 @@ func TestSmartLocalV2TradeAndTestCooldownSourcesAreIndependent(t *testing.T) {
 		}
 	}
 	if _, err := o.Insert(&models.Order{
-		ID: 1, Symbol: "REALCOOLUSDT", Side: "close", UpdateTime: now - 30_000,
+		AccountID: "main", ID: 1, Symbol: "REALCOOLUSDT", Side: "close", UpdateTime: now - 30_000,
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -211,5 +211,37 @@ func TestSmartLocalV2TradeAndTestCooldownSourcesAreIndependent(t *testing.T) {
 	}
 	if !testSymbols["REALCOOLUSDT"] {
 		t.Fatalf("test mode must ignore real-only cooldown: %+v", testMode.Candidates)
+	}
+}
+
+// Stage 3 Lead cooldown uses only its own closed trade history; a main close
+// never silently suppresses Lead's Top60 candidate and vice versa.
+func TestStage3CooldownByAccount(t *testing.T) {
+	o := setupSmartLocalV2DB(t)
+	now := time.Now().UnixMilli()
+	for i, symbol := range []string{"MAINCOOLUSDT", "LEADCOOLUSDT", "FREEUSDT"} {
+		s := smartSymbol(symbol, 1, 8, 100_000_000, 100_000, now)
+		s.ID = int64(i + 1)
+		if _, err := o.Insert(s); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for i, account := range []string{"main", "lead"} {
+		symbol := []string{"MAINCOOLUSDT", "LEADCOOLUSDT"}[i]
+		if _, err := o.Insert(&models.Order{ID: int64(i + 1), AccountID: account, Symbol: symbol, Side: "close", UpdateTime: now - 10_000}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, tc := range []struct{ account, excluded, other string }{
+		{"main", "MAINCOOLUSDT", "LEADCOOLUSDT"},
+		{"lead", "LEADCOOLUSDT", "MAINCOOLUSDT"},
+	} {
+		got, err := recentClosedSymbolsForAccountWithOrm(context.Background(), o, 5, tc.account)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !got[tc.excluded] || got[tc.other] {
+			t.Fatalf("account=%s cooldown=%v", tc.account, got)
+		}
 	}
 }

@@ -99,7 +99,7 @@ func (ctrl *AccountController) GetBinanceFuturesOpenOrders() {
 func (ctrl *AccountController) GetLocalFuturesPositions() {
 	var positions []models.FuturesPosition
 	o := orm.NewOrm()
-	sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where 1 = 1"
+	sql := "SELECT f.id, f.symbol, f.side, f.amount, f.leverage, f.margin_type, f.isolated_wallet, f.entry_price, s.close as mark_price FROM `futures_positions` f LEFT JOIN symbols s ON f.symbol = s.symbol where f.account_id = 'main' "
 	sql += ` and f.amount <> '0'`
 	_, err := o.Raw(sql).QueryRows(&positions)
 	if err != nil {
@@ -133,7 +133,7 @@ func (ctrl *AccountController) GetLocalFuturesPositions() {
 func (ctrl *AccountController) GetLocalFuturesOpenOrders() {
 	var orders []models.FuturesOrder
 	o := orm.NewOrm()
-	sql := "SELECT * FROM `futures_orders` as f where 1 = 1"
+	sql := "SELECT * FROM `futures_orders` as f WHERE f.account_id = 'main' "
 	sql += ` and (f.status = 'NEW' or f.status = 'PARTIALLY_FILLED')` // 下单类型
 	_, err := o.Raw(sql).QueryRows(&orders)
 	if err != nil {
@@ -153,9 +153,18 @@ func (ctrl *AccountController) EditLocalFuturesPositions() {
 	id := ctrl.Ctx.Input.Param(":id")
 	var position models.FuturesPosition
 	o := orm.NewOrm()
-	o.QueryTable(position.TableName()).Filter("Id", id).One(&position)
+	if err := o.QueryTable(position.TableName()).Filter("account_id", "main").Filter("Id", id).One(&position); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(404, nil, "main position not found"))
+		return
+	}
 
-	ctrl.BindJSON(&position)
+	originalID := position.ID
+	if err := ctrl.BindJSON(&position); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	position.ID = originalID
+	position.AccountID = "main"
 
 	_, err := o.Update(&position) // _ 是受影响的条数
 	if err != nil {
@@ -174,7 +183,10 @@ func (ctrl *AccountController) DelLocalFuturesPositions() {
 	id := ctrl.Ctx.Input.Param(":id")
 	var position models.FuturesPosition
 	o := orm.NewOrm()
-	o.QueryTable(position.TableName()).Filter("Id", id).One(&position)
+	if err := o.QueryTable(position.TableName()).Filter("account_id", "main").Filter("Id", id).One(&position); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(404, nil, "main position not found"))
+		return
+	}
 
 	_, err := o.Delete(&position)
 	if err != nil {
