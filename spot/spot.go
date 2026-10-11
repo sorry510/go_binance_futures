@@ -389,32 +389,50 @@ func trySellMarket(coin models.NewSymbols, stepSize string) (res *spot_api.Creat
 }
 
 var flagSpotListen = 0
+var spotListenDisabledLogEmitted bool
 
 func ListenCoin(systemConfig models.Config) {
-	if systemConfig.ListenCoinEnable == 1 {
-		if flagSpotListen == 0 {
-			logs.Info("spot listen bot start")
-			flagSpotListen = 1
-		}
-	} else {
+	if systemConfig.ListenCoinEnable != 1 {
 		if flagSpotListen == 1 {
-			logs.Info("spot listen bot stop")
+			logs.Info("spot listen bot stop: global listener disabled")
 			flagSpotListen = 0
+			spotListenDisabledLogEmitted = true
+		} else if !spotListenDisabledLogEmitted {
+			logs.Info("spot listen inactive: global ListenCoinEnable is disabled")
+			spotListenDisabledLogEmitted = true
 		}
 		return
 	}
+	if flagSpotListen == 0 {
+		logs.Info("spot listen bot start: custom strategies only")
+		flagSpotListen = 1
+	}
+	spotListenDisabledLogEmitted = false
 
 	o := orm.NewOrm()
 	var coins []models.ListenSymbols
-	o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins) // 通知币列表
+	if _, err := o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins); err != nil {
+		logs.Error("spot listen query enabled symbols failed: %v", err)
+		return
+	}
 
+	counts := make(map[spotListenOutcome]int)
 	for _, coin := range coins {
 		if coin.ListenType != "custom" {
-			// Legacy K-line/KC listeners are no longer executed in spot mode.
+			// Legacy K-line/KC listeners remain stored but never execute.
+			counts[spotListenLegacy]++
+			logSpotListenOutcome(coin, spotListenLegacy)
 			continue
 		}
-		spotKlineCustomListen(coin)
+		// Like the futures listener, report every scan of every enabled symbol.
+		// This intentionally logs at the scheduler cadence (currently every 2s),
+		// including during notification cooldown and when no rule matches.
+		logs.Info("listen spot custom: %s", coin.Symbol)
+		outcome := spotKlineCustomListen(coin)
+		counts[outcome]++
+		logSpotListenOutcome(coin, outcome)
 	}
+	logSpotListenSummary(len(coins), counts)
 }
 
 // 更新币种的交易精度和插入新币
