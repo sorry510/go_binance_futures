@@ -150,6 +150,20 @@ func init() {
 	web.Router("/orders/:id", &controllers.OrderController{}, "delete:Delete")        // 删除某个订单
 	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit")        // config get and edit
 
+	// Stage 6: JWT protected, Lead-only management. No real trade runner or
+	// live order/cancel route is registered. Start/reconcile fail closed.
+	web.Router("/futures/lead/status", &controllers.LeadController{}, "get:Status")
+	web.Router("/futures/lead/credentials", &controllers.LeadController{}, "put:SaveCredentials;delete:DeleteCredentials")
+	web.Router("/futures/lead/verify", &controllers.LeadController{}, "post:Verify")
+	web.Router("/futures/lead/config", &controllers.LeadController{}, "get:Config;put:SaveConfig")
+	web.Router("/futures/lead/start", &controllers.LeadController{}, "post:Start")
+	web.Router("/futures/lead/pause", &controllers.LeadController{}, "post:Pause")
+	web.Router("/futures/lead/reconcile", &controllers.LeadController{}, "post:Reconcile")
+	web.Router("/futures/lead/positions", &controllers.LeadController{}, "get:Managed")
+	web.Router("/futures/lead/orders", &controllers.LeadController{}, "get:Managed")
+	web.Router("/futures/lead/events", &controllers.LeadController{}, "get:Events")
+	web.Router("/futures/lead/metrics", &controllers.LeadController{}, "get:Metrics")
+	web.Router("/futures/lead/symbols", &controllers.LeadController{}, "get:Symbols")
 	web.Router("/futures/account", &controllers.AccountController{}, "get:GetBinanceFuturesAccount")                                              // 获取合约账户信息
 	web.Router("/futures/positions", &controllers.AccountController{}, "get:GetBinanceFuturesPositions")                                          // 获取合约持仓信息
 	web.Router("/futures/open-orders", &controllers.AccountController{}, "get:GetBinanceFuturesOpenOrders")                                       // 获取合约挂单信息

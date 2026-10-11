@@ -116,6 +116,21 @@ func (a *LeadExecutionAdapter) ReportLeadFault(code LeadFaultCode) {
 	}
 }
 
+func (a *LeadExecutionAdapter) completeAuthoritativeRecovery(report LeadRecoveryReport, mirror LeadMirrorStatus) bool {
+	if a == nil || a.guard == nil || report.AccountID != binance.LeadAccountID ||
+		report.Blocked || len(report.Reasons) != 0 || report.ObservedAt.IsZero() ||
+		mirror.AccountID != binance.LeadAccountID || !mirror.Ready || mirror.Generation == 0 ||
+		mirror.CapturedAt.Before(report.ObservedAt) ||
+		time.Since(mirror.CapturedAt) > RiskSnapshotMaxAge {
+		return false
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.pendingReconcile = false
+	a.guard.clearReconciledFaults()
+	return true
+}
+
 // CheckOpen is a read-only diagnostic. The same per-adapter lock protects
 // it from racing a new order reservation.
 func (a *LeadExecutionAdapter) CheckOpen(ctx context.Context, request RiskOpenOrder) (RiskDecision, error) {
@@ -135,6 +150,12 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 	}
 	if request.AccountID != binance.LeadAccountID {
 		return RiskDecision{}, ErrLeadOpenBlocked
+	}
+	// Stage 6 emergency halt is independent of the audit store and HTTP
+	// controller lifetime. Keep this in the actual pre-submit gate so a
+	// future explicit Stage 7 runner cannot bypass the process-local stop.
+	if LeadEmergencyPaused() {
+		return RiskDecision{BlockingReasons: []string{"lead_emergency_paused"}}, ErrLeadOpenBlocked
 	}
 	// No Stage 7 authorization exists in production: refuse BEFORE any
 	// Lead SAPI, signed /fapi or public exchangeInfo fetch.

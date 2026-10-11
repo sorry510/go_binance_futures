@@ -239,3 +239,22 @@ func (s *EncryptedFileStore) Save(credentials Credentials) error {
 	}
 	return nil
 }
+
+// Delete removes only the bound encrypted file, never the master key or Main
+// credentials. Callers MUST block deletion when Lead has uncertain orders,
+// managed positions or a pending private WS generation.
+func (s *EncryptedFileStore) Delete() error {
+	if s == nil {
+		return ErrCredentialsUnavailable
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := verifyCredentialPath(s.path); err != nil {
+		return err
+	}
+	err := os.Remove(s.path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
+}

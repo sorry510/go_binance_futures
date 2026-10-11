@@ -327,3 +327,15 @@ func NewManagerFromEnv() (*Manager, error) {
 // Ensure the live factory never takes an externally supplied shared HTTP
 // client or accesses main config credentials.
 var _ AccountReader = (*binanceapi.AccountClient)(nil)
+
+// ForgetCachedVerification revokes every previous verification result after
+// secure credential deletion. It cannot grant Stage 7 authorization.
+func (m *Manager) ForgetCachedVerification() {
+	if m == nil {
+		return
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.generation++
+	m.last = initialReport()
+}

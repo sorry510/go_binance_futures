@@ -2,7 +2,6 @@ package feature
 
 import (
 	"context"
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -211,7 +210,17 @@ func TestStage46RepositoryProductionLeadWritesRemainUnreachable(t *testing.T) {
 				name = v.Name
 			}
 			switch name {
-			case "NewLeadExecutionAdapter", "ExecuteManagedClose", "ExecuteOpen", "NewReadOnlyExecutor", "leadMockTradeRunner":
+			case "NewLeadExecutionAdapter":
+				// Stage 5's explicitly opt-in, inert read-only supervisor
+				// composes an adapter inside service/leadaccount, but the
+				// production root MUST still exclude this entire package.
+				// TestStage46ProductionBinaryDependencyClosureExcludesLeadAccount
+				// is a separate structural proof of its inaccessibility.
+				allowed := filepath.Join(root, "service", "leadaccount", "supervisor.go")
+				if path != allowed {
+					t.Errorf("unreviewed production Lead adapter instantiation: %s", path)
+				}
+			case "ExecuteManagedClose", "ExecuteOpen", "NewReadOnlyExecutor", "leadMockTradeRunner":
 				t.Errorf("Stage 4 production activation detected: %s invokes %s", path, name)
 			}
 			return true
@@ -231,7 +240,7 @@ func TestStage46RepositoryProductionLeadWritesRemainUnreachable(t *testing.T) {
 // or aliases that the AST name scans cannot detect. When Stage 5 intentionally
 // integrates read-only Lead state, this test must be reviewed together with
 // the new production permission boundary. Never silently delete it.
-func TestStage46ProductionBinaryDependencyClosureExcludesLeadAccount(t *testing.T) {
+func TestStage6ProductionLeadManagementDependencyHasNoLiveActivation(t *testing.T) {
 	_, here, _, ok := runtime.Caller(0)
 	if !ok {
 		t.Fatal("cannot locate repository root")
@@ -246,20 +255,53 @@ func TestStage46ProductionBinaryDependencyClosureExcludesLeadAccount(t *testing.
 		t.Fatalf("cannot audit production dependency closure: %v (%s)", err, string(output))
 	}
 	if ctx.Err() != nil {
-		t.Fatalf("production dependency audit timed out: %v", ctx.Err())
+		t.Fatalf("dependency audit timed out: %v", ctx.Err())
 	}
-	lines := strings.Split(string(output), "\n")
-	found := 0
-	for _, line := range lines {
-		pkg := strings.TrimSpace(line)
-		if pkg == "go_binance_futures/service/leadaccount" {
-			t.Errorf("production binary unexpectedly links Lead execution package: %s", pkg)
-		}
-		if pkg != "" {
-			found++
+	found := false
+	for _, line := range strings.Split(string(output), "\n") {
+		if strings.TrimSpace(line) == "go_binance_futures/service/leadaccount" {
+			found = true
 		}
 	}
-	if found < 40 {
-		t.Fatal(fmt.Sprintf("production dependency closure suspiciously small: %d packages", found))
+	if !found {
+		t.Fatal("Stage 6 authenticated controller missing its read-only Lead module dependency")
+	}
+	// Dependency alone is no longer the security boundary. Scan the ONLY new
+	// production management ingress and require zero live-runner/WS/submission
+	// entrypoints. Future authorization will need a new explicit review.
+	path := filepath.Join(root, "controllers", "lead_account.go")
+	node, err := parser.ParseFile(token.NewFileSet(), path, nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	disallowed := map[string]bool{
+		"NewLeadSupervisor": true, "NewLeadExecutionAdapter": true,
+		"ExecuteOpen": true, "ExecuteManagedClose": true, "Submit": true,
+		"Cancel": true, "Run": true, "DialLeadUserStream": true,
+		"completeAuthoritativeRecovery": true,
+	}
+	ast.Inspect(node, func(n ast.Node) bool {
+		call, ok := n.(*ast.CallExpr)
+		if !ok {
+			return true
+		}
+		var name string
+		switch v := call.Fun.(type) {
+		case *ast.SelectorExpr:
+			name = v.Sel.Name
+		case *ast.Ident:
+			name = v.Name
+		}
+		if disallowed[name] {
+			t.Errorf("Lead management ingress directly invokes unsafe method %s", name)
+		}
+		return true
+	})
+	routes, err := os.ReadFile(filepath.Join(root, "routers", "router.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(string(routes), "/futures/lead/") != 12 {
+		t.Fatal("Stage 6 Lead route set changed, review ACL and live-write safety")
 	}
 }

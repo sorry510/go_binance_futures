@@ -113,7 +113,7 @@ func (a *LeadExecutionAdapter) verifyCloseRules(ctx context.Context, order futur
 	if a.rules == nil || a.rules.AccountID != "lead" || a.rules.Reader == nil {
 		return ErrLeadOpenBlocked
 	}
-	exchange, err := a.rules.Reader.GetLeadExchangeInfoContext(ctx)
+	exchange, err := a.rules.exchangeInfo(ctx)
 	if err != nil || exchange == nil {
 		return fmt.Errorf("Lead close exchange rules unavailable")
 	}
