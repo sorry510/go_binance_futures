@@ -31,22 +31,40 @@ func saveSpotListenNotice(coin models.ListenSymbols, direction string) bool {
 
 // spotKlineCustomListen evaluates spot indicators and spot market prices only.
 // A true rule triggers a notification; it does not submit an order.
-func spotKlineCustomListen(coin models.ListenSymbols) {
-	if !spotListenNoticeDue(coin) || coin.Strategy == "" {
-		return
+// spotKlineCustomListen reports why an enabled custom listener did or did not
+// dispatch an alert. The caller rate-limits routine outcome logs.
+func spotKlineCustomListen(coin models.ListenSymbols) spotListenOutcome {
+	if !spotListenNoticeDue(coin) {
+		return spotListenCooldown
+	}
+	if coin.Strategy == "" {
+		return spotListenNoStrategy
 	}
 	var strategies technology.StrategyConfig
 	if err := json.Unmarshal([]byte(coin.Strategy), &strategies); err != nil {
-		logs.Error("invalid spot listen strategy:", coin.Symbol, err)
-		return
+		logSpotListenProblem(coin, spotListenInvalidStrategy, "", err)
+		return spotListenInvalidStrategy
+	}
+	// Do not request spot klines/indicator data when there is nothing enabled
+	// to execute; invalid configurations are reported explicitly.
+	active := 0
+	for _, strategy := range strategies {
+		if strategy.Enable && strategy.Code != "" && (strategy.Type == "long" || strategy.Type == "short") {
+			active++
+		}
+	}
+	if active == 0 {
+		return spotListenNoActiveRules
 	}
 
 	env := line.InitSpotParseEnv(coin.Symbol, coin.Technology)
 	price, ok := env["NowPrice"].(float64)
 	if !ok || price <= 0 {
-		logs.Error("spot listen has no valid spot ticker:", coin.Symbol)
-		return
+		logSpotListenProblem(coin, spotListenMissingPrice, "", nil)
+		return spotListenMissingPrice
 	}
+
+	hadRuleError := false
 	for _, strategy := range strategies {
 		if !strategy.Enable || strategy.Code == "" {
 			continue
@@ -62,27 +80,39 @@ func spotKlineCustomListen(coin models.ListenSymbols) {
 		}
 		program, err := expr.Compile(strategy.Code, expr.Env(env))
 		if err != nil {
-			logs.Error("compile spot listen strategy:", coin.Symbol, err)
+			logSpotListenProblem(coin, spotListenRuleError, strategy.Name, err)
+			hadRuleError = true
 			continue
 		}
 		result, err := expr.Run(program, env)
 		if err != nil {
-			logs.Error("run spot listen strategy:", coin.Symbol, err)
+			logSpotListenProblem(coin, spotListenRuleError, strategy.Name, err)
+			hadRuleError = true
 			continue
 		}
 		matched, isBool := result.(bool)
-		if !isBool || !matched {
+		if !isBool {
+			logSpotListenProblem(coin, spotListenRuleError, strategy.Name, nil)
+			hadRuleError = true
+			continue
+		}
+		if !matched {
 			continue
 		}
 		if !saveSpotListenNotice(coin, direction) {
-			return
+			return spotListenNoticeUpdateError
 		}
 		pusher.SetModuleName("coin_listen").SpotListenKlineCustom(notify.SpotListenParams{
 			Title:  lang.Lang("spot.listen_custom_title"),
 			Symbol: coin.Symbol, PositionSide: strategy.Type,
 			NowPrice: price, StrategyName: strategy.Name, Remarks: strategy.Code,
 		})
+		logs.Info("spot listen notification dispatched: symbol=%s strategy=%q side=%s price=%g", coin.Symbol, strategy.Name, strategy.Type, price)
 		// One notification per configured interval, even if multiple rules match.
-		return
+		return spotListenNotified
 	}
+	if hadRuleError {
+		return spotListenRuleError
+	}
+	return spotListenNoMatch
 }
