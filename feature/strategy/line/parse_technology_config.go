@@ -95,6 +95,12 @@ type KLinePrice struct {
 }
 
 func ParseTechnologyConfig(symbol string, strTechnology string) (config map[string]interface{}, klineMap map[string]KLinePrice) {
+	return ParseTechnologyConfigWithKlineLoader(symbol, strTechnology, binance.GetKlineData)
+}
+
+// ParseTechnologyConfigWithKlineLoader uses the same indicator calculations with a
+// market-specific kline source. Spot callers must not read futures klines.
+func ParseTechnologyConfigWithKlineLoader(symbol string, strTechnology string, getKlines func(string, string, int) ([]*futures.Kline, error)) (config map[string]interface{}, klineMap map[string]KLinePrice) {
 	var (
 		technologyConfig technology.TechnologyConfig
 	)
@@ -116,7 +122,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -145,7 +151,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -175,7 +181,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -208,7 +214,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -237,7 +243,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -266,7 +272,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -295,7 +301,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -323,7 +329,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -352,7 +358,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -385,7 +391,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -419,7 +425,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -453,7 +459,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -484,7 +490,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -513,7 +519,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())
@@ -544,7 +550,7 @@ func ParseTechnologyConfig(symbol string, strTechnology string) (config map[stri
 			}
 			klinePrice, ok := klineMap[item.KlineInterval]
 			if !ok {
-				kline, err := binance.GetKlineData(symbol, item.KlineInterval, limit)
+				kline, err := getKlines(symbol, item.KlineInterval, limit)
 				if err != nil {
 					logs.Error("kline error, symbol:", symbol)
 					logs.Error("kline error in ParseTechnologyConfig:", err.Error())

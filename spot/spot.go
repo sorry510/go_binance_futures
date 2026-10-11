@@ -12,7 +12,6 @@ import (
 	"go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"strconv"
-	"strings"
 
 	spot_api "github.com/adshao/go-binance/v2"
 
@@ -410,104 +409,94 @@ func ListenCoin(systemConfig models.Config) {
 	o.QueryTable("listen_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins) // 通知币列表
 
 	for _, coin := range coins {
-		logs.Info("listen spot:", coin.Symbol)
-		ctx := binanceapiusage.WithSource(context.Background(), "spot_listen")
-		kline_1, err1 := binance.GetKlineDataContext(ctx, coin.Symbol, coin.KlineInterval, 10)
-		if err1 != nil {
-			logs.Error("k线错误, 现货币种是:", coin.Symbol)
+		if coin.ListenType != "custom" {
+			// Legacy K-line/KC listeners are no longer executed in spot mode.
 			continue
 		}
-
-		percentLimit, _ := strconv.ParseFloat(coin.ChangePercent, 64)
-		percentLimit = percentLimit / 100 // 变化幅度
-
-		lastOpenPrice, _ := strconv.ParseFloat(kline_1[1].Open, 64) // 上一根 k 线的开盘价
-		nowPrice, _ := strconv.ParseFloat(kline_1[0].Close, 64)     // 当前价格
-
-		if (nowPrice > lastOpenPrice) &&
-			(nowPrice-lastOpenPrice)/lastOpenPrice >= percentLimit &&
-			((kline_1[0].CloseTime-coin.LastNoticeTime >= 60*1000*coin.NoticeLimitMin && coin.LastNoticeType == "up") || coin.LastNoticeType != "up") {
-			// 价格上涨
-			coin.LastNoticeTime = kline_1[0].CloseTime
-			coin.LastNoticeType = "up"
-			orm.NewOrm().Update(&coin)
-
-			pusher.SetModuleName("coin_listen").SpotListenKlineBase(notify.SpotListenParams{
-				Title:         lang.Lang("spot.kline_listen_base_title"),
-				Symbol:        coin.Symbol,
-				ChangePercent: (nowPrice - lastOpenPrice) / lastOpenPrice,
-				Price:         nowPrice,
-				Remarks:       lang.Lang("spot.fast_up"),
-			})
-		}
-		if (nowPrice < lastOpenPrice) &&
-			(lastOpenPrice-nowPrice)/lastOpenPrice >= percentLimit &&
-			((kline_1[0].CloseTime-coin.LastNoticeTime >= 60*1000*coin.NoticeLimitMin && coin.LastNoticeType == "down") || coin.LastNoticeType != "down") {
-			// 价格下跌
-			coin.LastNoticeTime = kline_1[0].CloseTime
-			coin.LastNoticeType = "down"
-			orm.NewOrm().Update(&coin)
-
-			pusher.SetModuleName("coin_listen").SpotListenKlineBase(notify.SpotListenParams{
-				Title:         lang.Lang("spot.kline_listen_base_title"),
-				Symbol:        coin.Symbol,
-				ChangePercent: (nowPrice - lastOpenPrice) / lastOpenPrice,
-				Price:         nowPrice,
-				Remarks:       lang.Lang("spot.fast_down"),
-			})
-		}
+		spotKlineCustomListen(coin)
 	}
 }
 
 // 更新币种的交易精度和插入新币
 func UpdateSymbolsTradePrecision() {
-	res, err := binance.GetExchangeInfo()
-	if err == nil {
-		for _, symbol := range res.Symbols {
-			o := orm.NewOrm()
-			var tickSize string
-			var stepSize string
-			priceFilter := symbol.PriceFilter()
-			if priceFilter != nil {
-				tickSize = priceFilter.TickSize
-			}
-			lotSizeFilter := symbol.LotSizeFilter()
-			if lotSizeFilter != nil {
-				stepSize = lotSizeFilter.StepSize
-			}
-			o.QueryTable("spot_symbols").Filter("symbol", symbol.Symbol).Update(orm.Params{
-				"tickSize": tickSize,
-				"stepSize": stepSize,
-			})
-
-			suffixType := ""
-			if strings.HasSuffix(symbol.Symbol, "USDT") {
-				suffixType = "USDT"
-			} else if strings.HasSuffix(symbol.Symbol, "FDUSD") {
-				suffixType = "FDUSD"
-			} else if strings.HasSuffix(symbol.Symbol, "USDC") {
-				suffixType = "USDC"
-			}
-
-			if suffixType != "" {
-				if !o.QueryTable("spot_symbols").Filter("symbol", symbol.Symbol).Exist() {
-					// 没有的币种插入
-					logs.Info("add new spot symbol", symbol.Symbol)
-					o.Insert(&models.SpotSymbols{
-						Symbol:       symbol.Symbol,
-						Enable:       0, // 默认不开启
-						TickSize:     tickSize,
-						StepSize:     stepSize,
-						Usdt:         "10",
-						Profit:       "10",
-						Loss:         "10",
-						StrategyType: "global",
-						Type:         suffixType,
-					})
+	exchange, err := binance.GetExchangeInfo()
+	if err != nil {
+		logs.Error("spot exchange info unavailable for symbol refresh:", err)
+		return
+	}
+	o := orm.NewOrm()
+	// Read existing symbol metadata once, not once per exchange pair.
+	var existing []models.SpotSymbols
+	if _, err := o.QueryTable("spot_symbols").All(&existing, "Symbol", "TickSize", "StepSize"); err != nil {
+		logs.Error("read existing spot symbols:", err)
+		return
+	}
+	known := make(map[string]models.SpotSymbols, len(existing))
+	for _, value := range existing {
+		known[value.Symbol] = value
+	}
+	var created, adjusted int
+	for _, symbol := range exchange.Symbols {
+		if symbol.Status != "TRADING" || !symbol.IsSpotTradingAllowed {
+			continue
+		}
+		kind := ""
+		switch symbol.QuoteAsset {
+		case "USDT", "USDC", "FDUSD":
+			kind = symbol.QuoteAsset
+		default:
+			continue
+		}
+		tickSize, stepSize := "", ""
+		if filter := symbol.PriceFilter(); filter != nil {
+			tickSize = filter.TickSize
+		}
+		if filter := symbol.LotSizeFilter(); filter != nil {
+			stepSize = filter.StepSize
+		}
+		previous, found := known[symbol.Symbol]
+		if found {
+			if previous.TickSize != tickSize || previous.StepSize != stepSize {
+				if _, err := o.QueryTable("spot_symbols").Filter("symbol", symbol.Symbol).Update(orm.Params{
+					"tickSize": tickSize, "stepSize": stepSize,
+				}); err != nil {
+					logs.Error("update spot symbol precision:", symbol.Symbol, err)
+				} else {
+					adjusted++
 				}
 			}
+			continue
 		}
+		// Creating metadata does not enable spot trading. WS fills prices.
+		_, err := o.Insert(&models.SpotSymbols{
+			Symbol:       symbol.Symbol,
+			Enable:       0,
+			TickSize:     tickSize,
+			StepSize:     stepSize,
+			Usdt:         "10",
+			Profit:       "10",
+			Loss:         "10",
+			Technology:   "{}",
+			Strategy:     "[]",
+			StrategyType: "global",
+			Type:         kind,
+		})
+		if err != nil {
+			// If the WS upsert inserted the pair concurrently, update only
+			// missing trade precision and preserve all user preferences.
+			if o.QueryTable("spot_symbols").Filter("symbol", symbol.Symbol).Exist() {
+				_, err = o.QueryTable("spot_symbols").Filter("symbol", symbol.Symbol).Update(orm.Params{
+					"tickSize": tickSize, "stepSize": stepSize,
+				})
+			}
+			if err != nil {
+				logs.Error("insert spot symbol metadata:", symbol.Symbol, err)
+			}
+			continue
+		}
+		created++
 	}
+	logs.Info("spot symbol precision refresh finished, new:", created, "adjusted:", adjusted)
 }
 func reserveSpotRushExchangeInfoRefresh(interval time.Duration) bool {
 	if interval <= 0 {

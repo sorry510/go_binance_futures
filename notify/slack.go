@@ -454,3 +454,17 @@ func (pusher Slack) AgentAlert(params AgentAlertParams) (int64, error) {
 	}
 	return notification.ID, nil
 }
+
+func (pusher Slack) SpotListenKlineCustom(params SpotListenParams) {
+	text := `
+>%s
+>{futures.side}：%s
+>{futures.now_price}：%f
+>{futures.strategy_name}：%s
+>{spot.time}：%s
+
+> %s`
+	SlackApi(fmt.Sprintf(lang.LangMatch(text), params.Symbol+params.Title,
+		lang.Lang("futures."+params.PositionSide), params.NowPrice,
+		params.StrategyName, nowTime(), params.Remarks), pusher)
+}

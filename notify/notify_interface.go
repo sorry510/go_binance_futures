@@ -74,6 +74,8 @@ type SpotListenParams struct {
 	Remarks string
 	ChangePercent float64
 	FundingRate float64
+	PositionSide string // spot signal direction
+	StrategyName string
 	
 	NowPrice float64
 	StopLossPrice float64
@@ -145,4 +147,5 @@ type Pusher interface {
 	SpotOrder(params SpotOrderParams)
 	SpotNotice(params SpotNoticeParams)
 	SpotListenKlineBase(params SpotListenParams)
+	SpotListenKlineCustom(params SpotListenParams)
 }

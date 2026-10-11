@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"strings"
+	"sync/atomic"
 
 	"go_binance_futures/binanceproxy"
 	"go_binance_futures/service/binanceapiusage"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/adshao/go-binance/v2"
 	"github.com/beego/beego/v2/adapter/logs"
-	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
 )
 
@@ -295,48 +295,32 @@ func GetOrder(orderParams OrderParams) (res *binance.Order, err error) {
 var flagWsSpot = 0
 
 func UpdateCoinByWs(retryNum int64) {
+	// Persist snapshots in batches instead of running SQL inside the WS callback.
+	startSpotWSFlushTask()
 	for {
 		if retryNum > 0 {
 			logs.Info("spot ws restart num:", retryNum)
 		}
 
 		// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
-		var lock = false
-		var o = orm.NewOrm()
 		runErrCh := make(chan error, 1)
-		doneC, _, err := wsSpotAllMarketsStatServe(func(event binance.WsAllMarketsStatEvent) {
+		// The 24h !ticker@arr stream has been observed to open but deliver
+		// no events through our configured WS proxies. The miniTicker stream
+		// delivers current prices and 24h OHLCV while using less bandwidth.
+		lastMessageAt := atomic.Int64{}
+		lastMessageAt.Store(time.Now().UnixMilli())
+		doneC, stopC, err := wsSpotAllMiniMarketsStatServe(func(event binance.WsAllMiniMarketsStatEvent) {
 			receivedAt := time.Now()
-			// Spot market WebSocket is mandatory infrastructure for runtime prices
-			// and the local spot_symbols market snapshot.
-			storeSpotTickerEvents(event, receivedAt)
-
-			if flagWsSpot == 0 {
-				logs.Info("spot ws start")
-				flagWsSpot = 1
+			rows := normalizeSpotMiniTickers(event)
+			if len(rows) == 0 {
+				return
 			}
-			if !lock {
-				lock = true
-				for _, ticker := range event {
-					if ticker == nil {
-						continue
-					}
-					o.Raw(
-						"UPDATE `spot_symbols` set `percentChange` = ?, `close` = ?, `open` = ?, `low` = ?, `high` = ?, `updateTime` = ?, `baseVolume` = ?, `quoteVolume` = ?, `closeQty` = ?,  `tradeCount` = ?, `lastClose` = close, `lastUpdateTime` = updateTime WHERE `symbol` = ?",
-						ticker.PriceChangePercent,
-						ticker.LastPrice, // 当前价格
-						ticker.OpenPrice,
-						ticker.LowPrice,
-						ticker.HighPrice,
-						ticker.Time,
-						ticker.BaseVolume,  // 成交量
-						ticker.QuoteVolume, // 成交额
-						ticker.CloseQty,    // 最新成交价格上的成交量
-						ticker.Count,       // 成交数
-
-						ticker.Symbol,
-					).Exec()
-				}
-				lock = false
+			lastMessageAt.Store(receivedAt.UnixMilli())
+			storeSpotTickerEvents(rows, receivedAt)
+			enqueueSpotWSTickers(rows)
+			if flagWsSpot == 0 {
+				logs.Info("spot miniTicker ws receiving prices")
+				flagWsSpot = 1
 			}
 		}, func(err error) {
 			logs.Error("spot ws run error:", err)
@@ -361,8 +345,33 @@ func UpdateCoinByWs(retryNum int64) {
 			continue
 		}
 
-		<-doneC
+		// A live TCP connection is not evidence of incoming market data.
+		// Rotate to the next configured proxy if no ticker arrives in 30s.
+		watchdog := time.NewTicker(5 * time.Second)
+		stalled := false
+	watchLoop:
+		for {
+			select {
+			case <-doneC:
+				break watchLoop
+			case <-watchdog.C:
+				if time.Since(time.UnixMilli(lastMessageAt.Load())) >= 30*time.Second {
+					stalled = true
+					logs.Warning("spot miniTicker ws has no market updates for 30s, reconnecting")
+					if stopC != nil {
+						close(stopC)
+					}
+					break watchLoop
+				}
+			}
+		}
+		watchdog.Stop()
 		flagWsSpot = 0
+		if stalled {
+			retryNum++
+			time.Sleep(time.Second * 3)
+			continue
+		}
 
 		select {
 		case runErr := <-runErrCh:

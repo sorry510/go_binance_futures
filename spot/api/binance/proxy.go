@@ -8,6 +8,12 @@ func wsSpotAllMarketsStatServe(handler binance.WsAllMarketsStatHandler, errHandl
 	})
 }
 
+func wsSpotAllMiniMarketsStatServe(handler binance.WsAllMiniMarketsStatServeHandler, errHandler binance.ErrHandler) (chan struct{}, chan struct{}, error) {
+	return proxyPool.WithSpotWS(func() (chan struct{}, chan struct{}, error) {
+		return binance.WsAllMiniMarketsStatServe(handler, errHandler)
+	})
+}
+
 func wsSpotCombinedKlineServeMultiInterval(symbolIntervals map[string][]string, handler binance.WsKlineHandler, errHandler binance.ErrHandler) (chan struct{}, chan struct{}, error) {
 	return proxyPool.WithSpotWS(func() (chan struct{}, chan struct{}, error) {
 		return binance.WsCombinedKlineServeMultiInterval(symbolIntervals, handler, errHandler)
