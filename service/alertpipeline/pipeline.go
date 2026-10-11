@@ -22,6 +22,12 @@ import (
 	signalservice "go_binance_futures/service/signal"
 )
 
+// The agent runtime allows tasks to run for 10 minutes. Alert triage can
+// require several 120-second LLM calls plus retries; expiring the pipeline
+// wait at two minutes caused false fallbacks (context deadline exceeded)
+// while the AI task was still running. Leave a short completion margin.
+const defaultAlertTaskTimeout = 10*time.Minute + 15*time.Second
+
 type StartTaskFunc func(agentruntime.Request) (*task.Task, error)
 type GetTaskFunc func(context.Context, string) (*task.Task, error)
 type NotifyFunc func(notify.AgentAlertParams) (int64, error)
@@ -90,7 +96,7 @@ func New(cfg Config) (*Pipeline, error) {
 		cfg.PollInterval = 500 * time.Millisecond
 	}
 	if cfg.TaskTimeout <= 0 {
-		cfg.TaskTimeout = 2 * time.Minute
+		cfg.TaskTimeout = defaultAlertTaskTimeout
 	}
 	pipeline := &Pipeline{
 		cfg: cfg, queue: make(chan signalservice.Signal, cfg.QueueSize), incidentQueue: make(chan []signalservice.Signal, cfg.QueueSize),
@@ -277,6 +283,7 @@ func (pipeline *Pipeline) runTriageAI(ctx context.Context, batch []signalservice
 	}
 	completed, err := pipeline.waitTask(ctx, item.ID)
 	if err != nil {
+		logs.Warning("AI incident triage task wait failed: task=%s count=%d timeout=%s err=%v", item.ID, len(batch), pipeline.cfg.TaskTimeout, err)
 		pipeline.fallbackIncidentBatch(batch, err.Error(), item.ID)
 		return
 	}
@@ -398,6 +405,7 @@ func (pipeline *Pipeline) runAI(ctx context.Context, value signalservice.Signal,
 
 	completed, err := pipeline.waitTask(ctx, item.ID)
 	if err != nil {
+		logs.Warning("AI event alert task wait failed: task=%s signal=%s symbol=%s timeout=%s err=%v", item.ID, value.SignalID, value.Symbol, pipeline.cfg.TaskTimeout, err)
 		pipeline.notifyFallback(value, trace, err.Error())
 		return
 	}

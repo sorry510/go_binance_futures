@@ -1,14 +1,14 @@
 package notify
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"context"
+	"net/url"
+	"time"
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/webnotification"
-	"io"
-	"net/http"
 
 	// Loads the global config before the package-level reads below run.
 	_ "go_binance_futures/bootstrap"
@@ -65,54 +65,35 @@ func dingDingAPI(content string, pusher Pusher, options webnotification.PublishO
     dingding_token = notifyConfig.DingDingToken
     dingding_word = notifyConfig.DingDingWord
   }
-  logs.Info("DingDingApi:", dingding_token, notifyConfig.ID)
-  
-	go func () {
-		url := "https://oapi.dingtalk.com/robot/send?access_token=" + dingding_token
-	
-		requestBody := DingDingData{
-			Msgtype: "markdown",
-			Markdown: DingDingApiMarkDownData {
-				Title: dingding_word,
-				Text: content,
-			},
-      At: At {
-        AtMobiles: []string{},
-        IsAtAll: true,
-      },
-		}
-		jsonData, _ := json.Marshal(requestBody)
-		fmt.Println(string(jsonData))
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
-		if err != nil {
-			fmt.Println("Error creating request:", err)
-			return
-		}
-		// 设置请求头，比如 Content-Type
-		req.Header.Set("Content-Type", "application/json")
-		// 发送请求
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Println("Error making POST request:", err)
-			return
-		}
-		defer resp.Body.Close()
-		// 读取响应体
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println("Error reading response body:", err)
-			return
-		}
-
-		// 打印响应体
-		fmt.Println(string(bodyBytes))
-
-		// 检查响应状态码
-		if resp.StatusCode != http.StatusOK {
-			fmt.Println("Unexpected status code:", resp.StatusCode)
-		}
-	}()
+  // Token and request body may contain secrets. Never log either.
+  if dingding_token == "" {
+      logs.Warning("DingTalk notification has no robot access token: module=%s notification_id=%d", pusher.GetModuleName(), notification.ID)
+      return notification, nil
+  }
+  endpoint := "https://oapi.dingtalk.com/robot/send?access_token=" + url.QueryEscape(dingding_token)
+  requestBody := DingDingData{
+      Msgtype: "markdown",
+      Markdown: DingDingApiMarkDownData{Title: dingding_word, Text: content},
+      At: At{AtMobiles: []string{}, IsAtAll: true},
+  }
+  payload, err := json.Marshal(requestBody)
+  if err != nil {
+      logs.Error("encode DingTalk message: module=%s notification_id=%d error=%v", pusher.GetModuleName(), notification.ID, err)
+      return notification, nil
+  }
+  module, notificationID := pusher.GetModuleName(), notification.ID
+  // Web notifications are persisted first. Delivery runs asynchronously
+  // with a bounded network budget and one transient retry.
+  go func() {
+      ctx, cancel := context.WithTimeout(context.Background(), dingTalkDeliveryTimeout)
+      defer cancel()
+      started := time.Now()
+      if err := sendDingTalkRequest(ctx, dingTalkHTTPClient, endpoint, payload); err != nil {
+          logs.Error("DingTalk delivery failed: module=%s notification_id=%d elapsed=%s error=%v", module, notificationID, time.Since(started), err)
+          return
+      }
+      logs.Info("DingTalk delivery succeeded: module=%s notification_id=%d elapsed=%s", module, notificationID, time.Since(started))
+  }()
 	return notification, nil
 }
 

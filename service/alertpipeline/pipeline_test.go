@@ -291,3 +291,38 @@ func BenchmarkV3BaselineSignalToNotification(b *testing.B) {
 		}
 	}
 }
+
+// The default alert wait must outlive the agent runtime's ten-minute budget.
+// A two-minute wait raced the model's 120-second HTTP deadline and caused
+// artificial 'context deadline exceeded' fallbacks in DingTalk alerts.
+func TestDefaultAlertPipelineTaskTimeoutAllowsAgentToFinish(t *testing.T) {
+	h := newPipelineTestHarness()
+	pipeline, err := New(Config{
+		Settings:  func() Settings { return h.settings },
+		StartTask: h.startTask,
+		GetTask:   h.getTask,
+		Notify:    h.notify,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pipeline.cfg.TaskTimeout != defaultAlertTaskTimeout {
+		t.Fatalf("default TaskTimeout=%s, expected %s", pipeline.cfg.TaskTimeout, defaultAlertTaskTimeout)
+	}
+	if pipeline.cfg.TaskTimeout <= 10*time.Minute {
+		t.Fatalf("default pipeline timeout must exceed agent runtime task budget: %s", pipeline.cfg.TaskTimeout)
+	}
+	short, err := New(Config{
+		Settings:    func() Settings { return h.settings },
+		StartTask:   h.startTask,
+		GetTask:     h.getTask,
+		Notify:      h.notify,
+		TaskTimeout: 3 * time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if short.cfg.TaskTimeout != 3*time.Second {
+		t.Fatalf("explicit timeout ignored: %s", short.cfg.TaskTimeout)
+	}
+}
