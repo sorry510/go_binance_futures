@@ -10,9 +10,11 @@ import (
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
 	"go_binance_futures/service/binanceapiusage"
+	spotbinance "go_binance_futures/spot/api/binance"
 	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 
+	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
@@ -23,10 +25,68 @@ type ListenCoinController struct {
 	web.Controller
 }
 
+// SpotSymbolOptions supplies only actual, active Binance Spot trading pairs.
+// Kept separate from spot_symbols because local market rows may be uninitialized.
+func (ctrl *ListenCoinController) SpotSymbolOptions() {
+	exchange, err := spotbinance.GetExchangeInfo()
+	if err != nil {
+		logs.Warning("spot listen symbols exchange info failed:", err)
+		ctrl.Ctx.Resp(utils.ResJson(503, nil, "现货交易对列表获取失败，请稍后重试"))
+		return
+	}
+	items := make([]string, 0, len(exchange.Symbols))
+	for _, item := range exchange.Symbols {
+		if item.Status != "TRADING" || !item.IsSpotTradingAllowed {
+			continue
+		}
+		switch item.QuoteAsset {
+		case "USDT", "USDC", "FDUSD":
+			items = append(items, item.Symbol)
+		}
+	}
+	sort.Strings(items)
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": items, "msg": "success"})
+}
+
+// futuresListenSymbolOptions returns tradable USD-M perpetual contracts only.
+// The source is the shared cached Binance Futures exchangeInfo, not local
+// symbols rows, which may include contracts that have already been delisted.
+func futuresListenSymbolOptions(symbols []futures.Symbol) []string {
+	options := make([]string, 0, len(symbols))
+	seen := make(map[string]struct{}, len(symbols))
+	for _, symbol := range symbols {
+		if symbol.Status != "TRADING" || symbol.ContractType != futures.ContractTypePerpetual ||
+			utils.FuturesSymbolType(symbol.Symbol, symbol.QuoteAsset) == "" || symbol.Symbol == "" {
+			continue
+		}
+		if _, exists := seen[symbol.Symbol]; exists {
+			continue
+		}
+		seen[symbol.Symbol] = struct{}{}
+		options = append(options, symbol.Symbol)
+	}
+	sort.Strings(options)
+	return options
+}
+
+// FuturesSymbolOptions provides the available pairs for the futures listener picker.
+func (ctrl *ListenCoinController) FuturesSymbolOptions() {
+	exchange, err := binance.GetExchangeInfo()
+	if err != nil {
+		logs.Warning("futures listen symbols exchange info failed:", err)
+		ctrl.Ctx.Resp(utils.ResJson(503, nil, "合约交易对列表获取失败，请稍后重试"))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{
+		"code": 200,
+		"data": futuresListenSymbolOptions(exchange.Symbols),
+		"msg":  "success",
+	})
+}
+
 func (ctrl *ListenCoinController) Get() {
 	paramsType := ctrl.GetString("type", "")
 	paramsSymbol := strings.TrimSpace(ctrl.GetString("symbol"))
-	paramsListenType := strings.TrimSpace(ctrl.GetString("listen_type"))
 	paramsEnable := ctrl.GetString("enable", "")
 
 	o := orm.NewOrm()
@@ -37,9 +97,6 @@ func (ctrl *ListenCoinController) Get() {
 	}
 	if paramsSymbol != "" {
 		query = query.Filter("symbol__icontains", strings.ToUpper(paramsSymbol))
-	}
-	if paramsListenType != "" {
-		query = query.Filter("listen_type", paramsListenType)
 	}
 	if paramsEnable != "" {
 		query = query.Filter("enable", paramsEnable)
@@ -59,8 +116,11 @@ func (ctrl *ListenCoinController) Get() {
 		closeMap := make(map[string]string)
 		if len(symbolNames) > 0 {
 			if paramsType == "1" {
+				// Display only the price persisted by the spot market WS writer.
 				var spotSymbols []models.SpotSymbols
-				o.QueryTable("spot_symbols").Filter("symbol__in", symbolNames).All(&spotSymbols, "Symbol", "Close")
+				if _, readErr := o.QueryTable("spot_symbols").Filter("symbol__in", symbolNames).All(&spotSymbols, "Symbol", "Close"); readErr != nil {
+					logs.Error("read spot listener prices:", readErr)
+				}
 				for _, ss := range spotSymbols {
 					closeMap[ss.Symbol] = ss.Close
 				}
@@ -105,7 +165,16 @@ func (ctrl *ListenCoinController) Edit() {
 	o := orm.NewOrm()
 	o.QueryTable("listen_symbols").Filter("Id", id).One(&symbols)
 
-	ctrl.BindJSON(&symbols)
+	if err := ctrl.BindJSON(&symbols); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "请求参数不正确"))
+		return
+	}
+	// Both spot and futures monitoring are exclusively custom strategies.
+	// Keep legacy records editable, but never allow an API edit to restore
+	// the retired kline_base/kline_kc modes.
+	if symbols.Type == 1 || symbols.Type == 2 {
+		symbols.ListenType = "custom"
+	}
 
 	_, err := o.Update(&symbols) // _ 是受影响的条数
 	if err != nil {
@@ -141,14 +210,66 @@ func (ctrl *ListenCoinController) Delete() {
 
 func (ctrl *ListenCoinController) Post() {
 	symbols := new(models.ListenSymbols)
-	ctrl.BindJSON(&symbols)
+	if err := ctrl.BindJSON(&symbols); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "请求参数不正确"))
+		return
+	}
+	symbols.Symbol = strings.ToUpper(strings.TrimSpace(symbols.Symbol))
+	if symbols.Type == 2 {
+		info, err := binance.GetExchangeInfo()
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(503, nil, "合约交易对校验暂不可用"))
+			return
+		}
+		valid := false
+		for _, allowed := range futuresListenSymbolOptions(info.Symbols) {
+			if allowed == symbols.Symbol {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, "请选择有效的永续合约交易对"))
+			return
+		}
+		if orm.NewOrm().QueryTable("listen_symbols").Filter("type", 2).Filter("symbol", symbols.Symbol).Exist() {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, "该合约交易对已在监听列表中"))
+			return
+		}
+	}
+	if symbols.Type == 1 {
+		info, err := spotbinance.GetExchangeInfo()
+		if err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(503, nil, "现货交易对校验暂不可用"))
+			return
+		}
+		valid := false
+		for _, item := range info.Symbols {
+			if item.Symbol != symbols.Symbol || item.Status != "TRADING" || !item.IsSpotTradingAllowed {
+				continue
+			}
+			if item.QuoteAsset == "USDT" || item.QuoteAsset == "USDC" || item.QuoteAsset == "FDUSD" {
+				valid = true
+			}
+			break
+		}
+		if !valid {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, "请选择有效的现货交易对"))
+			return
+		}
+		if orm.NewOrm().QueryTable("listen_symbols").Filter("type", 1).Filter("symbol", symbols.Symbol).Exist() {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, "该现货交易对已在监听列表中"))
+			return
+		}
+	}
 
-	symbols.Enable = 0            // 默认不开启
-	symbols.KlineInterval = "5m"  // 默认k线周期
-	symbols.ChangePercent = "10"  // 3% 默认变化幅度
-	symbols.LastNoticeTime = 0    // 最后一次通知时间
-	symbols.NoticeLimitMin = 5    // 最小通知间隔
-	symbols.ListenType = "custom" // 默认自定义策略, custom,kline_base,kline_kc
+	symbols.Enable = 0           // 默认不开启
+	symbols.KlineInterval = "5m" // 默认k线周期
+	symbols.ChangePercent = "10" // 3% 默认变化幅度
+	symbols.LastNoticeTime = 0   // 最后一次通知时间
+	symbols.NoticeLimitMin = 5   // 最小通知间隔
+	// Both markets now create custom listeners by default.
+	symbols.ListenType = "custom"
 
 	o := orm.NewOrm()
 	id, err := o.Insert(symbols)
@@ -330,7 +451,12 @@ func (ctrl *ListenCoinController) TestStrategyRule() {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
-	env := line.InitParseEnv(symbols.Symbol, symbols.Technology)
+	var env map[string]interface{}
+	if symbols.Type == 1 {
+		env = line.InitSpotParseEnv(symbols.Symbol, symbols.Technology)
+	} else {
+		env = line.InitParseEnv(symbols.Symbol, symbols.Technology)
+	}
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
 			program, err := expr.Compile(strategy.Code, expr.Env(env))

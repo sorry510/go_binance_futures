@@ -407,7 +407,7 @@ func main() {
 		for {
 			logs.Info("update symbols trade precision and add new symbols, every 12 hours")
 			feature.UpdateSymbolsTradePrecision() // u本位
-			// spot.UpdateSymbolsTradePrecision() // 现货
+			spot.UpdateSymbolsTradePrecision()    // 现货，启动时补齐交易对，之后每 12 小时更新精度
 			// feature.UpdateDeliverySymbolsTradePrecision() // 币本位
 			time.Sleep(12 * time.Hour) // 12小时更新一次
 		}

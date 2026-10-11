@@ -264,17 +264,11 @@ func GoTestListen() {
 		if coin.Symbol != "BTCUSDT" {
 			continue
 		}
-		logs.Info("listen futures: %s, type: %s ", coin.Symbol, coin.ListenType)
-		switch coin.ListenType {
-		case "kline_base":
-			klineBaseListen(coin)
-		case "kline_kc":
-			klineKcListen(coin)
-		case "custom":
-			klineCustomListen(coin)
-		default:
-			logs.Error("listen type error:", coin.ListenType)
+		if coin.ListenType != "custom" {
+			continue
 		}
+		logs.Info("listen futures custom debug: %s", coin.Symbol)
+		klineCustomListen(coin)
 	}
 }
 

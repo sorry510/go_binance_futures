@@ -452,3 +452,17 @@ func (pusher DingDing) AgentAlert(params AgentAlertParams) (int64, error) {
 	}
 	return notification.ID, nil
 }
+
+func (pusher DingDing) SpotListenKlineCustom(params SpotListenParams) {
+	text := `
+## %s
+#### **{futures.side}**：<font color="#008000">%s</font>
+#### **{futures.now_price}**：<font color="#008000">%f</font>
+#### **{futures.strategy_name}**：<font color="#008000">%s</font>
+#### **{spot.time}**：%s
+
+> %s`
+	DingDingApi(fmt.Sprintf(lang.LangMatch(text), params.Symbol+params.Title,
+		lang.Lang("futures."+params.PositionSide), params.NowPrice,
+		params.StrategyName, nowTime(), params.Remarks), pusher)
+}

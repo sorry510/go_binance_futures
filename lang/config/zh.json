@@ -89,6 +89,7 @@
     "new_coin_rush_notice_title": "新币交易通知",
     "notice_title": "现货交易通知",
     "notice_price_title": "现货通知价格",
+    "listen_custom_title": "现货自定义监听",
     "kline_listen_base_title": "现货K线通监控",
     "fast_up": "快速上涨",
     "fast_down": "快速下跌",
