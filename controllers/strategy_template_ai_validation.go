@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"go_binance_futures/feature/strategy/line"
@@ -32,12 +33,32 @@ func validateGeneratedStrategyTemplateJSON(data []byte) error {
 	return nil
 }
 
+var strategyKlineIdentifierPattern = regexp.MustCompile(`\bkline_[0-9]+[A-Za-z]+\b`)
+
 func validateStrategyTemplateRuleExpressions(config technology.TechnologyConfig, rules []strategyTemplateImportRule) error {
 	if len(rules) == 0 {
 		return fmt.Errorf("strategy 至少需要一条策略规则")
 	}
+	// The runtime only loads kline_INTERVAL for intervals enabled by indicators.
+	// Validate the same requirement at import time, before a template reaches the DB.
+	availableKlines := buildSyntheticStrategyTemplateEnv(config, "long")
+	hasKline := false
+	for name := range availableKlines {
+		if strings.HasPrefix(name, "kline_") {
+			hasKline = true
+			break
+		}
+	}
+	if !hasKline {
+		return fmt.Errorf("technology 至少需要一个已启用的技术指标以注册策略 K 线周期；不能全部为空或禁用")
+	}
 	for index, rule := range rules {
 		env := buildSyntheticStrategyTemplateEnv(config, rule.Type)
+		for _, name := range strategyKlineIdentifierPattern.FindAllString(rule.Code, -1) {
+			if _, ok := env[name]; !ok {
+				return fmt.Errorf("strategy 第 %d 项 %q 引用 %s，但 technology 中没有启用相应周期的技术指标", index+1, rule.Name, name)
+			}
+		}
 		program, err := expr.Compile(rule.Code, expr.Env(env), expr.AsBool())
 		if err != nil {
 			return fmt.Errorf("strategy 第 %d 项 %q 的 expr 编译失败: %w", index+1, rule.Name, err)
