@@ -77,18 +77,13 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | 菜单 | 页面与用途 |
 | --- | --- |
 | 配置中心 | 使用与 AI 配置一致的 Card/折叠布局管理非 AI 运行参数；Card 标题只显示名称和状态 Tag，实际开关位于 Card 内容区。`合约交易`、`快速波动`、`强平`、`市场趋势`、`测试策略` 均为独立 Card，另包含抢新、币种提醒、市场监听、资金费率监听、调试推送和外部链接；基础 WebSocket 为系统强制启用，不提供关闭开关 |
-| AI → 对话 | 统一 Agent 对话入口；选择允许在对话使用的 Native/Portable Skill，可从合约下拉框显式选择 Symbol，避免自然语言币名识别错误 |
-| AI → 单币分析 | 从真实合约列表选择 USDT 永续合约，启动结构化 AI 分析并查看历史 TradingPlan、方向、置信度、市场环境和后续价格变化 |
-| AI → 模型配置 | 新增、编辑、测试和切换数据库中的 LLM 模型配置；新任务无需重启即可使用当前模型 |
-| AI → Skill 管理 | Native / Portable 分 Tab 管理 Skill；支持搜索、分页、启停以及独立的“对话可用”开关 |
-| AI → MCP 管理 | 接入和治理第三方 HTTP MCP Server，管理 Tool、Resource、Prompt、OAuth/认证和 Skill 权限 |
-| AI → Memory 管理 | 查看和维护 Agent 长期 Memory、Scope、TTL 与状态 |
-| AI → 业务 Workflow | 运行市场扫描、策略复盘、策略实验、报警归并和每日市场摘要等业务 Workflow，并查看父任务与子 Agent Task |
+| AI → 对话 | 统一 Agent 多轮对话、Symbol 选择、模型切换和多 Skill 挂载入口 |
+| AI → 市场分析 | **单币分析 / 机会发现** 两个标签；结构化 TradingPlan、历史分析和机会审核、受控交易提议 |
+| AI → 业务 Workflow | 五种业务流程手动执行；其中「策略草案验证」只做表达式编译及模拟场景验证，**不等于历史回测**；手动市场扫描的合格候选异步衔接机会分析 |
+| AI → 任务中心 | **执行任务 / 定时任务与治理 / 报警链路** 三个标签；统一查看执行审计、Scheduler 状态、运行指标及报警历史 |
+| AI → AI 设置 | **AI 配置 / 模型 / Skill / MCP / Memory** 五个标签；默认显示第一个「AI 配置」，集中管理机会监控、报警、调度、交易风控和 AI 运行配置 |
 | 合约交易 → 受控交易 | 将成功的单币分析转换为 Trade Proposal，经确定性 Risk Engine、人工审批和执行前复检后受控提交 Binance，并保留完整审计 |
-| AI → 任务中心 | 查看 Agent 治理、Scheduler、运行指标和 Agent Task 历史 |
 | 系统看板 | 顶级菜单；集中查看 Database、Binance、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime、Trade Safety 健康状态；增加 Lead 账户只读摘要（WS、5 分钟 REST 用量及告警队列观测状态），并保留原长期 Trace、模型/Tool/Skill 指标和变更记录 |
-| AI → 报警链路历史 | 查看 FastMove、爆仓等 Signal 从事件、AI 分析/归并到通知或 fallback 的完整链路 |
-| AI → AI 配置 | 集中管理 AI 报警、AI Scheduler、Agent 全局预算/治理参数和受控交易 Risk Policy |
 | 合约交易 → 合约交易 | 按 `自选`、`USDT`、`USDC` 查看币种；新增、查询、批量编辑、全部开启或全部关闭币种配置 |
 | 合约交易 → 合约带单 | 独立 Lead 账户的只读管理界面（`/futures/lead`）：凭证与只读验证、账户风控、暂停、受控持仓/订单、本地审计和 WS/API 状态；**当前不允许真实带单下单** |
 | 合约交易 → 合约订单 | 查询真实合约订单，可按币种和时间筛选 |
@@ -232,18 +227,22 @@ BINANCE_LEAD_OBSERVER_MODE=read_only
 
 ### 单币分析
 
+入口：`AI → 市场分析 → 单币分析`。
+
 从真实 USDT 永续合约列表选择一个 Symbol，并可补充希望 AI 重点判断的方向。系统启动 `symbol_analysis` Skill，读取行情、市场环境和最近一次成功分析，输出结构化 `TradingPlan`。历史列表展示分析状态、方向、置信度、市场环境、当时价格、当前价格、后续涨跌和总结。
 
 ### 机会
 
-`AI → 机会` 是 V3-6 Opportunity Watch 的用户入口。系统可以从 FastMove、强平 Signal、MarketEvent/Binance Announcement 和定时 `market_scan` 主动发现候选，并在去重/冷却后调用现有 `symbol_analysis` 生成完整 `TradingPlanV1`。机会默认 60 分钟过期，同一 Symbol + 同类来源默认 30 分钟内只分析一次。
+`AI → 市场分析 → 机会发现` 是 V3-6 机会自动监控（Opportunity Watch）的用户入口。系统可以从 FastMove、强平 Signal、MarketEvent/Binance Announcement 和定时 `market_scan` 主动发现候选，并在去重/冷却后调用现有 `symbol_analysis` 生成完整 `TradingPlanV1`。机会默认 60 分钟过期，同一 Symbol + 同类来源默认 30 分钟内只分析一次。
 
-- Opportunity Watch 默认关闭，可在 `AI → AI 配置` 开启，并配置 Market Scan 周期和最低 Confidence。
+- 机会自动监控（Opportunity Watch）默认关闭；在 `AI → AI 设置 → AI 配置` 中启用，可调整市场扫描周期和最低机会置信度。置信度输入为 **1%～100%**（保留一位小数），修改后自动保存并从服务端回读验证；接口存储为 0～1 的小数。后端会拒绝空请求、格式错误或低于 1%／高于 100% 的置信度，避免错误配置被当成保存成功。
 - `neutral`、`partial`、`data_missing`、`failed` 或已过期机会只能查看，不能创建真实交易 Proposal。
 - 满足条件的机会可以由用户点击“创建受控交易”，但后续仍固定经过现有 Risk、人工批准和 V3-5 Ownership-safe Execution；Opportunity 本身没有 Binance Submit 路径。
 - 打开机会详情可查看原 `symbol_analysis` 的完整分析，也可跳转单币分析重新分析；完整 AI 结果继续保存在 Agent Task，不复制到 Opportunity 表。
 
 ### 模型配置
+
+入口：`AI → AI 设置 → 模型`。
 
 LLM 配置保存在数据库中。页面支持 Provider 模板、自定义 Provider、配置名称、API 地址、API Key、模型名称、请求超时和 Temperature，支持连接测试和切换当前模型。Agent 新任务直接读取当前配置，无需重启服务；API Key 不会由接口回传明文。
 
@@ -265,7 +264,7 @@ Skill 注册与治理配置保存在数据库中。Native 与 Portable Skill 分
 
 - `market_scan`：确定性 Scanner 先筛选候选，再由 Agent 分析少量币种并输出机会集合。
 - `strategy_review`：结合策略模板、已有测试结果、手续费后收益和当前市场环境进行复盘，只提出建议，不直接修改正式模板。
-- `strategy_experiment`：Agent 提议候选策略，系统做确定性表达式校验和固定场景测试，再由 Agent 总结；实验结果不会覆盖正式策略。
+- `strategy_experiment`：界面名称为「策略草案验证」。Agent 提议候选策略，系统做确定性表达式校验和固定场景测试，再由 Agent 总结；**不等同于真实历史单仓回测**，结果不会覆盖正式策略。
 - `alert_triage`：AI 开启时可把同一币种短时间内的多个相关 Signal 归并为 Incident，降低重复通知；AI 关闭或失败时保持确定性 fallback。
 - `daily_market_brief`：聚合市场环境、Scanner 和重要 Signal，生成固定结构的市场摘要；Scheduler 默认关闭。
 
@@ -286,15 +285,15 @@ Skill 注册与治理配置保存在数据库中。Native 与 Portable Skill 分
 
 ### AI 配置
 
-所有 AI 相关运行配置集中在 `AI → AI 配置`，包括：
+所有 AI 相关运行配置集中在 `AI → AI 设置 → AI 配置`（第一个、默认标签），包括：
 
 - AI 报警 Pipeline、AI 分析开关、最小严重级别、cooldown、并发与每分钟上限。
-- Opportunity Watch 总开关、Market Scan 周期和最低 Confidence。
+- 机会自动监控开关、市场机会扫描周期与最低机会置信度（1%～100%；编辑后通过接口回读确认保存）。
 - 市场环境自动更新和每日市场摘要 Scheduler。
 - Agent 每分钟/每小时启动额度、全局 Token 与 Tool 调用预算。
 - 受控交易 Kill Switch、Symbol 白名单、最大单笔风险、最大名义金额、总 Exposure、最大杠杆、价格 freshness、滑点、cooldown 和 Proposal TTL。
 
-这些 AI 配置已从“配置中心”迁出；`配置中心` 只保留非 AI 的交易、行情监听、提醒和系统运行配置。
+AI 设置还有「模型」「Skill」「MCP」「Memory」标签。以上 AI 运行配置已从“配置中心”迁出；`配置中心` 只保留非 AI 的交易、行情监听、提醒和系统运行配置。
 
 ### 任务中心、系统看板与报警历史
 
@@ -490,7 +489,7 @@ Adaptive Run 还会记录：
 ## 系统设置
 
 - `配置中心`：调整保存在数据库中的非 AI 交易、监听、提醒等运行参数和功能开关；采用 Card/折叠布局，标题显示状态 Tag，实际开关放在 Card 内容区。合约交易、快速波动、强平、市场趋势和测试策略分别独立配置。
-- `AI → AI 配置`：集中调整 AI 报警、Scheduler、Agent 全局预算和受控交易 Risk Policy。
+- `AI → AI 设置 → AI 配置`（首个标签）：集中调整 AI 报警、机会监控、Scheduler、Agent 全局预算和受控交易风险策略。
 - `系统配置`：在线编辑 `conf/app.conf`。点击 `保存` 后，启动期配置仍需点击 `重启服务` 或手动重启程序才能生效。
 - `日志`：查看 `web.commend_log` 配置的命令输出。
 
@@ -510,14 +509,14 @@ Adaptive Run 还会记录：
 
 ### 常见问题（UI）
 
-1. **登录后从哪里开启自动交易？** 进入 `配置中心 → 合约交易`，检查合约交易总开关和 `允许做多/允许做空`；再到 `合约交易 → 合约交易` 检查目标币种是否启用。基础 WebSocket 自动运行，无需人工开启。
+1. **登录后从哪里开启自动交易？** 进入 `配置中心 → 合约交易`，检查合约交易总开关和 `允许做多/允许做空`；再到 `合约交易 → 合约交易` 检查目标币种是否启用。
 2. **在哪里查看模拟交易？** 打开独立的 `配置中心 → 测试策略` Card，通过 `查看测试结果` 按钮或 `合约交易 → 测试结果` 查看。
-3. **修改配置后为什么没有生效？** 配置中心的运行参数通过页面更新；`系统配置` 编辑的是 `conf/app.conf`，点击 `保存` 后，启动期配置仍需重启程序。
+3. **修改配置后为什么没有生效？** 配置中心的运行参数通过页面更新；`系统配置` 编辑的是 `conf/app.conf`，点击 `保存` 后，`系统配置`修改后需重启程序。
 4. **合约页面价格为什么有延迟？** 价格通过强制启用的 WebSocket 更新，网络或代理不稳定时会延迟。请检查系统看板中的 WebSocket freshness/错误状态和网络连接。
 5. **账户为什么无法开仓？** 先检查做多/做空开关、最大持仓数、最大亏损仓位数、币种启用状态和账户 USDT；同时检查该 Symbol/方向是否已有 managed 仓位或活动中的受控订单。部分地区 IP 也可能被币安限制。
 6. **页面访问很慢怎么办？** 数据量较大时建议使用 MySQL；SQLite 更适合数据量较小的环境。
 7. **API 频率限制报错怎么办？** 减少启用币种、监听项和高频通知配置，等待币安限制解除后再恢复。
-8. **AI 的报警、Scheduler 和预算在哪里配置？** 统一进入 `AI → AI 配置`；这些设置已经不在配置中心。
+8. **AI 的报警、Scheduler 和预算在哪里配置？** 统一进入 `AI → AI 设置 → AI 配置`（第一个、默认标签）；这些设置已经不在配置中心。
 9. **AI 会不会直接下真实订单？** 不会。受控交易默认关闭，并且必须经过 Proposal、确定性 Risk、人工批准和执行前复检。
 10. **在哪里查看服务日志？** 打开左侧 `日志`；该页面执行 `web.commend_log`，请先在 `conf/app.conf` 中正确配置命令。
 11. **合约带单在哪里、可以直接实盘吗？** 进入 `合约交易 → 合约带单`。目前支持独立凭证、风险、暂停、只读观测与本地订单历史，**真实带单开仓仍锁定**；详见上文的安全配置与 Stage 7 Gate。
@@ -717,7 +716,7 @@ bee pack -be GOOS=windows
 - [X] 完成长 Memory、业务 Workflow、任务中心和可观测性
 - [X] 完成 AI 报警归并与报警链路历史
 - [X] 完成 Trade Proposal、确定性 Risk Engine、人工审批和受控真实执行
-- [X] 将 AI 运行配置集中迁移到 `AI → AI 配置`
+- [X] 将 AI 运行配置集中迁移到 `AI → AI 设置 → AI 配置`（第一个默认标签）
 - [X] 抢购添加手动设定价格挂单的功能，不设定才采用市价抢单
 - [X] 自动伸缩功能，当连续亏损时，是否需要自动缩减 最大持仓数量，反之亦然，类似于 tcp 窗口缩放
 - [ ] api 重构，添加一层适配器用来统一支持其它交易所的接口

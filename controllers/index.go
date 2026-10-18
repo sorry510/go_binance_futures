@@ -1,6 +1,11 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
+	"math"
+
+	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/utils"
 
@@ -120,14 +125,45 @@ func (ctrl *IndexController) GetServiceConfig() {
 	})
 }
 
+// applyServiceConfigPatch validates sensitive configuration fields before
+// mutating the existing config. It must preserve fields absent from the patch.
+func applyServiceConfigPatch(current models.Config, payload []byte) (models.Config, error) {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(payload, &fields); err != nil {
+		return current, fmt.Errorf("invalid config JSON: %w", err)
+	}
+	if len(fields) == 0 {
+		return current, fmt.Errorf("config update cannot be empty")
+	}
+	if raw, ok := fields["agent_opportunity_min_confidence"]; ok {
+		var confidence float64
+		if err := json.Unmarshal(raw, &confidence); err != nil {
+			return current, fmt.Errorf("invalid opportunity confidence: %w", err)
+		}
+		// Zero is not a valid threshold: the opportunity watcher treats <=0
+		// as its default 0.7, so accepting zero would mislead the UI.
+		if math.IsNaN(confidence) || math.IsInf(confidence, 0) || confidence < 0.01 || confidence > 1 {
+			return current, fmt.Errorf("opportunity confidence must be between 0.01 and 1")
+		}
+	}
+	if err := json.Unmarshal(payload, &current); err != nil {
+		return current, fmt.Errorf("invalid config value: %w", err)
+	}
+	return current, nil
+}
+
 func (ctrl *IndexController) EditServiceConfig() {
-	systemConfig, _ := utils.GetSystemConfig()
-
-	ctrl.BindJSON(&systemConfig)
-
-	_, err := orm.NewOrm().Update(&systemConfig) // _ 是受影响的条数
+	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
-		// 处理错误
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, "cannot load configuration"))
+		return
+	}
+	systemConfig, err = applyServiceConfigPatch(systemConfig, ctrl.Ctx.Input.RequestBody)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	if _, err = orm.NewOrm().Update(&systemConfig); err != nil {
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
 		return
 	}

@@ -1,8 +1,11 @@
 package app
 
 import (
-	workflowservice "go_binance_futures/service/workflow"
 	"sync"
+
+	"go_binance_futures/agent/task"
+	"go_binance_futures/service/opportunity"
+	workflowservice "go_binance_futures/service/workflow"
 )
 
 var defaultWorkflowOnce sync.Once
@@ -16,7 +19,13 @@ func DefaultWorkflowService() (*workflowservice.Service, error) {
 			defaultWorkflowErr = err
 			return
 		}
-		service := workflowservice.Service{Manager: manager, Store: workflowservice.Store{}}
+		service := workflowservice.Service{
+			Manager: manager,
+			Store:   workflowservice.Store{},
+			OnMarketScanComplete: func(item *task.Task) {
+				opportunity.DefaultEmitManualMarketScanTask(item)
+			},
+		}
 		defaultWorkflow = &service
 	})
 	return defaultWorkflow, defaultWorkflowErr
