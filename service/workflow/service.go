@@ -26,10 +26,11 @@ type Manager interface {
 }
 
 type Service struct {
-	Manager      Manager
-	Store        Store
-	PollInterval time.Duration
-	TaskTimeout  time.Duration
+	Manager              Manager
+	Store                Store
+	PollInterval         time.Duration
+	TaskTimeout          time.Duration
+	OnMarketScanComplete func(*task.Task)
 }
 
 type marketScanRequest struct {
@@ -109,7 +110,23 @@ func (s Service) executeMarketScan(ctx context.Context, run *Run) error {
 	if err != nil {
 		return err
 	}
-	return s.runSingle(ctx, run, workflowSkill.MarketScanName, in)
+	raw, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	item, err := s.startAndWait(ctx, run, workflowSkill.MarketScanName, raw, "analyzing")
+	if err != nil {
+		return err
+	}
+	if err := s.complete(run, item.Result); err != nil {
+		return err
+	}
+	// Queue follow-up opportunity analysis only after the workflow result is saved.
+	// This callback is best-effort: queue admission is not a trading action.
+	if s.OnMarketScanComplete != nil {
+		s.OnMarketScanComplete(item)
+	}
+	return nil
 }
 func (s Service) executeStrategyReview(ctx context.Context, run *Run) error {
 	var req strategyReviewRequest

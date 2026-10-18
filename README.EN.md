@@ -80,18 +80,13 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Menu | Pages and purpose |
 | --- | --- |
 | Configuration Center (`配置中心`) | Uses the same Card/collapse pattern as AI Configuration for non-AI runtime settings. Card headers show only the name and a status tag; actual switches live inside each Card. Futures Trade, Fast Move, Liquidation, Market Condition, and Test Strategy are separate Cards, alongside new-coin rush, coin alerts, market monitoring, funding-rate monitoring, debug push, and external links. Core WebSocket streams are mandatory infrastructure and have no disable switch. |
-| AI → Chat (`AI → 对话`) | Unified Agent chat entry; choose chat-enabled Native/Portable Skills and optionally select a real futures Symbol from the contract list so natural-language aliases cannot select the wrong market |
-| AI → Symbol Analysis (`AI → 单币分析`) | Select a real USDT perpetual contract, start structured AI analysis, and review historical TradingPlans, direction, confidence, market regime, and subsequent price movement |
-| AI → Model Configuration (`AI → 模型配置`) | Add, edit, test, and switch database-backed LLM configurations; new tasks use the current model without a restart |
-| AI → Skill Management (`AI → Skill 管理`) | Manage Native and Portable Skills in separate tabs with search, pagination, enable/disable, and an independent chat-availability switch |
-| AI → MCP Management (`AI → MCP 管理`) | Connect and govern third-party HTTP MCP Servers, including Tools, Resources, Prompts, authentication/OAuth, and per-Skill permissions |
-| AI → Memory Management (`AI → Memory 管理`) | Inspect and maintain long-term Agent Memory, Scope, TTL, and status |
-| AI → Workflows (`AI → 业务 Workflow`) | Run market scan, strategy review, strategy experiments, alert triage, and daily market brief workflows and inspect parent/child tasks |
+| AI → Chat (`AI → 对话`) | Unified multi-turn conversations with Symbol selection, per-chat models, and multiple mounted Skills |
+| AI → Market Analysis (`AI → 市场分析`) | **Symbol Analysis / Opportunities** tabs for structured TradingPlans, historical analysis, opportunity review, and controlled-trade proposals |
+| AI → Workflows (`AI → 业务 Workflow`) | Manually execute five workflows; **Strategy Draft Validation** only compiles expressions and runs synthetic scenarios, not a historical backtest. Eligible manual market-scan results enter asynchronous opportunity analysis |
+| AI → Task Center (`AI → 任务中心`) | **Tasks / Scheduler & Governance / Alert Pipeline** tabs for execution details, scheduler status, operational metrics, and alert history |
+| AI → AI Settings (`AI → AI 设置`) | **AI Configuration / Models / Skills / MCP / Memory** tabs, with AI Configuration first and selected by default; includes opportunity monitoring, schedules, alerts, risk controls, and runtime settings |
 | Futures Trade → Controlled Trading (`合约交易 → 受控交易`) | Convert a successful symbol analysis into a Trade Proposal, run deterministic risk checks, require human approval, re-check risk before execution, submit through the controlled Binance path, and retain audit history |
-| AI → Task Center (`AI → 任务中心`) | View Agent governance, Scheduler state, runtime metrics, and Agent Task history |
 | System Dashboard (`系统看板`) | Top-level menu for Database, Binance, Market Intelligence, MCP, LLM, Scheduler, Agent Runtime, and Trade Safety health, plus a read-only Lead-account summary (WS, 5-minute REST usage, and alert-queue availability), while retaining long-term traces, model/Tool/Skill metrics, and change history |
-| AI → Alert Pipeline History (`AI → 报警链路历史`) | Trace FastMove/liquidation Signals from event processing through AI analysis/triage to notification or fallback |
-| AI → AI Configuration (`AI → AI 配置`) | Central configuration for AI alerts, AI Schedulers, global Agent budgets/governance, and controlled-trading Risk Policy |
 | Futures Trade → Futures Trade (`合约交易 → 合约交易`) | Browse `Favorites`, `USDT`, and `USDC` symbols; add, search, batch-edit, enable all, or disable all symbol configurations |
 | Futures Trade → Lead Copy Trading (`合约交易 → 合约带单`) | Isolated Lead-account **management/read-only UI** (`/futures/lead`): credentials, read-only verification, risk limits, pause, locally managed positions/orders, audit history and WS/API health. **No live Lead order execution is authorized.** |
 | Futures Trade → Futures Orders (`合约交易 → 合约订单`) | Search real futures order history by symbol and time range |
@@ -235,18 +230,22 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 
 ### Symbol Analysis
 
+Open **AI → Market Analysis → Symbol Analysis**.
+
 Select a real USDT perpetual Symbol and optionally add an analysis focus. The application runs the `symbol_analysis` Skill with market data, current market regime, and the latest successful comparison context, then returns a structured `TradingPlan`. History shows status, direction, confidence, market regime, analysis-time price, current price, later movement, and summary.
 
 ### Opportunities
 
-**AI → Opportunities** is the V3-6 Opportunity Watch entry point. The system can discover candidates from FastMove, liquidation Signals, MarketEvent/Binance Announcement, and scheduled `market_scan`, then reuse the existing `symbol_analysis` Skill after deterministic deduplication and cooldown checks to produce a complete `TradingPlanV1`. Opportunities expire after 60 minutes by default, and the same Symbol + source type is analyzed at most once per 30-minute cooldown window.
+**AI → Market Analysis → Opportunities** is the V3-6 Opportunity Watch entry point. The system can discover candidates from FastMove, liquidation Signals, MarketEvent/Binance Announcement, and scheduled `market_scan`, then reuse the existing `symbol_analysis` Skill after deterministic deduplication and cooldown checks to produce a complete `TradingPlanV1`. Opportunities expire after 60 minutes by default, and the same Symbol + source type is analyzed at most once per 30-minute cooldown window.
 
-- Opportunity Watch is disabled by default. Enable it under **AI → AI Configuration** and configure the Market Scan interval and minimum confidence.
+- Opportunity Watch is disabled by default. Enable it under **AI → AI Settings → AI Configuration**, the first/default tab. Minimum confidence accepts **1%–100%** with one decimal place, saves automatically, and verifies the server-read value; the API stores a 0–1 fractional value. The backend rejects empty or malformed patches and confidence values outside 1%–100%, rather than reporting a successful save.
 - `neutral`, `partial`, `data_missing`, `failed`, and expired opportunities are view-only and cannot create a real-trading Proposal.
 - An eligible opportunity can create a Controlled Trade Proposal only after a user action; the existing Risk Engine, human approval, and V3-5 Ownership-safe Execution remain mandatory, and Opportunity Watch itself has no Binance submission path.
 - The detail view reads the original `symbol_analysis` Agent Task for the full plan and can jump back to Symbol Analysis for a fresh run; full AI JSON is not duplicated into the Opportunity record.
 
 ### Model Configuration
+
+Open **AI → AI Settings → Models**.
 
 LLM configurations are database-backed. The page supports provider templates and custom providers, configuration name, API endpoint, API key, model, request timeout, Temperature, connection testing, and switching the active model. New Agent tasks use the active configuration without restarting the service. API keys are never returned in plaintext.
 
@@ -268,7 +267,7 @@ Business Workflows reuse the existing Agent Runtime instead of creating a second
 
 - `market_scan`: a deterministic Scanner narrows the market first, then the Agent analyzes a small candidate set and returns opportunities.
 - `strategy_review`: reviews a strategy template using existing test results, post-fee performance, and the current market regime; it proposes changes but never edits the formal template directly.
-- `strategy_experiment`: the Agent proposes a candidate, deterministic expression validation and fixed-scenario tests run, and the Agent summarizes the result; experiments never overwrite a formal strategy.
+- `strategy_experiment` (**Strategy Draft Validation**): the Agent proposes a candidate, deterministic expression validation and fixed-scenario tests run, and the Agent summarizes the result. This is **not a historical single-position backtest**, and it never overwrites a formal strategy.
 - `alert_triage`: when AI is enabled, related same-symbol Signals arriving close together can be grouped into an Incident to reduce duplicate notifications; AI-off/failure paths keep deterministic fallback behavior.
 - `daily_market_brief`: aggregates market regime, Scanner results, and important Signals into a fixed-schema brief; its Scheduler is disabled by default.
 
@@ -289,15 +288,15 @@ Controlled trading does **not** expose a direct trading Tool to the LLM. Real ex
 
 ### AI Configuration
 
-All AI runtime configuration is centralized under **AI → AI Configuration**, including:
+All AI runtime configuration is centralized under **AI → AI Settings → AI Configuration**, the first/default tab, including:
 
 - Alert Pipeline / AI analysis switches, minimum severity, cooldown, concurrency, and per-minute limits.
-- Opportunity Watch master switch, Market Scan interval, and minimum confidence.
+- Opportunity Watch master switch, Market Scan interval, and minimum confidence (1%–100%, saved and verified via API read-back).
 - Market-regime update and daily-market-brief Schedulers.
 - Global Agent admission limits plus Token and Tool-call budgets.
 - Controlled-trading Kill Switch, Symbol allowlist, max per-trade risk/notional, total exposure, leverage, price freshness, slippage, cooldown, and Proposal TTL.
 
-These settings have been moved out of **Configuration Center**, which now contains only non-AI trading, market-monitoring, alert, and system runtime settings.
+The remaining AI Settings tabs are Models, Skills, MCP, and Memory. These runtime settings have been moved out of **Configuration Center**, which now contains only non-AI trading, market-monitoring, alert, and system runtime settings.
 
 ### Task Center, System Dashboard, and Alert History
 
@@ -454,7 +453,7 @@ Enable the master switch under **Configuration Center → Funding Rate Monitorin
 ## system-config
 
 - **Configuration Center:** changes non-AI database-backed trading, monitoring, and alert runtime settings. It uses Card/collapse sections with status tags in headers and actual switches inside the Card; Futures Trade, Fast Move, Liquidation, Market Condition, and Test Strategy are configured separately.
-- **AI → AI Configuration:** centralizes AI alerts, Schedulers, global Agent budgets, and controlled-trading Risk Policy.
+- **AI → AI Settings → AI Configuration** (first/default tab): centralizes AI alerts, opportunity monitoring, Schedulers, global Agent budgets, and controlled-trading risk controls.
 - **System Configuration:** edits `conf/app.conf` online. After `Save`, startup-time settings still require `Restart Service` or a manual application restart.
 - **Logs:** displays output from the command configured in `web.commend_log`.
 
@@ -481,7 +480,7 @@ The System Configuration page contains sensitive values such as API keys, databa
 5. **Why can the account not open a position?** Check direction switches, maximum-position limits, maximum losing positions, symbol enabled status, available USDT, and whether the same Symbol/side already has a managed position or active controlled order. Binance may also restrict some IP regions.
 6. **Why is the UI slow?** For larger datasets, use MySQL; SQLite is better suited to smaller deployments.
 7. **What should I do after an API rate-limit error?** Reduce enabled symbols, monitoring rules, and high-frequency notifications, then wait for Binance's restriction to clear.
-8. **Where are AI alert, Scheduler, and budget settings?** Open **AI → AI Configuration**; these settings are no longer in Configuration Center.
+8. **Where are AI alert, Scheduler, and budget settings?** Open **AI → AI Settings → AI Configuration** (first/default tab); these settings are no longer in Configuration Center.
 9. **Can the AI place a real order directly?** No. Controlled execution is disabled by default and requires a Proposal, deterministic Risk checks, human approval, and a final Risk re-check.
 10. **Where can I view service logs?** Open **Logs**. It runs the command configured in `web.commend_log`.
 11. **Where is Lead Copy Trading, and can it trade live?** Open **Futures Trade → Lead Copy Trading**. Dedicated credentials, risk settings, pause, read-only observation and locally managed records are available. **Live Lead opening remains locked** pending Stage 7 gates.

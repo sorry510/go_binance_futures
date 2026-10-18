@@ -96,8 +96,18 @@ func DefaultEmitSignal(value signalservice.Signal) bool {
 }
 
 func DefaultEmitMarketScanTask(item *task.Task) int {
+	return emitMarketScanTask(item, true)
+}
+
+// A manually started workflow is an explicit request to scan, even when the
+// automatic opportunity watcher is disabled.
+func DefaultEmitManualMarketScanTask(item *task.Task) int {
+	return emitMarketScanTask(item, false)
+}
+
+func emitMarketScanTask(item *task.Task, requireWatchEnabled bool) int {
 	pipeline, provider := currentDefault()
-	if pipeline == nil || provider == nil || provider().AgentOpportunityWatchEnable != 1 || item == nil || item.Status != task.StatusSucceeded {
+	if pipeline == nil || provider == nil || (requireWatchEnabled && provider().AgentOpportunityWatchEnable != 1) || item == nil || item.Status != task.StatusSucceeded {
 		return 0
 	}
 	var result workflowSkills.OpportunitySetV1
