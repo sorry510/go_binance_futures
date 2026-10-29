@@ -1,0 +1,268 @@
+{
+  "branch_assertions": 38,
+  "candidate_additional_exits_in_synthetic_cases": 2838,
+  "close_decision_matrix": [
+    {
+      "side": "LONG",
+      "scenario": "neutral",
+      "roi": 8,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "neutral",
+      "roi": -6,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "neutral",
+      "roi": -8.99,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "neutral",
+      "roi": -9,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "LONG",
+      "scenario": "pullback",
+      "roi": 8,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "LONG",
+      "scenario": "pullback",
+      "roi": 7.5,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "fading",
+      "roi": 8,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "fading",
+      "roi": 10,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "LONG",
+      "scenario": "rejection",
+      "roi": 10,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "LONG",
+      "scenario": "di_only",
+      "roi": -6,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "structure_only",
+      "roi": -6,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "di_structure",
+      "roi": -6,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "LONG",
+      "scenario": "di_structure",
+      "roi": -5.5,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "di_structure",
+      "roi": 8,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "LONG",
+      "scenario": "htf_flip",
+      "roi": -6,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "LONG",
+      "scenario": "htf_flip",
+      "roi": 8,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "LONG",
+      "scenario": "htf_flip",
+      "roi": 0,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "LONG",
+      "scenario": "neutral",
+      "roi": 25,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "neutral",
+      "roi": 8,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "neutral",
+      "roi": -6,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "neutral",
+      "roi": -8.99,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "neutral",
+      "roi": -9,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "SHORT",
+      "scenario": "pullback",
+      "roi": 8,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "SHORT",
+      "scenario": "pullback",
+      "roi": 7.5,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "fading",
+      "roi": 8,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "fading",
+      "roi": 10,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "SHORT",
+      "scenario": "rejection",
+      "roi": 10,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "SHORT",
+      "scenario": "di_only",
+      "roi": -6,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "structure_only",
+      "roi": -6,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "di_structure",
+      "roi": -6,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "SHORT",
+      "scenario": "di_structure",
+      "roi": -5.5,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "di_structure",
+      "roi": 8,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "SHORT",
+      "scenario": "htf_flip",
+      "roi": -6,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "SHORT",
+      "scenario": "htf_flip",
+      "roi": 8,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "side": "SHORT",
+      "scenario": "htf_flip",
+      "roi": 0,
+      "expected": false,
+      "actual": false
+    },
+    {
+      "side": "SHORT",
+      "scenario": "neutral",
+      "roi": 25,
+      "expected": false,
+      "actual": false
+    }
+  ],
+  "eligible_exit_equivalence_cases_leverage_8": 6144,
+  "eligible_exit_superset_cases_leverage_1_3_4_6_8": 30720,
+  "entry_equivalence_cases": 4000,
+  "environment": "real Expr engine and production line/types Go structs; no database or market calls",
+  "limits": [
+    "synthetic checks do not establish returns",
+    "unchanged entry signals and earlier exits do not prove actual trade-count non-regression",
+    "economic and frequency comparison remains pending"
+  ],
+  "status": "pass"
+}

@@ -1,0 +1,68 @@
+{
+  "status": "authored_preflight_passed_not_replay_qualified",
+  "parent_snapshot_hash": "00f4a921d7f5c12420acc91c1de7a08ac9c9ee59d440914120658fa308bb92b3",
+  "parent_capture_as_of_ms": 1792846576115,
+  "parent_capture_sha256": "a991b4ea0c87c37a77731b496a245d3c6d057d25850acbda6b5b2080986858ba",
+  "operational_settings": {
+    "stake_usdt": 20,
+    "leverage": 4,
+    "profit": 8,
+    "loss": 6,
+    "open_fee_rate": 0.0005,
+    "close_fee_rate": 0.0005
+  },
+  "logical_change": "ATR exit scales with actual position leverage; ordinary gates align with existing outer 8/6 eligibility",
+  "invariants": [
+    "technology identical",
+    "enabled long and short rule objects identical, including code and names",
+    "QPS1.30, scan window, symbol universe, position cap and cooldown unchanged",
+    "normal exits retain market confirmation",
+    "catastrophic-only ROI exit retained at 9..18 percent"
+  ],
+  "acceptance": [
+    "For each predeclared symbol and full common calendar window, candidate entry count >= parent entry count; aggregate entry count must also not decrease",
+    "Run parent and candidate independently with identical sizing, cooldown, selection, position limits, fills, fees, slippage and actual funding",
+    "Require improved net expectancy or lower closed/equity drawdown without lower portfolio net; report frequency and returns separately",
+    "Use unseen data for validation; previous audited forward window is development evidence only"
+  ],
+  "pending": [
+    "historical or forward trade-frequency comparison",
+    "real-cost net performance and drawdown comparison"
+  ],
+  "files": {
+    "01-v48-qps130-leverage-exit.json": "080a27c241011d9988002477d64beb154acc7730d80f94aad8615d445a09020f",
+    "00-v48-qps130-parent.json": "cdc6a957b7f743563d4509e6cb0ef43182dd990c78dd33ba790ca1cf735b8ea1"
+  },
+  "verdict": "insufficient evidence",
+  "checks": {
+    "branch_assertions": 38,
+    "candidate_additional_exits_in_synthetic_cases": 2838,
+    "eligible_exit_equivalence_cases_leverage_8": 6144,
+    "eligible_exit_superset_cases_leverage_1_3_4_6_8": 30720,
+    "entry_equivalence_cases": 4000,
+    "environment": "real Expr engine and production line/types Go structs; no database or market calls",
+    "status": "pass",
+    "frontend_actual_validator_and_serialization": "pass for both parent and candidate",
+    "json_shape": "pass",
+    "frontend_equivalent_api": {
+      "status": "blocked",
+      "reason": "local service not listening at configured loopback port; server not started"
+    },
+    "verification_sha256": "2737b15a72619f08295b2d9b13c631aad39afa036ee707639fdaf6eae2fd92e2"
+  },
+  "source_sha256": {
+    "feature/strategy/line/line_custom.go": "69c98951999452f6f2e172ba2e53bb267fc834936a3fbf151b25ce5ac89fbbd5",
+    "feature/strategy/line/parse_technology_config.go": "3166fcf31990f1a65e9a94e21e8d92cf2385ec0efcc14c731fc98a431e0b769b",
+    "feature/account_trade_cycle.go": "2eb106e618b87e9a32c34be0a24be83a2ccc798f8c5e6c6c0b4161f10b72b829",
+    "types/futures_define.go": "32e553f93811cecfce978fcd93482d65e19f32786521df385c7615ecbb11b28a",
+    "research_specs/20261024-v48-qps130-leverage-exit/verify.go": "3e3197d626de823a7995813be3169379d7d11dadd9845872271ebc9051181383",
+    "/Users/zhz/work/binance/go_binance_futrues_new_ui/src/utils/technology.ts": "9c94aeb1210e4e4757b5b05a1193d0e868a5791e27457451d7200e02eb6957ee"
+  },
+  "frequency_gate_status": "pending actual-entry comparison; identical signals and synthetic earlier exits alone are insufficient",
+  "runtime_notes": [
+    "Requires strategy_type=custom and the new template binding; authoring or importing JSON does not activate trading",
+    "Outer profit=8 and loss=6 are required for this candidate protocol; changing symbol gates changes behavior",
+    "Custom AutoStopOrder returns false; no in-band time exit is added",
+    "No database write, template assignment, risk-setting change or order placement performed"
+  ]
+}
