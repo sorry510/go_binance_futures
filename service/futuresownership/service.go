@@ -491,6 +491,70 @@ func (s Service) ReconcilePosition(ctx context.Context, owner, symbol, side stri
 	return position, err
 }
 
+// ReconcileObservedPosition is for verified periodic account snapshots.
+// A single zero observation must not permanently release ownership: an
+// asynchronous fill or a lagging WS mirror can temporarily omit the position.
+// All callers MUST pass a freshly verified exchange quantity before shrinking
+// or closing ownership. A cached WS/local quantity is not sufficient evidence.
+// This method deliberately does not claim unknown manual account positions.
+func (s Service) ReconcileObservedPosition(ctx context.Context, owner, symbol, side string, accountQty float64) (models.FuturesManagedPosition, error) {
+	if err := ctx.Err(); err != nil {
+		return models.FuturesManagedPosition{}, err
+	}
+	if math.IsNaN(accountQty) || math.IsInf(accountQty, 0) {
+		return models.FuturesManagedPosition{}, fmt.Errorf("invalid observed account quantity")
+	}
+	accountQty = math.Abs(accountQty)
+	mutationMu.Lock()
+	defer mutationMu.Unlock()
+
+	position, err := s.GetPosition(ctx, owner, symbol, side)
+	if err != nil {
+		return models.FuturesManagedPosition{}, err
+	}
+	previous := position
+	now := s.nowMillis()
+	if accountQty <= qtyEpsilon {
+		if position.Status != PositionReconcileRequired {
+			// First zero: reserve the owned quantity until a second verification.
+			position.Status = PositionReconcileRequired
+			position.LastReconciledAt, position.UpdatedAt = now, now
+		} else if now-position.LastReconciledAt >= 10_000 {
+			position.ManagedQty, position.Status, position.ClosedAt = 0, PositionClosed, now
+			position.LastReconciledAt, position.UpdatedAt = now, now
+		} else {
+			return position, nil
+		}
+	} else {
+		// Never adopt a manual increase; clear a false zero when it reappears.
+		if accountQty+qtyEpsilon < position.ManagedQty {
+			position.ManagedQty = accountQty
+		}
+		if position.Status == PositionReconcileRequired {
+			position.Status = PositionActive
+		}
+		position.LastReconciledAt, position.UpdatedAt = now, now
+	}
+	// Another process may apply a fill while this cycle holds a stale snapshot.
+	// Compare previous state instead of overwriting newer ownership.
+	n, err := orm.NewOrm().QueryTable(new(models.FuturesManagedPosition)).
+		Filter("id", previous.ID).Filter("account_id", previous.AccountID).
+		Filter("status", previous.Status).Filter("managed_qty", previous.ManagedQty).
+		Filter("updated_at", previous.UpdatedAt).
+		Update(orm.Params{
+			"managed_qty": position.ManagedQty, "status": position.Status,
+			"closed_at": position.ClosedAt, "last_reconciled_at": position.LastReconciledAt,
+			"updated_at": position.UpdatedAt,
+		})
+	if err != nil {
+		return models.FuturesManagedPosition{}, err
+	}
+	if n != 1 {
+		return models.FuturesManagedPosition{}, fmt.Errorf("ownership changed during reconciliation for %s %s; retry after fresh snapshot", symbol, side)
+	}
+	return position, nil
+}
+
 func (s Service) CloseQuantity(ctx context.Context, owner, symbol, side string, accountQty float64) (float64, error) {
 	position, err := s.GetPosition(ctx, owner, symbol, side)
 	if err != nil {

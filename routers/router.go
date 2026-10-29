@@ -25,32 +25,33 @@ func init() {
 	web.Router("/agents/workflows", &controllers.AgentWorkflowController{}, "get:List;post:Start")                                              // V2-11 业务 Workflow
 	web.Router("/agents/workflows/:id", &controllers.AgentWorkflowController{}, "get:Get")                                                      // Workflow 详情
 	web.Router("/agents/trade/ownership", &controllers.AgentTradeController{}, "get:Ownership")                                                 // V3-5 合约 ownership 视图
-	web.Router("/agents/trade/ownership/reconcile", &controllers.AgentTradeController{}, "post:ReconcileOwnership")                             // V3-5 手动 ownership 对账
-	web.Router("/agents/outcomes/backtest", &controllers.AgentOutcomeController{}, "get:Backtest")                                              // V3-7 交易复盘：历史回测
-	web.Router("/agents/outcomes/paper", &controllers.AgentOutcomeController{}, "get:Paper")                                                    // V3-7 交易复盘：模拟盘
-	web.Router("/agents/outcomes/live", &controllers.AgentOutcomeController{}, "get:Live")                                                      // V3-7 交易复盘：真实受控交易
-	web.Router("/agents/opportunities", &controllers.AgentOpportunityController{}, "get:List")                                                  // V3-6 Opportunity 列表
-	web.Router("/agents/opportunities/:opportunityId", &controllers.AgentOpportunityController{}, "get:Get")                                    // V3-6 Opportunity 详情
-	web.Router("/agents/opportunities/:opportunityId/review", &controllers.AgentOpportunityController{}, "post:Review")                         // V3-6 标记已查看
-	web.Router("/agents/opportunities/:opportunityId/proposal", &controllers.AgentOpportunityController{}, "post:CreateProposal")               // V3-6 创建现有受控交易 Proposal
-	web.Router("/agents/trade/proposals", &controllers.AgentTradeController{}, "get:List;post:Create")                                          // V2-12 受控交易 Proposal
-	web.Router("/agents/trade/proposals/:proposalId", &controllers.AgentTradeController{}, "get:Get")                                           // V2-12 Proposal 详情/审计
-	web.Router("/agents/trade/proposals/:proposalId/risk", &controllers.AgentTradeController{}, "post:Risk")                                    // V2-12 重新执行确定性 Risk
-	web.Router("/agents/trade/proposals/:proposalId/approve", &controllers.AgentTradeController{}, "post:Approve")                              // V2-12 人工批准
-	web.Router("/agents/trade/proposals/:proposalId/reject", &controllers.AgentTradeController{}, "post:Reject")                                // V2-12 人工拒绝
-	web.Router("/agents/trade/proposals/:proposalId/execute", &controllers.AgentTradeController{}, "post:Execute")                              // V2-12 受控执行
-	web.Router("/agents/trade/proposals/:proposalId/reconcile", &controllers.AgentTradeController{}, "post:Reconcile")                          // V2-12 不确定订单对账
-	web.Router("/agents/trade/proposals/:proposalId/close", &controllers.AgentTradeController{}, "post:Close")                                  // V3-5 关闭 agent_trade managed position
-	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask")                                                          // 查询统一 Agent 任务
-	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                                               // 取消运行中的 Agent 任务
-	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                                               // 从安全 Checkpoint 恢复 Agent 任务
-	web.Router("/agents/memories", &controllers.AgentMemoryController{}, "get:List;post:Create")                                                // 长期 Memory 列表/新增
-	web.Router("/agents/memories/:id", &controllers.AgentMemoryController{}, "put:Update;delete:Delete")                                        // 长期 Memory 更新/删除
-	web.Router("/agents/memories/:id/disable", &controllers.AgentMemoryController{}, "post:Disable")                                            // 禁用 Memory
-	web.Router("/agents/memories/:id/enable", &controllers.AgentMemoryController{}, "post:Enable")                                              // 启用 Memory
-	web.Router("/agents/memories/:id/approve", &controllers.AgentMemoryController{}, "post:Approve")                                            // 审批 candidate Memory
-	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory")                               // 查询单币分析历史
-	web.Router("/agents/market-intelligence", &controllers.AgentMarketIntelligenceController{}, "get:Get")                                      // V3-2 unified Market Intelligence query/replay
+	web.Router("/agents/trade/ownership/reconcile", &controllers.AgentTradeController{}, "post:ReconcileOwnership")
+	web.Router("/agents/trade/ownership/manual-claim", &controllers.AgentTradeController{}, "post:ManualClaimOwnership")          // V3-5 手动 ownership 对账
+	web.Router("/agents/outcomes/backtest", &controllers.AgentOutcomeController{}, "get:Backtest")                                // V3-7 交易复盘：历史回测
+	web.Router("/agents/outcomes/paper", &controllers.AgentOutcomeController{}, "get:Paper")                                      // V3-7 交易复盘：模拟盘
+	web.Router("/agents/outcomes/live", &controllers.AgentOutcomeController{}, "get:Live")                                        // V3-7 交易复盘：真实受控交易
+	web.Router("/agents/opportunities", &controllers.AgentOpportunityController{}, "get:List")                                    // V3-6 Opportunity 列表
+	web.Router("/agents/opportunities/:opportunityId", &controllers.AgentOpportunityController{}, "get:Get")                      // V3-6 Opportunity 详情
+	web.Router("/agents/opportunities/:opportunityId/review", &controllers.AgentOpportunityController{}, "post:Review")           // V3-6 标记已查看
+	web.Router("/agents/opportunities/:opportunityId/proposal", &controllers.AgentOpportunityController{}, "post:CreateProposal") // V3-6 创建现有受控交易 Proposal
+	web.Router("/agents/trade/proposals", &controllers.AgentTradeController{}, "get:List;post:Create")                            // V2-12 受控交易 Proposal
+	web.Router("/agents/trade/proposals/:proposalId", &controllers.AgentTradeController{}, "get:Get")                             // V2-12 Proposal 详情/审计
+	web.Router("/agents/trade/proposals/:proposalId/risk", &controllers.AgentTradeController{}, "post:Risk")                      // V2-12 重新执行确定性 Risk
+	web.Router("/agents/trade/proposals/:proposalId/approve", &controllers.AgentTradeController{}, "post:Approve")                // V2-12 人工批准
+	web.Router("/agents/trade/proposals/:proposalId/reject", &controllers.AgentTradeController{}, "post:Reject")                  // V2-12 人工拒绝
+	web.Router("/agents/trade/proposals/:proposalId/execute", &controllers.AgentTradeController{}, "post:Execute")                // V2-12 受控执行
+	web.Router("/agents/trade/proposals/:proposalId/reconcile", &controllers.AgentTradeController{}, "post:Reconcile")            // V2-12 不确定订单对账
+	web.Router("/agents/trade/proposals/:proposalId/close", &controllers.AgentTradeController{}, "post:Close")                    // V3-5 关闭 agent_trade managed position
+	web.Router("/agents/tasks/:taskId", &controllers.AgentController{}, "get:GetTask")                                            // 查询统一 Agent 任务
+	web.Router("/agents/tasks/:taskId/cancel", &controllers.AgentController{}, "post:CancelTask")                                 // 取消运行中的 Agent 任务
+	web.Router("/agents/tasks/:taskId/resume", &controllers.AgentController{}, "post:ResumeTask")                                 // 从安全 Checkpoint 恢复 Agent 任务
+	web.Router("/agents/memories", &controllers.AgentMemoryController{}, "get:List;post:Create")                                  // 长期 Memory 列表/新增
+	web.Router("/agents/memories/:id", &controllers.AgentMemoryController{}, "put:Update;delete:Delete")                          // 长期 Memory 更新/删除
+	web.Router("/agents/memories/:id/disable", &controllers.AgentMemoryController{}, "post:Disable")                              // 禁用 Memory
+	web.Router("/agents/memories/:id/enable", &controllers.AgentMemoryController{}, "post:Enable")                                // 启用 Memory
+	web.Router("/agents/memories/:id/approve", &controllers.AgentMemoryController{}, "post:Approve")                              // 审批 candidate Memory
+	web.Router("/agents/symbol-analysis/history", &controllers.AgentController{}, "get:GetSymbolAnalysisHistory")                 // 查询单币分析历史
+	web.Router("/agents/market-intelligence", &controllers.AgentMarketIntelligenceController{}, "get:Get")                        // V3-2 unified Market Intelligence query/replay
 	web.Router("/agents/market-intelligence/events", &controllers.AgentMarketIntelligenceController{}, "post:IngestEvents")
 	web.Router("/agents/historical-market/import", &controllers.AgentHistoricalMarketController{}, "post:Import")
 	web.Router("/agents/backtests/prefetch", &controllers.AgentBacktestController{}, "post:Prefetch")

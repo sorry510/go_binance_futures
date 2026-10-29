@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -12,7 +13,9 @@ import (
 	"go_binance_futures/utils"
 
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type AgentTradeController struct{ web.Controller }
@@ -172,7 +175,12 @@ func (ctrl *AgentTradeController) Ownership() {
 		ctrl.Ctx.Resp(utils.ResJson(500, nil, err.Error()))
 		return
 	}
-	data := map[string]any{"positions": positions, "orders": orders}
+	audits, auditErr := ownership.ManualClaims(ctx, 100)
+	if auditErr != nil {
+		ctrl.Ctx.Resp(utils.ResJson(500, nil, auditErr.Error()))
+		return
+	}
+	data := map[string]any{"positions": positions, "orders": orders, "manual_adjustments": audits}
 	overview, overviewErr := futuresownership.DefaultReconciler().PositionOverview(ctx)
 	if overviewErr == nil {
 		data["account_positions"] = overview
@@ -181,6 +189,64 @@ func (ctrl *AgentTradeController) Ownership() {
 		data["account_error"] = overviewErr.Error()
 	}
 	ctrl.Ctx.Resp(map[string]any{"code": 200, "data": data, "msg": "success"})
+}
+
+// manualClaimErrorCode returns only documented reason codes to the browser.
+// SQL and exchange error details stay in the server logs.
+func manualClaimErrorCode(err error) string {
+	switch {
+	case errors.Is(err, futuresownership.ErrManualPositionNotFound):
+		return "manual_claim_position_not_found"
+	case errors.Is(err, futuresownership.ErrManualAccountQuantityChanged):
+		return "manual_claim_account_quantity_changed"
+	case errors.Is(err, futuresownership.ErrManualDuplicateExchangePosition):
+		return "manual_claim_duplicate_exchange_position"
+	case errors.Is(err, futuresownership.ErrManualInvalidEntryPrice):
+		return "manual_claim_invalid_entry_price"
+	default:
+		return "manual_claim_rejected"
+	}
+}
+
+const manualClaimRequestMaxBytes = 4096
+
+func decodeManualClaimRequest(body []byte) (futuresownership.ManualClaimInput, error) {
+	if len(body) == 0 || len(body) > manualClaimRequestMaxBytes {
+		return futuresownership.ManualClaimInput{}, errors.New("manual_claim_invalid_input")
+	}
+	var request futuresownership.ManualClaimInput
+	if err := json.Unmarshal(body, &request); err != nil {
+		return futuresownership.ManualClaimInput{}, errors.New("manual_claim_invalid_input")
+	}
+	return request, nil
+}
+
+func (ctrl *AgentTradeController) ManualClaimOwnership() {
+	request, err := decodeManualClaimRequest(ctrl.Ctx.Input.RequestBody)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "manual_claim_invalid_input"))
+		return
+	}
+	// The JWT middleware authenticated the request; reject if its signed
+	// username is absent rather than attributing an audit to a generic user.
+	claims, ok := ctrl.Ctx.Input.GetData("user").(jwt.MapClaims)
+	if !ok {
+		ctrl.Ctx.Resp(utils.ResJson(401, nil, "manual_claim_unauthorized"))
+		return
+	}
+	username, ok := claims["Username"].(string)
+	if !ok || strings.TrimSpace(username) == "" {
+		ctrl.Ctx.Resp(utils.ResJson(401, nil, "manual_claim_unauthorized"))
+		return
+	}
+	request.Operator = strings.TrimSpace(username)
+	position, err := futuresownership.DefaultReconciler().ManualClaimPosition(ctrl.Ctx.Request.Context(), request)
+	if err != nil {
+		logs.Warning("manual ownership claim rejected: ", err)
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, manualClaimErrorCode(err)))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]any{"code": 200, "data": position, "msg": "success"})
 }
 
 func (ctrl *AgentTradeController) ReconcileOwnership() {

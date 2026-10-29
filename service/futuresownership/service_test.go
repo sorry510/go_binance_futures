@@ -18,7 +18,7 @@ func prepareOwnershipDB(t *testing.T) {
 		if err := orm.RegisterDataBase("default", "sqlite3", "file:ownership_test?mode=memory&cache=shared"); err != nil {
 			t.Fatal(err)
 		}
-		orm.RegisterModel(new(models.FuturesManagedPosition), new(models.FuturesManagedOrder))
+		orm.RegisterModel(new(models.FuturesManagedPosition), new(models.FuturesManagedOrder), new(models.FuturesOwnershipAdjustment))
 		if err := orm.RunSyncdb("default", false, false); err != nil {
 			t.Fatal(err)
 		}
@@ -28,6 +28,9 @@ func prepareOwnershipDB(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := o.Raw("DELETE FROM futures_managed_positions").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw("DELETE FROM futures_ownership_adjustments").Exec(); err != nil {
 		t.Fatal(err)
 	}
 }

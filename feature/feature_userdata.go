@@ -36,11 +36,17 @@ func SyncUserData() {
 	go func() {
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
+		var lastAttempt time.Time
 		for range ticker.C {
-			generation := binance.FuturesUserDataWSGeneration()
-			if generation == 0 || futuresUserDataLastFullSyncGeneration.Load() == generation {
+			if binance.FuturesUserDataWSGeneration() == 0 || futuresUserDataMirrorUsable() {
 				continue
 			}
+			// Failed WS writes, failed full snapshots and expired snapshots all
+			// require a new full sync. Bound retries to protect Binance limits.
+			if time.Since(lastAttempt) < 30*time.Second {
+				continue
+			}
+			lastAttempt = time.Now()
 			getNowUserData()
 		}
 	}()
@@ -54,6 +60,9 @@ func SyncUserData() {
 }
 
 func futuresUserDataMirrorUsable() bool {
+	if binance.MainFuturesAccountMirrorDirty() {
+		return false
+	}
 	generation := binance.FuturesUserDataWSGeneration()
 	if generation == 0 || futuresUserDataLastFullSyncGeneration.Load() != generation {
 		return false
@@ -63,6 +72,19 @@ func futuresUserDataMirrorUsable() bool {
 		return false
 	}
 	return time.Since(time.UnixMilli(lastSync)) <= futuresUserDataFullSyncMaxAge
+}
+
+// WS updateTime comes from Binance, but snapshotStartedAt is the local clock.
+// Keep a 2-second uncertainty window to avoid overwriting or deleting a newer
+// WS event when the clocks are slightly skewed. Mirror writes share one lock.
+const futuresSnapshotClockSkewAllowanceMS int64 = 2000
+
+func futuresSnapshotStaleCutoff(snapshotStartedAt int64) int64 {
+	return snapshotStartedAt - futuresSnapshotClockSkewAllowanceMS
+}
+
+func shouldApplyFuturesFullSnapshot(currentUpdateTime, snapshotStartedAt int64) bool {
+	return currentUpdateTime <= futuresSnapshotStaleCutoff(snapshotStartedAt)
 }
 
 // 删除数据表旧数据
@@ -97,79 +119,109 @@ func getNowUserData() bool {
 		return false
 	}
 
-	for _, position := range allPositions {
-		positionAmt, _ := strconv.ParseFloat(position.PositionAmt, 64)
-		positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
-		if positionAmtFloatAbs < 0.0000001 {
-			continue
+	return binance.WithFuturesAccountMirrorLock(func() bool {
+		// Incomplete/failed full-sync writes must not authorize local reads.
+		futuresUserDataLastFullSyncAt.Store(0)
+		for _, position := range allPositions {
+			positionAmt, _ := strconv.ParseFloat(position.PositionAmt, 64)
+			positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
+			if positionAmtFloatAbs < 0.0000001 {
+				continue
+			}
+			leverage, _ := strconv.ParseInt(position.Leverage, 10, 64)
+
+			var positionModel models.FuturesPosition
+			readErr := o.QueryTable("futures_positions").Filter("account_id", "main").Filter("symbol", position.Symbol).Filter("side", position.PositionSide).One(&positionModel)
+			if readErr != nil && readErr != orm.ErrNoRows {
+				logs.Error("read futures_positions during full sync:", readErr)
+				return false
+			}
+			if positionModel.ID != 0 && !shouldApplyFuturesFullSnapshot(positionModel.UpdateTime, nowTime) {
+				// WS event after the REST request began is newer than this snapshot.
+				continue
+			}
+			positionModel.AccountID = "main"
+			positionModel.Symbol = position.Symbol
+			positionModel.Side = position.PositionSide
+			positionModel.Amount = position.PositionAmt
+			positionModel.Leverage = leverage
+			positionModel.MarginType = position.MarginType
+			positionModel.IsolatedWallet = position.IsolatedWallet
+			positionModel.EntryPrice = position.EntryPrice
+			positionModel.MarkPrice = position.MarkPrice
+			positionModel.UnrealizedProfit = position.UnRealizedProfit
+			positionModel.AccumulatedRealized = "0"
+			positionModel.MaintenanceMarginRequired = "0"
+			positionModel.CreateTime = nowTime
+			positionModel.UpdateTime = nowTime
+			if positionModel.ID == 0 {
+				if _, err := o.Insert(&positionModel); err != nil {
+					logs.Error("insert futures_positions during full sync:", err)
+					return false
+				}
+			} else if _, err := o.Update(&positionModel); err != nil {
+				logs.Error("update futures_positions during full sync:", err)
+				return false
+			}
 		}
-		leverage, _ := strconv.ParseInt(position.Leverage, 10, 64)
 
-		var positionModel models.FuturesPosition
-		o.QueryTable("futures_positions").Filter("account_id", "main").Filter("symbol", position.Symbol).Filter("side", position.PositionSide).One(&positionModel)
-		positionModel.AccountID = "main"
-		positionModel.Symbol = position.Symbol
-		positionModel.Side = position.PositionSide
-		positionModel.Amount = position.PositionAmt
-		positionModel.Leverage = leverage
-		positionModel.MarginType = position.MarginType
-		positionModel.IsolatedWallet = position.IsolatedWallet
-		positionModel.EntryPrice = position.EntryPrice
-		positionModel.MarkPrice = position.MarkPrice
-		positionModel.UnrealizedProfit = position.UnRealizedProfit
-		positionModel.AccumulatedRealized = "0"
-		positionModel.MaintenanceMarginRequired = "0"
-		positionModel.CreateTime = nowTime
-		positionModel.UpdateTime = nowTime
-		if positionModel.ID == 0 {
-			o.Insert(&positionModel)
-		} else {
-			o.Update(&positionModel)
+		// open orders
+		for _, order := range allOpenOrders {
+			var orderModel models.FuturesOrder
+			readErr := o.QueryTable("futures_orders").Filter("account_id", "main").Filter("order_id", order.OrderID).One(&orderModel)
+			if readErr != nil && readErr != orm.ErrNoRows {
+				logs.Error("read futures_orders during full sync:", readErr)
+				return false
+			}
+			if orderModel.ID != 0 && !shouldApplyFuturesFullSnapshot(orderModel.UpdateTime, nowTime) {
+				continue
+			}
+			orderModel.AccountID = "main"
+			orderModel.Symbol = order.Symbol
+			orderModel.ClientOrderId = order.ClientOrderID
+			orderModel.OrderId = strconv.FormatInt(order.OrderID, 10)
+			orderModel.Side = string(order.Side)
+			orderModel.PositionSide = string(order.PositionSide)
+			orderModel.Type = string(order.Type)
+			orderModel.Status = string(order.Status) // NEW
+			orderModel.Price = string(order.Price)
+			orderModel.OrigQty = order.OrigQuantity
+			orderModel.ExecutedQty = order.ExecutedQuantity
+			orderModel.CreateTime = nowTime
+			orderModel.UpdateTime = nowTime
+			if orderModel.ID == 0 {
+				if _, err := o.Insert(&orderModel); err != nil {
+					logs.Error("insert futures_orders during full sync:", err)
+					return false
+				}
+			} else if _, err := o.Update(&orderModel); err != nil {
+				logs.Error("update futures_orders during full sync:", err)
+				return false
+			}
 		}
-	}
 
-	// open orders
-	for _, order := range allOpenOrders {
-		var orderModel models.FuturesOrder
-		o.QueryTable("futures_orders").Filter("account_id", "main").Filter("order_id", order.OrderID).One(&orderModel)
-		orderModel.AccountID = "main"
-		orderModel.Symbol = order.Symbol
-		orderModel.ClientOrderId = order.ClientOrderID
-		orderModel.OrderId = strconv.FormatInt(order.OrderID, 10)
-		orderModel.Side = string(order.Side)
-		orderModel.PositionSide = string(order.PositionSide)
-		orderModel.Type = string(order.Type)
-		orderModel.Status = string(order.Status) // NEW
-		orderModel.Price = string(order.Price)
-		orderModel.OrigQty = order.OrigQuantity
-		orderModel.ExecutedQty = order.ExecutedQuantity
-		orderModel.CreateTime = nowTime
-		orderModel.UpdateTime = nowTime
-		if orderModel.ID == 0 {
-			o.Insert(&orderModel)
-		} else {
-			o.Update(&orderModel)
+		// Remove active mirror rows that were not present in the successful REST
+		// snapshot. Rows updated by a concurrent WS event have updateTime >= nowTime
+		// and are deliberately preserved.
+		if _, err := o.Raw("DELETE FROM futures_positions WHERE account_id = 'main' AND updateTime < ?", futuresSnapshotStaleCutoff(nowTime)).Exec(); err != nil {
+			logs.Error("cleanup stale futures_positions after full sync:", err)
+			return false
 		}
-	}
+		if _, err := o.Raw("DELETE FROM futures_orders WHERE account_id = 'main' AND (status = 'NEW' OR status = 'PARTIALLY_FILLED') AND updateTime < ?", futuresSnapshotStaleCutoff(nowTime)).Exec(); err != nil {
+			logs.Error("cleanup stale futures_orders after full sync:", err)
+			return false
+		}
 
-	// Remove active mirror rows that were not present in the successful REST
-	// snapshot. Rows updated by a concurrent WS event have updateTime >= nowTime
-	// and are deliberately preserved.
-	if _, err := o.Raw("DELETE FROM futures_positions WHERE account_id = 'main' AND updateTime < ?", nowTime).Exec(); err != nil {
-		logs.Error("cleanup stale futures_positions after full sync:", err)
-		return false
-	}
-	if _, err := o.Raw("DELETE FROM futures_orders WHERE account_id = 'main' AND (status = 'NEW' OR status = 'PARTIALLY_FILLED') AND updateTime < ?", nowTime).Exec(); err != nil {
-		logs.Error("cleanup stale futures_orders after full sync:", err)
-		return false
-	}
-
-	// If the socket reconnected while the REST snapshot was loading, this
-	// snapshot belongs to the previous generation and must not authorize the
-	// new mirror. The watcher will immediately request another full sync.
-	if generation != 0 && binance.FuturesUserDataWSGeneration() == generation {
-		futuresUserDataLastFullSyncAt.Store(time.Now().UnixMilli())
-		futuresUserDataLastFullSyncGeneration.Store(generation)
-	}
-	return true
+		// If the socket reconnected while the REST snapshot was loading, this
+		// snapshot belongs to the previous generation and must not authorize the
+		// new mirror. The watcher will immediately request another full sync.
+		if generation != 0 && binance.FuturesUserDataWSGeneration() == generation {
+			// The same lock guarantees no new WS write races with clearing the
+			// dirty flag; a later failed WS write marks it dirty again.
+			binance.MarkMainFuturesAccountMirrorClean()
+			futuresUserDataLastFullSyncAt.Store(time.Now().UnixMilli())
+			futuresUserDataLastFullSyncGeneration.Store(generation)
+		}
+		return true
+	})
 }

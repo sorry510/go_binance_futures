@@ -273,12 +273,20 @@ func (e Executor) applyExchange(ctx context.Context, clientOrderID string, resul
 		}
 	}
 	switch strings.ToUpper(strings.TrimSpace(result.Status)) {
-	case "FILLED":
-		if err := e.Ownership.SetOrderStatus(ctx, clientOrderID, OrderFilled); err != nil {
-			return result, err
+	case "FILLED", "PARTIALLY_FILLED":
+		// Some submit/WS receipts can report a terminal exchange state
+		// without an executed quantity. Never finalize the ownership order
+		// before the cumulative fill is known; otherwise a restart would
+		// permanently skip it and leave a live account leg unmanaged.
+		status := OrderReconcile
+		if result.FilledQty > qtyEpsilon {
+			if strings.EqualFold(result.Status, "FILLED") {
+				status = OrderFilled
+			} else {
+				status = OrderPartiallyFilled
+			}
 		}
-	case "PARTIALLY_FILLED":
-		if err := e.Ownership.SetOrderStatus(ctx, clientOrderID, OrderPartiallyFilled); err != nil {
+		if err := e.Ownership.SetOrderStatus(ctx, clientOrderID, status); err != nil {
 			return result, err
 		}
 	case "CANCELED", "EXPIRED":
