@@ -3,17 +3,43 @@ package binance
 import (
 	"fmt"
 	"strconv"
+	"sync"
+	"sync/atomic"
 
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"go_binance_futures/models"
 )
 
+// Serialize WS updates with full REST mirror snapshot application. Without
+// this lock, an older REST snapshot can overwrite/delete a newer WS position.
+var futuresAccountMirrorMu sync.Mutex
+var mainFuturesAccountMirrorDirty atomic.Bool
+
+// Any failed WS persistence invalidates local account reads until a new full
+// REST snapshot is successfully installed.
+func MainFuturesAccountMirrorDirty() bool { return mainFuturesAccountMirrorDirty.Load() }
+
+// Caller must hold the mirror lock (via WithFuturesAccountMirrorLock).
+func MarkMainFuturesAccountMirrorClean() { mainFuturesAccountMirrorDirty.Store(false) }
+
+func WithFuturesAccountMirrorLock(fn func() bool) bool {
+	futuresAccountMirrorMu.Lock()
+	defer futuresAccountMirrorMu.Unlock()
+	return fn()
+}
+
 // persistFuturesAccountEvent is the account-scoped state writer, independent of
 // the WebSocket connection lifecycle. Stage 5 can connect the Lead WS to it.
 // It deliberately never adjusts ownership or claims an unmanaged position.
 func persistFuturesAccountEvent(accountID AccountID, account *AccountClient, event *futures.WsUserDataEvent) error {
-	return persistFuturesAccountEventWithDB(orm.NewOrm(), accountID, account, event)
+	futuresAccountMirrorMu.Lock()
+	defer futuresAccountMirrorMu.Unlock()
+	err := persistFuturesAccountEventWithDB(orm.NewOrm(), accountID, account, event)
+	if err != nil && accountID == MainAccountID {
+		mainFuturesAccountMirrorDirty.Store(true)
+	}
+	return err
 }
 
 func persistFuturesAccountEventWithDB(o orm.Ormer, accountID AccountID, account *AccountClient, event *futures.WsUserDataEvent) error {

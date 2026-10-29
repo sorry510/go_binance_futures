@@ -1049,7 +1049,14 @@ func GetTransformPositionsContext(ctx context.Context) (usePositions []types.Fut
 			return usePositions, err
 		}
 		for _, position := range positions {
-			positionAmt, _ := strconv.ParseFloat(position.Amount, 64)
+			positionAmt, parseErr := strconv.ParseFloat(position.Amount, 64)
+			if parseErr != nil || math.IsNaN(positionAmt) || math.IsInf(positionAmt, 0) {
+				// A malformed mirror row must not silently disappear or block all
+				// exits forever. Bypass the mirror with an authoritative REST read.
+				logs.Warning("invalid local futures position amount; falling back to fresh Binance snapshot: symbol=", position.Symbol,
+					" side=", position.Side, " amount=", position.Amount, " error=", parseErr)
+				return freshOwnershipAccountPositionsContext(ctx)
+			}
 			positionAmtFloatAbs := math.Abs(positionAmt) // 空单为负数,纠正为绝对值
 			if positionAmtFloatAbs < 0.0000001 {
 				continue

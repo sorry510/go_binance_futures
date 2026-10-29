@@ -39,26 +39,33 @@ func syncStrategyExitPositions(accountPositions []types.FuturesPosition) ([]owne
 	result := make([]ownedTradePosition, 0, len(autoPositions))
 	result = append(result, autoPositions...)
 
-	accountByKey := make(map[string]types.FuturesPosition, len(accountPositions))
-	for _, position := range accountPositions {
-		accountByKey[managedPositionKey(position.Symbol, position.Side)] = position
-	}
-	accountQty, err := ownershipAccountQuantities(accountPositions, false)
-	if err != nil {
-		return nil, err
-	}
 	for _, owner := range []string{futuresownership.OwnerNewCoinRush, futuresownership.OwnerFundingRate} {
 		managed, err := sharedOwnership.ActivePositions(context.Background(), owner)
 		if err != nil {
 			return nil, err
+		}
+		verified, err := verifiedOwnershipAccountSnapshot(accountPositions, managed, false)
+		if err != nil {
+			return nil, err
+		}
+		accountByKey := make(map[string]types.FuturesPosition, len(verified.positions))
+		for _, account := range verified.positions {
+			accountByKey[managedPositionKey(account.Symbol, account.Side)] = account
 		}
 		for _, position := range managed {
 			if owner == futuresownership.OwnerFundingRate && !strings.HasPrefix(position.SourceRef, "funding_rate:") {
 				continue
 			}
 			key := managedPositionKey(position.Symbol, position.PositionSide)
-			if _, err := sharedOwnership.ReconcilePosition(context.Background(), owner, position.Symbol, position.PositionSide, accountQty[key]); err != nil && err != orm.ErrNoRows {
+			updated, err := sharedOwnership.ReconcileObservedPosition(context.Background(), owner, position.Symbol, position.PositionSide, verified.quantities[key])
+			if err != nil && err != orm.ErrNoRows {
 				return nil, err
+			}
+			if err == nil && updated.Status != position.Status {
+				logs.Warning("managed ownership verification: owner=", owner, " symbol=", position.Symbol,
+					" side=", position.PositionSide, " status=", updated.Status,
+					" observed_qty=", verified.quantities[key], " previous_managed_qty=", position.ManagedQty,
+					" fresh_snapshot=", verified.fresh)
 			}
 		}
 		managed, err = sharedOwnership.ActivePositions(context.Background(), owner)
@@ -105,14 +112,27 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]owne
 	// the User Data WS/local tables when enabled, or directly from Binance REST
 	// otherwise. Only refresh from Binance after reconciling active managed orders,
 	// because a just-confirmed fill can make the pre-reconcile snapshot stale.
-	accountQtyByKey, err := ownershipAccountQuantities(accountPositions, shouldRefreshOwnershipAccountQuantities(positionRefreshRequired))
+	verified, err := verifiedOwnershipAccountSnapshot(accountPositions, managedPositions, shouldRefreshOwnershipAccountQuantities(positionRefreshRequired))
 	if err != nil {
 		return nil, err
 	}
 	for _, managed := range managedPositions {
-		accountQty := accountQtyByKey[managedPositionKey(managed.Symbol, managed.PositionSide)]
-		if _, err := sharedOwnership.ReconcilePosition(ctx, managed.Owner, managed.Symbol, managed.PositionSide, accountQty); err != nil && err != orm.ErrNoRows {
+		accountQty := verified.quantities[managedPositionKey(managed.Symbol, managed.PositionSide)]
+		if accountQty <= 1e-12 {
+			// Do not expire ownership while a partially filled/uncertain opening
+			// order may still increase the account leg after this snapshot.
+			if autoStrategyOpenUnresolved(ctx, managed, managedOrders, sharedOwnership.GetOrder) {
+				continue
+			}
+		}
+		updated, err := sharedOwnership.ReconcileObservedPosition(ctx, managed.Owner, managed.Symbol, managed.PositionSide, accountQty)
+		if err != nil && err != orm.ErrNoRows {
 			return nil, err
+		}
+		if updated.Status != managed.Status && (updated.Status == futuresownership.PositionReconcileRequired || updated.Status == futuresownership.PositionClosed) {
+			logs.Warning("auto_strategy ownership verification: ", managed.Symbol, " ", managed.PositionSide,
+				" status=", updated.Status, " observed_qty=", accountQty,
+				" previous_managed_qty=", managed.ManagedQty, " fresh_snapshot=", verified.fresh)
 		}
 	}
 
@@ -126,7 +146,7 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]owne
 	}
 
 	result := make([]ownedTradePosition, 0, len(managedPositions))
-	for _, account := range accountPositions {
+	for _, account := range verified.positions {
 		managed, ok := managedByKey[managedPositionKey(account.Symbol, account.Side)]
 		if !ok || managed.ManagedQty <= 0 {
 			continue
@@ -134,6 +154,28 @@ func syncAutoStrategyOwnership(accountPositions []types.FuturesPosition) ([]owne
 		result = append(result, ownedTradePosition{Position: managedAccountPosition(account, managed), Owner: futuresownership.OwnerAutoStrategy, SourceRef: managed.SourceRef})
 	}
 	return result, nil
+}
+
+// If the local DB cannot read an opening order, the result is unknown, not
+// "confirmed closed". Preserve just this leg and allow exits on other legs.
+func autoStrategyOpenUnresolved(ctx context.Context, managed models.FuturesManagedPosition, orders []models.FuturesManagedOrder,
+	load func(context.Context, string) (models.FuturesManagedOrder, error)) bool {
+	for _, order := range orders {
+		if order.Intent != futuresownership.IntentOpen || order.Symbol != managed.Symbol || order.PositionSide != managed.PositionSide {
+			continue
+		}
+		latest, err := load(ctx, order.ClientOrderID)
+		if err != nil {
+			logs.Warning("auto_strategy ownership pending open status unavailable: ", managed.Symbol,
+				" ", managed.PositionSide, " client_order_id=", order.ClientOrderID, " error=", err)
+			return true
+		}
+		switch latest.Status {
+		case futuresownership.OrderPending, futuresownership.OrderSubmitted, futuresownership.OrderPartiallyFilled, futuresownership.OrderReconcile:
+			return true
+		}
+	}
+	return false
 }
 
 func shouldRefreshOwnershipAccountQuantities(fillAdvanced bool) bool {
@@ -146,6 +188,7 @@ func reconcileAutoStrategyManagedOrder(ctx context.Context, order models.Futures
 	if futuresUserDataMirrorUsable() {
 		var local models.FuturesOrder
 		err := orm.NewOrm().QueryTable(new(models.FuturesOrder)).
+			Filter("account_id", "main").
 			Filter("client_order_id", order.ClientOrderID).
 			One(&local)
 		if err == nil && local.UpdateTime > order.LastReconciledAt {
@@ -564,29 +607,30 @@ func currentAccountPositionQty(owner, symbol string, positionSide futures.Positi
 	return 0, nil
 }
 
-func ownershipAccountQuantities(accountPositions []types.FuturesPosition, refreshFromBinance bool) (map[string]float64, error) {
-	out := make(map[string]float64)
-	if !refreshFromBinance {
-		for _, position := range accountPositions {
-			qty, err := strconv.ParseFloat(position.Amount, 64)
-			if err != nil {
-				continue
-			}
-			out[managedPositionKey(position.Symbol, position.Side)] = math.Abs(qty)
-		}
-		return out, nil
+// A cached snapshot may omit a freshly filled position. Do not shrink or close
+// ownership without an authoritative fresh exchange read.
+func needsFreshOwnershipSnapshot(managed []models.FuturesManagedPosition, quantities map[string]float64, force bool) bool {
+	if force {
+		return true
 	}
-	ctx := binanceapiusage.WithSource(context.Background(), "start_trade")
-	rows, err := binance.GetPositionFreshContext(ctx, binance.PositionParams{})
-	if err != nil {
-		return nil, fmt.Errorf("refresh Binance positions for ownership reconcile: %w", err)
-	}
-	for _, position := range rows {
-		qty, err := strconv.ParseFloat(position.PositionAmt, 64)
-		if err != nil {
-			continue
+	for _, row := range managed {
+		if quantities[managedPositionKey(row.Symbol, row.PositionSide)]+1e-12 < row.ManagedQty {
+			return true
 		}
-		out[managedPositionKey(position.Symbol, string(position.PositionSide))] = math.Abs(qty)
+	}
+	return false
+}
+
+// Parse ONLY the supplied snapshot. Callers that need authoritative data
+// must explicitly fetch it and keep the full rows for exit evaluation.
+func ownershipAccountQuantities(positions []types.FuturesPosition) (map[string]float64, error) {
+	out := make(map[string]float64, len(positions))
+	for _, position := range positions {
+		qty, err := strconv.ParseFloat(position.Amount, 64)
+		if err != nil || math.IsNaN(qty) || math.IsInf(qty, 0) {
+			return nil, fmt.Errorf("invalid account quantity for %s %s: %q", position.Symbol, position.Side, position.Amount)
+		}
+		out[managedPositionKey(position.Symbol, position.Side)] = math.Abs(qty)
 	}
 	return out, nil
 }

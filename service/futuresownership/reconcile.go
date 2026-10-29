@@ -17,6 +17,7 @@ type AccountPosition struct {
 	Symbol       string
 	PositionSide string
 	Quantity     float64
+	EntryPrice   float64
 }
 
 type AccountPositionSource interface {
@@ -113,7 +114,14 @@ func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (Reconcile
 	if r.Account == nil {
 		return summary, fmt.Errorf("account position source is required")
 	}
-	accountPositions, err := r.Account.Positions(ctx)
+	// Reconciliation can shrink/close durable ownership. A cached account
+	// snapshot is insufficient evidence for that destructive transition.
+	var accountPositions []AccountPosition
+	if source, ok := r.Account.(BinanceAccountPositionSource); ok {
+		accountPositions, err = source.FreshPositions(ctx)
+	} else {
+		accountPositions, err = r.Account.Positions(ctx)
+	}
 	if err != nil {
 		return summary, err
 	}
@@ -124,7 +132,23 @@ func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (Reconcile
 	for _, position := range managed {
 		summary.PositionsChecked++
 		before := position.ManagedQty
-		updated, err := r.Ownership.ReconcilePosition(ctx, owner, position.Symbol, position.PositionSide, accountQty[positionKey(position.Symbol, position.PositionSide)])
+		// A still-uncertain open can fill just after this snapshot. Retain its
+		// ownership until the exchange order is reconciled.
+		unresolvedOpen := false
+		for _, order := range orders {
+			if order.Intent != IntentOpen || order.Symbol != position.Symbol || order.PositionSide != position.PositionSide {
+				continue
+			}
+			refreshed, loadErr := r.Ownership.GetOrder(ctx, order.ClientOrderID)
+			if loadErr != nil || liveOrderStatus(refreshed.Status) {
+				unresolvedOpen = true
+				break
+			}
+		}
+		if unresolvedOpen && accountQty[positionKey(position.Symbol, position.PositionSide)] <= qtyEpsilon {
+			continue
+		}
+		updated, err := r.Ownership.ReconcileObservedPosition(ctx, owner, position.Symbol, position.PositionSide, accountQty[positionKey(position.Symbol, position.PositionSide)])
 		if err != nil {
 			return summary, err
 		}
@@ -195,13 +219,27 @@ type BinanceAccountPositionSource struct {
 }
 
 func (source BinanceAccountPositionSource) Positions(ctx context.Context) ([]AccountPosition, error) {
+	return source.positions(ctx, false)
+}
+
+func (source BinanceAccountPositionSource) FreshPositions(ctx context.Context) ([]AccountPosition, error) {
+	return source.positions(ctx, true)
+}
+
+func (source BinanceAccountPositionSource) positions(ctx context.Context, fresh bool) ([]AccountPosition, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 	var rows []*futures.PositionRisk
 	var err error
 	if source.Account != nil {
-		rows, err = source.Account.GetPositionContext(ctx, binanceapi.PositionParams{})
+		if fresh {
+			rows, err = source.Account.GetPositionFreshContext(ctx, binanceapi.PositionParams{})
+		} else {
+			rows, err = source.Account.GetPositionContext(ctx, binanceapi.PositionParams{})
+		}
+	} else if fresh {
+		rows, err = binanceapi.GetPositionFreshContext(ctx, binanceapi.PositionParams{})
 	} else {
 		rows, err = binanceapi.GetPositionContext(ctx, binanceapi.PositionParams{})
 	}
@@ -210,11 +248,21 @@ func (source BinanceAccountPositionSource) Positions(ctx context.Context) ([]Acc
 	}
 	out := make([]AccountPosition, 0, len(rows))
 	for _, row := range rows {
+		if row == nil {
+			return nil, fmt.Errorf("invalid nil account position")
+		}
 		qty, err := strconv.ParseFloat(row.PositionAmt, 64)
-		if err != nil || math.Abs(qty) <= qtyEpsilon {
+		if err != nil || math.IsNaN(qty) || math.IsInf(qty, 0) {
+			return nil, fmt.Errorf("invalid exchange position quantity %q for %s", row.PositionAmt, row.Symbol)
+		}
+		if math.Abs(qty) <= qtyEpsilon {
 			continue
 		}
-		out = append(out, AccountPosition{Symbol: row.Symbol, PositionSide: string(row.PositionSide), Quantity: qty})
+		entry, parseErr := strconv.ParseFloat(row.EntryPrice, 64)
+		if parseErr != nil || math.IsNaN(entry) || math.IsInf(entry, 0) || entry < 0 {
+			return nil, fmt.Errorf("invalid exchange entry price for %s %s: %q", row.Symbol, row.PositionSide, row.EntryPrice)
+		}
+		out = append(out, AccountPosition{Symbol: row.Symbol, PositionSide: string(row.PositionSide), Quantity: qty, EntryPrice: entry})
 	}
 	return out, nil
 }
