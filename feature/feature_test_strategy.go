@@ -280,14 +280,15 @@ func CheckTestResults(systemConfig *models.Config) {
 					continue
 				}
 				if res, ok := output.(bool); ok && res {
-					result.ClosePrice = position.MarkPrice
-					result.CloseProfit = strconv.FormatFloat(tradeProfit.NetProfit, 'f', 3, 64)
-					result.CloseStrategy = strategy.Code
-					result.CloseStrategyName = strings.TrimSpace(strategy.Name)
-					result.CloseStrategyType = strings.TrimSpace(strategy.Type)
-					result.CloseStrategyHash = strategyservice.RuleHash(strategy.Code)
-					result.UpdateTime = time.Now().Unix() * 1000
-					orm.NewOrm().Update(result)
+					closed, closeErr := finalizeTestStrategyClose(orm.NewOrm(), result, floatNowPrice, tradeProfit.NetProfit, strategy.Code, strategy.Name, strategy.Type)
+					if closeErr != nil {
+						logs.Error("test strategy close not saved, no notification (id=%d symbol=%s): %v", result.ID, result.Symbol, closeErr)
+						continue
+					}
+					if !closed {
+						logs.Warning("test strategy close skipped; row already closed or changed (id=%d symbol=%s)", result.ID, result.Symbol)
+						continue
+					}
 					// 平仓通知
 					quantity, _ := strconv.ParseFloat(result.PositionAmt, 64)
 					profitUsdt, _ := strconv.ParseFloat(result.CloseProfit, 64)
@@ -312,14 +313,15 @@ func CheckTestResults(systemConfig *models.Config) {
 		}
 		if !hasCloseStrategy && (nowProfit > 10 || nowProfit < -10) {
 			// 没有定义平仓策略，使用超过 10 % 就平仓
-			result.ClosePrice = position.MarkPrice
-			result.CloseProfit = strconv.FormatFloat(tradeProfit.NetProfit, 'f', 3, 64)
-			result.CloseStrategy = strategyservice.SystemCloseStrategyCode
-			result.CloseStrategyName = strategyservice.SystemCloseStrategyName
-			result.CloseStrategyType = strategyservice.SystemCloseStrategyType
-			result.CloseStrategyHash = strategyservice.RuleHash(strategyservice.SystemCloseStrategyCode)
-			result.UpdateTime = time.Now().Unix() * 1000
-			orm.NewOrm().Update(result)
+			closed, closeErr := finalizeTestStrategyClose(orm.NewOrm(), result, floatNowPrice, tradeProfit.NetProfit, strategyservice.SystemCloseStrategyCode, strategyservice.SystemCloseStrategyName, strategyservice.SystemCloseStrategyType)
+			if closeErr != nil {
+				logs.Error("system test close not saved, no notification (id=%d symbol=%s): %v", result.ID, result.Symbol, closeErr)
+				continue
+			}
+			if !closed {
+				logs.Warning("system test close skipped; row already closed or changed (id=%d symbol=%s)", result.ID, result.Symbol)
+				continue
+			}
 			// 平仓通知
 
 			quantity, _ := strconv.ParseFloat(result.PositionAmt, 64)
