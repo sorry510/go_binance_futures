@@ -82,20 +82,20 @@ func ResolveRuleIdentity(strategyJSON, code, preferredType string) RuleIdentity 
 	if fallback == nil {
 		return identity
 	}
-	identity.Name = truncateStrategyIdentity(fallback.Name)
+	identity.Name = PersistedStrategyName(fallback.Name)
 	identity.Type = strings.TrimSpace(fallback.Type)
 	return identity
 }
 
 func ResolveTemplateIdentity(o orm.Ormer, templateID int64, templateName, technologyJSON, strategyJSON string) (TemplateIdentity, error) {
-	identity := TemplateIdentity{ID: templateID, Name: truncateStrategyIdentity(templateName)}
+	identity := TemplateIdentity{ID: templateID, Name: PersistedStrategyName(templateName)}
 	if templateID > 0 {
 		if identity.Name != "" {
 			return identity, nil
 		}
 		var row models.StrategyTemplates
 		if err := o.QueryTable(new(models.StrategyTemplates)).Filter("id", templateID).One(&row); err == nil {
-			identity.Name = truncateStrategyIdentity(row.Name)
+			identity.Name = PersistedStrategyName(row.Name)
 			return identity, nil
 		} else if err != orm.ErrNoRows {
 			return TemplateIdentity{}, err
@@ -115,10 +115,12 @@ func ResolveTemplateIdentity(o orm.Ormer, templateID int64, templateName, techno
 	if len(rows) == 0 {
 		return identity, nil
 	}
-	return TemplateIdentity{ID: rows[0].ID, Name: truncateStrategyIdentity(rows[0].Name)}, nil
+	return TemplateIdentity{ID: rows[0].ID, Name: PersistedStrategyName(rows[0].Name)}, nil
 }
 
-func truncateStrategyIdentity(value string) string {
+// PersistedStrategyName keeps display metadata within the varchar(128) limit.
+// The original strategy snapshot and code hash remain unchanged.
+func PersistedStrategyName(value string) string {
 	runes := []rune(strings.TrimSpace(value))
 	if len(runes) > 128 {
 		runes = runes[:128]

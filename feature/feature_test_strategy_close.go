@@ -11,6 +11,7 @@ import (
 	strategyservice "go_binance_futures/service/strategy"
 
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 // finalizeTestStrategyClose atomically closes one simulated position. A close
@@ -29,9 +30,11 @@ func finalizeTestStrategyClose(o orm.Ormer, result *models.TestStrategyResults, 
 	}
 	priceText := strconv.FormatFloat(price, 'f', -1, 64)
 	profitText := strconv.FormatFloat(netProfit, 'f', 3, 64)
-	name, closeType = strings.TrimSpace(name), strings.TrimSpace(closeType)
-	if len([]rune(name)) > 128 || len([]rune(closeType)) > 32 {
-		return false, fmt.Errorf("simulated close strategy metadata exceeds database limits")
+	originalName := strings.TrimSpace(name)
+	name = strategyservice.PersistedStrategyName(originalName)
+	closeType = strings.TrimSpace(closeType)
+	if len([]rune(closeType)) > 32 {
+		return false, fmt.Errorf("simulated close strategy type exceeds database limits")
 	}
 	hash := strategyservice.RuleHash(code)
 	now := time.Now().UnixMilli()
@@ -52,6 +55,9 @@ func finalizeTestStrategyClose(o orm.Ormer, result *models.TestStrategyResults, 
 	if affected != 1 {
 		// Another cycle has already closed/deleted the row. No notification.
 		return false, nil
+	}
+	if name != originalName {
+		logs.Warning("test close strategy name truncated to 128 characters (id=%d symbol=%s original_chars=%d)", result.ID, result.Symbol, len([]rune(originalName)))
 	}
 	result.ClosePrice = priceText
 	result.CloseProfit = profitText

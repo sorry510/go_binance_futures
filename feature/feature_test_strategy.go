@@ -392,7 +392,8 @@ func createTestResult(coin *models.Symbols, nowPrice float64, positionSide, open
 	}
 	result.StrategySnapshotHash = strategyservice.StrategySnapshotHash(result.Technology, result.Strategy)
 	result.OpenStrategy = openStrategyCode
-	result.OpenStrategyName = strings.TrimSpace(openStrategyName)
+	originalOpenStrategyName := strings.TrimSpace(openStrategyName)
+	result.OpenStrategyName = strategyservice.PersistedStrategyName(originalOpenStrategyName)
 	result.OpenStrategyType = strings.TrimSpace(openStrategyType)
 	result.OpenStrategyHash = strategyservice.RuleHash(openStrategyCode)
 	result.ClosePrice = "0"
@@ -404,6 +405,9 @@ func createTestResult(coin *models.Symbols, nowPrice float64, positionSide, open
 
 	if _, err := o.Insert(result); err != nil {
 		return nil, false, err
+	}
+	if result.OpenStrategyName != originalOpenStrategyName {
+		logs.Warning("test open strategy name truncated to 128 characters (id=%d symbol=%s original_chars=%d)", result.ID, result.Symbol, len([]rune(originalOpenStrategyName)))
 	}
 	return result, true, nil
 }
