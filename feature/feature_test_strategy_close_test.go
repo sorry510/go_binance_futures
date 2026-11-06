@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"go_binance_futures/models"
+	strategyservice "go_binance_futures/service/strategy"
 
 	"github.com/beego/beego/v2/client/orm"
 )
@@ -70,11 +71,13 @@ func TestFinalizeTestStrategyCloseRejectsInvalidInputsWithoutUpdating(t *testing
 		{math.NaN(), 1, "ROI > 1", "close"},
 		{100, math.Inf(1), "ROI > 1", "close"},
 		{100, 1, "", "close"},
-		{100, 1, "ROI > 1", strings.Repeat("a", 129)},
 	} {
 		if ok, err := finalizeTestStrategyClose(orm.NewOrm(), row, tc.price, tc.profit, tc.code, tc.name, "close_long"); err == nil || ok {
 			t.Fatalf("invalid close accepted: %+v ok=%v err=%v", tc, ok, err)
 		}
+	}
+	if ok, err := finalizeTestStrategyClose(orm.NewOrm(), row, 100, 1, "ROI > 1", "close", strings.Repeat("a", 33)); err == nil || ok {
+		t.Fatalf("invalid close type accepted: ok=%v err=%v", ok, err)
 	}
 	var persisted models.TestStrategyResults
 	if err := orm.NewOrm().QueryTable(new(models.TestStrategyResults)).Filter("id", row.ID).One(&persisted); err != nil {
@@ -127,5 +130,53 @@ func TestFinalizeTestStrategyCloseDBFailureDoesNotReportSuccess(t *testing.T) {
 	updated, err = finalizeTestStrategyClose(o, row, 112, 12.5, "ROI > 1", "close", "close_long")
 	if err != nil || !updated {
 		t.Fatalf("retry after database recovery must succeed: updated=%v err=%v", updated, err)
+	}
+}
+
+func TestFinalizeTestStrategyCloseTruncatesNameWithoutLosingIdentity(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		code string
+	}{
+		{strings.Repeat("a", 150), "ROI > 3"},
+		{strings.Repeat("止损策略", 45), "ROI < -6"},
+	} {
+		t.Run(fmt.Sprintf("runes_%d", len([]rune(tc.name))), func(t *testing.T) {
+			row := newCloseTestResult(t)
+			snapshot := fmt.Sprintf(`[{"name":%q,"type":"close_long","code":%q,"enable":true}]`, tc.name, tc.code)
+			row.Strategy = snapshot
+			o := orm.NewOrm()
+			if _, err := o.Update(row, "Strategy"); err != nil {
+				t.Fatal(err)
+			}
+			updated, err := finalizeTestStrategyClose(o, row, 111, 11.1, tc.code, tc.name, "close_long")
+			if err != nil || !updated {
+				t.Fatalf("long close name must not block closing: updated=%v err=%v", updated, err)
+			}
+			var saved models.TestStrategyResults
+			if err := o.QueryTable(new(models.TestStrategyResults)).Filter("id", row.ID).One(&saved); err != nil {
+				t.Fatal(err)
+			}
+			expectedName := string([]rune(tc.name)[:128])
+			if saved.CloseStrategyName != expectedName || len([]rune(saved.CloseStrategyName)) != 128 {
+				t.Fatalf("incorrect truncated close name: %q", saved.CloseStrategyName)
+			}
+			if saved.ClosePrice != "111" || saved.CloseStrategy != tc.code ||
+				saved.CloseStrategyHash != strategyservice.RuleHash(tc.code) ||
+				saved.Strategy != snapshot || row.CloseStrategyName != expectedName {
+				t.Fatalf("close identity or original strategy snapshot changed: %+v", saved)
+			}
+			again, err := finalizeTestStrategyClose(o, row, 112, 12.2, tc.code, "different", "close_long")
+			if err != nil || again {
+				t.Fatalf("second close must be ignored: updated=%v err=%v", again, err)
+			}
+			var unchanged models.TestStrategyResults
+			if err := o.QueryTable(new(models.TestStrategyResults)).Filter("id", row.ID).One(&unchanged); err != nil {
+				t.Fatal(err)
+			}
+			if unchanged.ClosePrice != saved.ClosePrice || unchanged.CloseStrategyName != saved.CloseStrategyName {
+				t.Fatalf("duplicate close modified stored row: %+v", unchanged)
+			}
+		})
 	}
 }

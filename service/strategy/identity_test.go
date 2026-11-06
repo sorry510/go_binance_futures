@@ -1,6 +1,9 @@
 package strategy
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestStrategySnapshotHashUsesStoredSnapshotAndTrimsOuterWhitespace(t *testing.T) {
 	left := StrategySnapshotHash(` {"b":2,"a":1} `, ` [{"name":"n","type":"long"}] `)
@@ -27,5 +30,21 @@ func TestResolveRuleIdentityFindsNameAndType(t *testing.T) {
 	identity := ResolveRuleIdentity(strategyJSON, "Price > 1", "long")
 	if identity.Name != "long entry" || identity.Type != "long" || identity.Hash == "" {
 		t.Fatalf("unexpected rule identity: %+v", identity)
+	}
+}
+
+func TestPersistedStrategyNameTruncatesUnicodeSafely(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		want string
+	}{
+		{"  name  ", "name"},
+		{strings.Repeat("a", 128), strings.Repeat("a", 128)},
+		{strings.Repeat("a", 150), strings.Repeat("a", 128)},
+		{strings.Repeat("策略", 70), strings.Repeat("策略", 64)},
+	} {
+		if got := PersistedStrategyName(tc.name); got != tc.want {
+			t.Fatalf("PersistedStrategyName input_chars=%d got=%q want=%q", len([]rune(tc.name)), got, tc.want)
+		}
 	}
 }
