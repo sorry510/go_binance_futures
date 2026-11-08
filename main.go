@@ -86,7 +86,14 @@ func initLogger() {
 func registerModels() {
 	// orm.Debug = true
 	orm.RegisterModel(new(models.Config))
-	orm.RegisterModel(new(models.Order))
+	// Historical v19 account-scope migrations still inspect the physical
+	// `order` table. Register its archival schema ONLY during the explicit
+	// sync-db CLI; normal API/trading processes have no legacy ORM model.
+	// This preserves pre-v19 upgrade compatibility without restoring any
+	// old history read, write or delete endpoints.
+	if isSyncDatabaseCommand(os.Args[1:]) {
+		orm.RegisterModel(new(models.Order))
+	}
 	orm.RegisterModel(new(models.Symbols))
 	orm.RegisterModel(new(models.NewSymbols))
 	orm.RegisterModel(new(models.NoticeSymbols))
@@ -491,12 +498,6 @@ func main() {
 			logs.Info("agent_trade automatically repaired protected cycles: ", cycles)
 		}
 	}, time.Minute)
-
-	// 30 分钟检查一次所有未平仓的订单, 一次 200 条，此处是兜底行为，处理一些意外情况
-	// 处理 app 上已经平仓的订单，但是系统中没有找到对应的平仓订单
-	loopRun(func() {
-		feature.UpdateOrderStatus()
-	}, time.Minute*30) // 30分钟更新一次订单状态
 
 	/*******************************************测试自定义策略 start**********************************************************/
 	// 轮训测试所有开启合约交易的币种策略(每轮5个)

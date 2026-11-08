@@ -306,7 +306,8 @@ func CheckTestResults(systemConfig *models.Config) {
 						Remarks:      strategy.Code,
 					})
 					autoTestToTrade(systemConfig, profitUsdt >= 0.0)
-					// AutoLossScale(systemConfig, unRealizedProfit >= 0)
+					// Live loss-scale adjustment is performed only after
+					// verified managed settlement, not simulated closes.
 					return
 				}
 			}

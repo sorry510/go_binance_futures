@@ -138,10 +138,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 			// 触发策略,风向改变,强制平仓
 			logs.Info("%s:auto_stop_start", position.Symbol)
 			if position.Side == "LONG" {
-				order, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
-					// 数据库写入订单
-					runner.RecordClose(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
+					// 委托确认不等于真实成交
 
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					runner.NotifyClose(notify.FuturesOrderParams{
@@ -172,10 +171,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				}
 			}
 			if position.Side == "SHORT" {
-				order, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
-					// 数据库写入订单
-					runner.RecordClose(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
+					// 委托确认不等于真实成交
 
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					runner.NotifyClose(notify.FuturesOrderParams{
@@ -211,10 +209,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 		case tradeExitLoss:
 			//
 			if position.Side == "LONG" {
-				order, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
-					// 数据库写入订单
-					runner.RecordClose(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
+					// 委托确认不等于真实成交
 
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					runner.NotifyClose(notify.FuturesOrderParams{
@@ -245,10 +242,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				}
 			}
 			if position.Side == "SHORT" {
-				order, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
-					// 数据库写入订单
-					runner.RecordClose(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
+					// 委托确认不等于真实成交
 
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					runner.NotifyClose(notify.FuturesOrderParams{
@@ -283,10 +279,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 		case tradeExitProfit:
 
 			if position.Side == "LONG" {
-				order, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
-					// 数据库写入订单
-					runner.RecordClose(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
+					// 委托确认不等于真实成交
 
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					runner.NotifyClose(notify.FuturesOrderParams{
@@ -317,10 +312,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				}
 			}
 			if position.Side == "SHORT" {
-				order, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
-					// 数据库写入订单
-					runner.RecordClose(position, positionAmtFloatAbs, unRealizedProfit, position.MarkPrice, order.OrderID, systemConfig)
+					// 委托确认不等于真实成交
 
 					markPrice, _ := strconv.ParseFloat(position.MarkPrice, 64)
 					runner.NotifyClose(notify.FuturesOrderParams{
@@ -423,11 +417,10 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 					} // 更新倍率和仓位模式
 
 					if systemConfig.FutureOrderType == "MARKET" {
-						order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
+						_, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
 						if err == nil {
-							// 数据库写入订单
+							// 委托确认不等于真实成交
 							buyPrice := utils.GetTradePrecision(buyPrice*1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
-							runner.RecordOpen(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
 							isOpen = true
 							runner.NotifyOpen(notify.FuturesOrderParams{
 								Title:        lang.Lang("futures.open_notice_title"),
@@ -453,10 +446,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 							})
 						}
 					} else {
-						order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, openResult.LongStrategyHash)
+						_, err := runner.SubmitOpen(cycleAccount, symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, openResult.LongStrategyHash)
 						if err == nil {
-							// 数据库写入订单(可能没有买入)
-							runner.RecordOpen(symbol, quantity, strconv.FormatFloat(buyPrice, 'f', -1, 64), "LONG", int64(leverage_float64), order.OrderID)
+							// 下单确认不等于成交，真实历史由 Managed/Fill 记录
 							isOpen = true
 							runner.NotifyOpen(notify.FuturesOrderParams{
 								Title:        lang.Lang("futures.open_notice_title"),
@@ -500,11 +492,10 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 					} // 更新倍率和仓位模式
 
 					if systemConfig.FutureOrderType == "MARKET" {
-						order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
+						_, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
 						if err == nil {
-							// 数据库写入订单
+							// 委托确认不等于真实成交
 							sellPrice := utils.GetTradePrecision(sellPrice*0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
-							runner.RecordOpen(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
 							isOpen = true
 							runner.NotifyOpen(notify.FuturesOrderParams{
 								Title:        lang.Lang("futures.open_notice_title"),
@@ -530,10 +521,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 							})
 						}
 					} else {
-						order, err := runner.SubmitOpen(cycleAccount, symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit, openResult.ShortStrategyHash)
+						_, err := runner.SubmitOpen(cycleAccount, symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit, openResult.ShortStrategyHash)
 						if err == nil {
-							// 数据库写入订单(可能没有买入)
-							runner.RecordOpen(symbol, quantity, strconv.FormatFloat(sellPrice, 'f', -1, 64), "SHORT", int64(leverage_float64), order.OrderID)
+							// 下单确认不等于成交，真实历史由 Managed/Fill 记录
 							isOpen = true
 							runner.NotifyOpen(notify.FuturesOrderParams{
 								Title:        lang.Lang("futures.open_notice_title"),
@@ -580,73 +570,6 @@ func GetAllSymbols() (symbols []*models.Symbols, err error) {
 func cancelTimeoutOrder(buyTimeout int64) {
 	if err := cancelTimeoutAutoStrategyOrders(buyTimeout); err != nil {
 		logs.Error("cancel auto_strategy managed timeout orders:", err)
-	}
-}
-
-func insertOpenOrder(symbol string, quantity float64, avg_price string, positionSide string, leverage int64, orderId int64) {
-	order := new(models.Order)
-	order.AccountID = "main"
-	order.Symbol = symbol
-	order.Amount = strconv.FormatFloat(quantity, 'f', -1, 64)
-	order.Avg_price = avg_price
-	order.PositionSide = positionSide
-	order.Leverage = leverage
-	order.Inexact_profit = "0.0" // 预估收益
-	order.Side = "open"
-	order.OrderId = orderId
-	order.UpdateTime = time.Now().Unix() * 1000
-
-	o := orm.NewOrm()
-	o.Insert(order)
-}
-
-func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, unRealizedProfit float64, avg_price string, orderId int64, systemConfig *models.Config) {
-	// 数据库写入订单
-	order := new(models.Order)
-	order.AccountID = "main"
-	order.Symbol = position.Symbol
-	order.Amount = strconv.FormatFloat(positionAmtFloat, 'f', -1, 64)
-	order.Avg_price = avg_price // 平仓价格
-	order.Inexact_profit = strconv.FormatFloat(unRealizedProfit, 'f', -1, 64)
-	order.PositionSide = position.Side
-	order.Leverage = position.Leverage
-	order.Side = "close"
-	order.OrderId = orderId
-	order.UpdateTime = time.Now().Unix() * 1000
-
-	o := orm.NewOrm()
-	closeOrderID, err := o.Insert(order)
-	if err != nil {
-		logs.Error("insert futures close order:", err)
-		return
-	}
-	order.ID = closeOrderID
-
-	// Risk transitions are deferred until a fully verified and durable
-	// position settlement (service/futuresownership/settlement.go). Order
-	// acknowledgement and unrealized snapshots must never trigger them.
-
-	// 检查是否有相同的开仓订单,如果有则更新状态
-	var openOrder models.Order
-	o.QueryTable("order").
-		Filter("account_id", "main").
-		Filter("Side", "open").
-		Filter("Symbol", order.Symbol).
-		Filter("Amount", order.Amount).
-		Filter("PositionSide", order.PositionSide).
-		Filter("OrderId__lt", order.OrderId). // 只查找小于当前平仓订单的开仓订单
-		OrderBy("-Id").
-		One(&openOrder)
-	if openOrder.OrderId != 0 {
-		// 一对一关联本次平仓记录；当前订单模型不处理部分开仓/部分平仓。
-		openOrder.Inexact_profit = order.Inexact_profit
-		openOrder.ClosedTime = order.UpdateTime
-		openOrder.ClosedPrice = order.Avg_price
-		openOrder.CloseOrderId = order.ID
-		if _, err := o.Update(&openOrder, "Inexact_profit", "ClosedTime", "ClosedPrice", "CloseOrderId"); err != nil {
-			logs.Error("link futures close order to open order:", err)
-		}
-		logs.Info("Updated order status for open order, symbol:", openOrder.Symbol)
 	}
 }
 
@@ -1174,54 +1097,7 @@ func getTransformOpenOrdersContext(ctx context.Context) (useOrders []types.Futur
 	return useOrders, err
 }
 
-var orderCount = 0 // 计数器, 当连续平仓盈利 2次(或亏损2次)后,增大(缩小)窗口
-func AutoLossScale(systemConfig *models.Config, flag bool) {
-	if systemConfig.LossAutoScale == 0 {
-		return
-	}
-	if flag {
-		orderCount += 1
-	} else {
-		orderCount -= 1
-	}
-	if orderCount >= 2 {
-		orderCount = 0
-		// 增加窗口
-		orm.NewOrm().QueryTable("config").Filter("id", systemConfig.ID).Update(orm.Params{
-			"loss_max_count": systemConfig.LossMaxCount + 1,
-		})
-	}
-	if orderCount <= -2 {
-		orderCount = 0
-		newCount := systemConfig.LossMaxCount - 1
-		if newCount < 1 {
-			newCount = 1
-		}
-		// 减小窗口
-		orm.NewOrm().QueryTable("config").Filter("id", systemConfig.ID).Update(orm.Params{
-			"loss_max_count": newCount,
-		})
-	}
-}
-
-var trueLossTradeCount = 0 // 连续亏损计数器
-func autoTradeToTest(systemConfig *models.Config, isProfit bool) {
-	if systemConfig.FutureTestAutoTradeCountLimit <= 0 {
-		return
-	}
-	// 真实交易平仓n次都是亏损时，自动开启测试交易，关闭真实交易
-	if !isProfit {
-		trueLossTradeCount += 1
-	} else {
-		trueLossTradeCount = 0
-	}
-	if trueLossTradeCount >= systemConfig.FutureTestAutoTradeCountLimit {
-		logs.Info("futures loss %d times, auto close futures trade bot", trueLossTradeCount)
-		systemConfig.FutureEnable = 1 // 保持平仓策略继续运行
-		systemConfig.FutureAllowLong = 0
-		systemConfig.FutureAllowShort = 0
-		systemConfig.FutureTest = 1 // 开启测试交易
-		orm.NewOrm().Update(systemConfig)
-		trueLossTradeCount = 0
-	}
-}
+// Historical in-memory AutoLossScale/autoTradeToTest counters were removed
+// in 01-4. The active risk transition is durable, once per verified position
+// settlement: service/futuresownership/settlement.go:applySettledRisk.
+// Never reintroduce speculative ACK / unrealized-PnL risk transitions.

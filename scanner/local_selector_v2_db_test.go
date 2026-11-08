@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go_binance_futures/models"
+	"go_binance_futures/service/tradefills"
 
 	"github.com/beego/beego/v2/client/orm"
 	_ "github.com/mattn/go-sqlite3"
@@ -22,7 +23,7 @@ func setupSmartLocalV2DB(t *testing.T) orm.Ormer {
 	alias := fmt.Sprintf("smart_local_v2_%d", smartLocalV2DBSeq.Add(1))
 	smartLocalV2DBOnce.Do(func() {
 		_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
-		orm.RegisterModel(new(models.Symbols), new(models.Order), new(models.TestStrategyResults))
+		orm.RegisterModel(new(models.Symbols), new(models.FuturesManagedOrder), new(models.TestStrategyResults))
 	})
 	if err := orm.RegisterDataBase(alias, "sqlite3", fmt.Sprintf("file:%s?mode=memory&cache=shared", alias)); err != nil {
 		t.Fatal(err)
@@ -30,21 +31,56 @@ func setupSmartLocalV2DB(t *testing.T) orm.Ormer {
 	if err := orm.RunSyncdb(alias, true, false); err != nil {
 		t.Fatal(err)
 	}
-	return orm.NewOrmUsingDB(alias)
+	o := orm.NewOrmUsingDB(alias)
+	if _, err := o.Raw(tradefills.SchemaDDL).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	return o
 }
 
-func TestRecentClosedSymbolsUsesLocalOrderTable(t *testing.T) {
-	o := setupSmartLocalV2DB(t)
-	now := time.Now().UnixMilli()
-	rows := []*models.Order{
-		{AccountID: "main", ID: 1, Symbol: "RECENTUSDT", Side: "close", UpdateTime: now - 60_000},
-		{AccountID: "main", ID: 2, Symbol: "OLDUSDT", Side: "close", UpdateTime: now - 10*60_000},
-		{AccountID: "main", ID: 3, Symbol: "OPENUSDT", Side: "open", UpdateTime: now - 60_000},
+func insertManagedCooldownFixture(t *testing.T, o orm.Ormer, id int64, account, symbol, intent string, filled float64, at int64) {
+	t.Helper()
+	row := &models.FuturesManagedOrder{
+		ID: id, AccountID: account, Owner: "auto_strategy", Symbol: symbol,
+		PositionSide: "LONG", Intent: intent, ClientOrderID: fmt.Sprintf("cooldown-%d-%s-%s", id, account, symbol),
+		RequestedQty: 1, FilledQty: filled, OrderType: "MARKET",
+		Status: "filled", CreatedAt: at, UpdatedAt: at,
 	}
-	for _, row := range rows {
-		if _, err := o.Insert(row); err != nil {
+	if _, err := o.Insert(row); err != nil {
+		t.Fatal(err)
+	}
+	if filled > 0 {
+		idstr := fmt.Sprintf("%d", id)
+		_, err := o.Raw(`INSERT INTO futures_trade_fills
+        (market,account_id,symbol,order_id,trade_id,client_order_id,intent,
+        position_side,qty,price,commission,commission_asset,realized_pnl,pnl_asset,trade_time,rest_verified)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+			tradefills.MarketUSDM, account, symbol, idstr, idstr, row.ClientOrderID, intent,
+			"LONG", fmt.Sprintf("%.8f", filled), "100", "0", "USDT", "0", "USDT", at, 1).Exec()
+		if err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+func TestRecentClosedSymbolsUsesManagedFillsNotLegacyHistory(t *testing.T) {
+	o := setupSmartLocalV2DB(t)
+	now := time.Now().UnixMilli()
+	insertManagedCooldownFixture(t, o, 1, "main", "RECENTUSDT", "close", 1, now-60_000)
+	insertManagedCooldownFixture(t, o, 2, "main", "OLDUSDT", "close", 1, now-10*60_000)
+	insertManagedCooldownFixture(t, o, 3, "main", "OPENUSDT", "open", 1, now-60_000)
+	insertManagedCooldownFixture(t, o, 4, "main", "ACKONLYUSDT", "close", 0, now-10_000)
+	insertManagedCooldownFixture(t, o, 5, "main", "PARTCANCELUSDT", "stop_loss", 0.3, now-20_000)
+
+	insertManagedCooldownFixture(t, o, 6, "main", "LATEFILLUSDT", "close", 1, now-20*60_000)
+	insertManagedCooldownFixture(t, o, 7, "main", "REFRESHEDUSDT", "close", 1, now-10_000)
+	// Immutable trade times must win in BOTH directions, independent of
+	// Managed updated_at (e.g. late WS/REST insert versus later status refresh).
+	if _, err := o.Raw("UPDATE futures_trade_fills SET trade_time=? WHERE symbol='LATEFILLUSDT'", now-10_000).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw("UPDATE futures_trade_fills SET trade_time=? WHERE symbol='REFRESHEDUSDT'", now-60*60_000).Exec(); err != nil {
+		t.Fatal(err)
 	}
 
 	got, err := recentClosedSymbolsWithOrm(context.Background(), o, 5)
@@ -59,6 +95,12 @@ func TestRecentClosedSymbolsUsesLocalOrderTable(t *testing.T) {
 	}
 	if got["OPENUSDT"] {
 		t.Fatalf("open order must not trigger cooldown: %+v", got)
+	}
+	if got["ACKONLYUSDT"] || !got["PARTCANCELUSDT"] {
+		t.Fatalf("ACK-only must not cool down, real partial protective fill must cool down: %+v", got)
+	}
+	if !got["LATEFILLUSDT"] || got["REFRESHEDUSDT"] {
+		t.Fatalf("trade_time cooldown broken by mutable Managed timestamp: %+v", got)
 	}
 }
 
@@ -106,9 +148,7 @@ func TestSmartLocalV2DBEndToEndAndFailClosed(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := o.Insert(&models.Order{AccountID: "main", ID: 1, Symbol: "BBBUSDT", Side: "close", UpdateTime: now - 30_000}); err != nil {
-		t.Fatal(err)
-	}
+	insertManagedCooldownFixture(t, o, 1, "main", "BBBUSDT", "close", 1, now-30_000)
 
 	result, err := smartLocalV2WithOrm(context.Background(), o, SmartLocalV2ModeTrade, SmartLocalV2Options{
 		Limit:           3,
@@ -168,11 +208,7 @@ func TestSmartLocalV2TradeAndTestCooldownSourcesAreIndependent(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := o.Insert(&models.Order{
-		AccountID: "main", ID: 1, Symbol: "REALCOOLUSDT", Side: "close", UpdateTime: now - 30_000,
-	}); err != nil {
-		t.Fatal(err)
-	}
+	insertManagedCooldownFixture(t, o, 1, "main", "REALCOOLUSDT", "close", 1, now-30_000)
 	if _, err := o.Insert(&models.TestStrategyResults{
 		ID: 1, Symbol: "TESTCOOLUSDT", ClosePrice: "1", UpdateTime: now - 30_000,
 	}); err != nil {
@@ -228,9 +264,7 @@ func TestStage3CooldownByAccount(t *testing.T) {
 	}
 	for i, account := range []string{"main", "lead"} {
 		symbol := []string{"MAINCOOLUSDT", "LEADCOOLUSDT"}[i]
-		if _, err := o.Insert(&models.Order{ID: int64(i + 1), AccountID: account, Symbol: symbol, Side: "close", UpdateTime: now - 10_000}); err != nil {
-			t.Fatal(err)
-		}
+		insertManagedCooldownFixture(t, o, int64(i+1), account, symbol, "close", 1, now-10_000)
 	}
 	for _, tc := range []struct{ account, excluded, other string }{
 		{"main", "MAINCOOLUSDT", "LEADCOOLUSDT"},

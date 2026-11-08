@@ -149,9 +149,10 @@ func init() {
 	web.Router("/listen/funding-rate/history", &controllers.ListenCoinController{}, "get:GetFundingRateHistory") // 合约费率历史
 	web.Router("/listen/strategy-rule/test/:id", &controllers.ListenCoinController{}, "post:TestStrategyRule")   // 测试策略规则
 
-	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll") // order list 和 删除所有 order
-	web.Router("/orders/:id", &controllers.OrderController{}, "delete:Delete")        // 删除某个订单
-	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit")        // config get and edit
+	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll")         // v23 Managed position cycle history
+	web.Router("/orders/:position_id/details", &controllers.OrderController{}, "get:Details") // child orders and immutable exchange Fills
+	web.Router("/orders/:id", &controllers.OrderController{}, "delete:Delete")                // exchange history remains immutable
+	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit")                // config get and edit
 
 	// Stage 6: JWT protected, Lead-only management. No real trade runner or
 	// live order/cancel route is registered. Start/reconcile fail closed.

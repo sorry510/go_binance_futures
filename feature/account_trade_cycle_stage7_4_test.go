@@ -23,7 +23,7 @@ func TestStage74TwoAccountFourEnableModesSharedSignals(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			main, mainOpened, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+			main, mainOpened, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 			main.AccountID = binance.MainAccountID
 			main.Mock = false
 			main.LeadSymbols = nil
@@ -32,7 +32,7 @@ func TestStage74TwoAccountFourEnableModesSharedSignals(t *testing.T) {
 			main.SelectCoins = func(_ *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) { return coins[:1], nil }
 			main.EvaluateEntry = stage46BothDirections
 			main.AllowNewOpens = tc.main
-			lead, leadOpened, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+			lead, leadOpened, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 			lead.SelectCoins = func(_ *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) { return coins[:1], nil }
 			lead.EvaluateEntry = stage46BothDirections
 			lead.AllowNewOpens = tc.lead
@@ -58,7 +58,7 @@ func TestStage74TwoAccountFourEnableModesSharedSignals(t *testing.T) {
 	}
 }
 func TestStage74LeadPreflightFailureDoesNotChangeMainIntents(t *testing.T) {
-	main, mainOpened, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	main, mainOpened, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	main.AccountID = binance.MainAccountID
 	main.Mock = false
 	main.LeadSymbols = nil
@@ -66,7 +66,7 @@ func TestStage74LeadPreflightFailureDoesNotChangeMainIntents(t *testing.T) {
 	main.PreflightOpen = nil
 	main.SelectCoins = func(_ *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) { return coins[:1], nil }
 	main.EvaluateEntry = stage46BothDirections
-	lead, leadOpened, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	lead, leadOpened, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	lead.SelectCoins = func(_ *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) { return coins[:1], nil }
 	lead.EvaluateEntry = stage46BothDirections
 	lead.PreflightOpen = func(context.Context, *models.Symbols, futures.PositionSideType, float64, float64) error {
@@ -87,7 +87,7 @@ func TestStage74NoProductionLeadTradingLoop(t *testing.T) {
 	// Running the two-account simulation is intentionally restricted to tests.
 	// The only production StartTrade uses the existing Main runner and cannot
 	// instantiate the test-only Lead permit.
-	r, _, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.Mock = false
 	r.leadMockPermit = nil
 	if err := r.validate(); err == nil {

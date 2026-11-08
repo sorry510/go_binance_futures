@@ -14,7 +14,7 @@ import (
 )
 
 func TestStage42LeadPreflightDeniesAllOrdersWhenRiskNotAuthorized(t *testing.T) {
-	r, opens, _, history := stage3MockRunner(t, []string{"BTCUSDT", "ETHUSDT"})
+	r, opens, _ := stage3MockRunner(t, []string{"BTCUSDT", "ETHUSDT"})
 	risk := leadaccount.NewRiskController()
 	r.PreflightOpen = func(ctx context.Context, coin *models.Symbols, side futures.PositionSideType, qty, price float64) error {
 		d := risk.CheckOpen(ctx, leadaccount.RiskOpenOrder{AccountID: binance.LeadAccountID, Symbol: coin.Symbol, Side: string(side), Quantity: qty, ReferencePrice: price}, leadaccount.RiskSnapshot{AccountID: binance.LeadAccountID}, r.LeadSymbols)
@@ -24,12 +24,12 @@ func TestStage42LeadPreflightDeniesAllOrdersWhenRiskNotAuthorized(t *testing.T) 
 		return errors.New("blocked by default-deny Stage 4-2 risk gate")
 	}
 	runAccountTradeCycle(r)
-	if *opens != 0 || *history != 0 {
-		t.Fatalf("Lead risk gate was bypassed, opens=%d history=%d", *opens, *history)
+	if *opens != 0 {
+		t.Fatalf("Lead risk gate bypassed: opens=%d", *opens)
 	}
 }
 func TestStage42LeadDirectionPreflightIndependent(t *testing.T) {
-	r, _, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.LoadSymbols = func() ([]*models.Symbols, error) {
 		return []*models.Symbols{{Symbol: "BTCUSDT", Usdt: "100", Leverage: 4, TickSize: "0.1", StepSize: "0.01", Profit: "8", Loss: "6"}}, nil
 	}
@@ -57,7 +57,7 @@ func TestStage42LeadDirectionPreflightIndependent(t *testing.T) {
 	}
 }
 func TestStage42MainPathDoesNotCallLeadPreflight(t *testing.T) {
-	r, opens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, opens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.AccountID = binance.MainAccountID
 	r.Mock = false
 	r.leadMockPermit = nil
@@ -73,7 +73,7 @@ func TestStage42MainPathDoesNotCallLeadPreflight(t *testing.T) {
 	}
 }
 func TestStage42LeadRunnerMissingPreflightRejected(t *testing.T) {
-	r, _, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.PreflightOpen = nil
 	if err := r.validate(); err == nil {
 		t.Fatal("Lead trade loop accepted missing risk gate")

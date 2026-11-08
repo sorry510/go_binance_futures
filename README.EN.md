@@ -89,7 +89,7 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | System Dashboard (`系统看板`) | Top-level menu for Database, Binance, Market Intelligence, MCP, LLM, Scheduler, Agent Runtime, and Trade Safety health, plus a read-only Lead-account summary (WS, 5-minute REST usage, and alert-queue availability), while retaining long-term traces, model/Tool/Skill metrics, and change history |
 | Futures Trade → Futures Trade (`合约交易 → 合约交易`) | Browse `Favorites`, `USDT`, and `USDC` symbols; add, search, batch-edit, enable all, or disable all symbol configurations |
 | Futures Trade → Lead Copy Trading (`合约交易 → 合约带单`) | Isolated Lead-account **management/read-only UI** (`/futures/lead`): credentials, read-only verification, risk limits, pause, locally managed positions/orders, audit history and WS/API health. **No live Lead order execution is authorized.** |
-| Futures Trade → Futures Orders (`合约交易 → 合约订单`) | Search real futures order history by symbol and time range |
+| Futures Trade → Futures Orders (`合约交易 → 合约订单`) | **New managed-cycle history (Stage 01-5, pending 01-6 release)**: position_id summary rows with expandable OPEN/CLOSE/TP/SL Managed orders and exchange Fills, main/Lead account isolation and completeness flags; excludes legacy `order` rows |
 | Futures Trade → Futures Account (`合约交易 → 合约账户`) | View Binance futures assets, positions, and open orders |
 | Futures Trade → Local Futures Account (`合约交易 → 本地合约账户`) | View assets, positions, and orders recorded locally by the application |
 | Futures Trade → Strategy Templates (`合约交易 → 策略模板`) | Create and maintain indicator and strategy-method templates |
@@ -398,7 +398,7 @@ When the `Test Auto-Conversion Count Limit` is non-zero, consecutive simulated w
 
 ## futures-trade-order
 
-- **Futures Orders:** automatic-trading order history. Profit is estimated from order data and may differ slightly from Binance's final result.
+- **Futures Orders** (**Stage 01-5, pending Stage 01-6 deployment**): one row per Managed `position_id`; expandable OPEN/CLOSE/TP/SL orders and actual Binance trades, including execution quantity, price, fees and order/trade IDs. **Verified net trading PnL** (realized trade PnL minus commissions, **excluding funding**) and opening-notional return are displayed only for fully REST-confirmed settled cycles. Incomplete/legacy cycles are marked for reconciliation, never assigned speculative profits. Historic leverage is shown as unavailable when no immutable snapshot exists. Old `order` history is not migrated; authentic Fill rows cannot be deleted. Read access to main/Lead histories is restricted to the single authenticated operator, not a public data API.
 - **Futures Account:** assets, positions, and open orders returned by Binance.
 - **Local Futures Account:** the application's local account state, useful for comparing local data with exchange data.
 

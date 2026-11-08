@@ -280,6 +280,10 @@ func (s Service) settleVerifiedFlat(ctx context.Context, positionID int64, verif
 	return result, nil
 }
 
+// applySettledRisk is the ONLY active automatic loss-scale/test-mode trigger.
+// It runs inside the once-only verified settlement transaction. Missing
+// zero-position exchange proof must remain INCOMPLETE with operator alarm,
+// never use old speculative prices as a fallback.
 func applySettledRisk(tx orm.TxOrmer, netSign int) error {
 	db, err := orm.GetDB("default")
 	if err != nil {
