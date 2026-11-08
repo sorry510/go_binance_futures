@@ -10,7 +10,12 @@ type TradeCoin6 struct {
 
 // 策略: 最近5min交易过的币不再交易,从交易额最高的前150个币中随机选取5个
 func (tradeCoin TradeCoin6) SelectCoins(allCoins []*models.Symbols) (coins []*models.Symbols) {
-	exclude_symbols_map := getLimitMinLocalOrder(5)
+	exclude_symbols_map, err := getLimitMinManagedClose(5)
+	if err != nil {
+		// Without an authoritative completed-order filter, never interpret
+		// missing DB results as permission to open fresh positions.
+		return []*models.Symbols{}
+	}
 	filterCoins := []*models.Symbols{}
 	for _, coin := range allCoins {
 		if _, exist := exclude_symbols_map[coin.Symbol]; exist {
@@ -20,11 +25,11 @@ func (tradeCoin TradeCoin6) SelectCoins(allCoins []*models.Symbols) (coins []*mo
 			filterCoins = append(filterCoins, coin)
 		}
 	}
-	
+
 	sort.SliceStable(filterCoins, func(i, j int) bool {
 		return filterCoins[i].QuoteVolume > filterCoins[j].QuoteVolume // 交易金额从高到低
 	})
-	
+
 	maxCount := len(filterCoins)
 	if maxCount >= 200 {
 		maxCount = 200

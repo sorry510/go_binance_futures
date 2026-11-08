@@ -318,9 +318,6 @@ func cancelTimeoutAutoStrategyOrders(timeoutSec int64) error {
 			logs.Error("cancel auto_strategy managed order:", order.ClientOrderID, err)
 			continue
 		}
-		if order.ExchangeOrderID != "" {
-			_, _ = orm.NewOrm().Raw("DELETE FROM `order` WHERE order_id = ?", order.ExchangeOrderID).Exec()
-		}
 	}
 	return nil
 }
