@@ -14,6 +14,10 @@ type FuturesManagedPosition struct {
 	UpdatedAt        int64   `orm:"column(updated_at);index" json:"updated_at"`
 	ClosedAt         int64   `orm:"column(closed_at);default(0);index" json:"closed_at"`
 	LastReconciledAt int64   `orm:"column(last_reconciled_at);default(0);index" json:"last_reconciled_at"`
+	// Existing positions remain legacy; only post-v22 positions can settle.
+	SettlementStatus      string `orm:"column(settlement_status);size(16);default(legacy);index" json:"settlement_status"`
+	SettlementProcessedAt int64  `orm:"column(settlement_processed_at);default(0);index" json:"settlement_processed_at"`
+	SettlementPNLSign     int    `orm:"column(settlement_pnl_sign);default(0)" json:"settlement_pnl_sign"`
 }
 
 func (*FuturesManagedPosition) TableName() string { return "futures_managed_positions" }
@@ -27,6 +31,8 @@ type FuturesManagedOrder struct {
 	Intent           string  `orm:"column(intent);size(24);index" json:"intent"`
 	ClientOrderID    string  `orm:"column(client_order_id);size(64);unique" json:"client_order_id"`
 	ExchangeOrderID  string  `orm:"column(exchange_order_id);size(64);null;index" json:"exchange_order_id,omitempty"`
+	PositionID       *int64  `orm:"column(position_id);null;index" json:"position_id,omitempty"`
+	ActualOrderID    *string `orm:"column(actual_order_id);size(64);null;index" json:"actual_order_id,omitempty"`
 	RequestedQty     float64 `orm:"column(requested_qty);digits(30);decimals(12);default(0)" json:"requested_qty"`
 	FilledQty        float64 `orm:"column(filled_qty);digits(30);decimals(12);default(0)" json:"filled_qty"`
 	OrderType        string  `orm:"column(order_type);size(24)" json:"order_type"`

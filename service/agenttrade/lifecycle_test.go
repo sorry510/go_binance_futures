@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/adshao/go-binance/v2/futures"
+	"go_binance_futures/service/internal/testtrades"
 	"math"
 	"testing"
 	"time"
@@ -44,6 +46,9 @@ func (b *lifecycleBroker) Submit(_ context.Context, request futuresownership.Ord
 	}
 	b.nextOrderID++
 	result := futuresownership.ExchangeOrder{ExchangeOrderID: fmt.Sprintf("%d", b.nextOrderID), ClientOrderID: clientID, Status: status, FilledQty: filled, AveragePrice: 101}
+	if request.Intent == futuresownership.IntentTakeProfit || request.Intent == futuresownership.IntentStopLoss {
+		result.ActualOrderID = result.ExchangeOrderID
+	}
 	b.orders[clientID] = result
 	return result, nil
 }
@@ -57,6 +62,9 @@ func (b *lifecycleBroker) Lookup(_ context.Context, _ string, clientID, _ string
 	return row, nil
 }
 
+func (b *lifecycleBroker) ListAccountTrades(ctx context.Context, symbol string, orderID, fromID int64, limit int) ([]*futures.AccountTrade, error) {
+	return testtrades.FromTestManagedOrder(ctx, "main", symbol, orderID, fromID, limit)
+}
 func (b *lifecycleBroker) Cancel(_ context.Context, _ string, orderID int64, _ string) error {
 	b.cancelIDs = append(b.cancelIDs, orderID)
 	return nil
@@ -325,4 +333,244 @@ func findLifecycleOrder(clientOrderID string) (models.FuturesManagedOrder, error
 	var row models.FuturesManagedOrder
 	err := orm.NewOrm().QueryTable(new(models.FuturesManagedOrder)).Filter("client_order_id", clientOrderID).One(&row)
 	return row, err
+}
+
+// R2-N3: the scheduled agent repair must replace a canceled oversized stop
+// with a confirmed exchange order for the currently managed quantity.
+func TestStageR2AgentRepairRearmsRemainingManagedProtection(t *testing.T) {
+	t.Setenv(ProtectionAutoRepairEnv, ProtectionAutoRepairEnabledValue)
+
+	prepareTradeTestDB(t)
+	ctx := context.Background()
+	proposal := baseProposal(time.UnixMilli(1_800_000_000_000).UTC())
+	proposal.Status = StatusExecuted
+	proposal.RiskStatus = RiskPass
+	proposal.ApprovedAt = proposal.CreatedAt
+	proposal.ExecutedAt = proposal.CreatedAt
+	if _, err := orm.NewOrm().Insert(&proposal); err != nil {
+		t.Fatal(err)
+	}
+	broker := newLifecycleBroker()
+	lifecycle := testOwnershipLifecycle(t, proposal, 0.5, broker)
+	original, err := lifecycle.EnsureProtection(ctx, proposal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = lifecycle.Ownership.ReconcilePosition(ctx, futuresownership.OwnerAgentTrade, proposal.Symbol, proposal.Side, 0.3); err != nil {
+		t.Fatal(err)
+	}
+	oldStop, err := lifecycle.Ownership.GetOrder(ctx, original.StopClientOrderID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = lifecycle.Executor.Cancel(ctx, futuresownership.OwnerAgentTrade, oldStop); err != nil {
+		t.Fatal(err)
+	}
+	count, err := lifecycle.RepairActiveManagedProtections(ctx)
+	if err != nil || count != 1 {
+		t.Fatalf("scheduled rearm failed: count=%d err=%v", count, err)
+	}
+	orders, err := lifecycle.Ownership.ActiveOrders(ctx, futuresownership.OwnerAgentTrade)
+	if err != nil {
+		t.Fatal(err)
+	}
+	haveStop, haveTP := false, false
+	for _, row := range orders {
+		if row.PositionID == nil || row.ExchangeOrderID == "" {
+			continue
+		}
+		if math.Abs(row.RequestedQty-row.FilledQty-0.3) > 1e-9 {
+			continue
+		}
+		if row.Intent == futuresownership.IntentStopLoss {
+			haveStop = true
+		}
+		if row.Intent == futuresownership.IntentTakeProfit {
+			haveTP = true
+		}
+	}
+	if !haveStop || !haveTP {
+		t.Fatalf("after resize no live 0.3 TP+SL exists: %+v", orders)
+	}
+	before := broker.submitCalls[futuresownership.IntentStopLoss]
+	count, err = lifecycle.RepairActiveManagedProtections(ctx)
+	if err != nil || count != 0 || broker.submitCalls[futuresownership.IntentStopLoss] != before {
+		t.Fatalf("idempotent repair created duplicate stops: count=%d err=%v", count, err)
+	}
+}
+
+func validStageR3Proposal(id, symbol string) models.AgentTradeProposal {
+	proposal := baseProposal(time.UnixMilli(1_800_000_000_000).UTC())
+	proposal.ProposalID = id
+	proposal.Symbol = symbol
+	proposal.Status = StatusExecuted
+	proposal.RiskStatus = RiskPass
+	proposal.ApprovedAt = proposal.CreatedAt
+	proposal.ExecutedAt = proposal.CreatedAt
+	return proposal
+}
+func TestStageR3ProtectionRepairDefaultDisabled(t *testing.T) {
+	prepareTradeTestDB(t)
+	t.Setenv(ProtectionAutoRepairEnv, "")
+	proposal := validStageR3Proposal("r3_optout", "BTCUSDT")
+	if _, err := orm.NewOrm().Insert(&proposal); err != nil {
+		t.Fatal(err)
+	}
+	broker := newLifecycleBroker()
+	lifecycle := testOwnershipLifecycle(t, proposal, 0.4, broker)
+	if _, err := lifecycle.RepairActiveManagedProtections(context.Background()); err == nil {
+		t.Fatal("automatic real trade order submits must require explicit opt-in")
+	}
+	if broker.submitCalls[futuresownership.IntentStopLoss] != 0 {
+		t.Fatal("default-disabled repair submitted real protection")
+	}
+}
+func TestStageR3InvalidProposalCannotRepair(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		mutate func(*models.AgentTradeProposal)
+	}{
+		{"rejected", func(p *models.AgentTradeProposal) { p.Status = StatusRejected }},
+		{"risk_failed", func(p *models.AgentTradeProposal) { p.RiskStatus = RiskFail }},
+		{"rejection_time", func(p *models.AgentTradeProposal) { p.RejectedAt = p.CreatedAt }},
+		{"expired", func(p *models.AgentTradeProposal) { p.ExpiresAt = 1 }},
+		{"unapproved", func(p *models.AgentTradeProposal) { p.ApprovedAt = 0 }},
+		{"never_executed", func(p *models.AgentTradeProposal) { p.ExecutedAt = 0 }},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			prepareTradeTestDB(t)
+			t.Setenv(ProtectionAutoRepairEnv, ProtectionAutoRepairEnabledValue)
+			p := validStageR3Proposal("r3_"+tc.name, "BTCUSDT")
+			tc.mutate(&p)
+			if _, err := orm.NewOrm().Insert(&p); err != nil {
+				t.Fatal(err)
+			}
+			broker := newLifecycleBroker()
+			lifecycle := testOwnershipLifecycle(t, p, 0.5, broker)
+			n, err := lifecycle.RepairActiveManagedProtections(context.Background())
+			if err == nil || n != 0 || broker.submitCalls[futuresownership.IntentStopLoss] != 0 ||
+				broker.submitCalls[futuresownership.IntentTakeProfit] != 0 {
+				t.Fatalf("invalid proposal submitted risk protection: n=%d err=%v calls=%+v", n, err, broker.submitCalls)
+			}
+		})
+	}
+}
+func TestStageR3FailedFirstCycleDoesNotBlockValidSecondCycle(t *testing.T) {
+	prepareTradeTestDB(t)
+	t.Setenv(ProtectionAutoRepairEnv, ProtectionAutoRepairEnabledValue)
+	bad := validStageR3Proposal("r3_missing_proposal", "BTCUSDT")
+	good := validStageR3Proposal("r3_valid_second", "ETHUSDT")
+	if _, err := orm.NewOrm().Insert(&good); err != nil {
+		t.Fatal(err)
+	}
+	broker := newLifecycleBroker()
+	lifecycle := testOwnershipLifecycle(t, bad, 0.5, broker)
+	seedAgentManagedPosition(t, good, 0.25)
+	n, err := lifecycle.RepairActiveManagedProtections(context.Background())
+	if err == nil || n != 1 {
+		t.Fatalf("failed cycle must be reported while valid second gets protection: n=%d err=%v", n, err)
+	}
+	if broker.submitCalls[futuresownership.IntentStopLoss] != 1 ||
+		broker.submitCalls[futuresownership.IntentTakeProfit] != 1 {
+		t.Fatalf("second cycle was starved by first bad cycle: %+v", broker.submitCalls)
+	}
+	orders, err := lifecycle.Ownership.ListOrders(context.Background(), futuresownership.OwnerAgentTrade, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	matched := 0
+	for _, order := range orders {
+		if order.SourceRef == good.ProposalID &&
+			(order.Intent == futuresownership.IntentTakeProfit || order.Intent == futuresownership.IntentStopLoss) &&
+			order.ExchangeOrderID != "" && math.Abs(order.RequestedQty-0.25) < 1e-9 {
+			matched++
+		}
+	}
+	if matched != 2 {
+		t.Fatalf("valid cycle missing exchange-confirmed TP/SL: matched=%d", matched)
+	}
+}
+func TestStageR3MissingTPOnlyRearmsTPAndAudits(t *testing.T) {
+	prepareTradeTestDB(t)
+	t.Setenv(ProtectionAutoRepairEnv, ProtectionAutoRepairEnabledValue)
+	proposal := validStageR3Proposal("r3_only_tp", "BTCUSDT")
+	if _, err := orm.NewOrm().Insert(&proposal); err != nil {
+		t.Fatal(err)
+	}
+	broker := newLifecycleBroker()
+	lifecycle := testOwnershipLifecycle(t, proposal, 0.5, broker)
+	initial, err := lifecycle.EnsureProtection(context.Background(), proposal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	old, err := lifecycle.Ownership.GetOrder(context.Background(), initial.TakeProfitClientOrderID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := lifecycle.Executor.Cancel(context.Background(), futuresownership.OwnerAgentTrade, old); err != nil {
+		t.Fatal(err)
+	}
+	priorStop := broker.submitCalls[futuresownership.IntentStopLoss]
+	n, err := lifecycle.RepairActiveManagedProtections(context.Background())
+	if err != nil || n != 1 {
+		t.Fatalf("TP-only recovery failed: n=%d err=%v", n, err)
+	}
+	if broker.submitCalls[futuresownership.IntentStopLoss] != priorStop ||
+		broker.submitCalls[futuresownership.IntentTakeProfit] != 2 {
+		t.Fatalf("stop should be untouched; TP must be re-armed: %+v", broker.submitCalls)
+	}
+	var attempts, successes int64
+	o := orm.NewOrm()
+	for _, query := range []struct {
+		event string
+		dst   *int64
+	}{
+		{"protection_rearm_attempt", &attempts}, {"protection_rearm", &successes},
+	} {
+		if err := o.Raw("SELECT COUNT(*) FROM agent_trade_audits WHERE proposal_id=? AND event=?", proposal.ProposalID, query.event).
+			QueryRow(query.dst); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if attempts != 1 || successes != 1 {
+		t.Fatalf("rearm audit missing attempt=%d success=%d", attempts, successes)
+	}
+	// Explicit TP error must surface, never be silently ignored.
+	updatedOrders, err := lifecycle.Ownership.ActiveOrders(context.Background(), futuresownership.OwnerAgentTrade)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, row := range updatedOrders {
+		if row.Intent == futuresownership.IntentTakeProfit && row.SourceRef == proposal.ProposalID {
+			if err := lifecycle.Executor.Cancel(context.Background(), futuresownership.OwnerAgentTrade, row); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	broker.failIntent = futuresownership.IntentTakeProfit
+	if _, err := lifecycle.RepairActiveManagedProtections(context.Background()); err == nil {
+		t.Fatal("TP submission failure was swallowed")
+	}
+}
+
+// R3-N4: any owner with unresolved exchange state must block new automatic
+// protective submits; an empty summary is not a successful reconcile.
+func TestStageR3ProtectionRepairRequiresAllOwnerReconcileSuccess(t *testing.T) {
+	auto := futuresownership.ReconcileSummary{Owner: futuresownership.OwnerAutoStrategy}
+	agent := futuresownership.ReconcileSummary{Owner: futuresownership.OwnerAgentTrade}
+	if ProtectionRepairReconcileOK(nil) || ProtectionRepairReconcileOK([]futuresownership.ReconcileSummary{auto}) {
+		t.Fatal("empty/missing agent owner was considered safe for auto rearm")
+	}
+	if !ProtectionRepairReconcileOK([]futuresownership.ReconcileSummary{auto, agent}) {
+		t.Fatal("all owners resolved should permit policy to inspect eligible positions")
+	}
+	agent.OrdersUnresolved = 1
+	if ProtectionRepairReconcileOK([]futuresownership.ReconcileSummary{auto, agent}) {
+		t.Fatal("unresolved agent order allowed protective submit")
+	}
+	agent.OrdersUnresolved = 0
+	auto.OrdersUnresolved = 1
+	if ProtectionRepairReconcileOK([]futuresownership.ReconcileSummary{auto, agent}) {
+		t.Fatal("other owner with unresolved account state allowed rearm")
+	}
 }

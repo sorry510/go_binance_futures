@@ -622,10 +622,9 @@ func insertCloseOrder(position types.FuturesPosition, positionAmtFloat float64, 
 	}
 	order.ID = closeOrderID
 
-	// 自动缩放
-	AutoLossScale(systemConfig, unRealizedProfit >= 0)
-	// 检查自动转换测试仓
-	autoTradeToTest(systemConfig, unRealizedProfit >= 0)
+	// Risk transitions are deferred until a fully verified and durable
+	// position settlement (service/futuresownership/settlement.go). Order
+	// acknowledgement and unrealized snapshots must never trigger them.
 
 	// 检查是否有相同的开仓订单,如果有则更新状态
 	var openOrder models.Order

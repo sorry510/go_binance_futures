@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"go_binance_futures/service/internal/testtrades"
+	"go_binance_futures/service/tradefills"
 	"strings"
 	"sync"
 	"testing"
@@ -21,6 +23,7 @@ import (
 var setupTradeTestDB sync.Once
 
 func prepareTradeTestDB(t testing.TB) {
+	testtrades.Reset()
 	t.Helper()
 	setupTradeTestDB.Do(func() {
 		_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
@@ -33,6 +36,12 @@ func prepareTradeTestDB(t testing.TB) {
 		}
 	})
 	o := orm.NewOrm()
+	if _, err := o.Raw(tradefills.SchemaDDL).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw("DELETE FROM futures_trade_fills").Exec(); err != nil {
+		t.Fatal(err)
+	}
 	_, _ = o.Raw("DELETE FROM futures_managed_orders").Exec()
 	_, _ = o.Raw("DELETE FROM futures_managed_positions").Exec()
 	_, _ = o.Raw("DELETE FROM agent_trade_audits").Exec()

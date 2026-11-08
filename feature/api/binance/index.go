@@ -671,6 +671,22 @@ func GetAlgoOrderByClientOrderID(ctx context.Context, clientOrderID string) (*fu
 	})
 }
 
+// ListAccountTradesByOrderIDContext fetches official USD-M execution facts
+// for the main account. A specific exchange order ID is mandatory; we never
+// search by symbol/time and guess a managed owner's trade.
+func ListAccountTradesByOrderIDContext(ctx context.Context, symbol string, orderID, fromID int64, limit int) ([]*futures.AccountTrade, error) {
+	if strings.TrimSpace(symbol) == "" || orderID <= 0 || limit < 1 || limit > 1000 {
+		return nil, fmt.Errorf("invalid account trade lookup")
+	}
+	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.AccountTrade, error) {
+		service := client.NewListAccountTradeService().Symbol(symbol).OrderID(orderID).Limit(limit)
+		if fromID > 0 {
+			service = service.FromID(fromID)
+		}
+		return service.Do(ctx, opts...)
+	})
+}
+
 func GetOrderByOrderID(ctx context.Context, symbol string, orderID int64) (*futures.Order, error) {
 	return doFuturesSigned(ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) (*futures.Order, error) {
 		return client.NewGetOrderService().Symbol(symbol).OrderID(orderID).Do(ctx, opts...)
@@ -823,6 +839,12 @@ func getOpenOrderContext(ctx context.Context, fresh bool, symbols ...string) ([]
 // 绕过缓存完成一次精度刷新。
 func GetExchangeInfo() (res *futures.ExchangeInfo, err error) {
 	ctx := binanceapiusage.WithSource(context.Background(), "exchange_info")
+	return getFuturesExchangeInfoCached(ctx, loadFuturesExchangeInfo)
+}
+
+// GetExchangeInfoContext uses the existing TTL cache and respects the caller
+// cancellation deadline. Reconciliation only reads exchange contract metadata.
+func GetExchangeInfoContext(ctx context.Context) (*futures.ExchangeInfo, error) {
 	return getFuturesExchangeInfoCached(ctx, loadFuturesExchangeInfo)
 }
 

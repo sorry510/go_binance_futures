@@ -59,12 +59,15 @@ type Config struct {
 	AgentTradeMaxSlippageBps                   int     `orm:"column(agent_trade_max_slippage_bps);default(30)" json:"agent_trade_max_slippage_bps"`
 	AgentTradeCooldownSec                      int     `orm:"column(agent_trade_cooldown_sec);default(900)" json:"agent_trade_cooldown_sec"`
 	AgentTradeProposalTTLMin                   int     `orm:"column(agent_trade_proposal_ttl_min);default(15)" json:"agent_trade_proposal_ttl_min"`
-	LossMaxCount                               int     `orm:"column(loss_max_count)" json:"loss_max_count"`                                                    // 允许开仓的最大亏损仓位临界值
-	LossAutoScale                              int     `orm:"column(loss_auto_scale)" json:"loss_auto_scale"`                                                  // 是否自动缩放 loss_max_count
-	MarketCondition                            int     `orm:"column(market_condition)" json:"market_condition"`                                                // Market condition code; see types/market_condition.go.
-	MarketConditionIsAuto                      int     `orm:"column(market_condition_is_auto)" json:"market_condition_is_auto"`                                // 0:手动 1:自动
-	FutureTestAutoTradeCountLimit              int     `orm:"column(future_test_auto_trade_count_limit)" json:"future_test_auto_trade_count_limit"`            // 测试交易与真实交易自动切换的连续盈利次数限制，为0则不启用
-	FutureTestFeeRate                          float64 `orm:"column(future_test_fee_rate);digits(12);decimals(8);default(0.0005)" json:"future_test_fee_rate"` // 测试策略单边手续费率，例如 0.0005 = 0.05%
+	LossMaxCount                               int     `orm:"column(loss_max_count)" json:"loss_max_count"`   // 允许开仓的最大亏损仓位临界值
+	LossAutoScale                              int     `orm:"column(loss_auto_scale)" json:"loss_auto_scale"` // 是否自动缩放 loss_max_count
+	// Durable risk streaks are committed with each verified position close.
+	SettlementScaleBalance        int     `orm:"column(settlement_scale_balance);default(0)" json:"settlement_scale_balance"`
+	SettlementConsecutiveLosses   int     `orm:"column(settlement_consecutive_losses);default(0)" json:"settlement_consecutive_losses"`
+	MarketCondition               int     `orm:"column(market_condition)" json:"market_condition"`                                                // Market condition code; see types/market_condition.go.
+	MarketConditionIsAuto         int     `orm:"column(market_condition_is_auto)" json:"market_condition_is_auto"`                                // 0:手动 1:自动
+	FutureTestAutoTradeCountLimit int     `orm:"column(future_test_auto_trade_count_limit)" json:"future_test_auto_trade_count_limit"`            // 测试交易与真实交易自动切换的连续盈利次数限制，为0则不启用
+	FutureTestFeeRate             float64 `orm:"column(future_test_fee_rate);digits(12);decimals(8);default(0.0005)" json:"future_test_fee_rate"` // 测试策略单边手续费率，例如 0.0005 = 0.05%
 }
 
 // 切记需要注册model后才能使用

@@ -8,8 +8,10 @@ import (
 
 	"go_binance_futures/models"
 	"go_binance_futures/service/binanceapiusage"
+	"go_binance_futures/service/internal/testtrades"
 
 	"github.com/adshao/go-binance/v2/common"
+	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 )
 
@@ -65,6 +67,9 @@ func (f *fakeOrderBroker) Lookup(context.Context, string, string, string) (Excha
 	return f.lookupResult, f.lookupErr
 }
 
+func (f *fakeOrderBroker) ListAccountTrades(ctx context.Context, symbol string, orderID, fromID int64, limit int) ([]*futures.AccountTrade, error) {
+	return testtrades.FromTestManagedOrder(ctx, "", symbol, orderID, fromID, limit)
+}
 func (f *fakeOrderBroker) Cancel(context.Context, string, int64, string) error {
 	f.cancelCalls++
 	return nil

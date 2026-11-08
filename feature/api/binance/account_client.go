@@ -182,6 +182,21 @@ func (a *AccountClient) GetOrderByClientOrderID(ctx context.Context, symbol, id 
 		return c.NewGetOrderService().Symbol(symbol).OrigClientOrderID(id).Do(ctx, o...)
 	})
 }
+
+// ListAccountTradesByOrderIDContext is credential-scoped; the Lead path may
+// not fall back to the main account, even on a transport or auth failure.
+func (a *AccountClient) ListAccountTradesByOrderIDContext(ctx context.Context, symbol string, orderID, fromID int64, limit int) ([]*futures.AccountTrade, error) {
+	if strings.TrimSpace(symbol) == "" || orderID <= 0 || limit < 1 || limit > 1000 {
+		return nil, fmt.Errorf("invalid account trade lookup")
+	}
+	return doAccountSigned(a, ctx, futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.AccountTrade, error) {
+		service := client.NewListAccountTradeService().Symbol(symbol).OrderID(orderID).Limit(limit)
+		if fromID > 0 {
+			service = service.FromID(fromID)
+		}
+		return service.Do(ctx, opts...)
+	})
+}
 func (a *AccountClient) GetOrderByOrderID(ctx context.Context, symbol string, id int64) (*futures.Order, error) {
 	return doAccountSigned(a, ctx, futuresSignedReadRecvWindow, func(c *futures.Client, ctx context.Context, o ...futures.RequestOption) (*futures.Order, error) {
 		return c.NewGetOrderService().Symbol(symbol).OrderID(id).Do(ctx, o...)
