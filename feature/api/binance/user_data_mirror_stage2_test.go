@@ -1,6 +1,7 @@
 package binance
 
 import (
+	"go_binance_futures/service/tradefills"
 	"path/filepath"
 	"testing"
 
@@ -22,11 +23,14 @@ func TestStage2UserDataMirrorIsolatedForSameSymbolAndOrderID(t *testing.T) {
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "mirror.db")); err != nil {
 		t.Fatal(err)
 	}
-	orm.RegisterModel(new(models.FuturesOrder), new(models.FuturesPosition), new(models.Symbols))
+	orm.RegisterModel(new(models.FuturesOrder), new(models.FuturesPosition), new(models.Symbols), new(models.FuturesManagedOrder))
 	if err := orm.RunSyncdb(alias, false, false); err != nil {
 		t.Fatal(err)
 	}
 	o := orm.NewOrmUsingDB(alias)
+	if _, err := o.Raw(tradefills.SchemaDDL).Exec(); err != nil {
+		t.Fatal(err)
+	}
 	sdk := futures.NewClient("fake", "fake")
 	lead, err := NewAccountClient(LeadAccountID, sdk)
 	if err != nil {
@@ -109,4 +113,25 @@ func TestStage2UserDataMirrorIsolatedForSameSymbolAndOrderID(t *testing.T) {
 	if err := persistFuturesAccountEventWithDB(o, LeadAccountID, nil, leadOrder("3.0", 300)); err == nil {
 		t.Fatal("nil lead client must fail")
 	}
+	// The ORDER_TRADE_UPDATE timestamp is older than the mirror's current
+	// order state, but the unique exchange execution must still persist.
+	late := leadOrder("0.5", 95)
+	late.OrderTradeUpdate.ExecutionType = futures.OrderExecutionType("TRADE")
+	late.OrderTradeUpdate.TradeID = 999
+	late.OrderTradeUpdate.LastFilledQty = "0.5"
+	late.OrderTradeUpdate.LastFilledPrice = "100"
+	late.OrderTradeUpdate.Commission = "0.05"
+	late.OrderTradeUpdate.CommissionAsset = "USDT"
+	late.OrderTradeUpdate.RealizedPnL = "1"
+	late.OrderTradeUpdate.TradeTime = 95
+	for i := 0; i < 100; i++ {
+		if err := persistFuturesAccountEventWithDB(o, LeadAccountID, lead, late); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var fills int64
+	if err := o.Raw("SELECT COUNT(*) FROM futures_trade_fills WHERE account_id='lead' AND order_id='777' AND trade_id='999'").QueryRow(&fills); err != nil || fills != 1 {
+		t.Fatalf("late duplicate WS events should persist one fill: %d err=%v", fills, err)
+	}
+	check("lead", "1.0")
 }

@@ -354,6 +354,21 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 			return fmt.Errorf("migrate account mirror unique indexes v19: %w", err)
 		}
 	}
+	if oldVersion < 21 && newVersion >= 21 {
+		if err := ensureFuturesTradeFillsTable(o); err != nil {
+			return fmt.Errorf("migrate futures trade fills v21: %w", err)
+		}
+	}
+	if oldVersion < 22 && newVersion >= 22 {
+		if err := ensureV22SettlementColumns(o); err != nil {
+			return fmt.Errorf("migrate v22 settlement fields: %w", err)
+		}
+	}
+	if oldVersion < 23 && newVersion >= 23 {
+		if err := ensureV23RESTVerificationColumn(o); err != nil {
+			return fmt.Errorf("migrate v23 REST-confirmed fills: %w", err)
+		}
+	}
 	to, err := o.Begin()
 	if err != nil {
 		logs.Error("begin transaction error:", err)
@@ -415,6 +430,14 @@ func SyncDatabase(targetVersion int64) error {
 		logs.Info("initialize database data success")
 	}
 
+	// Repair missing explicit settlement indexes on already-v22/v23 test
+	// databases too; a successfully advanced version alone does not prove
+	// that MySQL auto-index creation succeeded on every installation.
+	if systemConfig.Version >= 22 {
+		if err := ensureV22SettlementIndexes(orm.NewOrm()); err != nil {
+			return fmt.Errorf("verify v22 settlement indexes: %w", err)
+		}
+	}
 	if systemConfig.Version < targetVersion {
 		logs.Info("update database version:", systemConfig.Version, "->", targetVersion)
 		if err := UpdateDatabase(systemConfig.Version, targetVersion); err != nil {

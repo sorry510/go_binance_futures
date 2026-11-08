@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"go_binance_futures/models"
+
 	"github.com/beego/beego/v2/client/orm"
 )
 
@@ -83,7 +85,7 @@ func TestManualFundingRateClaimCarriesExitEligibilityPrefix(t *testing.T) {
 	}
 }
 
-func TestManualClaimRevivesClosedHistoricalOwnership(t *testing.T) {
+func TestManualClaimCreatesNewCycleAfterClosedHistoricalOwnership(t *testing.T) {
 	prepareOwnershipDB(t)
 	s := testService()
 	ctx := context.Background()
@@ -102,8 +104,13 @@ func TestManualClaimRevivesClosedHistoricalOwnership(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if pos.ID != old.ID || pos.Owner != OwnerNewCoinRush || pos.ManagedQty != 1.04 {
-		t.Fatalf("expected same row reactivated with new owner: %+v", pos)
+	if pos.ID == old.ID || pos.Owner != OwnerNewCoinRush || pos.ManagedQty != 1.04 {
+		t.Fatalf("expected a new position cycle after prior close: %+v", pos)
+	}
+	var original models.FuturesManagedPosition
+	if err := orm.NewOrm().QueryTable(new(models.FuturesManagedPosition)).Filter("id", old.ID).One(&original); err != nil ||
+		original.Status != PositionClosed || original.ManagedQty != 0 || original.Owner != OwnerAutoStrategy {
+		t.Fatalf("prior closed cycle must remain immutable: %+v err=%v", original, err)
 	}
 	audits, err := s.ManualClaims(ctx, 10)
 	if err != nil || len(audits) != 1 || audits[0].PreviousStatus != PositionClosed ||

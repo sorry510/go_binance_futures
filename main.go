@@ -444,18 +444,51 @@ func main() {
 		if !futuresTradingConfigured() {
 			return
 		}
-		if summaries, err := futuresownership.DefaultReconciler().ReconcileAll(context.Background()); err != nil {
+		reconcileCtx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+		defer cancel()
+		if summaries, err := futuresownership.DefaultReconciler().ReconcileAll(reconcileCtx); err != nil {
 			logs.Warning("periodic futures ownership reconcile:", err)
 		} else {
 			logs.Debug("periodic futures ownership reconcile complete:", len(summaries), "owners checked")
-			if updated, syncErr := agenttrade.DefaultService().SyncClosedManagedProposals(context.Background(), "ownership_reconcile"); syncErr != nil {
+			if updated, syncErr := agenttrade.DefaultService().SyncClosedManagedProposals(reconcileCtx, "ownership_reconcile"); syncErr != nil {
 				logs.Warning("sync closed agent trade proposals:", syncErr)
 			} else if updated > 0 {
 				logs.Info("agent trade proposal ownership reconcile:", updated, "proposals closed")
 			}
+			// Never submit even the pre-existing notice repair if the
+			// bounded account reconciliation context has expired.
+			if reconcileCtx.Err() != nil {
+				return
+			}
 			// Only rebuild notice protection after account/ownership reconciliation
 			// succeeds; otherwise stale managed quantity could over-protect a position.
 			feature.RepairNoticeAutoOrderProtections()
+		}
+	}, time.Minute)
+
+	// Real SL/TP submissions are deliberately NOT part of the ownership
+	// reconciliation loop. This optional independent worker is disabled
+	// unless the operator explicitly sets BINANCE_AGENT_PROTECTION_AUTO_REPAIR=enabled.
+	// It requires a fresh, fully resolved agent owner reconcile and cannot
+	// block the main ownership loop if the exchange stalls.
+	loopRun(func() {
+		if !futuresTradingConfigured() || !agenttrade.AutomaticProtectionRepairEnabled() {
+			return
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		summaries, err := futuresownership.DefaultReconciler().ReconcileAll(ctx)
+		if err != nil || !agenttrade.ProtectionRepairReconcileOK(summaries) {
+			logs.Warning("报警: auto protection rearm skipped: account ownership reconcile incomplete",
+				" owner_summaries=", len(summaries), " err=", err)
+			return
+		}
+		cycles, err := agenttrade.DefaultOwnershipLifecycle().RepairActiveManagedProtections(ctx)
+		if err != nil {
+			logs.Warning("报警: auto protection rearm unresolved: ", err)
+		}
+		if cycles > 0 {
+			logs.Info("agent_trade automatically repaired protected cycles: ", cycles)
 		}
 	}, time.Minute)
 

@@ -207,11 +207,12 @@ func (s Service) claimVerifiedManualPosition(ctx context.Context, input ManualCl
 	if audit.ID, err = tx.Insert(&audit); err != nil {
 		return models.FuturesManagedPosition{}, err
 	}
-	position := previous
-	position.AccountID = accountID
-	position.Owner, position.Symbol, position.PositionSide = input.Owner, input.Symbol, input.PositionSide
-	position.ManagedQty, position.EntryPrice = input.Quantity, entryPrice
-	position.Status = PositionActive
+	// Never revive a closed cycle: every manual claim is a new position ID.
+	// The audit still records the previous closed cycle without altering it.
+	position := models.FuturesManagedPosition{
+		AccountID: accountID, Owner: input.Owner, Symbol: input.Symbol, PositionSide: input.PositionSide,
+		ManagedQty: input.Quantity, EntryPrice: entryPrice, Status: PositionActive, CreatedAt: now, SettlementStatus: "open",
+	}
 	position.SourceRef = fmt.Sprintf("manual_repair:%d", audit.ID)
 	if input.Owner == OwnerFundingRate {
 		// The shared main strategy-exit loop intentionally filters funding
@@ -221,23 +222,7 @@ func (s Service) claimVerifiedManualPosition(ctx context.Context, input ManualCl
 	}
 	position.UpdatedAt, position.LastReconciledAt = now, now
 	position.ClosedAt = 0
-	if position.ID == 0 {
-		position.CreatedAt = now
-		position.ID, err = tx.Insert(&position)
-	} else {
-		var affected int64
-		affected, err = tx.QueryTable(new(models.FuturesManagedPosition)).
-			Filter("id", previous.ID).Filter("account_id", accountID).
-			Filter("status", previous.Status).Filter("managed_qty", previous.ManagedQty).
-			Filter("updated_at", previous.UpdatedAt).
-			Update(orm.Params{"owner": position.Owner, "managed_qty": position.ManagedQty,
-				"entry_price": position.EntryPrice, "status": position.Status,
-				"source_ref": position.SourceRef, "updated_at": position.UpdatedAt,
-				"last_reconciled_at": position.LastReconciledAt, "closed_at": int64(0)})
-		if err == nil && affected != 1 {
-			err = fmt.Errorf("ownership changed concurrently; refresh and retry")
-		}
-	}
+	position.ID, err = tx.Insert(&position)
 	if err != nil {
 		return models.FuturesManagedPosition{}, err
 	}
