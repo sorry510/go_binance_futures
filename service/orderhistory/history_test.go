@@ -30,7 +30,7 @@ func historyDB(t *testing.T) (orm.Ormer, Store) {
 				t.Fatal(e)
 			}
 		}
-		orm.RegisterModel(new(models.FuturesManagedPosition), new(models.FuturesManagedOrder))
+		orm.RegisterModel(new(models.FuturesManagedPosition), new(models.FuturesManagedOrder), new(models.OrderHistoryAdminAudit), new(models.FuturesOwnershipAdjustment))
 	})
 	alias := fmt.Sprintf("s510_history015_%d", nextAlias.Add(1))
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "history.db")); err != nil {
@@ -44,7 +44,8 @@ func historyDB(t *testing.T) (orm.Ormer, Store) {
 		t.Fatal(err)
 	}
 	return o, Store{DB: o, Now: func() time.Time { return time.UnixMilli(1800000010000).UTC() },
-		ActivatedAt: func(account string) (int64, error) { return 1799999999000, nil }}
+		ActivatedAt:                  func(account string) (int64, error) { return 1799999999000, nil },
+		DisableRowLockForSQLiteTests: true}
 }
 func positionFixture(t *testing.T, o orm.Ormer, account, owner, symbol, side, status, settlement string, closed bool) int64 {
 	t.Helper()

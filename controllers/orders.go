@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,7 +14,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// OrderController exposes ONLY read-only v23 Managed/Fill order history.
+// OrderController exposes Managed/Fill history and audited, presentation-only
+// bulk administration. No exchange order or execution ledger can be deleted.
 // The physical legacy `order` table is deliberately never read or deleted.
 type OrderController struct{ web.Controller }
 
@@ -42,6 +45,138 @@ func (ctrl *OrderController) authorized() bool {
 		return false
 	}
 	return true
+}
+
+func (ctrl *OrderController) historyOperator() string {
+	claims, ok := ctrl.Ctx.Input.GetData("user").(jwt.MapClaims)
+	if !ok {
+		return ""
+	}
+	operator, _ := claims["Username"].(string)
+	return strings.TrimSpace(operator)
+}
+func (ctrl *OrderController) parseBulkRequest() (orderhistory.BulkRequest, error) {
+	var req orderhistory.BulkRequest
+	// Limit request bodies and reject unknown fields to prevent accidental
+	// narrowing/expanding the batch scope from a misspelled query property.
+	// Beego may have pre-read the request body when CopyRequestBody is
+	// enabled. Prefer its captured bytes and fall back to the stream.
+	body := ctrl.Ctx.Input.RequestBody
+	if len(body) == 0 {
+		var err error
+		body, err = io.ReadAll(io.LimitReader(ctrl.Ctx.Request.Body, 8193))
+		if err != nil {
+			return req, err
+		}
+	}
+	if len(body) > 8192 {
+		return req, orderhistory.ErrInvalidQuery
+	}
+	var err error
+	decoder := json.NewDecoder(strings.NewReader(string(body)))
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&req); err != nil {
+		return req, err
+	}
+	var trailing any
+	if err = decoder.Decode(&trailing); err != io.EOF {
+		return req, orderhistory.ErrInvalidQuery
+	}
+	return req, nil
+}
+func (ctrl *OrderController) DeleteFiltered() {
+	if !ctrl.authorized() {
+		return
+	}
+	var req orderhistory.PhysicalDeleteRequest
+	if err := ctrl.parseStrictBody(&req); err != nil {
+		ctrl.respondError(400, "invalid history delete request")
+		return
+	}
+	result, err := (orderhistory.Store{}).DeleteMatching(ctrl.Ctx.Request.Context(), req)
+	if err != nil {
+		switch {
+		case errors.Is(err, orderhistory.ErrInvalidQuery):
+			ctrl.respondError(400, err.Error())
+		case errors.Is(err, orderhistory.ErrDeleteNotTerminal),
+			errors.Is(err, orderhistory.ErrDeleteCooldown),
+			errors.Is(err, orderhistory.ErrBulkTooLarge):
+			ctrl.respondError(400, err.Error())
+		case errors.Is(err, orderhistory.ErrDeleteChanged):
+			ctrl.respondError(409, err.Error())
+		default:
+			ctrl.respondError(500, "failed to delete historical position cycles")
+		}
+		return
+	}
+	ctrl.success(result)
+}
+func (ctrl *OrderController) parseStrictBody(out any) error {
+	body := ctrl.Ctx.Input.RequestBody
+	if len(body) == 0 {
+		read, err := io.ReadAll(io.LimitReader(ctrl.Ctx.Request.Body, 8193))
+		if err != nil {
+			return err
+		}
+		body = read
+	}
+	if len(body) > 8192 {
+		return orderhistory.ErrInvalidQuery
+	}
+	decoder := json.NewDecoder(strings.NewReader(string(body)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(out); err != nil {
+		return err
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		return orderhistory.ErrInvalidQuery
+	}
+	return nil
+}
+func (ctrl *OrderController) BulkPreview() {
+	if !ctrl.authorized() {
+		return
+	}
+	req, err := ctrl.parseBulkRequest()
+	if err != nil {
+		ctrl.respondError(400, "invalid batch request")
+		return
+	}
+	preview, err := (orderhistory.Store{}).Preview(ctrl.Ctx.Request.Context(), req)
+	if err != nil {
+		if errors.Is(err, orderhistory.ErrInvalidQuery) || errors.Is(err, orderhistory.ErrBulkTooLarge) || errors.Is(err, orderhistory.ErrBulkActive) {
+			ctrl.respondError(400, err.Error())
+			return
+		}
+		ctrl.respondError(500, "history bulk preview unavailable")
+		return
+	}
+	ctrl.success(preview)
+}
+func (ctrl *OrderController) BulkApply() {
+	if !ctrl.authorized() {
+		return
+	}
+	req, err := ctrl.parseBulkRequest()
+	if err != nil {
+		ctrl.respondError(400, "invalid batch request")
+		return
+	}
+	applied, err := (orderhistory.Store{}).Apply(ctrl.Ctx.Request.Context(), req, ctrl.historyOperator())
+	if err != nil {
+		if errors.Is(err, orderhistory.ErrBulkConflict) {
+			ctrl.respondError(409, err.Error())
+			return
+		}
+		if errors.Is(err, orderhistory.ErrInvalidQuery) || errors.Is(err, orderhistory.ErrBulkTooLarge) || errors.Is(err, orderhistory.ErrBulkActive) {
+			ctrl.respondError(400, err.Error())
+			return
+		}
+		ctrl.respondError(500, "history bulk update unavailable")
+		return
+	}
+	ctrl.success(applied)
 }
 
 func parseHistoryInt(s string, def int) (int, error) {

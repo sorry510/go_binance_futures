@@ -26,9 +26,16 @@ var ownerPattern = regexp.MustCompile(`^[a-z][a-z0-9_]{0,31}$`)
 var symbolPattern = regexp.MustCompile(`^[A-Z0-9]{1,32}$`)
 
 type Filter struct {
-	AccountID, Owner, Symbol, PositionSide, Status, Settlement string
-	StartTime, EndTime                                         int64
-	Page, Limit                                                int
+	AccountID    string `json:"account_id"`
+	Owner        string `json:"owner"`
+	Symbol       string `json:"symbol"`
+	PositionSide string `json:"position_side"`
+	Status       string `json:"status"`
+	Settlement   string `json:"settlement"`
+	StartTime    int64  `json:"start_time"`
+	EndTime      int64  `json:"end_time"`
+	Page         int    `json:"page"`
+	Limit        int    `json:"limit"`
 }
 
 func (q Filter) validated() (Filter, error) {
@@ -85,33 +92,39 @@ type AssetFee struct {
 	Amount string `json:"amount"`
 }
 type Position struct {
-	PositionID        int64      `json:"position_id"`
-	AccountID         string     `json:"account_id"`
-	Owner             string     `json:"owner"`
-	Symbol            string     `json:"symbol"`
-	PositionSide      string     `json:"position_side"`
-	Status            string     `json:"status"`
-	SettlementStatus  string     `json:"settlement_status"`
-	Completeness      string     `json:"completeness"`
-	IncompleteReason  string     `json:"incomplete_reason,omitempty"`
-	OpenQty           string     `json:"open_qty"`
-	CloseQty          string     `json:"close_qty"`
-	RemainingQty      string     `json:"remaining_qty"`
-	OpenAvgPrice      *string    `json:"open_avg_price"`
-	CloseAvgPrice     *string    `json:"close_avg_price"`
-	GrossPnL          *string    `json:"gross_pnl"`
-	NetPnL            *string    `json:"net_pnl"`
-	ReturnPct         *string    `json:"return_pct"`
-	PnLAsset          string     `json:"pnl_asset,omitempty"`
-	Fees              []AssetFee `json:"fees"`
-	Leverage          *int       `json:"leverage"`
-	CreatedAt         int64      `json:"created_at"`
-	UpdatedAt         int64      `json:"updated_at"`
-	ClosedAt          int64      `json:"closed_at"`
-	DurationMillis    int64      `json:"duration_millis"`
-	OrderCount        int        `json:"order_count"`
-	FillCount         int        `json:"fill_count"`
-	RESTVerifiedFills int        `json:"rest_verified_fills"`
+	PositionID              int64      `json:"position_id"`
+	AccountID               string     `json:"account_id"`
+	Owner                   string     `json:"owner"`
+	Symbol                  string     `json:"symbol"`
+	PositionSide            string     `json:"position_side"`
+	Status                  string     `json:"status"`
+	SystemStatus            string     `json:"system_status"`
+	SystemCompleteness      string     `json:"system_completeness"`
+	SystemIncompleteReason  string     `json:"system_incomplete_reason,omitempty"`
+	StatusManuallySet       bool       `json:"status_manually_set"`
+	CompletenessManuallySet bool       `json:"completeness_manually_set"`
+	HistoryModifiedAt       int64      `json:"history_modified_at"`
+	SettlementStatus        string     `json:"settlement_status"`
+	Completeness            string     `json:"completeness"`
+	IncompleteReason        string     `json:"incomplete_reason,omitempty"`
+	OpenQty                 string     `json:"open_qty"`
+	CloseQty                string     `json:"close_qty"`
+	RemainingQty            string     `json:"remaining_qty"`
+	OpenAvgPrice            *string    `json:"open_avg_price"`
+	CloseAvgPrice           *string    `json:"close_avg_price"`
+	GrossPnL                *string    `json:"gross_pnl"`
+	NetPnL                  *string    `json:"net_pnl"`
+	ReturnPct               *string    `json:"return_pct"`
+	PnLAsset                string     `json:"pnl_asset,omitempty"`
+	Fees                    []AssetFee `json:"fees"`
+	Leverage                *int       `json:"leverage"`
+	CreatedAt               int64      `json:"created_at"`
+	UpdatedAt               int64      `json:"updated_at"`
+	ClosedAt                int64      `json:"closed_at"`
+	DurationMillis          int64      `json:"duration_millis"`
+	OrderCount              int        `json:"order_count"`
+	FillCount               int        `json:"fill_count"`
+	RESTVerifiedFills       int        `json:"rest_verified_fills"`
 }
 
 // ManagedOrderView is an intentional public response allowlist. SourceRef
@@ -175,6 +188,9 @@ type Store struct {
 	// ActivatedAt injects a durable, explicitly approved UTC Unix-ms T0
 	// during tests. Production reads account-scoped process configuration.
 	ActivatedAt func(account string) (int64, error)
+	// Test-only: SQLite cannot parse SELECT ... FOR UPDATE. Production
+	// store uses InnoDB row locking for destructive operations.
+	DisableRowLockForSQLiteTests bool
 }
 
 // ConfiguredHistoryT0 is deliberately fail-closed. T0 is never inferred
@@ -304,28 +320,7 @@ func (s Store) List(ctx context.Context, q Filter) (Page, error) {
 	if err != nil {
 		return Page{}, err
 	}
-	qs := s.db().QueryTable(new(models.FuturesManagedPosition)).Filter("account_id", q.AccountID)
-	if q.Owner != "" {
-		qs = qs.Filter("owner", q.Owner)
-	}
-	if q.Symbol != "" {
-		qs = qs.Filter("symbol__icontains", q.Symbol)
-	}
-	if q.PositionSide != "" {
-		qs = qs.Filter("position_side", q.PositionSide)
-	}
-	if q.Status != "" {
-		qs = qs.Filter("status", q.Status)
-	}
-	if q.Settlement != "" {
-		qs = qs.Filter("settlement_status", q.Settlement)
-	}
-	if q.StartTime > 0 {
-		qs = qs.Filter("created_at__gte", q.StartTime)
-	}
-	if q.EndTime > 0 {
-		qs = qs.Filter("created_at__lte", q.EndTime)
-	}
+	qs := batchScope(q, s.db())
 	total, err := qs.Count()
 	if err != nil {
 		return Page{}, err
@@ -450,6 +445,32 @@ func (s Store) project(ctx context.Context, positions []models.FuturesManagedPos
 			return nil, nil, err
 		}
 		summary, children := summarize(p, ordersByID[p.ID], fillsByID[p.ID], includeFills, now, t0)
+		summary.SystemCompleteness = summary.Completeness
+		summary.SystemIncompleteReason = summary.IncompleteReason
+		summary.SystemStatus = p.Status
+		summary.HistoryModifiedAt = p.HistoryModifiedAt
+		if p.HistoryStatusOverride != "" {
+			summary.Status = p.HistoryStatusOverride
+			summary.StatusManuallySet = true
+		}
+		if p.HistoryCompletenessOverride != "" {
+			summary.Completeness = p.HistoryCompletenessOverride
+			summary.CompletenessManuallySet = true
+			// Operator review does NOT authenticate underlying Fills or
+			// create an official exchange profit/settlement certification.
+			summary.NetPnL = nil
+			summary.GrossPnL = nil
+			summary.ReturnPct = nil
+			summary.PnLAsset = ""
+			summary.Fees = []AssetFee{}
+			summary.IncompleteReason = "history_manual_review"
+			for i := range children {
+				children[i].Completeness = "incomplete"
+				children[i].GrossPnL = nil
+				children[i].PnLAsset = ""
+				children[i].Fees = []AssetFee{}
+			}
+		}
 		result = append(result, summary)
 		details[p.ID] = children
 	}
