@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/service/binanceapiusage"
+	"go_binance_futures/service/spotstrategy"
 	"go_binance_futures/spot/api/binance"
 	"go_binance_futures/utils"
 	"strconv"
@@ -43,7 +44,6 @@ func TryRush(systemConfig models.Config) {
 		}
 		return
 	}
-
 	o := orm.NewOrm()
 	var coins []models.NewSymbols
 	o.QueryTable("new_symbols").OrderBy("ID").Filter("enable", 1).Filter("type", 1).All(&coins) // 允许抢购的币
@@ -52,6 +52,15 @@ func TryRush(systemConfig models.Config) {
 
 	for _, coin := range coins {
 		if coin.StepSize != "0" {
+			intent, err := spotstrategy.LegacyIntentForSide(coin.Side)
+			if err != nil {
+				logs.Warning("spot rush invalid side:", coin.Symbol, coin.Side)
+				continue
+			}
+			if err := spotstrategy.AuthorizeLegacyOrder(spotstrategy.SourceRush, coin.Symbol, intent); err != nil {
+				// Do not mark the old exit request as processed.
+				continue
+			}
 			if coin.Side == "buy" {
 				_, err := tryBuyMarket(coin, coin.StepSize)
 				if err == nil {
@@ -169,36 +178,41 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 		nowPrice, _ := strconv.ParseFloat(resPrice[0].Price, 64)   // 预计交易价格
 		noticePrice, _ := strconv.ParseFloat(coin.NoticePrice, 64) // 预警价格
 		if coin.HasNotice == 0 {
-			var autoOrderText = "no"
-			if coin.AutoOrder == 1 {
-				autoOrderText = "yes"
-			}
 			if nowPrice <= noticePrice && coin.Side == "buy" {
-				// 买币，价格低于预警价格，进行通知
 				canOrder = true
-				pusher.SetModuleName("coin_notice").SpotNotice(notify.SpotNoticeParams{
-					Title:     lang.Lang("spot.notice_price_title"),
-					Symbol:    coin.Symbol,
-					Side:      "buy",
-					Price:     noticePrice,
-					AutoOrder: autoOrderText,
-				})
 			}
 			if nowPrice >= noticePrice && coin.Side == "sell" {
-				// 卖币，价格高于预警价格，进行通知
 				canOrder = true
-				pusher.SetModuleName("coin_notice").SpotNotice(notify.SpotNoticeParams{
-					Title:     lang.Lang("spot.notice_price_title"),
-					Symbol:    coin.Symbol,
-					Side:      "sell",
-					Price:     noticePrice,
-					AutoOrder: autoOrderText,
-				})
 			}
 			if canOrder {
+				// Order-producing alerts must pass the persisted mode gate
+				// BEFORE any notification or has_notice/enable mutation.
+				// Otherwise a blocked legacy SELL would be consumed forever.
+				if coin.AutoOrder == 1 {
+					intent, sideErr := spotstrategy.LegacyIntentForSide(coin.Side)
+					if sideErr != nil {
+						logs.Warning("legacy spot notice invalid side: ", coin.Side)
+						continue
+					}
+					if gateErr := spotstrategy.AuthorizeLegacyOrder(spotstrategy.SourceNotice, coin.Symbol, intent); gateErr != nil {
+						logs.Warning("legacy spot notice pending (not consumed): ", gateErr)
+						continue
+					}
+				}
+				autoOrderText := "no"
+				if coin.AutoOrder == 1 {
+					autoOrderText = "yes"
+				}
+				pusher.SetModuleName("coin_notice").SpotNotice(notify.SpotNoticeParams{
+					Title: lang.Lang("spot.notice_price_title"), Symbol: coin.Symbol,
+					Side: coin.Side, Price: noticePrice, AutoOrder: autoOrderText,
+				})
 				coin.HasNotice = 1
-				coin.Enable = 0 // 更新为关闭
-				orm.NewOrm().Update(&coin)
+				coin.Enable = 0
+				if _, updateErr := orm.NewOrm().Update(&coin); updateErr != nil {
+					logs.Error("spot notice state update failed:", coin.Symbol, updateErr)
+					continue
+				}
 			}
 		}
 		if coin.AutoOrder == 1 && canOrder {
@@ -210,7 +224,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 			}
 			quantity = utils.GetTradePrecision(quantity, coin.StepSize) // 合理精度的数量
 			if coin.Side == "buy" {
-				_, err := binance.BuyMarket(coin.Symbol, quantity)
+				_, err := binance.BuyMarket(coin.Symbol, quantity, spotstrategy.SourceNotice)
 				if err != nil {
 					logs.Error("购买失败symbol:", coin.Symbol)
 					logs.Error("err:", err.Error())
@@ -256,7 +270,7 @@ func NoticeAndAutoOrder(systemConfig models.Config) {
 				}
 			}
 			if coin.Side == "sell" {
-				_, err := binance.SellMarket(coin.Symbol, quantity)
+				_, err := binance.SellMarket(coin.Symbol, quantity, spotstrategy.SourceNotice)
 				if err != nil {
 					logs.Error("卖出失败symbol:", coin.Symbol)
 					logs.Error("err:", err.Error())
@@ -316,10 +330,10 @@ func tryBuyMarket(coin models.NewSymbols, stepSize string) (res *spot_api.Create
 
 	if coin.ExpectPrice != "0" {
 		// 挂单价格
-		res, err = binance.BuyLimit(symbol, quantity, buyPrice)
+		res, err = binance.BuyLimit(symbol, quantity, buyPrice, spotstrategy.SourceRush)
 	} else {
 		// 市价
-		res, err = binance.BuyMarket(symbol, quantity)
+		res, err = binance.BuyMarket(symbol, quantity, spotstrategy.SourceRush)
 	}
 
 	if err != nil {
@@ -353,10 +367,10 @@ func trySellMarket(coin models.NewSymbols, stepSize string) (res *spot_api.Creat
 		// 挂单价格
 		sellPrice, _ := strconv.ParseFloat(coin.ExpectPrice, 64)      // 挂单价格
 		sellPrice = utils.GetTradePrecision(sellPrice, coin.TickSize) // 合理精度的价格
-		res, err = binance.SellLimit(symbol, quantity_float64, sellPrice)
+		res, err = binance.SellLimit(symbol, quantity_float64, sellPrice, spotstrategy.SourceRush)
 	} else {
 		// 市价
-		res, err = binance.SellMarket(symbol, quantity_float64)
+		res, err = binance.SellMarket(symbol, quantity_float64, spotstrategy.SourceRush)
 	}
 
 	if err != nil {
@@ -487,17 +501,19 @@ func UpdateSymbolsTradePrecision() {
 		}
 		// Creating metadata does not enable spot trading. WS fills prices.
 		_, err := o.Insert(&models.SpotSymbols{
-			Symbol:       symbol.Symbol,
-			Enable:       0,
-			TickSize:     tickSize,
-			StepSize:     stepSize,
-			Usdt:         "10",
-			Profit:       "10",
-			Loss:         "10",
-			Technology:   "{}",
-			Strategy:     "[]",
-			StrategyType: "global",
-			Type:         kind,
+			Symbol:               symbol.Symbol,
+			Enable:               0,
+			StrategyTradeEnabled: 0,
+			StrategyBudgetQuote:  "0",
+			TickSize:             tickSize,
+			StepSize:             stepSize,
+			Usdt:                 "10",
+			Profit:               "10",
+			Loss:                 "10",
+			Technology:           "{}",
+			Strategy:             "[]",
+			StrategyType:         "global",
+			Type:                 kind,
 		})
 		if err != nil {
 			// If the WS upsert inserted the pair concurrently, update only

@@ -5,6 +5,7 @@ type Config struct {
 	Version                                    int64   `orm:"column(version)" json:"version"`
 	FutureEnable                               int     `orm:"column(future_enable)" json:"future_enable"`
 	SpotEnable                                 int     `orm:"column(spot_enable)" json:"spot_enable"`
+	SpotAutoTradeMode                          string  `orm:"column(spot_auto_trade_mode);size(16);default(legacy)" json:"-"` // Only the dedicated Spot strategy API may change this.
 	DeliveryEnable                             int     `orm:"column(delivery_enable)" json:"delivery_enable"`
 	FuturesPositionConvertEnable               int     `orm:"column(futures_position_convert_enable)" json:"futures_position_convert_enable"` // 合约持仓正负转换通知
 	FutureBuyTimeout                           int     `orm:"column(future_buy_timeout)" json:"future_buy_timeout"`

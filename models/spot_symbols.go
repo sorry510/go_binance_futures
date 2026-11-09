@@ -1,21 +1,23 @@
 package models
 
 type SpotSymbols struct {
-	ID             int64   `orm:"column(id)" json:"id"`
-	Symbol         string  `orm:"column(symbol);size(32)" json:"symbol"`
-	PercentChange  float64 `orm:"column(percentChange)" json:"percentChange"`   // 24小时涨跌幅
-	Close          string  `orm:"column(close)" json:"close"`                   // 最新成交价格
-	Open           string  `orm:"column(open)" json:"open"`                     // 24小时开盘价
-	Low            string  `orm:"column(low)" json:"low"`                       // 24小时最低价
-	High           string  `orm:"column(high)" json:"high"`                     // 24小时最高价
-	Enable         int     `orm:"column(enable)" json:"enable"`                 // 是否开启
-	UpdateTime     int64   `orm:"column(updateTime)" json:"updateTime"`         // 更新时间
-	LastClose      string  `orm:"column(lastClose)" json:"lastClose"`           // 上一次的最新成交价格
-	LastUpdateTime int64   `orm:"column(lastUpdateTime)" json:"lastUpdateTime"` // 上一次的更新时间
-	BaseVolume     float64 `orm:"column(baseVolume)" json:"baseVolume"`         // 24小时成交量
-	QuoteVolume    float64 `orm:"column(quoteVolume)" json:"quoteVolume"`       // 24小时成交额 USDT
-	CloseQty       float64 `orm:"column(closeQty)" json:"closeQty"`             // 最新成交价格上的成交量
-	TradeCount     float64 `orm:"column(tradeCount)" json:"tradeCount"`         // 24小时交易数
+	ID                   int64   `orm:"column(id)" json:"id"`
+	Symbol               string  `orm:"column(symbol);size(32)" json:"symbol"`
+	PercentChange        float64 `orm:"column(percentChange)" json:"percentChange"`         // 24小时涨跌幅
+	Close                string  `orm:"column(close)" json:"close"`                         // 最新成交价格
+	Open                 string  `orm:"column(open)" json:"open"`                           // 24小时开盘价
+	Low                  string  `orm:"column(low)" json:"low"`                             // 24小时最低价
+	High                 string  `orm:"column(high)" json:"high"`                           // 24小时最高价
+	Enable               int     `orm:"column(enable)" json:"enable"`                       // 是否开启
+	StrategyTradeEnabled int     `orm:"column(strategy_trade_enabled);default(0)" json:"-"` // S1 private configuration only; never the old /spots API
+	StrategyBudgetQuote  string  `orm:"column(strategy_budget_quote);size(40);default(0)" json:"-"`
+	UpdateTime           int64   `orm:"column(updateTime)" json:"updateTime"`         // 更新时间
+	LastClose            string  `orm:"column(lastClose)" json:"lastClose"`           // 上一次的最新成交价格
+	LastUpdateTime       int64   `orm:"column(lastUpdateTime)" json:"lastUpdateTime"` // 上一次的更新时间
+	BaseVolume           float64 `orm:"column(baseVolume)" json:"baseVolume"`         // 24小时成交量
+	QuoteVolume          float64 `orm:"column(quoteVolume)" json:"quoteVolume"`       // 24小时成交额 USDT
+	CloseQty             float64 `orm:"column(closeQty)" json:"closeQty"`             // 最新成交价格上的成交量
+	TradeCount           float64 `orm:"column(tradeCount)" json:"tradeCount"`         // 24小时交易数
 
 	TickSize     string `orm:"column(tickSize)" json:"tickSize"`                // 交易金额精度
 	StepSize     string `orm:"column(stepSize)" json:"stepSize"`                // 交易数量精度

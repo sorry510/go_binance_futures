@@ -2,11 +2,13 @@ package binance
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync/atomic"
 
 	"go_binance_futures/binanceproxy"
 	"go_binance_futures/service/binanceapiusage"
+	"go_binance_futures/service/spotstrategy"
 	"go_binance_futures/utils"
 	"strconv"
 	"time"
@@ -134,7 +136,29 @@ func GetTickerPriceContext(ctx context.Context, symbol string) (res []*binance.S
 	return res, err
 }
 
-func BuyLimit(symbol string, quantity float64, price float64) (res *binance.CreateOrderResponse, err error) {
+// Deprecated callers retain their original signatures, but every retained
+// Spot strategy caller supplies an explicit source. The default identifies
+// direct legacy calls (including the abandoned eatRate routes).
+func legacySpotOrderSource(sources []spotstrategy.OrderSource) (spotstrategy.OrderSource, error) {
+	if len(sources) == 0 {
+		return spotstrategy.SourceLegacyDirect, nil
+	}
+	if len(sources) != 1 {
+		return "", fmt.Errorf("exactly one legacy Spot order source permitted")
+	}
+	return sources[0], nil
+}
+
+func BuyLimit(symbol string, quantity float64, price float64, sources ...spotstrategy.OrderSource) (res *binance.CreateOrderResponse, err error) {
+	// S1: all legacy Spot order constructors are subject to the same
+	// persisted mode gate, even when invoked outside the scheduler.
+	source, sourceErr := legacySpotOrderSource(sources)
+	if sourceErr != nil {
+		return nil, sourceErr
+	}
+	if gateErr := spotstrategy.AuthorizeLegacyOrder(source, symbol, spotstrategy.IntentNewRisk); gateErr != nil {
+		return nil, gateErr
+	}
 	res, err = client.NewCreateOrderService().
 		Symbol(symbol).
 		Side(binance.SideTypeBuy).
@@ -150,7 +174,16 @@ func BuyLimit(symbol string, quantity float64, price float64) (res *binance.Crea
 	return res, err
 }
 
-func BuyMarket(symbol string, quantity float64) (res *binance.CreateOrderResponse, err error) {
+func BuyMarket(symbol string, quantity float64, sources ...spotstrategy.OrderSource) (res *binance.CreateOrderResponse, err error) {
+	// S1: all legacy Spot order constructors are subject to the same
+	// persisted mode gate, even when invoked outside the scheduler.
+	source, sourceErr := legacySpotOrderSource(sources)
+	if sourceErr != nil {
+		return nil, sourceErr
+	}
+	if gateErr := spotstrategy.AuthorizeLegacyOrder(source, symbol, spotstrategy.IntentNewRisk); gateErr != nil {
+		return nil, gateErr
+	}
 	res, err = client.NewCreateOrderService().
 		Symbol(symbol).
 		Side(binance.SideTypeBuy).
@@ -164,14 +197,26 @@ func BuyMarket(symbol string, quantity float64) (res *binance.CreateOrderRespons
 	return res, err
 }
 
-func SellLimit(symbol string, quantity float64, price float64) (res *binance.CreateOrderResponse, err error) {
-	res, err = client.NewCreateOrderService().
-		Symbol(symbol).
-		Side(binance.SideTypeSell).
-		Type(binance.OrderTypeLimit).
+// This isolated SDK builder is exercised against a local HTTP server, so
+// quantity and price cannot be accidentally interchanged again (T2-10).
+func s2BuildLegacySellLimit(order *binance.CreateOrderService, symbol string, quantity, price float64) *binance.CreateOrderService {
+	return order.Symbol(symbol).Side(binance.SideTypeSell).Type(binance.OrderTypeLimit).
 		TimeInForce(binance.TimeInForceTypeGTC).
 		Quantity(strconv.FormatFloat(quantity, 'f', -1, 64)).
-		Price(strconv.FormatFloat(quantity, 'f', -1, 64)).
+		Price(strconv.FormatFloat(price, 'f', -1, 64))
+}
+
+func SellLimit(symbol string, quantity float64, price float64, sources ...spotstrategy.OrderSource) (res *binance.CreateOrderResponse, err error) {
+	// S1: all legacy Spot order constructors are subject to the same
+	// persisted mode gate, even when invoked outside the scheduler.
+	source, sourceErr := legacySpotOrderSource(sources)
+	if sourceErr != nil {
+		return nil, sourceErr
+	}
+	if gateErr := spotstrategy.AuthorizeLegacyOrder(source, symbol, spotstrategy.IntentExit); gateErr != nil {
+		return nil, gateErr
+	}
+	res, err = s2BuildLegacySellLimit(client.NewCreateOrderService(), symbol, quantity, price).
 		Do(context.Background())
 	if err != nil {
 		logs.Error(err)
@@ -180,7 +225,16 @@ func SellLimit(symbol string, quantity float64, price float64) (res *binance.Cre
 	return res, err
 }
 
-func SellMarket(symbol string, quantity float64) (res *binance.CreateOrderResponse, err error) {
+func SellMarket(symbol string, quantity float64, sources ...spotstrategy.OrderSource) (res *binance.CreateOrderResponse, err error) {
+	// S1: all legacy Spot order constructors are subject to the same
+	// persisted mode gate, even when invoked outside the scheduler.
+	source, sourceErr := legacySpotOrderSource(sources)
+	if sourceErr != nil {
+		return nil, sourceErr
+	}
+	if gateErr := spotstrategy.AuthorizeLegacyOrder(source, symbol, spotstrategy.IntentExit); gateErr != nil {
+		return nil, gateErr
+	}
 	res, err = client.NewCreateOrderService().
 		Symbol(symbol).
 		Side(binance.SideTypeSell).
@@ -197,7 +251,16 @@ func SellMarket(symbol string, quantity float64) (res *binance.CreateOrderRespon
 // 挂止盈单(现货不支持)
 // @see https://binance-docs.github.io/apidocs/spot/cn/#trade-3
 // @returns /doc/order.js
-func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order *binance.CreateOrderResponse, err error) {
+func OrderTakeProfit(symbol string, quantity float64, stopPrice float64, sources ...spotstrategy.OrderSource) (order *binance.CreateOrderResponse, err error) {
+	// S1: all legacy Spot order constructors are subject to the same
+	// persisted mode gate, even when invoked outside the scheduler.
+	source, sourceErr := legacySpotOrderSource(sources)
+	if sourceErr != nil {
+		return nil, sourceErr
+	}
+	if gateErr := spotstrategy.AuthorizeLegacyOrder(source, symbol, spotstrategy.IntentExit); gateErr != nil {
+		return nil, gateErr
+	}
 	order, err = client.NewCreateOrderService().
 		Symbol(symbol).
 		Side(binance.SideTypeSell).                             // 止盈单是卖出
@@ -217,7 +280,16 @@ func OrderTakeProfit(symbol string, quantity float64, stopPrice float64) (order 
 // 挂单止损(现货不支持)
 // @see https://binance-docs.github.io/apidocs/spot/cn/#trade-3
 // @returns /doc/order.js
-func OrderStopLoss(symbol string, quantity float64, stopPrice float64) (order *binance.CreateOrderResponse, err error) {
+func OrderStopLoss(symbol string, quantity float64, stopPrice float64, sources ...spotstrategy.OrderSource) (order *binance.CreateOrderResponse, err error) {
+	// S1: all legacy Spot order constructors are subject to the same
+	// persisted mode gate, even when invoked outside the scheduler.
+	source, sourceErr := legacySpotOrderSource(sources)
+	if sourceErr != nil {
+		return nil, sourceErr
+	}
+	if gateErr := spotstrategy.AuthorizeLegacyOrder(source, symbol, spotstrategy.IntentExit); gateErr != nil {
+		return nil, gateErr
+	}
 	order, err = client.NewCreateOrderService().
 		Symbol(symbol).
 		Side(binance.SideTypeSell).                             // 止损单是卖出

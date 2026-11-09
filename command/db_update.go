@@ -369,6 +369,11 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 			return fmt.Errorf("migrate v23 REST-confirmed fills: %w", err)
 		}
 	}
+	if oldVersion < 25 && newVersion >= 25 {
+		if err := ensureSpotStrategyV25(o); err != nil {
+			return fmt.Errorf("migrate spot strategy v25: %w", err)
+		}
+	}
 	to, err := o.Begin()
 	if err != nil {
 		logs.Error("begin transaction error:", err)
@@ -436,6 +441,11 @@ func SyncDatabase(targetVersion int64) error {
 	if systemConfig.Version >= 22 {
 		if err := ensureV22SettlementIndexes(orm.NewOrm()); err != nil {
 			return fmt.Errorf("verify v22 settlement indexes: %w", err)
+		}
+	}
+	if systemConfig.Version >= 25 {
+		if err := ensureSpotStrategyV25(orm.NewOrm()); err != nil {
+			return fmt.Errorf("verify v25 spot strategy schema: %w", err)
 		}
 	}
 	if systemConfig.Version < targetVersion {

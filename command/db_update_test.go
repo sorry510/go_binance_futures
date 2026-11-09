@@ -709,6 +709,71 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err != nil || version.Version != 24 {
 		t.Fatalf("v24 persisted version: %+v %v", version, err)
 	}
+	// v25: Spot custom strategy is independently disabled and financial
+	// records are explicit DECIMAL tables, not ORM VARCHAR substitutes.
+	_, err = o.Insert(&models.SpotSymbols{Symbol: "S510SPOTUSDT", Type: "USDT", Strategy: "[]", Technology: "{}"})
+	if err != nil {
+		t.Fatalf("insert pre-v25 spot symbol: %v", err)
+	}
+	if err := SyncDatabase(25); err != nil {
+		t.Fatalf("v25 Spot strategy migration: %v", err)
+	}
+	if err := SyncDatabase(25); err != nil {
+		t.Fatalf("v25 repeat: %v", err)
+	}
+	for table, columns := range map[string][]string{
+		"config":       {"spot_auto_trade_mode"},
+		"spot_symbols": {"strategy_trade_enabled", "strategy_budget_quote"},
+	} {
+		for _, column := range columns {
+			var count int
+			if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('"+table+"') WHERE name=?", column).QueryRow(&count); err != nil || count != 1 {
+				t.Fatalf("v25 column %s.%s missing: %d %v", table, column, count, err)
+			}
+		}
+	}
+	var spotMode string
+	if err := o.Raw("SELECT spot_auto_trade_mode FROM config LIMIT 1").QueryRow(&spotMode); err != nil || spotMode != "legacy" {
+		t.Fatalf("v25 legacy mode lost: %q %v", spotMode, err)
+	}
+	var tradingEnabled int
+	var budget string
+	if err := o.Raw("SELECT strategy_trade_enabled,strategy_budget_quote FROM spot_symbols WHERE symbol='S510SPOTUSDT'").QueryRow(&tradingEnabled, &budget); err != nil || tradingEnabled != 0 || budget != "0" {
+		t.Fatalf("v25 new Spot trading must stay OFF: enabled=%d budget=%q err=%v", tradingEnabled, budget, err)
+	}
+	for table, column := range map[string]string{
+		"spot_strategy_holdings": "owned_qty",
+		"spot_strategy_orders":   "requested_qty",
+		"spot_strategy_fills":    "commission",
+	} {
+		var sqlType string
+		if err := o.Raw("SELECT type FROM pragma_table_info('"+table+"') WHERE name=?", column).QueryRow(&sqlType); err != nil || sqlType != "DECIMAL(36,18)" {
+			t.Fatalf("v25 %s.%s must be DECIMAL(36,18), got %q: %v", table, column, sqlType, err)
+		}
+	}
+	for _, idx := range []struct {
+		table   string
+		columns []string
+	}{
+		{"spot_strategy_holdings", []string{"active_slot"}},
+		{"spot_strategy_orders", []string{"client_order_id"}},
+		{"spot_strategy_orders", []string{"pending_slot"}},
+		{"spot_strategy_orders", []string{"account_id", "owner", "symbol", "signal_key"}},
+		{"spot_strategy_fills", []string{"account_id", "symbol", "order_id", "trade_id"}},
+		// S1-F5: check lookup indexes too, not only UNIQUE/PK.
+		{"spot_strategy_holdings", []string{"account_id", "owner", "symbol", "status"}},
+		{"spot_strategy_orders", []string{"holding_id", "status"}},
+		{"spot_strategy_orders", []string{"account_id", "symbol", "status"}},
+		{"spot_strategy_fills", []string{"client_order_id"}},
+	} {
+		if !sqliteHasIndexColumns(t, o, idx.table, idx.columns) {
+			t.Fatalf("v25 index missing: %s %v", idx.table, idx.columns)
+		}
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 25 {
+		t.Fatalf("v25 version not saved: %+v %v", version, err)
+	}
 	// Every schema bump must advance this test's highest checked version.
 	if version.Version != appversion.DatabaseSchemaVersion {
 		t.Fatalf("migration test ends at v%d, binary requires v%d", version.Version, appversion.DatabaseSchemaVersion)

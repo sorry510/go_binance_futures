@@ -124,6 +124,9 @@ func init() {
 	web.Router("/test-strategy-results/:id", &controllers.TestStrategyResultController{}, "delete:Delete;get:Show")         // 删除某个测试策略结果和获取明细
 	web.Router("/test-strategy-results/test/:symbol", &controllers.TestStrategyResultController{}, "post:TestStrategyRule") // 测试策略结果的某个平仓测试是否符合条件
 
+	// S1: scoped Spot strategy configuration only; no create/cancel order route.
+	web.Router("/spots/strategy/config", &controllers.SpotStrategyController{}, "get:Get;put:Put")
+	web.Router("/spots/strategy/mode", &controllers.SpotStrategyController{}, "get:GetMode;put:PutMode")
 	web.Router("/spots", &controllers.SpotController{}, "get:Get;post:Post")             // 列表查询和新增
 	web.Router("/spots/:id", &controllers.SpotController{}, "delete:Delete;put:Edit")    // 更新和删除
 	web.Router("/spots/enable/:flag", &controllers.SpotController{}, "put:UpdateEnable") // 修改所有的合约交易对开启关闭
