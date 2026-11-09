@@ -35,7 +35,7 @@ Normal startup:
 ./go_binance_futures
 ```
 
-**Current binary requires database schema v23** (canonical code source: `appversion.DatabaseSchemaVersion`). An isolated local MySQL 5.6 database has passed fresh `sync db` and idempotence checks; **production MySQL 8 structure, performance, existing Main-account data preservation and live Binance gates remain unverified**. Local mocks, SQLite and empty-table plans do not substitute for these checks.
+**Current binary requires database schema v24** (canonical code source: `appversion.DatabaseSchemaVersion`). An isolated local MySQL 5.6 database has passed fresh `sync db` and idempotence checks; **production MySQL 8 structure, performance, existing Main-account data preservation and live Binance gates remain unverified**. Local mocks, SQLite and empty-table plans do not substitute for these checks.
 
 Normal startup **does not automatically synchronize the schema or run database version migrations**. If the database has not been initialized or its version is older than the current binary requires, the application will instruct you to run `go_binance_futures sync db`. Back up the database before production upgrades and preferably run the sync command while the service is stopped.
 
@@ -103,6 +103,16 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Logs (`日志`) | Display the service logs returned by `web.commend_log` |
 
 
+#### Futures order-history administration (Schema v24)
+
+**Futures Orders** now supports **permanent deletion** of all historical position cycles matching the current account/owner/symbol/side/status/settlement/open-time filters, across all pages. Associated Managed orders, actual exchange Fills, ownership adjustments and history display-admin records are physically deleted within one transaction after a single confirmation displaying the latest match count. If the count changes, deletion is rejected. Limit: 5000 cycles per batch.
+
+**Trading safety**: only fully closed, zero-quantity cycles with settled or legacy status, no pending exchange/protection orders, and whose close time and last trade are both older than **30 days** can be deleted. Any unsafe cycle rejects the entire batch. Active positions, incomplete settlement, existing exchange orders and recent cooldowns are protected. **Deletion cannot be undone** and removes local historical accounting evidence.
+
+Bulk edits to **display-only status and manual integrity labels** are preserved and cannot change actual trading state, exchange REST verification, settlement, or risk controls. Column order is: status → verified net PnL → nominal return → data integrity.
+
+**Schema v24** adds only view-status override fields and an edit-audit table; soft hiding and restoration are gone. A database upgrade requires explicit approval for `./go_binance_futures sync db`, and production must deploy matching backend and frontend artifacts together.
+
 #### Exchange order-history activation time T0 (not activated)
 
 New order history requires a separately approved, persistent **UTC Unix timestamp in milliseconds** for each account, not a process startup timestamp:
@@ -118,7 +128,7 @@ Before configuring either value, close production G1–G5, retain each account's
 
 ### Lead Copy Trading (Stages 6 and 7-1 through 7-4)
 
-> **Current status: the management UI and account-isolation infrastructure are implemented and verified with Mock/Race tests. Live Lead Portfolio identity, MySQL 8 schema v23, private WS, Algo orders, and funded execution have NOT passed their live gates. Live Lead order execution remains locked.** This feature is separate from AI Controlled Trading and cannot guarantee any follower fills.
+> **Current status: the management UI and account-isolation infrastructure are implemented and verified with Mock/Race tests. Live Lead Portfolio identity, MySQL 8 schema v24, private WS, Algo orders, and funded execution have NOT passed their live gates. Live Lead order execution remains locked.** This feature is separate from AI Controlled Trading and cannot guarantee any follower fills.
 
 Open **Futures Trade → Lead Copy Trading** (`/futures/lead`). The page has six Cards:
 
@@ -148,7 +158,7 @@ BINANCE_LEAD_AUDIT_FILE=/private/lead/operations.jsonl
 - `BINANCE_LEAD_CREDENTIAL_KEY` must decode from **standard Base64 to exactly 32 random bytes**. Generate and persist it securely: losing/rotating this master key makes the existing encrypted credentials unreadable.
 - All three file paths must be **absolute and outside the repository**, with an operator-owned private parent directory (recommended `0700`) and private files (`0600`), not symlinks. The app does not silently create private directories or generate a master key.
 - After setting these values and deploying the updated backend, use the UI to save a dedicated Lead credential, request read-only verification, and save independent risk limits. Missing secure storage causes fail-closed errors; **do not work around this by putting secrets into `app.conf`**.
-- Only after backing up the target DB, checking the actual version/data and taking the service down should an operator explicitly run `./go_binance_futures sync db`. The current binary requires **schema v23** (see `appversion.DatabaseSchemaVersion`). Passing SQLite/Mock migration tests does **not** confirm your real MySQL 8 schema has been migrated.
+- Only after backing up the target DB, checking the actual version/data and taking the service down should an operator explicitly run `./go_binance_futures sync db`. The current binary requires **schema v24** (see `appversion.DatabaseSchemaVersion`). Passing SQLite/Mock migration tests does **not** confirm your real MySQL 8 schema has been migrated.
 
 #### Private read-only observer: explicit opt-in performs real Binance I/O
 

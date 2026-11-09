@@ -108,6 +108,7 @@ func registerModels() {
 	orm.RegisterModel(new(models.FuturesPosition))
 	orm.RegisterModel(new(models.FuturesOrder))
 	orm.RegisterModel(new(models.FuturesManagedPosition))
+	orm.RegisterModel(new(models.OrderHistoryAdminAudit))
 	orm.RegisterModel(new(models.FuturesManagedOrder))
 	orm.RegisterModel(new(models.FuturesOwnershipAdjustment))
 	orm.RegisterModel(new(models.NotifyConfig))

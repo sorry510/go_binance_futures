@@ -50,7 +50,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus), new(models.MarketConditionHistory),
 		new(models.MarketDataImportBatch), new(models.MarketKline1s), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate), new(models.MarketTrade),
 		new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint), new(models.AgentBacktestEquityChunk), new(models.AgentBacktestEquityPreview),
-		new(models.FuturesManagedPosition), new(models.FuturesManagedOrder),
+		new(models.FuturesManagedPosition), new(models.FuturesManagedOrder), new(models.OrderHistoryAdminAudit),
 	)
 
 	if err := SyncDatabase(1); err != nil {
@@ -681,6 +681,33 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	version, err = utils.GetSystemConfig()
 	if err != nil || version.Version != 23 {
 		t.Fatalf("v23 version not saved: %+v %v", version, err)
+	}
+	// v24: presentation-only bulk order history administration. The new
+	// columns must never rewrite existing Managed positions or exchange Fills.
+	if err := SyncDatabase(24); err != nil {
+		t.Fatalf("v24 history admin schema: %v", err)
+	}
+	for _, column := range []string{"history_status_override",
+		"history_completeness_override", "history_modified_at"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('futures_managed_positions') WHERE name=?", column).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("v24 position history view column %s missing: count=%d err=%v", column, count, err)
+		}
+	}
+	var auditTable int
+	if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='order_history_admin_audits'").QueryRow(&auditTable); err != nil || auditTable != 1 {
+		t.Fatalf("v24 admin audit table absent: %d %v", auditTable, err)
+	}
+	var unchangedLegacyCount int
+	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_positions WHERE symbol='S510LEGACYUSDT' AND settlement_status='legacy' ").QueryRow(&unchangedLegacyCount); err != nil || unchangedLegacyCount != 1 {
+		t.Fatalf("v24 incorrectly rewrote old cycle: %d %v", unchangedLegacyCount, err)
+	}
+	if err := SyncDatabase(24); err != nil {
+		t.Fatalf("repeat v24: %v", err)
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 24 {
+		t.Fatalf("v24 persisted version: %+v %v", version, err)
 	}
 	// Every schema bump must advance this test's highest checked version.
 	if version.Version != appversion.DatabaseSchemaVersion {

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -199,6 +200,85 @@ func TestStage015SuccessResponseAlwaysJSON(t *testing.T) {
 			}
 			if payload.Code != 200 || payload.Data.Total != 3 || payload.Msg != "success" {
 				t.Fatalf("invalid successful JSON response: %+v", payload)
+			}
+		})
+	}
+}
+
+// Batch requests must require the operator JWT and reject malformed scopes,
+// forged verification and missing confirmation without accessing the DB.
+func TestHistoryBulkRoutesRequireOperatorAndValidateInputs(t *testing.T) {
+	cases := []struct {
+		name, path, body string
+		authorized       bool
+		want             int
+	}{
+		{"unauth_preview", "/orders/batch/preview", `{"action":"hide","filters":{"account_id":"main"}}`, false, 401},
+		{"unauth_apply", "/orders/batch/apply", `{"action":"hide","filters":{"account_id":"main"}}`, false, 401},
+		{"bad_json", "/orders/batch/preview", `{"action":`, true, 400},
+		{"invalid_account", "/orders/batch/preview", `{"action":"hide","filters":{"account_id":"attacker"}}`, true, 400},
+		{"invalid_status", "/orders/batch/preview", `{"action":"update","status_override":"forged","filters":{"account_id":"main"}}`, true, 400},
+		{"forged_verified", "/orders/batch/preview", `{"action":"update","completeness_override":"verified","filters":{"account_id":"main"}}`, true, 400},
+		{"missing_digest", "/orders/batch/apply", `{"action":"hide","filters":{"account_id":"main"},"reason":"historical audit requested"}`, true, 400},
+		{"unknown_field", "/orders/batch/preview", `{"action":"hide","filters":{"account_id":"main"},"surprise":42}`, true, 400},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, tc.path, bytes.NewBufferString(tc.body))
+			req.Header.Set("Accept", "application/x-protobuf")
+			recorder := httptest.NewRecorder()
+			ctx := beegocontext.NewContext()
+			ctx.Reset(recorder, req)
+			if tc.authorized {
+				ctx.Input.SetData("user", jwt.MapClaims{"Username": "single_operator"})
+			}
+			ctrl := new(OrderController)
+			ctrl.Init(ctx, "OrderController", "", nil)
+			if strings.Contains(tc.path, "preview") {
+				ctrl.BulkPreview()
+			} else {
+				ctrl.BulkApply()
+			}
+			if recorder.Code != tc.want {
+				t.Fatalf("unexpected http=%d want=%d body=%s", recorder.Code, tc.want, recorder.Body.String())
+			}
+			if !strings.Contains(recorder.Header().Get("Content-Type"), "application/json") {
+				t.Fatalf("batch endpoints must be fixed JSON: %s", recorder.Header().Get("Content-Type"))
+			}
+		})
+	}
+}
+
+// New physical batch deletion is a separate POST. The former DELETE
+// endpoints continue to return 410 and cannot bypass the explicit UI scope.
+func TestHistoryPhysicalDeleteControllerRequiresAuthAndValidCount(t *testing.T) {
+	cases := []struct {
+		name, body string
+		auth       bool
+		status     int
+	}{
+		{"unauthorized", `{"filters":{"account_id":"main"},"expected_count":1}`, false, 401},
+		{"missing_count", `{"filters":{"account_id":"main"}}`, true, 400},
+		{"negative_count", `{"filters":{"account_id":"main"},"expected_count":-1}`, true, 400},
+		{"invalid_account", `{"filters":{"account_id":"foreign"},"expected_count":1}`, true, 400},
+		{"invalid_symbol", `{"filters":{"account_id":"main","symbol":"BTC'"},"expected_count":1}`, true, 400},
+		{"unknown_fields", `{"filters":{"account_id":"main"},"expected_count":1,"unsafe":true}`, true, 400},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodPost, "/orders/batch/delete", strings.NewReader(c.body))
+			request.Header.Set("Accept", "application/x-protobuf")
+			recorder := httptest.NewRecorder()
+			ctx := beegocontext.NewContext()
+			ctx.Reset(recorder, request)
+			if c.auth {
+				ctx.Input.SetData("user", jwt.MapClaims{"Username": "single_operator"})
+			}
+			controller := new(OrderController)
+			controller.Init(ctx, "OrderController", "", nil)
+			controller.DeleteFiltered()
+			if recorder.Code != c.status || !strings.Contains(recorder.Header().Get("Content-Type"), "application/json") {
+				t.Fatalf("status=%d want=%d contentType=%q body=%s", recorder.Code, c.status, recorder.Header().Get("Content-Type"), recorder.Body.String())
 			}
 		})
 	}
