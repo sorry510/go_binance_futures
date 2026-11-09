@@ -149,6 +149,9 @@ func init() {
 	web.Router("/listen/funding-rate/history", &controllers.ListenCoinController{}, "get:GetFundingRateHistory") // 合约费率历史
 	web.Router("/listen/strategy-rule/test/:id", &controllers.ListenCoinController{}, "post:TestStrategyRule")   // 测试策略规则
 
+	web.Router("/orders/batch/delete", &controllers.OrderController{}, "post:DeleteFiltered")
+	web.Router("/orders/batch/preview", &controllers.OrderController{}, "post:BulkPreview")
+	web.Router("/orders/batch/apply", &controllers.OrderController{}, "post:BulkApply")
 	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll")         // v23 Managed position cycle history
 	web.Router("/orders/:position_id/details", &controllers.OrderController{}, "get:Details") // child orders and immutable exchange Fills
 	web.Router("/orders/:id", &controllers.OrderController{}, "delete:Delete")                // exchange history remains immutable

@@ -18,6 +18,11 @@ type FuturesManagedPosition struct {
 	SettlementStatus      string `orm:"column(settlement_status);size(16);default(legacy);index" json:"settlement_status"`
 	SettlementProcessedAt int64  `orm:"column(settlement_processed_at);default(0);index" json:"settlement_processed_at"`
 	SettlementPNLSign     int    `orm:"column(settlement_pnl_sign);default(0)" json:"settlement_pnl_sign"`
+	// View-only history administration. NEVER used by exchange reconciliation,
+	// position ownership, settlement, or automatic trading/risk controls.
+	HistoryStatusOverride       string `orm:"column(history_status_override);size(32);null" json:"-"`
+	HistoryCompletenessOverride string `orm:"column(history_completeness_override);size(32);null" json:"-"`
+	HistoryModifiedAt           int64  `orm:"column(history_modified_at);default(0)" json:"-"`
 }
 
 func (*FuturesManagedPosition) TableName() string { return "futures_managed_positions" }
