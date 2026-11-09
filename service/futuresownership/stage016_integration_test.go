@@ -35,7 +35,8 @@ func TestStage016EndToEndPartialOpenCancelRestartSettleAndHistory(t *testing.T) 
 	if err != nil || position.ManagedQty != 2 {
 		t.Fatalf("partial opening owns wrong amount: %+v %v", position, err)
 	}
-	store := orderhistory.Store{DB: orm.NewOrm(), Now: svc.Now}
+	store := orderhistory.Store{DB: orm.NewOrm(), Now: svc.Now,
+		ActivatedAt: func(account string) (int64, error) { return 1700000000000, nil }}
 	page, err := store.List(ctx, orderhistory.Filter{AccountID: "main", Page: 1, Limit: 20})
 	if err != nil || page.Total != 1 || len(page.List) != 1 ||
 		page.List[0].OpenQty != "2" || page.List[0].RemainingQty != "2" ||

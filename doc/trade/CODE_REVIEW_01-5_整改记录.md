@@ -7,7 +7,7 @@
 | Finding | 整改内容 / 判断 | 状态 |
 | --- | --- | --- |
 | **015-F1 P1** | `controllers/orders.go` 的 `respondError` 和 `success` 从 `ctrl.Ctx.Resp(map[string]any{...})` 改为 **`ctrl.JSONResp(...)`**。不再根据 `Accept` 头分发到 YAML/XML/Protobuf。新增 `TestStage015HistoryResponseFixedJSONAcrossAcceptTypes` 和 `TestStage015SuccessResponseAlwaysJSON`，以 JSON、YAML、XML、text/xml、Protobuf `Accept` 验证 HTTP 400/410/200、`application/json` 和可 JSON 解析的 `code/data/msg`，无 panic。 | **代码修复并测试通过** |
-| **015-F2 P1** | 前端已在自身 `dist` 构建，后端 `static` 和根目录主程序保持不动，原因是运行中进程会立即对外提供磁盘静态文件。把前后端版本绑定、产物 staging、协同发布和回滚检查列入下面正式部署 SOP。不得只替换新后端 API 或先覆盖旧进程的 `static`。 | **01-6 上线硬前置，尚未发布** |
+| **015-F2 P1** | **01-5 整改发生时**前端仅在自身 `dist` 构建，后端 `static` 和根目录主程序当时保持不动。**后续更新（2026-11-09）**：`8841d8a` 已将 106 个新前端文件纳入后端 `static`；这只是本地 Git 仓库的源码/资产状态，**并未证明目标服务、生产 DB 或后端二进制同步切换**。仓库中已存在新页面，直接在运行目录 `git pull` 有半发布风险。把前后端版本绑定、产物 staging、协同发布和回滚检查列入下面正式部署 SOP。不得只替换新后端 API 或先覆盖旧进程的 `static`。 | **01-6 上线硬前置，尚未发布** |
 | **015-F3 P2** | 当前 `futures_trade_fills.position_id` 索引已存在，无需重复建；`RecentClosedSymbols` 的 `trade_time` 过滤没有辅助索引，可能拖慢高频选币。01-6 必须在目标 MySQL 8 上以只读 `EXPLAIN`、P95 查询时间、行数/分布、QPS 实测，若不达标走 **新 schema version + `sync db`** 加索引。没有凭空选择索引或擅改生产 v23。 | **数据库压测 Gate 未关闭** |
 | **015-F4 P2** | 检查 `controllers/login.go`：当前单 `web::username` / `web::password` 生成带 `Username` claim 的 JWT，没有角色/账户级用户系统。本项目明确采用 **单一操作员读权限模型：唯一登录身份可只读 main 与 lead 两个账户**。路由仍经 `JwtMiddleware`；新增 `OrderController.authorized()` 防御性要求中间件填入有效 `Username` claims（否则 401），避免未来误漏路由过滤。main/lead 的 `position_id` 仍须严格绑定账户，否则 404。单操作员身份不能伪称有 RBAC；如未来引入多个独立登录用户，必须先实现账户级 RBAC，当前模型不能直接复用。 | **当前单账号策略已明确并加固；生产登录模型只读复核仍需 01-6** |
 | **015-F5 P2** | 前端 `src/api/order.ts` 新增 `OrderHistoryApiResult<T>` 明确 `code/data/msg`；改为 `http.get<OrderHistoryApiResult<ManagedOrderPage>, unknown>` 和 `http.get<OrderHistoryApiResult<ManagedCycleDetail>, unknown>`。清除页面 `as ManagedOrderPage`、`as ManagedCycleDetail`，直接使用 `res.data`；避免误把第二泛型当作 query 参数类型。 | **代码修复，TS 类型检查通过** |
@@ -29,4 +29,4 @@
 
 - 新增的 GO Controller 固定 JSON（5 个非默认 Accept × 3 类返回）测试、401 未认证保护、订单模型 source_ref 不泄漏测试、原 01-5 完整性测试需全部通过；前端 ESLint、TypeScript 类型检查和构建通过。
 - 继承 `controllers` 全包中既有策略模板 fixture 红点：`default` DB alias 重复注册、空指标校验及 `strategy_templates/research/config.json` 不支持的 `family` 字段。本轮不对其它 AI 的策略研究文件进行修复/删除。
-- 本轮不执行 `sync db`、不接触生产 `go_binance`、不发 Binance 委托、不修改 `conf/app.conf`、不覆盖后端 static、不重启运行中的程序，也不自动 commit/push。
+- **原 01-5 复审整改阶段的操作记录**：当时未执行 `sync db`、未访问生产 `go_binance`、未发委托、未改 `conf/app.conf`、未复制 `static`、未重启程序或 commit/push。**后续状态不同**：后端静态文件已随 `8841d8a` 提交；当前审计修订仍未部署、未授权启用 T0。

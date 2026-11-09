@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -171,6 +172,40 @@ type Page struct {
 type Store struct {
 	DB  orm.Ormer
 	Now func() time.Time
+	// ActivatedAt injects a durable, explicitly approved UTC Unix-ms T0
+	// during tests. Production reads account-scoped process configuration.
+	ActivatedAt func(account string) (int64, error)
+}
+
+// ConfiguredHistoryT0 is deliberately fail-closed. T0 is never inferred
+// from process start or from the creation date of an older Managed cycle.
+// This only guards read-only history certification: trading/recovery/settlement
+// keep operating independently for pre-activation positions.
+func ConfiguredHistoryT0(account string) (int64, error) {
+	var name string
+	switch account {
+	case "main":
+		name = "BINANCE_ORDER_HISTORY_T0_MAIN_MS"
+	case "lead":
+		name = "BINANCE_ORDER_HISTORY_T0_LEAD_MS"
+	default:
+		return 0, fmt.Errorf("invalid history activation account")
+	}
+	raw := strings.TrimSpace(os.Getenv(name))
+	if raw == "" {
+		return 0, nil
+	} // no approved T0: display audit rows, never certified PnL
+	ms, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil || ms < 946684800000 || ms > 4102444800000 {
+		return 0, fmt.Errorf("invalid UTC Unix-ms activation for %s", account)
+	}
+	return ms, nil
+}
+func (s Store) activatedAt(account string) (int64, error) {
+	if s.ActivatedAt != nil {
+		return s.ActivatedAt(account)
+	}
+	return ConfiguredHistoryT0(account)
 }
 
 func (s Store) db() orm.Ormer {
@@ -360,6 +395,13 @@ func (s Store) project(ctx context.Context, positions []models.FuturesManagedPos
 		return []Position{}, map[int64][]Order{}, nil
 	}
 	account := positions[0].AccountID
+	t0, err := s.activatedAt(account)
+	if err != nil {
+		return nil, nil, err
+	}
+	if t0 < 0 {
+		return nil, nil, fmt.Errorf("negative history activation")
+	}
 	ids := make([]int64, 0, len(positions))
 	for _, p := range positions {
 		if p.AccountID != account {
@@ -368,7 +410,7 @@ func (s Store) project(ctx context.Context, positions []models.FuturesManagedPos
 		ids = append(ids, p.ID)
 	}
 	var orders []models.FuturesManagedOrder
-	_, err := s.db().QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", account).
+	_, err = s.db().QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", account).
 		Filter("position_id__in", ids).OrderBy("created_at", "id").All(&orders)
 	if err != nil {
 		return nil, nil, err
@@ -407,14 +449,14 @@ func (s Store) project(ctx context.Context, positions []models.FuturesManagedPos
 		if err := ctx.Err(); err != nil {
 			return nil, nil, err
 		}
-		summary, children := summarize(p, ordersByID[p.ID], fillsByID[p.ID], includeFills, now)
+		summary, children := summarize(p, ordersByID[p.ID], fillsByID[p.ID], includeFills, now, t0)
 		result = append(result, summary)
 		details[p.ID] = children
 	}
 	return result, details, nil
 }
 
-func summarize(p models.FuturesManagedPosition, orders []models.FuturesManagedOrder, fills []fillRow, includeFills bool, now int64) (Position, []Order) {
+func summarize(p models.FuturesManagedPosition, orders []models.FuturesManagedOrder, fills []fillRow, includeFills bool, now, t0 int64) (Position, []Order) {
 	v := Position{PositionID: p.ID, AccountID: p.AccountID, Owner: p.Owner, Symbol: p.Symbol, PositionSide: p.PositionSide,
 		Status: p.Status, SettlementStatus: p.SettlementStatus, Completeness: "pending",
 		OpenQty: "0", CloseQty: "0", RemainingQty: strings.TrimRight(strings.TrimRight(strconv.FormatFloat(p.ManagedQty, 'f', 12, 64), "0"), "."),
@@ -432,6 +474,11 @@ func summarize(p models.FuturesManagedPosition, orders []models.FuturesManagedOr
 		if problem == "" {
 			problem = reason
 		}
+	}
+	if t0 == 0 {
+		mark("history_not_activated")
+	} else if p.CreatedAt < t0 {
+		mark("pre_activation_position_cycle")
 	}
 	if p.SettlementStatus == "legacy" {
 		mark("legacy_cycle_without_complete_fills")
@@ -603,6 +650,15 @@ func summarize(p models.FuturesManagedPosition, orders []models.FuturesManagedOr
 				entry.Fees = append(entry.Fees, AssetFee{Asset: asset, Amount: val(amount)})
 			}
 			sort.Slice(entry.Fees, func(i, j int) bool { return entry.Fees[i].Asset < entry.Fees[j].Asset })
+		}
+		if t0 == 0 || p.CreatedAt < t0 {
+			// Pre-cutover or unactivated history may be inspected, but it is
+			// not certified as new exchange ledger history. Keep individual
+			// Fill facts visible with their REST source flags.
+			entry.Completeness = "incomplete"
+			entry.GrossPnL = nil
+			entry.PnLAsset = ""
+			entry.Fees = []AssetFee{}
 		}
 		child = append(child, entry)
 	}
