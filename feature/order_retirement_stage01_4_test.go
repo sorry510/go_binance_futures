@@ -195,7 +195,7 @@ func TestStage014LegacyOrderORMRegistrationOnlyForSyncDB(t *testing.T) {
 		if stmt, ok := n.(*ast.IfStmt); ok {
 			var condition bytes.Buffer
 			_ = printer.Fprint(&condition, fset, stmt.Cond)
-			if condition.String() != "isSyncDatabaseCommand(os.Args[1:])" {
+			if condition.String() != "cliargs.IsSyncDatabaseCommand(os.Args[1:])" {
 				return true
 			}
 			ast.Inspect(stmt.Body, func(node ast.Node) bool {

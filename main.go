@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/controllers"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/internal/cliargs"
 	"go_binance_futures/llm"
 	"go_binance_futures/mcpserver"
 	"go_binance_futures/middlewares"
@@ -91,7 +92,7 @@ func registerModels() {
 	// sync-db CLI; normal API/trading processes have no legacy ORM model.
 	// This preserves pre-v19 upgrade compatibility without restoring any
 	// old history read, write or delete endpoints.
-	if isSyncDatabaseCommand(os.Args[1:]) {
+	if cliargs.IsSyncDatabaseCommand(os.Args[1:]) {
 		orm.RegisterModel(new(models.Order))
 	}
 	orm.RegisterModel(new(models.Symbols))
@@ -265,19 +266,15 @@ func futuresTradingConfigured() bool {
 	return strings.TrimSpace(tradeKey) != ""
 }
 
-func isSyncDatabaseCommand(args []string) bool {
-	return len(args) == 2 && args[0] == "sync" && args[1] == "db"
-}
-
 func isCLICommand(args []string) bool {
-	if isSyncDatabaseCommand(args) {
+	if cliargs.IsSyncDatabaseCommand(args) {
 		return true
 	}
 	return len(args) > 0 && (args[0] == "doctor" || args[0] == "cleanup")
 }
 
 func runCommand(args []string) bool {
-	if isSyncDatabaseCommand(args) {
+	if cliargs.IsSyncDatabaseCommand(args) {
 		if err := command.SyncDatabase(dbVersion); err != nil {
 			logs.Error("sync database failed:", err)
 			os.Exit(1)

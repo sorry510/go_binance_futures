@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -42,7 +43,8 @@ func historyDB(t *testing.T) (orm.Ormer, Store) {
 	if _, err := o.Raw(tradefills.SchemaDDL).Exec(); err != nil {
 		t.Fatal(err)
 	}
-	return o, Store{DB: o, Now: func() time.Time { return time.UnixMilli(1800000010000).UTC() }}
+	return o, Store{DB: o, Now: func() time.Time { return time.UnixMilli(1800000010000).UTC() },
+		ActivatedAt: func(account string) (int64, error) { return 1799999999000, nil }}
 }
 func positionFixture(t *testing.T, o orm.Ormer, account, owner, symbol, side, status, settlement string, closed bool) int64 {
 	t.Helper()
@@ -340,5 +342,92 @@ func TestStage015HistoryJSONResponseDoesNotLeakInternalSourceRefs(t *testing.T) 
 	}
 	if strings.Contains(string(jsonPage), marker) || strings.Contains(string(jsonPage), "source_ref") {
 		t.Fatalf("internal source_ref leaked through list: %s", string(jsonPage))
+	}
+}
+
+// ALL-F4: an old, even REST-verified/settled cycle must not be certified
+// as "new history" until its account has an explicit T0. This only affects
+// the read-only projection and its page totals, never persisted settlement.
+func TestStage016AccountHistoryT0GateFailsClosedWithoutChangingLedger(t *testing.T) {
+	o, store := historyDB(t)
+	id := fullCycle(t, o)
+	cases := []struct {
+		name   string
+		t0     int64
+		status string
+		reason string
+		net    *string
+	}{
+		{"not_activated", 0, "incomplete", "history_not_activated", nil},
+		{"pre_activation", 1800000000001, "incomplete", "pre_activation_position_cycle", nil},
+		{"activated_earlier", 1799999999999, "verified", "", ptr(big.NewRat(546, 5))},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			store.ActivatedAt = func(account string) (int64, error) {
+				if account != "main" {
+					t.Fatalf("history requested wrong account: %s", account)
+				}
+				return tc.t0, nil
+			}
+			list, err := store.List(context.Background(), Filter{AccountID: "main", Page: 1, Limit: 20})
+			if err != nil || list.Total != 1 {
+				t.Fatalf("history query: %v, %+v", err, list)
+			}
+			item := list.List[0]
+			if item.Completeness != tc.status || item.IncompleteReason != tc.reason {
+				t.Fatalf("T0 not enforced: %+v", item)
+			}
+			detail, err := store.Details(context.Background(), "main", id)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if tc.net == nil {
+				for _, child := range detail.Orders {
+					if child.GrossPnL != nil || len(child.Fees) != 0 || child.Completeness == "verified" {
+						t.Fatalf("pre-T0 child falsely certified: %+v", child)
+					}
+				}
+			}
+			if detail.Position.Completeness != item.Completeness || detail.Position.IncompleteReason != item.IncompleteReason {
+				t.Fatalf("detail bypassed history T0: list=%+v detail=%+v", item, detail.Position)
+			}
+			if tc.net == nil {
+				if item.NetPnL != nil || item.ReturnPct != nil || len(list.PageVerifiedNet) != 0 {
+					t.Fatalf("old/unactivated PnL leaked: %+v %+v", item, list.PageVerifiedNet)
+				}
+			} else if item.NetPnL == nil || *item.NetPnL != *tc.net || list.PageVerifiedNet["USDT"] != *tc.net {
+				t.Fatalf("post-T0 verified PnL lost: %+v %+v", item, list.PageVerifiedNet)
+			}
+		})
+	}
+	var status string
+	if err := o.Raw("SELECT settlement_status FROM futures_managed_positions WHERE id=?", id).QueryRow(&status); err != nil || status != "settled" {
+		t.Fatalf("read-only T0 gate mutated settlement: status=%q err=%v", status, err)
+	}
+}
+
+func TestStage016ConfiguredHistoryT0IndependentAndMalformedRejected(t *testing.T) {
+	t.Setenv("BINANCE_ORDER_HISTORY_T0_MAIN_MS", "")
+	t.Setenv("BINANCE_ORDER_HISTORY_T0_LEAD_MS", "")
+	if v, err := ConfiguredHistoryT0("main"); err != nil || v != 0 {
+		t.Fatalf("unset T0 must not activate: %d %v", v, err)
+	}
+	t.Setenv("BINANCE_ORDER_HISTORY_T0_MAIN_MS", "1800000000000")
+	t.Setenv("BINANCE_ORDER_HISTORY_T0_LEAD_MS", "1800000001000")
+	if v, err := ConfiguredHistoryT0("main"); err != nil || v != 1800000000000 {
+		t.Fatalf("main T0 not independent: %d %v", v, err)
+	}
+	if v, err := ConfiguredHistoryT0("lead"); err != nil || v != 1800000001000 {
+		t.Fatalf("lead T0 not independent: %d %v", v, err)
+	}
+	for _, raw := range []string{"0", "garbage", "-1", "2026-11-09T00:00:00Z", "4102444800001"} {
+		t.Setenv("BINANCE_ORDER_HISTORY_T0_MAIN_MS", raw)
+		if _, err := ConfiguredHistoryT0("main"); err == nil {
+			t.Fatalf("invalid T0 accepted %q", raw)
+		}
+	}
+	if _, err := ConfiguredHistoryT0("attacker"); err == nil {
+		t.Fatal("unknown account accepted")
 	}
 }

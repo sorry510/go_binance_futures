@@ -35,7 +35,7 @@ Normal startup:
 ./go_binance_futures
 ```
 
-For the current Stage 7-1 through 7-4 code, the required database schema is **v19**. The actual MySQL 8 version and preservation of historical Main-account data have not been verified in a live environment; local SQLite/Mock tests do not replace those checks.
+**Current binary requires database schema v23** (canonical code source: `appversion.DatabaseSchemaVersion`). An isolated local MySQL 5.6 database has passed fresh `sync db` and idempotence checks; **production MySQL 8 structure, performance, existing Main-account data preservation and live Binance gates remain unverified**. Local mocks, SQLite and empty-table plans do not substitute for these checks.
 
 Normal startup **does not automatically synchronize the schema or run database version migrations**. If the database has not been initialized or its version is older than the current binary requires, the application will instruct you to run `go_binance_futures sync db`. Back up the database before production upgrades and preferably run the sync command while the service is stopped.
 
@@ -102,9 +102,23 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | System Configuration (`系统配置`) | Edit `conf/app.conf` online and access Save, Restart Service, and Stop Service actions |
 | Logs (`日志`) | Display the service logs returned by `web.commend_log` |
 
+
+#### Exchange order-history activation time T0 (not activated)
+
+New order history requires a separately approved, persistent **UTC Unix timestamp in milliseconds** for each account, not a process startup timestamp:
+
+```text
+BINANCE_ORDER_HISTORY_T0_MAIN_MS=<approved Main activation UTC milliseconds>
+BINANCE_ORDER_HISTORY_T0_LEAD_MS=<approved Lead activation UTC milliseconds>
+```
+
+**Do not set or invent these values yet.** Without an approved T0, Managed cycles remain available for read-only inspection, but **neither cycles nor child orders will be certified as verified new-history PnL**; net PnL/return/page totals remain unavailable. Cycles created before the corresponding account's T0 likewise remain visible only as incomplete audit history. Invalid activation values fail closed rather than defaulting to epoch or process start time. The gate affects **read-only `GET /orders` history only**, not live protection, exchange fills, or settlement.
+
+Before configuring either value, close production G1–G5, retain each account's approval and UTC T0 alongside the exact deployed binary/frontend SHA256 and actual production Schema version, and keep the values stable across restarts. **New static files in Git do not mean the matching backend/database has been deployed.** Never use a direct `git pull` into a running deployment to update `static` by itself.
+
 ### Lead Copy Trading (Stages 6 and 7-1 through 7-4)
 
-> **Current status: the management UI and account-isolation infrastructure are implemented and verified with Mock/Race tests. Live Lead Portfolio identity, MySQL 8 schema v19, private WS, Algo orders, and funded execution have NOT passed their live gates. Live Lead order execution remains locked.** This feature is separate from AI Controlled Trading and cannot guarantee any follower fills.
+> **Current status: the management UI and account-isolation infrastructure are implemented and verified with Mock/Race tests. Live Lead Portfolio identity, MySQL 8 schema v23, private WS, Algo orders, and funded execution have NOT passed their live gates. Live Lead order execution remains locked.** This feature is separate from AI Controlled Trading and cannot guarantee any follower fills.
 
 Open **Futures Trade → Lead Copy Trading** (`/futures/lead`). The page has six Cards:
 
@@ -134,7 +148,7 @@ BINANCE_LEAD_AUDIT_FILE=/private/lead/operations.jsonl
 - `BINANCE_LEAD_CREDENTIAL_KEY` must decode from **standard Base64 to exactly 32 random bytes**. Generate and persist it securely: losing/rotating this master key makes the existing encrypted credentials unreadable.
 - All three file paths must be **absolute and outside the repository**, with an operator-owned private parent directory (recommended `0700`) and private files (`0600`), not symlinks. The app does not silently create private directories or generate a master key.
 - After setting these values and deploying the updated backend, use the UI to save a dedicated Lead credential, request read-only verification, and save independent risk limits. Missing secure storage causes fail-closed errors; **do not work around this by putting secrets into `app.conf`**.
-- Only after backing up the target DB, checking the actual version/data and taking the service down should an operator explicitly run `./go_binance_futures sync db`. The current binary requires **schema v19**. Passing SQLite/Mock migration tests does **not** confirm your real MySQL 8 schema has been migrated.
+- Only after backing up the target DB, checking the actual version/data and taking the service down should an operator explicitly run `./go_binance_futures sync db`. The current binary requires **schema v23** (see `appversion.DatabaseSchemaVersion`). Passing SQLite/Mock migration tests does **not** confirm your real MySQL 8 schema has been migrated.
 
 #### Private read-only observer: explicit opt-in performs real Binance I/O
 
@@ -398,7 +412,7 @@ When the `Test Auto-Conversion Count Limit` is non-zero, consecutive simulated w
 
 ## futures-trade-order
 
-- **Futures Orders** (**Stage 01-5, pending Stage 01-6 deployment**): one row per Managed `position_id`; expandable OPEN/CLOSE/TP/SL orders and actual Binance trades, including execution quantity, price, fees and order/trade IDs. **Verified net trading PnL** (realized trade PnL minus commissions, **excluding funding**) and opening-notional return are displayed only for fully REST-confirmed settled cycles. Incomplete/legacy cycles are marked for reconciliation, never assigned speculative profits. Historic leverage is shown as unavailable when no immutable snapshot exists. Old `order` history is not migrated; authentic Fill rows cannot be deleted. Read access to main/Lead histories is restricted to the single authenticated operator, not a public data API.
+- **Futures Orders** (**Stage 01-5 committed with the new static assets; production deployment remains BLOCKED pending live gates**): one row per Managed `position_id`; expandable OPEN/CLOSE/TP/SL orders and actual Binance trades, including execution quantity, price, fees and order/trade IDs. **Verified net trading PnL** (realized trade PnL minus commissions, **excluding funding**) and opening-notional return are displayed only for fully REST-confirmed settled cycles. Incomplete/legacy cycles are marked for reconciliation, never assigned speculative profits. Historic leverage is shown as unavailable when no immutable snapshot exists. Old `order` history is not migrated; authentic Fill rows cannot be deleted. Read access to main/Lead histories is restricted to the single authenticated operator, not a public data API.
 - **Futures Account:** assets, positions, and open orders returned by Binance.
 - **Local Futures Account:** the application's local account state, useful for comparing local data with exchange data.
 
