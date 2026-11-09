@@ -13,11 +13,11 @@ import (
 
 func TestStage45LeadFaultNeverStopsMainTradeRunner(t *testing.T) {
 	// No shared lead/global config, no actual network or private Binance calls.
-	lead, leadOpens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	lead, leadOpens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	lead.PreflightOpen = func(context.Context, *models.Symbols, futures.PositionSideType, float64, float64) error {
 		return leadaccount.ErrLeadPendingReconcile
 	}
-	main, mainOpens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	main, mainOpens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	main.AccountID = binance.MainAccountID
 	main.Mock = false
 	main.LeadSymbols = nil
@@ -34,7 +34,7 @@ func TestStage45LeadFaultNeverStopsMainTradeRunner(t *testing.T) {
 }
 
 func TestStage45LeadPreflightErrorDoesNotRemoveSafeExitHooks(t *testing.T) {
-	runner, opens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	runner, opens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	runner.PreflightOpen = func(context.Context, *models.Symbols, futures.PositionSideType, float64, float64) error {
 		return errors.New("private raw error remains unlogged")
 	}

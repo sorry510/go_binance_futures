@@ -1,0 +1,1 @@
+import t from"./feature-BPt0uAuh.js";import{d as e,g as o,o as r}from"./index-BrzFZ34d.js";import"./codemirror-DB41MNQR.js";import"./listenCoin-B8_YZcmj.js";import"./technology-DuYeVeMQ.js";const f=e({name:"listenSpot",__name:"spot",setup(p){return(a,m)=>(r(),o(t,{"market-type":1}))}});export{f as default};

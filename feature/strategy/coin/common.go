@@ -4,6 +4,7 @@ import (
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
 	"go_binance_futures/service/binanceapiusage"
+	"go_binance_futures/service/tradefills"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -92,21 +93,20 @@ func cloneSymbolSet(input map[string]bool) map[string]bool {
 	return output
 }
 
-// 最近min交易过的币种local订单
-func getLimitMinLocalOrder(minute int64) (symbols map[string]bool) {
-	startTime := time.Now().Unix()*1000 - minute*60*1000 // 毫秒时间戳
-	o := orm.NewOrm()
-	var orders []models.Order
-	_, _ = o.QueryTable("order").
-		Filter("account_id", "main").
-		Filter("UpdateTime__gte", startTime).
-		Filter("Side", "close").
-		All(&orders)
-	symbols = make(map[string]bool)
-	for _, order := range orders {
-		symbols[order.Symbol] = true
+// getLimitMinManagedClose excludes genuinely recent exchange CLOSE/TP/SL
+// fills using immutable trade_time; orders may be updated hours later. It never queries historical `order`, and never treats an order
+// acknowledgement as a trade. A canceled partial fill is still a real close.
+// On DB errors callers fail closed and do not select any new entry symbols.
+func getLimitMinManagedClose(minute int64) (map[string]bool, error) {
+	return getLimitMinManagedCloseWithOrm(orm.NewOrm(), minute)
+}
+func getLimitMinManagedCloseWithOrm(o orm.Ormer, minute int64) (map[string]bool, error) {
+	excluded := make(map[string]bool)
+	if minute <= 0 {
+		return excluded, nil
 	}
-	return symbols
+	now := time.Now().UnixMilli()
+	return tradefills.RecentClosedSymbols(o, "main", now-minute*60*1000, now)
 }
 
 func GetRandArr(arr []*models.Symbols, num int) (result []*models.Symbols) {

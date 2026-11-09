@@ -9,6 +9,7 @@ import (
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"go_binance_futures/models"
+	"go_binance_futures/service/tradefills"
 )
 
 // Serialize WS updates with full REST mirror snapshot application. Without
@@ -102,6 +103,17 @@ func persistFuturesAccountEventWithDB(o orm.Ormer, accountID AccountID, account 
 		}
 	case "ORDER_TRADE_UPDATE":
 		order := event.OrderTradeUpdate
+		// Persist real TRADE fills independently from the current order
+		// mirror timestamp. Out-of-order events are still immutable fills.
+		fill, accepted, fillErr := tradefills.FromWS(id, order)
+		if fillErr != nil {
+			return fmt.Errorf("invalid futures WS fill: %w", fillErr)
+		}
+		if accepted {
+			if err := tradefills.Insert(o, fill); err != nil {
+				return fmt.Errorf("persist futures WS fill: %w", err)
+			}
+		}
 		var row models.FuturesOrder
 		err := o.QueryTable("futures_orders").Filter("account_id", id).Filter("order_id", order.ID).One(&row)
 		if err != nil && err != orm.ErrNoRows {

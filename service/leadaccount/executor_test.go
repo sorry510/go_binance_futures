@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go_binance_futures/service/tradefills"
 	"sync"
 	"testing"
 	"time"
@@ -14,9 +15,11 @@ import (
 	binance "go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
 	"go_binance_futures/service/futuresownership"
+	"go_binance_futures/service/internal/testtrades"
 )
 
 func prepareLeadExecutionDB(t *testing.T) {
+	testtrades.Reset()
 	t.Helper()
 	_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	if _, err := orm.GetDB("default"); err != nil {
@@ -29,7 +32,10 @@ func prepareLeadExecutionDB(t *testing.T) {
 		}
 	}
 	db := orm.NewOrm()
-	for _, table := range []string{"futures_managed_orders", "futures_managed_positions"} {
+	if _, err := db.Raw(tradefills.SchemaDDL).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	for _, table := range []string{"futures_trade_fills", "futures_managed_orders", "futures_managed_positions"} {
 		if _, err := db.Raw("DELETE FROM " + table).Exec(); err != nil {
 			t.Fatal(err)
 		}
@@ -55,6 +61,9 @@ func (b *stage43Broker) Submit(_ context.Context, r futuresownership.OrderReques
 	}
 	v := b.result
 	v.ClientOrderID = clientID
+	if (r.Intent == futuresownership.IntentTakeProfit || r.Intent == futuresownership.IntentStopLoss) && v.FilledQty > 0 {
+		v.ActualOrderID = v.ExchangeOrderID
+	}
 	return v, nil
 }
 func (b *stage43Broker) Lookup(_ context.Context, _, _, _ string) (futuresownership.ExchangeOrder, error) {
@@ -62,6 +71,9 @@ func (b *stage43Broker) Lookup(_ context.Context, _, _, _ string) (futuresowners
 	defer b.mu.Unlock()
 	b.lookups++
 	return b.lookupResult, b.lookupErr
+}
+func (b *stage43Broker) ListAccountTrades(ctx context.Context, symbol string, orderID, fromID int64, limit int) ([]*futures.AccountTrade, error) {
+	return testtrades.FromTestManagedOrder(ctx, "lead", symbol, orderID, fromID, limit)
 }
 func (b *stage43Broker) Cancel(context.Context, string, int64, string) error { return nil }
 func stage43Adapter(t *testing.T, allowInTests bool) (*LeadExecutionAdapter, *stage43Broker) {
