@@ -25,7 +25,7 @@ func stage46BothDirections(*models.Symbols, []types.FuturesPosition) strategy.Op
 	return strategy.OpenResult{CanLong: true, CanShort: true, LongStrategyHash: "shared-long", ShortStrategyHash: "shared-short"}
 }
 func TestStage46SharedStrategyConcurrentMainLeadIsolation(t *testing.T) {
-	main, mainOpens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	main, mainOpens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	main.AccountID = binance.MainAccountID
 	main.Mock = false
 	main.LeadSymbols = nil
@@ -35,7 +35,7 @@ func TestStage46SharedStrategyConcurrentMainLeadIsolation(t *testing.T) {
 	main.SelectCoins = func(_ *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) { return coins[:1], nil }
 	main.EvaluateEntry = stage46BothDirections
 
-	lead, leadOpens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	lead, leadOpens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	lead.EvaluateEntry = stage46BothDirections
 	lead.SelectCoins = func(_ *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) { return coins[:1], nil }
 	leadConfigChecks := 0
@@ -59,13 +59,13 @@ func TestStage46SharedStrategyConcurrentMainLeadIsolation(t *testing.T) {
 	}
 
 	// Break Lead only. Main must retain exactly the same two golden directions.
-	lead2, leadFaultOpens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	lead2, leadFaultOpens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	lead2.EvaluateEntry = stage46BothDirections
 	lead2.SelectCoins = func(_ *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) { return coins[:1], nil }
 	lead2.PreflightOpen = func(context.Context, *models.Symbols, futures.PositionSideType, float64, float64) error {
 		return context.DeadlineExceeded
 	}
-	main2, main2Opens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	main2, main2Opens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	main2.AccountID = binance.MainAccountID
 	main2.Mock = false
 	main2.LeadSymbols = nil
@@ -93,7 +93,7 @@ func TestStage46SharedExitSignalsBothSidesEvenWhenLeadPaused(t *testing.T) {
 		{"hold", tradeExitHold, 0},
 	} {
 		t.Run(decision.name, func(t *testing.T) {
-			r, opens, closes, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+			r, opens, closes := stage3MockRunner(t, []string{"BTCUSDT"})
 			r.AllowNewOpens = false
 			r.LeadSymbols.Invalidate()
 			r.ReadPositions = func(context.Context) ([]types.FuturesPosition, error) {

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"go_binance_futures/feature/strategy/line"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,7 +27,7 @@ type stage3TestOnlyPermit struct{}
 func (stage3TestOnlyPermit) stage3MockOnly() {}
 
 // Build from explicit test hooks, never from mainTradeRunner or its real
-// broker, history writer, WS position source or side-effecting API closures.
+// broker, WS position source or side-effecting API closures.
 func leadMockTradeRunner(cfg *models.Config, symbols *binance.LeadSymbolCache, fake *accountTradeRunner) (*accountTradeRunner, error) {
 	if cfg == nil || symbols == nil || fake == nil {
 		return nil, fmt.Errorf("lead mock test configuration/hooks required")
@@ -52,7 +54,7 @@ func leadMockTradeRunner(cfg *models.Config, symbols *binance.LeadSymbolCache, f
 	return &r, nil
 }
 
-func stage3MockRunner(t *testing.T, allowed []string) (*accountTradeRunner, *int, *int, *int) {
+func stage3MockRunner(t *testing.T, allowed []string) (*accountTradeRunner, *int, *int) {
 	t.Helper()
 	client, err := binance.NewAccountClient(binance.LeadAccountID, futures.NewClient("fake", "fake"))
 	if err != nil {
@@ -76,7 +78,7 @@ func stage3MockRunner(t *testing.T, allowed []string) (*accountTradeRunner, *int
 		{Symbol: "BTCUSDT", TickSize: "0.1", StepSize: "0.01", Usdt: "100", Leverage: 4, Profit: "8", Loss: "6"},
 		{Symbol: "ETHUSDT", TickSize: "0.1", StepSize: "0.01", Usdt: "100", Leverage: 4, Profit: "8", Loss: "6"},
 	}
-	openCount, closeCount, historyCount := new(int), new(int), new(int)
+	openCount, closeCount := new(int), new(int)
 	fake := &accountTradeRunner{
 		AllowNewOpens:  true,
 		LoadSymbols:    func() ([]*models.Symbols, error) { return coins, nil },
@@ -97,8 +99,6 @@ func stage3MockRunner(t *testing.T, allowed []string) (*accountTradeRunner, *int
 			*closeCount++
 			return &futures.CreateOrderResponse{OrderID: 100}, nil
 		},
-		RecordOpen:  func(string, float64, string, string, int64, int64) { *historyCount++ },
-		RecordClose: func(types.FuturesPosition, float64, float64, string, int64, *models.Config) { *historyCount++ },
 		NotifyOpen:  func(notify.FuturesOrderParams) {},
 		NotifyClose: func(notify.FuturesOrderParams) {},
 		Sleep:       func(time.Duration) {},
@@ -113,13 +113,13 @@ func stage3MockRunner(t *testing.T, allowed []string) (*accountTradeRunner, *int
 	r.EvaluateEntry = func(*models.Symbols, []types.FuturesPosition) strategy.OpenResult {
 		return strategy.OpenResult{CanLong: true}
 	}
-	return r, openCount, closeCount, historyCount
+	return r, openCount, closeCount
 }
 func TestStage3LeadMockNeverOpensOutsideWhitelist(t *testing.T) {
-	r, opens, closes, history := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, opens, closes := stage3MockRunner(t, []string{"BTCUSDT"})
 	runAccountTradeCycle(r)
-	if *opens != 1 || *closes != 0 || *history != 1 {
-		t.Fatalf("opens=%d closes=%d history=%d", *opens, *closes, *history)
+	if *opens != 1 || *closes != 0 {
+		t.Fatalf("opens=%d closes=%d", *opens, *closes)
 	}
 	// Cached whitelist is required again immediately before submission.
 	r.LeadSymbols.Invalidate()
@@ -129,7 +129,7 @@ func TestStage3LeadMockNeverOpensOutsideWhitelist(t *testing.T) {
 	}
 }
 func TestStage3LeadPausedStillReconciles(t *testing.T) {
-	r, opens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, opens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.AllowNewOpens = false
 	syncs, cancels := 0, 0
 	r.SyncPositions = func([]types.FuturesPosition) ([]ownedTradePosition, error) { syncs++; return nil, nil }
@@ -140,7 +140,7 @@ func TestStage3LeadPausedStillReconciles(t *testing.T) {
 	}
 }
 func TestStage3LeadUsesOwnPositionsForOpeningSlots(t *testing.T) {
-	r, opens, _, _ := stage3MockRunner(t, []string{"BTCUSDT", "ETHUSDT"})
+	r, opens, _ := stage3MockRunner(t, []string{"BTCUSDT", "ETHUSDT"})
 	r.ReadPositions = func(context.Context) ([]types.FuturesPosition, error) {
 		return []types.FuturesPosition{{Symbol: "BTCUSDT", Side: "LONG", Amount: "1"}}, nil
 	}
@@ -159,7 +159,7 @@ func TestStage3LeadCannotUseIncompleteOrLiveRunner(t *testing.T) {
 // MARKET/LIMIT price/quantity semantics through the shared runner. It never
 // invokes the real Binance client or writes the database.
 func TestStage3MainMarketEntryGolden(t *testing.T) {
-	r, _, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.AccountID = binance.MainAccountID
 	r.Mock = false
 	r.leadMockPermit = nil
@@ -180,12 +180,12 @@ func TestStage3MainMarketEntryGolden(t *testing.T) {
 		snapshot.RecordPendingOpen(symbol, side, ps, id)
 		return &futures.CreateOrderResponse{OrderID: id}, nil
 	}
-	var recorded []string
-	r.RecordOpen = func(_ string, qty float64, avg, positionSide string, _ int64, _ int64) {
-		recorded = append(recorded, positionSide+":"+avg)
-		if qty != 4 {
-			t.Errorf("quantity=%v want 4", qty)
+	var notified []string
+	r.NotifyOpen = func(params notify.FuturesOrderParams) {
+		if params.Quantity != 4 {
+			t.Errorf("notification quantity=%g want 4", params.Quantity)
 		}
+		notified = append(notified, strings.ToUpper(params.PositionSide)+":"+strconv.FormatFloat(params.Price, 'f', -1, 64))
 	}
 	var sleeps []time.Duration
 	r.Sleep = func(d time.Duration) { sleeps = append(sleeps, d) }
@@ -197,15 +197,15 @@ func TestStage3MainMarketEntryGolden(t *testing.T) {
 	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("golden intents mismatch:\ngot=%+v\nwant=%+v", actual, expected)
 	}
-	if !reflect.DeepEqual(recorded, []string{"LONG:100.1", "SHORT:99.9"}) {
-		t.Fatalf("golden market history price mismatch: %v", recorded)
+	if !reflect.DeepEqual(notified, []string{"LONG:100.1", "SHORT:99.9"}) {
+		t.Fatalf("market notification price drift after removing history writer: %v", notified)
 	}
 	if !reflect.DeepEqual(sleeps, []time.Duration{30 * time.Second}) {
 		t.Fatalf("cooldown=%v", sleeps)
 	}
 }
 func TestStage3LeadCloseDoesNotDependOnWhitelist(t *testing.T) {
-	r, opens, closes, history := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, opens, closes := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.AllowNewOpens = false
 	r.ReadPositions = func(context.Context) ([]types.FuturesPosition, error) {
 		return []types.FuturesPosition{{Symbol: "BTCUSDT", Side: "LONG", Amount: "2", Leverage: 4, MarkPrice: "100", UnrealizedProfit: "-20"}}, nil
@@ -216,15 +216,15 @@ func TestStage3LeadCloseDoesNotDependOnWhitelist(t *testing.T) {
 	r.EvaluateExit = func(strategy.CloseParams, float64, float64) tradeExitReason { return tradeExitAuto }
 	r.LeadSymbols.Invalidate()
 	runAccountTradeCycle(r)
-	if *opens != 0 || *closes != 1 || *history != 1 {
-		t.Fatalf("expired whitelist blocked managed close, opens=%d closes=%d history=%d", *opens, *closes, *history)
+	if *opens != 0 || *closes != 1 {
+		t.Fatalf("expired whitelist blocked managed close, opens=%d closes=%d", *opens, *closes)
 	}
 }
 
-// CODE_REVIEW_Stage3 PR-Stage3-1: the LIMIT request and history price must
+// CODE_REVIEW_Stage3 PR-Stage3-1: the LIMIT request and notification price must
 // remain exactly the rounded depth price (no MARKET 1.0012/0.9988 adjustment).
 func TestStage3MainLimitOrderGolden(t *testing.T) {
-	r, _, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.AccountID = binance.MainAccountID
 	r.Mock = false
 	r.leadMockPermit = nil
@@ -250,12 +250,12 @@ func TestStage3MainLimitOrderGolden(t *testing.T) {
 		snap.RecordPendingOpen(symbol, side, pos, id)
 		return &futures.CreateOrderResponse{OrderID: id}, nil
 	}
-	var history []string
-	r.RecordOpen = func(_ string, qty float64, price, pos string, _ int64, _ int64) {
-		if qty != 4 {
-			t.Errorf("quantity=%g", qty)
+	var notified []string
+	r.NotifyOpen = func(params notify.FuturesOrderParams) {
+		if params.Quantity != 4 {
+			t.Errorf("notification quantity=%g want 4", params.Quantity)
 		}
-		history = append(history, pos+":"+price)
+		notified = append(notified, strings.ToUpper(params.PositionSide)+":"+strconv.FormatFloat(params.Price, 'f', -1, 64))
 	}
 	var sleep []time.Duration
 	r.Sleep = func(d time.Duration) { sleep = append(sleep, d) }
@@ -267,8 +267,8 @@ func TestStage3MainLimitOrderGolden(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("LIMIT trade drift\ngot=%+v\nwant=%+v", got, want)
 	}
-	if !reflect.DeepEqual(history, []string{"LONG:100", "SHORT:100"}) {
-		t.Fatalf("LIMIT history price drift: %v", history)
+	if !reflect.DeepEqual(notified, []string{"LONG:100", "SHORT:100"}) {
+		t.Fatalf("LIMIT notification price drift after history retirement: %v", notified)
 	}
 	if !reflect.DeepEqual(sleep, []time.Duration{30 * time.Second}) {
 		t.Fatalf("LIMIT cooldown drift: %v", sleep)
@@ -288,7 +288,7 @@ func TestStage3MainDirectionSwitches(t *testing.T) {
 		{"both_disabled", 0, 0, nil},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			r, _, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+			r, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 			r.AccountID = binance.MainAccountID
 			r.Mock = false
 			r.leadMockPermit = nil
@@ -317,7 +317,7 @@ func TestStage3MainDirectionSwitches(t *testing.T) {
 // CODE_REVIEW_Stage3 PR-Stage3-3: when no Lead whitelist is ready, the real
 // selector returns an empty non-error result, permitting exit/reconcile.
 func TestStage3LeadUnavailableWhitelistDoesNotAbortExitCycle(t *testing.T) {
-	r, opens, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, opens, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	r.SelectCoins = func(cfg *models.Config, all []*models.Symbols) ([]*models.Symbols, error) {
 		return selectLeadTradeCoins(cfg, all, r.LeadSymbols)
 	}
@@ -337,7 +337,7 @@ func TestStage3LeadUnavailableWhitelistDoesNotAbortExitCycle(t *testing.T) {
 
 // Protection against the exact factory misuse identified in F3.
 func TestStage3LeadMockFactoryRejectsMainRunner(t *testing.T) {
-	r, _, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+	r, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 	if _, err := leadMockTradeRunner(r.Config, r.LeadSymbols, mainTradeRunner(r.Config)); err == nil {
 		t.Fatal("main's real broker and IO hooks must never be reused by a Lead fixture")
 	}
@@ -363,7 +363,7 @@ func TestStage3TradeCycleAttributionPerAccount(t *testing.T) {
 		{"lead", binance.LeadAccountID, "lead_trading"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			r, _, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
+			r, _, _ := stage3MockRunner(t, []string{"BTCUSDT"})
 			r.AccountID = tc.id
 			if tc.id == binance.MainAccountID {
 				r.Mock = false

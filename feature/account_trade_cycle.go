@@ -42,8 +42,6 @@ type accountTradeRunner struct {
 	PreflightOpen func(context.Context, *models.Symbols, futures.PositionSideType, float64, float64) error
 	SubmitOpen    func(*tradeCycleAccountSnapshot, string, float64, float64, futures.SideType, futures.PositionSideType, futures.OrderType, string) (*futures.CreateOrderResponse, error)
 	SubmitClose   func(string, string, string, float64, futures.PositionSideType) (*futures.CreateOrderResponse, error)
-	RecordOpen    func(string, float64, string, string, int64, int64)
-	RecordClose   func(types.FuturesPosition, float64, float64, string, int64, *models.Config)
 	NotifyOpen    func(notify.FuturesOrderParams)
 	NotifyClose   func(notify.FuturesOrderParams)
 	EvaluateExit  func(strategy.CloseParams, float64, float64) tradeExitReason
@@ -75,8 +73,6 @@ func mainTradeRunner(cfg *models.Config) *accountTradeRunner {
 		},
 		SubmitOpen:   submitAutoStrategyOpen,
 		SubmitClose:  submitManagedStrategyClose,
-		RecordOpen:   insertOpenOrder,
-		RecordClose:  insertCloseOrder,
 		NotifyOpen:   func(params notify.FuturesOrderParams) { pusher.SetModuleName("futures").FuturesOpenOrder(params) },
 		NotifyClose:  func(params notify.FuturesOrderParams) { pusher.SetModuleName("futures").FuturesCloseOrder(params) },
 		EvaluateExit: evaluateSharedTradeExit,
@@ -106,7 +102,7 @@ func (r *accountTradeRunner) validate() error {
 	if r.LoadSymbols == nil || r.SelectCoins == nil || r.ReadPositions == nil || r.ReadOpenOrders == nil ||
 		r.SyncPositions == nil || r.CancelExpired == nil || r.EvaluateEntry == nil || r.Depth == nil ||
 		r.EnsureConfig == nil || r.EvaluateExit == nil || r.SubmitOpen == nil || r.SubmitClose == nil ||
-		r.RecordOpen == nil || r.RecordClose == nil || r.NotifyOpen == nil || r.NotifyClose == nil || r.Sleep == nil {
+		r.NotifyOpen == nil || r.NotifyClose == nil || r.Sleep == nil {
 		return fmt.Errorf("incomplete account-scoped trade adapter")
 	}
 	return nil

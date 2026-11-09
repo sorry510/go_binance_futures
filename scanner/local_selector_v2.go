@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go_binance_futures/models"
+	"go_binance_futures/service/tradefills"
 
 	"github.com/beego/beego/v2/client/orm"
 )
@@ -217,24 +218,10 @@ func recentClosedSymbolsForAccountWithOrm(ctx context.Context, o orm.Ormer, cool
 	if cooldownMinute <= 0 {
 		cooldownMinute = DefaultSmartLocalV2CooldownMinute
 	}
-	startTime := time.Now().UnixMilli() - cooldownMinute*60*1000
-	var orders []models.Order
-	_, err := o.QueryTable("order").
-		Filter("account_id", accountID).
-		Filter("UpdateTime__gte", startTime).
-		Filter("Side", "close").
-		All(&orders, "Symbol")
-	if err != nil {
-		return nil, err
-	}
-	result := make(map[string]bool, len(orders))
-	for _, order := range orders {
-		symbol := strings.ToUpper(strings.TrimSpace(order.Symbol))
-		if symbol != "" {
-			result[symbol] = true
-		}
-	}
-	return result, nil
+	now := time.Now().UnixMilli()
+	// Trade time, not a mutable Managed order update timestamp, defines
+	// the real exchange cooldown boundary. Test mode is independent.
+	return tradefills.RecentClosedSymbols(o, accountID, now-cooldownMinute*60*1000, now)
 }
 
 func recentTestClosedSymbolsWithOrm(ctx context.Context, o orm.Ormer, cooldownMinute int64) (map[string]bool, error) {

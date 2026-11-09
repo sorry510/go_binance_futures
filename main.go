@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/controllers"
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/api/binance"
+	"go_binance_futures/internal/cliargs"
 	"go_binance_futures/llm"
 	"go_binance_futures/mcpserver"
 	"go_binance_futures/middlewares"
@@ -86,7 +87,14 @@ func initLogger() {
 func registerModels() {
 	// orm.Debug = true
 	orm.RegisterModel(new(models.Config))
-	orm.RegisterModel(new(models.Order))
+	// Historical v19 account-scope migrations still inspect the physical
+	// `order` table. Register its archival schema ONLY during the explicit
+	// sync-db CLI; normal API/trading processes have no legacy ORM model.
+	// This preserves pre-v19 upgrade compatibility without restoring any
+	// old history read, write or delete endpoints.
+	if cliargs.IsSyncDatabaseCommand(os.Args[1:]) {
+		orm.RegisterModel(new(models.Order))
+	}
 	orm.RegisterModel(new(models.Symbols))
 	orm.RegisterModel(new(models.NewSymbols))
 	orm.RegisterModel(new(models.NoticeSymbols))
@@ -258,19 +266,15 @@ func futuresTradingConfigured() bool {
 	return strings.TrimSpace(tradeKey) != ""
 }
 
-func isSyncDatabaseCommand(args []string) bool {
-	return len(args) == 2 && args[0] == "sync" && args[1] == "db"
-}
-
 func isCLICommand(args []string) bool {
-	if isSyncDatabaseCommand(args) {
+	if cliargs.IsSyncDatabaseCommand(args) {
 		return true
 	}
 	return len(args) > 0 && (args[0] == "doctor" || args[0] == "cleanup")
 }
 
 func runCommand(args []string) bool {
-	if isSyncDatabaseCommand(args) {
+	if cliargs.IsSyncDatabaseCommand(args) {
 		if err := command.SyncDatabase(dbVersion); err != nil {
 			logs.Error("sync database failed:", err)
 			os.Exit(1)
@@ -444,14 +448,21 @@ func main() {
 		if !futuresTradingConfigured() {
 			return
 		}
-		if summaries, err := futuresownership.DefaultReconciler().ReconcileAll(context.Background()); err != nil {
+		reconcileCtx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+		defer cancel()
+		if summaries, err := futuresownership.DefaultReconciler().ReconcileAll(reconcileCtx); err != nil {
 			logs.Warning("periodic futures ownership reconcile:", err)
 		} else {
 			logs.Debug("periodic futures ownership reconcile complete:", len(summaries), "owners checked")
-			if updated, syncErr := agenttrade.DefaultService().SyncClosedManagedProposals(context.Background(), "ownership_reconcile"); syncErr != nil {
+			if updated, syncErr := agenttrade.DefaultService().SyncClosedManagedProposals(reconcileCtx, "ownership_reconcile"); syncErr != nil {
 				logs.Warning("sync closed agent trade proposals:", syncErr)
 			} else if updated > 0 {
 				logs.Info("agent trade proposal ownership reconcile:", updated, "proposals closed")
+			}
+			// Never submit even the pre-existing notice repair if the
+			// bounded account reconciliation context has expired.
+			if reconcileCtx.Err() != nil {
+				return
 			}
 			// Only rebuild notice protection after account/ownership reconciliation
 			// succeeds; otherwise stale managed quantity could over-protect a position.
@@ -459,11 +470,31 @@ func main() {
 		}
 	}, time.Minute)
 
-	// 30 分钟检查一次所有未平仓的订单, 一次 200 条，此处是兜底行为，处理一些意外情况
-	// 处理 app 上已经平仓的订单，但是系统中没有找到对应的平仓订单
+	// Real SL/TP submissions are deliberately NOT part of the ownership
+	// reconciliation loop. This optional independent worker is disabled
+	// unless the operator explicitly sets BINANCE_AGENT_PROTECTION_AUTO_REPAIR=enabled.
+	// It requires a fresh, fully resolved agent owner reconcile and cannot
+	// block the main ownership loop if the exchange stalls.
 	loopRun(func() {
-		feature.UpdateOrderStatus()
-	}, time.Minute*30) // 30分钟更新一次订单状态
+		if !futuresTradingConfigured() || !agenttrade.AutomaticProtectionRepairEnabled() {
+			return
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		summaries, err := futuresownership.DefaultReconciler().ReconcileAll(ctx)
+		if err != nil || !agenttrade.ProtectionRepairReconcileOK(summaries) {
+			logs.Warning("报警: auto protection rearm skipped: account ownership reconcile incomplete",
+				" owner_summaries=", len(summaries), " err=", err)
+			return
+		}
+		cycles, err := agenttrade.DefaultOwnershipLifecycle().RepairActiveManagedProtections(ctx)
+		if err != nil {
+			logs.Warning("报警: auto protection rearm unresolved: ", err)
+		}
+		if cycles > 0 {
+			logs.Info("agent_trade automatically repaired protected cycles: ", cycles)
+		}
+	}, time.Minute)
 
 	/*******************************************测试自定义策略 start**********************************************************/
 	// 轮训测试所有开启合约交易的币种策略(每轮5个)

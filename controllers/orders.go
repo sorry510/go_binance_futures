@@ -1,259 +1,131 @@
 package controllers
 
 import (
-	"fmt"
+	"errors"
+	"net/http"
 	"strconv"
 	"strings"
 
-	"go_binance_futures/models"
-	"go_binance_futures/utils"
+	"go_binance_futures/service/orderhistory"
 
-	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-type OrderController struct {
-	web.Controller
+// OrderController exposes ONLY read-only v23 Managed/Fill order history.
+// The physical legacy `order` table is deliberately never read or deleted.
+type OrderController struct{ web.Controller }
+
+func (ctrl *OrderController) respondError(status int, message string) {
+	ctrl.Ctx.Output.SetStatus(status)
+	// Always respond JSON, regardless of Accept. Context.Resp negotiates
+	// YAML/XML/Protobuf and can panic on a non-proto map payload.
+	_ = ctrl.JSONResp(map[string]any{"code": status, "data": nil, "msg": message})
+}
+func (ctrl *OrderController) success(value any) {
+	_ = ctrl.JSONResp(map[string]any{"code": 200, "data": value, "msg": "success"})
 }
 
-type OrderTableList struct {
-	models.Order
-	NowPrice string `orm:"column(now_price)" json:"now_price"`
+// The product has a single configured operator login, not independent
+// main/lead per-user roles. Both accounts are readable only to that operator.
+// Defense-in-depth: require validated JWT claims set by JwtMiddleware even if
+// a future router accidentally omits its filter.
+func (ctrl *OrderController) authorized() bool {
+	claims, ok := ctrl.Ctx.Input.GetData("user").(jwt.MapClaims)
+	if !ok {
+		ctrl.respondError(http.StatusUnauthorized, "order_history_auth_required")
+		return false
+	}
+	username, ok := claims["Username"].(string)
+	if !ok || strings.TrimSpace(username) == "" {
+		ctrl.respondError(http.StatusUnauthorized, "order_history_auth_required")
+		return false
+	}
+	return true
 }
 
-type orderSearchParams struct {
-	Symbol       string
-	PositionSide string
-	StartTime    string
-	EndTime      string
-	Type         string
+func parseHistoryInt(s string, def int) (int, error) {
+	if strings.TrimSpace(s) == "" {
+		return def, nil
+	}
+	return strconv.Atoi(strings.TrimSpace(s))
 }
-
-func (ctrl *OrderController) getSearchParams() orderSearchParams {
-	return orderSearchParams{
-		Symbol:       strings.TrimSpace(ctrl.GetString("symbol")),
-		PositionSide: strings.ToUpper(strings.TrimSpace(ctrl.GetString("position_side"))),
-		StartTime:    strings.TrimSpace(ctrl.GetString("start_time")),
-		EndTime:      strings.TrimSpace(ctrl.GetString("end_time")),
-		Type:         strings.ToLower(strings.TrimSpace(ctrl.GetString("type"))),
+func parseHistoryMillis(s string) (int64, error) {
+	if strings.TrimSpace(s) == "" {
+		return 0, nil
 	}
+	return strconv.ParseInt(strings.TrimSpace(s), 10, 64)
 }
-
-func orderOpenClause(alias string) string {
-	prefix := ""
-	if alias != "" {
-		prefix = alias + "."
-	}
-	return prefix + "account_id = 'main' AND " + prefix + "side = 'open'"
-}
-
-func (params orderSearchParams) whereClause(alias string) (string, []interface{}, bool, error) {
-	prefix := ""
-	if alias != "" {
-		prefix = alias + "."
-	}
-	conditions := make([]string, 0, 5)
-	args := make([]interface{}, 0, 5)
-	if params.Symbol != "" {
-		if strings.ContainsAny(params.Symbol, "%_") {
-			return "", nil, false, fmt.Errorf("invalid symbol")
-		}
-		conditions = append(conditions, prefix+"symbol LIKE ?")
-		args = append(args, "%"+params.Symbol+"%")
-	}
-	if params.PositionSide != "" && params.PositionSide != "ALL" {
-		if params.PositionSide != "LONG" && params.PositionSide != "SHORT" {
-			return "", nil, false, fmt.Errorf("invalid position_side")
-		}
-		conditions = append(conditions, prefix+"positionSide = ?")
-		args = append(args, params.PositionSide)
-	}
-	var startTime int64
-	var endTime int64
-	if params.StartTime != "" {
-		value, err := strconv.ParseInt(params.StartTime, 10, 64)
-		if err != nil || value <= 0 {
-			return "", nil, false, fmt.Errorf("invalid start_time")
-		}
-		startTime = value
-		conditions = append(conditions, prefix+"updateTime >= ?")
-		args = append(args, value)
-	}
-	if params.EndTime != "" {
-		value, err := strconv.ParseInt(params.EndTime, 10, 64)
-		if err != nil || value <= 0 {
-			return "", nil, false, fmt.Errorf("invalid end_time")
-		}
-		endTime = value
-		conditions = append(conditions, prefix+"updateTime <= ?")
-		args = append(args, value)
-	}
-	if startTime > 0 && endTime > 0 && startTime > endTime {
-		return "", nil, false, fmt.Errorf("start_time must not exceed end_time")
-	}
-	switch params.Type {
-	case "", "all":
-	case "open":
-		conditions = append(conditions, prefix+"closeOrderId = 0")
-	case "close":
-		conditions = append(conditions, prefix+"closeOrderId > 0")
-	default:
-		return "", nil, false, fmt.Errorf("invalid type")
-	}
-	if len(conditions) == 0 {
-		return "", nil, false, nil
-	}
-	return " AND " + strings.Join(conditions, " AND "), args, true, nil
-}
-
 func (ctrl *OrderController) Get() {
-	page, _ := strconv.Atoi(ctrl.GetString("page", "1"))
-	limit, _ := strconv.Atoi(ctrl.GetString("limit", "100"))
-	if page < 1 {
-		page = 1
+	if !ctrl.authorized() {
+		return
 	}
-	if limit < 1 {
-		limit = 100
-	}
-	if limit > 10000 {
-		limit = 10000
-	}
-	where, args, _, err := ctrl.getSearchParams().whereClause("t")
+	page, err := parseHistoryInt(ctrl.GetString("page"), 1)
 	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		ctrl.respondError(400, "invalid page")
 		return
 	}
-	offset := (page - 1) * limit
-	o := orm.NewOrm()
-	var orders []OrderTableList
-	selectSQL := "SELECT t.*, COALESCE(s.close, '') AS now_price FROM `order` t LEFT JOIN symbols s ON t.symbol = s.symbol WHERE " + orderOpenClause("t") + where + " ORDER BY t.updateTime DESC LIMIT ? OFFSET ?"
-	selectArgs := append(append([]interface{}{}, args...), limit, offset)
-	if _, err := o.Raw(selectSQL, selectArgs...).QueryRows(&orders); err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	var total int64
-	countSQL := "SELECT COUNT(*) FROM `order` t WHERE " + orderOpenClause("t") + where
-	if err := o.Raw(countSQL, args...).QueryRow(&total); err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	ctrl.Ctx.Resp(map[string]interface{}{
-		"code": 200,
-		"data": map[string]interface{}{"total": total, "list": orders},
-		"msg":  "success",
-	})
-}
-
-func (ctrl *OrderController) Delete() {
-	id, err := strconv.ParseInt(strings.TrimSpace(ctrl.Ctx.Input.Param(":id")), 10, 64)
-	if err != nil || id <= 0 {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "invalid order id"))
-		return
-	}
-	o := orm.NewOrm()
-	var openOrder models.Order
-	if err := o.QueryTable("order").Filter("account_id", "main").Filter("Id", id).Filter("Side", "open").One(&openOrder); err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	tx, err := o.Begin()
+	limit, err := parseHistoryInt(ctrl.GetString("limit"), 20)
 	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		ctrl.respondError(400, "invalid limit")
 		return
 	}
-	if openOrder.CloseOrderId > 0 {
-		if _, err := tx.Raw("DELETE FROM `order` WHERE id = ? AND side = 'close'", openOrder.CloseOrderId).Exec(); err != nil {
-			_ = tx.Rollback()
-			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+	start, err := parseHistoryMillis(ctrl.GetString("start_time"))
+	if err != nil {
+		ctrl.respondError(400, "invalid start_time")
+		return
+	}
+	end, err := parseHistoryMillis(ctrl.GetString("end_time"))
+	if err != nil {
+		ctrl.respondError(400, "invalid end_time")
+		return
+	}
+	filters := orderhistory.Filter{
+		AccountID: ctrl.GetString("account_id"), Owner: ctrl.GetString("owner"),
+		Symbol: ctrl.GetString("symbol"), PositionSide: ctrl.GetString("position_side"),
+		Status: ctrl.GetString("status"), Settlement: ctrl.GetString("settlement"),
+		StartTime: start, EndTime: end, Page: page, Limit: limit,
+	}
+	result, err := (orderhistory.Store{}).List(ctrl.Ctx.Request.Context(), filters)
+	if err != nil {
+		if errors.Is(err, orderhistory.ErrInvalidQuery) {
+			ctrl.respondError(400, err.Error())
 			return
 		}
-	}
-	if _, err := tx.Raw("DELETE FROM `order` WHERE id = ? AND side = 'open'", openOrder.ID).Exec(); err != nil {
-		_ = tx.Rollback()
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		ctrl.respondError(500, "managed order history unavailable")
 		return
 	}
-	if err := tx.Commit(); err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+	ctrl.success(result)
+}
+func (ctrl *OrderController) Details() {
+	if !ctrl.authorized() {
 		return
 	}
-	ctrl.Ctx.Resp(utils.ResJson(200, map[string]interface{}{"deleted": 1}))
+	raw := ctrl.Ctx.Input.Param(":position_id")
+	id, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil || id <= 0 {
+		ctrl.respondError(400, "invalid position_id")
+		return
+	}
+	result, err := (orderhistory.Store{}).Details(ctrl.Ctx.Request.Context(), ctrl.GetString("account_id"), id)
+	if err != nil {
+		switch {
+		case errors.Is(err, orderhistory.ErrInvalidQuery):
+			ctrl.respondError(400, err.Error())
+		case errors.Is(err, orderhistory.ErrNotFound):
+			ctrl.respondError(404, "position cycle not found for this account")
+		default:
+			ctrl.respondError(500, "managed order details unavailable")
+		}
+		return
+	}
+	ctrl.success(result)
 }
 
+// Historical Fill records are immutable. No DELETE endpoint exists for them.
+func (ctrl *OrderController) Delete() {
+	ctrl.respondError(http.StatusGone, "historical exchange fills cannot be deleted")
+}
 func (ctrl *OrderController) DeleteAll() {
-	params := ctrl.getSearchParams()
-	where, args, hasSearchCondition, err := params.whereClause("t")
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	if !hasSearchCondition {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "at least one search condition is required"))
-		return
-	}
-	o := orm.NewOrm()
-	tx, err := o.Begin()
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	var rows []struct {
-		ID           int64 `orm:"column(id)"`
-		CloseOrderId int64 `orm:"column(closeOrderId)"`
-	}
-	if _, err := tx.Raw("SELECT t.id, t.closeOrderId FROM `order` t WHERE "+orderOpenClause("t")+where, args...).QueryRows(&rows); err != nil {
-		_ = tx.Rollback()
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	closeIDs := make([]int64, 0, len(rows))
-	for _, row := range rows {
-		if row.CloseOrderId > 0 {
-			closeIDs = append(closeIDs, row.CloseOrderId)
-		}
-	}
-	if err := deleteOrderIDs(tx, closeIDs); err != nil {
-		_ = tx.Rollback()
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	deleteWhere, deleteArgs, _, err := params.whereClause("")
-	if err != nil {
-		_ = tx.Rollback()
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	result, err := tx.Raw("DELETE FROM `order` WHERE "+orderOpenClause("")+deleteWhere, deleteArgs...).Exec()
-	if err != nil {
-		_ = tx.Rollback()
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	if err := tx.Commit(); err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-		return
-	}
-	deleted, _ := result.RowsAffected()
-	ctrl.Ctx.Resp(utils.ResJson(200, map[string]interface{}{"deleted": deleted, "deleted_close_orders": len(closeIDs)}))
-}
-
-func deleteOrderIDs(tx orm.TxOrmer, ids []int64) error {
-	const chunkSize = 500
-	for start := 0; start < len(ids); start += chunkSize {
-		end := start + chunkSize
-		if end > len(ids) {
-			end = len(ids)
-		}
-		chunk := ids[start:end]
-		placeholders := strings.TrimSuffix(strings.Repeat("?,", len(chunk)), ",")
-		args := make([]interface{}, len(chunk))
-		for i, id := range chunk {
-			args[i] = id
-		}
-		if _, err := tx.Raw("DELETE FROM `order` WHERE account_id = 'main' AND side = 'close' AND id IN ("+placeholders+")", args...).Exec(); err != nil {
-			return err
-		}
-	}
-	return nil
+	ctrl.respondError(http.StatusGone, "historical exchange fills cannot be deleted")
 }

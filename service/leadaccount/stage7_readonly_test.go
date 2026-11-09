@@ -3,8 +3,15 @@ package leadaccount
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/beego/beego/v2/client/orm"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -17,8 +24,8 @@ import (
 )
 
 func TestStage71SchemaVersionStaticGate(t *testing.T) {
-	if appversion.DatabaseSchemaVersion != 19 {
-		t.Fatalf("Stage7 requires v19 account-scoped schema, code requires %d", appversion.DatabaseSchemaVersion)
+	if appversion.DatabaseSchemaVersion < 19 {
+		t.Fatalf("Stage7 requires at least v19 account-scoped schema, code requires %d", appversion.DatabaseSchemaVersion)
 	}
 	// No real MySQL I/O or sync db: tests must not silently pass the live Gate.
 }
@@ -142,6 +149,12 @@ func TestStage72OwnershipReadOnlyInspectionDoesNotReconcile(t *testing.T) {
 	if err != nil || persisted.Status != futuresownership.OrderPending {
 		t.Fatalf("read-only inspector mutated ledger %+v %v", persisted, err)
 	}
+	// F12: the Stage7 SELECT-only observer must never route its WS events
+	// through the main-account persistent trade fill writer.
+	var persistedFills int64
+	if err := orm.NewOrm().Raw("SELECT COUNT(*) FROM futures_trade_fills WHERE account_id='lead'").QueryRow(&persistedFills); err != nil || persistedFills != 0 {
+		t.Fatalf("lead read-only inspection wrote fills: %d err=%v", persistedFills, err)
+	}
 }
 func TestStage73DurablePauseFileBlocksAcrossInstancesAndAudit(t *testing.T) {
 	directory := t.TempDir()
@@ -208,4 +221,81 @@ func TestStage74ConcurrentStatusReadsNeverAuthorizeStage7(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+}
+
+// Review F12: future Lead read-only WS wiring must not call the main-account
+// persistence writer or import the tradefill ledger. It may only update the
+// ephemeral read-only mirror; test fails if someone wires the write path.
+// readOnlyStreamGate audits direct imports and EVERY selector of the
+// Binance adapter. The stream is allowed to name only the account type and
+// Lead account identity: it must not directly invoke DB-writing functions
+// exported by the same adapter package.
+func readOnlyStreamGate(source []byte) error {
+	file, err := parser.ParseFile(token.NewFileSet(), "stream.go", source, 0)
+	if err != nil {
+		return err
+	}
+	allowedImports := map[string]bool{
+		"context": true, "errors": true, "fmt": true, "sync": true,
+		"sync/atomic": true, "time": true,
+		"github.com/adshao/go-binance/v2/futures": true,
+		"go_binance_futures/feature/api/binance":  true,
+	}
+	binanceAlias := "binance"
+	for _, item := range file.Imports {
+		path, e := strconv.Unquote(item.Path.Value)
+		if e != nil || !allowedImports[path] {
+			return fmt.Errorf("non-read-only import %q", path)
+		}
+		if path == "go_binance_futures/feature/api/binance" && item.Name != nil {
+			binanceAlias = item.Name.Name
+		}
+	}
+	allowedBinanceNames := map[string]bool{
+		"AccountID": true, "AccountClient": true, "LeadAccountID": true,
+	}
+	var unsafe error
+	ast.Inspect(file, func(n ast.Node) bool {
+		if unsafe != nil {
+			return false
+		}
+		selector, ok := n.(*ast.SelectorExpr)
+		if !ok {
+			return true
+		}
+		pkg, ok := selector.X.(*ast.Ident)
+		if ok && pkg.Name == binanceAlias && !allowedBinanceNames[selector.Sel.Name] {
+			unsafe = fmt.Errorf("Lead read-only stream uses non-allowlisted Binance adapter symbol %s", selector.Sel.Name)
+			return false
+		}
+		return true
+	})
+	if unsafe != nil {
+		return unsafe
+	}
+	for _, danger := range []string{"persistFuturesAccountEvent(", "tradefills.Insert(", "orm.NewOrm(", ".Exec("} {
+		if strings.Contains(string(source), danger) {
+			return fmt.Errorf("dangerous persistence call %q", danger)
+		}
+	}
+	return nil
+}
+func TestStageReviewLeadReadOnlyStreamCannotPersistTradeFills(t *testing.T) {
+	source, err := os.ReadFile("stream.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := readOnlyStreamGate(source); err != nil {
+		t.Fatal(err)
+	}
+	// Negative mutation probe: despite the existing Binance adapter import,
+	// no additional function such as a write API can enter the read-only
+	// stream through a renamed or syntactically different call.
+	mutation := strings.Replace(string(source), "binance.LeadAccountID", "binance.PersistFuturesAccountEvent", 1)
+	if mutation == string(source) {
+		t.Fatal("test mutation did not change source")
+	}
+	if err := readOnlyStreamGate([]byte(mutation)); err == nil {
+		t.Fatal("read-only validator accepted a forbidden adapter selector")
+	}
 }

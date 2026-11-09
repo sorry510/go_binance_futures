@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"go_binance_futures/appversion"
 	"go_binance_futures/models"
 	"go_binance_futures/utils"
 
@@ -569,6 +570,122 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		t.Fatalf("repeating recovered v19 migration should be idempotent: %v", err)
 	}
 
+	// Stage 01-1: v20 is preexisting; v21 creates one lossless fill
+	// ledger and adds nullable position/actual-order associations.
+	if err := SyncDatabase(20); err != nil {
+		t.Fatalf("sync previous schema v20: %v", err)
+	}
+	if err := SyncDatabase(21); err != nil {
+		t.Fatalf("create stage 01-1 schema: %v", err)
+	}
+	for _, column := range []string{"position_id", "actual_order_id"} {
+		var count int64
+		if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('futures_managed_orders') WHERE name=?", column).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("missing managed order field %s count=%d err=%v", column, count, err)
+		}
+	}
+	for _, column := range []string{"qty", "price", "commission", "realized_pnl"} {
+		var columnType string
+		if err := o.Raw("SELECT type FROM pragma_table_info('futures_trade_fills') WHERE name=?", column).QueryRow(&columnType); err != nil || columnType != "DECIMAL(36,18)" {
+			t.Fatalf("fill %s must be exact DECIMAL: %s err=%v", column, columnType, err)
+		}
+	}
+	if !sqliteHasIndexColumns(t, o, "futures_trade_fills", []string{"market", "account_id", "symbol", "order_id", "trade_id"}) {
+		t.Fatal("missing composite WS/REST fill identity")
+	}
+	if !sqliteHasIndexColumns(t, o, "futures_trade_fills", []string{"position_id"}) {
+		t.Fatal("missing position lookup index")
+	}
+	const insertFill = `INSERT INTO futures_trade_fills
+		(market,account_id,symbol,order_id,trade_id,qty,price,commission,commission_asset,realized_pnl,pnl_asset,trade_time)
+		VALUES ('USDM','main','BTCUSDT','123456','78','0.000000010000000001','100.000000010000000001','0.000000000000000001','USDT','0.000000000000000000','USDT',1800000000000)`
+	if _, err := o.Raw(insertFill).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw(insertFill).Exec(); err == nil {
+		t.Fatal("duplicate exchange trade identity must be rejected")
+	}
+	// A failed repeated insert does not remove or mutate the first fill.
+	var count int64
+	if err := o.Raw("SELECT COUNT(*) FROM futures_trade_fills").QueryRow(&count); err != nil || count != 1 {
+		t.Fatalf("fill duplicate count=%d err=%v", count, err)
+	}
+	if err := SyncDatabase(21); err != nil {
+		t.Fatalf("repeated stage 01-1 sync should be idempotent: %v", err)
+	}
+	if err := o.Raw("SELECT COUNT(*) FROM futures_trade_fills").QueryRow(&count); err != nil || count != 1 {
+		t.Fatalf("repeated schema sync lost the fill: count=%d err=%v", count, err)
+	}
+	version, err := utils.GetSystemConfig()
+	if err != nil || version.Version != 21 {
+		t.Fatalf("schema version was not advanced to v21: %+v %v", version, err)
+	}
+	// Simulate a pre-v22 historical cycle explicitly marked blank. The
+	// explicit migration must never elevate it into a new settleable cycle.
+	if _, err := o.Raw(`INSERT INTO futures_managed_positions
+        (account_id,owner,symbol,position_side,managed_qty,status,
+         settlement_status,settlement_processed_at,settlement_pnl_sign)
+         VALUES('main','auto_strategy','S510LEGACYUSDT','LONG',0,'closed','',0,0)`).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if err := SyncDatabase(22); err != nil {
+		t.Fatalf("stage 01-3 schema v22: %v", err)
+	}
+	var historicalStatus string
+	if err := o.Raw("SELECT settlement_status FROM futures_managed_positions WHERE symbol='S510LEGACYUSDT'").QueryRow(&historicalStatus); err != nil || historicalStatus != "legacy" {
+		t.Fatalf("historical cycle not backfilled as legacy: %q err=%v", historicalStatus, err)
+	}
+	for _, name := range []string{"idx_fmp_settlement_status", "idx_fmp_settlement_processed"} {
+		var indexed int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name=?", name).QueryRow(&indexed); err != nil || indexed != 1 {
+			t.Fatalf("explicit v22 index missing %s count=%d err=%v", name, indexed, err)
+		}
+	}
+	for table, columns := range map[string][]string{
+		"futures_managed_positions": {"settlement_status", "settlement_processed_at", "settlement_pnl_sign"},
+		"config":                    {"settlement_scale_balance", "settlement_consecutive_losses"},
+	} {
+		for _, column := range columns {
+			var count int
+			if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('"+table+"') WHERE name=?", column).QueryRow(&count); err != nil || count != 1 {
+				t.Fatalf("missing v22 %s.%s count=%d error=%v", table, column, count, err)
+			}
+		}
+	}
+	// Missing historical Fill provenance never makes an old cycle eligible.
+	var defaultValue string
+	if err := o.Raw("SELECT dflt_value FROM pragma_table_info('futures_managed_positions') WHERE name='settlement_status'").QueryRow(&defaultValue); err != nil || defaultValue == "" {
+		t.Fatalf("v22 historical position must have safe legacy default: %q err=%v", defaultValue, err)
+	}
+	if err := SyncDatabase(22); err != nil {
+		t.Fatalf("repeated v22 sync: %v", err)
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 22 {
+		t.Fatalf("db version after v22: %+v %v", version, err)
+	}
+	if err := SyncDatabase(23); err != nil {
+		t.Fatalf("v23 REST verification schema: %v", err)
+	}
+	var verifiedColumn int
+	if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('futures_trade_fills') WHERE name='rest_verified'").QueryRow(&verifiedColumn); err != nil || verifiedColumn != 1 {
+		t.Fatalf("REST verification column missing: count=%d err=%v", verifiedColumn, err)
+	}
+	var defaultUnverified int
+	if err := o.Raw("SELECT rest_verified FROM futures_trade_fills WHERE trade_id='78'").QueryRow(&defaultUnverified); err != nil || defaultUnverified != 0 {
+		t.Fatalf("legacy fill must remain REST-unverified: %d %v", defaultUnverified, err)
+	}
+	if err := SyncDatabase(23); err != nil {
+		t.Fatalf("repeat v23: %v", err)
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 23 {
+		t.Fatalf("v23 version not saved: %+v %v", version, err)
+	}
+	// Every schema bump must advance this test's highest checked version.
+	if version.Version != appversion.DatabaseSchemaVersion {
+		t.Fatalf("migration test ends at v%d, binary requires v%d", version.Version, appversion.DatabaseSchemaVersion)
+	}
 }
 
 func sqliteHasIndexColumns(t *testing.T, o orm.Ormer, table string, want []string) bool {

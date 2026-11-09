@@ -7,15 +7,19 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
 	"strconv"
 	"strings"
 
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
 	"go_binance_futures/service/binanceapiusage"
+	"go_binance_futures/service/tradefills"
 
 	"github.com/adshao/go-binance/v2/common"
 	"github.com/adshao/go-binance/v2/futures"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 type OrderRequest struct {
@@ -34,6 +38,7 @@ type OrderRequest struct {
 
 type ExchangeOrder struct {
 	ExchangeOrderID string
+	ActualOrderID   string
 	ClientOrderID   string
 	Status          string
 	FilledQty       float64
@@ -267,6 +272,11 @@ func (e Executor) applyExchange(ctx context.Context, clientOrderID string, resul
 			return result, err
 		}
 	}
+	if result.ActualOrderID != "" {
+		if err := e.Ownership.SetActualOrderID(ctx, clientOrderID, result.ActualOrderID); err != nil {
+			return result, err
+		}
+	}
 	if result.FilledQty > 0 {
 		if _, err := e.Ownership.ApplyFill(ctx, clientOrderID, result.FilledQty, result.AveragePrice); err != nil {
 			return result, err
@@ -301,7 +311,84 @@ func (e Executor) applyExchange(ctx context.Context, clientOrderID string, resul
 	if err := e.Ownership.MarkOrderReconciled(ctx, clientOrderID); err != nil {
 		return result, err
 	}
+	// The REST trade reader is optional for fake brokers; live Binance
+	// brokers always provide it. Never infer a Fill from the order ACK.
+	fillErr := e.reconcileTradeFills(ctx, clientOrderID, result)
+	// Regardless of REST availability, shrinking a position requires the
+	// remote protections to be checked. The order's own fill status must not
+	// be rewritten to reconcile_required simply because its sibling is
+	// not cancellable yet.
+	managedAfter, loadErr := e.Ownership.GetOrder(ctx, clientOrderID)
+	if loadErr != nil {
+		return result, loadErr
+	}
+	var protectionErr error
+	if managedAfter.Intent != IntentOpen && managedAfter.PositionID != nil && managedAfter.FilledQty > qtyEpsilon {
+		protectionErr = e.cancelExcessProtections(ctx, *managedAfter.PositionID)
+	}
+	if fillErr != nil {
+		_ = e.Ownership.SetOrderStatus(ctx, clientOrderID, OrderReconcile)
+		return result, fmt.Errorf("managed order %s fill ledger incomplete: %w", clientOrderID, fillErr)
+	}
+	if protectionErr != nil {
+		return result, fmt.Errorf("over-sized protective order cancellation required: %w", protectionErr)
+	}
 	return result, nil
+}
+
+// cancelExcessProtections never pretends a remote order has been resized.
+// Binance conditional protections are canceled by their exchange identity;
+// the original owner-specific repair logic re-arms at the verified remaining
+// quantity when trigger price and fresh risk state are available.
+func (e Executor) cancelExcessProtections(ctx context.Context, positionID int64) error {
+	if positionID <= 0 {
+		return fmt.Errorf("invalid protected position ID")
+	}
+	accountID, err := e.Ownership.accountID()
+	if err != nil {
+		return err
+	}
+	o := orm.NewOrm()
+	var position models.FuturesManagedPosition
+	if err = o.QueryTable(new(models.FuturesManagedPosition)).
+		Filter("id", positionID).Filter("account_id", accountID).One(&position); err != nil {
+		return err
+	}
+	remaining := position.ManagedQty
+	if position.Status == PositionClosed {
+		remaining = 0
+	}
+	var orders []models.FuturesManagedOrder
+	_, err = o.QueryTable(new(models.FuturesManagedOrder)).
+		Filter("account_id", accountID).Filter("position_id", positionID).All(&orders)
+	if err != nil {
+		return err
+	}
+	for _, order := range orders {
+		if order.Intent != IntentStopLoss && order.Intent != IntentTakeProfit {
+			continue
+		}
+		if !liveOrderStatus(order.Status) {
+			continue
+		}
+		if order.RequestedQty-order.FilledQty <= remaining+qtyEpsilon {
+			continue
+		}
+		if strings.TrimSpace(order.ExchangeOrderID) == "" {
+			return fmt.Errorf("protective order %s has unknown exchange identity; reconcile before replacing", order.ClientOrderID)
+		}
+		if err := e.Cancel(ctx, position.Owner, order); err != nil {
+			return fmt.Errorf("cancel oversize protective order %s: %w", order.ClientOrderID, err)
+		}
+		if remaining > qtyEpsilon {
+			logs.Warning("报警: oversized futures protection canceled; owner must re-arm using remaining quantity",
+				" account=", accountID, " owner=", position.Owner, " symbol=", position.Symbol,
+				" position_id=", position.ID, " client_order_id=", order.ClientOrderID,
+				" old_qty=", order.RequestedQty, " filled_qty=", order.FilledQty,
+				" remaining_managed_qty=", remaining)
+		}
+	}
+	return nil
 }
 
 func (e Executor) Cancel(ctx context.Context, owner string, order models.FuturesManagedOrder) error {
@@ -361,7 +448,143 @@ func newOwnedClientOrderID(owner string) (string, error) {
 
 // BinanceOrderBroker can be bound to a specific account adapter. Nil Account
 // preserves the original main-only path for existing callers.
+// OrderTradeReader is optional so all existing fake brokers remain deterministic.
+// The real BinanceOrderBroker implements it with account-scoped signed REST.
+type OrderTradeReader interface {
+	ListAccountTrades(context.Context, string, int64, int64, int) ([]*futures.AccountTrade, error)
+}
+
+// Compile-time guarantee: both main and Lead BinanceOrderBroker use the
+// account-scoped REST trade source; unsupported broker types fail closed.
+var _ OrderTradeReader = BinanceOrderBroker{}
+
+func (e Executor) reconcileTradeFills(ctx context.Context, clientOrderID string, result ExchangeOrder) error {
+	if result.FilledQty <= qtyEpsilon {
+		return nil
+	}
+	reader, ok := e.Broker.(OrderTradeReader)
+	if !ok {
+		return fmt.Errorf("managed order broker %T cannot verify official exchange trades", e.Broker)
+	}
+	managed, err := e.Ownership.GetOrder(ctx, clientOrderID)
+	if err != nil {
+		return err
+	}
+	actual := managed.ExchangeOrderID
+	if isAlgoManagedOrderType(managed.OrderType) {
+		if managed.ActualOrderID == nil || *managed.ActualOrderID == "" {
+			return fmt.Errorf("Algo fill identity unresolved")
+		}
+		actual = *managed.ActualOrderID
+	}
+	actualNum, err := strconv.ParseInt(actual, 10, 64)
+	if err != nil || actualNum <= 0 {
+		return fmt.Errorf("actual matching order is unknown")
+	}
+	o := orm.NewOrm()
+	// A WS fill can already be persisted before the API response.
+	if err = tradefills.Attach(o, managed); err != nil {
+		return err
+	}
+	target := new(big.Rat).SetFloat64(result.FilledQty)
+	if target == nil {
+		return fmt.Errorf("invalid cumulative fill")
+	}
+	// Compare with enough tolerance for the older float64 cumulative field;
+	// the ledger retains exact exchange decimals for accounting.
+	equalQty := func(actual *big.Rat) bool {
+		diff := new(big.Rat).Sub(actual, target)
+		abs := new(big.Rat).Abs(diff)
+		return abs.Cmp(big.NewRat(1, 100000000)) <= 0
+	}
+	got, err := tradefills.Quantity(o, managed)
+	if err != nil {
+		return err
+	}
+	unverified, err := tradefills.UnverifiedCount(o, managed)
+	if err != nil {
+		return err
+	}
+	if equalQty(got) && unverified == 0 {
+		if managed.Intent == IntentOpen {
+			return e.Ownership.SyncOpenAverageFromFills(ctx, clientOrderID)
+		}
+		return nil
+	}
+	if got.Cmp(target) > 0 {
+		return fmt.Errorf("ledger quantity exceeds exchange cumulative")
+	}
+	const maxPages = 12
+	const pageSize = 1000
+	var fromID int64
+	for page := 0; page < maxPages; page++ {
+		trades, err := reader.ListAccountTrades(ctx, managed.Symbol, actualNum, fromID, pageSize)
+		if err != nil {
+			return err
+		}
+		if len(trades) == 0 {
+			break
+		}
+		previous := fromID
+		for _, trade := range trades {
+			if trade == nil || trade.OrderID != actualNum || trade.Symbol != managed.Symbol ||
+				(string(trade.PositionSide) != "BOTH" && string(trade.PositionSide) != managed.PositionSide) {
+				return fmt.Errorf("REST trade identity does not match managed order")
+			}
+			fill, err := tradefills.FromREST(managed.AccountID, trade)
+			if err != nil {
+				return err
+			}
+			if err = tradefills.Insert(o, fill); err != nil {
+				return err
+			}
+			if trade.ID >= fromID {
+				fromID = trade.ID + 1
+			}
+		}
+		if fromID <= previous {
+			return fmt.Errorf("REST trade pagination did not advance")
+		}
+		if len(trades) < pageSize {
+			break
+		}
+		if page == maxPages-1 {
+			return fmt.Errorf("REST fill pagination exceeds safety limit")
+		}
+	}
+	if err = tradefills.Attach(o, managed); err != nil {
+		return err
+	}
+	got, err = tradefills.Quantity(o, managed)
+	if err != nil {
+		return err
+	}
+	if !equalQty(got) {
+		return fmt.Errorf("verified fills sum %s does not equal cumulative execution %s", got.RatString(), target.RatString())
+	}
+	unverified, err = tradefills.UnverifiedCount(o, managed)
+	if err != nil {
+		return err
+	}
+	if unverified != 0 {
+		return fmt.Errorf("%d fills still lack official REST confirmation", unverified)
+	}
+	if managed.Intent == IntentOpen {
+		return e.Ownership.SyncOpenAverageFromFills(ctx, clientOrderID)
+	}
+	return nil
+}
+
 type BinanceOrderBroker struct{ Account *binance.AccountClient }
+
+// ListAccountTrades uses the bound client's credentials and Binance's
+// signed read budget; Lead never falls back to main on errors.
+func (b BinanceOrderBroker) ListAccountTrades(ctx context.Context, symbol string, orderID, fromID int64, limit int) ([]*futures.AccountTrade, error) {
+	if b.Account != nil {
+		return b.Account.ListAccountTradesByOrderIDContext(ctx, symbol, orderID, fromID, limit)
+	}
+	return binance.ListAccountTradesByOrderIDContext(ctx, symbol, orderID, fromID, limit)
+}
 
 func (b BinanceOrderBroker) createOwned(ctx context.Context, p binance.OwnedOrderParams) (*futures.CreateOrderResponse, error) {
 	if b.Account != nil {
@@ -498,6 +721,10 @@ func exchangeFromAlgoLookupWithOrderLookup(ctx context.Context, algo *futures.Ge
 		return result, err
 	}
 	actualResult := exchangeFromOrder(actual)
+	if actual == nil || actual.OrderID != actualID || actual.Symbol != algo.Symbol {
+		return result, fmt.Errorf("Algo actual order lookup identity mismatch")
+	}
+	result.ActualOrderID = strconv.FormatInt(actualID, 10)
 	result.Status = actualResult.Status
 	result.FilledQty = actualResult.FilledQty
 	result.AveragePrice = actualResult.AveragePrice

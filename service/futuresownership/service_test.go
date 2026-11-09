@@ -2,6 +2,8 @@ package futuresownership
 
 import (
 	"context"
+	"go_binance_futures/service/internal/testtrades"
+	"go_binance_futures/service/tradefills"
 	"testing"
 	"time"
 
@@ -12,18 +14,27 @@ import (
 )
 
 func prepareOwnershipDB(t *testing.T) {
+	testtrades.Reset()
 	t.Helper()
 	_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	if _, err := orm.GetDB("default"); err != nil {
 		if err := orm.RegisterDataBase("default", "sqlite3", "file:ownership_test?mode=memory&cache=shared"); err != nil {
 			t.Fatal(err)
 		}
-		orm.RegisterModel(new(models.FuturesManagedPosition), new(models.FuturesManagedOrder), new(models.FuturesOwnershipAdjustment))
+		orm.RegisterModel(new(models.FuturesManagedPosition), new(models.FuturesManagedOrder), new(models.FuturesOwnershipAdjustment), new(models.Config))
 		if err := orm.RunSyncdb("default", false, false); err != nil {
 			t.Fatal(err)
 		}
 	}
 	o := orm.NewOrm()
+	// Fill ledger is raw DECIMAL DDL and deliberately is not an ORM model.
+	// The tests run in SQLite; SQL is identical to command's v21 table shape.
+	if _, err := o.Raw(tradefills.SchemaDDL).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw("DELETE FROM futures_trade_fills").Exec(); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := o.Raw("DELETE FROM futures_managed_orders").Exec(); err != nil {
 		t.Fatal(err)
 	}

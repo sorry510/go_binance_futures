@@ -98,26 +98,3 @@ func (ctrl *FuturesOrderController) Get() {
 	}
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": map[string]interface{}{"total": total, "list": orders}, "msg": "success"})
 }
-
-// func (ctrl *FuturesOrderController) Delete() {
-// 	id := ctrl.Ctx.Input.Param(":id")
-// 	o := orm.NewOrm()
-// 	_, err := o.Raw("DELETE FROM order where id = ?", id).Exec()
-// 	if err != nil {
-// 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-// 		return
-// 	}
-// 	ctrl.Ctx.Resp(utils.ResJson(200, nil))
-// }
-
-// func (ctrl *FuturesOrderController) DeleteAll() {
-
-// 	o := orm.NewOrm()
-// 	_, err := o.Raw("DELETE FROM order where 1=1").Exec()
-// 	if err != nil {
-// 		// 处理错误
-// 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
-// 		return
-// 	}
-// 	ctrl.Ctx.Resp(utils.ResJson(200, nil))
-// }
