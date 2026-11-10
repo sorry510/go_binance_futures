@@ -43,6 +43,9 @@ func historyDB(t *testing.T) (orm.Ormer, Store) {
 	if _, err := o.Raw(tradefills.SchemaDDL).Exec(); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := o.Raw("CREATE TABLE IF NOT EXISTS symbols (symbol VARCHAR(32), close VARCHAR(50), updateTime BIGINT, type VARCHAR(16))").Exec(); err != nil {
+		t.Fatal(err)
+	}
 	return o, Store{DB: o, Now: func() time.Time { return time.UnixMilli(1800000010000).UTC() },
 		ActivatedAt:                  func(account string) (int64, error) { return 1799999999000, nil },
 		DisableRowLockForSQLiteTests: true}

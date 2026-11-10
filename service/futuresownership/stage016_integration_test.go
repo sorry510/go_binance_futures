@@ -15,6 +15,10 @@ import (
 // No Binance network or production DB is touched.
 func TestStage016EndToEndPartialOpenCancelRestartSettleAndHistory(t *testing.T) {
 	prepareOwnershipDB(t)
+	// Order history reads the local market price source.
+	if _, err := orm.NewOrm().Raw("CREATE TABLE IF NOT EXISTS symbols (symbol VARCHAR(32), close VARCHAR(50), updateTime BIGINT, type VARCHAR(16))").Exec(); err != nil {
+		t.Fatal(err)
+	}
 	settlementConfig(t, 1, 2)
 	ctx := context.Background()
 	svc := testService()
