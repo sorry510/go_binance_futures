@@ -11,7 +11,7 @@ import (
 )
 
 func TestQueryStrategyTemplatePageOrdersByIDDescending(t *testing.T) {
-	const alias = "default"
+	const alias = "controller_strategy_template_page_test"
 
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)

@@ -16,6 +16,10 @@ func TestStaticStrategyTemplatesCompileWithoutDeprecatedMarketGlobals(t *testing
 		if err != nil {
 			return err
 		}
+		// Research archives hold experiment metadata, not built-in templates.
+		if info.IsDir() && filepath.Clean(path) == filepath.Clean("../strategy_templates/research") {
+			return filepath.SkipDir
+		}
 		if !info.IsDir() && strings.EqualFold(filepath.Ext(path), ".json") {
 			files = append(files, path)
 		}
