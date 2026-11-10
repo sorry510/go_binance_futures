@@ -706,6 +706,11 @@ bee run
 go build -o go_binance_futures
 ```
 
+### 测试
+```
+./scripts/test-go.sh
+```
+
 ### 打包
 
 #### 打包到`windows`平台
