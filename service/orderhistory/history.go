@@ -125,6 +125,13 @@ type Position struct {
 	OrderCount              int        `json:"order_count"`
 	FillCount               int        `json:"fill_count"`
 	RESTVerifiedFills       int        `json:"rest_verified_fills"`
+	CurrentPrice            *string    `json:"current_price"`
+	PriceUpdatedAt          int64      `json:"price_updated_at"`
+	RealizedPnL             *string    `json:"realized_pnl"`
+	UnrealizedPnL           *string    `json:"unrealized_pnl"`
+	TotalPnL                *string    `json:"total_pnl"`
+	DisplayReturnPct        *string    `json:"display_return_pct"`
+	DisplayPnLAsset         string     `json:"display_pnl_asset,omitempty"`
 }
 
 // ManagedOrderView is an intentional public response allowlist. SourceRef
@@ -175,11 +182,13 @@ type Detail struct {
 	Orders   []Order  `json:"orders"`
 }
 type Page struct {
-	Total           int64             `json:"total"`
-	Page            int               `json:"page"`
-	Limit           int               `json:"limit"`
-	List            []Position        `json:"list"`
-	PageVerifiedNet map[string]string `json:"page_verified_net"`
+	Total           int64                      `json:"total"`
+	Page            int                        `json:"page"`
+	Limit           int                        `json:"limit"`
+	List            []Position                 `json:"list"`
+	PageVerifiedNet map[string]string          `json:"page_verified_net"`
+	FilteredPnL     map[string]ProfitBreakdown `json:"filtered_pnl"`
+	PNLUnpriced     int                        `json:"pnl_unpriced_count"`
 }
 
 type Store struct {
@@ -325,7 +334,7 @@ func (s Store) List(ctx context.Context, q Filter) (Page, error) {
 	if err != nil {
 		return Page{}, err
 	}
-	page := Page{Total: total, Page: q.Page, Limit: q.Limit, List: []Position{}, PageVerifiedNet: map[string]string{}}
+	page := Page{Total: total, Page: q.Page, Limit: q.Limit, List: []Position{}, PageVerifiedNet: map[string]string{}, FilteredPnL: map[string]ProfitBreakdown{}}
 	if total == 0 {
 		return page, nil
 	}
@@ -334,9 +343,7 @@ func (s Store) List(ctx context.Context, q Filter) (Page, error) {
 	if err != nil {
 		return Page{}, err
 	}
-	if len(positions) == 0 {
-		return page, nil
-	}
+	// An out-of-range page still carries the PnL of the full filter.
 	page.List, _, err = s.project(ctx, positions, false)
 	if err != nil {
 		return Page{}, err
@@ -357,6 +364,40 @@ func (s Store) List(ctx context.Context, q Filter) (Page, error) {
 	}
 	for asset, net := range sums {
 		page.PageVerifiedNet[asset] = val(net)
+	}
+	// Sum every matching cycle, not just the current page. Keep the
+	// certified page-only financial audit above unchanged for compatibility.
+	grouped := map[string]*profitAccumulator{}
+	if q.Page == 1 && int64(len(page.List)) == total {
+		page.PNLUnpriced = sumDisplayedPnL(page.List, grouped)
+	} else {
+		const batchSize = 100
+		for offset := int64(0); offset < total; offset += batchSize {
+			if err := ctx.Err(); err != nil {
+				return Page{}, err
+			}
+			var batch []models.FuturesManagedPosition
+			_, err := batchScope(q, s.db()).OrderBy("-created_at", "-id").
+				Limit(batchSize, offset).All(&batch)
+			if err != nil {
+				return Page{}, err
+			}
+			if len(batch) == 0 {
+				break
+			}
+			items, _, err := s.project(ctx, batch, false)
+			if err != nil {
+				return Page{}, err
+			}
+			page.PNLUnpriced += sumDisplayedPnL(items, grouped)
+		}
+	}
+	for asset, amounts := range grouped {
+		page.FilteredPnL[asset] = ProfitBreakdown{
+			Realized:   displayProfitValue(amounts.realized),
+			Unrealized: displayProfitValue(amounts.unrealized),
+			Total:      displayProfitValue(amounts.total),
+		}
 	}
 	return page, nil
 }
@@ -404,6 +445,10 @@ func (s Store) project(ctx context.Context, positions []models.FuturesManagedPos
 		}
 		ids = append(ids, p.ID)
 	}
+	prices, err := s.symbolPrices(ctx, positions)
+	if err != nil {
+		return nil, nil, err
+	}
 	var orders []models.FuturesManagedOrder
 	_, err = s.db().QueryTable(new(models.FuturesManagedOrder)).Filter("account_id", account).
 		Filter("position_id__in", ids).OrderBy("created_at", "id").All(&orders)
@@ -445,6 +490,7 @@ func (s Store) project(ctx context.Context, positions []models.FuturesManagedPos
 			return nil, nil, err
 		}
 		summary, children := summarize(p, ordersByID[p.ID], fillsByID[p.ID], includeFills, now, t0)
+		applyPricePnL(p, &summary, prices[p.Symbol])
 		summary.SystemCompleteness = summary.Completeness
 		summary.SystemIncompleteReason = summary.IncompleteReason
 		summary.SystemStatus = p.Status

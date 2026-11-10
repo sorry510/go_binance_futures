@@ -152,11 +152,11 @@ func resetStrategyTemplateAITaskStoreForRuntimeTest() {
 }
 
 func validStrategyBuilderEnvelope(name string) string {
-	return fmt.Sprintf(`{"action":"final","summary":"done","result":{"name":%q,"technology":{"ma":[],"ema":[],"macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]},"strategy":[{"name":"long","type":"long","code":"NowPrice > 0","fullScreen":false,"enable":true}]}}`, name)
+	return fmt.Sprintf(`{"action":"final","summary":"done","result":{"name":%q,"technology":{"ma":[{"name":"ma_1h_2","enable":true,"kline_interval":"1h","period":2}],"ema":[],"macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]},"strategy":[{"name":"long","type":"long","code":"NowPrice > 0","fullScreen":false,"enable":true}]}}`, name)
 }
 
 func TestStrategyTemplateValidationAcceptsMarketConditionStringComparison(t *testing.T) {
-	candidate := []byte(`{"name":"market-condition","technology":{"ma":[],"ema":[],"macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]},"strategy":[{"name":"regime","type":"long","code":"MarketCondition == \"1\" && NowPrice > 0","fullScreen":false,"enable":true}]}`)
+	candidate := []byte(`{"name":"market-condition","technology":{"ma":[{"name":"ma_1h_2","enable":true,"kline_interval":"1h","period":2}],"ema":[],"macd":[],"adx":[],"mfi":[],"obv":[],"cci":[],"roc":[],"kdj":[],"rsi":[],"kc":[],"boll":[],"donchian":[],"atr":[],"supertrend":[]},"strategy":[{"name":"regime","type":"long","code":"MarketCondition == \"1\" && NowPrice > 0","fullScreen":false,"enable":true}]}`)
 	if err := validateGeneratedStrategyTemplateJSON(candidate); err != nil {
 		t.Fatalf("MarketCondition string comparison should compile: %v", err)
 	}
@@ -164,7 +164,7 @@ func TestStrategyTemplateValidationAcceptsMarketConditionStringComparison(t *tes
 
 func TestStrategyTemplateValidationAcceptsMultilineLetExpression(t *testing.T) {
 	code := "let warmup_ok = (NowTime - SystemStartTime) / 1000 > 600;\nlet strong_bull = MarketCondition == \"1\" && NowPrice > NowSymbolOpen;\nwarmup_ok && strong_bull"
-	technology := map[string]any{"ma": []any{}, "ema": []any{}, "macd": []any{}, "adx": []any{}, "mfi": []any{}, "obv": []any{}, "cci": []any{}, "roc": []any{}, "kdj": []any{}, "rsi": []any{}, "kc": []any{}, "boll": []any{}, "donchian": []any{}, "atr": []any{}, "supertrend": []any{}}
+	technology := map[string]any{"ma": []any{map[string]any{"name": "ma_1h_2", "enable": true, "kline_interval": "1h", "period": 2}}, "ema": []any{}, "macd": []any{}, "adx": []any{}, "mfi": []any{}, "obv": []any{}, "cci": []any{}, "roc": []any{}, "kdj": []any{}, "rsi": []any{}, "kc": []any{}, "boll": []any{}, "donchian": []any{}, "atr": []any{}, "supertrend": []any{}}
 	candidate, err := json.Marshal(map[string]any{"name": "readable-let", "technology": technology, "strategy": []map[string]any{{"name": "long", "type": "long", "code": code, "fullScreen": false, "enable": true}}})
 	if err != nil {
 		t.Fatal(err)
