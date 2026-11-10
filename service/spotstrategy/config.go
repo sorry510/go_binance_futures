@@ -124,11 +124,14 @@ func ValidateRulesWithTechnology(raw string, tech string, enabled bool) error {
 	}
 	hasLong, hasClose := false, false
 	for _, rule := range rules {
+		// Spot configurations cannot carry Futures SHORT directions even
+		// when a rule is disabled. Otherwise a disabled SHORT payload could
+		// be persisted today and accidentally enabled by a later editor.
+		if rule.Type != "long" && rule.Type != "close_long" {
+			return fmt.Errorf("spot strategy rule type %q is not long/close_long", rule.Type)
+		}
 		if !rule.Enable {
 			continue
-		}
-		if rule.Type != "long" && rule.Type != "close_long" {
-			return fmt.Errorf("enabled spot strategy rule type %q is not long/close_long", rule.Type)
 		}
 		if strings.TrimSpace(rule.Code) == "" {
 			return errors.New("enabled spot strategy rule code cannot be empty")
@@ -242,24 +245,22 @@ func AuthorizeLegacyOrder(source OrderSource, symbol string, intent OrderIntent)
 	return nil
 }
 
+// Setting contains public symbol configuration, not private account state.
+// Account ownership and runtime mode belong to order/Holding and mode APIs.
 type Setting struct {
-	AccountID   string `json:"account_id"`
-	Owner       string `json:"owner"`
 	Symbol      string `json:"symbol"`
 	QuoteAsset  string `json:"quote_asset"`
-	Mode        string `json:"mode"`
 	Enabled     bool   `json:"enabled"`
 	BudgetQuote string `json:"budget_quote"`
 	Strategy    string `json:"strategy"`
 	Technology  string `json:"technology"`
-	Execution   string `json:"execution"`
+	LastPrice   string `json:"last_price"`
+	LastPriceAt int64  `json:"last_price_at"`
 }
 
-// Patch is a narrow, explicitly scoped endpoint. Missing enabled is rejected,
-// so a legacy Spot editor cannot accidentally enable new trading.
+// Patch updates a single spot_symbols row. It has no account/owner or
+// exchange order fields; missing enabled is rejected.
 type Patch struct {
-	AccountID   string  `json:"account_id"`
-	Owner       string  `json:"owner"`
 	Symbol      string  `json:"symbol"`
 	Enabled     *bool   `json:"enabled"`
 	BudgetQuote string  `json:"budget_quote"`
@@ -268,24 +269,21 @@ type Patch struct {
 }
 
 func LoadSetting(symbol string) (Setting, error) {
+	symbol = strings.ToUpper(strings.TrimSpace(symbol))
+	if !s4SymbolPattern.MatchString(symbol) {
+		return Setting{}, errors.New("invalid spot symbol")
+	}
 	var coin models.SpotSymbols
-	if err := orm.NewOrm().QueryTable("spot_symbols").Filter("symbol", strings.ToUpper(strings.TrimSpace(symbol))).One(&coin); err != nil {
+	if err := orm.NewOrm().QueryTable("spot_symbols").Filter("symbol", symbol).One(&coin); err != nil {
 		return Setting{}, fmt.Errorf("spot symbol unavailable: %w", err)
 	}
-	mode, err := CurrentMode()
-	if err != nil {
-		return Setting{}, err
-	}
-	return Setting{AccountID: AccountMain, Owner: OwnerAuto, Symbol: coin.Symbol,
-		QuoteAsset: coin.Type, Mode: mode, Enabled: coin.StrategyTradeEnabled == 1,
-		BudgetQuote: coin.StrategyBudgetQuote, Strategy: coin.Strategy,
-		Technology: coin.Technology, Execution: "mock_only"}, nil
+	return Setting{Symbol: coin.Symbol, QuoteAsset: coin.Type,
+		Enabled: coin.StrategyTradeEnabled == 1, BudgetQuote: coin.StrategyBudgetQuote,
+		Strategy: coin.Strategy, Technology: coin.Technology,
+		LastPrice: coin.Close, LastPriceAt: coin.LastUpdateTime}, nil
 }
 
 func UpdateSetting(p Patch) (Setting, error) {
-	if err := ValidateScope(p.AccountID, p.Owner); err != nil {
-		return Setting{}, err
-	}
 	if p.Enabled == nil {
 		return Setting{}, errors.New("enabled must be supplied")
 	}

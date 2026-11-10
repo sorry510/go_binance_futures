@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"io"
@@ -16,8 +17,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// S1: configuration only. No route sends or cancels a Binance order.
-type SpotStrategyController struct{ web.Controller }
+// S1 configuration and S4 strictly scoped read-only views. No route sends or cancels a Binance order.
+type SpotStrategyController struct {
+	web.Controller
+	// nil in production; a test may supply a private in-memory SQL database.
+	// This field is never populated by user input or HTTP handlers.
+	readDB *sql.DB
+}
 
 // Never use Ctx.Resp: it negotiates YAML/XML/protobuf based on Accept and can
 // panic on map values. Always return the same JSON with a real HTTP status.
@@ -51,10 +57,6 @@ func (c *SpotStrategyController) checkJSONRequest() bool {
 
 func (c *SpotStrategyController) Get() {
 	if _, ok := c.authorized(); !ok {
-		return
-	}
-	if err := spotstrategy.ValidateScope(c.GetString("account_id"), c.GetString("owner")); err != nil {
-		c.respond(http.StatusBadRequest, nil, err.Error())
 		return
 	}
 	config, err := spotstrategy.LoadSetting(c.GetString("symbol"))
@@ -107,6 +109,13 @@ type spotModePatch struct {
 	Mode      string `json:"mode"`
 }
 
+// Display status comes from the same real release/verification sources as
+// AuthorizeLiveMode, not a permanently stale API literal.
+func spotModeStatus(mode string) map[string]any {
+	execution, approved, reason := spotstrategy.LiveStatus(mode)
+	return map[string]any{"mode": mode, "execution": execution, "live_approved": approved, "reason": reason, "contract_version": 4}
+}
+
 func (c *SpotStrategyController) GetMode() {
 	if _, ok := c.authorized(); !ok {
 		return
@@ -120,7 +129,7 @@ func (c *SpotStrategyController) GetMode() {
 		c.respond(http.StatusServiceUnavailable, nil, "spot_mode_unavailable")
 		return
 	}
-	c.respond(http.StatusOK, map[string]any{"mode": mode, "execution": "mock_only"}, "success")
+	c.respond(http.StatusOK, spotModeStatus(mode), "success")
 }
 
 func (c *SpotStrategyController) PutMode() {
@@ -159,5 +168,5 @@ func (c *SpotStrategyController) PutMode() {
 		c.respond(http.StatusConflict, nil, err.Error())
 		return
 	}
-	c.respond(http.StatusOK, map[string]any{"mode": old, "execution": "mock_only"}, "success")
+	c.respond(http.StatusOK, spotModeStatus(old), "success")
 }

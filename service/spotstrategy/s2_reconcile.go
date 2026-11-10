@@ -172,6 +172,10 @@ func (e *Engine) Reconcile(ctx context.Context, id int64) (result LocalOrder, re
 		now, _ := e.loadOrder(ctx, id)
 		return now, fmt.Errorf("%w: trades unavailable or incomplete", ErrReconciliation)
 	}
+	// Authenticated transport provenance is checked outside the SQL
+	// transaction. CurrentMode queries the config table and must never
+	// require another pooled connection while holding a Fill row lock.
+	signedEvidence := canAttestLiveFills(e)
 	tx, err := e.db.BeginTx(ctx, nil)
 	if err != nil {
 		return o, err
@@ -207,7 +211,7 @@ func (e *Engine) Reconcile(ctx context.Context, id int64) (result LocalOrder, re
  VALUES (?,?,?,?,NULL,?,?,?,?,?,?,?,?,?)`,
 			o.AccountID, o.Symbol, snapshot.OrderID, trade.TradeID, o.ClientOrderID, o.Side,
 			trade.Qty, trade.Price, trade.QuoteQty, trade.Commission, trade.CommissionAsset,
-			trade.Time, false) // Never attest genuine REST merely from an Engine constructor.
+			trade.Time, signedEvidence) // Signed production REST and independent live mode are both required.
 		if insertErr != nil {
 			msg := strings.ToLower(insertErr.Error())
 			if !strings.Contains(msg, "unique constraint") && !strings.Contains(msg, "duplicate entry") {

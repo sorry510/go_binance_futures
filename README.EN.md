@@ -35,7 +35,7 @@ Normal startup:
 ./go_binance_futures
 ```
 
-**Current binary requires database schema v24** (canonical code source: `appversion.DatabaseSchemaVersion`). An isolated local MySQL 5.6 database has passed fresh `sync db` and idempotence checks; **production MySQL 8 structure, performance, existing Main-account data preservation and live Binance gates remain unverified**. Local mocks, SQLite and empty-table plans do not substitute for these checks.
+**Current binary requires database schema v25** (canonical code source: `appversion.DatabaseSchemaVersion`). An isolated local MySQL 5.6 database has passed fresh `sync db` and idempotence checks; **production MySQL 8 structure, performance, existing Main-account data preservation and live Binance gates remain unverified**. Local mocks, SQLite and empty-table plans do not substitute for these checks.
 
 Normal startup **does not automatically synchronize the schema or run database version migrations**. If the database has not been initialized or its version is older than the current binary requires, the application will instruct you to run `go_binance_futures sync db`. Back up the database before production upgrades and preferably run the sync command while the service is stopped.
 
@@ -96,6 +96,7 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Futures Trade → Test Results (`合约交易 → 测试结果`) | Search real-time paper-trading results by symbol and time range |
 | Futures Trade → Historical Backtest (`合约交易 → 历史回测`) | Replay strategies on historical 1m market data with Funding and MarketCondition; supports Standard 1m and Adaptive Resolution modes with trades, equity, audit events, and drill-down statistics |
 | Coin Alerts → Spot/Futures Alerts (`币种提醒 → 现货提醒 / 合约提醒`) | Configure target-price alerts and optional automatic trades |
+| **Spot Trading** (below Futures Trading) | Four pages: Spot Trading, Local Spot Account, Strategy Templates, Positions & Controlled Trading. LONG/CLOSE_LONG only; account and controlled operations remain read-only and live funds are blocked by S3 gates. |
 | Market Monitoring → Spot/Futures Monitoring (`市场监听 → 现货监听 / 合约监听`) | Configure K-line, threshold, indicator, and custom-strategy monitoring |
 | Funding Rate Monitoring (`资金费率监听`) | View funding rates and configure automatic trading |
 | New-Coin Rush (`抢新配置`) | Configure spot, mining-token, and futures launch trades |
@@ -128,7 +129,7 @@ Before configuring either value, close production G1–G5, retain each account's
 
 ### Lead Copy Trading (Stages 6 and 7-1 through 7-4)
 
-> **Current status: the management UI and account-isolation infrastructure are implemented and verified with Mock/Race tests. Live Lead Portfolio identity, MySQL 8 schema v24, private WS, Algo orders, and funded execution have NOT passed their live gates. Live Lead order execution remains locked.** This feature is separate from AI Controlled Trading and cannot guarantee any follower fills.
+> **Current status: the management UI and account-isolation infrastructure are implemented and verified with Mock/Race tests. Live Lead Portfolio identity, MySQL 8 schema v25, private WS, Algo orders, and funded execution have NOT passed their live gates. Live Lead order execution remains locked.** This feature is separate from AI Controlled Trading and cannot guarantee any follower fills.
 
 Open **Futures Trade → Lead Copy Trading** (`/futures/lead`). The page has six Cards:
 
@@ -158,7 +159,7 @@ BINANCE_LEAD_AUDIT_FILE=/private/lead/operations.jsonl
 - `BINANCE_LEAD_CREDENTIAL_KEY` must decode from **standard Base64 to exactly 32 random bytes**. Generate and persist it securely: losing/rotating this master key makes the existing encrypted credentials unreadable.
 - All three file paths must be **absolute and outside the repository**, with an operator-owned private parent directory (recommended `0700`) and private files (`0600`), not symlinks. The app does not silently create private directories or generate a master key.
 - After setting these values and deploying the updated backend, use the UI to save a dedicated Lead credential, request read-only verification, and save independent risk limits. Missing secure storage causes fail-closed errors; **do not work around this by putting secrets into `app.conf`**.
-- Only after backing up the target DB, checking the actual version/data and taking the service down should an operator explicitly run `./go_binance_futures sync db`. The current binary requires **schema v24** (see `appversion.DatabaseSchemaVersion`). Passing SQLite/Mock migration tests does **not** confirm your real MySQL 8 schema has been migrated.
+- Only after backing up the target DB, checking the actual version/data and taking the service down should an operator explicitly run `./go_binance_futures sync db`. The current binary requires **schema v25** (see `appversion.DatabaseSchemaVersion`). Passing SQLite/Mock migration tests does **not** confirm your real MySQL 8 schema has been migrated.
 
 #### Private read-only observer: explicit opt-in performs real Binance I/O
 
@@ -666,3 +667,33 @@ bee pack -be GOOS=windows
 
 ## web ui
 > https://github.com/sorry510/binance_bot_ui
+
+
+#### Spot custom strategy trading (S4 read-only UI, Schema v25)
+
+Spot Trading now has its own top-level menu directly below Futures Trading. Its four child pages are Spot Trading (`/spot/trading`: symbol settings, quote budget and LONG/CLOSE_LONG rule editor), Local Spot Account (`/spot/account`: locally verified inventory, Holdings, orders and fills), Strategy Templates (`/spot/strategy-templates`: LONG/CLOSE_LONG only, **browser-local storage, not server-synced**), and Positions & Controlled Trading (`/spot/controlled-trade`: read-only ownership/risk view; live execution not authorized). The duplicate `/notice/spot-strategy` menu/view was removed, leaving legacy Spot alerts/listeners intact. See [S4-R2 Spot menu and code cleanup](doc/trade/开发方案-02-S4-现货顶级菜单与代码精简.md).
+
+Settings use separate `strategy_trade_enabled`, `strategy_budget_quote` and LONG/CLOSE_LONG rules; they do not modify legacy Spot notice, listening or launch-buy configuration. Budgets use the pair's real quote currency (USDT/USDC/FDUSD). **Locally owned assets are not Binance wallet balances**. The controlled trading view contains no executable approval/order action until the S3 safety gates have been independently reviewed and approved.
+
+The **symbol list** is now `GET /spots/symbols`, which queries only `spot_symbols` and requires a normal JWT login, **not Account/Owner or the runtime trade mode**. It supports symbol, strategy enabled status, USDT/USDC/FDUSD quote asset and pagination. `GET /spots/strategy/config?symbol=...` and `PUT /spots/strategy/config` likewise read/update only a symbol's whitelisted strategy configuration without Account/Owner. The private `GET /spots/strategy/holdings`, `/orders` and `/fills` **continue to enforce `main/auto_strategy` ownership**. Settings changes cannot place or cancel exchange orders. Expand a holding by holding ID, then an order by its local ID to see trade ID, executed quantity, quote amount, actual commission and commission asset. Unknown/reconciliation-required orders expose a safe diagnostic category, never raw signed REST errors. Unverified fills and missing third-asset fee conversion produce explicit `incomplete` indicators rather than fictitious verified net PnL.
+
+Before any release, follow the [S4 matched binary + static + schema deployment/rollback checklist](doc/trade/发布检查-02-S4-成套交付与回滚.md). **Never deploy only the static files.** The new Spot symbol API route and frontend must ship with the same backend binary; the symbol list no longer depends on the trade-mode endpoint.
+
+**Live trading remains BLOCKED.** The S3-R1 review closed the environment-variable-and-DB-mode bypass in code. Durable revocable operator approval, reconciliation of old orders/inventory and response-level signed REST provenance are not implemented. UI settings cannot enable live order creation, cancellation or strategy mode switching. Offline Go/Vue tests do not count as a Binance live-trading acceptance test; production DB upgrades, deployment/restarts and transactions need separate explicit authorization.
+
+
+S4 **offline browser regression**: run `pnpm build` then `pnpm test:s4-browser` in the frontend repository. The script loads the real compiled Vue `dist` into an isolated headless Chrome profile with read-only loopback fixtures to test strategy settings, Holding, orders, fills, empty states and old-backend compatibility. It does **not** connect to your real app database, Binance or production service, and passing it does **not** establish live-trading E2E readiness.
+
+
+**Spot UI parity (S4-R3)**: Spot Trading and Spot Strategy Templates now follow the Futures Trading/Strategy Templates layout: compact toolbar/table, separate indicator and strategy edit dialogs, 15 indicator types, rule-grid editor and fullscreen CodeMirror. Spot only supports LONG/CLOSE_LONG; no shorting, leverage, Futures margin or funding concepts. Templates remain browser-local. S4-R4 implements server-side USDT/USDC/FDUSD quote filtering before COUNT/pagination. The UI directly sends `quote_asset` to the new symbol-list endpoint; the database filters before pagination, with no separate mode/capability handshake or partial-page fallback. See [S4-R3 development notes](doc/trade/开发方案-02-S4-现货顶级菜单与代码精简.md). The S4-R3 UI build was not hot-swapped into a running service. At S4-R4, after confirming no local trade process or TCP 3333 listener was active, the latest `dist` was synchronized into the backend's **local** `static` directory (119/119 SHA-256 matches). No service restart, production deployment or live orders were performed.
+
+
+**S4-R5 symbol-list decoupling (2026-11-10)**: Like the Futures symbol list, Spot symbol configuration is now queried directly from `spot_symbols`, without Account/Owner, trade-mode or order/Holding table dependencies. The dedicated endpoint is **`GET /spots/symbols`**; the former `GET /spots/strategy/configs` route has been removed from the new router. Spot single-symbol configuration GET/PUT also uses only `symbol`. Authenticated Holding/order/fill views still enforce their original owner scope, and S3 live-trading gates remain closed. See [S4-R5 contract and migration notes](doc/trade/开发方案-02-S4-R5-币种列表去账户绑定.md).
+
+**S4-R5 local verification**: Go scoped tests, Controller, Race, vet, temporary main build and Vue typecheck/build all PASS. Isolated Chrome browser: 13 scenarios PASS, 131 loopback GET and zero HTTP writes. Local static: SYNCED_IDLE_SERVICE; dist=119, static=119, SHA-256 matching=True. No production deployment or Binance order requests.
+
+
+**02ALL overall review (2026-11-10)**: The Spot symbol manager is account-independent. The Local Spot Account / Controlled Trading views also no longer request the trade-mode API or send fixed Account/Owner fields. The backend retains mandatory internal `main/auto_strategy` ownership checks for actual Holdings, orders and fills and rejects explicit invalid overrides; these controls protect manually held inventory. Unused legacy read-only preflight code is excluded from standard builds with the `spot_legacy_doctor` build tag, retaining the nine existing diagnostic tests. [Independent re-review](doc/trade/CODE_REVIEW_02-ALL-rereview.md). Real Fill provenance, revocable approval and the BUY→Holding→SELL cycle remain **BLOCKED**.
+
+
+**02ALL R2 read-only simplification**: The three S4 Service readers no longer take redundant Account/Owner arguments. Their SQL **still restricts queries to internal `main/auto_strategy` ownership**, and the Controller still rejects unauthorized explicit scope overrides. An isolated SQLite test verifies that foreign-owner Holdings, orders, and fills cannot be retrieved by IDs. See [review addendum](doc/trade/CODE_REVIEW_02-ALL-rereview.md). Live trading and Fill provenance remain BLOCKED.

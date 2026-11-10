@@ -127,6 +127,11 @@ func init() {
 	// S1: scoped Spot strategy configuration only; no create/cancel order route.
 	web.Router("/spots/strategy/config", &controllers.SpotStrategyController{}, "get:Get;put:Put")
 	web.Router("/spots/strategy/mode", &controllers.SpotStrategyController{}, "get:GetMode;put:PutMode")
+	// S4: paginated, scoped, read-only strategy inventory / order / trade data.
+	web.Router("/spots/symbols", &controllers.SpotStrategyController{}, "get:ListSymbols")
+	web.Router("/spots/strategy/holdings", &controllers.SpotStrategyController{}, "get:ListHoldings")
+	web.Router("/spots/strategy/orders", &controllers.SpotStrategyController{}, "get:ListOrders")
+	web.Router("/spots/strategy/fills", &controllers.SpotStrategyController{}, "get:ListFills")
 	web.Router("/spots", &controllers.SpotController{}, "get:Get;post:Post")             // 列表查询和新增
 	web.Router("/spots/:id", &controllers.SpotController{}, "delete:Delete;put:Edit")    // 更新和删除
 	web.Router("/spots/enable/:flag", &controllers.SpotController{}, "put:UpdateEnable") // 修改所有的合约交易对开启关闭

@@ -1,0 +1,1 @@
+import{aF as s,aG as a}from"./index-kTvdRBmw.js";const g=(t={})=>s.get(a("spots/symbols"),{params:t}),o=t=>s.request("put",a("spots/strategy/config"),{data:t}),r=(t={})=>s.get(a("spots/strategy/holdings"),{params:t}),p=(t={})=>s.get(a("spots/strategy/orders"),{params:t}),S=(t={})=>s.get(a("spots/strategy/fills"),{params:t});export{r as a,p as b,S as c,g,o as p};

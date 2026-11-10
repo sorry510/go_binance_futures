@@ -27,12 +27,12 @@ func TestS1SpotStrategyAlwaysJSONAndAuthorized(t *testing.T) {
 			call                                 func(*SpotStrategyController)
 		}{
 			{"get_missing_claims", http.MethodGet, "/spots/strategy/config?account_id=main&owner=auto_strategy&symbol=BTCUSDT", "", "", nil, http.StatusUnauthorized, (*SpotStrategyController).Get},
-			{"get_invalid_scope", http.MethodGet, "/spots/strategy/config?account_id=lead&owner=auto_strategy&symbol=BTCUSDT", "", "", jwt.MapClaims{"Username": "operator"}, http.StatusBadRequest, (*SpotStrategyController).Get},
+			{"get_missing_symbol", http.MethodGet, "/spots/strategy/config", "", "", jwt.MapClaims{"Username": "operator"}, http.StatusBadRequest, (*SpotStrategyController).Get},
 			{"put_mode_missing_claims", http.MethodPut, "/spots/strategy/mode", `{"account_id":"main","owner":"auto_strategy","mode":"off"}`, "application/json", nil, http.StatusUnauthorized, (*SpotStrategyController).PutMode},
 			{"put_mode_no_json", http.MethodPut, "/spots/strategy/mode", `{"account_id":"main","owner":"auto_strategy","mode":"off"}`, "application/x-www-form-urlencoded", jwt.MapClaims{"Username": "operator"}, http.StatusUnsupportedMediaType, (*SpotStrategyController).PutMode},
 			{"put_mode_bad_scope", http.MethodPut, "/spots/strategy/mode", `{"account_id":"lead","owner":"auto_strategy","mode":"off"}`, "application/json", jwt.MapClaims{"Username": "operator"}, http.StatusBadRequest, (*SpotStrategyController).PutMode},
 			{"put_config_no_json", http.MethodPut, "/spots/strategy/config", `{}`, "application/x-yaml", jwt.MapClaims{"Username": "operator"}, http.StatusUnsupportedMediaType, (*SpotStrategyController).Put},
-			{"put_config_bad_scope", http.MethodPut, "/spots/strategy/config", `{"account_id":"lead","owner":"auto_strategy","symbol":"BTCUSDT","enabled":false,"budget_quote":"0"}`, "application/json", jwt.MapClaims{"Username": "operator"}, http.StatusBadRequest, (*SpotStrategyController).Put},
+			{"put_config_reject_account_fields", http.MethodPut, "/spots/strategy/config", `{"account_id":"lead","owner":"auto_strategy","symbol":"BTCUSDT","enabled":false,"budget_quote":"0"}`, "application/json", jwt.MapClaims{"Username": "operator"}, http.StatusBadRequest, (*SpotStrategyController).Put},
 		} {
 			t.Run(accept+"/"+tc.name, func(t *testing.T) {
 				req := httptest.NewRequest(tc.method, tc.url, strings.NewReader(tc.body))
@@ -79,6 +79,7 @@ func TestS1SpotStrategyPayloadWhitelist(t *testing.T) {
 		`{"account_id":"main","owner":"auto_strategy","symbol":"BTCUSDT","enabled":true,"budget_quote":"10","mode":"strategy"}`,
 		`{"account_id":"main","owner":"auto_strategy","symbol":"BTCUSDT","enabled":true,"budget_quote":"10","exchange_order_id":"fake"}`,
 		`{"account_id":"main"}{}`,
+		`{"account_id":"main","owner":"auto_strategy","symbol":"BTCUSDT","enabled":false,"budget_quote":"0"}`,
 		"{}{}",
 		strings.Repeat("X", 32769),
 	} {
@@ -88,7 +89,7 @@ func TestS1SpotStrategyPayloadWhitelist(t *testing.T) {
 		}
 	}
 	var req spotstrategy.Patch
-	if err := decodeSpotStrategyPayload([]byte(`{"account_id":"main","owner":"auto_strategy","symbol":"BTCUSDT","enabled":false,"budget_quote":"0"}`), &req); err != nil {
+	if err := decodeSpotStrategyPayload([]byte(`{"symbol":"BTCUSDT","enabled":false,"budget_quote":"0"}`), &req); err != nil {
 		t.Fatal(err)
 	}
 	if req.Enabled == nil || *req.Enabled {
@@ -108,7 +109,7 @@ func TestS1SpotStrategySuccessAlwaysJSON(t *testing.T) {
 			ctx.Reset(rec, req)
 			ctrl := new(SpotStrategyController)
 			ctrl.Init(ctx, "SpotStrategyController", "", nil)
-			ctrl.respond(http.StatusOK, map[string]any{"execution": "mock_only"}, "success")
+			ctrl.respond(http.StatusOK, map[string]any{"execution": "live_disabled"}, "success")
 			if rec.Code != http.StatusOK || !strings.Contains(rec.Header().Get("Content-Type"), "application/json") {
 				t.Fatalf("response negotiation at Accept=%s code=%d type=%s", accept, rec.Code, rec.Header().Get("Content-Type"))
 			}
@@ -119,7 +120,7 @@ func TestS1SpotStrategySuccessAlwaysJSON(t *testing.T) {
 				} `json:"data"`
 				Msg string `json:"msg"`
 			}
-			if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil || payload.Code != 200 || payload.Data.Execution != "mock_only" {
+			if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil || payload.Code != 200 || payload.Data.Execution != "live_disabled" {
 				t.Fatalf("bad JSON: %+v err=%v", payload, err)
 			}
 		})

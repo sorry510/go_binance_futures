@@ -26,12 +26,13 @@ type fakeS2Client struct {
 	mutateOnCancel                            []Trade
 	unmanaged                                 []OrderSnapshot
 	free                                      string
+	baseFree                                  string
 	instrument                                Instrument
 }
 
 func newFakeS2() *fakeS2Client {
 	return &fakeS2Client{
-		free: "10000", instrument: Instrument{Symbol: "BTCUSDT", BaseAsset: "BTC", QuoteAsset: "USDT", Status: "TRADING", SpotAllowed: true,
+		free: "10000", baseFree: "0", instrument: Instrument{Symbol: "BTCUSDT", BaseAsset: "BTC", QuoteAsset: "USDT", Status: "TRADING", SpotAllowed: true,
 			LotMin: "1", LotMax: "100", LotStep: "1", TickSize: "1", MinNotional: "10"},
 	}
 }
@@ -42,7 +43,7 @@ func (f *fakeS2Client) Balances(ctx context.Context, account string) (map[string
 	if account != AccountMain {
 		return nil, errors.New("wrong account")
 	}
-	return map[string]Balance{"BTC": {Free: "0", Locked: "0"}, "USDT": {Free: f.free, Locked: "0"}}, nil
+	return map[string]Balance{"BTC": {Free: f.baseFree, Locked: "0"}, "USDT": {Free: f.free, Locked: "0"}}, nil
 }
 func (f *fakeS2Client) Instrument(ctx context.Context, sym string) (Instrument, error) {
 	if f.instrumentErr != nil {

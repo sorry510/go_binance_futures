@@ -530,6 +530,13 @@ func main() {
 		spot.ListenCoin(SystemConfig)
 	}, time.Second*2)
 
+	// Spot 自定义策略：真实交易代码与已有 2 秒调度复用。
+	// 默认无独立运行时许可且全局模式无法开启 strategy，因此这里
+	// 不触发任何 Binance 私有 IO / 下单 / 撤单。
+	loopRun(func() {
+		spot.RunRealSpotStrategies()
+	}, time.Second*2)
+
 	// 合约费率监听
 	loopRun(func() {
 		// 更新所有币种的资金费率

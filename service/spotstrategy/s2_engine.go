@@ -15,10 +15,11 @@ import (
 )
 
 type Engine struct {
-	db       *sql.DB
-	client   Client
-	mockOnly bool
-	mysql    bool
+	db        *sql.DB
+	client    Client
+	mockOnly  bool
+	liveReady bool
+	mysql     bool
 }
 
 // NewMockEngine can be used by S2 tests or S3 test fixtures only. There is
@@ -28,6 +29,18 @@ func NewMockEngine(db *sql.DB, fake Client) *Engine {
 }
 func NewReadOnlyEngine(db *sql.DB, client Client) *Engine {
 	return &Engine{db: db, client: client, mockOnly: false, mysql: strings.Contains(strings.ToLower(fmt.Sprintf("%T", db.Driver())), "mysql")}
+}
+
+// NewLiveEngine wires production order handling but only with a signed REST
+// adapter. It is NOT permission to trade. Runtime calls separately require
+// current strategy mode and explicit out-of-band operator approval.
+func NewLiveEngine(db *sql.DB, client Client) (*Engine, error) {
+	provenance, ok := client.(signedRESTTradeEvidence)
+	if !ok || !provenance.SpotSignedRESTProvenance() {
+		return nil, ErrLiveWriteDisabled
+	}
+	return &Engine{db: db, client: client, liveReady: true,
+		mysql: strings.Contains(strings.ToLower(fmt.Sprintf("%T", db.Driver())), "mysql")}, nil
 }
 
 type LocalOrder struct {
@@ -74,7 +87,12 @@ func (e *Engine) forUpdate() string {
 
 func (e *Engine) Prepare(ctx context.Context, req OrderRequest) (LocalOrder, error) {
 	if !e.mockOnly {
-		return LocalOrder{}, ErrLiveWriteDisabled
+		if !e.liveReady {
+			return LocalOrder{}, ErrLiveWriteDisabled
+		}
+		if err := AuthorizeLiveMode(); err != nil {
+			return LocalOrder{}, err
+		}
 	}
 	if err := ValidateScope(req.AccountID, req.Owner); err != nil {
 		return LocalOrder{}, err
@@ -246,6 +264,15 @@ func (e *Engine) Prepare(ctx context.Context, req OrderRequest) (LocalOrder, err
 	if blocked > 0 {
 		return LocalOrder{}, ErrReconciliation
 	}
+	// No averaging-in/additional BUY for an already active Spot cycle.
+	var existingCycle int64
+	if err = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM spot_strategy_holdings
+ WHERE active_slot=? AND status='active'`, AccountMain+":"+OwnerAuto+":"+req.Symbol).Scan(&existingCycle); err != nil {
+		return LocalOrder{}, err
+	}
+	if existingCycle > 0 {
+		return LocalOrder{}, ErrReconciliation
+	}
 	budget, err := parseAmount(budgetText, false)
 	if err != nil {
 		return LocalOrder{}, err
@@ -282,7 +309,7 @@ func (e *Engine) Prepare(ctx context.Context, req OrderRequest) (LocalOrder, err
 		if strings.Contains(message, "duplicate") || strings.Contains(message, "unique constraint") {
 			return LocalOrder{}, ErrDuplicate
 		}
-		return LocalOrder{}, fmt.Errorf("persist mock order intent: %w", err)
+		return LocalOrder{}, fmt.Errorf("persist Spot order intent: %w", err)
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
@@ -296,7 +323,12 @@ func (e *Engine) Prepare(ctx context.Context, req OrderRequest) (LocalOrder, err
 
 func (e *Engine) Submit(ctx context.Context, id int64, price, estimatedPrice string) (LocalOrder, error) {
 	if !e.mockOnly {
-		return LocalOrder{}, ErrLiveWriteDisabled
+		if !e.liveReady {
+			return LocalOrder{}, ErrLiveWriteDisabled
+		}
+		if err := AuthorizeLiveMode(); err != nil {
+			return LocalOrder{}, err
+		}
 	}
 	order, err := e.loadOrder(ctx, id)
 	if err != nil {

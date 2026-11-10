@@ -154,16 +154,12 @@ func TestS1ConfigurationModeAndMockReservation(t *testing.T) {
 
 	en := true
 	rules := `[{"name":"buy","type":"long","enable":true,"code":"NowPrice > 10"},{"name":"sell","type":"close_long","enable":true,"code":"NowPrice < 7"}]`
-	_, err := UpdateSetting(Patch{AccountID: "lead", Owner: OwnerAuto, Symbol: "BTCUSDT", Enabled: &en, BudgetQuote: "10", Strategy: &rules})
-	if err == nil {
-		t.Fatal("invalid scope accepted")
-	}
-	_, err = UpdateSetting(Patch{AccountID: AccountMain, Owner: OwnerAuto, Symbol: "BTCUSDT", Enabled: &en, BudgetQuote: "0", Strategy: &rules})
+	_, err := UpdateSetting(Patch{Symbol: "BTCUSDT", Enabled: &en, BudgetQuote: "0", Strategy: &rules})
 	if err == nil {
 		t.Fatal("zero budget accepted")
 	}
-	setting, err := UpdateSetting(Patch{AccountID: AccountMain, Owner: OwnerAuto, Symbol: "BTCUSDT", Enabled: &en, BudgetQuote: "12.5000", Strategy: &rules})
-	if err != nil || !setting.Enabled || setting.BudgetQuote != "12.5" || setting.Execution != "mock_only" {
+	setting, err := UpdateSetting(Patch{Symbol: "BTCUSDT", Enabled: &en, BudgetQuote: "12.5000", Strategy: &rules})
+	if err != nil || !setting.Enabled || setting.BudgetQuote != "12.5" {
 		t.Fatalf("setting=%+v err=%v", setting, err)
 	}
 	// Existing legacy JSON API must not change the private enable/budget.

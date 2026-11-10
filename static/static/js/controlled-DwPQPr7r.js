@@ -1,0 +1,1 @@
+import{_ as o}from"./account.vue_vue_type_script_setup_true_lang-DrJ506r1.js";import{d as e,g as r,o as t}from"./index-kTvdRBmw.js";import"./spotStrategy-CNVBNOv1.js";const s=e({name:"SpotControlledTrade",__name:"controlled",setup(n){return(a,c)=>(t(),r(o,{controlled:""}))}});export{s as default};

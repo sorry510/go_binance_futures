@@ -35,7 +35,7 @@
 ./go_binance_futures
 ```
 
-**当前二进制数据库 Schema 要求 v24**（唯一代码真源：`appversion.DatabaseSchemaVersion`）。本机 MySQL 5.6 隔离库已验证新建与重复 `sync db`；**生产 MySQL 8 的真实结构、性能、旧 Main 数据无损升级及 Binance 交易 Gate 尚未验证**，不得以本地 Mock/SQLite/空表结果替代。
+**当前二进制数据库 Schema 要求 v25**（唯一代码真源：`appversion.DatabaseSchemaVersion`）。本机 MySQL 5.6 隔离库已验证新建与重复 `sync db`；**生产 MySQL 8 的真实结构、性能、旧 Main 数据无损升级及 Binance 交易 Gate 尚未验证**，不得以本地 Mock/SQLite/空表结果替代。
 
 正常启动**不会再自动执行数据库 Schema 或版本迁移**。如果数据库尚未初始化，或数据库版本低于当前二进制要求，程序会提示先运行 `go_binance_futures sync db`。生产环境升级时建议先备份数据库，并在服务停止状态下执行同步命令。
 
@@ -93,6 +93,7 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | 合约交易 → 测试结果 | 查询实时模拟交易结果，可按币种和时间筛选 |
 | 合约交易 → 历史回测 | 使用历史 1m 行情、Funding 与 MarketCondition 回放策略；支持标准 1m 与自适应精度模式，并查看交易、权益曲线、审计事件和高精度下钻统计 |
 | 币种提醒 → 现货提醒 / 合约提醒 | 配置到价提醒和可选的自动交易 |
+| **现货交易**（合约交易下方） | 四个子菜单：现货交易、现货本地账户、策略模板、仓位与受控交易。现货只允许 LONG/CLOSE_LONG；账户/受控交易只读，真实资金写入仍被 S3 门禁阻断 |
 | 市场监听 → 现货监听 / 合约监听 | 配置 K 线、阈值、技术指标和自定义策略监听 |
 | 资金费率监听 | 查看资金费率并配置自动交易 |
 | 抢新配置 | 配置现货、挖矿币和合约的新币抢购 |
@@ -125,7 +126,7 @@ BINANCE_ORDER_HISTORY_T0_LEAD_MS=<已批准的 Lead 启用 UTC Unix 毫秒>
 
 ## 合约带单（Lead 账户，Stage 6 / Stage 7-1～7-4）
 
-> **当前交付状态：管理界面和独立账户基础设施已完成代码与 Mock/Race 验证；真实 Lead Portfolio、MySQL 8 Schema v24、私有 WS、Algo 条件单和资金交易尚未完成真实环境 Gate。Lead 实盘执行仍锁定。** 这不是普通 AI 受控交易，也不是复制跟随者成交的保证。
+> **当前交付状态：管理界面和独立账户基础设施已完成代码与 Mock/Race 验证；真实 Lead Portfolio、MySQL 8 Schema v25、私有 WS、Algo 条件单和资金交易尚未完成真实环境 Gate。Lead 实盘执行仍锁定。** 这不是普通 AI 受控交易，也不是复制跟随者成交的保证。
 
 访问 `合约交易 → 合约带单`（`/futures/lead`）。页面采用六个 Card：
 
@@ -155,7 +156,7 @@ BINANCE_LEAD_AUDIT_FILE=/private/lead/operations.jsonl
 - `BINANCE_LEAD_CREDENTIAL_KEY` 必须是**32 个随机字节的标准 Base64 编码**，由运维人员安全生成并长期保存。丢失或更换主密钥会导致旧加密凭证无法解密。
 - 三个文件路径均须为**仓库外的绝对路径**；父目录需由部署用户控制，权限建议 `0700`，目标文件为 `0600`，不允许符号链接。应用不会隐式创建私有目录或生成主密钥。
 - 配好上述环境并部署新版后端后，再通过 UI 保存 Lead 专用凭证、查看只读验证结果和保存独立风险限额。未配置存储时，凭证/配置保存会安全拒绝，**不应修改 `app.conf` 来绕过检查**。
-- 应在备份、停机并确认目标数据库版本/数据后，才由人工单独执行 `./go_binance_futures sync db`。当前代码要求 **Schema v24**（以 `appversion.DatabaseSchemaVersion` 为准）；离线 SQLite/Mock PASS **不能证明实际 MySQL 8 已完成迁移**。
+- 应在备份、停机并确认目标数据库版本/数据后，才由人工单独执行 `./go_binance_futures sync db`。当前代码要求 **Schema v25**（以 `appversion.DatabaseSchemaVersion` 为准）；离线 SQLite/Mock PASS **不能证明实际 MySQL 8 已完成迁移**。
 
 #### 只读观察器：明确选择才会连接真实 Binance
 
@@ -767,3 +768,36 @@ bee pack -be GOOS=windows
 
 - [ ] binance_announcement
 - [ ] binance_news
+
+
+#### 现货自定义策略交易（S4，只读视图，Schema v25）
+
+现货交易已从「币种提醒」迁出，位于「**现货交易**」顶级菜单（合约交易下方）。四个子页为「现货交易」（`/spot/trading`，币种、预算、LONG/CLOSE_LONG 编辑和应用模板）、「现货本地账户」（`/spot/account`，本地归属资产/Holding/订单/Fill）、「策略模板」（`/spot/strategy-templates`，只支持 LONG/CLOSE_LONG，**浏览器本地保存，暂不跨设备共享**）和「仓位与受控交易」（`/spot/controlled-trade`，只读归属与风险状态，实盘执行未授权）。已删除旧 `/notice/spot-strategy` 菜单与重复页面，不影响旧现货提醒/监听。详见 [S4-R2 现货菜单调整与代码精简](doc/trade/开发方案-02-S4-现货顶级菜单与代码精简.md)。
+
+现货策略配置使用独立的 `strategy_trade_enabled`、`strategy_budget_quote` 和 LONG/CLOSE_LONG 规则；它们不等于旧的现货 `enable` / 新币抢购 / 监听自动下单设置。预算按币对真实 quote 资产（USDT/USDC/FDUSD）表示。**本地归属资产不是 Binance 钱包余额；受控交易没有实际审批/执行入口**，不要把现货列表理解为已完成真实资金验收。
+
+现货币种列表改为 **`GET /spots/symbols`**，仅查询 `spot_symbols`，支持币种/启用状态/报价资产筛选和分页，保留 JWT 登录验证，**不要求 `account_id`、`owner`，也不依赖 `spot_auto_trade_mode`**。单币种 `GET /spots/strategy/config?symbol=...` 和 `PUT /spots/strategy/config` 同样按 `symbol` 读写独立的配置白名单，禁止把 Account/Owner、mode、交易所下单字段混入配置请求。**只有** `GET /spots/strategy/holdings`、`/orders`、`/fills` 等资金归属相关接口继续固定 `main/auto_strategy`。Holding 下钻按独立 `holding_id`，订单下钻按本地订单 ID 获取 `tradeId`、价量、quote 成交额、手续费及原计费资产。未知 / `reconcile_required` 委托只显示可诊断状态码，不返回带签名 REST 错误。未核实 Fill、第三资产历史费用不完整时必须标记 `incomplete`，不能编造已核实净盈亏。
+
+发布前请使用 [S4 二进制 + static + Schema 成套交付与回滚 SOP](doc/trade/发布检查-02-S4-成套交付与回滚.md)，**禁止仅更新前端 static**。现货币种列表不再依赖 mode API；报价资产筛选由新 `GET /spots/symbols` 直接执行，数据库先过滤后分页，不再引入能力协商或旧页兼容分支。旧版后端因路由契约不同，须与新版前端成套发布。
+
+**实盘仍 BLOCKED**：S3-R1 关闭了单凭环境变量加一行数据库模式切换启用真实资金的路径；尚未实现经审计的可撤销授权、旧单/库存对账和真正响应级成交核验。**S4 页面、配置开关或手动修改数据库都不能解除。** Go/Vue 本地构建和隔离测试不代表真实 Binance 交易已验收。生产 `sync db`、部署、重启、交易均需另外明确授权。
+
+
+S4 **隔离浏览器验收**：先在前端仓库 `pnpm build`，然后执行 `pnpm test:s4-browser`。脚本以本机无头 Chrome 加载真实 Vue `dist`，用隔离的只读 HTTP 夹具测试配置/Holding/订单/Fill/版本不匹配 UI；全程无真实 Binance、生产数据库或应用服务调用。通过代表**UI Fixture 测试**，不代表真实成交/生产 E2E。
+
+
+**现货页面样式（S4-R3）**：现货交易与策略模板以现有合约交易/合约策略模板页面为参照，使用相同的操作栏、紧凑表格、分栏按钮、技术指标弹窗（15 类指标）、策略规则表格和 CodeMirror 全屏编辑。现货规则只有 LONG/CLOSE_LONG；不显示合约做空、杠杆、保证金模式、资金费率。模板仍仅浏览器本地保存。S4-R4 后端支持按 USDT/USDC/FDUSD **服务端筛选和正确分页总数**；前端直接传 `quote_asset`，后端数据库先过滤再计算分页；不再通过模式接口/能力标记判断。详见 [S4-R3 复刻说明](doc/trade/开发方案-02-S4-现货顶级菜单与代码精简.md)。S4-R3 阶段未热覆盖仍在运行的交易服务；**S4-R4 确认本地服务停止后**已将最新 `dist` 同步至后端本地 `static`，119/119 文件哈希一致。没有重启交易服务或部署生产。
+
+
+**S4-R5 列表解耦（2026-11-10）**：现货币种管理参照合约 `GET /features` 的“币种表 → 条件过滤 → 排序/分页 → 列表”模式。新增独立入口 `GET /spots/symbols`；无须账户、仓位、订单表或全局交易模式。现货币种配置读取与 PUT 更新仅按 `symbol` 操作，仍禁止 SHORT/CLOSE_SHORT，并与真实资金下单审批严格分离。旧 `GET /spots/strategy/configs` 已从新路由移除，必须同步新 Go 二进制和静态前端。详情见 [S4-R5 列表逻辑重构](doc/trade/开发方案-02-S4-R5-币种列表去账户绑定.md)。
+
+**S4-R5 本地交付**：S4-R5 检查（2026-11-10）：受影响 Go 5 包、Controller S1/S4、5 包 Race、Go vet、临时主程序编译、Vue typecheck/build 均 PASS；隔离 Chrome 13 个业务场景 PASS、131 次本地 GET、0 HTTP 写请求。币种 GET /spots/symbols 不带 Account/Owner、不请求 mode；订单/仓位按原作用域控制。本地 static 状态：SYNCED_IDLE_SERVICE，dist=119 文件、static=119 文件、SHA256 一致=True。真实 Go/JWT/生产发布未执行。
+
+
+**02ALL 整体复审（2026-11-10）**：普通现货币种管理无需账户绑定；现货本地账户与受控交易页面也不再通过 `getSpotStrategyMode` 校验 `contract_version` 或传入固定 `main/auto_strategy`。服务端对真实 Holding/订单/Fill 仍固定归属范围并拒绝显式非法覆盖，不能删除防止误卖手动库存的表约束。无生产消费者的旧现货只读预检已隔离至 `spot_legacy_doctor` build tag（9 项历史测试保留）。[独立复审记录](doc/trade/CODE_REVIEW_02-ALL-rereview.md)。方案 02 的真实 BUY→Holding→SELL 闭环、来源核验及授权仍 BLOCKED，尚未完成。
+
+
+**02ALL R2 资金只读精简**：S4 三个只读 Service 不再接受无实际用途的 Account/Owner 参数，内部 SQL 仍只查询 `main/auto_strategy`；Controller 保留 JWT 与显式非法 Owner 400。已增加其他 Owner 的 Holding、订单、Fill 越界隔离测试。详情见 [复审记录](doc/trade/CODE_REVIEW_02-ALL-rereview.md)。交易许可和真实 Fill 证据仍 BLOCKED。
+
+
+**现货交易 S4 搜索与启用修复（2026-11-10）**：`/spots/symbols` 支持大小写不敏感的包含查询（如 `BTC` 匹配 `BTCUSDT`、`WBTCUSDT`），前端输入后防抖搜索。启用开关只提交必要的配置字段；须先填写正数报价资产预算并配置有效、已启用的 LONG/CLOSE_LONG 规则。停用可在旧策略 JSON 损坏时执行。配置启用**不允许**真实发单。详见 [S4-R5 修复记录](doc/trade/开发方案-02-S4-R5-币种列表去账户绑定.md)。本次新版本尚未成套部署到运行中的交易服务。

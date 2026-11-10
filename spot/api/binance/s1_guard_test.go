@@ -81,14 +81,32 @@ func TestS1LegacySpotWritersUsePersistentGate(t *testing.T) {
 						return true
 					}
 					sel, ok := call.Fun.(*ast.SelectorExpr)
-					if !ok || sel.Sel.Name != "AuthorizeLegacyOrder" || len(call.Args) != 3 {
+					if !ok || (sel.Sel.Name != "AuthorizeLegacyOrder" && sel.Sel.Name != "AuthorizeLiveWrite") || len(call.Args) != 3 {
 						return true
 					}
 					base, ok := sel.X.(*ast.Ident)
 					if !ok || base.Name != "spotstrategy" {
 						return true
 					}
-					// Require source + real symbol + explicit BUY/SELL intent.
+					// Real Spot writers MUST check the actual ctx and
+					// persisted order request with an explicit bool intent.
+					// Merely mentioning AuthorizeLiveWrite in an unrelated
+					// top-level IF no longer satisfies the AST gate.
+					if sel.Sel.Name == "AuthorizeLiveWrite" {
+						ctx, ok0 := call.Args[0].(*ast.Ident)
+						order, ok1 := call.Args[1].(*ast.Ident)
+						intent, ok2 := call.Args[2].(*ast.Ident)
+						if !ok0 || ctx.Name != "ctx" || !ok1 || order.Name != "req" ||
+							!ok2 || (intent.Name != "true" && intent.Name != "false") {
+							return true
+						}
+						if (fn.Name.Name == "Place" && intent.Name == "false") ||
+							(fn.Name.Name == "Cancel" && intent.Name == "true") {
+							guarded = true
+						}
+						return true
+					}
+					// Legacy writers require source + real symbol + explicit intent.
 					arg0, ok0 := call.Args[0].(*ast.Ident)
 					arg1, ok1 := call.Args[1].(*ast.Ident)
 					arg2, ok2 := call.Args[2].(*ast.SelectorExpr)
@@ -111,7 +129,7 @@ func TestS1LegacySpotWritersUsePersistentGate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if writers != 6 {
-		t.Fatalf("expected 6 guarded Spot SDK writers, found %d; review new writers explicitly", writers)
+	if writers != 8 {
+		t.Fatalf("expected 8 guarded Spot SDK writers, found %d; review new writers explicitly", writers)
 	}
 }
