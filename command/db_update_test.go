@@ -709,6 +709,129 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err != nil || version.Version != 24 {
 		t.Fatalf("v24 persisted version: %+v %v", version, err)
 	}
+	// v25: only the two disabled-by-default opt-ins and four isolated
+	// Spot Quant tables may be added. Old spot enable and Futures ledger rows
+	// must remain intact.
+	legacySpot := &models.SpotSymbols{Symbol: "S510SPOTUSDT", Enable: 1, Usdt: "42"}
+	if _, err := o.Insert(legacySpot); err != nil {
+		t.Fatalf("seed existing spot symbol: %v", err)
+	}
+	var futuresBefore int
+	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_positions WHERE symbol='S510LEGACYUSDT' AND settlement_status='legacy'").QueryRow(&futuresBefore); err != nil {
+		t.Fatal(err)
+	}
+	if err := SyncDatabase(25); err != nil {
+		t.Fatalf("v25 spot quant schema: %v", err)
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 25 || version.SpotQuantEnable != 0 {
+		t.Fatalf("v25 global quant opt-in must be OFF: %+v %v", version, err)
+	}
+	var legacyEnabled, spotQuantEnabled int
+	if err := o.Raw("SELECT enable, spot_quant_enabled FROM spot_symbols WHERE id=?", legacySpot.ID).QueryRow(&legacyEnabled, &spotQuantEnabled); err != nil || legacyEnabled != 1 || spotQuantEnabled != 0 {
+		t.Fatalf("v25 changed legacy spot or enabled new quant: legacy=%d quant=%d err=%v", legacyEnabled, spotQuantEnabled, err)
+	}
+	for _, table := range []string{"spot_managed_positions", "spot_managed_orders", "spot_trade_fills", "spot_strategy_templates"} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("missing v25 table %s, count=%d err=%v", table, count, err)
+		}
+	}
+	for table, columns := range map[string][]string{
+		"spot_managed_positions": {"bought_qty", "remaining_qty", "avg_cost_quote", "realized_pnl"},
+		"spot_managed_orders":    {"requested_qty", "filled_qty"},
+		"spot_trade_fills":       {"qty", "price", "quote_qty", "commission"},
+	} {
+		for _, column := range columns {
+			var dataType string
+			if err := o.Raw("SELECT type FROM pragma_table_info('"+table+"') WHERE name=?", column).QueryRow(&dataType); err != nil || dataType != "DECIMAL(36,18)" {
+				t.Fatalf("v25 column %s.%s type=%q err=%v", table, column, dataType, err)
+			}
+		}
+	}
+	for table, indexes := range map[string][][]string{
+		"spot_managed_positions": {{"symbol", "status"}},
+		"spot_managed_orders":    {{"client_order_id"}, {"symbol", "exchange_order_id"}, {"position_id"}},
+		"spot_trade_fills":       {{"symbol", "exchange_order_id", "trade_id"}, {"order_id"}, {"position_id"}},
+	} {
+		for _, columns := range indexes {
+			if !sqliteHasIndexColumns(t, o, table, columns) {
+				t.Fatalf("v25 missing index on %s%v", table, columns)
+			}
+		}
+	}
+	positionResult, err := o.Raw("INSERT INTO spot_managed_positions (symbol,base_asset,quote_asset,bought_qty,remaining_qty,avg_cost_quote,realized_pnl,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'OPEN',?,?)",
+		"S510SPOTUSDT", "S510SPOT", "USDT", "1.5", "1.5", "100.0", "0", 10, 10).Exec()
+	if err != nil {
+		t.Fatalf("insert spot position: %v", err)
+	}
+	positionID, err := positionResult.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+	orderResult, err := o.Raw("INSERT INTO spot_managed_orders (position_id,symbol,side,order_type,client_order_id,exchange_order_id,requested_qty,filled_qty,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+		positionID, "S510SPOTUSDT", "BUY", "MARKET", "S510-CLIENT-1", "1000", "1.5", "1.5", "FILLED", 10, 10).Exec()
+	if err != nil {
+		t.Fatalf("insert spot order: %v", err)
+	}
+	orderID, err := orderResult.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw("INSERT INTO spot_managed_orders (position_id,symbol,side,order_type,client_order_id,requested_qty,filled_qty,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+		positionID, "S510SPOTUSDT", "BUY", "MARKET", "S510-CLIENT-1", "1", "0", "NEW", 11, 11).Exec(); err == nil {
+		t.Fatal("duplicate Spot ClientOrderID was accepted")
+	}
+	spotFillSQL := "INSERT INTO spot_trade_fills (position_id,order_id,exchange_order_id,trade_id,symbol,side,qty,price,quote_qty,commission,commission_asset,trade_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+	if _, err := o.Raw(spotFillSQL, positionID, orderID, "1000", "9000", "S510SPOTUSDT", "BUY", "1.5", "100", "150", "0.15", "USDT", 10).Exec(); err != nil {
+		t.Fatalf("insert spot fill: %v", err)
+	}
+	if _, err := o.Raw(spotFillSQL, positionID, orderID, "1000", "9000", "S510SPOTUSDT", "BUY", "1.5", "100", "150", "0.15", "USDT", 10).Exec(); err == nil {
+		t.Fatal("duplicate Spot exchange fill was accepted")
+	}
+	if err := SyncDatabase(25); err != nil {
+		t.Fatalf("repeated v25 sync: %v", err)
+	}
+	var futuresAfter, fillCount int
+	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_positions WHERE symbol='S510LEGACYUSDT' AND settlement_status='legacy'").QueryRow(&futuresAfter); err != nil || futuresAfter != futuresBefore {
+		t.Fatalf("v25 changed Futures history: before=%d after=%d err=%v", futuresBefore, futuresAfter, err)
+	}
+	if err := o.Raw("SELECT COUNT(*) FROM spot_trade_fills").QueryRow(&fillCount); err != nil || fillCount != 1 {
+		t.Fatalf("v25 repeat changed Spot fills: count=%d err=%v", fillCount, err)
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 25 || version.SpotQuantEnable != 0 {
+		t.Fatalf("repeated v25 config invalid: %+v err=%v", version, err)
+	}
+	// Regression 06-F1: an unrelated legacy branch also marked its different
+	// Spot schema as v25. Never report success just because version==25.
+	t.Run("V25VersionReuseMissingSpotLedgerFailsClosed", func(t *testing.T) {
+		if _, err := o.Raw("DROP TABLE spot_trade_fills").Exec(); err != nil {
+			t.Fatal(err)
+		}
+		if err := VerifyV25SpotQuantSchema(o); err == nil || !strings.Contains(err.Error(), "missing spot_trade_fills") {
+			t.Fatalf("read-only schema check must reject missing ledger: %v", err)
+		}
+		err := SyncDatabase(25)
+		if err == nil || !strings.Contains(err.Error(), "missing spot_trade_fills") {
+			t.Fatalf("version==25 must not silently accept missing Spot ledger: %v", err)
+		}
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='spot_trade_fills'").QueryRow(&count); err != nil || count != 0 {
+			t.Fatalf("mismatch must not auto-create a ledger and conceal lost fills: count=%d err=%v", count, err)
+		}
+		cfg, err := utils.GetSystemConfig()
+		if err != nil || cfg.Version != 25 {
+			t.Fatalf("schema mismatch changed DB version: cfg=%+v err=%v", cfg, err)
+		}
+		if err := ensureV25SpotQuantTables(o); err != nil {
+			t.Fatalf("explicit repair fixture: %v", err)
+		}
+		if err := SyncDatabase(25); err != nil {
+			t.Fatalf("healthy schema must remain idempotent: %v", err)
+		}
+	})
+
 	// Every schema bump must advance this test's highest checked version.
 	if version.Version != appversion.DatabaseSchemaVersion {
 		t.Fatalf("migration test ends at v%d, binary requires v%d", version.Version, appversion.DatabaseSchemaVersion)

@@ -369,6 +369,11 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 			return fmt.Errorf("migrate v23 REST-confirmed fills: %w", err)
 		}
 	}
+	if oldVersion < 25 && newVersion >= 25 {
+		if err := ensureV25SpotQuantTables(o); err != nil {
+			return fmt.Errorf("migrate v25 independent spot quant schema: %w", err)
+		}
+	}
 	to, err := o.Begin()
 	if err != nil {
 		logs.Error("begin transaction error:", err)
@@ -416,6 +421,11 @@ func SyncDatabase(targetVersion int64) error {
 		return fmt.Errorf("sync database schema: %w", err)
 	}
 	logs.Info("sync database schema success")
+	if targetVersion >= 25 {
+		if err := ensureV25SpotQuantFlagTypes(orm.NewOrm()); err != nil {
+			return fmt.Errorf("verify v25 spot quant flag columns: %w", err)
+		}
+	}
 
 	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
@@ -438,10 +448,27 @@ func SyncDatabase(targetVersion int64) error {
 			return fmt.Errorf("verify v22 settlement indexes: %w", err)
 		}
 	}
+	// A reused v25 number is not proof that the Spot Quant ledger exists:
+	// a retired branch used v25 for a different physical schema. Fail closed
+	// instead of silently declaring a broken database up-to-date. Only when
+	// the v25 ledger is already present do we repair its optional indexes.
+	if targetVersion >= 25 && systemConfig.Version >= 25 && systemConfig.Version <= targetVersion {
+		if err := VerifyV25SpotQuantSchema(orm.NewOrm()); err != nil {
+			return fmt.Errorf("database v25 Spot Quant schema mismatch (possibly retired v25 schema); manual inspection required: %w", err)
+		}
+		if err := ensureV25SpotQuantTables(orm.NewOrm()); err != nil {
+			return fmt.Errorf("repair v25 Spot Quant indexes: %w", err)
+		}
+	}
 	if systemConfig.Version < targetVersion {
 		logs.Info("update database version:", systemConfig.Version, "->", targetVersion)
 		if err := UpdateDatabase(systemConfig.Version, targetVersion); err != nil {
 			return err
+		}
+		if targetVersion >= 25 {
+			if err := VerifyV25SpotQuantSchema(orm.NewOrm()); err != nil {
+				return fmt.Errorf("verify upgraded v25 Spot Quant schema: %w", err)
+			}
 		}
 		systemConfig.Version = targetVersion
 		if _, err := orm.NewOrm().Update(&systemConfig, "Version"); err != nil {

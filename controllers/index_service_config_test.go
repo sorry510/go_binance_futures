@@ -64,3 +64,41 @@ func TestApplyServiceConfigPatchUnrelatedField(t *testing.T) {
 		t.Fatalf("unexpected patch result: %#v", got)
 	}
 }
+
+func TestApplyServiceConfigPatchSpotQuant(t *testing.T) {
+	base := models.Config{ID: 1, SpotQuantEnable: 0, SpotEnable: 1, SpotNewEnable: 1, FutureEnable: 1}
+	for _, tc := range []struct {
+		body    string
+		want    int
+		wantErr bool
+	}{
+		{body: `{"spot_quant_enable":1}`, want: 1},
+		{body: `{"spot_quant_enable":0}`, want: 0},
+		{body: `{"spot_quant_enable":2}`, wantErr: true},
+		{body: `{"spot_quant_enable":-1}`, wantErr: true},
+		{body: `{"spot_quant_enable":"1"}`, wantErr: true},
+		{body: `{"spot_quant_enable":true}`, wantErr: true},
+		{body: `{"spot_quant_enable":null}`, wantErr: true},
+		{body: `{"spotQuantEnable":1}`, wantErr: true},
+		{body: `{"spot_quant_enable":1,"future_enable":1}`, wantErr: true},
+		{body: `{"spot_quant_enable":0,"spot_enable":0}`, wantErr: true},
+	} {
+		got, err := applyServiceConfigPatch(base, []byte(tc.body))
+		if tc.wantErr {
+			if err == nil || (!strings.Contains(err.Error(), "spot_quant_enable") && !strings.Contains(err.Error(), "spotQuantEnable")) {
+				t.Errorf("%s: expected spot quant validation error, got %v", tc.body, err)
+			}
+			continue
+		}
+		if err != nil || int(got.SpotQuantEnable) != tc.want {
+			t.Errorf("%s: got enabled=%d, err=%v", tc.body, got.SpotQuantEnable, err)
+		}
+		if got.ID != base.ID || got.SpotEnable != 1 || got.SpotNewEnable != 1 || got.FutureEnable != 1 {
+			t.Errorf("%s: patch changed unrelated market settings: %+v", tc.body, got)
+		}
+	}
+	got, err := applyServiceConfigPatch(base, []byte(`{"future_enable":0}`))
+	if err != nil || got.SpotQuantEnable != 0 {
+		t.Errorf("unrelated patch unexpectedly enabled spot quant: %+v, %v", got, err)
+	}
+}

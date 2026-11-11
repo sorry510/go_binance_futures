@@ -19,11 +19,18 @@ type IndexController struct {
 	web.Controller
 }
 
+// respondServiceConfig sends JSON regardless of the request Accept header.
+// Beego Context.Resp would negotiate XML/Protobuf for map payloads.
+func (ctrl *IndexController) respondServiceConfig(payload interface{}) {
+	_ = ctrl.JSONResp(payload)
+}
+
 func (ctrl *IndexController) GetServiceConfig() {
 	var debug, _ = config.String("debug")
 	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
 		logs.Error("GetSystemConfig:", err)
+		ctrl.respondServiceConfig(utils.ResJson(500, nil, "cannot load configuration"))
 		return
 	}
 
@@ -50,7 +57,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 	var futureTestAutoTradeCountLimit = systemConfig.FutureTestAutoTradeCountLimit
 	var externalLinks, _ = config.String("external::links")
 
-	ctrl.Ctx.Resp(map[string]interface{}{
+	ctrl.respondServiceConfig(map[string]interface{}{
 		"code": 200,
 		"data": map[string]interface{}{
 			"debug": debug,
@@ -66,6 +73,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"tradeFutureTestNoticeLimitMin": tradeFutureTestNoticeLimitMin,
 			"tradeFutureEnable":             tradeFutureEnable,
 			"tradeSpotEnable":               tradeSpotEnable,
+			"spot_quant_enable":             systemConfig.SpotQuantEnable,
 			"tradeDeliveryEnable":           tradeDeliveryEnable,
 			"tradeStrategyCoin":             tradeStrategyCoin,
 			"tradeNewEnable":                tradeNewEnable,
@@ -135,6 +143,20 @@ func applyServiceConfigPatch(current models.Config, payload []byte) (models.Conf
 	if len(fields) == 0 {
 		return current, fmt.Errorf("config update cannot be empty")
 	}
+	if _, wrongName := fields["spotQuantEnable"]; wrongName {
+		return current, fmt.Errorf("unknown spotQuantEnable field; use spot_quant_enable")
+	}
+	// The Spot Quant toggle must not piggyback on a patch that also changes
+	// legacy Spot or Futures settings. Keep unrelated config API behavior as-is.
+	if raw, ok := fields["spot_quant_enable"]; ok {
+		if len(fields) != 1 {
+			return current, fmt.Errorf("spot_quant_enable must be updated alone")
+		}
+		var enabled int
+		if err := json.Unmarshal(raw, &enabled); err != nil || (enabled != 0 && enabled != 1) || string(raw) == "null" {
+			return current, fmt.Errorf("spot_quant_enable must be 0 or 1")
+		}
+	}
 	if raw, ok := fields["agent_opportunity_min_confidence"]; ok {
 		var confidence float64
 		if err := json.Unmarshal(raw, &confidence); err != nil {
@@ -152,22 +174,38 @@ func applyServiceConfigPatch(current models.Config, payload []byte) (models.Conf
 	return current, nil
 }
 
+// persistServiceConfigPatch updates only the Spot toggle column for that
+// dedicated request. Existing callers editing other config fields keep their
+// historical behavior; the new toggle cannot change Futures or legacy Spot.
+func persistServiceConfigPatch(o orm.Ormer, current *models.Config, payload []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(payload, &fields); err != nil {
+		return fmt.Errorf("invalid config JSON: %w", err)
+	}
+	if _, onlySpot := fields["spot_quant_enable"]; onlySpot {
+		_, err := o.Update(current, "SpotQuantEnable")
+		return err
+	}
+	_, err := o.Update(current)
+	return err
+}
+
 func (ctrl *IndexController) EditServiceConfig() {
 	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(500, nil, "cannot load configuration"))
+		ctrl.respondServiceConfig(utils.ResJson(500, nil, "cannot load configuration"))
 		return
 	}
 	systemConfig, err = applyServiceConfigPatch(systemConfig, ctrl.Ctx.Input.RequestBody)
 	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		ctrl.respondServiceConfig(utils.ResJson(400, nil, err.Error()))
 		return
 	}
-	if _, err = orm.NewOrm().Update(&systemConfig); err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "edit failed"))
+	if err = persistServiceConfigPatch(orm.NewOrm(), &systemConfig, ctrl.Ctx.Input.RequestBody); err != nil {
+		ctrl.respondServiceConfig(utils.ResJson(400, nil, "edit failed"))
 		return
 	}
-	ctrl.Ctx.Resp(map[string]interface{}{
+	ctrl.respondServiceConfig(map[string]interface{}{
 		"code": 200,
 		"data": systemConfig,
 		"msg":  "success",
