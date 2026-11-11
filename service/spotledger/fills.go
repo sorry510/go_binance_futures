@@ -320,6 +320,26 @@ func projectPosition(q orm.QueryExecutor, p models.SpotManagedPosition) (positio
 	}
 	status := "PENDING_BUY"
 	avg := zero
+	// An unfilled BUY cycle can be closed only after ALL its intents have
+	// been explicitly resolved as terminal. In particular, an operator-
+	// confirmed never-accepted NEW order becomes REJECTED; the position
+	// then closes with zero inventory, allowing the next cycle.
+	if !bought.IsPositive() && len(orders) > 0 {
+		allTerminal := true
+		for _, o := range orders {
+			if !terminalStatus(proj.orderStatus[o.ID]) {
+				allTerminal = false
+				break
+			}
+		}
+		if allTerminal {
+			status = "CLOSED"
+			closedAt = p.ClosedAt
+			if closedAt == 0 {
+				closedAt = now()
+			}
+		}
+	}
 	if bought.IsPositive() {
 		if remaining.IsPositive() {
 			status = "OPEN"
@@ -450,6 +470,12 @@ func (l *Ledger) RecordFill(e FillEvent) (FillResult, error) {
 	}
 	if o.Symbol != e.Symbol || o.Side != e.Side || p.Symbol != e.Symbol {
 		return result, fmt.Errorf("Spot fill symbol/side mismatch with strategy-owned order")
+	}
+	// The local BUY was explicitly confirmed ABSENT and its empty cycle
+	// released. A late exchange execution is a reconciliation incident,
+	// not permission to silently reopen a CLOSED cycle alongside a new one.
+	if p.Status == "CLOSED" && o.Status == "REJECTED" && o.ExchangeOrderID == "" {
+		return result, fmt.Errorf("%w: late trade for explicitly abandoned Spot order", ErrNeedsReview)
 	}
 	if p.Status == "CLOSED" && e.TradeTime > p.ClosedAt {
 		return result, fmt.Errorf("cannot append a new trade to already-closed Spot position")
