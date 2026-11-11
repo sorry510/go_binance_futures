@@ -33,6 +33,9 @@ func setupConversationStoreTest(t *testing.T) *ORMStore {
 	if conversationStoreTestErr != nil {
 		t.Fatal(conversationStoreTestErr)
 	}
+	if err := orm.RunSyncdb("agent_conversation_test", true, false); err != nil {
+		t.Fatal(err)
+	}
 	return &ORMStore{Alias: "agent_conversation_test"}
 }
 

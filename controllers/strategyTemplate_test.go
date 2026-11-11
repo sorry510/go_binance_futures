@@ -11,7 +11,7 @@ import (
 )
 
 func TestQueryStrategyTemplatePageOrdersByIDDescending(t *testing.T) {
-	const alias = "controller_strategy_template_page_test"
+	alias := newControllerTestAlias("controller_strategy_template_page_test")
 
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
@@ -19,7 +19,7 @@ func TestQueryStrategyTemplatePageOrdersByIDDescending(t *testing.T) {
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "test.db")); err != nil {
 		t.Fatal(err)
 	}
-	orm.RegisterModel(new(models.StrategyTemplates))
+	controllerStrategyModelsOnce.Do(func() { orm.RegisterModel(new(models.StrategyTemplates)) })
 	if err := orm.RunSyncdb(alias, false, false); err != nil {
 		t.Fatal(err)
 	}

@@ -23,6 +23,14 @@ func setupORMStoreTest(t *testing.T) *ORMStore {
 		if ormStoreTestErr != nil {
 			return
 		}
+		// Beego requires a default alias during model bootstrap even when
+		// the store being tested uses a separate named database.
+		if _, err := orm.GetDB("default"); err != nil {
+			ormStoreTestErr = orm.RegisterDataBase("default", "sqlite3", "file:agent_task_default_bootstrap?mode=memory&cache=shared")
+			if ormStoreTestErr != nil {
+				return
+			}
+		}
 		orm.RegisterModel(new(models.AgentTask), new(models.AgentTaskEvent))
 		ormStoreTestErr = orm.RegisterDataBase("agent_task_test", "sqlite3", "file:agent_task_test?mode=memory&cache=shared")
 		if ormStoreTestErr != nil {
@@ -32,6 +40,9 @@ func setupORMStoreTest(t *testing.T) *ORMStore {
 	})
 	if ormStoreTestErr != nil {
 		t.Fatal(ormStoreTestErr)
+	}
+	if err := orm.RunSyncdb("agent_task_test", true, false); err != nil {
+		t.Fatal(err)
 	}
 	return &ORMStore{Alias: "agent_task_test"}
 }
@@ -165,6 +176,14 @@ func TestORMStoreMarksRunningTeamParentInterruptedAfterRestart(t *testing.T) {
 
 func TestORMStoreListsPersistedTasks(t *testing.T) {
 	store := setupORMStoreTest(t)
+	// Seed locally: the test must not rely on a previous test having run.
+	now := time.Now().UTC()
+	if err := store.Save(context.Background(), &Task{
+		ID: "list-fixture", Skill: "symbol_analysis", Status: StatusSucceeded,
+		CreatedAt: now, UpdatedAt: now,
+	}); err != nil {
+		t.Fatal(err)
+	}
 	result, err := store.List(context.Background(), ListOptions{Skill: "symbol_analysis", Page: 1, Limit: 10})
 	if err != nil {
 		t.Fatal(err)

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	"go_binance_futures/appversion"
@@ -13,6 +14,9 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+var syncDatabaseTestSetupOnce sync.Once
+var syncDatabaseTestSetupErr error
 
 func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	cwd, err := os.Getwd()
@@ -28,30 +32,69 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
-	dbPath := filepath.Join(t.TempDir(), "sync.db")
-	if err := orm.RegisterDataBase("default", "sqlite3", dbPath); err != nil {
+	syncDatabaseTestSetupOnce.Do(func() {
+		syncDatabaseTestSetupErr = orm.RegisterDataBase("default", "sqlite3", "file:s510_command_sync_db?mode=memory&cache=shared")
+		if syncDatabaseTestSetupErr != nil {
+			return
+		}
+		orm.RegisterModel(
+			new(models.Config),
+			new(models.Order),
+			new(models.FuturesOrder), new(models.FuturesPosition),
+			new(models.StrategyTemplates),
+			new(models.TestStrategyResults),
+			new(models.Symbols),
+			new(models.SpotSymbols),
+			new(models.AgentConversation), new(models.AgentConversationSkill), new(models.AgentSkill),
+			new(models.AgentTask),
+			new(models.AgentTradeProposal),
+			new(models.AgentTradeExecution),
+			new(models.AgentTradeAudit),
+			new(models.AgentOpportunity),
+			new(models.LLMConfig),
+			new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus), new(models.MarketConditionHistory),
+			new(models.MarketDataImportBatch), new(models.MarketKline1s), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate), new(models.MarketTrade),
+			new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint), new(models.AgentBacktestEquityChunk), new(models.AgentBacktestEquityPreview),
+			new(models.FuturesManagedPosition), new(models.FuturesManagedOrder), new(models.OrderHistoryAdminAudit),
+		)
+	})
+	if syncDatabaseTestSetupErr != nil {
+		t.Fatal(syncDatabaseTestSetupErr)
+	}
+
+	// Rebuild the raw SQLite fixture before each -count=N repetition.
+	// This is a dedicated in-memory test database; never touch app.conf.
+	sqlDB, err := orm.GetDB("default")
+	if err != nil {
 		t.Fatal(err)
 	}
-	orm.RegisterModel(
-		new(models.Config),
-		new(models.Order),
-		new(models.FuturesOrder), new(models.FuturesPosition),
-		new(models.StrategyTemplates),
-		new(models.TestStrategyResults),
-		new(models.Symbols),
-		new(models.SpotSymbols),
-		new(models.AgentConversation), new(models.AgentConversationSkill), new(models.AgentSkill),
-		new(models.AgentTask),
-		new(models.AgentTradeProposal),
-		new(models.AgentTradeExecution),
-		new(models.AgentTradeAudit),
-		new(models.AgentOpportunity),
-		new(models.LLMConfig),
-		new(models.AgentMarketEvent), new(models.AgentMarketEventSource), new(models.AgentMarketFact), new(models.AgentMarketSourceStatus), new(models.MarketConditionHistory),
-		new(models.MarketDataImportBatch), new(models.MarketKline1s), new(models.MarketKline1m), new(models.MarketKline3m), new(models.MarketKline5m), new(models.MarketKline15m), new(models.MarketKline30m), new(models.MarketKline1h), new(models.MarketKline2h), new(models.MarketKline4h), new(models.MarketKline6h), new(models.MarketKline8h), new(models.MarketKline12h), new(models.MarketKline1d), new(models.MarketKline3d), new(models.MarketKline1w), new(models.MarketKline1mo), new(models.MarketFundingRate), new(models.MarketTrade),
-		new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint), new(models.AgentBacktestEquityChunk), new(models.AgentBacktestEquityPreview),
-		new(models.FuturesManagedPosition), new(models.FuturesManagedOrder), new(models.OrderHistoryAdminAudit),
-	)
+	if _, err := sqlDB.Exec("PRAGMA foreign_keys=OFF"); err != nil {
+		t.Fatal(err)
+	}
+	rows, err := sqlDB.Query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var tables []string
+	for rows.Next() {
+		var table string
+		if err := rows.Scan(&table); err != nil {
+			rows.Close()
+			t.Fatal(err)
+		}
+		tables = append(tables, table)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		t.Fatal(err)
+	}
+	rows.Close()
+	for _, table := range tables {
+		name := strings.ReplaceAll(table, `"`, `""`)
+		if _, err := sqlDB.Exec(`DROP TABLE IF EXISTS "` + name + `"`); err != nil {
+			t.Fatal(err)
+		}
+	}
 
 	if err := SyncDatabase(1); err != nil {
 		t.Fatal(err)

@@ -31,6 +31,9 @@ func setupLLMStoreTest(t *testing.T) Store {
 	if llmStoreTestErr != nil {
 		t.Fatal(llmStoreTestErr)
 	}
+	if err := orm.RunSyncdb("default", true, false); err != nil {
+		t.Fatal(err)
+	}
 	return Store{}
 }
 func TestStoreMasksKeyAndSwitchesActiveConfig(t *testing.T) {
