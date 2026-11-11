@@ -57,6 +57,18 @@ func TestStage56SupervisorRecoveryStartsBeforeWSAndStopsAllWorkers(t *testing.T)
 	if got.State != LeadReconcileRequired || !ws.Running || !ws.Healthy {
 		t.Fatalf("incomplete recovery did not block Lead while observing WS: %+v %+v", got, ws)
 	}
+	// The alert consumer is asynchronous: if the context is canceled
+	// immediately after WS startup, it may exit before delivering the
+	// queued recovery fault. Assert delivery while the worker is active.
+	alertDeadline := time.Now().Add(time.Second)
+	for dispatched.Load() == 0 && time.Now().Before(alertDeadline) {
+		time.Sleep(time.Millisecond)
+	}
+	if dispatched.Load() == 0 {
+		cancel()
+		<-done
+		t.Fatal("recovery fault did not reach alert queue")
+	}
 	cancel()
 	select {
 	case <-done:
@@ -68,9 +80,6 @@ func TestStage56SupervisorRecoveryStartsBeforeWSAndStopsAllWorkers(t *testing.T)
 	}
 	if broker.submits != 0 {
 		t.Fatal("run unexpectedly issued a Binance order")
-	}
-	if dispatched.Load() == 0 {
-		t.Fatal("recovery fault did not reach alert queue")
 	}
 }
 func TestStage56PreSnapshotWSMessageForcesResync(t *testing.T) {

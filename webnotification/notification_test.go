@@ -1,7 +1,10 @@
 package webnotification
 
 import (
+	"fmt"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"go_binance_futures/models"
@@ -10,16 +13,25 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var notificationDefaultOnce sync.Once
+var notificationDefaultErr error
+var notificationMigrationSeq atomic.Uint64
+
 func TestPublishWithOptionsPersistsStructuredLiquidationFields(t *testing.T) {
 	const alias = "default"
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
-	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "test.db")); err != nil {
-		t.Fatal(err)
+	notificationDefaultOnce.Do(func() {
+		notificationDefaultErr = orm.RegisterDataBase(alias, "sqlite3", "file:s510_webnotification_default?mode=memory&cache=shared")
+		if notificationDefaultErr == nil {
+			orm.RegisterModel(new(models.Notification))
+		}
+	})
+	if notificationDefaultErr != nil {
+		t.Fatal(notificationDefaultErr)
 	}
-	orm.RegisterModel(new(models.Notification))
-	if err := orm.RunSyncdb(alias, false, false); err != nil {
+	if err := orm.RunSyncdb(alias, true, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -48,7 +60,7 @@ func TestPublishWithOptionsPersistsStructuredLiquidationFields(t *testing.T) {
 		t.Fatalf("unexpected structured notification: %+v", stored)
 	}
 
-	const migrationAlias = "webnotification_existing_schema"
+	migrationAlias := fmt.Sprintf("webnotification_existing_schema_%d", notificationMigrationSeq.Add(1))
 	if err := orm.RegisterDataBase(migrationAlias, "sqlite3", filepath.Join(t.TempDir(), "existing.db")); err != nil {
 		t.Fatal(err)
 	}

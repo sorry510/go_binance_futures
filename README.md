@@ -709,6 +709,7 @@ go build -o go_binance_futures
 ### 测试
 ```
 ./scripts/test-go.sh
+./scripts/test-go.sh -count=5 -p=2 -timeout=120s
 ```
 
 ### 打包

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -14,8 +16,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var symbolHistoryModelsOnce sync.Once
+var symbolHistoryAliasSeq atomic.Uint64
+
 func TestHistoryServicePersistsAndListsAnalysis(t *testing.T) {
-	const alias = "symbol_analysis_history_test"
+	alias := fmt.Sprintf("symbol_analysis_history_test_%d", symbolHistoryAliasSeq.Add(1))
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
@@ -23,7 +28,7 @@ func TestHistoryServicePersistsAndListsAnalysis(t *testing.T) {
 	if err := orm.RegisterDataBase(alias, "sqlite3", dataSource); err != nil {
 		t.Fatal(err)
 	}
-	orm.RegisterModel(new(models.SymbolAnalysisHistory))
+	symbolHistoryModelsOnce.Do(func() { orm.RegisterModel(new(models.SymbolAnalysisHistory)) })
 	if err := orm.RunSyncdb(alias, false, false); err != nil {
 		t.Fatal(err)
 	}

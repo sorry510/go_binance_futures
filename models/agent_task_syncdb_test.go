@@ -2,8 +2,11 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -108,15 +111,24 @@ const legacyAgentTaskEventDDL = `CREATE TABLE agent_task_events (
 	event_time integer
 )`
 
+var agentTaskMigrationOnce sync.Once
+var agentTaskMigrationSeq atomic.Uint64
+
 func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
+	alias := fmt.Sprintf("agent_task_migration_test_%d", agentTaskMigrationSeq.Add(1))
 	path := filepath.Join(t.TempDir(), "legacy.db")
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
-	if err := orm.RegisterDataBase("default", "sqlite3", path); err != nil {
+	if _, err := orm.GetDB("default"); err != nil {
+		if err := orm.RegisterDataBase("default", "sqlite3", "file:agent_task_migration_bootstrap?mode=memory&cache=shared"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := orm.RegisterDataBase(alias, "sqlite3", path); err != nil {
 		t.Fatal(err)
 	}
-	db, err := orm.GetDB("default")
+	db, err := orm.GetDB(alias)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,8 +175,10 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentConversation), new(AgentConversationSkill), new(AgentConversationMessage), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace), new(AgentOpportunity), new(AgentMarketEvent), new(AgentMarketEventSource), new(AgentMarketFact), new(AgentMarketSourceStatus), new(MarketConditionHistory), new(MarketDataImportBatch), new(MarketKline1s), new(MarketKline1m), new(MarketKline3m), new(MarketKline5m), new(MarketKline15m), new(MarketKline30m), new(MarketKline1h), new(MarketKline2h), new(MarketKline4h), new(MarketKline6h), new(MarketKline8h), new(MarketKline12h), new(MarketKline1d), new(MarketKline3d), new(MarketKline1w), new(MarketKline1mo), new(MarketFundingRate), new(MarketTrade), new(AgentBacktestDataset), new(AgentBacktestRun), new(AgentBacktestTrade), new(AgentBacktestEvent), new(AgentBacktestEquityPoint), new(AgentBacktestEquityChunk), new(AgentBacktestEquityPreview), new(AgentMemory), new(AgentWorkflowRun), new(AgentObservation), new(AgentChangeEvent), new(AgentTradeProposal), new(AgentTradeExecution), new(AgentTradeAudit), new(LLMConfig), new(LLMRouterSetting))
-	if err := orm.RunSyncdb("default", false, false); err != nil {
+	agentTaskMigrationOnce.Do(func() {
+		orm.RegisterModel(new(AgentTask), new(AgentTaskEvent), new(AgentConversation), new(AgentConversationSkill), new(AgentConversationMessage), new(AgentSkill), new(AgentSkillVersion), new(AgentSkillPermission), new(AgentMCPServer), new(AgentMCPTool), new(AgentMCPResource), new(AgentMCPPrompt), new(AgentMCPPermission), new(AgentMCPSecret), new(AgentMCPOAuthState), new(AgentAlertPipelineTrace), new(AgentOpportunity), new(AgentMarketEvent), new(AgentMarketEventSource), new(AgentMarketFact), new(AgentMarketSourceStatus), new(MarketConditionHistory), new(MarketDataImportBatch), new(MarketKline1s), new(MarketKline1m), new(MarketKline3m), new(MarketKline5m), new(MarketKline15m), new(MarketKline30m), new(MarketKline1h), new(MarketKline2h), new(MarketKline4h), new(MarketKline6h), new(MarketKline8h), new(MarketKline12h), new(MarketKline1d), new(MarketKline3d), new(MarketKline1w), new(MarketKline1mo), new(MarketFundingRate), new(MarketTrade), new(AgentBacktestDataset), new(AgentBacktestRun), new(AgentBacktestTrade), new(AgentBacktestEvent), new(AgentBacktestEquityPoint), new(AgentBacktestEquityChunk), new(AgentBacktestEquityPreview), new(AgentMemory), new(AgentWorkflowRun), new(AgentObservation), new(AgentChangeEvent), new(AgentTradeProposal), new(AgentTradeExecution), new(AgentTradeAudit), new(LLMConfig), new(LLMRouterSetting))
+	})
+	if err := orm.RunSyncdb(alias, false, false); err != nil {
 		t.Fatalf("RunSyncdb must upgrade an existing database with rows: %v", err)
 	}
 
@@ -267,7 +281,7 @@ func TestAgentTaskSyncdbUpgradesExistingSQLiteRows(t *testing.T) {
 		t.Fatalf("legacy events lost during sync: %d", eventCount)
 	}
 
-	o := orm.NewOrmUsingDB("default")
+	o := orm.NewOrmUsingDB(alias)
 	legacy := AgentTask{ID: "legacy-task"}
 	if err := o.Read(&legacy); err != nil {
 		t.Fatalf("beego ORM must read NULL V2 text fields as empty strings: %v", err)

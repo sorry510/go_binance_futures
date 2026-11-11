@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"strings"
+	"sync"
 	"testing"
 
 	"go_binance_futures/agent/governance"
@@ -13,14 +14,21 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var skillGovernanceDBOnce sync.Once
+var skillGovernanceDBErr error
+
 func setupSkillGovernanceTest(t *testing.T) {
 	t.Helper()
-	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
-		t.Fatal(err)
-	}
-	orm.RegisterModel(new(models.AgentSkill))
-	if err := orm.RegisterDataBase("default", "sqlite3", "file:agent_app_skill?mode=memory&cache=shared"); err != nil {
-		t.Fatal(err)
+	skillGovernanceDBOnce.Do(func() {
+		if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
+			skillGovernanceDBErr = err
+			return
+		}
+		orm.RegisterModel(new(models.AgentSkill))
+		skillGovernanceDBErr = orm.RegisterDataBase("default", "sqlite3", "file:agent_app_skill?mode=memory&cache=shared")
+	})
+	if skillGovernanceDBErr != nil {
+		t.Fatal(skillGovernanceDBErr)
 	}
 	if err := orm.RunSyncdb("default", true, false); err != nil {
 		t.Fatal(err)
