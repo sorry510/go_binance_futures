@@ -2,21 +2,36 @@ package logcleanup
 
 import (
 	"context"
-	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/beego/beego/v2/client/orm"
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var cleanupDefaultOnce sync.Once
+var cleanupDefaultErr error
+
 func TestCleanupUsesStrictLogWhitelist(t *testing.T) {
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
-	if err := orm.RegisterDataBase("default", "sqlite3", filepath.Join(t.TempDir(), "cleanup.db")); err != nil {
-		t.Fatal(err)
+	cleanupDefaultOnce.Do(func() {
+		cleanupDefaultErr = orm.RegisterDataBase("default", "sqlite3", "file:s510_logcleanup_default?mode=memory&cache=shared")
+	})
+	if cleanupDefaultErr != nil {
+		t.Fatal(cleanupDefaultErr)
 	}
 	o := orm.NewOrm()
+	// No test may inherit rows/tables from an earlier -count=N repetition.
+	for _, target := range targets {
+		if _, err := o.Raw("DROP TABLE IF EXISTS " + target.Table).Exec(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := o.Raw("DROP TABLE IF EXISTS agent_trade_audits").Exec(); err != nil {
+		t.Fatal(err)
+	}
 	for _, target := range targets {
 		if _, err := o.Raw("CREATE TABLE " + target.Table + " (id INTEGER PRIMARY KEY AUTOINCREMENT, " + target.TimeColumn + " INTEGER NOT NULL)").Exec(); err != nil {
 			t.Fatal(err)

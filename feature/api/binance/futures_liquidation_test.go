@@ -3,7 +3,7 @@ package binance
 import (
 	"database/sql/driver"
 	"errors"
-	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -13,15 +13,33 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var binanceFuturesTestModelsOnce sync.Once
+
+func registerBinanceFuturesTestModels() {
+	binanceFuturesTestModelsOnce.Do(func() {
+		orm.RegisterModel(new(models.FuturesLiquidationOrder),
+			new(models.FuturesOrder), new(models.FuturesPosition),
+			new(models.Symbols), new(models.FuturesManagedOrder))
+	})
+}
+
+var binanceFuturesDefaultOnce sync.Once
+var binanceFuturesDefaultErr error
+
 func TestCleanupOldFuturesLiquidationOrdersDeletesInBatches(t *testing.T) {
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
-	if err := orm.RegisterDataBase("default", "sqlite3", filepath.Join(t.TempDir(), "test.db")); err != nil {
-		t.Fatal(err)
+	binanceFuturesDefaultOnce.Do(func() {
+		if _, err := orm.GetDB("default"); err != nil {
+			binanceFuturesDefaultErr = orm.RegisterDataBase("default", "sqlite3", "file:s510_binance_liquidation_default?mode=memory&cache=shared")
+		}
+	})
+	if binanceFuturesDefaultErr != nil {
+		t.Fatal(binanceFuturesDefaultErr)
 	}
-	orm.RegisterModel(new(models.FuturesLiquidationOrder))
-	if err := orm.RunSyncdb("default", false, false); err != nil {
+	registerBinanceFuturesTestModels()
+	if err := orm.RunSyncdb("default", true, false); err != nil {
 		t.Fatal(err)
 	}
 

@@ -1,9 +1,11 @@
 package tradefills
 
 import (
+	"fmt"
 	"math/big"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"go_binance_futures/models"
@@ -14,17 +16,26 @@ import (
 )
 
 var reviewRegisterModelsOnce sync.Once
+var reviewDefaultRegisterOnce sync.Once
+var reviewDefaultRegisterErr error
+var reviewRESTAliases atomic.Uint64
 
 func TestStage012ImmutableDedupAlgoAndAccountScope(t *testing.T) {
 	_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
-	if err := orm.RegisterDataBase("default", "sqlite3", filepath.Join(t.TempDir(), "fills.db")); err != nil {
-		t.Fatal(err)
+	reviewDefaultRegisterOnce.Do(func() {
+		reviewDefaultRegisterErr = orm.RegisterDataBase("default", "sqlite3", "file:s510_tradefills_default?mode=memory&cache=shared")
+	})
+	if reviewDefaultRegisterErr != nil {
+		t.Fatal(reviewDefaultRegisterErr)
 	}
 	reviewRegisterModelsOnce.Do(func() { orm.RegisterModel(new(models.FuturesManagedPosition), new(models.FuturesManagedOrder)) })
-	if err := orm.RunSyncdb("default", false, false); err != nil {
+	if err := orm.RunSyncdb("default", true, false); err != nil {
 		t.Fatal(err)
 	}
 	o := orm.NewOrm()
+	if _, err := o.Raw("DROP TABLE IF EXISTS futures_trade_fills").Exec(); err != nil {
+		t.Fatal(err)
+	}
 	const create = SchemaDDL
 	if _, err := o.Raw(create).Exec(); err != nil {
 		t.Fatal(err)
@@ -123,7 +134,7 @@ func TestStage012ImmutableDedupAlgoAndAccountScope(t *testing.T) {
 func TestStageReviewRESTAuthoritativeAndMissingWSCommission(t *testing.T) {
 	_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	reviewRegisterModelsOnce.Do(func() { orm.RegisterModel(new(models.FuturesManagedPosition), new(models.FuturesManagedOrder)) })
-	const alias = "stage_review_rest_confirmed"
+	alias := fmt.Sprintf("stage_review_rest_confirmed_%d", reviewRESTAliases.Add(1))
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "review-rest.db")); err != nil {
 		t.Fatal(err)
 	}
