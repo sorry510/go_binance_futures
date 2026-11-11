@@ -51,10 +51,10 @@ type SpotTradeFill struct {
 }
 
 type SpotStrategyTemplate struct {
-	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	Technology string `json:"technology"`
-	Strategy   string `json:"strategy"`
-	CreateTime int64  `json:"create_time"`
-	UpdateTime int64  `json:"update_time"`
+	ID         int64  `orm:"column(id)" json:"id"`
+	Name       string `orm:"column(name)" json:"name"`
+	Technology string `orm:"column(technology)" json:"technology"`
+	Strategy   string `orm:"column(strategy)" json:"strategy"`
+	CreateTime int64  `orm:"column(create_time)" json:"create_time"`
+	UpdateTime int64  `orm:"column(update_time)" json:"update_time"`
 }

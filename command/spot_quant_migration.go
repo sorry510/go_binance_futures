@@ -201,9 +201,11 @@ func ensureV25SpotQuantFlagTypes(o orm.Ormer) error {
 	return nil
 }
 
-// VerifyV25SpotQuantSchema is read-only. It is also called at application
-// startup: matching config.version alone is not sufficient to start a v25
-// binary, since the retired Spot branch used the same version number.
+// VerifyV25SpotQuantSchema is read-only and is called by the explicit
+// `sync db` command. The normal runtime startup does NOT call it: startup
+// only checks the schema version number, per the project's simplified
+// startup policy. Deployment must run the schema preflight before launching
+// a binary because an older, incompatible branch also used version v25.
 func VerifyV25SpotQuantSchema(o orm.Ormer) error {
 	required := []struct {
 		table   string
