@@ -108,8 +108,16 @@ func TestSmartLocalV2RoundRobinScopesAreIndependent(t *testing.T) {
 		{Rank: 5, Symbol: "EUSDT"},
 		{Rank: 6, Symbol: "FUSDT"},
 	}
-	tradeScope := "trade-test-scope"
-	testScope := "paper-test-scope"
+	// Each repetition must begin with its own scope and rotation state.
+	scopeSuffix := t.TempDir()
+	tradeScope := "trade-test-scope-" + scopeSuffix
+	testScope := "paper-test-scope-" + scopeSuffix
+	t.Cleanup(func() {
+		smartLocalV2RoundRobinMu.Lock()
+		delete(smartLocalV2RoundRobins, tradeScope)
+		delete(smartLocalV2RoundRobins, testScope)
+		smartLocalV2RoundRobinMu.Unlock()
+	})
 
 	trade1, stateTrade1 := NextSmartLocalV2BatchFor(tradeScope, pool, 5)
 	test1, stateTest1 := NextSmartLocalV2BatchFor(testScope, pool, 5)

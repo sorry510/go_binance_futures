@@ -2,8 +2,10 @@ package market
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"go_binance_futures/models"
@@ -14,28 +16,39 @@ import (
 
 var marketHistoryTestOnce sync.Once
 var marketHistoryTestErr error
+var marketHistoryTestSeq atomic.Uint64
 
-func setupMarketHistoryTest(t *testing.T) {
+func setupMarketHistoryTest(t *testing.T) string {
 	t.Helper()
 	marketHistoryTestOnce.Do(func() {
-		if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
-			marketHistoryTestErr = err
+		marketHistoryTestErr = orm.RegisterDriver("sqlite3", orm.DRSqlite)
+		if marketHistoryTestErr != nil {
 			return
 		}
-		orm.RegisterModel(new(models.Config), new(models.MarketConditionHistory))
-		marketHistoryTestErr = orm.RegisterDataBase("market_history_test", "sqlite3", filepath.Join(t.TempDir(), "market-history.db"))
-		if marketHistoryTestErr == nil {
-			marketHistoryTestErr = orm.RunSyncdb("market_history_test", true, false)
+		if _, err := orm.GetDB("default"); err != nil {
+			marketHistoryTestErr = orm.RegisterDataBase("default", "sqlite3", "file:market_history_bootstrap?mode=memory&cache=shared")
+			if marketHistoryTestErr != nil {
+				return
+			}
 		}
+		orm.RegisterModel(new(models.Config), new(models.MarketConditionHistory))
 	})
 	if marketHistoryTestErr != nil {
 		t.Fatal(marketHistoryTestErr)
 	}
+	alias := fmt.Sprintf("market_history_test_%d", marketHistoryTestSeq.Add(1))
+	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "market-history.db")); err != nil {
+		t.Fatal(err)
+	}
+	if err := orm.RunSyncdb(alias, false, false); err != nil {
+		t.Fatal(err)
+	}
+	return alias
 }
 
 func TestSaveMarketConditionAppendsHistoryForEverySave(t *testing.T) {
-	setupMarketHistoryTest(t)
-	o := orm.NewOrmUsingDB("market_history_test")
+	alias := setupMarketHistoryTest(t)
+	o := orm.NewOrmUsingDB(alias)
 	_, _ = o.Raw("DELETE FROM market_condition_histories").Exec()
 	_, _ = o.Raw("DELETE FROM config").Exec()
 	cfg := models.Config{ID: 1, MarketCondition: 3}

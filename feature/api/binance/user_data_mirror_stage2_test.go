@@ -1,8 +1,10 @@
 package binance
 
 import (
+	"fmt"
 	"go_binance_futures/service/tradefills"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 
 	"go_binance_futures/models"
@@ -12,18 +14,20 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var stage2UserDataAliasSeq atomic.Uint64
+
 func TestStage2UserDataMirrorIsolatedForSameSymbolAndOrderID(t *testing.T) {
 	_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	if _, err := orm.GetDB("default"); err != nil {
-		if err := orm.RegisterDataBase("default", "sqlite3", filepath.Join(t.TempDir(), "default.db")); err != nil {
+		if err := orm.RegisterDataBase("default", "sqlite3", "file:s510_stage2_bootstrap_default?mode=memory&cache=shared"); err != nil {
 			t.Fatal(err)
 		}
 	}
-	alias := "stage2_user_data_mirror"
+	alias := fmt.Sprintf("stage2_user_data_mirror_%d", stage2UserDataAliasSeq.Add(1))
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "mirror.db")); err != nil {
 		t.Fatal(err)
 	}
-	orm.RegisterModel(new(models.FuturesOrder), new(models.FuturesPosition), new(models.Symbols), new(models.FuturesManagedOrder))
+	registerBinanceFuturesTestModels()
 	if err := orm.RunSyncdb(alias, false, false); err != nil {
 		t.Fatal(err)
 	}

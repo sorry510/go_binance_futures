@@ -2,6 +2,8 @@ package coin
 
 import (
 	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -12,10 +14,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var stage014CoinModelsOnce sync.Once
+var stage014CoinAliases atomic.Uint64
+
 func TestStage014LegacyCoinSelectorUsesManagedCloseWithAccountBoundary(t *testing.T) {
 	_ = orm.RegisterDriver("sqlite3", orm.DRSqlite)
-	orm.RegisterModel(new(models.FuturesManagedOrder))
-	alias := "s510_stage014_coin"
+	stage014CoinModelsOnce.Do(func() { orm.RegisterModel(new(models.FuturesManagedOrder)) })
+	alias := fmt.Sprintf("s510_stage014_coin_%d", stage014CoinAliases.Add(1))
 	if err := orm.RegisterDataBase(alias, "sqlite3", fmt.Sprintf("file:%s?mode=memory&cache=shared", alias)); err != nil {
 		t.Fatal(err)
 	}

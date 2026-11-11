@@ -32,6 +32,9 @@ func setupFeatureTestORM(t *testing.T) {
 	if featureTestORMError != nil {
 		t.Fatal(featureTestORMError)
 	}
+	if err := orm.RunSyncdb("default", true, false); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestCreateTestResultAllowsOnlyOneOpenRowPerSymbol(t *testing.T) {

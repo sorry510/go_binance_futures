@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -16,19 +16,25 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var healthDBOnce sync.Once
+var healthDBErr error
+
 func setupHealthDB(t *testing.T, now time.Time) orm.Ormer {
 	t.Helper()
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
-	orm.RegisterModel(
-		new(models.Config), new(models.Symbols), new(models.AgentMarketSourceStatus),
-		new(models.AgentMCPServer), new(models.LLMConfig), new(models.AgentObservation),
-		new(models.AgentTask), new(models.AgentTradeProposal), new(models.FuturesManagedPosition),
-		new(models.FuturesManagedOrder),
-	)
-	if err := orm.RegisterDataBase("default", "sqlite3", filepath.Join(t.TempDir(), "health.db")); err != nil {
-		t.Fatal(err)
+	healthDBOnce.Do(func() {
+		orm.RegisterModel(
+			new(models.Config), new(models.Symbols), new(models.AgentMarketSourceStatus),
+			new(models.AgentMCPServer), new(models.LLMConfig), new(models.AgentObservation),
+			new(models.AgentTask), new(models.AgentTradeProposal), new(models.FuturesManagedPosition),
+			new(models.FuturesManagedOrder),
+		)
+		healthDBErr = orm.RegisterDataBase("default", "sqlite3", "file:s510_systemhealth_default?mode=memory&cache=shared")
+	})
+	if healthDBErr != nil {
+		t.Fatal(healthDBErr)
 	}
 	if err := orm.RunSyncdb("default", true, false); err != nil {
 		t.Fatal(err)

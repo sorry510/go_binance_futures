@@ -30,6 +30,9 @@ func setupSkillStoreTest(t *testing.T) Store {
 	if skillStoreTestErr != nil {
 		t.Fatal(skillStoreTestErr)
 	}
+	if err := orm.RunSyncdb("default", true, false); err != nil {
+		t.Fatal(err)
+	}
 	return Store{}
 }
 

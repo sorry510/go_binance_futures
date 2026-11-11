@@ -34,7 +34,7 @@ func TestListenSymbolOptionsFilterPersistedPairs(t *testing.T) {
 }
 
 func TestLocalListenSymbolOptionsReadFromSeparateTables(t *testing.T) {
-	const alias = "listen_symbol_options_test"
+	alias := newControllerTestAlias("listen_symbol_options_test")
 	if err := orm.RegisterDriver("sqlite3", orm.DRSqlite); err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestLocalListenSymbolOptionsReadFromSeparateTables(t *testing.T) {
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "symbols.db")); err != nil {
 		t.Fatal(err)
 	}
-	orm.RegisterModel(new(models.Symbols), new(models.SpotSymbols))
+	controllerSymbolModelsOnce.Do(func() { orm.RegisterModel(new(models.Symbols), new(models.SpotSymbols)) })
 	if err := orm.RunSyncdb(alias, false, false); err != nil {
 		t.Fatal(err)
 	}
