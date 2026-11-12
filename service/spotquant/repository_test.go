@@ -3,8 +3,10 @@ package spotquant
 import (
 	"encoding/json"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"go_binance_futures/models"
@@ -16,6 +18,7 @@ import (
 const testLongRule = `[{"name":"buy entry","type":"long","code":"NowPrice > 0","enable":true}]`
 
 var registerSpotQuantTestModel sync.Once
+var spotQuantTestAliasCounter atomic.Uint64
 
 func testStore(t *testing.T) orm.Ormer {
 	t.Helper()
@@ -27,7 +30,10 @@ func testStore(t *testing.T) orm.Ormer {
 			t.Fatal(err)
 		}
 	}
-	alias := "spot_quant_062_" + strings.ReplaceAll(t.Name(), "/", "_")
+	// ORM aliases survive for the lifetime of the test process. Give every
+	// invocation a unique alias so -count=N reliably repeats this suite.
+	alias := "spot_quant_062_" + strings.ReplaceAll(t.Name(), "/", "_") +
+		"_" + strconv.FormatUint(spotQuantTestAliasCounter.Add(1), 10)
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "spot.db")); err != nil {
 		t.Fatal(err)
 	}
@@ -262,7 +268,6 @@ func strconvQuote(value string) string {
 // accept Futures-only variables even in disabled rules or imported templates.
 func TestStage062SpotRejectFuturesOnlyIdentifiers(t *testing.T) {
 	for _, code := range []string{
-		"ROI > 5",
 		"FundingRate.Data[0] > 0",
 		"Position.Leverage > 1",
 		"Positions[0].MarginType == \"CROSSED\"",
@@ -274,6 +279,28 @@ func TestStage062SpotRejectFuturesOnlyIdentifiers(t *testing.T) {
 			if _, err := ParseRules(string(payload)); err == nil || !strings.Contains(err.Error(), "futures-only") {
 				t.Errorf("allowed futures-only code=%q enabled=%v: %v", code, enabled, err)
 			}
+		}
+	}
+	// 06-7-1: Spot close rules may access Spot (not Futures) ROI
+	// and supported position values. They remain unavailable to entries.
+	for _, code := range []string{
+		"ROI > 5",
+		"Position.EntryPrice < Position.MarkPrice",
+		"len(Positions) == 1",
+		"Position.UnrealizedProfit > 0",
+	} {
+		payload, _ := json.Marshal([]Rule{{Name: "close", Type: "close_long", Code: code, Enable: true}})
+		if _, err := ParseRules(string(payload)); err != nil {
+			t.Fatalf("rejected Spot-specific close expression %q: %v", code, err)
+		}
+	}
+	for _, code := range []string{
+		"ROI > 5", "Position.Amount > 0", "OpenStrategyHash == \"x\"",
+		"Position[\"Leverage\"] == 1", "Positions[0].MarginType == \"CROSSED\"",
+	} {
+		payload, _ := json.Marshal([]Rule{{Name: "bad", Type: "long", Code: code, Enable: true}})
+		if _, err := ParseRules(string(payload)); err == nil {
+			t.Fatalf("allowed entry-only or futures expression %q", code)
 		}
 	}
 	// AST validation must not block string literals containing field names.
@@ -290,5 +317,30 @@ func TestStage062SpotRejectFuturesOnlyIdentifiers(t *testing.T) {
 	bad := []byte(`{"name":"bad-funding","technology":{},"strategy":[{"name":"x","type":"long","enable":false,"code":"FundingRate > 0"}]}`)
 	if _, _, err := ImportTemplate(o, bad); err == nil {
 		t.Fatal("Futures-only rule entered Spot templates through JSON import")
+	}
+}
+
+// Review F7: permit Spot UnrealizedProfit only when rooted in Position or
+// Positions, not as a blanket exception for every future DSL object.
+func TestReview0671SpotUnrealizedProfitHostScope(t *testing.T) {
+	for _, tc := range []struct {
+		code  string
+		valid bool
+	}{
+		{"Position.UnrealizedProfit > 0", true},
+		{`Position["UnrealizedProfit"] > 0`, true},
+		{`Positions[0].UnrealizedProfit > 0`, true},
+		{`Positions[0]["UnrealizedProfit"] > 0`, true},
+		{"Other.UnrealizedProfit > 0", false},
+		{`Other["UnrealizedProfit"] > 0`, false},
+		{"Position.Leverage > 0", false},
+		{`Positions[0]["MarginType"] == "CROSSED"`, false},
+	} {
+		code := tc.code
+		payload, _ := json.Marshal([]Rule{{Name: "close", Type: "close_long", Enable: true, Code: code}})
+		_, err := ParseRules(string(payload))
+		if (err == nil) != tc.valid {
+			t.Fatalf("code %s: valid=%v error=%v", code, tc.valid, err)
+		}
 	}
 }
