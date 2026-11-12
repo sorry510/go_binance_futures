@@ -3,6 +3,7 @@ package test
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -16,8 +17,21 @@ import (
 
 func init() {
 	_, file, _, _ := runtime.Caller(0)
-	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
-	beego.TestBeegoInit(apppath)
+	apppath, _ := filepath.Abs(filepath.Join(filepath.Dir(file), ".."))
+	// TestBeegoInit hardcodes conf/app.conf and panics in clean CI, where
+	// the private runtime config must NOT be checked in. Use the tracked,
+	// credential-free example only when the private config is absent.
+	configPath := filepath.Join(apppath, "conf", "app.conf")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		configPath = filepath.Join(apppath, "conf", "app.conf.example")
+	}
+	if _, err := os.Stat(configPath); err != nil {
+		panic(err)
+	}
+	if err := os.Chdir(apppath); err != nil {
+		panic(err)
+	}
+	beego.InitBeegoBeforeTest(configPath)
 	// The login controller binds the request body, which beego only retains
 	// when this option is on. main.go sets the same flag at startup.
 	beego.BConfig.CopyRequestBody = true

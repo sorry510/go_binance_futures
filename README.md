@@ -35,7 +35,7 @@
 ./go_binance_futures
 ```
 
-**当前二进制数据库 Schema 要求 v24**（唯一代码真源：`appversion.DatabaseSchemaVersion`）。本机 MySQL 5.6 隔离库已验证新建与重复 `sync db`；**生产 MySQL 8 的真实结构、性能、旧 Main 数据无损升级及 Binance 交易 Gate 尚未验证**，不得以本地 Mock/SQLite/空表结果替代。
+**当前二进制数据库 Schema 要求 v25**（以 `appversion.DatabaseSchemaVersion` 为唯一代码真源；发布前还须核对 v25 物理表结构，不能只检查版本号）。本机 MySQL 5.6 隔离库已验证新建与重复 `sync db`；**生产 MySQL 8 的真实结构、性能、旧 Main 数据无损升级及 Binance 交易 Gate 尚未验证**，不得以本地 Mock/SQLite/空表结果替代。
 
 正常启动**不会再自动执行数据库 Schema 或版本迁移**。如果数据库尚未初始化，或数据库版本低于当前二进制要求，程序会提示先运行 `go_binance_futures sync db`。生产环境升级时建议先备份数据库，并在服务停止状态下执行同步命令。
 
@@ -132,7 +132,7 @@ BINANCE_ORDER_HISTORY_T0_LEAD_MS=<已批准的 Lead 启用 UTC Unix 毫秒>
 
 ## 合约带单（Lead 账户，Stage 6 / Stage 7-1～7-4）
 
-> **当前交付状态：管理界面和独立账户基础设施已完成代码与 Mock/Race 验证；真实 Lead Portfolio、MySQL 8 Schema v24、私有 WS、Algo 条件单和资金交易尚未完成真实环境 Gate。Lead 实盘执行仍锁定。** 这不是普通 AI 受控交易，也不是复制跟随者成交的保证。
+> **当前交付状态：管理界面和独立账户基础设施已完成代码与 Mock/Race 验证；真实 Lead Portfolio、MySQL 8 Schema v25 物理结构、私有 WS、Algo 条件单和资金交易尚未完成真实环境 Gate。Lead 实盘执行仍锁定。** 这不是普通 AI 受控交易，也不是复制跟随者成交的保证。
 
 访问 `合约交易 → 合约带单`（`/futures/lead`）。页面采用六个 Card：
 
@@ -162,7 +162,7 @@ BINANCE_LEAD_AUDIT_FILE=/private/lead/operations.jsonl
 - `BINANCE_LEAD_CREDENTIAL_KEY` 必须是**32 个随机字节的标准 Base64 编码**，由运维人员安全生成并长期保存。丢失或更换主密钥会导致旧加密凭证无法解密。
 - 三个文件路径均须为**仓库外的绝对路径**；父目录需由部署用户控制，权限建议 `0700`，目标文件为 `0600`，不允许符号链接。应用不会隐式创建私有目录或生成主密钥。
 - 配好上述环境并部署新版后端后，再通过 UI 保存 Lead 专用凭证、查看只读验证结果和保存独立风险限额。未配置存储时，凭证/配置保存会安全拒绝，**不应修改 `app.conf` 来绕过检查**。
-- 应在备份、停机并确认目标数据库版本/数据后，才由人工单独执行 `./go_binance_futures sync db`。当前代码要求 **Schema v24**（以 `appversion.DatabaseSchemaVersion` 为准）；离线 SQLite/Mock PASS **不能证明实际 MySQL 8 已完成迁移**。
+- 应在备份、停机并确认目标数据库版本/数据后，才由人工单独执行 `./go_binance_futures sync db`。当前代码要求 **Schema v25**（以 `appversion.DatabaseSchemaVersion` 为准；生产 v25 物理结构须单独只读核验）；离线 SQLite/Mock PASS **不能证明实际 MySQL 8 已完成迁移**。
 
 #### 只读观察器：明确选择才会连接真实 Binance
 
