@@ -1,0 +1,18 @@
+# 2026-11-12 06-ALL frontend source snapshot; not a Git commit or reproducible release
+# Frontend HEAD: 89f15bdd2034121dd57f3e0184367a7c62ae25a0
+# All changed/untracked frontend working-tree files at inspection time.
+# hash  path
+ff2a01ca574ad1a2f5b881b3110e5d3572001350753999d6002fa541b8c0f0d2  locales/en.yaml
+d6e9741db160fe687095aabf1cc95846aafda195c3edc2c2bfeea10704756698  locales/zh-CN.yaml
+fcd6baa1d01109cb87022e228f346a53083faeca78abab420bd53a6dc4818bfb  src/api/order.ts
+4ab4916a8ac33ffdb3abd83829b840d7c38b7355d7e09ca84dc18dc1527fd1fa  src/api/spotQuant.ts
+310fe931abc3e1fdf476824cd6dcf9b35f171bf535408e51917886a1e9f8ccc6  src/composables/useStrategyTemplateOptions.ts
+e792da48d937d5846789fa063c94923b89a8cc92aca963f25b547c9d75f105ab  src/router/modules/spotQuant.ts
+93bb26c145357af9ff54416f1dfbb93d075d28e01dc5f572c2e8a965633e406e  src/views/dashboard/configShow.vue
+59482bcd9e6115c18b967653313b87a2e7c19f44483e5b4f0966b14b9ea6fbe1  src/views/order/index.vue
+5b91c882df8910d71fbcdd7d116290c146d222796100bbc8f6f4f93992eb4808  src/views/spotQuant/account.vue
+3288cd224196727b6737d40a77d752083d531da5df03539a06a6ea84ce63856e  src/views/spotQuant/controlledTrade.vue
+f45e89ff4bd5c52b68efb527616c89987c953daaac3bfb37f1679a33dd4b9af3  src/views/spotQuant/format.ts
+c58943f9479df41b078d56a0fb729c0d95e583bc814d3939d524bb96e12a1b88  src/views/spotQuant/positionDetail.vue
+58c1d084b165396262573dca6bcdb7b63ca3551fd59e489593973928bae98313  src/views/spotQuant/strategyTemplate.vue
+a3d2331b8de38c5fba5a36f3c08d1eeb8ddfbf586e9bd2dc61a3c0ed7acdd54a  src/views/spotQuant/symbol.vue
