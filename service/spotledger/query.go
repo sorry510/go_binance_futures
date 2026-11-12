@@ -9,10 +9,11 @@ import (
 )
 
 type PositionFilter struct {
-	Symbol string
-	Status string
-	Page   int
-	Limit  int
+	Symbol     string // exact match by default: execution/recovery contract
+	SymbolLike bool   // explicit UI-only substring search
+	Status     string
+	Page       int
+	Limit      int
 }
 
 type PositionPage struct {
@@ -40,8 +41,15 @@ func (l *Ledger) ListPositions(f PositionFilter) (PositionPage, error) {
 		if !assetPattern.MatchString(f.Symbol) {
 			return page, fmt.Errorf("invalid Spot symbol filter")
 		}
-		where = append(where, "symbol=?")
-		params = append(params, f.Symbol)
+		// Execution/recovery depends on exact symbol identity. Fuzzy
+		// matching is explicitly opt-in for the read-only UI.
+		if f.SymbolLike {
+			where = append(where, "symbol LIKE ?")
+			params = append(params, "%"+f.Symbol+"%")
+		} else {
+			where = append(where, "symbol=?")
+			params = append(params, f.Symbol)
+		}
 	}
 	if f.Status != "" {
 		if f.Status != "PENDING_BUY" && f.Status != "OPEN" && f.Status != "CLOSED" {

@@ -14,6 +14,7 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/expr-lang/expr"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type SpotQuantController struct{ web.Controller }
@@ -25,6 +26,23 @@ func (ctrl *SpotQuantController) respond(status int, value interface{}, err erro
 		return
 	}
 	_ = ctrl.JSONResp(map[string]interface{}{"code": 200, "data": value, "msg": "success"})
+}
+
+// authorized is a defense-in-depth check beyond JwtMiddleware. None of
+// the Spot quant controller routes is public. Require a validated
+// operator Username claim even if a future router misses the global filter.
+func (ctrl *SpotQuantController) authorized() bool {
+	claims, ok := ctrl.Ctx.Input.GetData("user").(jwt.MapClaims)
+	if !ok {
+		ctrl.respond(http.StatusUnauthorized, nil, fmt.Errorf("spot_quant_auth_required"))
+		return false
+	}
+	username, ok := claims["Username"].(string)
+	if !ok || strings.TrimSpace(username) == "" {
+		ctrl.respond(http.StatusUnauthorized, nil, fmt.Errorf("spot_quant_auth_required"))
+		return false
+	}
+	return true
 }
 
 func (ctrl *SpotQuantController) intParam(name string, fallback int) int {
@@ -51,8 +69,16 @@ func (ctrl *SpotQuantController) symbols() {
 	ctrl.respond(http.StatusBadRequest, page, err)
 }
 
-func (ctrl *SpotQuantController) ListSymbols() { ctrl.symbols() }
+func (ctrl *SpotQuantController) ListSymbols() {
+	if !ctrl.authorized() {
+		return
+	}
+	ctrl.symbols()
+}
 func (ctrl *SpotQuantController) GetSymbol() {
+	if !ctrl.authorized() {
+		return
+	}
 	id, err := ctrl.id()
 	if err != nil {
 		ctrl.respond(400, nil, err)
@@ -66,6 +92,9 @@ func (ctrl *SpotQuantController) GetSymbol() {
 	ctrl.respond(200, row, nil)
 }
 func (ctrl *SpotQuantController) CreateSymbol() {
+	if !ctrl.authorized() {
+		return
+	}
 	var request struct {
 		Symbol string `json:"symbol"`
 	}
@@ -77,6 +106,9 @@ func (ctrl *SpotQuantController) CreateSymbol() {
 	ctrl.respond(400, row, err)
 }
 func (ctrl *SpotQuantController) EditSymbol() {
+	if !ctrl.authorized() {
+		return
+	}
 	id, err := ctrl.id()
 	if err != nil {
 		ctrl.respond(400, nil, err)
@@ -86,6 +118,9 @@ func (ctrl *SpotQuantController) EditSymbol() {
 	ctrl.respond(400, row, err)
 }
 func (ctrl *SpotQuantController) BatchSymbols() {
+	if !ctrl.authorized() {
+		return
+	}
 	var body struct {
 		IDs                []int64         `json:"ids"`
 		SpotQuantEnabled   *int            `json:"spot_quant_enabled"`
@@ -131,6 +166,9 @@ func (ctrl *SpotQuantController) BatchSymbols() {
 	ctrl.respond(400, map[string]interface{}{"updated": n}, err)
 }
 func (ctrl *SpotQuantController) EnableSymbols() {
+	if !ctrl.authorized() {
+		return
+	}
 	flag, err := strconv.Atoi(ctrl.Ctx.Input.Param(":flag"))
 	if err != nil {
 		ctrl.respond(400, nil, fmt.Errorf("invalid flag"))
@@ -141,10 +179,16 @@ func (ctrl *SpotQuantController) EnableSymbols() {
 }
 
 func (ctrl *SpotQuantController) ListTemplates() {
+	if !ctrl.authorized() {
+		return
+	}
 	page, err := spotquant.ListTemplates(orm.NewOrm(), ctrl.GetString("name"), ctrl.intParam("page", 1), ctrl.intParam("limit", 20))
 	ctrl.respond(400, page, err)
 }
 func (ctrl *SpotQuantController) GetTemplate() {
+	if !ctrl.authorized() {
+		return
+	}
 	id, err := ctrl.id()
 	if err != nil {
 		ctrl.respond(400, nil, err)
@@ -158,10 +202,16 @@ func (ctrl *SpotQuantController) GetTemplate() {
 	ctrl.respond(200, row, nil)
 }
 func (ctrl *SpotQuantController) CreateTemplate() {
+	if !ctrl.authorized() {
+		return
+	}
 	row, err := spotquant.CreateTemplate(orm.NewOrm(), ctrl.Ctx.Input.RequestBody)
 	ctrl.respond(400, row, err)
 }
 func (ctrl *SpotQuantController) EditTemplate() {
+	if !ctrl.authorized() {
+		return
+	}
 	id, err := ctrl.id()
 	if err != nil {
 		ctrl.respond(400, nil, err)
@@ -171,6 +221,9 @@ func (ctrl *SpotQuantController) EditTemplate() {
 	ctrl.respond(400, row, err)
 }
 func (ctrl *SpotQuantController) DeleteTemplate() {
+	if !ctrl.authorized() {
+		return
+	}
 	id, err := ctrl.id()
 	if err != nil {
 		ctrl.respond(400, nil, err)
@@ -180,6 +233,9 @@ func (ctrl *SpotQuantController) DeleteTemplate() {
 	ctrl.respond(400, nil, err)
 }
 func (ctrl *SpotQuantController) ImportTemplate() {
+	if !ctrl.authorized() {
+		return
+	}
 	row, action, err := spotquant.ImportTemplate(orm.NewOrm(), ctrl.Ctx.Input.RequestBody)
 	ctrl.respond(400, map[string]interface{}{"template": row, "action": action}, err)
 }
@@ -188,6 +244,9 @@ func (ctrl *SpotQuantController) ImportTemplate() {
 // Expressions involving historical indicators may only pass syntax validation
 // until the Spot-only indicator runtime is implemented.
 func (ctrl *SpotQuantController) SpotRuleTest() {
+	if !ctrl.authorized() {
+		return
+	}
 	var payload struct {
 		Strategy   json.RawMessage `json:"strategy"`
 		Technology json.RawMessage `json:"technology"`

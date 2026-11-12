@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	beegocontext "github.com/beego/beego/v2/server/web/context"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func spotQuantTestController(method, route, body, accept string) (*SpotQuantController, *httptest.ResponseRecorder) {
@@ -17,6 +18,7 @@ func spotQuantTestController(method, route, body, accept string) (*SpotQuantCont
 	recorder := httptest.NewRecorder()
 	ctx := beegocontext.NewContext()
 	ctx.Reset(recorder, request)
+	ctx.Input.SetData("user", jwt.MapClaims{"Username": "single_operator"})
 	ctx.Input.RequestBody = []byte(body)
 	ctrl := new(SpotQuantController)
 	ctrl.Init(ctx, "SpotQuantController", "", nil)
@@ -97,5 +99,33 @@ func TestStage062SpotPreviewRejectsFuturesOnlyVariables(t *testing.T) {
 	ctrl.SpotRuleTest()
 	if rec.Code != 400 || !strings.Contains(rec.Body.String(), "futures-only") {
 		t.Fatalf("Futures-only preview should be rejected: %d %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestReview065SpotQuantControllerRejectsMissingOperatorClaim(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		run  func(*SpotQuantController)
+	}{
+		{"symbols", func(c *SpotQuantController) { c.ListSymbols() }},
+		{"create", func(c *SpotQuantController) { c.CreateSymbol() }},
+		{"rule preview", func(c *SpotQuantController) { c.SpotRuleTest() }},
+		{"import", func(c *SpotQuantController) { c.ImportTemplate() }},
+		{"batch", func(c *SpotQuantController) { c.BatchSymbols() }},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			c, rec := spotQuantTestController(http.MethodPost, "/spot-quant/test", "{}", "application/json")
+			c.Ctx.Input.SetData("user", nil)
+			tc.run(c)
+			if rec.Code != http.StatusUnauthorized || !strings.Contains(rec.Body.String(), "spot_quant_auth_required") {
+				t.Fatalf("unauthenticated %s accessed Spot API: status=%d response=%s", tc.name, rec.Code, rec.Body.String())
+			}
+			c, rec = spotQuantTestController(http.MethodPost, "/spot-quant/test", "{}", "application/json")
+			c.Ctx.Input.SetData("user", jwt.MapClaims{"Username": " "})
+			tc.run(c)
+			if rec.Code != http.StatusUnauthorized {
+				t.Fatalf("blank username authorized %s: %d", tc.name, rec.Code)
+			}
+		})
 	}
 }
