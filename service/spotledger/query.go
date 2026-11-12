@@ -70,3 +70,19 @@ func (l *Ledger) ListPositions(f PositionFilter) (PositionPage, error) {
 	_, err := l.db.Raw(query, params...).QueryRows(&page.List)
 	return page, err
 }
+
+// ListUnsettledOrders uses the order table rather than the mutable Position
+// status cache. Orphan/closed-cache pending orders must still be reconciled
+// before a new strategy BUY. Exact symbol match, no wallet ownership inference.
+func (l *Ledger) ListUnsettledOrders(symbol string) ([]models.SpotManagedOrder, error) {
+	if !assetPattern.MatchString(symbol) {
+		return nil, fmt.Errorf("invalid Spot symbol")
+	}
+	orders := make([]models.SpotManagedOrder, 0)
+	_, err := l.db.Raw(`SELECT id,position_id,symbol,side,order_type,client_order_id,
+		exchange_order_id,requested_qty,filled_qty,status,created_at,updated_at
+		FROM spot_managed_orders WHERE symbol=?
+		AND status IN ('NEW','PARTIALLY_FILLED','PENDING_CANCEL')
+		ORDER BY id`, symbol).QueryRows(&orders)
+	return orders, err
+}
