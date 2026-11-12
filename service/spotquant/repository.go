@@ -125,6 +125,9 @@ func CreateSymbol(o orm.Ormer, name string) (models.SpotSymbols, error) {
 	item := models.SpotSymbols{
 		Symbol: name, Type: quote, Enable: 0, SpotQuantEnabled: 0,
 		Close: "0", Open: "0", High: "0", Low: "0", LastClose: "0",
+		// Historical Spot defaults are +/-100% unleveraged ROI thresholds:
+		// close_long only authorizes a SELL after crossing one of them.
+		// Operators must set desired values before using the future runner.
 		Usdt: "10", TickSize: "0.1", StepSize: "0.1", Profit: "100", Loss: "100",
 		UpdateTime: time.Now().UnixMilli(),
 	}

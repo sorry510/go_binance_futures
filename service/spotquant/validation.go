@@ -20,13 +20,13 @@ type Rule struct {
 
 var positiveAmountPattern = regexp.MustCompile(`^[0-9]+(?:\.[0-9]{1,18})?$`)
 
-// Spot Quant does not expose Futures account/position state. Reject these
-// dependencies on save/import, before real Spot execution is connected.
-// Unknown indicator names remain syntax-only previews until 06-4.
+// Spot Quant rejects Futures-only DSL fields. In 06-7, ROI/Position/Positions
+// have independently verified Spot semantics, without Futures account data.
+// OpenStrategyHash stays forbidden until the entry-rule identity is persisted.
 var spotFuturesOnlyIdentifiers = map[string]bool{
-	"ROI": true, "FundingRate": true, "Position": true, "Positions": true,
-	"Leverage": true, "MarginType": true, "PositionSide": true,
-	"LiquidationPrice": true, "UnrealizedProfit": true,
+	"FundingRate": true, "Leverage": true, "MarginType": true,
+	"PositionSide": true, "LiquidationPrice": true,
+	"UnrealizedProfit": true, "IsolatedWallet": true,
 	"MarketCondition": true, "BasicTrend": true, "OpenStrategyHash": true,
 }
 
@@ -83,6 +83,22 @@ func ValidateTechnology(raw string) error {
 	return nil
 }
 
+// Nested index/member expressions such as Positions[0].UnrealizedProfit
+// have to be rooted in the verified Spot position input. Reject other hosts.
+func spotMemberRoot(node ast.Node) string {
+	for node != nil {
+		switch n := node.(type) {
+		case *ast.IdentifierNode:
+			return n.Value
+		case *ast.MemberNode:
+			node = n.Node
+		default:
+			return ""
+		}
+	}
+	return ""
+}
+
 // ParseRules validates rule directions and expression syntax. This is
 // deliberately not a live market evaluation or an order trigger.
 func ParseRules(raw string) ([]Rule, error) {
@@ -111,11 +127,35 @@ func ParseRules(raw string) ([]Rule, error) {
 			// Inspect identifier nodes, not raw substrings: a string
 			// containing "FundingRate" is not a funding-rate dependency.
 			forbidden := ast.Find(tree.Node, func(node ast.Node) bool {
-				identifier, ok := node.(*ast.IdentifierNode)
-				return ok && spotFuturesOnlyIdentifiers[identifier.Value]
+				switch typed := node.(type) {
+				case *ast.IdentifierNode:
+					if spotFuturesOnlyIdentifiers[typed.Value] {
+						return true
+					}
+					// Only a real Spot strategy position can provide ROI and
+					// Position; the entry side has no position to evaluate.
+					return rule.Type == "long" && (typed.Value == "ROI" || typed.Value == "Position")
+				case *ast.MemberNode:
+					// Position.Leverage and Positions[0]["MarginType"]
+					// must remain unavailable even though Position itself
+					// is now allowed for Spot close rules.
+					property, ok := typed.Property.(*ast.StringNode)
+					if !ok {
+						return false
+					}
+					// This property exists on the verified Spot position,
+					// not arbitrary future environment variables.
+					if property.Value == "UnrealizedProfit" {
+						root := spotMemberRoot(typed.Node)
+						return root != "Position" && root != "Positions"
+					}
+					return spotFuturesOnlyIdentifiers[property.Value]
+				default:
+					return false
+				}
 			})
-			if identifier, ok := forbidden.(*ast.IdentifierNode); ok {
-				return nil, fmt.Errorf("strategy[%d] uses futures-only identifier %q; Spot supports LONG/CLOSE_LONG without futures positions, funding or leverage", i, identifier.Value)
+			if forbidden != nil {
+				return nil, fmt.Errorf("strategy[%d] uses futures-only or unavailable Spot identifier %q", i, forbidden.String())
 			}
 		}
 	}
