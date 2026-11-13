@@ -98,7 +98,7 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Spot Quant → Spot Trading (`现货量化交易`) | Independent Spot symbol/indicator configuration with LONG and CLOSE_LONG rules only; no futures leverage, shorts or margin |
 | Spot Quant → Local Spot Account (`本地现货账户`) | Spot-managed positions, orders and immutable exchange fills; quote-asset PnL is shown only when prices and fees are verifiable |
 | Spot Quant → Strategy Templates (`现货策略模板`) | Independent Spot-only technical indicators and strategy templates, separate from Futures templates |
-| Spot Quant → Controlled Trading (`仓位与受控交易`) | Review managed positions and anomalies, rebuild local projections after confirmation; real sell/cancel/exchange actions stay disabled pending release gates |
+| Spot Quant → Controlled Trading (`仓位与受控交易`) | Review managed positions and anomalies, rebuild local projections after confirmation; manual sell/cancel/exchange UI operations remain unavailable; separate from automated strategy execution |
 | Coin Alerts → Spot/Futures Alerts (`币种提醒 → 现货提醒 / 合约提醒`) | Configure target-price alerts and optional automatic trades |
 | Market Monitoring → Spot/Futures Monitoring (`市场监听 → 现货监听 / 合约监听`) | Configure K-line, threshold, indicator, and custom-strategy monitoring |
 | Funding Rate Monitoring (`资金费率监听`) | View funding rates and configure automatic trading |
@@ -107,7 +107,34 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Logs (`日志`) | Display the service logs returned by `web.commend_log` |
 
 
-**Spot Quant stage 06-6 development status (2026-11-12)**: Configuration Center includes a separate `spot_quant_enable` Card. The backend uses isolated v25 Spot position/order/fill tables; the four Spot pages and read-only accounting APIs are implemented. The local `go_bn_test` schema was verified read-only with all Spot switches OFF. Fake BUY/SELL/recovery tests and legacy Futures/Spot regressions passed. All frontend `dist` files were SHA-256 verified against the **local development repository** `static`; **nothing has been deployed or enabled for live trading**. Public Spot Testnet market metadata works, but the signed Testnet account request returned `-2015`; real Testnet execution, MySQL 8/production checks, small live orders and deployment remain blocked. See [06-6 implementation record](doc/trade/开发方案-06-6-完整联调与交付-实施记录.md).
+### Automated Spot Quant trading (06-7)
+
+Spot Quant now uses the existing **2-second strategy polling loop** with dedicated Spot symbols, indicators, and `LONG → BUY` / `CLOSE_LONG → SELL` rules. **Only the two existing trading switches** are needed—no third mode, extra environment variable, or task center.
+
+**1. Choose the environment (`[binance]` in `conf/app.conf`)**
+
+| `testnet` | Spot REST | API credentials | Notes |
+| --- | --- | --- | --- |
+| `true` | `https://testnet.binance.vision` | `testnet_spot_api_key` / `testnet_spot_api_secret` | Spot Testnet; **never uses** Futures Testnet `testnet_api_key` / `testnet_api_secret` |
+| `false` | `https://api.binance.com` | `api_key` / `api_secret` | **Live Spot Mainnet: real funds and real orders** |
+
+Set `testnet_binance_spot_base_url` to `https://testnet.binance.vision` without `/api/v3` (the SDK adds the API path). `testnet` is the existing Binance environment setting: **restart the service** after changing `app.conf`, and check other features in the same process that use this setting.
+
+**2. Enable automated trading**
+
+1. **Configuration Center → Spot Quant**: enable the global switch (`config.spot_quant_enable=1`).
+2. **Spot Quant → Spot Trading**: set the symbol's quote-asset budget (`usdt`), indicators, `long` / `close_long` strategy, TP/SL thresholds, and symbol switch (`spot_symbols.spot_quant_enabled=1`).
+3. Both switches must be ON, the signed user-data WebSocket must be ready, and strategy, balance, quantity precision and exchange-rule checks must pass before automatic BUY/SELL. Switching either one OFF prevents **new automatic orders**; it **does not force-close** existing strategy positions.
+
+**Important:** Defaults `profit=100` and `loss=100` mean **+100% / −100% unleveraged ROI**, not +8% / −6%. A `close_long` rule is a sell permission evaluated **after** the ROI exit threshold is reached. Confirm thresholds and budget before enabling trading.
+
+**3. Orders and recovery**
+
+The runner reuses `spotexecution.Processor` and an independent Spot Fill ledger. Inventory is derived from verified exchange fills: **manually purchased wallet assets are never treated as strategy-owned inventory**. UNKNOWN states, partial fills, fee/dust issues, and failed reconciliation block unsafe retries. A canceled/expired/rejected SELL with **authoritatively verified zero fills** can be retried at most once; legacy `sq4` orders with uncertain exchange ownership require manual review. Local Spot Account displays positions, orders, fills and PnL; UI permissions for manual exchange actions are separate from automatic strategy switches.
+
+**Validation and release status (2026-11-13):** A real small Spot Testnet **BUY → SELL → CLOSED** cycle, exchange fills and signed user-data WS were verified, along with Go regression/race/vet/build and disposable MySQL 8 compatibility checks. **Real Mainnet orders, production v25 physical schema/performance, Linux/ARM deployment and rollback remain unverified.** Source code supporting Mainnet does not mean a release is deployed. Back up and verify the physical schema before an approved `./go_binance_futures sync db` upgrade.
+
+See [06-7 execution plan](doc/trade/开发方案-06-7-现货量化自动策略执行链路.md), [06-7-ALL re-review](doc/trade/CODE_REVIEW_06-7-ALL-rereview.md), and [read-only preflight SQL](doc/trade/开发方案-06-7-4-生产只读预检.sql).
 
 
 #### Futures order-history administration (Schema v24)

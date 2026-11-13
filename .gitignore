@@ -9,3 +9,5 @@ db/coin.db
 /data/agent-skill-imports/
 /data/agent-skill-drafts/
 /cache/tmp/
+/.local/
+/research_specs/
