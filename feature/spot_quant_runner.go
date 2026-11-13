@@ -220,6 +220,16 @@ func spotQuantExitClientID(symbol string, positionID int64) string {
 	return "sqe" + hex.EncodeToString(digest[:15]) // 33 chars
 }
 
+// One deterministic supplemental SELL is allowed when the first SELL was
+// confirmed terminal with ZERO exchange fills. Never reuse its ClientOrderID.
+func spotQuantExitRetryClientID(symbol string, positionID int64) string {
+	if symbol == "" || positionID <= 0 {
+		return ""
+	}
+	digest := sha256.Sum256([]byte("spot_quant_067all_exit_retry_v1|" + symbol + "|" + strconv.FormatInt(positionID, 10)))
+	return "sqr" + hex.EncodeToString(digest[:15])
+}
+
 func spotStoredBUYEvent(id string) (string, time.Time, bool) {
 	if len(id) != 34 || (!strings.HasPrefix(id, "sq4") &&
 		!strings.HasPrefix(id, "sqt") && !strings.HasPrefix(id, "sqm")) {
@@ -510,10 +520,12 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 		if err != nil || signal.Action != "SELL" {
 			return err
 		}
-		// A SELL is strictly bound to this verified Position and its Fill.
-		// Never require the BUY-candle's 3d market OpenTime to release
-		// an existing position. A previously submitted SELL under any
-		// older (timeframe-based) client ID also blocks a second POST.
+		// Prior SELLs that were canceled/expired/rejected without any Fill
+		// must not permanently strand a still-open strategy position. Check
+		// authoritative exchange status + myTrades before one supplemental
+		// SELL; a second cancellation or ANY partial/uncertain SELL requires
+		// review rather than repeatedly posting orders every 2 seconds.
+		var terminalSELL *models.SpotManagedOrder
 		for _, order := range orders {
 			if order.Side != "SELL" {
 				continue
@@ -521,10 +533,44 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 			if order.PositionID != active.ID || order.Symbol != coin.Symbol {
 				return fmt.Errorf("%w: Spot SELL belongs to another managed position", spotledger.ErrNeedsReview)
 			}
-			return fmt.Errorf("%w: Spot position %d remains OPEN after prior SELL order %d; review the remaining Fill and dust",
-				spotledger.ErrNeedsReview, active.ID, order.ID)
+			if terminalSELL != nil ||
+				(order.Status != "CANCELED" && order.Status != "EXPIRED" && order.Status != "REJECTED") {
+				return fmt.Errorf("%w: prior Spot SELL %d must be reviewed before another SELL",
+					spotledger.ErrNeedsReview, order.ID)
+			}
+			reconciled, err := r.exec.Reconcile(ctx, order.ID) // REST read-only; never re-POST
+			if err != nil {
+				return fmt.Errorf("%w: cannot confirm canceled Spot SELL %d: %v",
+					spotledger.ErrNeedsReview, order.ID, err)
+			}
+			if reconciled.Status != order.Status || reconciled.ExchangeOrderID == "" {
+				return fmt.Errorf("%w: Spot SELL %d status changed during recovery", spotledger.ErrNeedsReview, order.ID)
+			}
+			filled, err := decimal.NewFromString(reconciled.FilledQty)
+			if err != nil || !filled.IsZero() {
+				return fmt.Errorf("%w: Spot SELL %d has an unverified or nonzero fill", spotledger.ErrNeedsReview, order.ID)
+			}
+			fills, err := r.ledger.ListFills(active.ID)
+			if err != nil {
+				return err
+			}
+			for _, fill := range fills {
+				if fill.OrderID == order.ID {
+					return fmt.Errorf("%w: canceled Spot SELL %d has a recorded Fill", spotledger.ErrNeedsReview, order.ID)
+				}
+			}
+			terminalSELL = &order
 		}
 		id := spotQuantExitClientID(coin.Symbol, active.ID)
+		if terminalSELL != nil {
+			// Reproject after REST recovery; never sell quantity reconstructed
+			// from stale position caches or a newly arrived partial Fill.
+			verified, err := r.ledger.Accounting(active.ID, "")
+			if err != nil || verified.Position.Status != "OPEN" {
+				return fmt.Errorf("%w: canceled Spot SELL recovery changed inventory: %v", spotledger.ErrNeedsReview, err)
+			}
+			id = spotQuantExitRetryClientID(coin.Symbol, active.ID)
+		}
 		prior, err := r.ledger.FindOrderByClientID(id)
 		if err == nil {
 			if prior.Symbol != coin.Symbol || prior.Side != "SELL" || prior.PositionID != active.ID {

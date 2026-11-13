@@ -78,21 +78,23 @@ SELECT (SELECT COUNT(*) FROM spot_managed_positions) AS positions_total,
        (SELECT COUNT(*) FROM spot_managed_orders) AS orders_total,
        (SELECT COUNT(*) FROM spot_trade_fills) AS fills_total;
 
--- Missing/overfilled FILLED orders are not safe to ignore.
--- Validate the complete v4 identity, including hash binding:
--- sq4 + 2-char interval + 7-char base36 UTC open + 22-char SHA256 prefix.
--- This mirrors Runner's spotQuantClientID(symbol,BUY,0,interval,open).
--- A syntactically valid forged ID must fail, not authorize automatic BUY.
--- No modification of order history occurs here.
+-- All new BUY client IDs use the same v4 interval/time/hash payload:
+--   sqt = Spot Testnet, sqm = Spot Mainnet, sq4 = legacy/unknown environment.
+-- Legacy sq4 may have a mathematically correct hash but MUST NOT be
+-- considered safe to trade until its account environment is reviewed.
+-- The Runner compares the 31 payload characters after the 3-char prefix
+-- against spotQuantClientID(symbol,BUY,0,interval,open).
 SELECT
   IF(COALESCE(SUM(status='FILLED' AND filled_qty>requested_qty),0)=0,
      'PASS','FAIL') AS filled_over_qty_gate,
-  IF(COALESCE(SUM(invalid_buy_id),0)=0,
+  IF(COALESCE(SUM(invalid_buy_id + legacy_buy_id),0)=0,
      'PASS','FAIL') AS buy_client_id_gate,
   COALESCE(SUM(status='FILLED' AND filled_qty<requested_qty),0) AS filled_missing_fills,
   COALESCE(SUM(status='FILLED' AND filled_qty>requested_qty),0) AS filled_over_qty,
   COALESCE(SUM(status IN ('NEW','PARTIALLY_FILLED','PENDING_CANCEL')),0) AS awaiting_recovery,
-  COALESCE(SUM(invalid_buy_id),0) AS invalid_or_legacy_buy_ids
+  COALESCE(SUM(invalid_buy_id),0) AS invalid_buy_ids,
+  COALESCE(SUM(legacy_buy_id),0) AS legacy_sq4_needs_review,
+  COALESCE(SUM(invalid_buy_id + legacy_buy_id),0) AS invalid_or_legacy_buy_ids
 FROM (
  SELECT parsed.*,
    CASE WHEN side='BUY' AND NOT (
@@ -100,12 +102,14 @@ FROM (
       AND SUBSTRING(client_order_id,13,22)=LEFT(SHA2(CONCAT(
           'spot_quant_0673_v4|',symbol,'|BUY|0|',
           kline_interval,'|',event_unix),256),22)
-   ) THEN 1 ELSE 0 END AS invalid_buy_id
+   ) THEN 1 ELSE 0 END AS invalid_buy_id,
+   CASE WHEN side='BUY' AND LEFT(client_order_id,3)='sq4'
+        THEN 1 ELSE 0 END AS legacy_buy_id
  FROM (
    SELECT symbol,side,client_order_id,status,requested_qty,filled_qty,
       CAST(CONV(SUBSTRING(client_order_id,6,7),36,10) AS UNSIGNED) AS event_unix,
       (REGEXP_LIKE(client_order_id,
-       '^sq4(01|03|05|15|30|H1|H2|H4|H6|H8|HC|D1|D3|W1|M1)[0-9a-z]{7}[0-9a-f]{22}$','c')
+       '^(sqt|sqm|sq4)(01|03|05|15|30|H1|H2|H4|H6|H8|HC|D1|D3|W1|M1)[0-9a-z]{7}[0-9a-f]{22}$','c')
        AND CAST(CONV(SUBSTRING(client_order_id,6,7),36,10) AS UNSIGNED)>0
       ) AS valid_shape,
       CASE SUBSTRING(client_order_id,4,2)
