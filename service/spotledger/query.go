@@ -73,7 +73,10 @@ func (l *Ledger) ListPositions(f PositionFilter) (PositionPage, error) {
 
 // ListUnsettledOrders uses the order table rather than the mutable Position
 // status cache. Orphan/closed-cache pending orders must still be reconciled
-// before a new strategy BUY. Exact symbol match, no wallet ownership inference.
+// before a new strategy BUY. A FILLED ACK with local filled_qty below
+// requested_qty still needs late myTrades recovery. A value ABOVE requested
+// is also returned, but the Runner explicitly raises ErrNeedsReview instead
+// of silently retrying forever. Exact symbol match; no manual wallet data.
 func (l *Ledger) ListUnsettledOrders(symbol string) ([]models.SpotManagedOrder, error) {
 	if !assetPattern.MatchString(symbol) {
 		return nil, fmt.Errorf("invalid Spot symbol")
@@ -82,7 +85,7 @@ func (l *Ledger) ListUnsettledOrders(symbol string) ([]models.SpotManagedOrder, 
 	_, err := l.db.Raw(`SELECT id,position_id,symbol,side,order_type,client_order_id,
 		exchange_order_id,requested_qty,filled_qty,status,created_at,updated_at
 		FROM spot_managed_orders WHERE symbol=?
-		AND status IN ('NEW','PARTIALLY_FILLED','PENDING_CANCEL')
+		AND (status IN ('NEW','PARTIALLY_FILLED','PENDING_CANCEL') OR (status='FILLED' AND filled_qty <> requested_qty))
 		ORDER BY id`, symbol).QueryRows(&orders)
 	return orders, err
 }

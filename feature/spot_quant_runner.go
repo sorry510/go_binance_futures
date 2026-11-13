@@ -23,6 +23,7 @@ import (
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/shopspring/decimal"
 )
 
 // spotQuantExecutor describes the existing, separately verified 06-4 order
@@ -136,14 +137,100 @@ func spotCandleOpen(t time.Time, interval string) time.Time {
 	}
 }
 
-// spotQuantClientID includes a canonical Spot Kline OPEN timestamp rather
-// than the polling minute. Hash is independent of editable strategy rules.
-// This function accepts a candle event time already aligned by caller.
-func spotQuantClientID(symbol, side string, positionID int64, eventOpen time.Time) string {
+// Store the event interval and event open timestamp IN the client ID, not
+// only in a one-way hash. A strategy may switch from 1m to 1h or back;
+// old BUY events must remain distinguishable from DB created_at (wall clock).
+// Format: sq4 + 2-char interval + 7-char base36 Unix open + 22-char hash
+// = 34 chars, within Binance newClientOrderId's 36-character limit.
+var spotClientIntervalCodes = map[string]string{
+	"1m": "01", "3m": "03", "5m": "05", "15m": "15", "30m": "30",
+	"1h": "H1", "2h": "H2", "4h": "H4", "6h": "H6", "8h": "H8", "12h": "HC",
+	"1d": "D1", "3d": "D3", "1w": "W1", "1M": "M1",
+}
+
+func spotQuantClientID(symbol, side string, positionID int64, interval string, eventOpen time.Time) string {
+	code, ok := spotClientIntervalCodes[interval]
+	if !ok || eventOpen.IsZero() || eventOpen.Unix() < 0 {
+		return ""
+	}
+	seconds := strconv.FormatInt(eventOpen.UTC().Unix(), 36)
+	if len(seconds) > 7 {
+		return ""
+	}
+	seconds = strings.Repeat("0", 7-len(seconds)) + seconds
 	identity := symbol + "|" + side + "|" + strconv.FormatInt(positionID, 10) +
-		"|" + strconv.FormatInt(eventOpen.UTC().Unix(), 10)
-	hash := sha256.Sum256([]byte("spot_quant_0672_v2|" + identity))
-	return "sq" + hex.EncodeToString(hash[:16]) // 34 characters
+		"|" + interval + "|" + strconv.FormatInt(eventOpen.UTC().Unix(), 10)
+	digest := sha256.Sum256([]byte("spot_quant_0673_v4|" + identity))
+	return "sq4" + code + seconds + hex.EncodeToString(digest[:11])
+}
+
+func spotStoredBUYEvent(id string) (string, time.Time, bool) {
+	if len(id) != 34 || !strings.HasPrefix(id, "sq4") {
+		return "", time.Time{}, false
+	}
+	interval := ""
+	for key, code := range spotClientIntervalCodes {
+		if code == id[3:5] {
+			interval = key
+			break
+		}
+	}
+	if interval == "" {
+		return "", time.Time{}, false
+	}
+	seconds, err := strconv.ParseInt(id[5:12], 36, 64)
+	if err != nil || seconds <= 0 {
+		return "", time.Time{}, false
+	}
+	return interval, time.Unix(seconds, 0).UTC(), true
+}
+
+func spotEventEnd(open time.Time, interval string) time.Time {
+	if interval == "1M" {
+		return open.AddDate(0, 1, 0)
+	}
+	return open.Add(spotCandleDuration[interval])
+}
+
+// hasBUYInEvent compares persisted event identities, NOT order.created_at.
+// That column uses the ledger's wall clock, whereas the event clock may be
+// injected or replayed from a historical Kline. The two clocks must never
+// be mixed to decide whether another real BUY can be posted.
+//
+// We only scan Spot strategy BUY orders at a decision boundary; no new
+// tables, schema fields, worker queues or mutable state caches are required.
+// Unrecognized legacy managed client IDs fail closed until reviewed, since
+// a v2/v3 hashed ID cannot reconstruct a former shorter candle period.
+func (r *SpotQuantRunner) hasBUYInEvent(symbol, interval string, now time.Time) (bool, error) {
+	start := spotCandleOpen(now, interval)
+	if start.IsZero() || spotEventEnd(start, interval).IsZero() {
+		return false, fmt.Errorf("invalid Spot BUY signal interval")
+	}
+	var orders []models.SpotManagedOrder
+	_, err := r.db.Raw(`SELECT id,position_id,symbol,side,order_type,client_order_id,
+		exchange_order_id,requested_qty,filled_qty,status,created_at,updated_at
+		FROM spot_managed_orders WHERE symbol=? AND side='BUY'
+		ORDER BY id DESC`, symbol).QueryRows(&orders)
+	if err != nil {
+		return false, err
+	}
+	for _, prior := range orders {
+		oldInterval, oldOpen, ok := spotStoredBUYEvent(prior.ClientOrderID)
+		if !ok {
+			return false, fmt.Errorf("%w: historical Spot BUY client id %q has no verifiable candle identity",
+				spotledger.ErrNeedsReview, prior.ClientOrderID)
+		}
+		if oldOpen.After(now) {
+			// A restored/replayed event clock or NTP rollback must not
+			// bypass a BUY created under a later event identity.
+			return false, fmt.Errorf("%w: persisted Spot BUY event %s is later than current signal %s",
+				spotledger.ErrNeedsReview, oldOpen.Format(time.RFC3339), now.Format(time.RFC3339))
+		}
+		if spotEventEnd(oldOpen, oldInterval).After(start) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (r *SpotQuantRunner) logSymbolError(symbol string, err error) {
@@ -271,6 +358,23 @@ func (r *SpotQuantRunner) reconcileUnsettled(ctx context.Context, symbol string)
 		if ctx.Err() != nil {
 			return true, ctx.Err()
 		}
+		if o.Status == "FILLED" {
+			requested, e1 := decimal.NewFromString(o.RequestedQty)
+			filled, e2 := decimal.NewFromString(o.FilledQty)
+			if e1 != nil || e2 != nil || !requested.IsPositive() || filled.IsNegative() {
+				issues = append(issues, fmt.Errorf("%w: Spot FILLED order %d has invalid local quantities", spotledger.ErrNeedsReview, o.ID))
+				continue
+			}
+			if filled.GreaterThan(requested) {
+				// Remote ACK cannot authorize more verified Fill than the
+				// persisted requested quantity. Reconcile may otherwise
+				// return nil forever while this same order keeps blocking
+				// all future strategy signals without any log.
+				issues = append(issues, fmt.Errorf("%w: Spot FILLED order %d exceeds requested quantity (%s > %s)",
+					spotledger.ErrNeedsReview, o.ID, filled, requested))
+				continue
+			}
+		}
 		if _, err := r.exec.Reconcile(ctx, o.ID); err != nil {
 			issues = append(issues, fmt.Errorf("%s/%s: %w", o.Symbol, o.ClientOrderID, err))
 		}
@@ -326,7 +430,7 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 		if err != nil {
 			return err
 		}
-		id := spotQuantClientID(coin.Symbol, "SELL", active.ID, spotCandleOpen(r.clock(), interval))
+		id := spotQuantClientID(coin.Symbol, "SELL", active.ID, interval, spotCandleOpen(r.clock(), interval))
 		prior, err := r.ledger.FindOrderByClientID(id)
 		if err == nil {
 			if prior.Symbol != coin.Symbol || prior.Side != "SELL" || prior.PositionID != active.ID {
@@ -353,7 +457,7 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 	if err != nil {
 		return err
 	}
-	id := spotQuantClientID(coin.Symbol, "BUY", 0, spotCandleOpen(r.clock(), interval))
+	id := spotQuantClientID(coin.Symbol, "BUY", 0, interval, spotCandleOpen(r.clock(), interval))
 	prior, err := r.ledger.FindOrderByClientID(id)
 	if err == nil {
 		if prior.Symbol != coin.Symbol || prior.Side != "BUY" {
@@ -364,6 +468,13 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 	if !errors.Is(err, orm.ErrNoRows) {
 		return err
 	}
+	priorEvent, err := r.hasBUYInEvent(coin.Symbol, interval, r.clock())
+	if err != nil {
+		return err
+	}
+	if priorEvent {
+		return nil
+	} // includes a previous longer/shorter Kline
 	on, err = gate.Enabled(ctx, coin.Symbol)
 	if err != nil || !on {
 		return err

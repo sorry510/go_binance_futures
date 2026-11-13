@@ -314,14 +314,14 @@ func TestSpotQuant0672UnknownOrderSurvivesRestartAndRuleChanges(t *testing.T) {
 		t.Fatal("restart duplicated an ambiguous BUY")
 	}
 	fixed := r.clock()
-	if spotQuantClientID("BTCUSDT", "BUY", 0, spotCandleOpen(fixed, "1m")) != spotQuantClientID("BTCUSDT", "BUY", 0, spotCandleOpen(fixed.Add(5*time.Second), "1m")) {
+	if spotQuantClientID("BTCUSDT", "BUY", 0, "1m", spotCandleOpen(fixed, "1m")) != spotQuantClientID("BTCUSDT", "BUY", 0, "1m", spotCandleOpen(fixed.Add(5*time.Second), "1m")) {
 		t.Fatal("same-minute id is unstable")
 	}
-	if spotQuantClientID("BTCUSDT", "BUY", 0, fixed) == spotQuantClientID("WBTCUSDT", "BUY", 0, fixed) ||
-		spotQuantClientID("BTCUSDT", "BUY", 0, fixed) == spotQuantClientID("BTCUSDT", "SELL", 123, fixed) {
+	if spotQuantClientID("BTCUSDT", "BUY", 0, "1m", fixed) == spotQuantClientID("WBTCUSDT", "BUY", 0, "1m", fixed) ||
+		spotQuantClientID("BTCUSDT", "BUY", 0, "1m", fixed) == spotQuantClientID("BTCUSDT", "SELL", 123, "1m", fixed) {
 		t.Fatal("symbol/side/cycle identity collision")
 	}
-	if len(spotQuantClientID("BTCUSDT", "BUY", 0, fixed)) > 36 {
+	if len(spotQuantClientID("BTCUSDT", "BUY", 0, "1m", fixed)) > 36 {
 		t.Fatal("Binance client id too long")
 	}
 }
