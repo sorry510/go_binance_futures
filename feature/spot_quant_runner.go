@@ -46,8 +46,8 @@ type spotQuantStrategy interface {
 
 // SpotQuantRunner follows the existing Futures two-second loop contract but
 // uses only Spot symbols, the dedicated Spot Fill ledger and 06-4 processor.
-// Running the scheduler without an explicitly attached executor is safe:
-// business switches alone cannot authorize a real Binance order.
+// The production scheduler attaches the same Processor in both Spot
+// environments; two DB switches, WS readiness and Fill proof gate orders.
 type SpotQuantRunner struct {
 	db       orm.Ormer
 	ledger   *spotledger.Ledger
@@ -57,11 +57,12 @@ type SpotQuantRunner struct {
 	// 3d must use the ACTUAL candle OpenTime from the same Spot market
 	// environment as trading. It varies between Mainnet and Testnet.
 	// Absent an authorized matching market source, fail closed.
-	spot3dOpen func(string, time.Time) (time.Time, error)
-	running    atomic.Bool // only protects this instance; main.loopRun owns process-tick serialization
-	errorMu    sync.Mutex
-	lastErr    map[string]string
-	warnings   map[string]bool
+	spot3dOpen  func(string, time.Time) (time.Time, error)
+	orderPrefix string      // sqt Testnet / sqm Mainnet; empty=legacy Fake tests
+	running     atomic.Bool // only protects this instance; main.loopRun owns process-tick serialization
+	errorMu     sync.Mutex
+	lastErr     map[string]string
+	warnings    map[string]bool
 }
 
 func NewSpotQuantRunner(db orm.Ormer, ledger *spotledger.Ledger, strategy spotQuantStrategy, exec spotQuantExecutor) (*SpotQuantRunner, error) {
@@ -203,6 +204,14 @@ func spotQuantClientID(symbol, side string, positionID int64, interval string, e
 // market timeframes. There is only one automatic SELL for each independently
 // verified Spot-managed position. In particular, a missing 3d Kline OPEN
 // cannot trap an existing OPEN position after a valid exit signal.
+func (r *SpotQuantRunner) buyClientID(symbol, interval string, open time.Time) string {
+	id := spotQuantClientID(symbol, "BUY", 0, interval, open)
+	if id == "" || r.orderPrefix == "" {
+		return id
+	}
+	return r.orderPrefix + id[3:]
+}
+
 func spotQuantExitClientID(symbol string, positionID int64) string {
 	if symbol == "" || positionID <= 0 {
 		return ""
@@ -212,7 +221,8 @@ func spotQuantExitClientID(symbol string, positionID int64) string {
 }
 
 func spotStoredBUYEvent(id string) (string, time.Time, bool) {
-	if len(id) != 34 || !strings.HasPrefix(id, "sq4") {
+	if len(id) != 34 || (!strings.HasPrefix(id, "sq4") &&
+		!strings.HasPrefix(id, "sqt") && !strings.HasPrefix(id, "sqm")) {
 		return "", time.Time{}, false
 	}
 	interval := ""
@@ -262,9 +272,21 @@ func (r *SpotQuantRunner) hasBUYInEvent(symbol, interval string, start, now time
 	}
 	for _, prior := range orders {
 		oldInterval, oldOpen, ok := spotStoredBUYEvent(prior.ClientOrderID)
-		if !ok || spotQuantClientID(symbol, "BUY", 0, oldInterval, oldOpen) != prior.ClientOrderID {
+		check := spotQuantClientID(symbol, "BUY", 0, oldInterval, oldOpen)
+		if !ok || check == "" || check[3:] != prior.ClientOrderID[3:] {
 			return false, fmt.Errorf("%w: historical Spot BUY client id %q has no verifiable candle identity",
 				spotledger.ErrNeedsReview, prior.ClientOrderID)
+		}
+		// A completed cycle from the other environment does not block a
+		// new candle here. Legacy sq4 has no environment identity and
+		// must be manually reviewed before any automatic order.
+		if r.orderPrefix != "" {
+			if strings.HasPrefix(prior.ClientOrderID, "sq4") {
+				return false, fmt.Errorf("%w: Spot legacy BUY has no exchange environment identity", spotledger.ErrNeedsReview)
+			}
+			if !strings.HasPrefix(prior.ClientOrderID, r.orderPrefix) {
+				continue
+			}
 		}
 		if oldOpen.After(now) {
 			// A restored/replayed event clock or NTP rollback must not
@@ -279,6 +301,14 @@ func (r *SpotQuantRunner) hasBUYInEvent(symbol, interval string, start, now time
 	return false, nil
 }
 
+// SDK network errors may contain a signed Binance request URL.
+// Never send the signature or API credentials to application logs.
+var spotQuantSignedQuery = regexp.MustCompile(`(?i)(signature|api_key|api_secret)=[^&"\s]+`)
+
+func spotQuantSafeMessage(raw string) string {
+	return spotQuantSignedQuery.ReplaceAllString(raw, "$1=[REDACTED]")
+}
+
 func (r *SpotQuantRunner) logSymbolError(symbol string, err error) {
 	r.errorMu.Lock()
 	defer r.errorMu.Unlock()
@@ -289,10 +319,10 @@ func (r *SpotQuantRunner) logSymbolError(symbol string, err error) {
 		}
 		return
 	}
-	msg := err.Error()
+	msg := spotQuantSafeMessage(err.Error())
 	if r.lastErr[symbol] != msg {
 		r.lastErr[symbol] = msg
-		logs.Warning("spot quant: ", symbol, " skip: ", err)
+		logs.Warning("spot quant: ", symbol, " skip: ", msg)
 	}
 }
 
@@ -463,6 +493,14 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 		if len(orders) == 0 {
 			return fmt.Errorf("%w: active Spot cycle has no verified BUY order", spotledger.ErrNeedsReview)
 		}
+		if r.orderPrefix != "" {
+			for _, o := range orders {
+				if o.Side == "BUY" && !strings.HasPrefix(o.ClientOrderID, r.orderPrefix) {
+					return fmt.Errorf("%w: existing Spot position belongs to a different or unknown exchange environment",
+						spotledger.ErrNeedsReview)
+				}
+			}
+		}
 		// Reconcile all NEW/PARTIALLY_FILLED/PENDING_CANCEL orders
 		// above before any decision; current projection is Fill-sourced.
 		if active.Status != "OPEN" {
@@ -519,7 +557,7 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 	if err != nil {
 		return err
 	}
-	id := spotQuantClientID(coin.Symbol, "BUY", 0, interval, open)
+	id := r.buyClientID(coin.Symbol, interval, open)
 	prior, err := r.ledger.FindOrderByClientID(id)
 	if err == nil {
 		if prior.Symbol != coin.Symbol || prior.Side != "BUY" {
@@ -545,13 +583,11 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 	return err
 }
 
-// StartSpotQuantTrade is the 06-7-2 main.go scheduling entry.
-// Production has no authorized Exchange mutation executor. Return BEFORE
-// any config/ORM access so even an unregistered default DB cannot panic a
-// Futures worker. The full Runner is exercised with injected Fake executors.
-// Real Testnet/Mainnet injection needs a separate reviewed release gate.
+// The existing binance.testnet config selects Spot Testnet or Mainnet.
+// Trading is controlled by the existing global + per-symbol Spot switches,
+// and only starts with a signed user WebSocket and a verified Fill ledger.
 func StartSpotQuantTrade(ctx context.Context) error {
-	return ctx.Err()
+	return spotQuantRunLive(ctx)
 }
 
 // ReportSpotQuantScheduler suppresses duplicate scheduler errors across the
@@ -566,9 +602,9 @@ func ReportSpotQuantScheduler(err error) {
 		spotQuantSchedulerLogState = ""
 		return
 	}
-	if msg := err.Error(); spotQuantSchedulerLogState != msg {
+	if msg := spotQuantSafeMessage(err.Error()); spotQuantSchedulerLogState != msg {
 		spotQuantSchedulerLogState = msg
-		logs.Warning("spot quant scheduler: ", err)
+		logs.Warning("spot quant scheduler: ", msg)
 	}
 }
 
@@ -577,7 +613,7 @@ func ReportSpotQuantScheduler(err error) {
 func RunSpotQuantProtected(callback func()) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
-			logs.Warning("spot quant scheduler recovered panic: ", recovered)
+			logs.Warning("spot quant scheduler recovered panic: ", spotQuantSafeMessage(fmt.Sprint(recovered)))
 		}
 	}()
 	callback()

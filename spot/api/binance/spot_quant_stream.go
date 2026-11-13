@@ -17,18 +17,22 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// Never use sdk.WsUserDataServeSignature here: the SDK chooses its WS host
-// using GLOBAL sdk.UseTestnet/sdK.UseDemo, not the injected Client.BaseURL.
-// Switching sdk.UseTestnet globally would also redirect unrelated Spot code.
-const spotQuantTestnetWSURL = "wss://ws-api.testnet.binance.vision/ws-api/v3"
-const spotQuantTestnetRESTURL = "https://testnet.binance.vision"
+// Select Spot WS by THIS adapter's REST environment, not SDK globals.
+// Switching the global SDK flag would affect unrelated Spot/Futures code.
+const (
+	spotQuantTestnetWSURL   = "wss://ws-api.testnet.binance.vision/ws-api/v3"
+	spotQuantMainnetWSURL   = "wss://ws-api.binance.com/ws-api/v3"
+	spotQuantTestnetRESTURL = "https://testnet.binance.vision"
+)
 
 func spotQuantStreamEndpoint(a *QuantAdapter) (string, error) {
-	if a == nil || a.c == nil || !a.allowOrderMutation ||
-		a.c.BaseURL != spotQuantTestnetRESTURL {
+	if !a.canMutate() {
 		return "", spotexecution.ErrDisabled
 	}
-	return spotQuantTestnetWSURL, nil
+	if a.endpoint == spotQuantTestnetRESTURL {
+		return spotQuantTestnetWSURL, nil
+	}
+	return spotQuantMainnetWSURL, nil
 }
 
 // decodeSpotQuantMessage recognizes signed WS API subscription ACKs and
@@ -100,8 +104,9 @@ func applySpotQuantOrderEvent(ctx context.Context, p spotQuantEventProcessor, v 
 	}
 	if errors.Is(err, spotexecution.ErrNeedsReview) {
 		reconcileErr := p.ReconcileByClientID(ctx, clientID)
-		if reconcileErr != nil {
-			logs.Warn("spot quant user stream requires REST reconciliation: symbol=%s client=%s: %v", v.Symbol, clientID, reconcileErr)
+		if reconcileErr != nil && ctx.Err() == nil {
+			// Signed SDK errors can contain the REST URL's signature.
+			logs.Warn("spot quant user stream requires REST reconciliation: symbol=%s client=%s error_type=%T", v.Symbol, clientID, reconcileErr)
 		}
 		// No disconnect for expected FILLED-before-myTrades races. The
 		// ledger's reconciliation gate still blocks future new orders.
@@ -110,10 +115,33 @@ func applySpotQuantOrderEvent(ctx context.Context, p spotQuantEventProcessor, v 
 	return err
 }
 
-// RunSpotQuantUserStream connects ONLY to the fixed Spot Testnet WS API.
+// RunSpotQuantUserStream connects to the WS API matching this Spot account.
 // It neither switches SDK global endpoints nor starts a background task.
 // On connection-level failure the caller must reconcile REST before use.
 func (a *QuantAdapter) RunSpotQuantUserStream(ctx context.Context, p *spotexecution.Processor) error {
+	return a.runSpotQuantUserStream(ctx, p, nil, nil)
+}
+
+// RunSpotQuantUserStreamWithStatus reports the confirmed signed WS ACK,
+// then always reports false when disconnected. No order is submitted here.
+// The Runner must require ready=true at each new BUY/SELL boundary.
+func (a *QuantAdapter) RunSpotQuantUserStreamWithStatus(
+	ctx context.Context, p *spotexecution.Processor, onStatus func(bool),
+) error {
+	if onStatus == nil {
+		return fmt.Errorf("Spot user WS readiness callback required")
+	}
+	defer onStatus(false)
+	return a.runSpotQuantUserStream(ctx, p, func() { onStatus(true) }, nil)
+}
+
+// The callbacks are optional observer-only test hooks: they never authorize
+// trading, and never touch the Testnet/Mainnet endpoint selection. Production
+// calls the public method above with both hooks nil.
+func (a *QuantAdapter) runSpotQuantUserStream(
+	ctx context.Context, p *spotexecution.Processor,
+	onSubscribed func(), onExecutionReport func(sdk.WsOrderUpdate),
+) error {
 	endpoint, err := spotQuantStreamEndpoint(a)
 	if err != nil {
 		return err
@@ -122,7 +150,7 @@ func (a *QuantAdapter) RunSpotQuantUserStream(ctx context.Context, p *spotexecut
 		return fmt.Errorf("nil Spot Quant processor")
 	}
 	if a.c.APIKey == "" || a.c.SecretKey == "" {
-		return fmt.Errorf("missing Spot Testnet credentials")
+		return fmt.Errorf("missing Spot account credentials")
 	}
 	dialer, err := proxyPool.WebSocketDialer()
 	if err != nil {
@@ -167,14 +195,19 @@ func (a *QuantAdapter) RunSpotQuantUserStream(ctx context.Context, p *spotexecut
 			if ctx.Err() != nil {
 				return ctx.Err()
 			}
-			return fmt.Errorf("Spot Testnet user stream disconnected; reconcile REST before new signals: %w", err)
+			return fmt.Errorf("Spot user stream disconnected; reconcile REST before new signals: %w", err)
 		}
 		ack, update, err := decodeSpotQuantMessage(message)
 		if err != nil {
-			return fmt.Errorf("Spot Testnet signed WS response: %w", err)
+			return fmt.Errorf("Spot signed WS response: %w", err)
 		}
 		if ack {
-			subscribed = true
+			if !subscribed {
+				subscribed = true
+				if onSubscribed != nil {
+					onSubscribed()
+				}
+			}
 			continue
 		}
 		if !subscribed {
@@ -185,6 +218,9 @@ func (a *QuantAdapter) RunSpotQuantUserStream(ctx context.Context, p *spotexecut
 		}
 		if err := applySpotQuantOrderEvent(ctx, p, *update); err != nil {
 			return fmt.Errorf("Spot WS executionReport failed: %w", err)
+		}
+		if onExecutionReport != nil {
+			onExecutionReport(*update)
 		}
 	}
 }

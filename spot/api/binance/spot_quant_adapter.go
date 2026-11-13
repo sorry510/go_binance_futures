@@ -17,26 +17,59 @@ import (
 
 // QuantAdapter uses the project's Spot client (existing proxy + REST limit
 // wrapper + ticker cache). It does not reuse legacy Spot rush order methods.
-// No main/router registers the 06-4 processor; none of this runs on import.
+// Runtime constructs a single Processor only after the global switch is ON.
 type QuantAdapter struct {
 	c                  *sdk.Client
 	allowOrderMutation bool
+	endpoint           string // immutable REST environment identity
 }
 
-// NewSpotQuantAdapter is read-only by default. Live execution/cancel must
-// only be wired during the separately authorized 06-6 deployment gate.
+// NewSpotQuantAdapter remains read-only for legacy callers. The Spot Quant
+// runtime explicitly opts in to trading with the configured environment.
 func NewSpotQuantAdapter() *QuantAdapter { return &QuantAdapter{c: client} }
 func NewSpotQuantAdapterWithClient(c *sdk.Client, permitOrderMutation bool) (*QuantAdapter, error) {
 	if c == nil {
 		return nil, fmt.Errorf("nil Spot Binance client")
 	}
-	// 06-4 is a Fake/Testnet development stage. Production mutations are
-	// deliberately impossible even if someone mistakenly passes true.
-	// Mainnet release needs a separate, explicit 06-6 code/review gate.
-	if permitOrderMutation && strings.TrimRight(c.BaseURL, "/") != "https://testnet.binance.vision" {
-		return nil, fmt.Errorf("Spot quant order mutations are restricted to Binance Spot Testnet in 06-4")
+	if permitOrderMutation && !spotQuantKnownREST(c.BaseURL) {
+		return nil, fmt.Errorf("Spot quant requires a supported Binance Spot REST endpoint")
 	}
-	return &QuantAdapter{c: c, allowOrderMutation: permitOrderMutation}, nil
+	return &QuantAdapter{c: c, allowOrderMutation: permitOrderMutation, endpoint: c.BaseURL}, nil
+}
+
+const spotQuantMainnetRESTURL = "https://api.binance.com"
+
+func spotQuantKnownREST(baseURL string) bool {
+	return baseURL == spotQuantMainnetRESTURL || baseURL == spotQuantTestnetRESTURL
+}
+
+func (a *QuantAdapter) canMutate() bool {
+	return a != nil && a.c != nil && a.allowOrderMutation &&
+		spotQuantKnownREST(a.endpoint) && a.c.BaseURL == a.endpoint
+}
+
+// NewSpotQuantTradingAdapterFromConfig uses exactly the existing Binance
+// [binance].testnet toggle. Spot Mainnet shares the already configured
+// Mainnet Spot client/proxy; Spot Testnet uses its OWN credentials (never
+// the separate Futures testnet_api_key/testnet_api_secret).
+func NewSpotQuantTradingAdapterFromConfig(testnet bool) (*QuantAdapter, error) {
+	if testnet {
+		return NewSpotQuantTestnetTradingAdapterFromConfig()
+	}
+	key, err := config.String("binance::api_key")
+	if err != nil {
+		return nil, err
+	}
+	secret, err := config.String("binance::api_secret")
+	if err != nil {
+		return nil, err
+	}
+	if strings.TrimSpace(key) == "" || strings.TrimSpace(secret) == "" ||
+		client == nil || client.BaseURL != spotQuantMainnetRESTURL ||
+		client.APIKey != key || client.SecretKey != secret {
+		return nil, fmt.Errorf("Spot Mainnet API credentials or endpoint are unavailable")
+	}
+	return NewSpotQuantAdapterWithClient(client, true)
 }
 
 // NewSpotQuantTestnetAdapterFromConfig creates an isolated, READ-ONLY Spot
@@ -82,9 +115,19 @@ func newSpotQuantTestnetAdapter(baseURL, apiKey, apiSecret string) (*QuantAdapte
 	c.HTTPClient = binanceapiusage.WrapClient(proxyPool.HTTPClient(), binanceapiusage.TransportConfig{
 		Product: "spot", Environment: "testnet", Source: "spot_quant_testnet",
 	})
-	// An explicit future Testnet integration gate is still required before
-	// constructing an order-mutation-capable adapter.
+	// This constructor is read-only; the shared runtime explicitly enables
+	// trading after verifying the existing Spot Quant switches.
 	return NewSpotQuantAdapterWithClient(c, false)
+}
+
+// NewSpotQuantTestnetTradingAdapterFromConfig uses the distinct Spot Testnet
+// credentials. Constructing an adapter never submits an order.
+func NewSpotQuantTestnetTradingAdapterFromConfig() (*QuantAdapter, error) {
+	readOnly, err := NewSpotQuantTestnetAdapterFromConfig()
+	if err != nil {
+		return nil, err
+	}
+	return NewSpotQuantAdapterWithClient(readOnly.c, true)
 }
 
 var _ spotexecution.Exchange = (*QuantAdapter)(nil)
@@ -224,7 +267,7 @@ func (a *QuantAdapter) FindOrder(ctx context.Context, symbol, clientID string) (
 }
 func (a *QuantAdapter) Place(ctx context.Context, req spotexecution.Request) (spotexecution.RemoteOrder, error) {
 	var empty spotexecution.RemoteOrder
-	if a == nil || a.c == nil || !a.allowOrderMutation || strings.TrimRight(a.c.BaseURL, "/") != "https://testnet.binance.vision" {
+	if !a.canMutate() {
 		return empty, spotexecution.ErrDisabled
 	}
 	if req.Type != "MARKET" || (req.Side != "BUY" && req.Side != "SELL") || req.Quantity == "" || len(req.ClientOrderID) > 36 {
@@ -247,7 +290,7 @@ func (a *QuantAdapter) Place(ctx context.Context, req spotexecution.Request) (sp
 }
 func (a *QuantAdapter) Cancel(ctx context.Context, symbol, clientID string) (spotexecution.RemoteOrder, error) {
 	var empty spotexecution.RemoteOrder
-	if a == nil || a.c == nil || !a.allowOrderMutation || strings.TrimRight(a.c.BaseURL, "/") != "https://testnet.binance.vision" {
+	if !a.canMutate() {
 		return empty, spotexecution.ErrDisabled
 	}
 	result, err := a.c.NewCancelOrderService().Symbol(symbol).OrigClientOrderID(clientID).Do(binanceapiusage.WithSource(ctx, "spot_quant_cancel"))

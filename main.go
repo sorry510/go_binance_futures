@@ -442,10 +442,9 @@ func main() {
 		feature.StartTrade(&SystemConfig)
 	}, time.Second*2) // 2秒间隔；REST 权重随 managed orders/WS 状态变化，不使用固定预算假设
 
-	// 06-7-2: match the Futures two-second cadence and loopRun no-overlap.
-	// The Spot Runner currently has NO live order executor in production:
-	// two business switches never override the separately blocked
-	// Spot Testnet/Mainnet mutation gate. Fake integration is tested in Go.
+	// Spot quant uses the same 2-second cadence. The existing binance.testnet
+	// selects the Spot API environment; the two Spot Quant switches authorize
+	// trading. WS readiness, verified Fill inventory and deduplication remain required.
 	loopRun(func() {
 		feature.RunSpotQuantProtected(func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

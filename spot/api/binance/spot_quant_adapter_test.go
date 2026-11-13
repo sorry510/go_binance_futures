@@ -32,8 +32,17 @@ func TestStage064SpotAdapterCannotTradeByDefault(t *testing.T) {
 	if err != nil || injected.allowOrderMutation {
 		t.Fatalf("explicit read-only adapter error: %v", err)
 	}
-	if _, err := NewSpotQuantAdapterWithClient(sdk.NewClient("fake_test_key", "fake_secret"), true); err == nil {
-		t.Fatal("06-4 mistakenly authorized mainnet Spot order mutation")
+	mainnet := sdk.NewClient("fake_mainnet_key", "fake_secret")
+	mainnetAdapter, err := NewSpotQuantAdapterWithClient(mainnet, true)
+	if err != nil || !mainnetAdapter.allowOrderMutation {
+		t.Fatalf("Spot Mainnet adapter could not be constructed: %v", err)
+	}
+	// SDK BaseURL can be mutated, but a live adapter freezes its environment.
+	mainnet.SetApiEndpoint("https://testnet.binance.vision")
+	if _, err = mainnetAdapter.Place(context.Background(), spotexecution.Request{
+		Symbol: "BTCUSDT", Side: "BUY", Type: "MARKET", ClientOrderID: "blocked", Quantity: "1",
+	}); !errors.Is(err, spotexecution.ErrDisabled) {
+		t.Fatalf("mutated Mainnet client could submit an unapproved order: %v", err)
 	}
 	testnet := sdk.NewClient("fake_test_key", "fake_secret")
 	testnet.SetApiEndpoint("https://testnet.binance.vision")
@@ -71,6 +80,19 @@ func TestReview064WSExplicitTestnetEndpointAndDecode(t *testing.T) {
 	a.c.SetApiEndpoint("https://api.binance.com")
 	if _, err = spotQuantStreamEndpoint(a); !errors.Is(err, spotexecution.ErrDisabled) {
 		t.Fatalf("mutated Testnet adapter could target Mainnet WS: %v", err)
+	}
+	mainnet := sdk.NewClient("fake_mainnet_key", "fake_mainnet_secret")
+	mainnetAdapter, err := NewSpotQuantAdapterWithClient(mainnet, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if endpoint, err := spotQuantStreamEndpoint(mainnetAdapter); err != nil ||
+		endpoint != "wss://ws-api.binance.com/ws-api/v3" {
+		t.Fatalf("unexpected Mainnet signed Spot WS %q: %v", endpoint, err)
+	}
+	mainnet.SetApiEndpoint("https://testnet.binance.vision")
+	if _, err := spotQuantStreamEndpoint(mainnetAdapter); !errors.Is(err, spotexecution.ErrDisabled) {
+		t.Fatalf("mutated Mainnet adapter swapped WS environments: %v", err)
 	}
 	for _, tc := range []struct {
 		payload   string

@@ -580,11 +580,11 @@ func TestReview0672ReconcileALLPendingEvenWithoutActivePosition(t *testing.T) {
 	}
 }
 
-func TestReview0672DisabledRuntimeDoesNotInitializeORM(t *testing.T) {
-	// A clean process without a default ORM alias must not panic when the
-	// 2s main callback is wired but execution authorization is absent.
-	if err := StartSpotQuantTrade(context.Background()); err != nil {
-		t.Fatalf("nil-executor runtime unexpectedly accessed DB/config: %v", err)
+func TestSpotQuantMainEntryFailsClosedIfGlobalSwitchUnavailable(t *testing.T) {
+	// Mainnet and Testnet share one runtime; without a registered DB
+	// and verified global switch, startup must return an error, not panic.
+	if err := StartSpotQuantTrade(context.Background()); err == nil {
+		t.Fatal("Spot Quant entry bypassed missing global DB switch")
 	}
 }
 
