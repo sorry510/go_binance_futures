@@ -12,6 +12,7 @@ import (
 
 	sdk "github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/common"
+	"github.com/beego/beego/v2/core/config"
 )
 
 // QuantAdapter uses the project's Spot client (existing proxy + REST limit
@@ -36,6 +37,54 @@ func NewSpotQuantAdapterWithClient(c *sdk.Client, permitOrderMutation bool) (*Qu
 		return nil, fmt.Errorf("Spot quant order mutations are restricted to Binance Spot Testnet in 06-4")
 	}
 	return &QuantAdapter{c: c, allowOrderMutation: permitOrderMutation}, nil
+}
+
+// NewSpotQuantTestnetAdapterFromConfig creates an isolated, READ-ONLY Spot
+// Testnet client with credentials exclusively from [binance] Spot Testnet
+// fields. It NEVER falls back to Futures testnet_api_key/secret or mainnet
+// Spot api_key/secret. No request is sent during construction.
+func NewSpotQuantTestnetAdapterFromConfig() (*QuantAdapter, error) {
+	return spotQuantTestnetAdapterFromConfig(config.String)
+}
+
+func spotQuantTestnetAdapterFromConfig(read func(string) (string, error)) (*QuantAdapter, error) {
+	if read == nil {
+		return nil, fmt.Errorf("nil Spot Testnet configuration source")
+	}
+	fields := []string{
+		"binance::testnet_binance_spot_base_url",
+		"binance::testnet_spot_api_key",
+		"binance::testnet_spot_api_secret",
+	}
+	values := make([]string, 0, len(fields))
+	for _, field := range fields {
+		value, err := read(field)
+		if err != nil {
+			return nil, fmt.Errorf("Spot Testnet configuration %s: %w", field, err)
+		}
+		values = append(values, strings.TrimSpace(value))
+	}
+	return newSpotQuantTestnetAdapter(values[0], values[1], values[2])
+}
+
+func newSpotQuantTestnetAdapter(baseURL, apiKey, apiSecret string) (*QuantAdapter, error) {
+	// Never accept a production host, misleading hostname, endpoint path,
+	// userinfo or scheme: even a read-only signed account query is sensitive.
+	baseURL = strings.TrimSpace(baseURL)
+	if baseURL != spotQuantTestnetRESTURL {
+		return nil, fmt.Errorf("Spot Testnet REST base URL must be https://testnet.binance.vision (without /api)")
+	}
+	if strings.TrimSpace(apiKey) == "" || strings.TrimSpace(apiSecret) == "" {
+		return nil, fmt.Errorf("Spot Testnet API key/secret not configured")
+	}
+	c := sdk.NewClient(strings.TrimSpace(apiKey), strings.TrimSpace(apiSecret))
+	c.SetApiEndpoint(baseURL)
+	c.HTTPClient = binanceapiusage.WrapClient(proxyPool.HTTPClient(), binanceapiusage.TransportConfig{
+		Product: "spot", Environment: "testnet", Source: "spot_quant_testnet",
+	})
+	// An explicit future Testnet integration gate is still required before
+	// constructing an order-mutation-capable adapter.
+	return NewSpotQuantAdapterWithClient(c, false)
 }
 
 var _ spotexecution.Exchange = (*QuantAdapter)(nil)

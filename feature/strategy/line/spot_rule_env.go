@@ -28,6 +28,31 @@ func LoadVerifiedSpotRuleEnv(coin models.SpotSymbols) (map[string]interface{}, e
 	return buildVerifiedSpotRuleEnv(coin, time.Now(), livePrice, verifiedSpotKlines)
 }
 
+// LoadVerifiedSpotRuleEnvWithSource is the same strict Spot environment
+// builder used in production, with an explicit market-data source for
+// isolated full-chain tests (and an eventual authorized Testnet feed).
+// Validation applies to the injected Klines too: no test-only bypass of
+// freshness, OHLC validity or indicator warm-up is permitted.
+func LoadVerifiedSpotRuleEnvWithSource(
+	coin models.SpotSymbols, at time.Time, livePrice string,
+	loader func(string, string, int) ([]*futures.Kline, error),
+) (map[string]interface{}, error) {
+	if loader == nil {
+		return nil, fmt.Errorf("Spot market Kline source is required")
+	}
+	validated := func(symbol, interval string, limit int) ([]*futures.Kline, error) {
+		rows, err := loader(symbol, interval, limit)
+		if err != nil {
+			return nil, err
+		}
+		if err := verifySpotKlineRows(rows, symbol, interval, at); err != nil {
+			return nil, err
+		}
+		return rows, nil
+	}
+	return buildVerifiedSpotRuleEnv(coin, at, livePrice, validated)
+}
+
 func validSpotNumber(raw string) (float64, error) {
 	n, err := strconv.ParseFloat(strings.TrimSpace(raw), 64)
 	if err != nil || n <= 0 || math.IsNaN(n) || math.IsInf(n, 0) {

@@ -54,10 +54,14 @@ type SpotQuantRunner struct {
 	strategy spotQuantStrategy
 	exec     spotQuantExecutor
 	clock    func() time.Time
-	running  atomic.Bool // only protects this instance; main.loopRun owns process-tick serialization
-	errorMu  sync.Mutex
-	lastErr  map[string]string
-	warnings map[string]bool
+	// 3d must use the ACTUAL candle OpenTime from the same Spot market
+	// environment as trading. It varies between Mainnet and Testnet.
+	// Absent an authorized matching market source, fail closed.
+	spot3dOpen func(string, time.Time) (time.Time, error)
+	running    atomic.Bool // only protects this instance; main.loopRun owns process-tick serialization
+	errorMu    sync.Mutex
+	lastErr    map[string]string
+	warnings   map[string]bool
 }
 
 func NewSpotQuantRunner(db orm.Ormer, ledger *spotledger.Ledger, strategy spotQuantStrategy, exec spotQuantExecutor) (*SpotQuantRunner, error) {
@@ -128,6 +132,10 @@ func spotCandleOpen(t time.Time, interval string) time.Time {
 	case "1w":
 		day := t.Truncate(24 * time.Hour)
 		return day.Add(-time.Duration((int(day.Weekday())+6)%7) * 24 * time.Hour)
+	case "3d":
+		// Epoch-based 72h truncation is NOT an authoritative Spot 3d
+		// open: the public Binance Testnet/Mainnet endpoints can differ.
+		return time.Time{}
 	default:
 		duration := spotCandleDuration[interval]
 		if duration <= 0 {
@@ -135,6 +143,33 @@ func spotCandleOpen(t time.Time, interval string) time.Time {
 		}
 		return t.Truncate(duration)
 	}
+}
+
+// resolveSpotEventOpen never invents a 3d Kline boundary. The market
+// callback must return the exchange's real OpenTime for the exact Spot
+// environment; invalid/missing data blocks any new order.
+func (r *SpotQuantRunner) resolveSpotEventOpen(symbol, interval string, at time.Time) (time.Time, error) {
+	if interval != "3d" {
+		open := spotCandleOpen(at, interval)
+		if open.IsZero() {
+			return time.Time{}, fmt.Errorf("invalid Spot signal interval %q", interval)
+		}
+		return open, nil
+	}
+	if r.spot3dOpen == nil {
+		return time.Time{}, fmt.Errorf("%w: 3d Spot Kline OpenTime requires an authoritative market source",
+			spotledger.ErrNeedsReview)
+	}
+	open, err := r.spot3dOpen(symbol, at)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("%w: cannot verify 3d Spot Kline OpenTime: %v", spotledger.ErrNeedsReview, err)
+	}
+	open = open.UTC()
+	if open.IsZero() || open.After(at) || !open.Add(3*24*time.Hour).After(at) {
+		return time.Time{}, fmt.Errorf("%w: invalid or stale 3d Spot Kline OpenTime",
+			spotledger.ErrNeedsReview)
+	}
+	return open, nil
 }
 
 // Store the event interval and event open timestamp IN the client ID, not
@@ -162,6 +197,18 @@ func spotQuantClientID(symbol, side string, positionID int64, interval string, e
 		"|" + interval + "|" + strconv.FormatInt(eventOpen.UTC().Unix(), 10)
 	digest := sha256.Sum256([]byte("spot_quant_0673_v4|" + identity))
 	return "sq4" + code + seconds + hex.EncodeToString(digest[:11])
+}
+
+// spotQuantExitClientID is deliberately stable across strategy edits and
+// market timeframes. There is only one automatic SELL for each independently
+// verified Spot-managed position. In particular, a missing 3d Kline OPEN
+// cannot trap an existing OPEN position after a valid exit signal.
+func spotQuantExitClientID(symbol string, positionID int64) string {
+	if symbol == "" || positionID <= 0 {
+		return ""
+	}
+	digest := sha256.Sum256([]byte("spot_quant_0674_exit_v1|" + symbol + "|" + strconv.FormatInt(positionID, 10)))
+	return "sqe" + hex.EncodeToString(digest[:15]) // 33 chars
 }
 
 func spotStoredBUYEvent(id string) (string, time.Time, bool) {
@@ -201,8 +248,7 @@ func spotEventEnd(open time.Time, interval string) time.Time {
 // tables, schema fields, worker queues or mutable state caches are required.
 // Unrecognized legacy managed client IDs fail closed until reviewed, since
 // a v2/v3 hashed ID cannot reconstruct a former shorter candle period.
-func (r *SpotQuantRunner) hasBUYInEvent(symbol, interval string, now time.Time) (bool, error) {
-	start := spotCandleOpen(now, interval)
+func (r *SpotQuantRunner) hasBUYInEvent(symbol, interval string, start, now time.Time) (bool, error) {
 	if start.IsZero() || spotEventEnd(start, interval).IsZero() {
 		return false, fmt.Errorf("invalid Spot BUY signal interval")
 	}
@@ -216,7 +262,7 @@ func (r *SpotQuantRunner) hasBUYInEvent(symbol, interval string, now time.Time) 
 	}
 	for _, prior := range orders {
 		oldInterval, oldOpen, ok := spotStoredBUYEvent(prior.ClientOrderID)
-		if !ok {
+		if !ok || spotQuantClientID(symbol, "BUY", 0, oldInterval, oldOpen) != prior.ClientOrderID {
 			return false, fmt.Errorf("%w: historical Spot BUY client id %q has no verifiable candle identity",
 				spotledger.ErrNeedsReview, prior.ClientOrderID)
 		}
@@ -426,17 +472,28 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 		if err != nil || signal.Action != "SELL" {
 			return err
 		}
-		interval, err := spotSignalInterval(coin)
-		if err != nil {
-			return err
+		// A SELL is strictly bound to this verified Position and its Fill.
+		// Never require the BUY-candle's 3d market OpenTime to release
+		// an existing position. A previously submitted SELL under any
+		// older (timeframe-based) client ID also blocks a second POST.
+		for _, order := range orders {
+			if order.Side != "SELL" {
+				continue
+			}
+			if order.PositionID != active.ID || order.Symbol != coin.Symbol {
+				return fmt.Errorf("%w: Spot SELL belongs to another managed position", spotledger.ErrNeedsReview)
+			}
+			return fmt.Errorf("%w: Spot position %d remains OPEN after prior SELL order %d; review the remaining Fill and dust",
+				spotledger.ErrNeedsReview, active.ID, order.ID)
 		}
-		id := spotQuantClientID(coin.Symbol, "SELL", active.ID, interval, spotCandleOpen(r.clock(), interval))
+		id := spotQuantExitClientID(coin.Symbol, active.ID)
 		prior, err := r.ledger.FindOrderByClientID(id)
 		if err == nil {
 			if prior.Symbol != coin.Symbol || prior.Side != "SELL" || prior.PositionID != active.ID {
 				return fmt.Errorf("%w: Spot SELL client id collision", spotledger.ErrNeedsReview)
 			}
-			return nil // already submitted in this Spot candle, even if FILLED
+			return fmt.Errorf("%w: Spot position %d has a prior SELL client order but is still OPEN",
+				spotledger.ErrNeedsReview, active.ID)
 		}
 		if !errors.Is(err, orm.ErrNoRows) {
 			return err
@@ -457,7 +514,12 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 	if err != nil {
 		return err
 	}
-	id := spotQuantClientID(coin.Symbol, "BUY", 0, interval, spotCandleOpen(r.clock(), interval))
+	eventNow := r.clock()
+	open, err := r.resolveSpotEventOpen(coin.Symbol, interval, eventNow)
+	if err != nil {
+		return err
+	}
+	id := spotQuantClientID(coin.Symbol, "BUY", 0, interval, open)
 	prior, err := r.ledger.FindOrderByClientID(id)
 	if err == nil {
 		if prior.Symbol != coin.Symbol || prior.Side != "BUY" {
@@ -468,7 +530,7 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 	if !errors.Is(err, orm.ErrNoRows) {
 		return err
 	}
-	priorEvent, err := r.hasBUYInEvent(coin.Symbol, interval, r.clock())
+	priorEvent, err := r.hasBUYInEvent(coin.Symbol, interval, open, eventNow)
 	if err != nil {
 		return err
 	}
