@@ -26,6 +26,12 @@ testnet_binance_futures_base_url = "https://testnet.binancefuture.com"
 testnet_api_key = ""
 testnet_api_secret = ""
 
+# 独立的 Binance Spot 测试网配置；不能使用上面的 Futures Testnet 密钥
+# SDK 自动拼接 /api/v3 路径，这里只填 REST 主机，不加 /api
+testnet_binance_spot_base_url = "https://testnet.binance.vision"
+testnet_spot_api_key = ""
+testnet_spot_api_secret = ""
+
 # Binance HTTP/WebSocket SOCKS5 代理，不需要时留空；多个代理使用英文逗号分隔并轮询使用
 # 支持 socks5:// 与 socks5h://，可使用 socks5://user:password@host:port
 proxy_url = ""

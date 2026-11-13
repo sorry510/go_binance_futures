@@ -1,0 +1,75 @@
+{
+  "recorded_utc": "2026-11-13T05:12:55.846536+00:00",
+  "method_policy": "GET ONLY, never submit/cancel orders",
+  "no_api_key_or_account_balances_recorded": true,
+  "checks": [
+    {
+      "market": "spot_testnet",
+      "method": "GET",
+      "endpoint": "https://testnet.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=3d&limit=3",
+      "http_status": 200,
+      "response": [
+        [
+          1793923200000,
+          "76100.00000000",
+          "76643.43000000",
+          "61448.30000000",
+          "74792.64000000",
+          "1459.73449000",
+          1794182399999,
+          "110645802.88923930",
+          173411,
+          "690.35800000",
+          "52330396.09882680",
+          "0"
+        ],
+        [
+          1794182400000,
+          "74792.64000000",
+          "76643.43000000",
+          "62170.21000000",
+          "74009.47000000",
+          "1494.09051000",
+          1794441599999,
+          "111309847.89200060",
+          224583,
+          "709.82198000",
+          "52902824.68335990",
+          "0"
+        ],
+        [
+          1794441600000,
+          "74009.48000000",
+          "74217.49000000",
+          "58414.29000000",
+          "68690.30000000",
+          "389.51871000",
+          1794700799999,
+          "28011326.17259100",
+          90802,
+          "185.56919000",
+          "13319092.12125800",
+          "0"
+        ]
+      ]
+    },
+    {
+      "market": "spot_mainnet",
+      "method": "GET",
+      "endpoint": "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=3d&limit=3",
+      "network_error": "URLError"
+    },
+    {
+      "market": "spot_testnet",
+      "method": "GET",
+      "endpoint": "https://testnet.binance.vision/api/v3/account",
+      "credentials_configured": true,
+      "http_status": 401,
+      "status": "BLOCKED",
+      "binance_code": -2015,
+      "error_text": "Invalid API-key, IP, or permissions for action.",
+      "server_time_utc": "2026-11-13T05:12:58.755000+00:00",
+      "response_header_date": "Fri, 13 Nov 2026 05:12:59 GMT"
+    }
+  ]
+}
