@@ -35,7 +35,7 @@ Normal startup:
 ./go_binance_futures
 ```
 
-**Current binary requires database schema v24** (canonical code source: `appversion.DatabaseSchemaVersion`). An isolated local MySQL 5.6 database has passed fresh `sync db` and idempotence checks; **production MySQL 8 structure, performance, existing Main-account data preservation and live Binance gates remain unverified**. Local mocks, SQLite and empty-table plans do not substitute for these checks.
+**Current binary requires database schema v25** (canonical code source: `appversion.DatabaseSchemaVersion`; the physical v25 tables must be checked separately before deployment, not just the version number). An isolated local MySQL 5.6 database has passed fresh `sync db` and idempotence checks; **production MySQL 8 structure, performance, existing Main-account data preservation and live Binance gates remain unverified**. Local mocks, SQLite and empty-table plans do not substitute for these checks.
 
 Normal startup **does not automatically synchronize the schema or run database version migrations**. If the database has not been initialized or its version is older than the current binary requires, the application will instruct you to run `go_binance_futures sync db`. Back up the database before production upgrades and preferably run the sync command while the service is stopped.
 
@@ -79,7 +79,7 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 
 | Menu | Pages and purpose |
 | --- | --- |
-| Configuration Center (`配置中心`) | Uses the same Card/collapse pattern as AI Configuration for non-AI runtime settings. Card headers show only the name and a status tag; actual switches live inside each Card. Futures Trade, Fast Move, Liquidation, Market Condition, and Test Strategy are separate Cards, alongside new-coin rush, coin alerts, market monitoring, funding-rate monitoring, debug push, and external links. Core WebSocket streams are mandatory infrastructure and have no disable switch. |
+| Configuration Center (`配置中心`) | Uses the same Card/collapse pattern as AI Configuration for non-AI runtime settings. Card headers show only the name and a status tag; actual switches live inside each Card. Futures Trade, Spot Quant, Fast Move, Liquidation, Market Condition, and Test Strategy are separate Cards, alongside new-coin rush, coin alerts, market monitoring, funding-rate monitoring, debug push, and external links. Core WebSocket streams are mandatory infrastructure and have no disable switch. |
 | AI → Chat (`AI → 对话`) | Unified multi-turn conversations with Symbol selection, per-chat models, and multiple mounted Skills |
 | AI → Market Analysis (`AI → 市场分析`) | **Symbol Analysis / Opportunities** tabs for structured TradingPlans, historical analysis, opportunity review, and controlled-trade proposals |
 | AI → Workflows (`AI → 业务 Workflow`) | Manually execute five workflows; **Strategy Draft Validation** only compiles expressions and runs synthetic scenarios, not a historical backtest. Eligible manual market-scan results enter asynchronous opportunity analysis |
@@ -95,12 +95,19 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Futures Trade → Strategy Templates (`合约交易 → 策略模板`) | Create and maintain indicator and strategy-method templates |
 | Futures Trade → Test Results (`合约交易 → 测试结果`) | Search real-time paper-trading results by symbol and time range |
 | Futures Trade → Historical Backtest (`合约交易 → 历史回测`) | Replay strategies on historical 1m market data with Funding and MarketCondition; supports Standard 1m and Adaptive Resolution modes with trades, equity, audit events, and drill-down statistics |
+| Spot Quant → Spot Trading (`现货量化交易`) | Independent Spot symbol/indicator configuration with LONG and CLOSE_LONG rules only; no futures leverage, shorts or margin |
+| Spot Quant → Local Spot Account (`本地现货账户`) | Spot-managed positions, orders and immutable exchange fills; quote-asset PnL is shown only when prices and fees are verifiable |
+| Spot Quant → Strategy Templates (`现货策略模板`) | Independent Spot-only technical indicators and strategy templates, separate from Futures templates |
+| Spot Quant → Controlled Trading (`仓位与受控交易`) | Review managed positions and anomalies, rebuild local projections after confirmation; real sell/cancel/exchange actions stay disabled pending release gates |
 | Coin Alerts → Spot/Futures Alerts (`币种提醒 → 现货提醒 / 合约提醒`) | Configure target-price alerts and optional automatic trades |
 | Market Monitoring → Spot/Futures Monitoring (`市场监听 → 现货监听 / 合约监听`) | Configure K-line, threshold, indicator, and custom-strategy monitoring |
 | Funding Rate Monitoring (`资金费率监听`) | View funding rates and configure automatic trading |
 | New-Coin Rush (`抢新配置`) | Configure spot, mining-token, and futures launch trades |
 | System Configuration (`系统配置`) | Edit `conf/app.conf` online and access Save, Restart Service, and Stop Service actions |
 | Logs (`日志`) | Display the service logs returned by `web.commend_log` |
+
+
+**Spot Quant stage 06-6 development status (2026-11-12)**: Configuration Center includes a separate `spot_quant_enable` Card. The backend uses isolated v25 Spot position/order/fill tables; the four Spot pages and read-only accounting APIs are implemented. The local `go_bn_test` schema was verified read-only with all Spot switches OFF. Fake BUY/SELL/recovery tests and legacy Futures/Spot regressions passed. All frontend `dist` files were SHA-256 verified against the **local development repository** `static`; **nothing has been deployed or enabled for live trading**. Public Spot Testnet market metadata works, but the signed Testnet account request returned `-2015`; real Testnet execution, MySQL 8/production checks, small live orders and deployment remain blocked. See [06-6 implementation record](doc/trade/开发方案-06-6-完整联调与交付-实施记录.md).
 
 
 #### Futures order-history administration (Schema v24)
@@ -128,7 +135,7 @@ Before configuring either value, close production G1–G5, retain each account's
 
 ### Lead Copy Trading (Stages 6 and 7-1 through 7-4)
 
-> **Current status: the management UI and account-isolation infrastructure are implemented and verified with Mock/Race tests. Live Lead Portfolio identity, MySQL 8 schema v24, private WS, Algo orders, and funded execution have NOT passed their live gates. Live Lead order execution remains locked.** This feature is separate from AI Controlled Trading and cannot guarantee any follower fills.
+> **Current status: the management UI and account-isolation infrastructure are implemented and verified with Mock/Race tests. Live Lead Portfolio identity, MySQL 8 physical schema v25, private WS, Algo orders, and funded execution have NOT passed their live gates. Live Lead order execution remains locked.** This feature is separate from AI Controlled Trading and cannot guarantee any follower fills.
 
 Open **Futures Trade → Lead Copy Trading** (`/futures/lead`). The page has six Cards:
 
@@ -158,7 +165,7 @@ BINANCE_LEAD_AUDIT_FILE=/private/lead/operations.jsonl
 - `BINANCE_LEAD_CREDENTIAL_KEY` must decode from **standard Base64 to exactly 32 random bytes**. Generate and persist it securely: losing/rotating this master key makes the existing encrypted credentials unreadable.
 - All three file paths must be **absolute and outside the repository**, with an operator-owned private parent directory (recommended `0700`) and private files (`0600`), not symlinks. The app does not silently create private directories or generate a master key.
 - After setting these values and deploying the updated backend, use the UI to save a dedicated Lead credential, request read-only verification, and save independent risk limits. Missing secure storage causes fail-closed errors; **do not work around this by putting secrets into `app.conf`**.
-- Only after backing up the target DB, checking the actual version/data and taking the service down should an operator explicitly run `./go_binance_futures sync db`. The current binary requires **schema v24** (see `appversion.DatabaseSchemaVersion`). Passing SQLite/Mock migration tests does **not** confirm your real MySQL 8 schema has been migrated.
+- Only after backing up the target DB, checking the actual version/data and taking the service down should an operator explicitly run `./go_binance_futures sync db`. The current binary requires **schema v25** (see `appversion.DatabaseSchemaVersion`; verify the production physical v25 schema read-only before deployment). Passing SQLite/Mock migration tests does **not** confirm your real MySQL 8 schema has been migrated.
 
 #### Private read-only observer: explicit opt-in performs real Binance I/O
 

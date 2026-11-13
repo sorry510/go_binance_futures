@@ -1,0 +1,17 @@
+{
+  "name": "CI Kline LONG fixture",
+  "technology": {
+    "ma": [
+      {"name": "ma_1h_2", "enable": true, "kline_interval": "1h", "period": 2}
+    ]
+  },
+  "strategy": [
+    {
+      "name": "long kline entry",
+      "type": "long",
+      "code": "kline_1h.Close[1] > 0",
+      "enable": true,
+      "fullScreen": false
+    }
+  ]
+}

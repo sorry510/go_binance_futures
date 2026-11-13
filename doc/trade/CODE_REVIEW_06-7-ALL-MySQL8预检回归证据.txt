@@ -1,0 +1,22 @@
+CODE_REVIEW_06-7-ALL · F2 disposable MySQL 8 real SQL regression
+Recorded UTC: 2026-11-13T13:38:27.058657+00:00
+Scope: disposable Docker MySQL 8 container, synthetic 500 CLOSED positions,
+1000 orders (250 sqt BUY, 250 sqm BUY, 500 SELL), 1000 synthetic Fills.
+The generator's v4 hash payload was preserved; only the three-byte
+environment prefix was set for this test's legitimate sqt/sqm orders.
+Executed: doc/trade/开发方案-06-7-4-生产只读预检.sql (SELECT / EXPLAIN only).
+No user database, API key, Mainnet orders, or persistent MySQL changes.
+Tests then changed one BUY prefix to sq4 (still valid payload), and
+modified one additional BUY SHA nibble. The SQL must fail those cases.
+
+SYNTHETIC_BUY_IDS_sqt 250 sqm 250 legacy_sq4 0
+MIXED_ENV_SQL_GATE PASS	PASS	0	0	0	0	0	0
+LEGACY_SQ4_SQL_GATE PASS	FAIL	0	0	0	0	1	1
+FORGED_HASH_SQL_GATE PASS	FAIL	0	0	0	1	1	2
+REVIEW_ALL_F2_DISPOSABLE_MYSQL8_SQL_REGRESSION_PASS
+
+Raw preflight output (legitimate sqt/sqm) remains at:
+ /tmp/spot067all_mysql8_F2_evidence.txt (development machine temporary file)
+Both the disposable Docker container and generated SQL scratch folder are
+removed by the exit trap. Results do not establish production P95,
+physical production v25 schema correctness, or deployment approval.

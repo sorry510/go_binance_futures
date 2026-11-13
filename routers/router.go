@@ -124,6 +124,24 @@ func init() {
 	web.Router("/test-strategy-results/:id", &controllers.TestStrategyResultController{}, "delete:Delete;get:Show")         // 删除某个测试策略结果和获取明细
 	web.Router("/test-strategy-results/test/:symbol", &controllers.TestStrategyResultController{}, "post:TestStrategyRule") // 测试策略结果的某个平仓测试是否符合条件
 
+	// 06-5: Spot-only local read models. Rebuild only recalculates cached
+	// position fields from verified fills; no Binance order mutations here.
+	web.Router("/spot-quant/positions", &controllers.SpotQuantAccountController{}, "get:Positions")
+	web.Router("/spot-quant/positions/:id/rebuild", &controllers.SpotQuantAccountController{}, "post:LocalRebuild")
+	web.Router("/spot-quant/positions/:id", &controllers.SpotQuantAccountController{}, "get:PositionDetail")
+	web.Router("/spot-quant/orders", &controllers.SpotQuantAccountController{}, "get:Orders")
+
+	// 06-2: Spot Quant configuration. No live order routes are registered.
+	web.Router("/spot-quant/symbols", &controllers.SpotQuantController{}, "get:ListSymbols;post:CreateSymbol")
+	web.Router("/spot-quant/symbols/batch", &controllers.SpotQuantController{}, "put:BatchSymbols")
+	web.Router("/spot-quant/symbols/enable/:flag", &controllers.SpotQuantController{}, "put:EnableSymbols")
+	web.Router("/spot-quant/symbols/:id", &controllers.SpotQuantController{}, "get:GetSymbol;put:EditSymbol")
+	web.Router("/spot-quant/symbols/:id/rule-test", &controllers.SpotQuantController{}, "post:SpotRuleTest")
+	web.Router("/spot-quant/strategy-templates", &controllers.SpotQuantController{}, "get:ListTemplates;post:CreateTemplate")
+	web.Router("/spot-quant/strategy-templates/import", &controllers.SpotQuantController{}, "post:ImportTemplate")
+	web.Router("/spot-quant/strategy-templates/rule-test", &controllers.SpotQuantController{}, "post:SpotRuleTest")
+	web.Router("/spot-quant/strategy-templates/:id", &controllers.SpotQuantController{}, "get:GetTemplate;put:EditTemplate;delete:DeleteTemplate")
+
 	web.Router("/spots", &controllers.SpotController{}, "get:Get;post:Post")             // 列表查询和新增
 	web.Router("/spots/:id", &controllers.SpotController{}, "delete:Delete;put:Edit")    // 更新和删除
 	web.Router("/spots/enable/:flag", &controllers.SpotController{}, "put:UpdateEnable") // 修改所有的合约交易对开启关闭
