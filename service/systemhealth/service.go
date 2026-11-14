@@ -42,6 +42,14 @@ type DatabaseCheck struct {
 	RequiredVersion int64 `json:"required_version"`
 }
 
+// WSMarketStatus reports market-data freshness, not user-data/order WS connectivity.
+type WSMarketStatus struct {
+	Check
+	Market       string `json:"market"`
+	Enabled      bool   `json:"enabled"`
+	LastUpdateAt int64  `json:"last_update_at,omitempty"`
+}
+
 type MCPServerStatus struct {
 	Name          string `json:"name"`
 	Status        string `json:"status"`
@@ -83,7 +91,9 @@ type Report struct {
 	Overall            string                            `json:"overall"`
 	Database           DatabaseCheck                     `json:"database"`
 	BinanceREST        Check                             `json:"binance_rest"`
-	FuturesWS          Check                             `json:"futures_ws"`
+	FuturesWS          Check                             `json:"futures_ws"` // Legacy compatibility.
+	MarketWS           Check                             `json:"market_ws"`
+	WSMarkets          []WSMarketStatus                  `json:"ws_markets"`
 	AnnouncementWS     Check                             `json:"announcement_ws"`
 	MarketIntelligence Check                             `json:"market_intelligence"`
 	MarketSources      []marketintelligence.SourceStatus `json:"market_sources"`
@@ -103,6 +113,7 @@ type Options struct {
 	BinanceProxyURL              string
 	IgnoreConfiguredBinanceProxy bool
 	SchedulerRuntimeAvailable    bool
+	DeliveryWSEnabled            bool // Set by the actual delivery WS startup, not by stale DB rows.
 	SchedulerJobs                []scheduler.JobStatus
 }
 
@@ -140,6 +151,7 @@ func (Service) Report(ctx context.Context, options Options) (Report, error) {
 		report.BinanceREST = Check{Status: StatusUnknown, Message: "network check not requested"}
 	}
 	report.FuturesWS = checkFuturesWS(o, now)
+	report.MarketWS, report.WSMarkets = checkMarketWS(o, now, report.FuturesWS, options.DeliveryWSEnabled)
 	marketSources, sourceErr := (marketintelligence.Service{}).SourceStatuses(ctx)
 	if sourceErr != nil {
 		report.MarketIntelligence = Check{Status: StatusError, Message: "read market intelligence source status failed", LastError: sourceErr.Error()}
@@ -213,6 +225,59 @@ func checkFuturesWS(o orm.Ormer, now time.Time) Check {
 	}
 	if latest <= 0 {
 		return Check{Status: StatusWarning, Message: "no futures market update has been recorded"}
+	}
+	age := now.UnixMilli() - latest
+	if age < 0 {
+		age = 0
+	}
+	status := StatusHealthy
+	if age > 15*time.Minute.Milliseconds() {
+		status = StatusError
+	} else if age > 5*time.Minute.Milliseconds() {
+		status = StatusWarning
+	}
+	return Check{Status: status, Message: fmt.Sprintf("last market update %s ago", humanAge(age)), LastSuccessAt: latest}
+}
+
+// checkMarketWS groups actual market data sources into one health item.
+// USD-M and Spot WS are started from main.go. Delivery is disabled until its
+// own startup is invoked; old delivery_symbols timestamps must not trigger an alert.
+func checkMarketWS(o orm.Ormer, now time.Time, futures Check, deliveryEnabled bool) (Check, []WSMarketStatus) {
+	markets := []WSMarketStatus{
+		{Check: futures, Market: "futures", Enabled: true, LastUpdateAt: futures.LastSuccessAt},
+	}
+	spot := checkWSFreshness(o, now, "spot_symbols", "spot")
+	markets = append(markets, WSMarketStatus{Check: spot, Market: "spot", Enabled: true, LastUpdateAt: spot.LastSuccessAt})
+	delivery := Check{Status: StatusDisabled, Message: "market WS not started"}
+	if deliveryEnabled {
+		delivery = checkWSFreshness(o, now, "delivery_symbols", "delivery")
+	}
+	markets = append(markets, WSMarketStatus{Check: delivery, Market: "delivery", Enabled: deliveryEnabled, LastUpdateAt: delivery.LastSuccessAt})
+	overall := Check{Status: StatusHealthy, Message: "market WS healthy"}
+	for _, market := range markets {
+		if !market.Enabled {
+			continue
+		}
+		if market.Status == StatusError {
+			overall.Status = StatusError
+		} else if market.Status != StatusHealthy && overall.Status == StatusHealthy {
+			overall.Status = StatusWarning
+		}
+	}
+	if overall.Status != StatusHealthy {
+		overall.Message = "market WS needs attention"
+	}
+	return overall, markets
+}
+
+func checkWSFreshness(o orm.Ormer, now time.Time, table, market string) Check {
+	var latest int64
+	// table is a fixed, internal name; never interpolate user input into SQL.
+	if err := o.Raw("SELECT COALESCE(MAX(updateTime), 0) FROM " + table).QueryRow(&latest); err != nil {
+		return Check{Status: StatusError, Message: "read " + market + " websocket freshness failed", LastError: err.Error()}
+	}
+	if latest <= 0 {
+		return Check{Status: StatusWarning, Message: "no " + market + " market update has been recorded"}
 	}
 	age := now.UnixMilli() - latest
 	if age < 0 {
@@ -470,7 +535,7 @@ func checkTrade(o orm.Ormer) TradeCheck {
 
 func (report *Report) markOverall() {
 	report.Overall = StatusHealthy
-	statuses := []string{report.Database.Status, report.BinanceREST.Status, report.FuturesWS.Status, report.AnnouncementWS.Status, report.MarketIntelligence.Status, report.MCP.Status, report.LLM.Status, report.Scheduler.Status, report.Agent.Status, report.Trade.Status}
+	statuses := []string{report.Database.Status, report.BinanceREST.Status, report.MarketWS.Status, report.AnnouncementWS.Status, report.MarketIntelligence.Status, report.MCP.Status, report.LLM.Status, report.Scheduler.Status, report.Agent.Status, report.Trade.Status}
 	for _, status := range statuses {
 		if status == StatusError {
 			report.Overall = StatusError

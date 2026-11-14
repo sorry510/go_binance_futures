@@ -4,6 +4,7 @@ import (
 	"time"
 
 	agentapp "go_binance_futures/agent/app"
+	binance "go_binance_futures/feature/api/binance"
 	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/service/systemhealth"
 	"go_binance_futures/utils"
@@ -22,6 +23,7 @@ func (ctrl *SystemDashboardController) Health() {
 	report, err := (systemhealth.Service{}).Report(ctrl.Ctx.Request.Context(), systemhealth.Options{
 		CheckBinanceREST:          true,
 		SchedulerRuntimeAvailable: true,
+		DeliveryWSEnabled:         binance.DeliveryWSStarted(),
 		SchedulerJobs:             agentapp.DefaultSchedulerStatus(),
 	})
 	if err != nil {

@@ -26,7 +26,7 @@ func setupHealthDB(t *testing.T, now time.Time) orm.Ormer {
 	}
 	healthDBOnce.Do(func() {
 		orm.RegisterModel(
-			new(models.Config), new(models.Symbols), new(models.AgentMarketSourceStatus),
+			new(models.Config), new(models.Symbols), new(models.SpotSymbols), new(models.DeliverySymbols), new(models.AgentMarketSourceStatus),
 			new(models.AgentMCPServer), new(models.LLMConfig), new(models.AgentObservation),
 			new(models.AgentTask), new(models.AgentTradeProposal), new(models.FuturesManagedPosition),
 			new(models.FuturesManagedOrder),
@@ -45,6 +45,9 @@ func setupHealthDB(t *testing.T, now time.Time) orm.Ormer {
 		t.Fatal(err)
 	}
 	if _, err := o.Insert(&models.Symbols{Symbol: "BTCUSDT", UpdateTime: now.Add(-time.Minute).UnixMilli()}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Insert(&models.SpotSymbols{Symbol: "BTCUSDT", UpdateTime: now.Add(-time.Minute).UnixMilli()}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := o.Insert(&models.LLMConfig{Name: "fixture", Provider: "mock", Model: "fixture", Enabled: 1}); err != nil {
@@ -87,6 +90,12 @@ func TestReportUsesDeterministicHealthSignals(t *testing.T) {
 	}
 	if report.BinanceREST.Status != StatusHealthy || report.FuturesWS.Status != StatusHealthy {
 		t.Fatalf("unexpected Binance health: rest=%+v ws=%+v", report.BinanceREST, report.FuturesWS)
+	}
+	if report.MarketWS.Status != StatusHealthy || len(report.WSMarkets) != 3 ||
+		report.WSMarkets[0].Market != "futures" || report.WSMarkets[0].Status != StatusHealthy ||
+		report.WSMarkets[1].Market != "spot" || report.WSMarkets[1].Status != StatusHealthy ||
+		report.WSMarkets[2].Market != "delivery" || report.WSMarkets[2].Enabled || report.WSMarkets[2].Status != StatusDisabled {
+		t.Fatalf("unexpected WS market statuses: overall=%+v markets=%+v", report.MarketWS, report.WSMarkets)
 	}
 	if report.MCP.Status != StatusHealthy || report.LLM.Status != StatusHealthy || report.Scheduler.Status != StatusHealthy {
 		t.Fatalf("unexpected subsystem health: mcp=%+v llm=%+v scheduler=%+v", report.MCP, report.LLM, report.Scheduler)
@@ -163,5 +172,39 @@ func TestSchedulerDefinitionsRespectConfig(t *testing.T) {
 	items := schedulerDefinitions(models.Config{MarketConditionIsAuto: 1, AgentMarketRegimeScheduleEnable: 1, AgentMarketRegimeIntervalMin: 30, AgentOpportunityWatchEnable: 1, AgentOpportunityScanIntervalMin: 60})
 	if len(items) != 3 || !items[0].Enabled || items[0].IntervalSeconds != 1800 || !items[1].Enabled || items[2].Enabled {
 		t.Fatalf("unexpected scheduler definitions: %+v", items)
+	}
+}
+
+func TestMarketWSStatusAndDisabledDelivery(t *testing.T) {
+	now := time.UnixMilli(1800000000000)
+	o := setupHealthDB(t, now)
+	healthy := checkFuturesWS(o, now)
+	overall, markets := checkMarketWS(o, now, healthy, false)
+	if overall.Status != StatusHealthy || markets[2].Status != StatusDisabled {
+		t.Fatalf("disabled delivery must not degrade health: %+v %+v", overall, markets)
+	}
+	if _, err := o.Raw("UPDATE spot_symbols SET updateTime=? WHERE symbol=?", now.Add(-16*time.Minute).UnixMilli(), "BTCUSDT").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	overall, markets = checkMarketWS(o, now, healthy, false)
+	if overall.Status != StatusError || markets[1].Status != StatusError || markets[2].Status != StatusDisabled {
+		t.Fatalf("stale spot should degrade WS while disabled delivery stays ignored: %+v %+v", overall, markets)
+	}
+	if _, err := o.Raw("UPDATE spot_symbols SET updateTime=? WHERE symbol=?", now.Add(-time.Minute).UnixMilli(), "BTCUSDT").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Insert(&models.DeliverySymbols{Symbol: "BTCUSD_PERP", UpdateTime: now.Add(-time.Minute).UnixMilli()}); err != nil {
+		t.Fatal(err)
+	}
+	overall, markets = checkMarketWS(o, now, healthy, true)
+	if overall.Status != StatusHealthy || !markets[2].Enabled || markets[2].Status != StatusHealthy {
+		t.Fatalf("enabled delivery should use its own timestamp: %+v %+v", overall, markets)
+	}
+	if _, err := o.Raw("UPDATE delivery_symbols SET updateTime=? WHERE symbol=?", now.Add(-10*time.Minute).UnixMilli(), "BTCUSD_PERP").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	overall, markets = checkMarketWS(o, now, healthy, true)
+	if overall.Status != StatusWarning || markets[2].Status != StatusWarning {
+		t.Fatalf("delivery freshness warning not propagated: %+v %+v", overall, markets)
 	}
 }

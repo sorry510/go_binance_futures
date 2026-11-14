@@ -83,7 +83,7 @@ UI 可在 `合约交易 → 策略模板` 中维护技术指标和策略方法�
 | AI → 任务中心 | **执行任务 / 定时任务与治理 / 报警链路** 三个标签；统一查看执行审计、Scheduler 状态、运行指标及报警历史 |
 | AI → AI 设置 | **AI 配置 / 模型 / Skill / MCP / Memory** 五个标签；默认显示第一个「AI 配置」，集中管理机会监控、报警、调度、交易风控和 AI 运行配置 |
 | 合约交易 → 受控交易 | 将成功的单币分析转换为 Trade Proposal，经确定性 Risk Engine、人工审批和执行前复检后受控提交 Binance，并保留完整审计 |
-| 系统看板 | 顶级菜单；集中查看 Database、Binance、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime、Trade Safety 健康状态；增加 Lead 账户只读摘要（WS、5 分钟 REST 用量及告警队列观测状态），并保留原长期 Trace、模型/Tool/Skill 指标和变更记录 |
+| 系统看板 | 顶级菜单；精简显示数据库、Binance REST、WS 行情状态（U 本位合约 / 现货 / 币本位合约）、LLM、Agent 和交易安全；MCP、市场情报和调度详情折叠查看，保留调用追踪、Skill / 模型 / 工具指标；Lead 详情在独立带单页面查看 |
 | 合约交易 → 合约交易 | 按 `自选`、`USDT`、`USDC` 查看币种；新增、查询、批量编辑、全部开启或全部关闭币种配置 |
 | 合约交易 → 合约带单 | 独立 Lead 账户的只读管理界面（`/futures/lead`）：凭证与只读验证、账户风控、暂停、受控持仓/订单、本地审计和 WS/API 状态；**当前不允许真实带单下单** |
 | 合约交易 → 合约订单 | **新订单历史（现已支持筛选范围批量隐藏/恢复和人工标注，生产上线 Gate 未通过）**：按 Managed `position_id` 查询仓位周期；展开 Managed 开/平/止盈/止损订单与真实逐笔 Fill，支持 main/Lead 账户隔离、完整性和时间/币种筛选；不展示旧 `order` 历史 |
@@ -356,7 +356,7 @@ AI 设置还有「模型」「Skill」「MCP」「Memory」标签。以上 AI �
 ### 任务中心、系统看板与报警历史
 
 - **任务中心**：查看 Agent 治理状态、Runtime 直接交易权限与受控执行开关、Scheduler、Task 历史、模型和 Token 等运行信息。
-- **系统看板**：原“AI → 可观测性”已提升为最上方顶级菜单。在保留长期 Trace、Skill/模型/Tool 指标和变更历史的基础上，增加 Database、Binance REST/Futures WS、Announcement、Market Intelligence、MCP、LLM、Scheduler、Agent Runtime 和 Trade Safety 的只读健康摘要；同时集中展示 Chat 启动错误、LLM 错误、Skill Studio 校验错误、Binance Used Weight / Order Count、429/418、API Budget 以及 Deferred / Coalesced / Cache / WS 本地命中。
+- **系统看板**：原“AI → 可观测性”已提升为最上方顶级菜单。顶部只显示 Database、Binance REST、统一 WS 行情、LLM、Agent 和 Trade Safety 六项健康摘要；WS 展开后分别查看 U 本位合约（symbols）、现货（spot_symbols）和币本位合约（delivery_symbols）的行情新鲜度，未启动的币本位 WS 不计入异常。公告、市场情报、MCP、调度器详情按需展开；保留 Agent 任务数、成功率、Token、LLM 错误和调用追踪，以及 Skill/模型/Tool 统计。Binance REST 常显限额预算、429/418，详细排行按需展开，前端每 1 秒无 loading 静默刷新一次本地 REST 快照（请求不重叠、失败保留上次数据）、每 60 秒刷新一次系统健康；切换 Agent 时间窗口不重新请求健康和 REST 状态。Lead 状态在合约带单页面查看，变更历史已从看板移除。
 - **报警链路历史**：查看 Signal 从 Event Bus、Signal Engine、AI 分析/归并到 Notification 或 fallback 的完整处理历史。
 
 ### 系统诊断与日志清理

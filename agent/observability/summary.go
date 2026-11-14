@@ -305,10 +305,6 @@ func (s Store) Summary(ctx context.Context, start, end int64) (Summary, error) {
 		}
 		result.MCPServers = append(result.MCPServers, m)
 	}
-	changes, err := o.QueryTable(new(models.AgentChangeEvent)).Filter("created_at__gte", start).Filter("created_at__lte", end).Count()
-	if err == nil {
-		result.ChangeEvents = changes
-	}
 	return result, nil
 }
 

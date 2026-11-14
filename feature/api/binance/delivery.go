@@ -3,6 +3,7 @@ package binance
 import (
 	"context"
 	"strings"
+	"sync/atomic"
 
 	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/utils"
@@ -54,8 +55,14 @@ func GetDeliveryExchangeInfo() (res *delivery.ExchangeInfo, err error) {
 }
 
 var flagWsDelivery = 0
+var deliveryWSStarted atomic.Bool
+
+// DeliveryWSStarted reports whether this process actually attempted to start
+// the delivery market-data stream. Historical database records are not proof.
+func DeliveryWSStarted() bool { return deliveryWSStarted.Load() }
 
 func UpdateDeliveryCoinByWs() {
+	deliveryWSStarted.Store(true)
 	// binance.BaseWsMainURL = "wss://testnet.binance.vision/ws"
 	var lock = false
 	var o = orm.NewOrm()
