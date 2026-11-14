@@ -698,7 +698,7 @@ dbname = ""
 ## 交流群
 
 ### wx
-![alt text](qrcode.jpg)
+![alt text](qrcode.png)
 
 ### tg
 https://t.me/+neEHA8VSgF1jMTg9
