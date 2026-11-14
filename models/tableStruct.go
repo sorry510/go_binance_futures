@@ -203,38 +203,6 @@ type SymbolFundingRates struct {
 	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
 }
 
-// 吃资金费率
-type EatRateSymbols struct {
-	ID              int64   `orm:"column(id)" json:"id"`
-	Type            int64   `orm:"column(type)" json:"type"` // 1:正向套利 2:反向套利, 目前只有正向套利
-	Enable          int     `orm:"column(enable)" json:"enable"`
-	Symbol          string  `orm:"column(symbol)" json:"symbol"`                     // 交易对(usdt)
-	SpotSymbol      string  `orm:"column(spot_symbol)" json:"spot_symbol"`           // 现货的交易对
-	FuturesSymbol   string  `orm:"column(futures_symbol)" json:"futures_symbol"`     // 合约的交易对
-	TotalAmount     string  `orm:"column(total_amount)" json:"total_amount"`         // 总交易金额
-	SpotAmount      string  `orm:"column(spot_amount)" json:"spot_amount"`           // 现货交易金额
-	FuturesAmount   string  `orm:"column(futures_amount)" json:"futures_amount"`     // 合约交易金额 (没有乘杠杆倍率)
-	SpotPrice       string  `orm:"column(spot_price)" json:"spot_price"`             // 现货的买入价格
-	FuturesPrice    string  `orm:"column(futures_price)" json:"futures_price"`       // 合约做空的价格
-	SpotQuantity    float64 `orm:"column(spot_quantity)" json:"spot_quantity"`       // 现货的买入的数量
-	FuturesQuantity float64 `orm:"column(futures_quantity)" json:"futures_quantity"` // 合约做空的数量
-	SpotOrderId     int64   `orm:"column(spot_order_id)" json:"spot_order_id"`       // 现货订单id
-	FuturesOrderId  int64   `orm:"column(futures_order_id)" json:"futures_order_id"` // 合约订单id
-
-	Leverage   int64  `orm:"column(leverage)" json:"leverage"`     // 合约杠杆倍率
-	MarginType string `orm:"column(marginType)" json:"marginType"` // 杠杆类型 ISOLATED(逐仓), CROSSED(全仓)
-	TickSize   string `orm:"column(tickSize)" json:"tickSize"`     // 交易金额精度
-	StepSize   string `orm:"column(stepSize)" json:"stepSize"`     // 交易数量精度
-
-	Profit         float64 `orm:"column(profit)" json:"profit"`                     // 盈利(usdt)，不带交易买卖的手续费
-	LastProfitTime int64   `orm:"column(last_profit_time)" json:"last_profit_time"` // 上次统计时间
-	StartTime      int64   `orm:"column(start_time)" json:"start_time"`             // 套利开始时间
-	EndTime        int64   `orm:"column(end_time)" json:"end_time"`                 // 套利结束时间
-
-	CreateTime int64 `orm:"column(createTime)" json:"createTime"`
-	UpdateTime int64 `orm:"column(updateTime)" json:"updateTime"`
-}
-
 // 策略模板
 type StrategyTemplates struct {
 	ID         int64  `orm:"column(id)" json:"id"`
@@ -308,10 +276,6 @@ func (u *ListenSymbols) TableName() string {
 
 func (u *SymbolFundingRates) TableName() string {
 	return "symbol_funding_rates"
-}
-
-func (u *EatRateSymbols) TableName() string {
-	return "eat_rate_symbols"
 }
 
 func (u *StrategyTemplates) TableName() string {

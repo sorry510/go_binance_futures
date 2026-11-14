@@ -453,44 +453,7 @@
 
 ---
 
-## 13. 吃资金费率套利（Fund Rate Eat）
-
-### GET `/fund-rate/eat`
-查询套利配置列表。
-
-**Query 参数**
-
-| 参数 | 说明 |
-|---|---|
-| `symbol` | 精确匹配 |
-
-### POST `/fund-rate/eat`
-新增套利配置（自动读取合约精度，默认 leverage=3，enable=0）。
-
-**Request Body**
-```json
-{
-  "futuresSymbol": "BTCUSDT",
-  "spotSymbol": "BTCUSDT",
-  "totalAmount": "300"
-}
-```
-
-### PUT `/fund-rate/eat/:id`
-更新套利配置。
-
-### DELETE `/fund-rate/eat/:id`
-删除套利配置。
-
-### POST `/fund-rate/eat/start/:id`
-开启套利：同时买入现货 + 做空合约。
-
-### POST `/fund-rate/eat/end/:id`
-关闭套利：同时卖出现货 + 平仓合约。
-
----
-
-## 14. 策略模板（Strategy Templates）
+## 13. 策略模板（Strategy Templates）
 
 ### GET `/strategy-templates`
 查询策略模板列表。
@@ -515,7 +478,7 @@
 
 ---
 
-## 15. 服务控制（Command）
+## 14. 服务控制（Command）
 
 ### POST `/start`
 启动后台交易任务（执行 `conf/app.conf` 中配置的 `commend_start` 命令，异步执行）。

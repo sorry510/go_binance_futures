@@ -197,11 +197,6 @@ func init() {
 	web.Router("/futures/local/open-orders", &controllers.AccountController{}, "get:GetLocalFuturesOpenOrders")                                   // 获取本地存储的挂单信息
 	web.Router("/futures/liquidation-orders", &controllers.FuturesLiquidationOrderController{}, "get:Get")                                        // 合约强平订单查询
 
-	web.Router("/fund-rate/eat", &controllers.EatRateController{}, "get:Get;post:Post")          // 列表查询和新增
-	web.Router("/fund-rate/eat/:id", &controllers.EatRateController{}, "delete:Delete;put:Edit") // 更新和删除
-	web.Router("/fund-rate/eat/start/:id", &controllers.EatRateController{}, "post:Start")       // start
-	web.Router("/fund-rate/eat/end/:id", &controllers.EatRateController{}, "post:End")           // end
-
 	web.Router("/strategy-templates", &controllers.StrategyTemplateController{}, "get:Get;post:Post")                                         // 策略模板
 	web.Router("/strategy-templates/import", &controllers.StrategyTemplateController{}, "post:Import")                                        // 导入策略模板 JSON
 	web.Router("/strategy-templates/ai-generate", &controllers.StrategyTemplateController{}, "post:StartAIGeneration")                        // 创建 AI 策略模板生成任务

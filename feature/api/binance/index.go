@@ -267,41 +267,6 @@ func GetPositionV3(positionParams PositionParams) (res []*futures.PositionRiskV3
 	})
 }
 
-type IncomeParams struct {
-	Symbol     string
-	IncomeType string
-	StartTime  int64
-	EndTime    int64
-	Limit      int64
-}
-
-// @returns /doc/income.js
-func GetIncome(incomeParams IncomeParams) (res []*futures.IncomeHistory, err error) {
-	res, err = doFuturesSigned(context.Background(), futuresSignedReadRecvWindow, func(client *futures.Client, ctx context.Context, opts ...futures.RequestOption) ([]*futures.IncomeHistory, error) {
-		query := client.NewGetIncomeHistoryService()
-		if incomeParams.Symbol != "" {
-			query = query.Symbol(incomeParams.Symbol)
-		}
-		if incomeParams.IncomeType != "" {
-			query = query.IncomeType(incomeParams.IncomeType)
-		}
-		if incomeParams.StartTime != 0 {
-			query = query.StartTime(incomeParams.StartTime)
-		}
-		if incomeParams.EndTime != 0 {
-			query = query.EndTime(incomeParams.EndTime)
-		}
-		if incomeParams.Limit != 0 {
-			query = query.Limit(incomeParams.Limit)
-		}
-		return query.Do(ctx, opts...)
-	})
-	if err != nil {
-		logs.Error(err)
-	}
-	return res, err
-}
-
 func GetDepth(symbol string, limits ...int) (res *futures.DepthResponse, err error) {
 	return GetDepthContext(context.Background(), symbol, limits...)
 }

@@ -100,7 +100,6 @@ func registerModels() {
 	orm.RegisterModel(new(models.NoticeSymbols))
 	orm.RegisterModel(new(models.ListenSymbols))
 	orm.RegisterModel(new(models.SymbolFundingRates))
-	orm.RegisterModel(new(models.EatRateSymbols))
 	orm.RegisterModel(new(models.StrategyTemplates))
 	orm.RegisterModel(new(models.TestStrategyResults))
 	orm.RegisterModel(new(models.SpotSymbols))
@@ -548,15 +547,6 @@ func main() {
 		// 监听费率报警信息
 		feature.ListenCoinFundingRate(SystemConfig)
 	}, time.Second*120) // 120 秒更新一次
-
-	// 监听套利情况
-	// go func() {
-	// 	return
-	// 	for {
-	// 		rate.ListenRateEat()
-	// 		time.Sleep(time.Hour * 1) // 1 小时更新一次
-	// 	}
-	// }()
 
 	// 合约强平订单每日清理，删除 10 天前的数据
 	go binance.StartFuturesLiquidationOrderCleanupTask()
