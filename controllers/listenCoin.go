@@ -357,37 +357,107 @@ func (ctrl *ListenCoinController) GetKcLineChart() {
 	})
 }
 
+// fundingRatePagination normalizes paging for the management list. Requests
+// without page/limit retain the historical array response for older clients.
+func fundingRatePagination(rawPage, rawLimit string, total int64) (page, limit, offset int) {
+	page, err := strconv.Atoi(rawPage)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit, err = strconv.Atoi(rawLimit)
+	if err != nil || limit < 1 {
+		limit = 50
+	}
+	if limit > 500 {
+		limit = 500
+	}
+	if total == 0 {
+		page = 1
+	} else {
+		last := int((total-1)/int64(limit)) + 1
+		if page > last {
+			page = last
+		}
+	}
+	return page, limit, (page - 1) * limit
+}
+
+func fundingRateSort(rows []models.SymbolFundingRates, direction string) {
+	if direction != "+" && direction != "-" {
+		return
+	}
+	sort.SliceStable(rows, func(i, j int) bool {
+		left, _ := strconv.ParseFloat(rows[i].NowFundingRate, 64)
+		right, _ := strconv.ParseFloat(rows[j].NowFundingRate, 64)
+		if direction == "+" {
+			return left > right
+		}
+		return left < right
+	})
+}
+
 func (ctrl *ListenCoinController) GetFundingRates() {
 	paramsSort := ctrl.GetString("sort")
 	symbol := ctrl.GetString("symbol")
+	rawPage := ctrl.GetString("page")
+	rawLimit := ctrl.GetString("limit")
+	paged := rawPage != "" || rawLimit != ""
 
 	o := orm.NewOrm()
-	var symbols []models.SymbolFundingRates
 	query := o.QueryTable("symbol_funding_rates")
 	if symbol != "" {
 		query = query.Filter("symbol__contains", symbol)
 	}
-	_, err := query.OrderBy("ID").All(&symbols)
-	if err != nil {
-		ctrl.Ctx.Resp(utils.ResJson(400, nil, "error"))
+
+	var symbols []models.SymbolFundingRates
+	if !paged {
+		// Backwards compatibility for other consumers of the original endpoint.
+		if _, err := query.OrderBy("ID").All(&symbols); err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+		fundingRateSort(symbols, paramsSort)
+		ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": symbols, "msg": "success"})
+		return
 	}
 
-	sort.SliceStable(symbols, func(i, j int) bool {
-		nowFundingRate1, _ := strconv.ParseFloat(symbols[i].NowFundingRate, 64)
-		nowFundingRate2, _ := strconv.ParseFloat(symbols[j].NowFundingRate, 64)
-		if paramsSort == "+" {
-			return nowFundingRate1 >= nowFundingRate2 // 涨幅从大到小排序
-		} else if paramsSort == "-" {
-			return nowFundingRate1 < nowFundingRate2 // 涨幅从小到大排序
-		} else {
-			return true
+	total, err := query.Count()
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	page, limit, offset := fundingRatePagination(rawPage, rawLimit, total)
+	if paramsSort == "+" || paramsSort == "-" {
+		// The rate column is stored as a string. Sort numerically before slicing
+		// to preserve the legacy result ordering; the default path uses DB LIMIT.
+		if _, err := query.OrderBy("ID").All(&symbols); err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
 		}
-	})
-
+		fundingRateSort(symbols, paramsSort)
+		end := offset + limit
+		if end > len(symbols) {
+			end = len(symbols)
+		}
+		symbols = symbols[offset:end]
+	} else {
+		if _, err := query.OrderBy("ID").Limit(limit, offset).All(&symbols); err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+	}
+	if symbols == nil {
+		symbols = []models.SymbolFundingRates{}
+	}
 	ctrl.Ctx.Resp(map[string]interface{}{
 		"code": 200,
-		"data": symbols,
-		"msg":  "success",
+		"data": map[string]interface{}{
+			"list":  symbols,
+			"total": total,
+			"page":  page,
+			"limit": limit,
+		},
+		"msg": "success",
 	})
 }
 

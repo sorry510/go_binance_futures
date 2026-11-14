@@ -79,19 +79,13 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 
 | Menu | Pages and purpose |
 | --- | --- |
-| Configuration Center (`配置中心`) | Uses the same Card/collapse pattern as AI Configuration for non-AI runtime settings. Card headers show only the name and a status tag; actual switches live inside each Card. Futures Trade, Spot Quant, Fast Move, Liquidation, Market Condition, and Test Strategy are separate Cards, alongside new-coin rush, coin alerts, market monitoring, funding-rate monitoring, debug push, and external links. Core WebSocket streams are mandatory infrastructure and have no disable switch. |
-| AI → Chat (`AI → 对话`) | Unified multi-turn conversations with Symbol selection, per-chat models, and multiple mounted Skills |
-| AI → Market Analysis (`AI → 市场分析`) | **Symbol Analysis / Opportunities** tabs for structured TradingPlans, historical analysis, opportunity review, and controlled-trade proposals |
-| AI → Workflows (`AI → 业务 Workflow`) | Manually execute five workflows; **Strategy Draft Validation** only compiles expressions and runs synthetic scenarios, not a historical backtest. Eligible manual market-scan results enter asynchronous opportunity analysis |
-| AI → Task Center (`AI → 任务中心`) | **Tasks / Scheduler & Governance / Alert Pipeline** tabs for execution details, scheduler status, operational metrics, and alert history |
-| AI → AI Settings (`AI → AI 设置`) | **AI Configuration / Models / Skills / MCP / Memory** tabs, with AI Configuration first and selected by default; includes opportunity monitoring, schedules, alerts, risk controls, and runtime settings |
-| Futures Trade → Controlled Trading (`合约交易 → 受控交易`) | Convert a successful symbol analysis into a Trade Proposal, run deterministic risk checks, require human approval, re-check risk before execution, submit through the controlled Binance path, and retain audit history |
-| System Dashboard (`系统看板`) | Simplified Database, Binance REST, Market WS (USD-M Futures / Spot / COIN-M Futures), LLM, Agent, and Trade Safety health. MCP, market intelligence, and scheduler details are collapsible. Agent traces, Skill/model/tool metrics remain available. Lead account status stays on its dedicated page |
-| Futures Trade → Futures Trade (`合约交易 → 合约交易`) | Browse `Favorites`, `USDT`, and `USDC` symbols; add, search, batch-edit, enable all, or disable all symbol configurations |
-| Futures Trade → Lead Copy Trading (`合约交易 → 合约带单`) | Isolated Lead-account **management/read-only UI** (`/futures/lead`): credentials, read-only verification, risk limits, pause, locally managed positions/orders, audit history and WS/API health. **No live Lead order execution is authorized.** |
+| System Dashboard (`系统看板`) | Its top navigation tab is pinned and cannot be closed. Simplified Database, Binance REST, Market WS (USD-M Futures / Spot / COIN-M Futures), LLM, Agent, and Trade Safety health. MCP, market intelligence, and scheduler details are collapsible. Agent traces, Skill/model/tool metrics remain available. Lead account status stays on its dedicated page |
+| Configuration Center (`配置中心`) | Its top navigation tab is correctly named Configuration Center and can be closed. Uses the same Card/collapse pattern as AI Configuration for non-AI runtime settings. Card headers show only the name and a status tag; actual switches live inside each Card. Futures Trade, Spot Quant, Fast Move, Liquidation, Market Condition, and Test Strategy are separate Cards, alongside new-coin rush, coin alerts, market monitoring, funding-rate monitoring, debug push, and external links. Core WebSocket streams are mandatory infrastructure and have no disable switch. |
+| Futures Trade → Futures Trade (`合约交易 → 合约交易`) | Browse `Favorites`, `USDT`, and `USDC` symbols; add, search, batch-edit, enable all, or disable all symbol configurations; Market Liquidations and Funding Rate buttons after Batch Edit open the original pages |
 | Futures Trade → Futures Orders (`合约交易 → 合约订单`) | **New managed-cycle history (Stage 01-5, pending 01-6 release)**: position_id summary rows with expandable OPEN/CLOSE/TP/SL Managed orders and exchange Fills, main/Lead account isolation and completeness flags; excludes legacy `order` rows |
-| Futures Trade → Futures Account (`合约交易 → 合约账户`) | View Binance futures assets, positions, and open orders |
-| Futures Trade → Local Futures Account (`合约交易 → 本地合约账户`) | View assets, positions, and orders recorded locally by the application |
+| Futures Trade → Futures Positions (合约仓位) | Only the ownership card remains: exchange position ownership, local Managed orders, reconciliation, manual claim and repair history; directly after Futures Orders |
+| Futures Trade → Lead Copy Trading (`合约交易 → 合约带单`) | Isolated Lead-account **management/read-only UI** (`/futures/lead`): credentials, read-only verification, risk limits, pause, locally managed positions/orders, audit history and WS/API health. **No live Lead order execution is authorized.** |
+| Futures Trade → Futures Account (合约账户) | Shows the previous Local Futures Account (assets, local positions, local open orders). Exchange Positions and Exchange Orders buttons open the old Binance account tabs; old `/futures/account2` redirects here |
 | Futures Trade → Strategy Templates (`合约交易 → 策略模板`) | Create and maintain indicator and strategy-method templates |
 | Futures Trade → Test Results (`合约交易 → 测试结果`) | Search real-time paper-trading results by symbol and time range |
 | Futures Trade → Historical Backtest (`合约交易 → 历史回测`) | Replay strategies on historical 1m market data with Funding and MarketCondition; supports Standard 1m and Adaptive Resolution modes with trades, equity, audit events, and drill-down statistics |
@@ -101,7 +95,12 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | Spot Quant → Controlled Trading (`仓位与受控交易`) | Review managed positions and anomalies, rebuild local projections after confirmation; manual sell/cancel/exchange UI operations remain unavailable; separate from automated strategy execution |
 | Coin Alerts → Spot/Futures Alerts (`币种提醒 → 现货提醒 / 合约提醒`) | Configure target-price alerts and optional automatic trades |
 | Market Monitoring → Spot/Futures Monitoring (`市场监听 → 现货监听 / 合约监听`) | Configure K-line, threshold, indicator, and custom-strategy monitoring |
-| Funding Rate Monitoring (`资金费率监听`) | View funding rates and configure automatic trading |
+| AI → Chat (`AI → 对话`) | Unified multi-turn conversations with Symbol selection, per-chat models, and multiple mounted Skills |
+| AI → Market Analysis (`AI → 市场分析`) | **Symbol Analysis / Opportunities** tabs for structured TradingPlans, historical analysis, opportunity review, and controlled-trade proposals |
+| AI → Workflows (`AI → 业务 Workflow`) | Manually execute five workflows; **Strategy Draft Validation** only compiles expressions and runs synthetic scenarios, not a historical backtest. Eligible manual market-scan results enter asynchronous opportunity analysis |
+| AI → Task Center (`AI → 任务中心`) | **Tasks / Scheduler & Governance / Alert Pipeline** tabs for execution details, scheduler status, operational metrics, and alert history |
+| AI → AI Settings (`AI → AI 设置`) | **AI Configuration / Models / Skills / MCP / Memory** tabs, with AI Configuration first and selected by default; includes opportunity monitoring, schedules, alerts, risk controls, and runtime settings |
+| Notifications (通知) | View notification history and settings; below Market Monitoring |
 | New-Coin Rush (`抢新配置`) | Configure spot, mining-token, and futures launch trades |
 | System Configuration (`系统配置`) | Edit `conf/app.conf` online and access Save, Restart Service, and Stop Service actions |
 | Logs (`日志`) | Display the service logs returned by `web.commend_log` |
@@ -241,11 +240,11 @@ These screenshots use the current UI. Pages that may contain balances, orders, c
 #### Futures Orders
 ![New UI - Futures Orders](./img/ui/futures-orders.jpg)
 
-#### Futures Account
-![New UI - Futures Account](./img/ui/futures-account.jpg)
+#### Futures Account (Local Assets / Positions / Orders)
+![Previous Local Futures Account UI](./img/ui/local-futures-account.jpg)
 
-#### Local Futures Account
-![New UI - Local Futures Account](./img/ui/local-futures-account.jpg)
+#### Exchange Positions / Open Orders (via Account Buttons)
+![Previous Binance Futures Account UI](./img/ui/futures-account.jpg)
 
 #### Strategy Templates
 ![New UI - Strategy Templates](./img/ui/strategy-templates.jpg)
@@ -330,6 +329,8 @@ Business Workflows reuse the existing Agent Runtime instead of creating a second
 - `daily_market_brief`: aggregates market regime, Scanner results, and important Signals into a fixed-schema brief; its Scheduler is disabled by default.
 
 ### Controlled Trading
+
+**UI change:** Futures Positions now only shows the position/order ownership card, manual claims and reconciliation. Trade Proposal creation/approval/execution controls were removed from this page. The backend process below remains documented but is not exposed by this page.
 
 Controlled trading does **not** expose a direct trading Tool to the LLM. Real execution follows this fixed path:
 
@@ -457,8 +458,8 @@ When the `Test Auto-Conversion Count Limit` is non-zero, consecutive simulated w
 ## futures-trade-order
 
 - **Futures Orders** (**Stage 01-5 committed with the new static assets; production deployment remains BLOCKED pending live gates**): one row per Managed `position_id`; expandable OPEN/CLOSE/TP/SL orders and actual Binance trades, including execution quantity, price, fees and order/trade IDs. **Verified net trading PnL** (realized trade PnL minus commissions, **excluding funding**) and opening-notional return are displayed only for fully REST-confirmed settled cycles. Incomplete/legacy cycles are marked for reconciliation, never assigned speculative profits. Historic leverage is shown as unavailable when no immutable snapshot exists. Old `order` history is not migrated; authentic Fill rows cannot be deleted. Read access to main/Lead histories is restricted to the single authenticated operator, not a public data API.
-- **Futures Account:** assets, positions, and open orders returned by Binance.
-- **Local Futures Account:** the application's local account state, useful for comparing local data with exchange data.
+- **Futures Account:** the only visible account menu shows the former Local Futures Account content: assets, local positions and local open orders. **Exchange Positions** and **Exchange Orders** buttons open the former Binance account page at the relevant tab; old `/futures/account2` redirects here.
+- **Futures Positions:** directly after Futures Orders, shows the ownership card, Managed orders, manual claim/history and reconciliation only.
 
 ## strategy-templates
 
@@ -503,10 +504,10 @@ Enable the master switch under **Configuration Center → Market Monitoring**, t
 
 ## funding-rate
 
-- funding rate search and history
+- funding rate search and history (database pagination for the main list, 50 rows per page by default; 50 rows per page in the history dialog)
 - funding rate change listen
 
-Enable the master switch under **Configuration Center → Funding Rate Monitoring**, then query and configure symbols on the **Funding Rate Monitoring** page.
+Enable the master switch under **Configuration Center → Funding Rate Monitoring**, then use **Futures Trade → Futures Trade → Funding Rate** (after Batch Edit) to open the original page. The adjacent **Market Liquidations** button opens the former liquidation-orders page; neither has a standalone sidebar entry.
 
 ## system-config
 
