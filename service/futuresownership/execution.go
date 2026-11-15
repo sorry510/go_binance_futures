@@ -520,7 +520,7 @@ func (e Executor) reconcileTradeFills(ctx context.Context, clientOrderID string,
 	for page := 0; page < maxPages; page++ {
 		trades, err := reader.ListAccountTrades(ctx, managed.Symbol, actualNum, fromID, pageSize)
 		if err != nil {
-			return err
+			return fmt.Errorf("REST userTrades lookup order=%d: %w", actualNum, err)
 		}
 		if len(trades) == 0 {
 			break
@@ -533,10 +533,10 @@ func (e Executor) reconcileTradeFills(ctx context.Context, clientOrderID string,
 			}
 			fill, err := tradefills.FromREST(managed.AccountID, trade)
 			if err != nil {
-				return err
+				return fmt.Errorf("REST fill validation order=%d trade=%d: %w", actualNum, trade.ID, err)
 			}
 			if err = tradefills.Insert(o, fill); err != nil {
-				return err
+				return fmt.Errorf("REST fill ledger merge order=%d trade=%d: %w", actualNum, trade.ID, err)
 			}
 			if trade.ID >= fromID {
 				fromID = trade.ID + 1

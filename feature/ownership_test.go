@@ -47,3 +47,41 @@ func TestAutoStrategySourceRefCarriesRuleHash(t *testing.T) {
 		t.Fatalf("legacy source ref changed: %s", got)
 	}
 }
+
+// A completed local fill needs REST money verification, not 2-second order
+// status polling. Missing exchange identity/partial/uncertain execution must
+// continue to use the original fast recovery path.
+func TestDeferCompletedFillVerification(t *testing.T) {
+	positionID := int64(51)
+	complete := models.FuturesManagedOrder{
+		Status:          futuresownership.OrderReconcile,
+		PositionID:      &positionID,
+		ExchangeOrderID: "12345",
+		RequestedQty:    0.153,
+		FilledQty:       0.153,
+	}
+	if !deferCompletedFillVerification(complete) {
+		t.Fatal("completed exchange execution should use slow ledger recovery")
+	}
+	tests := []struct {
+		name   string
+		change func(*models.FuturesManagedOrder)
+	}{
+		{"unknown exchange ID", func(o *models.FuturesManagedOrder) { o.ExchangeOrderID = "" }},
+		{"missing position", func(o *models.FuturesManagedOrder) { o.PositionID = nil }},
+		{"pending execution", func(o *models.FuturesManagedOrder) { o.FilledQty = 0 }},
+		{"partial execution", func(o *models.FuturesManagedOrder) { o.FilledQty = 0.1 }},
+		{"overfilled mismatch", func(o *models.FuturesManagedOrder) { o.FilledQty = 0.2 }},
+		{"filled terminal", func(o *models.FuturesManagedOrder) { o.Status = futuresownership.OrderFilled }},
+		{"other active status", func(o *models.FuturesManagedOrder) { o.Status = futuresownership.OrderSubmitted }},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			row := complete
+			tt.change(&row)
+			if deferCompletedFillVerification(row) {
+				t.Fatalf("unsafe order was deferred: %+v", row)
+			}
+		})
+	}
+}

@@ -182,7 +182,26 @@ func shouldRefreshOwnershipAccountQuantities(fillAdvanced bool) bool {
 	return fillAdvanced
 }
 
+// A fully recorded exchange fill with a known order/position identity is not
+// an unknown execution. Only its official trade ledger still needs recovery.
+// The minute-level ownership reconciler handles that; never query the same
+// already-filled order every two seconds from the trading hot path.
+func deferCompletedFillVerification(order models.FuturesManagedOrder) bool {
+	return order.Status == futuresownership.OrderReconcile &&
+		order.PositionID != nil && *order.PositionID > 0 &&
+		strings.TrimSpace(order.ExchangeOrderID) != "" &&
+		order.RequestedQty > 0 &&
+		order.FilledQty > 0 &&
+		math.Abs(order.FilledQty-order.RequestedQty) <= 1e-8
+}
+
 func reconcileAutoStrategyManagedOrder(ctx context.Context, order models.FuturesManagedOrder) (futuresownership.ExchangeOrder, bool, error) {
+	if deferCompletedFillVerification(order) {
+		// Keep the durable status/REST verification marker unchanged.
+		// ReconcileAll retries this at most once per minute.
+		binanceapiusage.RecordOptimization("start_trade", "prevented_duplicate", 1)
+		return futuresownership.ExchangeOrder{}, false, nil
+	}
 	// A generation-matched User Data mirror is authoritative for regular order
 	// updates and is cheaper/faster than polling GET /order every StartTrade tick.
 	if futuresUserDataMirrorUsable() {

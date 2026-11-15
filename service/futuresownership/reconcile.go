@@ -169,11 +169,28 @@ func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (Reconcile
 	if err != nil {
 		return summary, err
 	}
+	// One bounded summary per owner pass; the previous implementation
+	// swallowed every per-order failure, masking stuck REST verification.
+	var firstOrderError error
+	firstOrderID := ""
+	failedPositions := make(map[int64]error)
 	for _, order := range orders {
 		summary.OrdersChecked++
 		if _, err := r.Executor.Reconcile(ctx, order.Symbol, order.ClientOrderID); err != nil {
 			summary.OrdersUnresolved++
+			if firstOrderError == nil {
+				firstOrderError, firstOrderID = err, order.ClientOrderID
+			}
+			if order.PositionID != nil {
+				failedPositions[*order.PositionID] = err
+			}
 		}
+	}
+	if firstOrderError != nil {
+		logs.Warning("futures ownership reconcile pending: owner=", owner,
+			" unresolved=", summary.OrdersUnresolved,
+			" first_client_order_id=", firstOrderID,
+			" reason=", firstOrderError)
 	}
 	managed, err := r.Ownership.ActivePositions(ctx, owner)
 	if err != nil {
@@ -331,6 +348,13 @@ func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (Reconcile
 	// retried separately until the immutable trade ledger proves a complete
 	// one-cycle settlement. Zero here is a fresh exchange REST snapshot.
 	for _, position := range unsettled {
+		// Don't query the same failed REST order a second time in this minute's
+		// pass. It will be retried on the next scheduled reconciliation.
+		if recentError := failedPositions[position.ID]; recentError != nil {
+			alarmIncompletePosition(position, r.Ownership.nowMillis(),
+				"closed-cycle trade backfill: "+recentError.Error(), &summary)
+			continue
+		}
 		// Read-only REST trade recovery is independent of the ability to
 		// prove a zero position side. A missing/ambiguous PositionRisk row
 		// MUST block settlement, never block fetching immutable trade facts.
