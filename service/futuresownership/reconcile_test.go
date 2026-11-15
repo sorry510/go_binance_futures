@@ -528,3 +528,20 @@ func TestStageR3NonExactSnapshotCannotShrinkEvenWithPresentKey(t *testing.T) {
 		}
 	}
 }
+
+func TestCountUnverifiedActiveSidesExcludesHistoricalSettlement(t *testing.T) {
+	managed := []models.FuturesManagedPosition{
+		{Symbol: "TRXUSDT", PositionSide: "SHORT", Status: PositionActive},
+	}
+	unverified := map[string]bool{
+		"BZUSDT|SHORT":  true,
+		"XMRUSDT|SHORT": true,
+	}
+	if got := countUnverifiedActiveSides(managed, unverified); got != 0 {
+		t.Fatalf("closed history must not count as active risk, got %d", got)
+	}
+	unverified["TRXUSDT|SHORT"] = true
+	if got := countUnverifiedActiveSides(managed, unverified); got != 1 {
+		t.Fatalf("missing active position-side proof must still be flagged, got %d", got)
+	}
+}

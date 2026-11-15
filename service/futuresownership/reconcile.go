@@ -155,6 +155,20 @@ func clearIncompleteAlarm(account string, positionID int64) {
 	incompleteAlertMu.Unlock()
 }
 
+// Only missing exact proof for ACTIVE managed positions is a current
+// ownership-safety warning. Historical closed cycles remain blocked from
+// settlement separately; count keys once even if multiple rows share a side.
+func countUnverifiedActiveSides(managed []models.FuturesManagedPosition, unverified map[string]bool) int {
+	seen := make(map[string]bool, len(managed))
+	for _, position := range managed {
+		key := positionKey(position.Symbol, position.PositionSide)
+		if unverified[key] {
+			seen[key] = true
+		}
+	}
+	return len(seen)
+}
+
 func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (ReconcileSummary, error) {
 	if err := r.validateBoundAccount(); err != nil {
 		return ReconcileSummary{}, err
@@ -286,9 +300,21 @@ func (r Reconciler) ReconcileOwner(ctx context.Context, owner string) (Reconcile
 		}
 	}
 	if len(unverified) > 0 {
-		logs.Warning("报警: ownership snapshot missing exact position-side verification",
-			" owner=", owner, " unverified_count=", len(unverified),
-			" ; no inferred zero allowed for these managed sides")
+		activeMissing := countUnverifiedActiveSides(managed, unverified)
+		historicalMissing := len(unverified) - activeMissing
+		if activeMissing > 0 {
+			logs.Warning("报警: ownership snapshot missing exact position-side verification",
+				" owner=", owner, " active_unverified=", activeMissing,
+				" historical_unverified=", historicalMissing,
+				" ; no inferred zero allowed for active managed sides")
+		} else {
+			// Closed cycles missing exact zero proof are a settlement backlog,
+			// not evidence of a currently unsafe exchange position. The
+			// existing fail-closed settlement checks remain unchanged.
+			logs.Info("ownership historical settlement verification pending:",
+				" owner=", owner, " historical_unverified=", historicalMissing,
+				" ; closed cycles remain unsettled until verified")
+		}
 	}
 	// A suspicious empty position snapshot plus unresolved exchange orders
 	// must not be used as proof of zero for account-managed ownership.

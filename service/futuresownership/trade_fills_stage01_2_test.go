@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"math"
+	"strings"
 	"testing"
 
+	"go_binance_futures/models"
 	"go_binance_futures/service/tradefills"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -210,5 +212,98 @@ func TestStage012FillDBFailureKeepsRecoverableReconcile(t *testing.T) {
 	got, err := tradefills.Quantity(o, order)
 	if err != nil || got.RatString() != "2" || order.Status != OrderFilled {
 		t.Fatalf("fill DB recovery failed: %+v qty=%v err=%v", order, got, err)
+	}
+}
+
+// The managed cumulative qty is float64, while the WS ledger is exact DECIMAL.
+// Its binary representation can be slightly LESS than the recorded fill even
+// when both are the same Binance quantity. REST must still verify those fills.
+func TestRESTFillRecoveryToleratesFloat64CumulativeRounding(t *testing.T) {
+	for _, tc := range []struct {
+		name, qty string
+		floatQty  float64
+	}{
+		{"XMR 0.153", "0.153", 0.153},
+		{"BZ 0.86", "0.86", 0.86},
+		{"LTC 1.628", "1.628", 1.628},
+		{"ARB 527.3", "527.3", 527.3},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			prepareOwnershipDB(t)
+			ctx := context.Background()
+			s := testService()
+			id := "test_rest_rounding"
+			claimOpen(t, s, OwnerAutoStrategy, "BTCUSDT", "LONG", id, tc.floatQty)
+			if err := s.MarkOrderSubmitted(ctx, id, "2401"); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := s.ApplyFill(ctx, id, tc.floatQty, 100); err != nil {
+				t.Fatal(err)
+			}
+			ws := models.FuturesTradeFill{
+				Market: tradefills.MarketUSDM, AccountID: "main", Symbol: "BTCUSDT",
+				OrderID: "2401", TradeID: "901", PositionSide: "LONG", Qty: tc.qty,
+				Price: "100", Commission: "0.001", CommissionAsset: "USDT",
+				RealizedPnL: "0", TradeTime: 1800000000901, RESTVerified: false,
+			}
+			o := orm.NewOrm()
+			if err := tradefills.Insert(o, ws); err != nil {
+				t.Fatal(err)
+			}
+			broker := &stage012Broker{trades: []*futures.AccountTrade{
+				ledgerTrade(901, 2401, tc.qty, "100", "0.001", "0", futures.PositionSideTypeLong),
+			}}
+			e := Executor{Ownership: s, Broker: broker}
+			_, err := e.ApplyObservedExchange(ctx, id, ExchangeOrder{
+				ExchangeOrderID: "2401", Status: "FILLED", FilledQty: tc.floatQty, AveragePrice: 100,
+			})
+			if err != nil {
+				t.Fatalf("exact fill must recover under float64 rounding: %v", err)
+			}
+			row, err := s.GetOrder(ctx, id)
+			if err != nil || row.Status != OrderFilled {
+				t.Fatalf("not confirmed as filled: %+v err=%v", row, err)
+			}
+			pending, err := tradefills.UnverifiedCount(o, row)
+			if err != nil || pending != 0 {
+				t.Fatalf("REST verification not completed: %d err=%v", pending, err)
+			}
+			if broker.tradeCalls != 1 {
+				t.Fatalf("expected one REST lookup, got %d", broker.tradeCalls)
+			}
+		})
+	}
+}
+
+// A real excess remains an error; the tolerance must not hide duplicated fills.
+func TestRESTFillRecoveryRejectsRealLedgerExcess(t *testing.T) {
+	prepareOwnershipDB(t)
+	ctx := context.Background()
+	s := testService()
+	id := "test_real_excess"
+	claimOpen(t, s, OwnerAutoStrategy, "BTCUSDT", "LONG", id, 1)
+	if err := s.MarkOrderSubmitted(ctx, id, "2402"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.ApplyFill(ctx, id, 1, 100); err != nil {
+		t.Fatal(err)
+	}
+	ws := models.FuturesTradeFill{
+		Market: tradefills.MarketUSDM, AccountID: "main", Symbol: "BTCUSDT",
+		OrderID: "2402", TradeID: "902", PositionSide: "LONG", Qty: "1.1",
+		Price: "100", Commission: "0.001", CommissionAsset: "USDT",
+		RealizedPnL: "0", TradeTime: 1800000000000,
+	}
+	if err := tradefills.Insert(orm.NewOrm(), ws); err != nil {
+		t.Fatal(err)
+	}
+	broker := &stage012Broker{}
+	e := Executor{Ownership: s, Broker: broker}
+	_, err := e.ApplyObservedExchange(ctx, id, ExchangeOrder{ExchangeOrderID: "2402", Status: "FILLED", FilledQty: 1, AveragePrice: 100})
+	if err == nil || !strings.Contains(err.Error(), "ledger quantity exceeds exchange cumulative") {
+		t.Fatalf("real ledger excess must still be detected: %v", err)
+	}
+	if broker.tradeCalls != 0 {
+		t.Fatal("must not fetch REST when local ledger already exceeds exchange")
 	}
 }

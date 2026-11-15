@@ -511,8 +511,11 @@ func (e Executor) reconcileTradeFills(ctx context.Context, clientOrderID string,
 		}
 		return nil
 	}
-	if got.Cmp(target) > 0 {
-		return fmt.Errorf("ledger quantity exceeds exchange cumulative")
+	// The ledger is exact DECIMAL while the cumulative order quantity comes
+	// through float64. Reuse the same 1e-8 tolerance for both comparisons:
+	// e.g. exact 0.86 is slightly greater than float64(0.86).
+	if got.Cmp(target) > 0 && !equalQty(got) {
+		return fmt.Errorf("ledger quantity exceeds exchange cumulative: ledger=%s exchange=%.12f", got.FloatString(12), result.FilledQty)
 	}
 	const maxPages = 12
 	const pageSize = 1000

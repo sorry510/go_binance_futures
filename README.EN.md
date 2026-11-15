@@ -463,6 +463,8 @@ When the `Test Auto-Conversion Count Limit` is non-zero, consecutive simulated w
 
 **Timed-out opening order cancellation:** Only live opening orders with unfilled remainder are eligible for cancellation. Locally fully filled `reconcile_required` orders pending REST evidence are never re-canceled. Binance `-2011 Unknown order sent` triggers read-only reconciliation, not a fabricated successful cancellation; unresolved orders stay unresolved.
 
+**Precision and alert correction (2026-11-15):** Exact DECIMAL fill quantities must use the same 1e-8 tolerance when compared against float64 cumulative order quantities, including the excess check; genuine excess remains blocked. Ownership snapshot diagnostics distinguish missing exact proof for active managed positions (safety warning) from missing zero-position proof for closed historical cycles (pending settlement information). No missing snapshot is treated as a confirmed flat position, and no unverified settlement is marked complete.
+
 **Simplified reconciliation for a personal system:** Unknown execution, partial fills and missing exchange identities keep fast safety reconciliation. An order with a fully recorded local execution but unverified official REST trades no longer triggers repeated two-second lookups: existing minute-level ownership reconciliation retries it. Each owner pass logs one summary with a representative failure; a failed closed cycle is not retried immediately within the same pass. Only actual official REST evidence can mark a fill verified. Position ownership, protective orders and trade execution remain unchanged.
 
 ## strategy-templates
