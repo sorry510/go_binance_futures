@@ -2,6 +2,7 @@ package feature
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
 
+	"github.com/adshao/go-binance/v2/common"
 	"github.com/adshao/go-binance/v2/futures"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -311,6 +313,27 @@ func accountTradeRiskCounts(positions []types.FuturesPosition) (positionCount, l
 	return positionCount, lossCount
 }
 
+// Timeout cancellation only applies to opening orders with an unfilled
+// remainder. "reconcile_required" can mean a COMPLETED fill waiting for
+// REST fee/ledger verification; that order is no longer cancellable.
+func shouldCancelTimedOutAutoOrder(order models.FuturesManagedOrder, nowMillis, timeoutSec int64) bool {
+	if order.Intent != futuresownership.IntentOpen || nowMillis < order.CreatedAt+timeoutSec*1000 {
+		return false
+	}
+	switch order.Status {
+	case futuresownership.OrderPending, futuresownership.OrderSubmitted,
+		futuresownership.OrderPartiallyFilled, futuresownership.OrderReconcile:
+	default:
+		return false
+	}
+	return order.RequestedQty > 0 && order.RequestedQty-order.FilledQty > 1e-8
+}
+
+func isUnknownBinanceCancelOrder(err error) bool {
+	var apiErr *common.APIError
+	return errors.As(err, &apiErr) && apiErr.Code == -2011
+}
+
 func cancelTimeoutAutoStrategyOrders(timeoutSec int64) error {
 	ctx := context.Background()
 	orders, err := sharedOwnership.ActiveOrders(ctx, futuresownership.OwnerAutoStrategy)
@@ -319,7 +342,7 @@ func cancelTimeoutAutoStrategyOrders(timeoutSec int64) error {
 	}
 	now := time.Now().UnixMilli()
 	for _, order := range orders {
-		if order.Intent != futuresownership.IntentOpen || now < order.CreatedAt+timeoutSec*1000 {
+		if !shouldCancelTimedOutAutoOrder(order, now, timeoutSec) {
 			continue
 		}
 		if strings.TrimSpace(order.ExchangeOrderID) == "" {
@@ -332,10 +355,23 @@ func cancelTimeoutAutoStrategyOrders(timeoutSec int64) error {
 				continue
 			}
 			order = refreshed
+			// Reconciliation may have discovered a full fill/canceled order.
+			if !shouldCancelTimedOutAutoOrder(order, now, timeoutSec) ||
+				strings.TrimSpace(order.ExchangeOrderID) == "" {
+				continue
+			}
 		}
 		if err := sharedOwnershipExecutor.Cancel(ctx, futuresownership.OwnerAutoStrategy, order); err != nil {
+			if isUnknownBinanceCancelOrder(err) {
+				// Binance -2011 is NOT proof of cancellation. The order may
+				// have already filled or been canceled; look up its state.
+				if _, reconcileErr := sharedOwnershipExecutor.Reconcile(ctx, order.Symbol, order.ClientOrderID); reconcileErr != nil {
+					logs.Warning("cancel auto_strategy unknown exchange order, reconciliation pending:",
+						order.ClientOrderID, reconcileErr)
+				}
+				continue
+			}
 			logs.Error("cancel auto_strategy managed order:", order.ClientOrderID, err)
-			continue
 		}
 	}
 	return nil

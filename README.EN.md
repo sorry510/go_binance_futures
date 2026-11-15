@@ -461,6 +461,8 @@ When the `Test Auto-Conversion Count Limit` is non-zero, consecutive simulated w
 - **Futures Account:** the only visible account menu shows the former Local Futures Account content: assets, local positions and local open orders. **Exchange Positions** and **Exchange Orders** buttons open the former Binance account page at the relevant tab; old `/futures/account2` redirects here.
 - **Futures Positions:** directly after Futures Orders, shows the ownership card, Managed orders, manual claim/history and reconciliation only.
 
+**Timed-out opening order cancellation:** Only live opening orders with unfilled remainder are eligible for cancellation. Locally fully filled `reconcile_required` orders pending REST evidence are never re-canceled. Binance `-2011 Unknown order sent` triggers read-only reconciliation, not a fabricated successful cancellation; unresolved orders stay unresolved.
+
 **Simplified reconciliation for a personal system:** Unknown execution, partial fills and missing exchange identities keep fast safety reconciliation. An order with a fully recorded local execution but unverified official REST trades no longer triggers repeated two-second lookups: existing minute-level ownership reconciliation retries it. Each owner pass logs one summary with a representative failure; a failed closed cycle is not retried immediately within the same pass. Only actual official REST evidence can mark a fill verified. Position ownership, protective orders and trade execution remain unchanged.
 
 ## strategy-templates

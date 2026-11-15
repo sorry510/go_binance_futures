@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/adshao/go-binance/v2/common"
+
 	"go_binance_futures/models"
 	futuresownership "go_binance_futures/service/futuresownership"
 )
@@ -83,5 +85,52 @@ func TestDeferCompletedFillVerification(t *testing.T) {
 				t.Fatalf("unsafe order was deferred: %+v", row)
 			}
 		})
+	}
+}
+
+func TestShouldCancelTimedOutAutoOrder(t *testing.T) {
+	now := int64(1800000000000)
+	example := models.FuturesManagedOrder{
+		Intent: futuresownership.IntentOpen, Status: futuresownership.OrderReconcile,
+		CreatedAt: now - 60000, RequestedQty: 0.153, FilledQty: 0.153,
+		ExchangeOrderID: "15843156710",
+	}
+	if shouldCancelTimedOutAutoOrder(example, now, 30) {
+		t.Fatal("fully filled reconcile_required order must never be canceled")
+	}
+	tests := []struct {
+		name string
+		edit func(*models.FuturesManagedOrder)
+		want bool
+	}{
+		{"working remainder", func(o *models.FuturesManagedOrder) { o.FilledQty = 0 }, true},
+		{"partially filled remainder", func(o *models.FuturesManagedOrder) {
+			o.FilledQty = 0.1
+			o.Status = futuresownership.OrderPartiallyFilled
+		}, true},
+		{"not timed out", func(o *models.FuturesManagedOrder) { o.CreatedAt = now - 1000; o.FilledQty = 0 }, false},
+		{"canceled order", func(o *models.FuturesManagedOrder) { o.Status = futuresownership.OrderCanceled; o.FilledQty = 0 }, false},
+		{"filled status", func(o *models.FuturesManagedOrder) { o.Status = futuresownership.OrderFilled; o.FilledQty = 0 }, false},
+		{"failed order", func(o *models.FuturesManagedOrder) { o.Status = futuresownership.OrderFailed; o.FilledQty = 0 }, false},
+		{"close order", func(o *models.FuturesManagedOrder) { o.Intent = futuresownership.IntentClose; o.FilledQty = 0 }, false},
+		{"no requested amount", func(o *models.FuturesManagedOrder) { o.RequestedQty = 0; o.FilledQty = 0 }, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := example
+			tt.edit(&o)
+			if got := shouldCancelTimedOutAutoOrder(o, now, 30); got != tt.want {
+				t.Fatalf("got %t want %t, order=%+v", got, tt.want, o)
+			}
+		})
+	}
+}
+
+func TestIsUnknownBinanceCancelOrder(t *testing.T) {
+	if !isUnknownBinanceCancelOrder(&common.APIError{Code: -2011, Message: "Unknown order sent."}) {
+		t.Fatal("Binance -2011 must be treated as unknown order identity/state")
+	}
+	if isUnknownBinanceCancelOrder(&common.APIError{Code: -2010, Message: "Order rejected"}) {
+		t.Fatal("different Binance errors must not be swallowed")
 	}
 }
