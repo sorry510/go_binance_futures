@@ -11,3 +11,6 @@ db/coin.db
 /cache/tmp/
 /.local/
 /research_specs/
+
+# Rotating application logs (never commit runtime log contents)
+/logs/

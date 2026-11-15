@@ -17,6 +17,7 @@ import (
 	_ "go_binance_futures/routers"
 	agenttrade "go_binance_futures/service/agenttrade"
 	alertpipeline "go_binance_futures/service/alertpipeline"
+	"go_binance_futures/service/applog"
 	futuresownership "go_binance_futures/service/futuresownership"
 	marketintelligence "go_binance_futures/service/marketintelligence"
 	opportunityservice "go_binance_futures/service/opportunity"
@@ -79,7 +80,13 @@ func init() {
 }
 
 func initLogger() {
-	// 设置日志级别
+	// The CLI keeps console logging; the web/trading process writes rotating
+	// application files alongside the existing console output used by PM2.
+	if !isCLICommand(os.Args[1:]) {
+		if err := applog.Init(); err != nil {
+			logs.Error("initialize application file log: ", err)
+		}
+	}
 	level, _ := config.Int("log_level")
 	logs.SetLevel(level)
 }

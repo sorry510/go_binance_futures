@@ -133,3 +133,16 @@ func TestExcludedRoutesSkipAuth(t *testing.T) {
 		})
 	}
 }
+
+// Application logs must never inherit the old unauthenticated /pm2-log bypass.
+func TestApplicationLogsRequireJWT(t *testing.T) {
+	for _, path := range []string{"/system/logs", "/pm2-log", "/pull", "/config/restart"} {
+		t.Run(path, func(t *testing.T) {
+			ctx, recorder := newRequestContext(path, map[string]string{"Accept": "application/json"})
+			JwtMiddleware(ctx)
+			if recorder.Code != http.StatusUnauthorized {
+				t.Fatalf("log endpoint %s did not require JWT (HTTP %d)", path, recorder.Code)
+			}
+		})
+	}
+}

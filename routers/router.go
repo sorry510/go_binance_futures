@@ -170,7 +170,8 @@ func init() {
 	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll")         // v23 Managed position cycle history
 	web.Router("/orders/:position_id/details", &controllers.OrderController{}, "get:Details") // child orders and immutable exchange Fills
 	web.Router("/orders/:id", &controllers.OrderController{}, "delete:Delete")                // exchange history remains immutable
-	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit")                // config get and edit
+	web.Router("/config", &controllers.ConfigController{}, "get:Get;put:Edit")
+	web.Router("/config/restart", &controllers.ConfigController{}, "post:Restart") // manual re-exec; JWT required, no PM2 command
 
 	// Stage 6: JWT protected, Lead-only management. No real trade runner or
 	// live order/cancel route is registered. Start/reconcile fail closed.
@@ -202,8 +203,5 @@ func init() {
 	web.Router("/strategy-templates/:id", &controllers.StrategyTemplateController{}, "delete:Delete;put:Edit")                                // 策略模板更新
 	web.Router("/strategy-templates/test/:symbol", &controllers.StrategyTemplateController{}, "post:TestStrategyRule")                        // 测试策略规则
 
-	web.Router("/start", &controllers.CommandController{}, "post:Start")   // start
-	web.Router("/stop", &controllers.CommandController{}, "post:Stop")     // stop
-	web.Router("/pull", &controllers.CommandController{}, "post:GitPull")  // git pull
-	web.Router("/pm2-log", &controllers.CommandController{}, "get:Pm2Log") // pm2-log
+	web.Router("/system/logs", &controllers.ApplicationLogController{}, "get:Get") // JWT-protected, PM2-independent file log
 }

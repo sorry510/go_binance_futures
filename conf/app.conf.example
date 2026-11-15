@@ -75,12 +75,6 @@ username = admin
 password = admin
 # 过期时间(hour)
 expires = 24
-# 重启服务按钮命令
-commend_start = pm2 restart go_binance_futures
-# 停止合约服务命令
-commend_stop = pm2 stop go_binance_futures
-# 查看 web 日志的命令 /pm2-log
-commend_log = pm2 log go_binance_futures
 
 [notification]
 # dingding, slack

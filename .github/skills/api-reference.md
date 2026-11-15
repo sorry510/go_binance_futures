@@ -404,7 +404,10 @@
 ```
 
 ### PUT `/config`
-覆盖写入 `conf/app.conf` 文件。
+保存编辑后的配置文件；内容未变化时不重复写盘。内容变化时进行 INI 格式检查、原子替换，响应中返回 changed 和 restart_required。保存本身不会触发重启。
+
+### POST `/config/restart`
+手动重启以应用已保存的配置，仅在 restart_required=true 时执行。Go 进程通过自身二进制 re-exec 实现，不调用 PM2 命令；接口受 JWT 认证。返回的是「重启已发起」，不是已完成的保证。
 
 **Request Body**
 ```json
@@ -478,16 +481,8 @@
 
 ---
 
-## 14. 服务控制（Command）
+## 14. 系统日志
 
-### POST `/start`
-启动后台交易任务（执行 `conf/app.conf` 中配置的 `commend_start` 命令，异步执行）。
-
-### POST `/stop`
-停止后台交易任务（执行 `commend_stop`，异步执行）。
-
-### POST `/pull`
-执行 `git pull` 拉取最新代码，返回输出结果。
-
-### GET `/pm2-log`
-获取 pm2 日志（需携带 `?key=sorry510` 查询参数鉴权）。
+### GET `/system/logs`
+读取 Go 内置应用日志。需 JWT 认证，支持日志级别、关键字和显示条数筛选。
+原 `/start`、`/stop`、`/pull`、`/pm2-log` 已删除。服务进程管理仍通过 PM2 在系统外进行。

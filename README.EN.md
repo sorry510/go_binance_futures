@@ -102,8 +102,8 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html`. The login username and pas
 | AI → AI Settings (`AI → AI 设置`) | **AI Configuration / Models / Skills / MCP / Memory** tabs, with AI Configuration first and selected by default; includes opportunity monitoring, schedules, alerts, risk controls, and runtime settings |
 | Notifications (通知) | View notification history and settings; below Market Monitoring |
 | New-Coin Rush (`抢新配置`) | Configure spot, mining-token, and futures launch trades |
-| System Configuration (`系统配置`) | Edit `conf/app.conf` online and access Save, Restart Service, and Stop Service actions |
-| Logs (`日志`) | Display the service logs returned by `web.commend_log` |
+| System Configuration (`系统配置`) | Edit/save configuration and manually restart to apply; PM2 still supervises the process |
+| Logs (`日志`) | Read the Go application log file without invoking PM2 |
 
 
 ### Automated Spot Quant trading (06-7)
@@ -519,8 +519,8 @@ Enable the master switch under **Configuration Center → Funding Rate Monitorin
 
 - **Configuration Center:** changes non-AI database-backed trading, monitoring, and alert runtime settings. It uses Card/collapse sections with status tags in headers and actual switches inside the Card; Futures Trade, Fast Move, Liquidation, Market Condition, and Test Strategy are configured separately.
 - **AI → AI Settings → AI Configuration** (first/default tab): centralizes AI alerts, opportunity monitoring, Schedulers, global Agent budgets, and controlled-trading risk controls.
-- **System Configuration:** edits `conf/app.conf` online. After `Save`, startup-time settings still require `Restart Service` or a manual application restart.
-- **Logs:** displays output from the command configured in `web.commend_log`.
+- **System Configuration:** edits `conf/app.conf` online. Only changed content is saved; select Restart to apply to re-execute the Go process without a PM2 command.
+- **Logs:** reads the Go application file through the authenticated log endpoint.
 
 The System Configuration page contains sensitive values such as API keys, database passwords, and notification tokens. Never include it in screenshots, issues, or Git commits.
 
@@ -540,14 +540,14 @@ The System Configuration page contains sensitive values such as API keys, databa
 
 1. **Where do I enable automatic trading?** Open **Configuration Center → Futures Trade** and verify the futures master switch and `Allow Long/Allow Short`. Then verify the symbol's enabled status under **Futures Trade → Futures Trade**. Core WebSocket streams run automatically.
 2. **Where can I view simulated trades?** Enable it in the standalone **Configuration Center → Test Strategy** Card, then use `View Test Results` or open **Futures Trade → Test Results**.
-3. **Why did a configuration change not take effect?** Configuration Center updates runtime settings. System Configuration edits `conf/app.conf`; after `Save`, startup-time settings still require an application restart.
+3. **Why did a configuration change not take effect?** Configuration Center updates runtime settings. System Configuration edits `conf/app.conf`; after saving changed content, select Restart to apply to activate it.
 4. **Why are futures prices delayed?** Prices are updated through mandatory WebSocket streams. Check WebSocket freshness/error state on the System Dashboard, network quality, and proxy stability.
 5. **Why can the account not open a position?** Check direction switches, maximum-position limits, maximum losing positions, symbol enabled status, available USDT, and whether the same Symbol/side already has a managed position or active controlled order. Binance may also restrict some IP regions.
 6. **Why is the UI slow?** For larger datasets, use MySQL; SQLite is better suited to smaller deployments.
 7. **What should I do after an API rate-limit error?** Reduce enabled symbols, monitoring rules, and high-frequency notifications, then wait for Binance's restriction to clear.
 8. **Where are AI alert, Scheduler, and budget settings?** Open **AI → AI Settings → AI Configuration** (first/default tab); these settings are no longer in Configuration Center.
 9. **Can the AI place a real order directly?** No. Controlled execution is disabled by default and requires a Proposal, deterministic Risk checks, human approval, and a final Risk re-check.
-10. **Where can I view service logs?** Open **Logs**. It runs the command configured in `web.commend_log`.
+10. **Where can I view service logs?** Open **Logs**. It reads the app log file with level/keyword filters and five-second refresh.
 11. **Where is Lead Copy Trading, and can it trade live?** Open **Futures Trade → Lead Copy Trading**. Dedicated credentials, risk settings, pause, read-only observation and locally managed records are available. **Live Lead opening remains locked** pending Stage 7 gates.
 
 ### edit config
@@ -622,9 +622,7 @@ Normal startup does not modify the database schema or run database version migra
 - **Futures Trade → Enable All / Disable All:** batch-updates the enabled status of the current symbol list. Verify the active filter first.
 - **Futures Trade → Batch Edit:** changes settings for multiple symbols.
 - **System Configuration → Save:** saves the `conf/app.conf` content shown in the editor.
-- **System Configuration → Restart Service:** runs `web.commend_start`; configure this command in `conf/app.conf` first.
-- **System Configuration → Stop Service:** runs `web.commend_stop`; configure this command in `conf/app.conf` first.
-- **Logs:** runs `web.commend_log` and displays its output.
+- **Logs:** directly reads Go application logs; no PM2/Shell command execution.
 
 ### new coin rush config
 
@@ -707,3 +705,11 @@ bee pack -be GOOS=windows
 
 ## web ui
 > https://github.com/sorry510/binance_bot_ui
+
+### Go built-in application logs
+
+Beego logs are written to both the console and logs/app.log (relative to the process working directory). The file rotates daily or at 20 MiB and retains old logs for up to seven days; logs/ is excluded from Git. The JWT-protected GET /system/logs scans at most 2 MiB, returns up to 1000 lines and supports severity/keyword filtering and five-second refresh. PM2 continues to deploy and supervise the process. Old PM2 logs are not imported, and occasional non-Beego third-party stdout/stderr remains in PM2 console logs. Legacy web.commend_start, web.commend_stop and web.commend_log settings are no longer used.
+
+### Manually apply saved system configuration
+
+The System Configuration page provides Save and Restart to apply. Save is a no-op if the file has not changed; changed content is INI-validated and atomically saved with permissions 0600. A separate JWT-protected POST /config/restart allows the Go process to re-execute its own binary, without invoking PM2 commands. No pending change means no restart. PM2 remains the deployment supervisor; active tasks may be interrupted, and connection or JWT changes may require a page refresh or sign-in.

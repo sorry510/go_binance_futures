@@ -21,9 +21,6 @@ var excludeRoutes = []string{
 	"/ws/notifications",
 	"/agents/mcp/oauth/client-metadata",
 	"/agents/mcp/oauth/callback",
-	"/pull",
-	"/pm2-log",
-	"/pm2-log2",
 	"/" + webIndex,
 }
 
