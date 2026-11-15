@@ -81,9 +81,12 @@ type AgentCheck struct {
 
 type TradeCheck struct {
 	Check
-	ExecutionUncertain int64 `json:"execution_uncertain"`
-	ProtectionFailed   int64 `json:"protection_failed"`
-	ReconcileRequired  int64 `json:"reconcile_required"`
+	ExecutionUncertain         int64 `json:"execution_uncertain"`
+	ProtectionFailed           int64 `json:"protection_failed"`
+	ReconcileRequired          int64 `json:"reconcile_required"`
+	FillVerificationPending    int64 `json:"fill_verification_pending"`
+	ActiveFillVerification     int64 `json:"active_fill_verification"`
+	HistoricalFillVerification int64 `json:"historical_fill_verification"`
 }
 
 type Report struct {
@@ -495,6 +498,9 @@ func checkAgent(o orm.Ormer, now time.Time) AgentCheck {
 	return result
 }
 
+// checkTrade separates unresolved execution risk from full local fills waiting
+// for official REST trade verification. Local fills do NOT imply verification.
+// No production state is changed by this read-only health check.
 func checkTrade(o orm.Ormer) TradeCheck {
 	result := TradeCheck{}
 	queries := []struct {
@@ -511,25 +517,72 @@ func checkTrade(o orm.Ormer) TradeCheck {
 			return result
 		}
 	}
-	var positions, orders int64
+	var positions int64
 	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_positions WHERE account_id='main' AND status='reconcile_required'").QueryRow(&positions); err != nil {
 		result.Status, result.Message, result.LastError = StatusError, "read managed position reconcile count failed", err.Error()
 		return result
 	}
-	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_orders WHERE account_id='main' AND status='reconcile_required'").QueryRow(&orders); err != nil {
-		result.Status, result.Message, result.LastError = StatusError, "read managed order reconcile count failed", err.Error()
+
+	// Downgrade only orders with an exchange identity, fully recorded local
+	// execution AND exactly matching durable fills that still need REST checks.
+	// Missing/mismatched fills or unknown/partial execution remain errors.
+	const orderQuery = `
+SELECT COUNT(*) AS total_orders,
+       COALESCE(SUM(CASE WHEN requested_qty > 0
+                          AND ABS(filled_qty - requested_qty) <= 0.00000001
+                          AND exchange_order_id IS NOT NULL
+                          AND exchange_order_id <> ''
+                          AND position_status IN ('active','closed')
+                          AND ledger_rows > 0 AND unverified_rows > 0
+                          AND ABS(ledger_qty - filled_qty) <= 0.00000001
+                         THEN 1 ELSE 0 END), 0) AS verification_pending,
+       COALESCE(SUM(CASE WHEN requested_qty > 0
+                          AND ABS(filled_qty - requested_qty) <= 0.00000001
+                          AND exchange_order_id IS NOT NULL
+                          AND exchange_order_id <> ''
+                          AND position_status IN ('active','closed')
+                          AND ledger_rows > 0 AND unverified_rows > 0
+                          AND ABS(ledger_qty - filled_qty) <= 0.00000001
+                          AND position_status='closed'
+                         THEN 1 ELSE 0 END), 0) AS historical_pending
+FROM (
+  SELECT o.requested_qty, o.filled_qty, o.exchange_order_id,
+         p.status AS position_status,
+         COUNT(f.trade_id) AS ledger_rows,
+         COALESCE(SUM(f.qty),0) AS ledger_qty,
+         COALESCE(SUM(CASE WHEN f.rest_verified=0 THEN 1 ELSE 0 END),0) AS unverified_rows
+    FROM futures_managed_orders o
+    LEFT JOIN futures_managed_positions p ON p.id=o.position_id AND p.account_id=o.account_id
+    LEFT JOIN futures_trade_fills f ON f.account_id=o.account_id
+                                   AND f.symbol=o.symbol
+                                   AND f.order_id=o.exchange_order_id
+   WHERE o.account_id='main' AND o.status='reconcile_required'
+   GROUP BY o.id, o.requested_qty, o.filled_qty, o.exchange_order_id, p.status
+) reconciliation_orders
+`
+	var allOrders, verifyPending, historicalPending int64
+	if err := o.Raw(orderQuery).QueryRow(&allOrders, &verifyPending, &historicalPending); err != nil {
+		result.Status, result.Message, result.LastError = StatusError, "read managed order reconcile detail failed", err.Error()
 		return result
 	}
-	result.ReconcileRequired = positions + orders
+	if verifyPending > allOrders || historicalPending > verifyPending {
+		result.Status, result.Message = StatusError, "invalid trade reconcile classification"
+		return result
+	}
+	result.ReconcileRequired = positions + allOrders - verifyPending
+	result.FillVerificationPending = verifyPending
+	result.HistoricalFillVerification = historicalPending
+	result.ActiveFillVerification = verifyPending - historicalPending
 	result.Status, result.Message = StatusHealthy, "no trade safety issue"
-	if result.ProtectionFailed > 0 {
-		result.Status, result.Message = StatusWarning, fmt.Sprintf("%d protection failures need review", result.ProtectionFailed)
+	if result.ProtectionFailed > 0 || result.FillVerificationPending > 0 {
+		result.Status = StatusWarning
+		result.Message = fmt.Sprintf("fill_verification_pending=%d active=%d historical=%d protection_failed=%d", result.FillVerificationPending, result.ActiveFillVerification, result.HistoricalFillVerification, result.ProtectionFailed)
 	}
 	if result.ExecutionUncertain > 0 || result.ReconcileRequired > 0 {
 		result.Status = StatusError
-		result.Message = fmt.Sprintf("execution_uncertain=%d reconcile_required=%d protection_failed=%d", result.ExecutionUncertain, result.ReconcileRequired, result.ProtectionFailed)
+		result.Message = fmt.Sprintf("execution_uncertain=%d reconcile_required=%d protection_failed=%d fill_verification_pending=%d", result.ExecutionUncertain, result.ReconcileRequired, result.ProtectionFailed, result.FillVerificationPending)
 	}
-	result.Count = result.ExecutionUncertain + result.ProtectionFailed + result.ReconcileRequired
+	result.Count = result.ExecutionUncertain + result.ProtectionFailed + result.ReconcileRequired + result.FillVerificationPending
 	return result
 }
 

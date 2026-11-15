@@ -40,6 +40,16 @@ func setupHealthDB(t *testing.T, now time.Time) orm.Ormer {
 		t.Fatal(err)
 	}
 	o := orm.NewOrm()
+	// Fill is deliberately not a Beego model; create only a SQLite test table.
+	if _, err := o.Raw(`CREATE TABLE IF NOT EXISTS futures_trade_fills (
+		account_id TEXT, symbol TEXT, order_id TEXT, trade_id TEXT,
+		qty DECIMAL(36,18), rest_verified INTEGER
+	)`).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw("DELETE FROM futures_trade_fills").Exec(); err != nil {
+		t.Fatal(err)
+	}
 	cfg := models.Config{ID: 1, Version: appversion.DatabaseSchemaVersion, AgentOpportunityWatchEnable: 1, AgentOpportunityScanIntervalMin: 60}
 	if _, err := o.Insert(&cfg); err != nil {
 		t.Fatal(err)
@@ -206,5 +216,70 @@ func TestMarketWSStatusAndDisabledDelivery(t *testing.T) {
 	overall, markets = checkMarketWS(o, now, healthy, true)
 	if overall.Status != StatusWarning || markets[2].Status != StatusWarning {
 		t.Fatalf("delivery freshness warning not propagated: %+v %+v", overall, markets)
+	}
+}
+
+func TestTradeHealthSeparatesUnverifiedFillsFromExecutionRisk(t *testing.T) {
+	now := time.UnixMilli(1800000000000)
+	o := setupHealthDB(t, now)
+	closedID, err := o.Insert(&models.FuturesManagedPosition{
+		AccountID: "main", Owner: "auto_strategy", Symbol: "ETHUSDT", PositionSide: "SHORT",
+		Status: "closed", SettlementStatus: "incomplete", CreatedAt: now.UnixMilli(), ClosedAt: now.UnixMilli(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	activeID, err := o.Insert(&models.FuturesManagedPosition{
+		AccountID: "main", Owner: "auto_strategy", Symbol: "XRPUSDT", PositionSide: "LONG",
+		Status: "active", ManagedQty: 10, SettlementStatus: "open", CreatedAt: now.UnixMilli(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	insertOrder := func(symbol, client, exchange string, positionID int64, requested, filled float64) {
+		t.Helper()
+		if _, err := o.Insert(&models.FuturesManagedOrder{
+			AccountID: "main", Owner: "auto_strategy", Symbol: symbol, PositionSide: "LONG",
+			Intent: "open", Status: "reconcile_required", ClientOrderID: client,
+			ExchangeOrderID: exchange, PositionID: &positionID,
+			RequestedQty: requested, FilledQty: filled, CreatedAt: now.UnixMilli(),
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	insertOrder("ETHUSDT", "filled-closed", "1001", closedID, 2, 2)
+	insertOrder("XRPUSDT", "filled-active", "1002", activeID, 10, 10)
+	for _, row := range []struct {
+		symbol, order, trade string
+		qty                  float64
+	}{
+		{"ETHUSDT", "1001", "4001", 2},
+		{"XRPUSDT", "1002", "4002", 10},
+	} {
+		if _, err := o.Raw("INSERT INTO futures_trade_fills(account_id,symbol,order_id,trade_id,qty,rest_verified) VALUES ('main',?,?,?,?,0)", row.symbol, row.order, row.trade, row.qty).Exec(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	report := checkTrade(o)
+	if report.Status != StatusWarning || report.ReconcileRequired != 0 ||
+		report.FillVerificationPending != 2 || report.HistoricalFillVerification != 1 ||
+		report.ActiveFillVerification != 1 || report.Count != 2 {
+		t.Fatalf("complete local fills pending REST should warn, not show execution failure: %+v", report)
+	}
+	// Missing fill evidence must never be downgraded to a warning.
+	insertOrder("XRPUSDT", "unknown-open", "1003", activeID, 10, 0)
+	report = checkTrade(o)
+	if report.Status != StatusError || report.ReconcileRequired != 1 ||
+		report.FillVerificationPending != 2 || report.Count != 3 {
+		t.Fatalf("unknown execution must stay an error: %+v", report)
+	}
+	// Even a completed local order with a mismatched ledger is risky.
+	insertOrder("ETHUSDT", "mismatch", "1004", closedID, 5, 5)
+	if _, err := o.Raw("INSERT INTO futures_trade_fills(account_id,symbol,order_id,trade_id,qty,rest_verified) VALUES ('main','ETHUSDT','1004','4004',2,0)").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	report = checkTrade(o)
+	if report.ReconcileRequired != 2 || report.FillVerificationPending != 2 {
+		t.Fatalf("ledger mismatch must not be hidden: %+v", report)
 	}
 }
