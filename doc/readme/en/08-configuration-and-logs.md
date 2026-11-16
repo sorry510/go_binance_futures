@@ -8,6 +8,14 @@
 
 ---
 
+## Login Attempt Rate Limit
+
+The public `/login` endpoint limits failed attempts in memory by the TCP peer IP: five consecutive failures within 15 minutes lock the IP for 15 minutes. HTTP `429` includes `Retry-After` in seconds. A successful login resets the counter. Restarting the Go process clears these counters. No database, Redis, or additional service is involved.
+
+Client-supplied `X-Forwarded-For` and `X-Real-IP` are not trusted. Behind Nginx or another reverse proxy, requests may appear to come from the same proxy IP. Apply per-client limits at a trusted reverse proxy to avoid shared lockouts.
+
+---
+
 ## System Diagnostics and Log Cleanup
 
 When the Web UI is unavailable or you need quick diagnostics on the server, run the read-only command:

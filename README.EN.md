@@ -25,6 +25,7 @@ For an introduction, read **[00 · System Overview](doc/readme/en/00-system-over
 | 06 | [Market Monitoring and Alerts](doc/readme/en/06-market-monitoring-and-alerts.md) | Notifications, coin alerts, monitoring, funding rates, and new-coin rush |
 | 07 | [AI and Agents](doc/readme/en/07-ai-and-agents.md) | Chat, analysis, Skills, MCP, Memory, tasks, and governance |
 | 08 | [System Configuration and Logs](doc/readme/en/08-configuration-and-logs.md) | Diagnostics, log viewing, and log cleanup |
+| 09 | [How to Develop](doc/readme/en/09-how-to-develop.md) | Go backend and Vue frontend development, testing, builds, and asset sync |
 
 ## Other Technical Documentation
 

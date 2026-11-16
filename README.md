@@ -24,6 +24,7 @@
 | 06 | [行情监控与通知](doc/readme/zh-CN/06-行情监控与通知.md) | 价格提醒、行情监听、资金费率、新币抢购和通知 |
 | 07 | [AI 与 Agent 功能](doc/readme/zh-CN/07-AI-Agent.md) | Chat、分析、Skill、MCP、Memory、任务与治理 |
 | 08 | [系统配置与日志](doc/readme/zh-CN/08-系统配置与日志.md) | 配置中心、内置日志、诊断与清理 |
+| 09 | [如何开发](doc/readme/zh-CN/09-如何开发.md) | Go 后端与 Vue 前端开发、调试、测试、构建与部署 |
 
 ## 其他技术文档
 
