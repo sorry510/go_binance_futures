@@ -105,3 +105,20 @@ func TestSpotQuantLiveSignedURLRedaction(t *testing.T) {
 		t.Fatalf("Spot signed URL leaked in logs: %s", redacted)
 	}
 }
+
+func TestSpotQuantRuntimeOffStillNeedsManagedRecovery(t *testing.T) {
+	r, ex, _, db := spotRunnerFixture(t)
+	needed, err := spotQuantNeedsRuntime(db)
+	if err != nil || needed {
+		t.Fatalf("empty disabled runtime should not start: %v %v", needed, err)
+	}
+	spotRunnerSetSwitches(t, db, 1, 1)
+	if err := r.Run(context.Background()); err != nil || ex.buys != 1 {
+		t.Fatalf("seed managed position: %v %d", err, ex.buys)
+	}
+	spotRunnerSetSwitches(t, db, 0, 0)
+	needed, err = spotQuantNeedsRuntime(db)
+	if err != nil || !needed {
+		t.Fatalf("disabled runtime must serve managed position: %v %v", needed, err)
+	}
+}

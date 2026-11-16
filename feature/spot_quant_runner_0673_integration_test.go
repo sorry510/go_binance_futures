@@ -531,17 +531,29 @@ func TestSpotQuant0673DisabledGateAndWalletFundsCannotOverrideFillOwnership(t *t
 	if !errors.Is(err, spotexecution.ErrNeedsReview) || ex.places != 1 {
 		t.Fatalf("insufficient free base should block SELL: %v places=%d", err, ex.places)
 	}
-	// Keep cancellation/recovery controls available when global switch OFF.
+	// The OFF switch must not bypass Fill ownership or sell more than
+	// is actually available. This still fails closed on wallet mismatch.
 	spotRunnerSetSwitches(t, db, 0, 1)
 	for i := 0; i < 5; i++ {
-		spot0673Tick(t, r)
+		err = r.Run(context.Background())
+		// Repeated NeedsReview is intentionally rate-limited when OFF;
+		// a skipped cooldown cycle is not an authorization to trade.
+		if (err != nil && !errors.Is(err, spotexecution.ErrNeedsReview)) || ex.places != 1 {
+			t.Fatalf("global OFF bypassed verified inventory: %v places=%d", err, ex.places)
+		}
 	}
-	if ex.places != 1 {
-		t.Fatalf("global OFF submitted new trade: %d", ex.places)
+	// Once the wallet inventory is restored, an OFF switch must allow
+	// exactly one exit of this already-managed position.
+	ex.freeBase = "50"
+	// Once corrected by an operator, the bounded OFF retry cooldown can be
+	// advanced for this deterministic test (production retries automatically).
+	r.offRetryAt["BTCUSDT"] = time.Now().Add(-time.Second)
+	if err := r.Run(context.Background()); err != nil || ex.places != 2 {
+		t.Fatalf("global OFF stranded verified exit: %v places=%d", err, ex.places)
 	}
 	orders, err := r.ledger.ListOrders(pos.ID)
-	if err != nil || len(orders) != 1 {
-		t.Fatalf("BUY evidence lost after OFF: %+v %v", orders, err)
+	if err != nil || len(orders) != 2 || orders[0].Side != "BUY" || orders[1].Side != "SELL" {
+		t.Fatalf("BUY/SELL Fill evidence lost after OFF: %+v %v", orders, err)
 	}
 	if _, err := processor.Reconcile(context.Background(), orders[0].ID); err != nil {
 		t.Fatalf("OFF must not prevent read-only recovery: %v", err)
@@ -845,37 +857,35 @@ func TestReview0673TwoSymbolsThroughRealProcessorStayExactAndIndependent(t *test
 			t.Fatalf("cross-symbol accounting invalid %s: %+v %v", symbol, snap, err)
 		}
 	}
-	// Disable WBTC only. BTC may close, but WBTC remains owned and OPEN.
+	// Disable WBTC only. Both positions are already Fill-owned and must
+	// close; the WBTC flag blocks NEW BUYs, not managed SELLs.
 	if _, err := db.Raw("UPDATE spot_symbols SET spot_quant_enabled=0 WHERE symbol='WBTCUSDT'").Exec(); err != nil {
 		t.Fatal(err)
 	}
 	ex.price = "110"
 	spot0673Tick(t, r)
-	if ex.places != 3 {
-		t.Fatalf("disabled WBTC was auto-sold: places=%d", ex.places)
+	if ex.places != 4 {
+		t.Fatalf("both managed symbols must close despite WBTC OFF: places=%d", ex.places)
 	}
-	for _, o := range ex.orders {
-		if o.Side == "SELL" && o.Symbol != "BTCUSDT" {
-			t.Fatalf("wrong coin auto-sold: %+v", o)
+	for _, symbol := range []string{"BTCUSDT", "WBTCUSDT"} {
+		positions, err := r.ledger.ListPositions(spotledger.PositionFilter{Symbol: symbol, Page: 1, Limit: 10})
+		if err != nil || len(positions.List) != 1 {
+			t.Fatalf("missing managed position %s: %+v %v", symbol, positions, err)
+		}
+		snapshot, err := r.ledger.Accounting(positions.List[0].ID, "110")
+		if err != nil || snapshot.Position.Status != "CLOSED" {
+			t.Fatalf("managed %s did not close: %+v %v", symbol, snapshot, err)
 		}
 	}
-	pending, err := r.ledger.ListPositions(spotledger.PositionFilter{Symbol: "WBTCUSDT", Page: 1, Limit: 10})
-	if err != nil || len(pending.List) != 1 {
-		t.Fatalf("WBTC position disappeared: %+v %v", pending, err)
-	}
-	snap, err := r.ledger.Accounting(pending.List[0].ID, "110")
-	if err != nil || snap.Position.Status != "OPEN" {
-		t.Fatalf("disabled WBTC unexpectedly closed: %+v %v", snap, err)
+	spot0673Tick(t, r)
+	if ex.places != 4 {
+		t.Fatalf("disabled WBTC or same-bar BTC opened twice: places=%d", ex.places)
 	}
 	if _, err := db.Raw("UPDATE spot_symbols SET spot_quant_enabled=1 WHERE symbol='WBTCUSDT'").Exec(); err != nil {
 		t.Fatal(err)
 	}
 	spot0673Tick(t, r)
 	if ex.places != 4 {
-		t.Fatalf("re-enabled WBTC failed independent SELL: places=%d", ex.places)
-	}
-	final, err := r.ledger.Accounting(pending.List[0].ID, "110")
-	if err != nil || final.Position.Status != "CLOSED" {
-		t.Fatalf("WBTC verified close failed: %+v %v", final, err)
+		t.Fatalf("re-enabled WBTC caused same-bar duplicate: places=%d", ex.places)
 	}
 }

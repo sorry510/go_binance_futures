@@ -711,9 +711,9 @@ func TestReview064AbsentOrderProofCannotOverrideAcceptedFill(t *testing.T) {
 	}
 }
 
-// F5: globally disabled NEW SELL must not spend any Binance REST lookup
-// weight. Explicit Reconcile and Cancel remain allowed when OFF.
-func TestReview064GateOffBeforeAnySellREST(t *testing.T) {
+// An OFF entry gate must not strand existing Fill-owned inventory. SELL
+// still verifies the exact owned quantity and the real wallet balance.
+func TestReview064GateOffAllowsVerifiedSell(t *testing.T) {
 	p, ex, gate, _, _ := testEngine(t)
 	buy, err := p.ExecuteBuy(context.Background(), "BTCUSDT", "100", "gate_sell_buy")
 	if err != nil {
@@ -721,19 +721,30 @@ func TestReview064GateOffBeforeAnySellREST(t *testing.T) {
 	}
 	gate.on = false
 	before := ex.lookups
-	_, err = p.ExecuteSell(context.Background(), buy.PositionID, "gate_sell_off")
-	if !errors.Is(err, ErrDisabled) {
-		t.Fatalf("global OFF did not block new SELL: %v", err)
+	sell, err := p.ExecuteSell(context.Background(), buy.PositionID, "gate_sell_off")
+	if err != nil || sell.Status != "FILLED" {
+		t.Fatalf("entry switch OFF blocked verified SELL: %+v %v", sell, err)
 	}
-	if ex.lookups != before {
-		t.Fatalf("global OFF did %d unnecessary REST order lookups", ex.lookups-before)
+	if ex.lookups-before != 1 || ex.placeCount != 2 {
+		t.Fatalf("expected one unique SELL and lookup: lookups=%d trades=%d", ex.lookups-before, ex.placeCount)
 	}
-	if ex.placeCount != 1 {
-		t.Fatalf("global OFF submitted SELL %d", ex.placeCount)
+	if _, err := p.ExecuteBuy(context.Background(), "BTCUSDT", "100", "gate_new_buy"); !errors.Is(err, ErrDisabled) {
+		t.Fatalf("entry gate OFF allowed new BUY: %v", err)
 	}
-	_, err = p.Reconcile(context.Background(), buy.ID)
-	if err != nil {
-		t.Fatalf("explicit OFF-time reconciliation should work: %v", err)
+	if ex.placeCount != 2 {
+		t.Fatal("new BUY posted while gate OFF")
+	}
+	if _, err := p.Reconcile(context.Background(), buy.ID); err != nil {
+		t.Fatalf("OFF-time reconciliation blocked: %v", err)
+	}
+}
+
+func TestReview064GateOffCannotSellWithoutVerifiedPosition(t *testing.T) {
+	p, ex, gate, _, _ := testEngine(t)
+	gate.on = false
+	_, err := p.ExecuteSell(context.Background(), 999999, "not_owned_sell")
+	if err == nil || ex.placeCount != 0 {
+		t.Fatalf("OFF gate authorized unowned SELL: err=%v places=%d", err, ex.placeCount)
 	}
 }
 

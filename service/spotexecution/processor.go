@@ -149,13 +149,10 @@ func (p *Processor) ExecuteSell(ctx context.Context, positionID int64, clientID 
 	if !errors.Is(err, orm.ErrNoRows) {
 		return empty, err
 	}
-	// The switch gate precedes any remote REST query for a NEW SELL.
-	// Cancel and explicit Reconcile remain usable when global OFF.
-	preview, err := p.ledger.GetPosition(positionID)
-	if err != nil {
-		return empty, err
-	}
-	if err = p.enabled(ctx, preview.Symbol); err != nil {
+	// A verified managed SELL must remain possible after an entry switch
+	// is disabled. Authentication, Fill ownership and wallet checks below
+	// still apply; arbitrary wallet holdings are never authorized.
+	if err := ctx.Err(); err != nil {
 		return empty, err
 	}
 	// Reconcile only unresolved or recently completed strategy orders.
@@ -171,9 +168,6 @@ func (p *Processor) ExecuteSell(ctx context.Context, positionID int64, clientID 
 		return empty, fmt.Errorf("cannot SELL without strategy-owned open inventory")
 	}
 	symbol := view.Position.Symbol
-	if err := p.enabled(ctx, symbol); err != nil {
-		return empty, err
-	}
 	r, price, err := p.market(ctx, symbol)
 	if err != nil {
 		return empty, err
@@ -189,7 +183,7 @@ func (p *Processor) ExecuteSell(ctx context.Context, positionID int64, clientID 
 	if err != nil {
 		return empty, err
 	}
-	if err = p.enabled(ctx, symbol); err != nil {
+	if err := ctx.Err(); err != nil {
 		return empty, err
 	}
 	intent := spotledger.OrderIntent{PositionID: positionID, Symbol: symbol, Side: "SELL", Type: "MARKET", ClientOrderID: clientID, RequestedQty: qty}
@@ -232,8 +226,13 @@ func (p *Processor) submitOnce(ctx context.Context, local models.SpotManagedOrde
 	if remote != nil {
 		return p.reconcileRemote(ctx, local, *remote)
 	}
-	if err := p.enabled(ctx, local.Symbol); err != nil {
+	if err := ctx.Err(); err != nil {
 		return local, err
+	}
+	if local.Side == "BUY" {
+		if err := p.enabled(ctx, local.Symbol); err != nil {
+			return local, err
+		}
 	}
 	// Final real-time balance and inventory checks before network POST.
 	r, price, err := p.market(ctx, local.Symbol)
@@ -281,8 +280,13 @@ func (p *Processor) submitOnce(ctx context.Context, local models.SpotManagedOrde
 			return local, fmt.Errorf("%w: Spot SELL must exactly match verified inventory, and wallet free balance must cover it", ErrNeedsReview)
 		}
 	}
-	if err := p.enabled(ctx, local.Symbol); err != nil {
+	if err := ctx.Err(); err != nil {
 		return local, err
+	}
+	if local.Side == "BUY" {
+		if err := p.enabled(ctx, local.Symbol); err != nil {
+			return local, err
+		}
 	}
 	req := Request{Symbol: local.Symbol, Side: local.Side, Type: "MARKET", ClientOrderID: local.ClientOrderID, Quantity: local.RequestedQty}
 	if err := validateRequest(req); err != nil {

@@ -7,8 +7,9 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
-// DBGate reads both independently controlled switches on EACH attempt,
-// including immediately before the exchange POST; no in-memory cache.
+// DBGate checks both independently controlled ENTRY switches on each
+// NEW BUY, including before the exchange POST; no in-memory cache.
+// Existing managed SELLs use verified Fill inventory, not this entry gate.
 type DBGate struct{ DB orm.Ormer }
 
 func (g DBGate) Enabled(ctx context.Context, symbol string) (bool, error) {

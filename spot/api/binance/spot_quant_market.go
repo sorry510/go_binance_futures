@@ -39,10 +39,29 @@ func (a *QuantAdapter) marketOnly() error {
 }
 
 func (a *QuantAdapter) MarketSnapshot(ctx context.Context, symbol string) (SpotMarketSnapshot, error) {
-	var out SpotMarketSnapshot
 	if err := a.marketOnly(); err != nil {
-		return out, err
+		return SpotMarketSnapshot{}, err
 	}
+	tick, err := a.cache.snapshot(symbol, func() (SpotMarketSnapshot, error) {
+		return a.fetchMarketSnapshot(ctx, symbol)
+	})
+	if err != nil {
+		return SpotMarketSnapshot{}, err
+	}
+	// The shared mainnet market WS may refresh the latest price between
+	// 24h-stat refreshes. Never reuse its data for an isolated Testnet client.
+	if a.c == client && a.endpoint == spotQuantMainnetRESTURL {
+		if price, ok := GetFreshSpotTickerPrice(symbol); ok {
+			tick.Price = price
+			// Preserve the exchange 24h statistics timestamp. A fresh WS
+			// last price cannot make stale OHLC/percent data current.
+		}
+	}
+	return tick, nil
+}
+
+func (a *QuantAdapter) fetchMarketSnapshot(ctx context.Context, symbol string) (SpotMarketSnapshot, error) {
+	var out SpotMarketSnapshot
 	stats, err := a.c.NewListPriceChangeStatsService().Symbol(symbol).Do(binanceapiusage.WithSource(ctx, "spot_quant_24h"))
 	if err != nil {
 		return out, err
@@ -68,7 +87,8 @@ func (a *QuantAdapter) MarketSnapshot(ctx context.Context, symbol string) (SpotM
 	}
 	return SpotMarketSnapshot{
 		Symbol: symbol, Price: v.LastPrice, Open: v.OpenPrice,
-		High: v.HighPrice, Low: v.LowPrice, PercentChange: pct, AsOf: now,
+		High: v.HighPrice, Low: v.LowPrice, PercentChange: pct,
+		AsOf: time.UnixMilli(v.CloseTime).UTC(),
 	}, nil
 }
 
@@ -81,6 +101,12 @@ func (a *QuantAdapter) MarketKlines(ctx context.Context, symbol, interval string
 	if strings.TrimSpace(symbol) == "" || limit <= 0 || limit > 1000 {
 		return nil, fmt.Errorf("invalid Spot market kline request")
 	}
+	return a.cache.candles(symbol, interval, limit, func() ([]*futures.Kline, error) {
+		return a.fetchMarketKlines(ctx, symbol, interval, limit)
+	})
+}
+
+func (a *QuantAdapter) fetchMarketKlines(ctx context.Context, symbol, interval string, limit int) ([]*futures.Kline, error) {
 	raw, err := a.c.NewKlinesService().Symbol(symbol).Interval(interval).Limit(limit).Do(binanceapiusage.WithSource(ctx, "spot_quant_klines"))
 	if err != nil {
 		return nil, err

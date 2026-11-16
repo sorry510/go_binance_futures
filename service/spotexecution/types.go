@@ -20,7 +20,8 @@ var (
 )
 
 type Gate interface {
-	// Checked at entry AND immediately before every new exchange order.
+	// Required for every NEW BUY, including immediately before exchange POST.
+	// A verified Managed SELL is governed by Fill inventory and wallet checks.
 	Enabled(ctx context.Context, symbol string) (bool, error)
 }
 

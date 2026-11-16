@@ -21,12 +21,15 @@ import (
 type QuantAdapter struct {
 	c                  *sdk.Client
 	allowOrderMutation bool
-	endpoint           string // immutable REST environment identity
+	endpoint           string                // immutable REST environment identity
+	cache              *spotQuantMarketCache // isolated per account/environment
 }
 
 // NewSpotQuantAdapter remains read-only for legacy callers. The Spot Quant
 // runtime explicitly opts in to trading with the configured environment.
-func NewSpotQuantAdapter() *QuantAdapter { return &QuantAdapter{c: client} }
+func NewSpotQuantAdapter() *QuantAdapter {
+	return &QuantAdapter{c: client, cache: newSpotQuantMarketCache()}
+}
 func NewSpotQuantAdapterWithClient(c *sdk.Client, permitOrderMutation bool) (*QuantAdapter, error) {
 	if c == nil {
 		return nil, fmt.Errorf("nil Spot Binance client")
@@ -34,7 +37,7 @@ func NewSpotQuantAdapterWithClient(c *sdk.Client, permitOrderMutation bool) (*Qu
 	if permitOrderMutation && !spotQuantKnownREST(c.BaseURL) {
 		return nil, fmt.Errorf("Spot quant requires a supported Binance Spot REST endpoint")
 	}
-	return &QuantAdapter{c: c, allowOrderMutation: permitOrderMutation, endpoint: c.BaseURL}, nil
+	return &QuantAdapter{c: c, allowOrderMutation: permitOrderMutation, endpoint: c.BaseURL, cache: newSpotQuantMarketCache()}, nil
 }
 
 const spotQuantMainnetRESTURL = "https://api.binance.com"

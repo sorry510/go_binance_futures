@@ -252,15 +252,15 @@ func TestSpotQuant0672SwitchesRepeatedSignalsAndSecondCycle(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if ex.sells != 0 {
-		t.Fatal("global OFF triggered automatic SELL")
+	if ex.sells != 1 {
+		t.Fatalf("global OFF must still close verified managed inventory, got %d SELLs", ex.sells)
 	}
 	spotRunnerSetSwitches(t, db, 1, 1)
 	if err := r.Run(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if ex.sells != 1 {
-		t.Fatalf("expected exactly one SELL, got %d", ex.sells)
+	if ex.sells != 1 || ex.buys != 1 {
+		t.Fatalf("unexpected duplicate after switch ON: buys=%d sells=%d", ex.buys, ex.sells)
 	}
 	for i := 0; i < 10; i++ {
 		if err := r.Run(ctx); err != nil {
@@ -661,5 +661,88 @@ func TestReview0672SpotCallbackPanicIsolatedAndLogStateDeduplicated(t *testing.T
 	spotQuantSchedulerLogMu.Unlock()
 	if value != "" {
 		t.Fatalf("successful callback failed to clear prior error state: %q", value)
+	}
+}
+
+// A disabled symbol is not a license to leave an existing Fill-owned position
+// unmanaged. Disabling either switch stops BUY, not SELL or reconciliation.
+func TestSpotQuantDisabledSymbolStillExitsWithoutReentry(t *testing.T) {
+	r, ex, eval, db := spotRunnerFixture(t)
+	ctx := context.Background()
+	spotRunnerSetSwitches(t, db, 1, 1)
+	if err := r.Run(ctx); err != nil || ex.buys != 1 {
+		t.Fatalf("seed BUY: err=%v buys=%d", err, ex.buys)
+	}
+	eval.exit = true
+	spotRunnerSetSwitches(t, db, 1, 0)
+	if err := r.Run(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if ex.sells != 1 || ex.buys != 1 {
+		t.Fatalf("symbol OFF must SELL but never BUY: buys=%d sells=%d", ex.buys, ex.sells)
+	}
+	for i := 0; i < 3; i++ {
+		if err := r.Run(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if ex.sells != 1 || ex.buys != 1 {
+		t.Fatalf("disabled symbol repeated trade: buys=%d sells=%d", ex.buys, ex.sells)
+	}
+}
+
+func TestSpotQuantManagedExitsBeforeNewEntries(t *testing.T) {
+	r, ex, eval, db := spotRunnerFixture(t)
+	spotRunnerSetSwitches(t, db, 1, 1)
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	// The new enabled-only symbol has a lower ID than the managed symbol;
+	// the exit path must nevertheless execute first.
+	if _, err := db.Raw("UPDATE spot_symbols SET id=2 WHERE symbol='BTCUSDT'").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Raw("INSERT INTO spot_symbols(id,symbol,spot_quant_enabled,usdt,profit,loss,strategy,technology,type,updateTime) VALUES(1,'ETHUSDT',1,'100','8','6',?,'{}','USDT',?)", runnerLongRules, time.Now().UnixMilli()).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	eval.exit = true
+	// A fake executor can't assert cross-symbol order directly, but an
+	// exit callback verifies that no earlier new BUY has been attempted.
+	eval.onEntry = func() {
+		if ex.sells == 0 {
+			t.Error("new entry evaluated before existing managed exit")
+		}
+	}
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if ex.sells != 1 || ex.buys != 2 {
+		t.Fatalf("priority pass: buys=%d sells=%d", ex.buys, ex.sells)
+	}
+}
+
+// A disabled coin with a manually corrupted CLOSED cache must still be
+// selected when materialized remaining_qty hints at an active position.
+// Fill accounting, rather than status, authorizes the actual SELL.
+func TestSpotQuantDisabledSymbolWithClosedCacheStillExits(t *testing.T) {
+	r, ex, eval, db := spotRunnerFixture(t)
+	spotRunnerSetSwitches(t, db, 1, 1)
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	pos, ok, err := r.activeSpotPosition("BTCUSDT")
+	if err != nil || !ok {
+		t.Fatalf("missing seeded BUY position: %v", err)
+	}
+	if _, err := db.Raw("UPDATE spot_managed_positions SET status='CLOSED' WHERE id=?", pos.ID).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	spotRunnerSetSwitches(t, db, 0, 0)
+	eval.exit = true
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if ex.buys != 1 || ex.sells != 1 {
+		t.Fatalf("disabled CLOSED cache stranded Fill-owned position: buys=%d sells=%d", ex.buys, ex.sells)
 	}
 }

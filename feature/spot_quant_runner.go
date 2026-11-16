@@ -47,7 +47,7 @@ type spotQuantStrategy interface {
 // SpotQuantRunner follows the existing Futures two-second loop contract but
 // uses only Spot symbols, the dedicated Spot Fill ledger and 06-4 processor.
 // The production scheduler attaches the same Processor in both Spot
-// environments; two DB switches, WS readiness and Fill proof gate orders.
+// environments; two entry switches, WS readiness and Fill proof gate orders.
 type SpotQuantRunner struct {
 	db       orm.Ormer
 	ledger   *spotledger.Ledger
@@ -57,12 +57,14 @@ type SpotQuantRunner struct {
 	// 3d must use the ACTUAL candle OpenTime from the same Spot market
 	// environment as trading. It varies between Mainnet and Testnet.
 	// Absent an authorized matching market source, fail closed.
-	spot3dOpen  func(string, time.Time) (time.Time, error)
-	orderPrefix string      // sqt Testnet / sqm Mainnet; empty=legacy Fake tests
-	running     atomic.Bool // only protects this instance; main.loopRun owns process-tick serialization
-	errorMu     sync.Mutex
-	lastErr     map[string]string
-	warnings    map[string]bool
+	spot3dOpen    func(string, time.Time) (time.Time, error)
+	orderPrefix   string      // sqt Testnet / sqm Mainnet; empty=legacy Fake tests
+	running       atomic.Bool // only protects this instance; main.loopRun owns process-tick serialization
+	errorMu       sync.Mutex
+	lastErr       map[string]string
+	warnings      map[string]bool
+	offRetryAt    map[string]time.Time
+	offRetryDelay map[string]time.Duration
 }
 
 func NewSpotQuantRunner(db orm.Ormer, ledger *spotledger.Ledger, strategy spotQuantStrategy, exec spotQuantExecutor) (*SpotQuantRunner, error) {
@@ -70,7 +72,8 @@ func NewSpotQuantRunner(db orm.Ormer, ledger *spotledger.Ledger, strategy spotQu
 		return nil, fmt.Errorf("Spot Quant runner requires DB, Spot Fill ledger and Spot strategy")
 	}
 	return &SpotQuantRunner{db: db, ledger: ledger, strategy: strategy, exec: exec, clock: time.Now,
-		lastErr: make(map[string]string), warnings: make(map[string]bool)}, nil
+		lastErr: make(map[string]string), warnings: make(map[string]bool),
+		offRetryAt: make(map[string]time.Time), offRetryDelay: make(map[string]time.Duration)}, nil
 }
 
 // Spot event identity uses the longest enabled indicator or explicitly
@@ -347,27 +350,108 @@ func (r *SpotQuantRunner) globalEnabled(ctx context.Context) (bool, error) {
 	return on == 1, nil
 }
 
-// Run is a single bounded, non-overlapping cycle; main.go reuses loopRun at
-// the same 2s cadence as Futures. Each enabled symbol is processed serially.
+// managedSpotSymbols lists symbols requiring an exit/reconciliation decision
+// even when their entry switches are OFF. This DB-only query gives exits
+// priority without ever selecting a different trading environment or assuming
+// editable position status proves ownership; runSymbol verifies the Fill ledger.
+func (r *SpotQuantRunner) managedSpotSymbols(ctx context.Context) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	symbols := make([]string, 0)
+	_, err := r.db.Raw(
+		// Remaining quantity is an additional hint when mutable status was
+		// manually marked CLOSED; the ledger remains the final authority.
+		"SELECT DISTINCT symbol FROM spot_managed_positions WHERE status IN ('OPEN','PENDING_BUY') OR remaining_qty > 0 " +
+			"UNION SELECT DISTINCT symbol FROM spot_managed_orders " +
+			"WHERE status IN ('NEW','PARTIALLY_FILLED','PENDING_CANCEL') " +
+			"OR (status='FILLED' AND filled_qty <> requested_qty) ORDER BY symbol",
+	).QueryRows(&symbols)
+	return symbols, err
+}
+
+// A disabled entry route with a persistent recovery/review error should not
+// query Binance every two seconds indefinitely. A bounded cooldown applies
+// only when an OFF switch and ErrNeedsReview coincide; enabled positions and
+// healthy managed exits continue without delay.
+func (r *SpotQuantRunner) shouldDelayOffRecovery(symbol string, off bool) bool {
+	if !off {
+		delete(r.offRetryAt, symbol)
+		delete(r.offRetryDelay, symbol)
+		return false
+	}
+	return time.Now().Before(r.offRetryAt[symbol])
+}
+
+func (r *SpotQuantRunner) updateOffRecovery(symbol string, off bool, err error) {
+	if !off || !errors.Is(err, spotledger.ErrNeedsReview) {
+		delete(r.offRetryAt, symbol)
+		delete(r.offRetryDelay, symbol)
+		return
+	}
+	delay := r.offRetryDelay[symbol] * 2
+	if delay < 5*time.Second {
+		delay = 5 * time.Second
+	}
+	if delay > 30*time.Second {
+		delay = 30 * time.Second
+	}
+	r.offRetryDelay[symbol] = delay
+	r.offRetryAt[symbol] = time.Now().Add(delay)
+}
+
+// Run never overlaps another cycle. Process managed positions and unsettled
+// orders before evaluating any NEW BUY; an OFF switch only stops new entries.
 func (r *SpotQuantRunner) Run(ctx context.Context) error {
 	if r == nil {
 		return fmt.Errorf("nil Spot Quant runner")
 	}
 	if !r.running.CompareAndSwap(false, true) {
-		return nil // prior run still active, never enqueue an overlapping cycle
+		return nil
 	}
 	defer r.running.Store(false)
 	if r.exec == nil {
-		// Stage 06-7-2 runtime wiring is intentionally non-mutating until
-		// isolated Spot Testnet credentials and the real-order Gate pass.
-		// Do not even fetch live market history on a disabled order route.
 		return nil
 	}
-	on, err := r.globalEnabled(ctx)
-	if err != nil || !on {
-		return err
+	managed, err := r.managedSpotSymbols(ctx)
+	if err != nil {
+		return fmt.Errorf("Spot Quant managed positions: %w", err)
 	}
+	on, err := r.globalEnabled(ctx)
+	if err != nil {
+		return err // never infer permission for new entries on a DB failure
+	}
+	if !on && len(managed) == 0 {
+		return nil
+	}
+	visited := make(map[string]struct{}, len(managed))
 	var problems []error
+	for _, symbol := range managed {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		visited[symbol] = struct{}{}
+		var coin models.SpotSymbols
+		if err := r.db.QueryTable(new(models.SpotSymbols)).Filter("Symbol", symbol).One(&coin); err != nil {
+			problems = append(problems, fmt.Errorf("%s: managed Spot symbol configuration unavailable: %w", symbol, err))
+			continue
+		}
+		off := !on || coin.SpotQuantEnabled != 1
+		if r.shouldDelayOffRecovery(symbol, off) {
+			continue
+		}
+		if err := r.runSymbol(ctx, coin); err != nil {
+			r.updateOffRecovery(symbol, off, err)
+			problems = append(problems, fmt.Errorf("%s: %w", symbol, err))
+			r.logSymbolError(symbol, err)
+		} else {
+			r.updateOffRecovery(symbol, off, nil)
+			r.logSymbolError(symbol, nil)
+		}
+	}
+	if !on {
+		return errors.Join(problems...)
+	}
 	for page := 1; ; page++ {
 		if err := ctx.Err(); err != nil {
 			return err
@@ -381,6 +465,9 @@ func (r *SpotQuantRunner) Run(ctx context.Context) error {
 		for _, coin := range symbols.List {
 			if err := ctx.Err(); err != nil {
 				return err
+			}
+			if _, ok := visited[coin.Symbol]; ok {
+				continue // managed exit/reconcile was already handled this cycle
 			}
 			if err := r.runSymbol(ctx, coin); err != nil {
 				problems = append(problems, fmt.Errorf("%s: %w", coin.Symbol, err))
@@ -471,15 +558,11 @@ func (r *SpotQuantRunner) reconcileUnsettled(ctx context.Context, symbol string)
 }
 
 func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols) error {
-	if coin.SpotQuantEnabled != 1 || coin.Symbol == "" {
+	if coin.Symbol == "" {
 		return nil
 	}
-	gate := spotexecution.DBGate{DB: r.db}
-	on, err := gate.Enabled(ctx, coin.Symbol)
-	if err != nil || !on {
-		return err
-	}
-
+	// Reconcile and verified-position exits must run even if the user has
+	// switched off this symbol or the global entry switch.
 	// Review every order still unsettled, regardless of the mutable
 	// parent Position.status, including orphan/closed-cache rows.
 	recovered, err := r.reconcileUnsettled(ctx, coin.Symbol)
@@ -582,14 +665,19 @@ func (r *SpotQuantRunner) runSymbol(ctx context.Context, coin models.SpotSymbols
 		if !errors.Is(err, orm.ErrNoRows) {
 			return err
 		}
-		on, err = gate.Enabled(ctx, coin.Symbol)
-		if err != nil || !on {
-			return err
-		}
+		// Exit authorization comes from the verified managed position,
+		// not from the two entry switches.
 		_, err = r.exec.ExecuteSell(ctx, active.ID, id)
 		return err
 	}
 
+	// Only new BUYs require both switches. Never create a new entry for
+	// a disabled symbol, including the case where all managed cycles closed.
+	gate := spotexecution.DBGate{DB: r.db}
+	on, err := gate.Enabled(ctx, coin.Symbol)
+	if err != nil || !on {
+		return err
+	}
 	signal, err := r.strategy.EvaluateEntry(coin)
 	if err != nil || signal.Action != "BUY" {
 		return err

@@ -41,7 +41,9 @@ func SpotMarketStrategy(exchange *spotbinance.QuantAdapter) (line.SpotRuleEvalua
 			snapshot.Close = tick.Price
 			snapshot.PercentChange = tick.PercentChange
 			snapshot.UpdateTime = tick.AsOf.UnixMilli()
-			return line.LoadVerifiedSpotRuleEnvWithSource(snapshot, tick.AsOf, tick.Price, loader)
+			// Independent validation time: the market snapshot must not
+			// certify its own freshness by supplying the "now" parameter.
+			return line.LoadVerifiedSpotRuleEnvWithSource(snapshot, time.Now().UTC(), tick.Price, loader)
 		},
 		LoadKlines: loader,
 	}, nil
