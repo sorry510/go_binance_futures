@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"go_binance_futures/models"
@@ -15,6 +17,14 @@ import (
 	beegocontext "github.com/beego/beego/v2/server/web/context"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+// Alias names must be unique across go test -count=N executions in one process.
+// Every invocation uses an isolated SQLite file in t.TempDir().
+var controllerConfigTestAliasSerial atomic.Uint64
+
+func uniqueControllerConfigTestAlias(prefix string) string {
+	return fmt.Sprintf("%s_%d", prefix, controllerConfigTestAliasSerial.Add(1))
+}
 
 var controllerConfigModelOnce sync.Once
 
@@ -72,7 +82,7 @@ func TestCM1GlobalTogglePersistOnlyOneColumn(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	const alias = "controller_cm1_config_patch"
+	alias := uniqueControllerConfigTestAlias("controller_cm1_config_patch")
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "cm1.db")); err != nil {
 		t.Fatal(err)
 	}

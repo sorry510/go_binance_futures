@@ -17,7 +17,7 @@ type DeliverySymbols struct {
 	LastClose      string  `orm:"column(lastClose)" json:"lastClose"`           // 上一次的最新成交价格
 	LastUpdateTime int64   `orm:"column(lastUpdateTime)" json:"lastUpdateTime"` // 上一次的更新时间
 	BaseVolume     float64 `orm:"column(baseVolume)" json:"baseVolume"`         // 24小时成交量
-	QuoteVolume    float64 `orm:"column(quoteVolume)" json:"quoteVolume"`       // 24小时成交额 USDT
+	QuoteVolume    float64 `orm:"column(quoteVolume)" json:"quoteVolume"`       // 币本位 24 小时成交额，按交易所产品定义
 	CloseQty       float64 `orm:"column(closeQty)" json:"closeQty"`             // 最新成交价格上的成交量
 	TradeCount     float64 `orm:"column(tradeCount)" json:"tradeCount"`         // 24小时交易数
 

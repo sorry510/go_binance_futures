@@ -26,7 +26,7 @@ func TestSpotQuantConfigUpdateOnlyChangesItsColumn(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	const alias = "controller_spot_quant_patch_test"
+	alias := uniqueControllerConfigTestAlias("controller_spot_quant_patch_test")
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "spot-config.db")); err != nil {
 		t.Fatal(err)
 	}

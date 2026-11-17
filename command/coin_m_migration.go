@@ -77,7 +77,7 @@ func ensureV27CoinMSchema(o orm.Ormer) error {
 		{"idx_coin_m_fill_position", "coin_m_trade_fills", "position_id"},
 		{"idx_coin_m_fill_order", "coin_m_trade_fills", "order_id"},
 	} {
-		present, err := coinMIndexExists(o, index.name)
+		present, err := coinMIndexExists(o, index.table, index.name)
 		if err != nil {
 			return fmt.Errorf("check CM index %s: %w", index.name, err)
 		}
@@ -96,16 +96,18 @@ func ensureV27CoinMSchema(o orm.Ormer) error {
 	return VerifyV27CoinMSchema(o)
 }
 
-func coinMIndexExists(o orm.Ormer, name string) (bool, error) {
+// Index names are table-scoped in MySQL; every dialect must check the
+// expected table, not accept the same name on an unrelated table.
+func coinMIndexExists(o orm.Ormer, table, name string) (bool, error) {
 	var count int64
 	var err error
 	switch {
 	case defaultDatabaseIsMySQL():
-		err = o.Raw("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND index_name=?", name).QueryRow(&count)
+		err = o.Raw("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name=? AND index_name=?", table, name).QueryRow(&count)
 	case spotQuantIsPostgres():
-		err = o.Raw("SELECT COUNT(*) FROM pg_indexes WHERE schemaname=current_schema() AND indexname=?", name).QueryRow(&count)
+		err = o.Raw("SELECT COUNT(*) FROM pg_indexes WHERE schemaname=current_schema() AND tablename=? AND indexname=?", table, name).QueryRow(&count)
 	default:
-		err = o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name=?", name).QueryRow(&count)
+		err = o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND tbl_name=? AND name=?", table, name).QueryRow(&count)
 	}
 	return count > 0, err
 }
@@ -229,17 +231,21 @@ func VerifyV27CoinMSchema(o orm.Ormer) error {
 			}
 		}
 	}
-	for _, idx := range []string{
-		"uq_coin_m_order_client", "uq_coin_m_order_exchange", "uq_coin_m_fill_trade",
-		"idx_coin_m_position_symbol_status", "idx_coin_m_order_position",
-		"idx_coin_m_fill_position", "idx_coin_m_fill_order",
+	for _, idx := range []struct{ table, name string }{
+		{"coin_m_managed_orders", "uq_coin_m_order_client"},
+		{"coin_m_managed_orders", "uq_coin_m_order_exchange"},
+		{"coin_m_trade_fills", "uq_coin_m_fill_trade"},
+		{"coin_m_managed_positions", "idx_coin_m_position_symbol_status"},
+		{"coin_m_managed_orders", "idx_coin_m_order_position"},
+		{"coin_m_trade_fills", "idx_coin_m_fill_position"},
+		{"coin_m_trade_fills", "idx_coin_m_fill_order"},
 	} {
-		present, err := coinMIndexExists(o, idx)
+		present, err := coinMIndexExists(o, idx.table, idx.name)
 		if err != nil {
-			return fmt.Errorf("inspect v27 index %s: %w", idx, err)
+			return fmt.Errorf("inspect v27 index %s on %s: %w", idx.name, idx.table, err)
 		}
 		if !present {
-			return fmt.Errorf("missing v27 index %s", idx)
+			return fmt.Errorf("missing v27 index %s on %s", idx.name, idx.table)
 		}
 	}
 	for _, idx := range []struct{ table, name string }{

@@ -10,6 +10,7 @@ import (
 	"go_binance_futures/service/binanceapiusage"
 	"go_binance_futures/service/mysqlretry"
 	"go_binance_futures/utils"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -172,7 +173,21 @@ func init() {
 	if testnet {
 		logs.Warning("Binance USD-M Futures TESTNET mode enabled; REST endpoint:", futuresClient.BaseURL)
 	}
-	deliveryClient = delivery.NewClient(api_key, api_secret)
+	// COIN-M is a separate DAPI product. USD-M's FAPI override must never
+	// redirect COIN-M requests to production or another product.
+	mode, envErr := resolveCoinMRuntime(testnet, os.Getenv("BINANCE_COIN_M_ENVIRONMENT"),
+		api_key, api_secret, testnet_api_key, testnet_api_secret,
+		os.Getenv("BINANCE_COIN_M_DEMO_API_KEY"), os.Getenv("BINANCE_COIN_M_DEMO_API_SECRET"))
+	if envErr != nil {
+		coinMSetupErr = envErr
+		logs.Error("COIN-M disabled: ", envErr)
+	} else {
+		coinMRuntime = mode
+		deliveryClient, coinMSetupErr = configureCoinMRuntime(mode)
+		if coinMSetupErr != nil {
+			logs.Error("COIN-M initialization failed: ", coinMSetupErr)
+		}
+	}
 
 	futuresEnvironment := "mainnet"
 	if testnet {
@@ -181,9 +196,23 @@ func init() {
 	futuresClient.HTTPClient = binanceapiusage.WrapClient(proxyPool.HTTPClient(), binanceapiusage.TransportConfig{
 		Product: "futures", Environment: futuresEnvironment, Source: "go_binance",
 	})
-	deliveryClient.HTTPClient = binanceapiusage.WrapClient(proxyPool.HTTPClient(), binanceapiusage.TransportConfig{
-		Product: "delivery", Environment: "mainnet", Source: "go_binance",
-	})
+	if deliveryClient != nil && coinMSetupErr == nil {
+		baseClient := proxyPool.HTTPClient()
+		guard, guardErr := newCoinMRESTGuard(baseClient.Transport, coinMRuntime.RESTURL)
+		if guardErr != nil {
+			coinMSetupErr = guardErr
+			deliveryClient = nil
+			logs.Error("COIN-M disabled: ", guardErr)
+		} else {
+			guarded := *baseClient
+			guarded.Transport = guard
+			deliveryClient.HTTPClient = binanceapiusage.WrapClient(&guarded, binanceapiusage.TransportConfig{
+				Product: "delivery", Environment: coinMRuntime.Environment, Source: "coin_m_market",
+			})
+			logs.Info("COIN-M DAPI configured: environment=", coinMRuntime.Environment,
+				" REST=", coinMRuntime.RESTURL, " WS=", coinMRuntime.WSURL)
+		}
+	}
 }
 
 type OrderParams struct {

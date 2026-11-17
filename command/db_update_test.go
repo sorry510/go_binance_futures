@@ -1056,6 +1056,17 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 	if err := o.Raw("SELECT COUNT(*) FROM spot_trade_fills").QueryRow(&countSpot); err != nil || countSpot != preV27SpotFills {
 		t.Fatalf("v27 changed Spot fills: %d %v", countSpot, err)
 	}
+	t.Run("V27IndexLookupRejectsWrongTable", func(t *testing.T) {
+		ok, err := coinMIndexExists(o, "coin_m_managed_orders", "uq_coin_m_order_client")
+		if err != nil || !ok {
+			t.Fatalf("expected existing index on correct table: exists=%v error=%v", ok, err)
+		}
+		ok, err = coinMIndexExists(o, "coin_m_managed_positions", "uq_coin_m_order_client")
+		if err != nil || ok {
+			t.Fatalf("index on another table must not match: exists=%v error=%v", ok, err)
+		}
+	})
+
 	t.Run("V27MissingCMFillLedgerFailsClosed", func(t *testing.T) {
 		if _, err := o.Raw("DROP TABLE coin_m_trade_fills").Exec(); err != nil {
 			t.Fatal(err)

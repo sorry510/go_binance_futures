@@ -418,16 +418,17 @@ func main() {
 	go func() {
 		for {
 			logs.Info("update symbols trade precision and add new symbols, every 12 hours")
-			feature.UpdateSymbolsTradePrecision() // u本位
-			spot.UpdateSymbolsTradePrecision()    // 现货，启动时补齐交易对，之后每 12 小时更新精度
-			// feature.UpdateDeliverySymbolsTradePrecision() // 币本位
-			time.Sleep(12 * time.Hour) // 12小时更新一次
+			feature.UpdateSymbolsTradePrecision()         // u本位
+			spot.UpdateSymbolsTradePrecision()            // 现货，启动时补齐交易对，之后每 12 小时更新精度
+			feature.UpdateDeliverySymbolsTradePrecision() // 币本位：仅公开 DAPI 合约信息（CM-2）；不触发交易
+			time.Sleep(12 * time.Hour)                    // 12小时更新一次
 		}
 	}()
 
 	// websocket 订阅更新币种价格
 	go binance.UpdateCoinByWs(0)
 	go spotbinance.UpdateCoinByWs(0)
+	go binance.UpdateDeliveryCoinByWs() // 币本位：仅公开行情 WS，按选定 DAPI 环境隔离
 	// websocket 订阅全市场强平订单
 	go binance.CollectFuturesLiquidationOrders(&SystemConfig)
 
