@@ -174,13 +174,13 @@ func TestStage43MockExecutesThenReservesUntilReconcile(t *testing.T) {
 			if err != nil || position.ManagedQty != 1 || position.AccountID != "lead" {
 				t.Fatalf("filled qty ownership incorrect %+v err=%v", position, err)
 			}
-			_, err = a.ExecuteOpen(context.Background(), req, check)
-			if !errors.Is(err, ErrLeadOpenBlocked) || !errors.Is(err, ErrLeadPendingReconcile) || broker.submits != 1 {
-				t.Fatalf("repeat open lost pending category or bypassed reconciliation err=%v submits=%d", err, broker.submits)
+			replayed, err := a.ExecuteOpen(context.Background(), req, check)
+			if err != nil || broker.submits != 1 || a.pendingReconcile {
+				t.Fatalf("idempotent exchange acknowledgement should not block account: %+v err=%v submits=%d", replayed, err, broker.submits)
 			}
 			decision, err := a.CheckOpen(context.Background(), check)
-			if !errors.Is(err, ErrLeadPendingReconcile) || !riskReasonsContain(decision, "lead_pending_reconcile") {
-				t.Fatalf("pending status unblocked: %+v %v", decision, err)
+			if err != nil || !decision.Allowed {
+				t.Fatalf("normal Binance acknowledgement created a global reconcile fault: %+v %v", decision, err)
 			}
 		})
 	}

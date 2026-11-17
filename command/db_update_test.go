@@ -875,6 +875,50 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		}
 	})
 
+	// v26: one new Lead configuration table; no credentials and no
+	// pre-enabled settings. Future invocations must preserve operator data.
+	if err := SyncDatabase(26); err != nil {
+		t.Fatalf("v26 Lead settings migration: %v", err)
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 26 {
+		t.Fatalf("v26 version: %+v %v", version, err)
+	}
+	if err := VerifyV26LeadSettingsSchema(o); err != nil {
+		t.Fatalf("missing Lead table: %v", err)
+	}
+	var leadRows int
+	if err := o.Raw("SELECT COUNT(*) FROM lead_trade_settings").QueryRow(&leadRows); err != nil || leadRows != 0 {
+		t.Fatalf("new Lead table must be empty and default OFF: %d %v", leadRows, err)
+	}
+	if _, err := o.Raw("INSERT INTO lead_trade_settings (account_id,allow_new_opens,max_order_notional_usdt,max_total_notional_usdt,max_daily_realized_loss_usdt,updated_at) VALUES (?,?,?,?,?,?)",
+		"lead", 0, 50, 150, 0, 1234).Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if err := SyncDatabase(26); err != nil {
+		t.Fatalf("repeat v26 sync: %v", err)
+	}
+	var enabled int
+	var cap float64
+	if err := o.Raw("SELECT allow_new_opens,max_order_notional_usdt FROM lead_trade_settings WHERE account_id='lead'").QueryRow(&enabled, &cap); err != nil || enabled != 0 || cap != 50 {
+		t.Fatalf("repeat migration lost Lead settings: enabled=%d cap=%v err=%v", enabled, cap, err)
+	}
+	t.Run("V26MissingLeadSchemaFailsClosed", func(t *testing.T) {
+		if _, err := o.Raw("DROP TABLE lead_trade_settings").Exec(); err != nil {
+			t.Fatal(err)
+		}
+		if err := SyncDatabase(26); err == nil || !strings.Contains(err.Error(), "lead_trade_settings") {
+			t.Fatalf("v26 missing Lead table must not silently pass: %v", err)
+		}
+		// Repair test fixture only, never production.
+		if _, err := o.Raw("CREATE TABLE lead_trade_settings (account_id VARCHAR(16) PRIMARY KEY,allow_new_opens SMALLINT NOT NULL DEFAULT 0,max_order_notional_usdt DECIMAL(20,8) NOT NULL DEFAULT 0,max_total_notional_usdt DECIMAL(20,8) NOT NULL DEFAULT 0,max_daily_realized_loss_usdt DECIMAL(20,8) NOT NULL DEFAULT 0,updated_at BIGINT NOT NULL DEFAULT 0)").Exec(); err != nil {
+			t.Fatal(err)
+		}
+		if err := SyncDatabase(26); err != nil {
+			t.Fatalf("repaired test fixture rejected: %v", err)
+		}
+	})
+
 	// Every schema bump must advance this test's highest checked version.
 	if version.Version != appversion.DatabaseSchemaVersion {
 		t.Fatalf("migration test ends at v%d, binary requires v%d", version.Version, appversion.DatabaseSchemaVersion)

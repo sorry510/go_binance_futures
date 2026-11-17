@@ -1,28 +1,24 @@
 package leadaccount
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math"
-	"os"
-	"path/filepath"
-	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/beego/beego/v2/client/orm"
 
 	"go_binance_futures/feature/api/binance"
 	"go_binance_futures/models"
 	"go_binance_futures/service/futuresownership"
 )
 
-// Management never owns a live broker. All operational mutations remain
-// explicitly guarded and do not authorize Stage 7 trading.
+// Management never owns a live broker. The default-OFF persisted setting
+// authorizes new-entry attempts only after dedicated Lead session/risk checks.
 var ErrLeadLiveGateLocked = errors.New("stage7_live_authorization_required")
-var ErrLeadConfigUnavailable = errors.New("lead_config_storage_unavailable")
+var ErrLeadConfigUnavailable = errors.New("lead_config_db_unavailable")
 
 // Stage 6 emergency pause is a one-way process-local latch. It is asserted
 // BEFORE any audit/file I/O and cannot be cleared via any management API.
@@ -38,8 +34,6 @@ func LatchLeadEmergencyPause() {
 func LeadEmergencyPaused() bool {
 	return emergencyLeadPause.Load()
 }
-
-const ConfigPathEnv = "BINANCE_LEAD_CONFIG_FILE"
 
 // Lead-01 has one configuration format. Unfinished old settings are not
 // migrated or read; the trading identity remains independently verified.
@@ -69,8 +63,11 @@ func LeadRiskLimitsReady(limits LeadRiskConfig) bool {
 }
 
 func ValidateLeadSettings(s LeadSettings) error {
-	if s.AccountID != "lead" || s.AllowNewOpens {
+	if s.AccountID != "lead" {
 		return ErrLeadLiveGateLocked
+	}
+	if s.AllowNewOpens && !LeadRiskLimitsReady(s.Limits) {
+		return fmt.Errorf("lead_risk_limits_required_to_enable")
 	}
 	for _, value := range []float64{
 		s.Limits.MaxOrderNotionalUSDT,
@@ -92,54 +89,62 @@ func ValidateLeadSettings(s LeadSettings) error {
 	return nil
 }
 
-type LeadConfigStore struct {
-	mu   sync.Mutex
-	path string
+// LeadTradeSettingsDDL is the single-table Lead settings schema introduced in v26.
+// This same schema is created by command/sql/version/26.sql during sync db.
+const LeadTradeSettingsDDL = `CREATE TABLE IF NOT EXISTS lead_trade_settings (
+    account_id VARCHAR(16) NOT NULL PRIMARY KEY,
+    allow_new_opens SMALLINT NOT NULL DEFAULT 0,
+    max_order_notional_usdt DECIMAL(20,8) NOT NULL DEFAULT 0,
+    max_total_notional_usdt DECIMAL(20,8) NOT NULL DEFAULT 0,
+    max_daily_realized_loss_usdt DECIMAL(20,8) NOT NULL DEFAULT 0,
+    updated_at BIGINT NOT NULL DEFAULT 0
+)`
+
+// LeadConfigStore uses the existing application's registered default database.
+// There is no JSON risk file, environment variable, implicit migration or
+// bypass when the DB is unavailable. Missing rows are default-OFF.
+type LeadConfigStore struct{}
+
+func LeadConfigStoreFromDB() (*LeadConfigStore, error) {
+	if _, err := orm.GetDB("default"); err != nil {
+		return nil, ErrLeadConfigUnavailable
+	}
+	return &LeadConfigStore{}, nil
 }
 
-func NewLeadConfigStore(path string) (*LeadConfigStore, error) {
-	if !filepath.IsAbs(path) || path == "/" || path == "" {
-		return nil, ErrLeadConfigUnavailable
-	}
-	if err := verifyCredentialPath(path); err != nil {
-		return nil, ErrLeadConfigUnavailable
-	}
-	return &LeadConfigStore{path: path}, nil
-}
-func LeadConfigStoreFromEnv() (*LeadConfigStore, error) {
-	p := os.Getenv(ConfigPathEnv)
-	if p == "" {
-		return nil, ErrLeadConfigUnavailable
-	}
-	return NewLeadConfigStore(p)
-}
 func (s *LeadConfigStore) Load() (LeadSettings, error) {
 	if s == nil {
 		return DefaultLeadSettings(), ErrLeadConfigUnavailable
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if err := verifyCredentialPath(s.path); err != nil {
-		return DefaultLeadSettings(), ErrLeadConfigUnavailable
-	}
-	data, err := os.ReadFile(s.path)
-	if errors.Is(err, os.ErrNotExist) {
+	var account string
+	var enabled int
+	var order, total, daily float64
+	var updated int64
+	err := orm.NewOrm().Raw(
+		"SELECT account_id, allow_new_opens, max_order_notional_usdt, max_total_notional_usdt, max_daily_realized_loss_usdt, updated_at FROM lead_trade_settings WHERE account_id = ?",
+		"lead",
+	).QueryRow(&account, &enabled, &order, &total, &daily, &updated)
+	if errors.Is(err, orm.ErrNoRows) {
 		return DefaultLeadSettings(), nil
 	}
-	if err != nil || len(data) > 4096 {
+	if err != nil {
+		return DefaultLeadSettings(), fmt.Errorf("%w: %v", ErrLeadConfigUnavailable, err)
+	}
+	result := LeadSettings{
+		AccountID: account, AllowNewOpens: enabled == 1,
+		Limits: LeadRiskConfig{
+			MaxOrderNotionalUSDT:     order,
+			MaxTotalNotionalUSDT:     total,
+			MaxDailyRealizedLossUSDT: daily,
+		},
+		UpdatedAt: time.UnixMilli(updated).UTC(),
+	}
+	if (enabled != 0 && enabled != 1) || ValidateLeadSettings(result) != nil {
 		return DefaultLeadSettings(), ErrLeadConfigUnavailable
 	}
-	var value LeadSettings
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	if err = decoder.Decode(&value); err != nil {
-		return DefaultLeadSettings(), ErrLeadConfigUnavailable
-	}
-	if err = decoder.Decode(new(any)); err != io.EOF || ValidateLeadSettings(value) != nil {
-		return DefaultLeadSettings(), ErrLeadConfigUnavailable
-	}
-	return value, nil
+	return result, nil
 }
+
 func (s *LeadConfigStore) Save(value LeadSettings) error {
 	if s == nil {
 		return ErrLeadConfigUnavailable
@@ -147,48 +152,49 @@ func (s *LeadConfigStore) Save(value LeadSettings) error {
 	if err := ValidateLeadSettings(value); err != nil {
 		return err
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if err := verifyCredentialPath(s.path); err != nil {
-		return ErrLeadConfigUnavailable
-	}
-	value.UpdatedAt = time.Now().UTC()
-	b, err := json.Marshal(value)
+	tx, err := orm.NewOrm().Begin()
 	if err != nil {
+		return fmt.Errorf("%w: %v", ErrLeadConfigUnavailable, err)
+	}
+	defer tx.Rollback()
+	var count int
+	if err = tx.Raw("SELECT COUNT(*) FROM lead_trade_settings WHERE account_id = ?", "lead").QueryRow(&count); err != nil {
+		return fmt.Errorf("%w: %v", ErrLeadConfigUnavailable, err)
+	}
+	allow := 0
+	if value.AllowNewOpens {
+		allow = 1
+	}
+	updated := time.Now().UTC().UnixMilli()
+	if count == 0 {
+		_, err = tx.Raw(
+			"INSERT INTO lead_trade_settings (account_id, allow_new_opens, max_order_notional_usdt, max_total_notional_usdt, max_daily_realized_loss_usdt, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+			"lead", allow, value.Limits.MaxOrderNotionalUSDT, value.Limits.MaxTotalNotionalUSDT, value.Limits.MaxDailyRealizedLossUSDT, updated,
+		).Exec()
+	} else if count == 1 {
+		_, err = tx.Raw(
+			"UPDATE lead_trade_settings SET allow_new_opens=?, max_order_notional_usdt=?, max_total_notional_usdt=?, max_daily_realized_loss_usdt=?, updated_at=? WHERE account_id=?",
+			allow, value.Limits.MaxOrderNotionalUSDT, value.Limits.MaxTotalNotionalUSDT, value.Limits.MaxDailyRealizedLossUSDT, updated, "lead",
+		).Exec()
+	} else {
 		return ErrLeadConfigUnavailable
 	}
-	tmp, err := os.CreateTemp(filepath.Dir(s.path), ".lead-settings-*")
 	if err != nil {
-		return ErrLeadConfigUnavailable
+		return fmt.Errorf("%w: %v", ErrLeadConfigUnavailable, err)
 	}
-	name := tmp.Name()
-	defer os.Remove(name)
-	if err = tmp.Chmod(0600); err == nil {
-		_, err = tmp.Write(b)
-	}
-	if err == nil {
-		err = tmp.Sync()
-	}
-	if closeErr := tmp.Close(); err == nil {
-		err = closeErr
-	}
-	if err != nil {
-		return ErrLeadConfigUnavailable
-	}
-	if err = os.Rename(name, s.path); err != nil {
-		return ErrLeadConfigUnavailable
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("%w: %v", ErrLeadConfigUnavailable, err)
 	}
 	return nil
 }
 
-// LeadDurableOpenGate validates disk state on every attempted future live
-// entry. It never returns success in Stage 7-1..7-4: Stage7 human
-// authorization has not been implemented and any file/read error is denial.
+// LeadDurableOpenGate validates the persisted user switch before every live
+// entry. Missing/invalid config and the emergency pause fail closed.
 func LeadDurableOpenGate() error {
 	if LeadEmergencyPaused() {
 		return ErrLeadLiveGateLocked
 	}
-	store, err := LeadConfigStoreFromEnv()
+	store, err := LeadConfigStoreFromDB()
 	if err != nil {
 		return ErrLeadConfigUnavailable
 	}
@@ -199,8 +205,9 @@ func LeadDurableOpenGate() error {
 	if settings.AccountID != "lead" || !settings.AllowNewOpens || !LeadRiskLimitsReady(settings.Limits) {
 		return ErrLeadLiveGateLocked
 	}
-	// Lead-01 does not authorize real orders, including after manual edits.
-	return ErrLeadLiveGateLocked
+	// Explicit persisted user switch, disabled by default. No HTTP handler,
+	// in-memory flag or old config format can silently enable live entries.
+	return nil
 }
 
 type LeadDataView struct {

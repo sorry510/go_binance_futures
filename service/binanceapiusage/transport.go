@@ -65,11 +65,19 @@ func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if source == "" {
 		source = t.config.Source
 	}
-	requestType := RequestType(t.config.Product, req.Method, req.URL.Path)
-	weight := EstimateWeight(t.config.Product, req.Method, req.URL.Path, req.URL.Query())
+	// Binance /sapi/ endpoints use a separate IP/UID weight namespace and
+	// X-SAPI-USED-IP-WEIGHT-1M, not Futures X-MBX-USED-WEIGHT-1M.
+	// Keep the SAME budget coordinator/collector; only its product key
+	// changes. In particular, a SAPI 429 must not poison /fapi/ trading.
+	product := t.config.Product
+	if strings.HasPrefix(req.URL.Path, "/sapi/") {
+		product = "sapi"
+	}
+	requestType := RequestType(product, req.Method, req.URL.Path)
+	weight := EstimateWeight(product, req.Method, req.URL.Path, req.URL.Query())
 	reservation, budgetErr := t.config.Budget.Reserve(
 		req.Context(),
-		t.config.Product,
+		product,
 		t.config.Environment,
 		source,
 		requestType,
@@ -91,15 +99,22 @@ func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	retryAfter := ""
 	if resp != nil {
 		status = resp.StatusCode
-		headers["used_weight_1m"] = resp.Header.Get("X-MBX-USED-WEIGHT-1M")
-		headers["order_count_10s"] = resp.Header.Get("X-MBX-ORDER-COUNT-10S")
-		headers["order_count_1m"] = resp.Header.Get("X-MBX-ORDER-COUNT-1M")
+		if product == "sapi" {
+			// These Lead copy-trading SAPI GET endpoints are IP weighted.
+			// UID limits, when present on other SAPI endpoints, are a
+			// separate counter and are NOT a Futures order count.
+			headers["used_weight_1m"] = resp.Header.Get("X-SAPI-USED-IP-WEIGHT-1M")
+		} else {
+			headers["used_weight_1m"] = resp.Header.Get("X-MBX-USED-WEIGHT-1M")
+			headers["order_count_10s"] = resp.Header.Get("X-MBX-ORDER-COUNT-10S")
+			headers["order_count_1m"] = resp.Header.Get("X-MBX-ORDER-COUNT-1M")
+		}
 		retryAfter = resp.Header.Get("Retry-After")
 	}
 
 	event := RequestEvent{
 		At:              finished.UnixMilli(),
-		Product:         t.config.Product,
+		Product:         product,
 		Environment:     t.config.Environment,
 		Source:          source,
 		RequestType:     requestType,

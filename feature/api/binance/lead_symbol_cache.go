@@ -63,6 +63,12 @@ func NewLeadSymbolCache(client *AccountClient, loader LeadSymbolLoader) (*LeadSy
 	return &LeadSymbolCache{account: client, loader: loader, now: time.Now}, nil
 }
 
+// BoundTo ensures a cached Lead allowlist cannot be mixed with credentials
+// from a different Lead account client during strategy execution.
+func (c *LeadSymbolCache) BoundTo(client *AccountClient) bool {
+	return c != nil && client != nil && client.ID() == LeadAccountID && c.account == client
+}
+
 func (c *LeadSymbolCache) Status() LeadSymbolStatus {
 	if c == nil {
 		return LeadSymbolStatus{ErrorCategory: "not_configured"}

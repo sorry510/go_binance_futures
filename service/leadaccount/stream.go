@@ -39,7 +39,7 @@ type LeadUserStream struct {
 	keepalive         time.Duration
 	backoff           time.Duration
 	onFault           func(LeadFaultCode)
-	onEvent           func(*futures.WsUserDataEvent) // optional observable callback; no DB writes
+	onEvent           func(*futures.WsUserDataEvent) // optional Main-shared local WS order/Fill persistence
 	onReady           func(uint64)
 }
 

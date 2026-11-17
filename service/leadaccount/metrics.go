@@ -8,19 +8,25 @@ import (
 )
 
 type LeadUsageMetrics struct {
-	AccountID             binance.AccountID `json:"account_id"`
-	WindowSeconds         int64             `json:"window_seconds"`
-	Requests              int64             `json:"requests"`
-	EstimatedWeight       int64             `json:"estimated_weight"`
-	Count429              int64             `json:"count_429"`
-	Count418              int64             `json:"count_418"`
-	WSUpdates             uint64            `json:"ws_updates"`
-	RESTSnapshots         uint64            `json:"rest_snapshots"`
-	AlertQueuePresent     bool              `json:"alert_queue_present"`
-	AlertQueueDepth       int               `json:"alert_queue_depth"`
-	AlertQueueCapacity    int               `json:"alert_queue_capacity"`
-	AlertsDropped         uint64            `json:"alerts_dropped"`
-	CriticalAlertsDropped uint64            `json:"critical_alerts_dropped"`
+	AccountID     binance.AccountID `json:"account_id"`
+	WindowSeconds int64             `json:"window_seconds"`
+	Requests      int64             `json:"requests"`
+	// Legacy combined weight is for historical display only; the SAPI IP
+	// and Futures IP counters are independent exchange rate-limit pools.
+	EstimatedWeight       int64  `json:"estimated_weight"`
+	FuturesRequests       int64  `json:"futures_requests"`
+	FuturesWeight         int64  `json:"futures_estimated_weight"`
+	SAPIRequests          int64  `json:"sapi_requests"`
+	SAPIWeight            int64  `json:"sapi_estimated_ip_weight"`
+	Count429              int64  `json:"count_429"`
+	Count418              int64  `json:"count_418"`
+	WSUpdates             uint64 `json:"ws_updates"`
+	RESTSnapshots         uint64 `json:"rest_snapshots"`
+	AlertQueuePresent     bool   `json:"alert_queue_present"`
+	AlertQueueDepth       int    `json:"alert_queue_depth"`
+	AlertQueueCapacity    int    `json:"alert_queue_capacity"`
+	AlertsDropped         uint64 `json:"alerts_dropped"`
+	CriticalAlertsDropped uint64 `json:"critical_alerts_dropped"`
 	// A real saved-REST metric needs endpoint-by-endpoint before/after evidence.
 	// Do not present observed WS updates as fabricated API request savings.
 	UnverifiedSavedRequests int64 `json:"-"`
@@ -46,7 +52,14 @@ func LeadUsageSnapshotWithAlerts(collector *binanceapiusage.Collector, mirror *L
 			continue
 		}
 		out.Requests += src.Count
-		out.EstimatedWeight += src.EstimatedWeight
+		out.EstimatedWeight += src.EstimatedWeight // historic combined total
+		if src.Source == "lead_trading_sapi" {
+			out.SAPIRequests += src.Count
+			out.SAPIWeight += src.EstimatedWeight
+		} else {
+			out.FuturesRequests += src.Count
+			out.FuturesWeight += src.EstimatedWeight
+		}
 		out.Count429 += src.Count429
 		out.Count418 += src.Count418
 	}

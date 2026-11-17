@@ -12,6 +12,7 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
 	"go_binance_futures/scanner"
+	"go_binance_futures/service/leadaccount"
 	"go_binance_futures/types"
 
 	"github.com/adshao/go-binance/v2/futures"
@@ -27,6 +28,8 @@ type accountTradeRunner struct {
 	leadMockPermit stage3LeadMockPermit
 	AllowNewOpens  bool
 	LeadSymbols    *binance.LeadSymbolCache
+	// Pending Lead orders only block their own symbols; Main is unchanged.
+	leadPendingSymbols map[string]bool
 
 	LoadSymbols    func() ([]*models.Symbols, error)
 	SelectCoins    func(*models.Config, []*models.Symbols) ([]*models.Symbols, error)
@@ -96,8 +99,19 @@ func (r *accountTradeRunner) validate() error {
 	if r.AccountID == binance.LeadAccountID && r.PreflightOpen == nil {
 		return fmt.Errorf("Lead requires an explicit risk preflight hook")
 	}
-	if r.AccountID == binance.LeadAccountID && (!r.Mock || r.LeadSymbols == nil || r.leadMockPermit == nil) {
-		return fmt.Errorf("Stage 3 lead runner requires a test-only mock permit and cached whitelist")
+	if r.AccountID == binance.LeadAccountID {
+		if r.LeadSymbols == nil {
+			return fmt.Errorf("Lead requires a bound whitelist")
+		}
+		if r.Mock {
+			if r.leadMockPermit == nil {
+				return fmt.Errorf("Lead mock requires test-only permit")
+			}
+		} else if r.AllowNewOpens {
+			if err := leadaccount.LeadDurableOpenGate(); err != nil {
+				return fmt.Errorf("Lead new entries disabled: %w", err)
+			}
+		}
 	}
 	if r.LoadSymbols == nil || r.SelectCoins == nil || r.ReadPositions == nil || r.ReadOpenOrders == nil ||
 		r.SyncPositions == nil || r.CancelExpired == nil || r.EvaluateEntry == nil || r.Depth == nil ||
@@ -114,20 +128,21 @@ func StartTrade(systemConfig *models.Config) {
 	if systemConfig == nil {
 		return
 	}
+	// Main runs first and retains its existing trade ordering. A slow
+	// authorized Lead round must not delay the current Main trade round.
 	if systemConfig.FutureEnable == 1 {
 		if flagFutures == 0 {
-			// Legacy log semantics remain untouched.
 			logs.Info("futures trade bot start")
 			flagFutures = 1
 		}
-	} else {
-		if flagFutures == 1 {
-			logs.Info("futures trade bot stop")
-			flagFutures = 0
-		}
-		return
+		runAccountTradeCycle(mainTradeRunner(systemConfig))
+	} else if flagFutures == 1 {
+		logs.Info("futures trade bot stop")
+		flagFutures = 0
 	}
-	runAccountTradeCycle(mainTradeRunner(systemConfig))
+	// The same existing tick, not another scheduler. If Main is stopped,
+	// a future separately authorized Lead may still manage its own exits.
+	runLeadOnSharedTradeTick(systemConfig)
 }
 
 // tradeExitReason records the existing Main priority: strategy auto stop,

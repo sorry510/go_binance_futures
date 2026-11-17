@@ -19,7 +19,7 @@ For an introduction, read **[00 · System Overview](doc/readme/en/00-system-over
 | 00 | [System Overview](doc/readme/en/00-system-overview.md) | Features, Web UI, operating guidance, and page screenshots |
 | 01 | [Installation and Initialization](doc/readme/en/01-installation-and-initialization.md) | Installation, database setup, configuration, and launch |
 | 02 | [Futures Trading and Orders](doc/readme/en/02-futures-and-orders.md) | Futures automation, positions, order settings, and execution flow |
-| 03 | [Spot Quant Trading](doc/readme/en/03-spot-quant.md) | Automated Spot strategies and trading environment |
+| 03 | [Spot Trading](doc/readme/en/03-spot-quant.md) | Automated Spot strategies and trading environment |
 | 04 | [Lead Copy Trading](doc/readme/en/04-lead-copy-trading.md) | Lead account management, read-only observer, and deployment restrictions |
 | 05 | [Strategies and Backtesting](doc/readme/en/05-strategies-and-backtests.md) | Strategy templates, historical backtests, and paper trading |
 | 06 | [Market Monitoring and Alerts](doc/readme/en/06-market-monitoring-and-alerts.md) | Notifications, coin alerts, monitoring, funding rates, and new-coin rush |

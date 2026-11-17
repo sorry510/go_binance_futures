@@ -252,8 +252,8 @@ func TestStage45PausedOpenStillAllowsVerifiedManagedExit(t *testing.T) {
 	if broker.submits != 1 {
 		t.Fatalf("paused owned exit submitted %d times", broker.submits)
 	}
-	if a.RuntimeStatus().State != LeadReconcileRequired {
-		t.Fatalf("post-exit needs reconcile: %+v", a.RuntimeStatus())
+	if a.pendingReconcile || a.RuntimeStatus().State != LeadPaused {
+		t.Fatalf("accepted managed exit should preserve pause without creating a global lock: %+v", a.RuntimeStatus())
 	}
 }
 func TestStage45UnsafeExitBlockedAndCannotTouchManualPositions(t *testing.T) {

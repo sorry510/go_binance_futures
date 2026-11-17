@@ -48,9 +48,19 @@ func NewAccountClient(id AccountID, client *futures.Client) (*AccountClient, err
 	return &AccountClient{id: id, client: client}, nil
 }
 
-// NewLeadAccountClient creates an inert lead adapter. Credentials must come
-// from a future secure configuration workflow, never the main app.conf keys.
+// Lead credentials must never match either configured Main Futures key,
+// even if someone pastes the Main key into the Lead settings UI.
+func LeadKeyIsMainKey(key string) bool {
+	k := strings.TrimSpace(key)
+	return k != "" && ((strings.TrimSpace(api_key) != "" && k == strings.TrimSpace(api_key)) ||
+		(strings.TrimSpace(testnet_api_key) != "" && k == strings.TrimSpace(testnet_api_key)))
+}
+
+// NewLeadAccountClient uses only the separate Lead encrypted credentials.
 func NewLeadAccountClient(apiKey, apiSecret string, httpClient *http.Client) (*AccountClient, error) {
+	if LeadKeyIsMainKey(apiKey) {
+		return nil, fmt.Errorf("Lead credentials must differ from Main Futures credentials")
+	}
 	if strings.TrimSpace(apiKey) == "" || strings.TrimSpace(apiSecret) == "" {
 		return nil, fmt.Errorf("lead API credentials are required")
 	}
@@ -230,6 +240,16 @@ func (a *AccountClient) CreateOwnedAlgoOrder(ctx context.Context, p OwnedOrderPa
 	a.InvalidateAccountReadCache()
 	return res, err
 }
+
+// PersistLeadUserDataEvent reuses the same account-scoped WS order/Fill
+// writer already used by Main. No new Lead-specific ledger or state machine.
+func (a *AccountClient) PersistLeadUserDataEvent(event *futures.WsUserDataEvent) error {
+	if a == nil || a.ID() != LeadAccountID {
+		return fmt.Errorf("Lead WS ledger requires the dedicated Lead account")
+	}
+	return persistFuturesAccountEvent(LeadAccountID, a, event)
+}
+
 func (a *AccountClient) GetAlgoOrderByClientOrderID(ctx context.Context, id string) (*futures.GetAlgoOrderResp, error) {
 	return doAccountSigned(a, ctx, futuresSignedReadRecvWindow, func(c *futures.Client, ctx context.Context, o ...futures.RequestOption) (*futures.GetAlgoOrderResp, error) {
 		return c.NewGetAlgoOrderService().ClientAlgoID(id).Do(ctx, o...)

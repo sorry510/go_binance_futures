@@ -9,12 +9,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/adshao/go-binance/v2/futures"
+	"github.com/beego/beego/v2/core/logs"
 	binance "go_binance_futures/feature/api/binance"
 	"go_binance_futures/service/futuresownership"
 )
 
-// ReadOnlyObserverEnv is opt-in. Without this exact value, nothing starts,
-// no account credentials are loaded and no HTTP/WS/DB connection is made.
+// ReadOnlyObserverEnv is an optional explicit observer mode. Without it,
+// a configured dedicated Lead credential may still start the observer on
+// application startup so managed exits work when new entries are switched off.
 const ReadOnlyObserverEnv = "BINANCE_LEAD_OBSERVER_MODE"
 const ReadOnlyObserverValue = "read_only"
 
@@ -38,14 +41,17 @@ type LeadReadOnlyHostStatus struct {
 	LiveTradeAuthorized bool `json:"live_trade_authorized"`
 }
 type LeadReadOnlyHost struct {
-	mu         sync.RWMutex
-	stream     *LeadUserStream
-	inspect    func(context.Context) (LeadReadOnlyInspection, error)
-	inspection LeadReadOnlyInspection
-	running    bool
-	revoked    bool
-	cancel     context.CancelFunc
-	done       chan struct{}
+	mu     sync.RWMutex
+	stream *LeadUserStream
+	// These are bound only to this host's dedicated Lead account client.
+	tradeSymbols *binance.LeadSymbolCache
+	tradeAdapter *LeadExecutionAdapter
+	inspect      func(context.Context) (LeadReadOnlyInspection, error)
+	inspection   LeadReadOnlyInspection
+	running      bool
+	revoked      bool
+	cancel       context.CancelFunc
+	done         chan struct{}
 }
 
 func NewLeadReadOnlyHost(stream *LeadUserStream, inspect func(context.Context) (LeadReadOnlyInspection, error)) (*LeadReadOnlyHost, error) {
@@ -111,8 +117,8 @@ func (h *LeadReadOnlyHost) Run(ctx context.Context) error {
 	if snapshot.AccountID != "lead" || !snapshot.ReadOnly || snapshot.Reconciled {
 		return ErrLeadReconcileIncomplete
 	}
-	// Recoverability evidence is audit-only; do not apply any fill or
-	// change Binance orders during this observer run.
+	// The observer never submits Binance orders or claims manual positions.
+	// Accepted WS orders and raw Fills use Main's local account-scoped writer.
 	if audit, err := LeadAuditStoreFromEnv(); err == nil {
 		if err := audit.Append(runCtx, "recovery_inspection", snapshot.Reason); err == nil {
 			snapshot.AuditRecorded = true
@@ -193,18 +199,133 @@ func LeadReadOnlyStatus() LeadReadOnlyHostStatus {
 	leadReadOnlyRegistry.RUnlock()
 	return host.Status()
 }
+
+// leadTradeSessionHealthyFor prevents an in-flight order from using a
+// stale/rotated client after a WS disconnect or credential replacement.
+func leadTradeSessionHealthyFor(account *binance.AccountClient) bool {
+	if account == nil || account.ID() != binance.LeadAccountID {
+		return false
+	}
+	leadReadOnlyRegistry.RLock()
+	h := leadReadOnlyRegistry.host
+	leadReadOnlyRegistry.RUnlock()
+	if h == nil {
+		return false
+	}
+	h.mu.RLock()
+	ready := !h.revoked && h.running && h.stream != nil &&
+		h.stream.account == account && h.stream.Status().Healthy &&
+		h.stream.mirror.Status().Ready
+	h.mu.RUnlock()
+	return ready
+}
+
+// CurrentLeadTradeSession reuses the existing WS observer's exact Lead
+// client. It constructs no additional socket or trading scheduler.
+func CurrentLeadTradeSession(ctx context.Context) (*binance.AccountClient, *binance.LeadSymbolCache, *LeadExecutionAdapter, error) {
+	// The opening switch can be OFF while an existing managed position
+	// still needs to exit. Credential separation and WS bootstrap below
+	// always apply; the durable gate is checked again before every OPEN.
+	if err := ctx.Err(); err != nil {
+		return nil, nil, nil, err
+	}
+	leadReadOnlyRegistry.RLock()
+	h := leadReadOnlyRegistry.host
+	leadReadOnlyRegistry.RUnlock()
+	if h == nil {
+		return nil, nil, nil, ErrLeadMirrorUntrusted
+	}
+	account, symbols, adapter, err := func() (*binance.AccountClient, *binance.LeadSymbolCache, *LeadExecutionAdapter, error) {
+		h.mu.Lock()
+		defer h.mu.Unlock()
+		if h.revoked || !h.running || h.stream == nil ||
+			!h.stream.Status().Healthy || !h.stream.mirror.Status().Ready {
+			return nil, nil, nil, ErrLeadMirrorUntrusted
+		}
+		account, ok := h.stream.account.(*binance.AccountClient)
+		if !ok || account.ID() != binance.LeadAccountID {
+			return nil, nil, nil, ErrLeadMirrorUntrusted
+		}
+		if h.tradeSymbols == nil {
+			cache, err := binance.NewLeadSymbolCache(account, nil)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			h.tradeSymbols = cache
+		}
+		if h.tradeAdapter == nil {
+			value, err := NewLeadExecutionAdapter(account, h.tradeSymbols)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			h.tradeAdapter = value
+		}
+		return account, h.tradeSymbols, h.tradeAdapter, nil
+	}()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	// SAPI requests must not hold the observer's lifecycle lock.
+	if err := symbols.Refresh(ctx); err != nil {
+		return nil, nil, nil, err
+	}
+	h.mu.RLock()
+	ready := !h.revoked && h.running && h.stream != nil &&
+		h.stream.account == account && h.stream.Status().Healthy
+	h.mu.RUnlock()
+	if !ready {
+		return nil, nil, nil, ErrLeadMirrorUntrusted
+	}
+	return account, symbols, adapter, nil
+}
+
 func leadSetReadOnlyHost(h *LeadReadOnlyHost) {
 	leadReadOnlyRegistry.Lock()
 	leadReadOnlyRegistry.host = h
 	leadReadOnlyRegistry.Unlock()
 }
+
+// StartConfiguredReadOnlyHost is the existing single Lead WS startup hook.
+// A persisted user-enabled Lead account can use it without the old observer
+// env toggle. It does not run a standalone verification or enable Binance
+// orders on its own.
 func StartConfiguredReadOnlyHost() error {
 	mode := os.Getenv(ReadOnlyObserverEnv)
-	if mode == "" {
-		return nil
-	}
-	if mode != ReadOnlyObserverValue {
+	if mode != "" && mode != ReadOnlyObserverValue {
 		return errors.New("invalid Lead observer mode; only read_only supported")
+	}
+	if mode == "" {
+		store, err := LeadConfigStoreFromDB()
+		if err != nil {
+			return nil
+		}
+		settings, err := store.Load()
+		if err != nil || settings.AccountID != "lead" {
+			return nil
+		}
+		// A disabled new-entry switch must not stop existing managed exits
+		// after a restart. Start only when the user has configured a valid
+		// private Lead credential store; never fall back to Main.
+		if store, e := NewEncryptedFileStoreFromEnv(); e != nil {
+			return nil
+		} else if credentials, e := store.Load(); e != nil || !credentials.Valid() {
+			return nil
+		}
+	}
+	return EnsureLeadHostRunning()
+}
+
+// EnsureLeadHostRunning is called only when the user enables the persistent
+// Lead switch or by existing startup. It reads ONLY encrypted Lead credentials.
+func EnsureLeadHostRunning() error {
+	leadReadOnlyRegistry.RLock()
+	host := leadReadOnlyRegistry.host
+	leadReadOnlyRegistry.RUnlock()
+	if host != nil {
+		if host.Status().Running {
+			return nil
+		}
+		StopReadOnlyHost() // discard a stale/failed observer before restart
 	}
 	store, err := NewEncryptedFileStoreFromEnv()
 	if err != nil {
@@ -222,7 +343,14 @@ func StartConfiguredReadOnlyHost() error {
 	if err != nil {
 		return err
 	}
-	host, err := NewLeadReadOnlyHost(stream, ReadOnlyInspectOwnership)
+	// Same local WS order/Fill persistence as Main. The observer never
+	// places Binance orders and never auto-claims manual positions.
+	stream.onEvent = func(event *futures.WsUserDataEvent) {
+		if err := account.PersistLeadUserDataEvent(event); err != nil {
+			logs.Error("Lead user WS event local persistence failed: ", err)
+		}
+	}
+	host, err = NewLeadReadOnlyHost(stream, ReadOnlyInspectOwnership)
 	if err != nil {
 		return err
 	}

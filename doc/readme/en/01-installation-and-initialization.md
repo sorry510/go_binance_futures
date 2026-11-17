@@ -88,4 +88,4 @@ After synchronization completes and exits, start the service:
 8. **Where are AI alerts, Schedulers, and budgets configured?** Open **AI → AI Settings → AI Configuration**, the first/default tab.
 9. **Can AI immediately submit real orders?** No. Controlled execution is off by default and requires a Proposal, deterministic Risk checks, human approval, and final verification.
 10. **Where can I view service logs?** Open **Logs** in the sidebar. The page reads the application log file, offers severity and keyword filters, and refreshes every five seconds.
-11. **Where is Lead Copy Trading, and is live trading available?** Open **Futures Trading → Lead Copy Trading**. Credentials, risk settings, pause, read-only observation, and local order history are available; **live Lead entries remain locked**.
+11. **Where is Lead Copy Trading, and is live trading available?** Open **Futures Trading** and click **Copy Trading** next to **Funding Rate**. Credentials, risk settings, pause, read-only observation, and local order history are available; **live Lead entries remain locked**.

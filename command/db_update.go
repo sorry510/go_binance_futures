@@ -412,6 +412,24 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 	return nil
 }
 
+// VerifyV26LeadSettingsSchema ensures a database already marked v26 really
+// has the Lead settings table. Never recreate missing settings silently:
+// doing so could lose the operator's intended default-OFF/ON state.
+func VerifyV26LeadSettingsSchema(executor rawExecutor) error {
+	var rows []struct {
+		AccountID     string  `orm:"column(account_id)"`
+		AllowNewOpens int     `orm:"column(allow_new_opens)"`
+		MaxOrder      float64 `orm:"column(max_order_notional_usdt)"`
+		MaxTotal      float64 `orm:"column(max_total_notional_usdt)"`
+		DailyLoss     float64 `orm:"column(max_daily_realized_loss_usdt)"`
+		UpdatedAt     int64   `orm:"column(updated_at)"`
+	}
+	if _, err := executor.Raw("SELECT account_id, allow_new_opens, max_order_notional_usdt, max_total_notional_usdt, max_daily_realized_loss_usdt, updated_at FROM lead_trade_settings WHERE 1=0").QueryRows(&rows); err != nil {
+		return fmt.Errorf("lead_trade_settings schema missing or invalid: %w", err)
+	}
+	return nil
+}
+
 // SyncDatabase updates the registered default database to the schema and data
 // version required by the current binary.
 func SyncDatabase(targetVersion int64) error {
@@ -460,6 +478,11 @@ func SyncDatabase(targetVersion int64) error {
 			return fmt.Errorf("repair v25 Spot Quant indexes: %w", err)
 		}
 	}
+	if targetVersion >= 26 && systemConfig.Version >= 26 && systemConfig.Version <= targetVersion {
+		if err := VerifyV26LeadSettingsSchema(orm.NewOrm()); err != nil {
+			return fmt.Errorf("database v26 Lead settings schema mismatch: %w", err)
+		}
+	}
 	if systemConfig.Version < targetVersion {
 		logs.Info("update database version:", systemConfig.Version, "->", targetVersion)
 		if err := UpdateDatabase(systemConfig.Version, targetVersion); err != nil {
@@ -468,6 +491,11 @@ func SyncDatabase(targetVersion int64) error {
 		if targetVersion >= 25 {
 			if err := VerifyV25SpotQuantSchema(orm.NewOrm()); err != nil {
 				return fmt.Errorf("verify upgraded v25 Spot Quant schema: %w", err)
+			}
+		}
+		if targetVersion >= 26 {
+			if err := VerifyV26LeadSettingsSchema(orm.NewOrm()); err != nil {
+				return fmt.Errorf("verify upgraded v26 Lead settings schema: %w", err)
 			}
 		}
 		systemConfig.Version = targetVersion

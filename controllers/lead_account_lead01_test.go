@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/beego/beego/v2/client/orm"
 	"go_binance_futures/service/leadaccount"
 )
 
@@ -22,8 +23,7 @@ func lead01PrivateDir(t *testing.T) string {
 }
 
 func TestLead01SaveConfigWithoutAuditFileAndCompactAPI(t *testing.T) {
-	dir := lead01PrivateDir(t)
-	t.Setenv(leadaccount.ConfigPathEnv, filepath.Join(dir, "risk.json"))
+	prepareLeadControllerSettingsDB(t)
 	t.Setenv(leadaccount.AuditPathEnv, "")
 	body := `{"account_id":"lead","allow_new_opens":false,"limits":{"max_order_notional_usdt":50,"max_total_notional_usdt":150,"max_daily_realized_loss_usdt":0}}`
 	ctrl, rec := stage6Controller(t, http.MethodPut, "/futures/lead/config", body, stage6AuthToken(t))
@@ -31,7 +31,7 @@ func TestLead01SaveConfigWithoutAuditFileAndCompactAPI(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("normal config write depended on audit: %d %s", rec.Code, rec.Body.String())
 	}
-	saved, err := leadaccount.LeadConfigStoreFromEnv()
+	saved, err := leadaccount.LeadConfigStoreFromDB()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,9 +64,7 @@ func TestLead01SaveConfigWithoutAuditFileAndCompactAPI(t *testing.T) {
 }
 
 func TestLead01InvalidRiskFormNeverWrites(t *testing.T) {
-	dir := lead01PrivateDir(t)
-	path := filepath.Join(dir, "risk.json")
-	t.Setenv(leadaccount.ConfigPathEnv, path)
+	prepareLeadControllerSettingsDB(t)
 	t.Setenv(leadaccount.AuditPathEnv, "")
 	for _, body := range []string{
 		`{"account_id":"lead","allow_new_opens":false,"limits":{}}`,
@@ -76,16 +74,18 @@ func TestLead01InvalidRiskFormNeverWrites(t *testing.T) {
 	} {
 		ctrl, rec := stage6Controller(t, http.MethodPut, "/futures/lead/config", body, stage6AuthToken(t))
 		ctrl.SaveConfig()
-		if rec.Code != http.StatusBadRequest && rec.Code != http.StatusLocked {
-			t.Fatalf("invalid config accepted: %d %s", rec.Code, rec.Body.String())
+		if rec.Code != http.StatusBadRequest && rec.Code != http.StatusLocked && rec.Code != http.StatusServiceUnavailable {
+			t.Fatalf("invalid or unconfigured Lead settings accepted: %d %s", rec.Code, rec.Body.String())
 		}
-		if _, err := os.Stat(path); !os.IsNotExist(err) {
-			t.Fatal("invalid config created file", err)
+		var count int
+		if err := orm.NewOrm().Raw("SELECT COUNT(*) FROM lead_trade_settings").QueryRow(&count); err != nil || count != 0 {
+			t.Fatalf("invalid config created DB settings: %d %v", count, err)
 		}
 	}
 }
 
 func TestLead01CredentialsCanSaveWithoutExtraAuditFile(t *testing.T) {
+	prepareLeadControllerSettingsDB(t)
 	dir := lead01PrivateDir(t)
 	path := filepath.Join(dir, "credentials.enc")
 	t.Setenv(leadaccount.StorePathEnv, path)

@@ -13,16 +13,20 @@ import (
 	"sync"
 	"time"
 
+	binance "go_binance_futures/feature/api/binance"
 	"go_binance_futures/middlewares"
 	"go_binance_futures/service/leadaccount"
 
 	"github.com/beego/beego/v2/server/web"
 )
 
-// LeadController exposes management-only endpoints. It intentionally has no
-// code path to execute Binance Submit/Cancel, enable the Lead Broker or start
-// the Stage 5 WS supervisor. JWT is checked here as defense in depth in case
-// a future router accidentally omits the global JwtMiddleware.
+// Test replacement is package-local; production always uses the existing
+// account-scoped Lead WS startup, never the Main stream.
+var ensureLeadHost = leadaccount.EnsureLeadHostRunning
+
+// LeadController exposes credential/configuration endpoints, including the
+// default-OFF user trading switch. It never submits Binance orders directly.
+// JWT is checked here as defense in depth against router misconfiguration.
 type LeadController struct{ web.Controller }
 
 var leadManagerState struct {
@@ -108,12 +112,21 @@ func (c *LeadController) Status() {
 	}
 	report := map[string]any{"account_id": "lead", "allow_new_opens": false,
 		"readiness": "disabled", "ws_healthy": false, "last_reconciled_at": nil,
-		"blocking_reasons":  []string{"stage7_live_authorization_required", "lead_supervisor_not_started"},
+		"blocking_reasons":  []string{"lead_new_opens_disabled"},
 		"runtime_connected": false, "live_trade_authorized": false,
-		"gate5_live_verified": false, "gate6_verified": false,
-		"gate7_authorized": false, "source": "offline_management",
+		"source":          "lead_database",
 		"pause_in_memory": leadaccount.LeadEmergencyPaused(),
 		"pause_persisted": false}
+	if store, err := leadaccount.LeadConfigStoreFromDB(); err == nil {
+		if settings, loadErr := store.Load(); loadErr == nil {
+			report["allow_new_opens"] = settings.AllowNewOpens
+			report["live_trade_authorized"] = leadaccount.LeadDurableOpenGate() == nil
+			if settings.AllowNewOpens {
+				report["readiness"] = "waiting_for_lead_ws"
+				report["blocking_reasons"] = []string{"lead_ws_not_ready"}
+			}
+		}
+	}
 	if manager, store, err := getLeadCredentialManager(); err == nil {
 		verification := manager.Status()
 		if stored, e := store.Load(); e == nil {
@@ -129,7 +142,12 @@ func (c *LeadController) Status() {
 	if observer.Running {
 		report["runtime_connected"] = true
 		report["ws_healthy"] = observer.Stream.Healthy
-		report["readiness"] = "read_only_observing"
+		if report["live_trade_authorized"] == true && observer.Stream.Healthy && observer.Mirror.Ready {
+			report["readiness"] = "enabled"
+			report["blocking_reasons"] = []string{}
+		} else if report["live_trade_authorized"] != true {
+			report["readiness"] = "entries_disabled"
+		}
 	}
 	c.reply(http.StatusOK, report, "success")
 }
@@ -137,15 +155,14 @@ func (c *LeadController) Config() {
 	if !c.authorized() {
 		return
 	}
-	store, err := leadaccount.LeadConfigStoreFromEnv()
+	store, err := leadaccount.LeadConfigStoreFromDB()
 	if err != nil {
-		c.reply(http.StatusOK, map[string]any{"configured": false, "risk_configured": false,
-			"settings": leadaccount.DefaultLeadSettings(), "blocking_reasons": []string{"lead_config_storage_unavailable"}}, "success")
+		c.reply(http.StatusServiceUnavailable, nil, "lead_config_db_unavailable")
 		return
 	}
 	v, err := store.Load()
 	if err != nil {
-		c.reply(http.StatusServiceUnavailable, nil, "lead_config_unavailable")
+		c.reply(http.StatusServiceUnavailable, nil, "lead_config_db_unavailable")
 		return
 	}
 	c.reply(http.StatusOK, map[string]any{"configured": true, "risk_configured": leadaccount.LeadRiskLimitsReady(v.Limits), "settings": v}, "success")
@@ -166,18 +183,31 @@ func (c *LeadController) SaveConfig() {
 		c.reply(http.StatusBadRequest, nil, "lead_risk_limits_incomplete")
 		return
 	}
-	store, err := leadaccount.LeadConfigStoreFromEnv()
+	store, err := leadaccount.LeadConfigStoreFromDB()
 	if err != nil {
-		c.reply(http.StatusLocked, nil, "lead_config_storage_unavailable")
+		c.reply(http.StatusServiceUnavailable, nil, "lead_config_db_unavailable")
 		return
+	}
+	if settings.AllowNewOpens && leadaccount.LeadEmergencyPaused() {
+		c.reply(http.StatusLocked, nil, "lead_emergency_pause_restart_required")
+		return
+	}
+	// Only a configured Lead-specific encrypted key can start the existing
+	// WS observer. No separate VerifyReadOnly request is made.
+	if settings.AllowNewOpens {
+		if err := ensureLeadHost(); err != nil {
+			c.reply(http.StatusServiceUnavailable, nil, "lead_credentials_or_ws_unavailable")
+			return
+		}
 	}
 	if err = store.Save(settings); err != nil {
 		c.reply(http.StatusServiceUnavailable, nil, "lead_config_save_failed")
 		return
 	}
 	c.auditOptional(c.Ctx.Request.Context(), "settings_updated", "authorized_request")
-	c.reply(http.StatusOK, map[string]any{"account_id": "lead", "allow_new_opens": false,
-		"risk_configured": true, "live_trade_authorized": false}, "success")
+	c.reply(http.StatusOK, map[string]any{"account_id": "lead",
+		"allow_new_opens": settings.AllowNewOpens,
+		"risk_configured": true, "live_trade_authorized": leadaccount.LeadDurableOpenGate() == nil}, "success")
 }
 func (c *LeadController) SaveCredentials() {
 	if !c.authorized() {
@@ -195,10 +225,34 @@ func (c *LeadController) SaveCredentials() {
 		c.reply(http.StatusBadRequest, nil, "invalid_lead_credentials")
 		return
 	}
+	if binance.LeadKeyIsMainKey(data.APIKey) {
+		c.reply(http.StatusBadRequest, nil, "lead_credentials_must_differ_from_main")
+		return
+	}
 	manager, _, err := getLeadCredentialManager()
 	if err != nil {
 		c.reply(http.StatusLocked, nil, "lead_encryption_not_configured")
 		return
+	}
+	// Credential rotation revokes previous WS and broker identity. Close the
+	// persisted new-entry switch BEFORE replacing its credentials. New keys
+	// require a fresh explicit user toggle; never inherit old authorization.
+	configStore, configErr := leadaccount.LeadConfigStoreFromDB()
+	if configErr != nil {
+		c.reply(http.StatusServiceUnavailable, nil, "lead_disable_before_key_rotation_failed")
+		return
+	}
+	current, loadErr := configStore.Load()
+	if loadErr != nil {
+		c.reply(http.StatusServiceUnavailable, nil, "lead_disable_before_key_rotation_failed")
+		return
+	}
+	if current.AllowNewOpens {
+		current.AllowNewOpens = false
+		if err := configStore.Save(current); err != nil {
+			c.reply(http.StatusServiceUnavailable, nil, "lead_disable_before_key_rotation_failed")
+			return
+		}
 	}
 	leadaccount.StopReadOnlyHost()
 	if err = manager.SaveCredentials(leadaccount.Credentials{APIKey: data.APIKey, APISecret: data.APISecret, PortfolioLabel: data.PortfolioLabel}); err != nil {
@@ -250,7 +304,7 @@ func (c *LeadController) Pause() {
 	persisted := false
 	audited := false
 	reasons := make([]string, 0, 2)
-	store, err := leadaccount.LeadConfigStoreFromEnv()
+	store, err := leadaccount.LeadConfigStoreFromDB()
 	if err == nil {
 		var settings leadaccount.LeadSettings
 		settings, err = store.Load()

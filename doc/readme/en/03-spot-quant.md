@@ -1,4 +1,4 @@
-# Spot Quant Trading
+# Spot Trading
 
 [中文](../zh-CN/03-现货量化交易.md) · [Back to English README](../../../README.EN.md)
 
@@ -18,7 +18,7 @@ Set `testnet_binance_spot_base_url` to `https://testnet.binance.vision` without 
 **2. Enable automated trading**
 
 1. Under **Configuration Center → Spot Quant Trading**, enable the master switch (`config.spot_quant_enable=1`).
-2. Under **Spot Quant → Spot Trading**, configure each symbol's quote-asset budget (`usdt`), technical indicators, `long` / `close_long` rules, and take-profit/stop-loss thresholds; then enable the symbol (`spot_symbols.spot_quant_enabled=1`).
+2. Under **Spot Trading → Spot Trading**, configure each symbol's quote-asset budget (`usdt`), technical indicators, `long` / `close_long` rules, and take-profit/stop-loss thresholds; then enable the symbol (`spot_symbols.spot_quant_enabled=1`).
 3. **New BUY entries** require both the global and per-symbol switches, a ready signed user-data WS, a valid strategy signal, and balance, precision and exchange-rule checks. Disabling either switch stops **new BUYs only**. Existing Managed positions continue to evaluate take-profit / stop-loss and **SELL** rules, and unsettled orders are reconciled. Disabling a switch **does not immediately force-sell** a position. Automatic SELLs still require verified Fill ownership and available balance.
 
 **Important:** The default `profit=100` and `loss=100` mean **+100% / −100% unleveraged ROI**, not the commonly used +8% / −6%. `close_long` grants permission to sell only after the exit ROI threshold is reached; **a true rule alone does not trigger an immediate close**. Confirm thresholds and budget before enabling trading.

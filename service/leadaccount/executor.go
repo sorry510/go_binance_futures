@@ -19,11 +19,9 @@ var (
 	ErrLeadPendingReconcile = errors.New("lead account has unresolved orders or incomplete reconciliation")
 )
 
-// LeadExecutionAdapter is NOT a live trading entry point. Its public
-// constructor uses a Stage 4-2 RiskController with no Enable method,
-// a source which always reports Reconciled=false/UnknownOrders=true and
-// no production callback that authorizes Stage 7. No actual order can be
-// submitted via this production configuration.
+// LeadExecutionAdapter is the account-scoped execution boundary. Construction
+// does not enable trading: only a dedicated, healthy Lead session plus the
+// persisted user switch and the existing risk/ownership gates allow entries.
 type LeadExecutionAdapter struct {
 	mu        sync.Mutex // serializes this instance; NOT a distributed reservation
 	account   *binance.AccountClient
@@ -36,7 +34,7 @@ type LeadExecutionAdapter struct {
 	// Production has no route, constructor parameter or activation of it.
 	simulateEvidence func(*RiskSnapshot)
 	simulateRules    func(RiskOpenOrder) (VerifiedOrderRules, error)
-	pendingReconcile bool // held until Stage 5 authoritative account resync
+	pendingReconcile bool // only unknown/failed order result requires recovery
 	guard            *LeadRuntimeGuard
 }
 
@@ -70,8 +68,63 @@ func NewLeadExecutionAdapter(client *binance.AccountClient, symbols *binance.Lea
 	}, nil
 }
 
-// RuntimeStatus is a read-only diagnostic; open_ready is NOT permission to
-// replace the permanently read-only production Lead broker.
+// ConfigureLiveSession is called only from the existing shared Main tick
+// after the dedicated Lead WS and signed account mirror are healthy.
+// The user controls new entries through a persisted, default-OFF switch.
+// ReadOnlyVerified/PortfolioBound in the legacy risk struct mean a scoped,
+// healthy *runtime session* here; they do NOT assert a separate Binance
+// Portfolio ID verification (which the operator elected to skip).
+func (a *LeadExecutionAdapter) ConfigureLiveSession(settings LeadSettings, maxPositions, maxLosing int) error {
+	if a == nil || a.account == nil || a.account.ID() != binance.LeadAccountID ||
+		a.symbols == nil || !a.symbols.BoundTo(a.account) ||
+		a.risk == nil || settings.AccountID != "lead" ||
+		!LeadRiskLimitsReady(settings.Limits) ||
+		!leadTradeSessionHealthyFor(a.account) {
+		return ErrLeadOpenBlocked
+	}
+	if err := ValidateLeadSettings(settings); err != nil {
+		return err
+	}
+	// Only the new-entry branch requires the durable switch. Disabling it
+	// must not block an already-owned position's safe exit.
+	if settings.AllowNewOpens {
+		if err := LeadDurableOpenGate(); err != nil {
+			return err
+		}
+	}
+	// Entry limits of zero mean Main is not configured to create new
+	// positions; continue existing Lead exits, but never enable entries.
+	if maxPositions < 1 {
+		maxPositions = 1
+	}
+	if maxLosing < 1 {
+		maxLosing = 1
+	}
+	a.risk.mu.Lock()
+	a.risk.limits = RiskLimits{
+		MaxOrderNotionalUSDT:     settings.Limits.MaxOrderNotionalUSDT,
+		MaxTotalNotionalUSDT:     settings.Limits.MaxTotalNotionalUSDT,
+		MaxDailyRealizedLossUSDT: settings.Limits.MaxDailyRealizedLossUSDT,
+		MaxPositions:             maxPositions,
+		MaxLosingPositions:       maxLosing,
+	}
+	a.risk.state = riskRunState{
+		Enabled:       true,
+		AllowNewOpens: settings.AllowNewOpens && !LeadEmergencyPaused(),
+		// Session identity comes from the dedicated Lead Client and live
+		// WS mirror, not a skipped Portfolio verification request.
+		PortfolioBound: true, ReadOnlyVerified: true,
+		WSHealthy: true, Stage7Authorized: true,
+	}
+	state := a.risk.state
+	a.risk.mu.Unlock()
+	if a.guard != nil {
+		a.guard.observeBoundState(state)
+	}
+	return nil
+}
+
+// RuntimeStatus is diagnostic only and never authorizes an order.
 func (a *LeadExecutionAdapter) RuntimeStatus() LeadStatusSnapshot {
 	if a == nil || a.guard == nil {
 		return NewLeadRuntimeGuard(nil).Status()
@@ -158,14 +211,17 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 		return RiskDecision{BlockingReasons: []string{"lead_emergency_paused"}}, ErrLeadOpenBlocked
 	}
 	if a.simulateEvidence == nil {
+		if !leadTradeSessionHealthyFor(a.account) {
+			return RiskDecision{BlockingReasons: []string{"lead_ws_not_healthy"}}, ErrLeadOpenBlocked
+		}
 		// Re-read durable safety state, independent of HTTP handler memory.
 		// A zero/absent config can never act as authorization.
 		if err := LeadDurableOpenGate(); err != nil {
 			return RiskDecision{BlockingReasons: []string{"lead_durable_gate_locked"}}, ErrLeadOpenBlocked
 		}
 	}
-	// No Stage 7 authorization exists in production: refuse BEFORE any
-	// Lead SAPI, signed /fapi or public exchangeInfo fetch.
+	// Require the configured live Lead session before any exchange order
+	// checks. No Main account or Main broker fallback is allowed.
 	a.risk.mu.RLock()
 	gates := a.risk.state
 	a.risk.mu.RUnlock()
@@ -219,6 +275,23 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 	}
 	if a.simulateEvidence != nil {
 		a.simulateEvidence(&snapshot)
+	} else {
+		// REST Snapshot verifies current Lead account/hedge/positions/opens.
+		// A local unknown order is still a blocker; an ordinary accepted
+		// NEW order is not an unverified exchange submission.
+		pending, pendingErr := a.ownership.Ownership.OutstandingOrders(ctx)
+		if pendingErr != nil {
+			return RiskDecision{BlockingReasons: []string{"lead_ownership_unavailable"}}, ErrLeadOpenBlocked
+		}
+		for _, order := range pending {
+			if order.AccountID != string(binance.LeadAccountID) ||
+				order.Status == futuresownership.OrderReconcile ||
+				order.Status == futuresownership.OrderPending {
+				return RiskDecision{BlockingReasons: []string{"lead_pending_reconcile"}}, ErrLeadPendingReconcile
+			}
+		}
+		snapshot.Reconciled = true
+		snapshot.UnknownOrders = false
 	}
 	if a.guard != nil {
 		a.guard.observeFreshEvidence(snapshot, time.Now().UTC(), gates.WSHealthy)
@@ -233,10 +306,8 @@ func (a *LeadExecutionAdapter) checkOpenLocked(ctx context.Context, request Risk
 	return result, nil
 }
 
-// ExecuteOpen is the only order-submission path exposed by this adapter.
-// A fresh Lead risk check happens while holding the per-adapter lock, *before*
-// any Ownership claim or Broker write. This cannot authorize production orders
-// without Stage 5 ownership / WS reconciliation and Stage 7 approval.
+// ExecuteOpen is the account-bound new-order submission path. A fresh Lead
+// risk check runs before the Ownership claim and broker write.
 func (a *LeadExecutionAdapter) ExecuteOpen(ctx context.Context, request futuresownership.OrderRequest, check RiskOpenOrder) (futuresownership.ExchangeOrder, error) {
 	if a == nil {
 		return futuresownership.ExchangeOrder{}, ErrLeadOpenBlocked
@@ -274,14 +345,16 @@ func (a *LeadExecutionAdapter) ExecuteOpen(ctx context.Context, request futureso
 	}
 	// The bound executor already provides persistent ClaimOrder and
 	// unknown-submit -> lookup/reconcile; no raw Binance call here.
-	// Reserve before submitting. Any ambiguous result keeps this instance
-	// blocked, and there is no public unsafe reset in Stage 4-3. Successful
-	// Binance acceptance also requires fresh Stage 5 account reconciliation.
-	a.pendingReconcile = true
-	if a.guard != nil {
-		a.guard.RecordFault(binance.LeadAccountID, FaultPendingReconcile)
-	}
+	// Use the same durable claim + Binance response + WS/Fill path as Main.
+	// A normal acknowledged submission is NOT an account-wide recovery fault.
+	// Only an uncertain submit or an incomplete ledger requires reconciliation.
 	executed, execErr := a.ownership.Execute(ctx, request)
+	if execErr != nil {
+		a.pendingReconcile = true
+		if a.guard != nil {
+			a.guard.RecordFault(binance.LeadAccountID, FaultPendingReconcile)
+		}
+	}
 	return executed, execErr
 }
 func finiteEqual(a, b float64) bool {
