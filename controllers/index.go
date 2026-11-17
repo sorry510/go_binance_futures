@@ -74,6 +74,7 @@ func (ctrl *IndexController) GetServiceConfig() {
 			"tradeFutureEnable":             tradeFutureEnable,
 			"tradeSpotEnable":               tradeSpotEnable,
 			"spot_quant_enable":             systemConfig.SpotQuantEnable,
+			"coin_m_quant_enable":           systemConfig.CoinMQuantEnable,
 			"tradeDeliveryEnable":           tradeDeliveryEnable,
 			"tradeStrategyCoin":             tradeStrategyCoin,
 			"tradeNewEnable":                tradeNewEnable,
@@ -146,6 +147,18 @@ func applyServiceConfigPatch(current models.Config, payload []byte) (models.Conf
 	if _, wrongName := fields["spotQuantEnable"]; wrongName {
 		return current, fmt.Errorf("unknown spotQuantEnable field; use spot_quant_enable")
 	}
+	if _, wrongName := fields["coinMQuantEnable"]; wrongName {
+		return current, fmt.Errorf("unknown coinMQuantEnable field; use coin_m_quant_enable")
+	}
+	if raw, ok := fields["coin_m_quant_enable"]; ok {
+		if len(fields) != 1 {
+			return current, fmt.Errorf("coin_m_quant_enable must be updated alone")
+		}
+		var enabled int
+		if err := json.Unmarshal(raw, &enabled); err != nil || (enabled != 0 && enabled != 1) || string(raw) == "null" {
+			return current, fmt.Errorf("coin_m_quant_enable must be 0 or 1")
+		}
+	}
 	// The Spot Quant toggle must not piggyback on a patch that also changes
 	// legacy Spot or Futures settings. Keep unrelated config API behavior as-is.
 	if raw, ok := fields["spot_quant_enable"]; ok {
@@ -184,6 +197,10 @@ func persistServiceConfigPatch(o orm.Ormer, current *models.Config, payload []by
 	}
 	if _, onlySpot := fields["spot_quant_enable"]; onlySpot {
 		_, err := o.Update(current, "SpotQuantEnable")
+		return err
+	}
+	if _, onlyCoinM := fields["coin_m_quant_enable"]; onlyCoinM {
+		_, err := o.Update(current, "CoinMQuantEnable")
 		return err
 	}
 	_, err := o.Update(current)

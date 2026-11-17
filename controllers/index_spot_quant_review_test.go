@@ -30,7 +30,7 @@ func TestSpotQuantConfigUpdateOnlyChangesItsColumn(t *testing.T) {
 	if err := orm.RegisterDataBase(alias, "sqlite3", filepath.Join(t.TempDir(), "spot-config.db")); err != nil {
 		t.Fatal(err)
 	}
-	orm.RegisterModel(new(models.Config))
+	registerControllerConfigModel()
 	o := orm.NewOrmUsingDB(alias)
 	if _, err := o.Raw(`CREATE TABLE config (
 		id BIGINT PRIMARY KEY,
