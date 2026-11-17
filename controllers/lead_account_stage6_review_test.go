@@ -31,7 +31,7 @@ func TestStage6ReviewEmergencyPauseWorksWithoutAuditOrSettings(t *testing.T) {
 	}
 	result := stage6ParseResponse(t, response)["data"].(map[string]any)
 	if result["pause_in_memory"] != true || result["pause_persisted"] != false || result["audit_recorded"] != false ||
-		result["enabled"] != false || result["allow_new_opens"] != false {
+		result["allow_new_opens"] != false {
 		t.Fatalf("unsafe or misleading pause status: %+v", result)
 	}
 	if !leadaccount.LeadEmergencyPaused() {
@@ -40,7 +40,7 @@ func TestStage6ReviewEmergencyPauseWorksWithoutAuditOrSettings(t *testing.T) {
 	ctrl, status := stage6Controller(t, http.MethodGet, "/futures/lead/status", "", stage6AuthToken(t))
 	ctrl.Status()
 	state := stage6ParseResponse(t, status)["data"].(map[string]any)
-	if state["pause_in_memory"] != true || state["enabled"] != false {
+	if state["pause_in_memory"] != true || state["allow_new_opens"] != false {
 		t.Fatalf("status dropped safety latch: %+v", state)
 	}
 }
@@ -64,7 +64,7 @@ func TestStage6ReviewPausePersistsEvenWhenAuditMissing(t *testing.T) {
 		t.Fatal(err)
 	}
 	config, err := store.Load()
-	if err != nil || config.Enabled || config.AllowNewOpens {
+	if err != nil || config.AllowNewOpens {
 		t.Fatalf("durable pause failed %+v %v", config, err)
 	}
 }

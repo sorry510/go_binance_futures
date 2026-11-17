@@ -301,7 +301,25 @@ func TestStage6ProductionLeadManagementDependencyHasNoLiveActivation(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Count(string(routes), "/futures/lead/") != 12 {
-		t.Fatal("Stage 6 Lead route set changed, review ACL and live-write safety")
+	// Lead-01 intentionally removed the unused /events compatibility route.
+	// Continue reviewing the exact management surface, not just its count.
+	expectedRoutes := []string{
+		"/futures/lead/status", "/futures/lead/credentials",
+		"/futures/lead/verify", "/futures/lead/config",
+		"/futures/lead/start", "/futures/lead/pause",
+		"/futures/lead/reconcile", "/futures/lead/positions",
+		"/futures/lead/orders", "/futures/lead/metrics",
+		"/futures/lead/symbols",
+	}
+	if strings.Count(string(routes), "web.Router(\"/futures/lead/") != len(expectedRoutes) {
+		t.Fatal("Lead route set changed, review ACL and live-write safety")
+	}
+	for _, route := range expectedRoutes {
+		if strings.Count(string(routes), "web.Router(\""+route+"\"") != 1 {
+			t.Fatalf("expected exactly one reviewed Lead route %s", route)
+		}
+	}
+	if strings.Contains(string(routes), "/futures/lead/events") {
+		t.Fatal("removed Lead event compatibility endpoint is still exposed")
 	}
 }

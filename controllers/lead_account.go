@@ -86,17 +86,18 @@ func (c *LeadController) body(out any) bool {
 	}
 	return true
 }
-func (c *LeadController) audit(ctx context.Context, action, reason string) bool {
+
+// Ordinary settings and read-only verification do not require a separate
+// JSONL audit file. Best-effort structured events are useful but must not
+// become a second permission system for this single-user application.
+func (c *LeadController) auditOptional(ctx context.Context, action, reason string) {
 	store, err := leadaccount.LeadAuditStoreFromEnv()
 	if err != nil {
-		c.reply(http.StatusLocked, nil, "lead_audit_not_configured")
-		return false
+		return
 	}
-	if err = store.Append(ctx, action, reason); err != nil {
-		c.reply(http.StatusServiceUnavailable, nil, "lead_audit_unavailable")
-		return false
+	if err := store.Append(ctx, action, reason); err != nil {
+		log.Print("lead_trading: optional event log unavailable (action=", action, ")")
 	}
-	return true
 }
 
 // Lead observer is an explicit read-only opt-in; no trade broker starts.
@@ -105,10 +106,11 @@ func (c *LeadController) Status() {
 	if !c.authorized() {
 		return
 	}
-	report := map[string]any{"account_id": "lead", "enabled": false, "allow_new_opens": false,
+	report := map[string]any{"account_id": "lead", "allow_new_opens": false,
 		"readiness": "disabled", "ws_healthy": false, "last_reconciled_at": nil,
 		"blocking_reasons":  []string{"stage7_live_authorization_required", "lead_supervisor_not_started"},
-		"runtime_connected": false, "gate5_live_verified": false, "gate6_verified": false,
+		"runtime_connected": false, "live_trade_authorized": false,
+		"gate5_live_verified": false, "gate6_verified": false,
 		"gate7_authorized": false, "source": "offline_management",
 		"pause_in_memory": leadaccount.LeadEmergencyPaused(),
 		"pause_persisted": false}
@@ -137,7 +139,8 @@ func (c *LeadController) Config() {
 	}
 	store, err := leadaccount.LeadConfigStoreFromEnv()
 	if err != nil {
-		c.reply(http.StatusOK, map[string]any{"configured": false, "settings": leadaccount.DefaultLeadSettings(), "blocking_reasons": []string{"lead_config_storage_unavailable"}}, "success")
+		c.reply(http.StatusOK, map[string]any{"configured": false, "risk_configured": false,
+			"settings": leadaccount.DefaultLeadSettings(), "blocking_reasons": []string{"lead_config_storage_unavailable"}}, "success")
 		return
 	}
 	v, err := store.Load()
@@ -145,7 +148,7 @@ func (c *LeadController) Config() {
 		c.reply(http.StatusServiceUnavailable, nil, "lead_config_unavailable")
 		return
 	}
-	c.reply(http.StatusOK, map[string]any{"configured": true, "settings": v}, "success")
+	c.reply(http.StatusOK, map[string]any{"configured": true, "risk_configured": leadaccount.LeadRiskLimitsReady(v.Limits), "settings": v}, "success")
 }
 func (c *LeadController) SaveConfig() {
 	if !c.authorized() {
@@ -159,19 +162,22 @@ func (c *LeadController) SaveConfig() {
 		c.reply(http.StatusLocked, nil, "lead_config_not_authorized_or_invalid")
 		return
 	}
+	if !leadaccount.LeadRiskLimitsReady(settings.Limits) {
+		c.reply(http.StatusBadRequest, nil, "lead_risk_limits_incomplete")
+		return
+	}
 	store, err := leadaccount.LeadConfigStoreFromEnv()
 	if err != nil {
 		c.reply(http.StatusLocked, nil, "lead_config_storage_unavailable")
-		return
-	}
-	if !c.audit(c.Ctx.Request.Context(), "settings_updated", "authorized_request") {
 		return
 	}
 	if err = store.Save(settings); err != nil {
 		c.reply(http.StatusServiceUnavailable, nil, "lead_config_save_failed")
 		return
 	}
-	c.reply(http.StatusOK, map[string]any{"account_id": "lead", "enabled": false, "allow_new_opens": false}, "success")
+	c.auditOptional(c.Ctx.Request.Context(), "settings_updated", "authorized_request")
+	c.reply(http.StatusOK, map[string]any{"account_id": "lead", "allow_new_opens": false,
+		"risk_configured": true, "live_trade_authorized": false}, "success")
 }
 func (c *LeadController) SaveCredentials() {
 	if !c.authorized() {
@@ -194,23 +200,19 @@ func (c *LeadController) SaveCredentials() {
 		c.reply(http.StatusLocked, nil, "lead_encryption_not_configured")
 		return
 	}
-	if !c.audit(c.Ctx.Request.Context(), "credentials_saved", "rotation_or_initial_request") {
-		return
-	}
 	leadaccount.StopReadOnlyHost()
 	if err = manager.SaveCredentials(leadaccount.Credentials{APIKey: data.APIKey, APISecret: data.APISecret, PortfolioLabel: data.PortfolioLabel}); err != nil {
 		c.reply(http.StatusServiceUnavailable, nil, "lead_credential_save_failed")
 		return
 	}
+	c.auditOptional(c.Ctx.Request.Context(), "credentials_saved", "rotation_or_initial_request")
 	c.reply(http.StatusOK, map[string]any{"account_id": "lead", "key_hint": manager.Status().KeyHint, "readiness": "disabled"}, "success")
 }
 func (c *LeadController) DeleteCredentials() {
 	if !c.authorized() {
 		return
 	}
-	if !c.audit(c.Ctx.Request.Context(), "credentials_deleted", "blocked_pending_authoritative_evidence") {
-		return
-	}
+	c.auditOptional(c.Ctx.Request.Context(), "credentials_deleted", "blocked_pending_authoritative_evidence")
 	// Local DB cannot establish that Binance has zero unmanaged positions,
 	// protective Algo orders or in-flight submissions. No unsafe deletion.
 	c.reply(http.StatusLocked, nil, "lead_credentials_deletion_requires_full_live_reconciliation")
@@ -224,9 +226,7 @@ func (c *LeadController) Verify() {
 		c.reply(http.StatusLocked, nil, "lead_credentials_unavailable")
 		return
 	}
-	if !c.audit(c.Ctx.Request.Context(), "verify_requested", "authorized_read_only") {
-		return
-	}
+	c.auditOptional(c.Ctx.Request.Context(), "verify_requested", "authorized_read_only")
 	ctx, cancel := context.WithTimeout(c.Ctx.Request.Context(), 50*time.Second)
 	defer cancel()
 	report, err := manager.VerifyReadOnly(ctx)
@@ -255,7 +255,6 @@ func (c *LeadController) Pause() {
 		var settings leadaccount.LeadSettings
 		settings, err = store.Load()
 		if err == nil {
-			settings.Enabled = false
 			settings.AllowNewOpens = false
 			err = store.Save(settings)
 		}
@@ -281,7 +280,7 @@ func (c *LeadController) Pause() {
 		code = http.StatusAccepted
 	}
 	c.reply(code, map[string]any{
-		"account_id": "lead", "enabled": false, "allow_new_opens": false,
+		"account_id": "lead", "allow_new_opens": false,
 		"pause_in_memory": true, "pause_persisted": persisted,
 		"audit_recorded": audited, "blocking_reasons": reasons,
 	}, "lead_pause_applied")
@@ -290,18 +289,14 @@ func (c *LeadController) Start() {
 	if !c.authorized() {
 		return
 	}
-	if !c.audit(c.Ctx.Request.Context(), "start_denied", "stage7_live_authorization_required") {
-		return
-	}
-	c.reply(http.StatusLocked, map[string]any{"account_id": "lead", "enabled": false, "allow_new_opens": false, "blocking_reasons": []string{"stage7_live_authorization_required"}}, "stage7_live_authorization_required")
+	c.auditOptional(c.Ctx.Request.Context(), "start_denied", "stage7_live_authorization_required")
+	c.reply(http.StatusLocked, map[string]any{"account_id": "lead", "allow_new_opens": false, "blocking_reasons": []string{"stage7_live_authorization_required"}}, "stage7_live_authorization_required")
 }
 func (c *LeadController) Reconcile() {
 	if !c.authorized() {
 		return
 	}
-	if !c.audit(c.Ctx.Request.Context(), "reconcile_denied", "gate5_live_evidence_required") {
-		return
-	}
+	c.auditOptional(c.Ctx.Request.Context(), "reconcile_denied", "gate5_live_evidence_required")
 	c.reply(http.StatusLocked, map[string]any{"account_id": "lead", "blocking_reasons": []string{"gate5_live_evidence_required"}}, "lead_reconciliation_not_authorized")
 }
 func (c *LeadController) Managed() {
@@ -320,23 +315,6 @@ func (c *LeadController) Managed() {
 	} else {
 		c.reply(http.StatusOK, map[string]any{"account_id": "lead", "orders": result.Orders, "data_source": "ownership_database", "live_verified": false}, "success")
 	}
-}
-func (c *LeadController) Events() {
-	if !c.authorized() {
-		return
-	}
-	audit, err := leadaccount.LeadAuditStoreFromEnv()
-	if err != nil {
-		c.reply(http.StatusOK, map[string]any{"account_id": "lead", "events": []any{}, "source": "audit_not_configured"}, "success")
-		return
-	}
-	limit, _ := strconv.Atoi(c.GetString("limit", "50"))
-	rows, err := audit.List(c.Ctx.Request.Context(), limit)
-	if err != nil {
-		c.reply(http.StatusServiceUnavailable, nil, "lead_audit_unavailable")
-		return
-	}
-	c.reply(http.StatusOK, map[string]any{"account_id": "lead", "events": rows, "source": "local_audit"}, "success")
 }
 func (c *LeadController) Metrics() {
 	if !c.authorized() {

@@ -178,7 +178,7 @@ func TestStage73DurablePauseFileBlocksAcrossInstancesAndAudit(t *testing.T) {
 		t.Fatal(err)
 	}
 	state, err := another.Load()
-	if err != nil || state.Enabled || state.AllowNewOpens {
+	if err != nil || state.AllowNewOpens {
 		t.Fatalf("new instance reopened Lead: %+v %v", state, err)
 	}
 	log, err := LeadAuditStoreFromEnv()

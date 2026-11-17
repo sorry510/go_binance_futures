@@ -1,10 +1,12 @@
 package leadaccount
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -39,29 +41,50 @@ func LeadEmergencyPaused() bool {
 
 const ConfigPathEnv = "BINANCE_LEAD_CONFIG_FILE"
 
+// Lead-01 has one configuration format. Unfinished old settings are not
+// migrated or read; the trading identity remains independently verified.
+type LeadRiskConfig struct {
+	MaxOrderNotionalUSDT     float64 `json:"max_order_notional_usdt"`
+	MaxTotalNotionalUSDT     float64 `json:"max_total_notional_usdt"`
+	MaxDailyRealizedLossUSDT float64 `json:"max_daily_realized_loss_usdt"`
+}
+
 type LeadSettings struct {
-	AccountID     string     `json:"account_id"`
-	Enabled       bool       `json:"enabled"`
-	AllowNewOpens bool       `json:"allow_new_opens"`
-	Limits        RiskLimits `json:"limits"`
-	UpdatedAt     time.Time  `json:"updated_at"`
+	AccountID     string         `json:"account_id"`
+	AllowNewOpens bool           `json:"allow_new_opens"`
+	Limits        LeadRiskConfig `json:"limits"`
+	UpdatedAt     time.Time      `json:"updated_at,omitempty"`
 }
 
 func DefaultLeadSettings() LeadSettings {
-	return LeadSettings{AccountID: "lead", Enabled: false, AllowNewOpens: false}
+	return LeadSettings{AccountID: "lead"}
 }
+
+// Exposure caps must both be configured. Optional daily loss zero disables
+// that extra check, but cannot bypass account identity or exchange controls.
+func LeadRiskLimitsReady(limits LeadRiskConfig) bool {
+	return riskFinitePositive(limits.MaxOrderNotionalUSDT) &&
+		riskFinitePositive(limits.MaxTotalNotionalUSDT) &&
+		limits.MaxOrderNotionalUSDT <= limits.MaxTotalNotionalUSDT
+}
+
 func ValidateLeadSettings(s LeadSettings) error {
-	if s.AccountID != "lead" || s.Enabled || s.AllowNewOpens {
+	if s.AccountID != "lead" || s.AllowNewOpens {
 		return ErrLeadLiveGateLocked
 	}
-	values := []float64{s.Limits.MaxOrderNotionalUSDT, s.Limits.MaxTotalNotionalUSDT, s.Limits.MaxDailyRealizedLossUSDT, s.Limits.MaxDrawdownPct}
-	for _, v := range values {
-		if math.IsNaN(v) || math.IsInf(v, 0) || v < 0 {
+	for _, value := range []float64{
+		s.Limits.MaxOrderNotionalUSDT,
+		s.Limits.MaxTotalNotionalUSDT,
+		s.Limits.MaxDailyRealizedLossUSDT,
+	} {
+		if math.IsNaN(value) || math.IsInf(value, 0) || value < 0 {
 			return fmt.Errorf("invalid_lead_risk_limit")
 		}
 	}
-	if s.Limits.MaxDrawdownPct > 100 || s.Limits.MaxPositions < 0 || s.Limits.MaxLosingPositions < 0 || s.Limits.MaxPositions > 1000 || s.Limits.MaxLosingPositions > 1000 {
-		return fmt.Errorf("invalid_lead_risk_limit")
+	// The initial default (both zero) is safe for read-only state; only
+	// configured positive caps may be accepted by the HTTP save endpoint.
+	if (s.Limits.MaxOrderNotionalUSDT == 0) != (s.Limits.MaxTotalNotionalUSDT == 0) {
+		return fmt.Errorf("lead_notional_limits_incomplete")
 	}
 	if s.Limits.MaxTotalNotionalUSDT > 0 && s.Limits.MaxOrderNotionalUSDT > s.Limits.MaxTotalNotionalUSDT {
 		return fmt.Errorf("order_limit_exceeds_total_limit")
@@ -107,7 +130,12 @@ func (s *LeadConfigStore) Load() (LeadSettings, error) {
 		return DefaultLeadSettings(), ErrLeadConfigUnavailable
 	}
 	var value LeadSettings
-	if err = json.Unmarshal(data, &value); err != nil || ValidateLeadSettings(value) != nil {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&value); err != nil {
+		return DefaultLeadSettings(), ErrLeadConfigUnavailable
+	}
+	if err = decoder.Decode(new(any)); err != io.EOF || ValidateLeadSettings(value) != nil {
 		return DefaultLeadSettings(), ErrLeadConfigUnavailable
 	}
 	return value, nil
@@ -124,8 +152,6 @@ func (s *LeadConfigStore) Save(value LeadSettings) error {
 	if err := verifyCredentialPath(s.path); err != nil {
 		return ErrLeadConfigUnavailable
 	}
-	value.Enabled = false
-	value.AllowNewOpens = false
 	value.UpdatedAt = time.Now().UTC()
 	b, err := json.Marshal(value)
 	if err != nil {
@@ -170,9 +196,10 @@ func LeadDurableOpenGate() error {
 	if err != nil {
 		return ErrLeadConfigUnavailable
 	}
-	if settings.AccountID != "lead" || !settings.Enabled || !settings.AllowNewOpens {
+	if settings.AccountID != "lead" || !settings.AllowNewOpens || !LeadRiskLimitsReady(settings.Limits) {
 		return ErrLeadLiveGateLocked
 	}
+	// Lead-01 does not authorize real orders, including after manual edits.
 	return ErrLeadLiveGateLocked
 }
 

@@ -51,7 +51,7 @@ func stage6AuditLeadFile(filePath, relative string) error {
 	allowed := map[string]bool{
 		"NewEncryptedFileStoreFromEnv": true, "NewManager": true,
 		"LeadAuditStoreFromEnv": true, "LeadConfigStoreFromEnv": true,
-		"DefaultLeadSettings": true, "ValidateLeadSettings": true,
+		"DefaultLeadSettings": true, "ValidateLeadSettings": true, "LeadRiskLimitsReady": true,
 		"ListLeadManaged": true, "LeadUsageSnapshot": true,
 		"Credentials": true, "LeadSettings": true,
 		"EncryptedFileStore": true, "Manager": true,
