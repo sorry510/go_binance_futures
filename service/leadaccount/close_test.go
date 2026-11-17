@@ -66,8 +66,11 @@ func TestStage43ManagedCloseCapsAtMinManagedAndLive(t *testing.T) {
 			if err != nil || owned.ManagedQty != 1 {
 				t.Fatalf("close changed managed quantity incorrectly: %+v %v", owned, err)
 			}
-			if _, err := a.ExecuteManagedClose(context.Background(), request); !errors.Is(err, ErrLeadPendingReconcile) {
-				t.Fatalf("second close not paused for reconcile: %v", err)
+			if _, err := a.ExecuteManagedClose(context.Background(), request); err != nil {
+				t.Fatalf("idempotent accepted close should not lock account: %v", err)
+			}
+			if broker.submits != 1 || a.pendingReconcile {
+				t.Fatalf("accepted close was submitted twice or left a global lock: submits=%d", broker.submits)
 			}
 			_ = reader
 		})

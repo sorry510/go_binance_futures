@@ -100,7 +100,7 @@ func TestStage42EverySafetyBarrierFailClosed(t *testing.T) {
 		{"ws_off", func(_ *RiskLimits, s *riskRunState, _ *RiskOpenOrder, _ *RiskSnapshot) { s.WSHealthy = false }, "lead_ws_not_healthy"},
 		{"no_authorization", func(_ *RiskLimits, s *riskRunState, _ *RiskOpenOrder, _ *RiskSnapshot) { s.Stage7Authorized = false }, "stage7_live_authorization_required"},
 		{"missing_limits", func(l *RiskLimits, _ *riskRunState, _ *RiskOpenOrder, _ *RiskSnapshot) {
-			l.MaxDailyRealizedLossUSDT = 0
+			l.MaxOrderNotionalUSDT = 0
 		}, "lead_risk_limits_not_configured"},
 		{"past_snapshot", func(_ *RiskLimits, _ *riskRunState, _ *RiskOpenOrder, s *RiskSnapshot) {
 			s.CapturedAt = now.Add(-15 * time.Second)
@@ -233,5 +233,28 @@ func TestStage42NormalSharedCoinMarketBudgetRemainsUsable(t *testing.T) {
 	if !decision.Allowed || decision.RawOrderNotionalUSDT != 100 ||
 		decision.OrderNotionalUSDT <= decision.RawOrderNotionalUSDT {
 		t.Fatalf("market buffer disabled ordinary shared coin budget: %+v", decision)
+	}
+}
+
+// Lead-01 removes a mandatory daily-loss input. A zero cap disables only
+// that additional rule; it must not disable identity, exposure or Fill checks.
+func TestLead01ZeroDailyLossDoesNotDemandDailyPNL(t *testing.T) {
+	now := time.Now().UTC()
+	limits, state, order, snapshot := validRiskFixture(now)
+	limits.MaxDailyRealizedLossUSDT = 0
+	snapshot.PNLComplete = false
+	snapshot.PNLDayStartUTC = time.Time{}
+	snapshot.PNLAsOf = time.Time{}
+	snapshot.DailyNetRealizedPNLUSDT = math.NaN()
+	decision := evaluateLeadOpen(context.Background(), now, limits, state, order, snapshot, riskSymbols(t))
+	for _, code := range []string{"lead_daily_pnl_unavailable", "lead_risk_limits_not_configured", "lead_snapshot_incomplete_or_uncertain"} {
+		if riskReasonsContain(decision, code) {
+			t.Fatalf("disabled daily cap still requires PNL history: %+v", decision.BlockingReasons)
+		}
+	}
+	limits.MaxDailyRealizedLossUSDT = 10
+	decision = evaluateLeadOpen(context.Background(), now, limits, state, order, snapshot, riskSymbols(t))
+	if !riskReasonsContain(decision, "lead_daily_pnl_unavailable") {
+		t.Fatalf("nonzero daily cap failed open without income history: %+v", decision.BlockingReasons)
 	}
 }

@@ -22,7 +22,7 @@ func TestSpotQuantConfigUpdateOnlyChangesItsColumn(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := orm.GetDB("default"); err != nil {
-		if err := orm.RegisterDataBase("default", "sqlite3", filepath.Join(t.TempDir(), "default.db")); err != nil {
+		if err := orm.RegisterDataBase("default", "sqlite3", "file:controllers_stable_default_test?mode=memory&cache=shared"); err != nil {
 			t.Fatal(err)
 		}
 	}

@@ -184,7 +184,6 @@ func init() {
 	web.Router("/futures/lead/reconcile", &controllers.LeadController{}, "post:Reconcile")
 	web.Router("/futures/lead/positions", &controllers.LeadController{}, "get:Managed")
 	web.Router("/futures/lead/orders", &controllers.LeadController{}, "get:Managed")
-	web.Router("/futures/lead/events", &controllers.LeadController{}, "get:Events")
 	web.Router("/futures/lead/metrics", &controllers.LeadController{}, "get:Metrics")
 	web.Router("/futures/lead/symbols", &controllers.LeadController{}, "get:Symbols")
 	web.Router("/futures/account", &controllers.AccountController{}, "get:GetBinanceFuturesAccount")                                              // 获取合约账户信息

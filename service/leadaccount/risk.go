@@ -183,7 +183,8 @@ func evaluateLeadOpen(ctx context.Context, now time.Time, limits RiskLimits, sta
 	if symbols == nil || !symbols.Allows(sym) {
 		block("lead_symbol_not_allowed")
 	}
-	if !snap.PositionsComplete || !snap.OrdersComplete || !snap.PNLComplete || !snap.Reconciled || snap.UnknownOrders {
+	if !snap.PositionsComplete || !snap.OrdersComplete ||
+		(riskFinitePositive(limits.MaxDailyRealizedLossUSDT) && !snap.PNLComplete) || !snap.Reconciled || snap.UnknownOrders {
 		block("lead_snapshot_incomplete_or_uncertain")
 	}
 	if snap.CapturedAt.IsZero() || now.Sub(snap.CapturedAt) > RiskSnapshotMaxAge || snap.CapturedAt.After(now.Add(2*time.Second)) {
@@ -198,16 +199,20 @@ func evaluateLeadOpen(ctx context.Context, now time.Time, limits RiskLimits, sta
 	}
 	if !riskFiniteNonnegative(limits.MaxOrderNotionalUSDT) || limits.MaxOrderNotionalUSDT == 0 ||
 		!riskFiniteNonnegative(limits.MaxTotalNotionalUSDT) || limits.MaxTotalNotionalUSDT == 0 ||
-		!riskFiniteNonnegative(limits.MaxDailyRealizedLossUSDT) || limits.MaxDailyRealizedLossUSDT == 0 ||
+		!riskFiniteNonnegative(limits.MaxDailyRealizedLossUSDT) ||
 		limits.MaxPositions <= 0 || limits.MaxLosingPositions <= 0 || !riskFiniteNonnegative(limits.MaxDrawdownPct) || limits.MaxDrawdownPct >= 100 {
 		block("lead_risk_limits_not_configured")
 	}
-	if snap.PNLDayStartUTC.IsZero() || !snap.PNLDayStartUTC.Equal(d.UTCTradingDayStart) ||
-		snap.PNLAsOf.Before(snap.CapturedAt) || snap.PNLAsOf.After(now.Add(2*time.Second)) ||
-		math.IsNaN(snap.DailyNetRealizedPNLUSDT) || math.IsInf(snap.DailyNetRealizedPNLUSDT, 0) {
-		block("lead_daily_pnl_unavailable")
-	} else if riskFinitePositive(limits.MaxDailyRealizedLossUSDT) && snap.DailyNetRealizedPNLUSDT <= -limits.MaxDailyRealizedLossUSDT {
-		block("lead_daily_loss_limit")
+	// Zero explicitly disables the optional Lead daily-loss cap. Do not
+	// demand income-history queries when this extra rule is not configured.
+	if riskFinitePositive(limits.MaxDailyRealizedLossUSDT) {
+		if snap.PNLDayStartUTC.IsZero() || !snap.PNLDayStartUTC.Equal(d.UTCTradingDayStart) ||
+			snap.PNLAsOf.Before(snap.CapturedAt) || snap.PNLAsOf.After(now.Add(2*time.Second)) ||
+			math.IsNaN(snap.DailyNetRealizedPNLUSDT) || math.IsInf(snap.DailyNetRealizedPNLUSDT, 0) {
+			block("lead_daily_pnl_unavailable")
+		} else if snap.DailyNetRealizedPNLUSDT <= -limits.MaxDailyRealizedLossUSDT {
+			block("lead_daily_loss_limit")
+		}
 	}
 	if riskFinitePositive(limits.MaxDrawdownPct) {
 		if !snap.PeakEquityVerified || !riskFinitePositive(snap.PeakEquityUSDT) || snap.EquityUSDT > snap.PeakEquityUSDT+1e-6 {

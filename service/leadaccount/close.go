@@ -11,9 +11,9 @@ import (
 	"go_binance_futures/service/futuresownership"
 )
 
-// ExecuteManagedClose is intentionally disabled in production until Stage 7.
-// A paused opening gate does not block a properly authorized exit, but an
-// identity/WS/portfolio failure or unknown exchange submission does.
+// ExecuteManagedClose handles only verified Lead-owned exits. The regular
+// new-entry switch does not block exits, but broken Lead identity/WS or
+// uncertain order reconciliation does.
 func (a *LeadExecutionAdapter) ExecuteManagedClose(ctx context.Context, request futuresownership.OrderRequest) (futuresownership.ExchangeOrder, error) {
 	if a == nil || a.risk == nil || a.source == nil || a.account == nil || a.account.ID() != binance.LeadAccountID {
 		return futuresownership.ExchangeOrder{}, ErrLeadOpenBlocked
@@ -25,6 +25,9 @@ func (a *LeadExecutionAdapter) ExecuteManagedClose(ctx context.Context, request 
 	}
 	if a.pendingReconcile {
 		return futuresownership.ExchangeOrder{}, ErrLeadPendingReconcile
+	}
+	if a.simulateEvidence == nil && !leadTradeSessionHealthyFor(a.account) {
+		return futuresownership.ExchangeOrder{}, ErrLeadOpenBlocked
 	}
 	if a.guard != nil && !a.guard.permitsExitWrite() {
 		return futuresownership.ExchangeOrder{}, ErrLeadOpenBlocked
@@ -85,11 +88,14 @@ func (a *LeadExecutionAdapter) ExecuteManagedClose(ctx context.Context, request 
 	if err := a.verifyCloseRules(ctx, request, markPrice, math.Min(owned.ManagedQty, liveQty), liveQty); err != nil {
 		return futuresownership.ExchangeOrder{}, fmt.Errorf("%w: %v", ErrLeadOpenBlocked, err)
 	}
-	// Any returned uncertainty or fill requires account reconciliation before
-	// another write. Stage 5 must provide a dedicated verified release workflow.
-	a.pendingReconcile = true
-	if a.guard != nil {
-		a.guard.RecordFault(binance.LeadAccountID, FaultPendingReconcile)
+	// An acknowledged TP/SL or close request must not block unrelated
+	// orders. Only submission/ledger uncertainty triggers recovery.
+	executed, execErr := a.ownership.Execute(ctx, request)
+	if execErr != nil {
+		a.pendingReconcile = true
+		if a.guard != nil {
+			a.guard.RecordFault(binance.LeadAccountID, FaultPendingReconcile)
+		}
 	}
-	return a.ownership.Execute(ctx, request)
+	return executed, execErr
 }

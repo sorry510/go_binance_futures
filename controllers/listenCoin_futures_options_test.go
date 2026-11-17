@@ -41,7 +41,7 @@ func TestLocalListenSymbolOptionsReadFromSeparateTables(t *testing.T) {
 	// Beego's model bootstrap requires a default alias even though the test
 	// queries the isolated named database. Never open the configured real DB.
 	if _, err := orm.GetDB("default"); err != nil {
-		if err := orm.RegisterDataBase("default", "sqlite3", filepath.Join(t.TempDir(), "default.db")); err != nil {
+		if err := orm.RegisterDataBase("default", "sqlite3", "file:controllers_stable_default_test?mode=memory&cache=shared"); err != nil {
 			t.Fatal(err)
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/beego/beego/v2/client/orm"
 	"go_binance_futures/service/leadaccount"
 )
 
@@ -23,7 +24,13 @@ func TestStage6ReviewEmergencyPauseWorksWithoutAuditOrSettings(t *testing.T) {
 	// Missing storage must never stop a safety-reducing pause. This test only
 	// changes the process-local one-way flag, not Binance or production files.
 	t.Setenv(leadaccount.AuditPathEnv, "")
-	t.Setenv(leadaccount.ConfigPathEnv, "")
+	prepareLeadControllerSettingsDB(t)
+	// Missing Lead table simulates a database storage outage. The emergency
+	// process-local pause must still apply even if persistence is impossible.
+	if _, err := orm.NewOrm().Raw("DROP TABLE lead_trade_settings").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _, _ = orm.NewOrm().Raw(leadaccount.LeadTradeSettingsDDL).Exec() })
 	ctrl, response := stage6Controller(t, http.MethodPost, "/futures/lead/pause", "{}", stage6AuthToken(t))
 	ctrl.Pause()
 	if response.Code != http.StatusAccepted {
@@ -31,7 +38,7 @@ func TestStage6ReviewEmergencyPauseWorksWithoutAuditOrSettings(t *testing.T) {
 	}
 	result := stage6ParseResponse(t, response)["data"].(map[string]any)
 	if result["pause_in_memory"] != true || result["pause_persisted"] != false || result["audit_recorded"] != false ||
-		result["enabled"] != false || result["allow_new_opens"] != false {
+		result["allow_new_opens"] != false {
 		t.Fatalf("unsafe or misleading pause status: %+v", result)
 	}
 	if !leadaccount.LeadEmergencyPaused() {
@@ -40,15 +47,13 @@ func TestStage6ReviewEmergencyPauseWorksWithoutAuditOrSettings(t *testing.T) {
 	ctrl, status := stage6Controller(t, http.MethodGet, "/futures/lead/status", "", stage6AuthToken(t))
 	ctrl.Status()
 	state := stage6ParseResponse(t, status)["data"].(map[string]any)
-	if state["pause_in_memory"] != true || state["enabled"] != false {
+	if state["pause_in_memory"] != true || state["allow_new_opens"] != false {
 		t.Fatalf("status dropped safety latch: %+v", state)
 	}
 }
 
 func TestStage6ReviewPausePersistsEvenWhenAuditMissing(t *testing.T) {
-	directory := stage6ReviewPrivateDir(t)
-	path := filepath.Join(directory, "settings.json")
-	t.Setenv(leadaccount.ConfigPathEnv, path)
+	prepareLeadControllerSettingsDB(t)
 	t.Setenv(leadaccount.AuditPathEnv, "")
 	ctrl, response := stage6Controller(t, http.MethodPost, "/futures/lead/pause", "{}", stage6AuthToken(t))
 	ctrl.Pause()
@@ -59,21 +64,20 @@ func TestStage6ReviewPausePersistsEvenWhenAuditMissing(t *testing.T) {
 	if result["pause_in_memory"] != true || result["pause_persisted"] != true || result["audit_recorded"] != false {
 		t.Fatalf("wrong response when audit unavailable: %+v", result)
 	}
-	store, err := leadaccount.LeadConfigStoreFromEnv()
+	store, err := leadaccount.LeadConfigStoreFromDB()
 	if err != nil {
 		t.Fatal(err)
 	}
 	config, err := store.Load()
-	if err != nil || config.Enabled || config.AllowNewOpens {
+	if err != nil || config.AllowNewOpens {
 		t.Fatalf("durable pause failed %+v %v", config, err)
 	}
 }
 
 func TestStage6ReviewPauseAuditAndSettingsAvailable(t *testing.T) {
+	prepareLeadControllerSettingsDB(t)
 	directory := stage6ReviewPrivateDir(t)
-	path := filepath.Join(directory, "settings.json")
 	auditPath := filepath.Join(directory, "events.jsonl")
-	t.Setenv(leadaccount.ConfigPathEnv, path)
 	t.Setenv(leadaccount.AuditPathEnv, auditPath)
 	ctrl, response := stage6Controller(t, http.MethodPost, "/futures/lead/pause", "{}", stage6AuthToken(t))
 	ctrl.Pause()

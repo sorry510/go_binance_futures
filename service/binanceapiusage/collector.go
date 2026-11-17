@@ -524,6 +524,10 @@ func referenceWeightLimit(product string) int64 {
 	switch strings.ToLower(strings.TrimSpace(product)) {
 	case "spot":
 		return 6000
+	case "sapi":
+		// Binance /sapi/ IP-weighted endpoints have an independent IP
+		// limit. Do not apply this reference to UID-weighted endpoints.
+		return 12000
 	case "futures", "delivery":
 		return 2400
 	default:

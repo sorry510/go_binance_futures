@@ -161,9 +161,9 @@ func TestStage73DurablePauseFileBlocksAcrossInstancesAndAudit(t *testing.T) {
 	if err := os.Chmod(directory, 0700); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv(ConfigPathEnv, filepath.Join(directory, "risk.json"))
+	prepareLeadSettingsTestDB(t)
 	t.Setenv(AuditPathEnv, filepath.Join(directory, "events.jsonl"))
-	store, err := LeadConfigStoreFromEnv()
+	store, err := LeadConfigStoreFromDB()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,12 +173,12 @@ func TestStage73DurablePauseFileBlocksAcrossInstancesAndAudit(t *testing.T) {
 	if err := LeadDurableOpenGate(); !errors.Is(err, ErrLeadLiveGateLocked) {
 		t.Fatalf("disabled durable config allowed new entries: %v", err)
 	}
-	another, err := LeadConfigStoreFromEnv()
+	another, err := LeadConfigStoreFromDB()
 	if err != nil {
 		t.Fatal(err)
 	}
 	state, err := another.Load()
-	if err != nil || state.Enabled || state.AllowNewOpens {
+	if err != nil || state.AllowNewOpens {
 		t.Fatalf("new instance reopened Lead: %+v %v", state, err)
 	}
 	log, err := LeadAuditStoreFromEnv()

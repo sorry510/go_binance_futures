@@ -154,7 +154,14 @@ func TestStage46NoProductionLeadExecutionEntrypoint(t *testing.T) {
 					ident = v.Name
 				}
 				switch ident {
-				case "NewLeadExecutionAdapter", "ExecuteManagedClose", "ExecuteOpen", "NewReadOnlyExecutor", "leadMockTradeRunner":
+				case "ExecuteManagedClose", "ExecuteStrategyOpen":
+					// Lead-03-2 allows these calls ONLY in the reviewed hook
+					// bridge. The shared runner is still Mock-only until the
+					// separately authorized final production integration.
+					if name != "lead_trade_execution.go" {
+						t.Errorf("unreviewed production Lead execution invocation in %s: %s", path, ident)
+					}
+				case "NewLeadExecutionAdapter", "ExecuteOpen", "NewReadOnlyExecutor", "leadMockTradeRunner":
 					t.Errorf("unexpected production Lead execution invocation in %s: %s", path, ident)
 				}
 				return true
@@ -216,11 +223,29 @@ func TestStage46RepositoryProductionLeadWritesRemainUnreachable(t *testing.T) {
 				// production root MUST still exclude this entire package.
 				// TestStage46ProductionBinaryDependencyClosureExcludesLeadAccount
 				// is a separate structural proof of its inaccessibility.
-				allowed := filepath.Join(root, "service", "leadaccount", "supervisor.go")
-				if path != allowed {
+				supervisor := filepath.Join(root, "service", "leadaccount", "supervisor.go")
+				sharedTick := filepath.Join(root, "service", "leadaccount", "read_only_host.go")
+				if path != supervisor && path != sharedTick {
 					t.Errorf("unreviewed production Lead adapter instantiation: %s", path)
 				}
-			case "ExecuteManagedClose", "ExecuteOpen", "NewReadOnlyExecutor", "leadMockTradeRunner":
+			case "ExecuteManagedClose":
+				strategyBridge := filepath.Join(root, "feature", "lead_trade_execution.go")
+				if path != strategyBridge {
+					t.Errorf("unreviewed production Lead managed close call: %s invokes %s", path, name)
+				}
+			case "ExecuteStrategyOpen":
+				approved := filepath.Join(root, "feature", "lead_trade_execution.go")
+				if path != approved {
+					t.Errorf("unreviewed production Lead strategy open call: %s", path)
+				}
+			case "ExecuteOpen":
+				// Lead-03-2 only delegates to the EXISTING hard-gated
+				// adapter; no other new direct ExecuteOpen call is allowed.
+				approved := filepath.Join(root, "service", "leadaccount", "strategy_execution.go")
+				if path != approved {
+					t.Errorf("unreviewed Lead ExecuteOpen caller: %s", path)
+				}
+			case "NewReadOnlyExecutor", "leadMockTradeRunner":
 				t.Errorf("Stage 4 production activation detected: %s invokes %s", path, name)
 			}
 			return true
@@ -301,7 +326,25 @@ func TestStage6ProductionLeadManagementDependencyHasNoLiveActivation(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Count(string(routes), "/futures/lead/") != 12 {
-		t.Fatal("Stage 6 Lead route set changed, review ACL and live-write safety")
+	// Lead-01 intentionally removed the unused /events compatibility route.
+	// Continue reviewing the exact management surface, not just its count.
+	expectedRoutes := []string{
+		"/futures/lead/status", "/futures/lead/credentials",
+		"/futures/lead/verify", "/futures/lead/config",
+		"/futures/lead/start", "/futures/lead/pause",
+		"/futures/lead/reconcile", "/futures/lead/positions",
+		"/futures/lead/orders", "/futures/lead/metrics",
+		"/futures/lead/symbols",
+	}
+	if strings.Count(string(routes), "web.Router(\"/futures/lead/") != len(expectedRoutes) {
+		t.Fatal("Lead route set changed, review ACL and live-write safety")
+	}
+	for _, route := range expectedRoutes {
+		if strings.Count(string(routes), "web.Router(\""+route+"\"") != 1 {
+			t.Fatalf("expected exactly one reviewed Lead route %s", route)
+		}
+	}
+	if strings.Contains(string(routes), "/futures/lead/events") {
+		t.Fatal("removed Lead event compatibility endpoint is still exposed")
 	}
 }

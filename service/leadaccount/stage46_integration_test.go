@@ -87,17 +87,12 @@ func TestStage46AccountScopedMockOpenMatrixAndStickyReconcile(t *testing.T) {
 			if err != nil || pos.AccountID != "lead" || pos.ManagedQty != 1 {
 				t.Fatalf("wrong managed fill %+v %v", pos, err)
 			}
-			if _, err = a.ExecuteOpen(context.Background(), request, check); !errors.Is(err, ErrLeadPendingReconcile) {
-				t.Fatalf("accepted duplicate intent after fill: %v", err)
+			replayed, err := a.ExecuteOpen(context.Background(), request, check)
+			if err != nil || broker.submits != 1 {
+				t.Fatalf("replayed accepted intent caused a duplicate Binance submit: %+v %v submits=%d", replayed, err, broker.submits)
 			}
-			if broker.submits != 1 || a.RuntimeStatus().State != LeadReconcileRequired {
-				t.Fatalf("lost pending gate submit=%d state=%s", broker.submits, a.RuntimeStatus().State)
-			}
-			evidence, _ := ClassifyLeadRecovery(futuresownership.ExchangeOrder{
-				ExchangeOrderID: "900", ClientOrderID: request.ClientOrderID, Status: "FILLED", FilledQty: 1, AveragePrice: 100,
-			}, request.ClientOrderID)
-			if !evidence.Terminal || !evidence.RequiresReconcile || !a.pendingReconcile {
-				t.Fatalf("terminal order alone illegally unlocked adapter: %+v", evidence)
+			if a.pendingReconcile || a.RuntimeStatus().State == LeadReconcileRequired {
+				t.Fatalf("normal confirmed order incorrectly locked the Lead account: %+v", a.RuntimeStatus())
 			}
 		})
 	}
@@ -180,14 +175,15 @@ func TestStage46MockProtectiveStopsAndTargetsWithManagedCaps(t *testing.T) {
 			if err != nil || len(positions) != 1 || positions[0].ManagedQty != 0 || positions[0].Status != futuresownership.PositionClosed {
 				t.Fatalf("managed protective fill wrong %+v %v", positions, err)
 			}
-			if a.RuntimeStatus().State != LeadReconcileRequired {
-				t.Fatalf("protective order lost pending status: %+v", a.RuntimeStatus())
+			if a.pendingReconcile || a.RuntimeStatus().State == LeadReconcileRequired {
+				t.Fatalf("confirmed protective Fill incorrectly locked Lead account: %+v", a.RuntimeStatus())
 			}
-			// A manual add cannot be included in managed quantity.
+			// The position is already closed. A manual add cannot be counted
+			// as a new Managed position, even without a global pending lock.
 			reader.positions[0].PositionAmt = "2"
 			request.ClientOrderID += "_manual"
-			if _, err = a.ExecuteManagedClose(context.Background(), request); !errors.Is(err, ErrLeadPendingReconcile) {
-				t.Fatalf("second protective write must await reconciler: %v", err)
+			if _, err = a.ExecuteManagedClose(context.Background(), request); !errors.Is(err, ErrLeadOpenBlocked) {
+				t.Fatalf("manual inventory was incorrectly claimed by protection: %v", err)
 			}
 			if broker.submits != 1 {
 				t.Fatal("unmanaged/manual quantity was submitted")
@@ -371,12 +367,22 @@ func TestStage46DeterministicRejectionAndUnknownTimeoutDifferentLedgerOutcomes(t
 // bypass that the name-based AST scan might miss. Any future public adapter
 // method must be explicitly reviewed and allowlisted (not auto-accepted).
 func TestStage46LeadExecutionAdapterPublicSurfaceAllowlist(t *testing.T) {
+	// Lead-03-2 reviewed additions:
+	// BoundTo checks exact Lead-client pointer identity;
+	// PreflightStrategyOpen does NOT authorize any trade;
+	// ExecuteStrategyOpen delegates to the existing hard-gated ExecuteOpen.
+	// No public Enable/Resume/ResetPending method is permitted.
 	expected := []string{
+		"BoundTo",
+		"CancelExpiredStrategyOpens",
 		"CheckOpen",
+		"ConfigureLiveSession",
 		"ExecuteManagedClose",
 		"ExecuteOpen",
+		"ExecuteStrategyOpen",
 		"InspectOrderRecovery",
 		"PauseOpens",
+		"PreflightStrategyOpen",
 		"ReportLeadFault",
 		"RuntimeStatus",
 	}

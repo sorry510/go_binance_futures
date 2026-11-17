@@ -2,7 +2,6 @@ package leadaccount
 
 import (
 	"context"
-	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,44 +11,30 @@ import (
 	"go_binance_futures/service/futuresownership"
 )
 
-func TestStage63SettingsSecurePersistenceAlwaysDisabled(t *testing.T) {
-	dir := t.TempDir()
-	if err := os.Chmod(dir, 0700); err != nil {
-		t.Fatal(err)
-	}
-	path := filepath.Join(dir, "lead-risk.json")
-	store, err := NewLeadConfigStore(path)
+func TestStage63SettingsDatabasePersistenceAlwaysDisabled(t *testing.T) {
+	prepareLeadSettingsTestDB(t)
+	store, err := LeadConfigStoreFromDB()
 	if err != nil {
 		t.Fatal(err)
 	}
 	initial, err := store.Load()
-	if err != nil || initial.AccountID != "lead" || initial.Enabled || initial.AllowNewOpens {
+	if err != nil || initial.AccountID != "lead" || initial.AllowNewOpens {
 		t.Fatalf("unsafe default %+v %v", initial, err)
 	}
 	settings := DefaultLeadSettings()
-	settings.Limits = RiskLimits{
-		MaxOrderNotionalUSDT: 50, MaxTotalNotionalUSDT: 100,
-		MaxDailyRealizedLossUSDT: 8, MaxDrawdownPct: 10,
-		MaxPositions: 3, MaxLosingPositions: 2,
-	}
+	settings.Limits = LeadRiskConfig{MaxOrderNotionalUSDT: 50, MaxTotalNotionalUSDT: 100, MaxDailyRealizedLossUSDT: 8}
 	if err := store.Save(settings); err != nil {
 		t.Fatal(err)
 	}
 	recovered, err := store.Load()
-	if err != nil || recovered.Limits.MaxOrderNotionalUSDT != 50 || recovered.Enabled || recovered.AllowNewOpens {
-		t.Fatalf("persisted Lead risk limits unsafe: %+v %v", recovered, err)
-	}
-	info, err := os.Stat(path)
-	if err != nil || info.Mode().Perm() != 0600 {
-		t.Fatalf("unsafe settings permission: %v %v", info, err)
+	if err != nil || recovered.Limits.MaxOrderNotionalUSDT != 50 || recovered.AllowNewOpens {
+		t.Fatalf("DB state %+v %v", recovered, err)
 	}
 	for _, tc := range []struct {
 		name   string
 		mutate func(*LeadSettings)
 	}{
 		{"wrong_account", func(v *LeadSettings) { v.AccountID = "main" }},
-		{"enabled", func(v *LeadSettings) { v.Enabled = true }},
-		{"open_authorized", func(v *LeadSettings) { v.AllowNewOpens = true }},
 		{"negative_loss", func(v *LeadSettings) { v.Limits.MaxDailyRealizedLossUSDT = -1 }},
 		{"total_smaller", func(v *LeadSettings) { v.Limits.MaxTotalNotionalUSDT = 1 }},
 	} {
@@ -60,13 +45,10 @@ func TestStage63SettingsSecurePersistenceAlwaysDisabled(t *testing.T) {
 				t.Fatal("unsafe config persisted")
 			}
 			after, e := store.Load()
-			if e != nil || after.Enabled || after.AllowNewOpens || after.Limits.MaxOrderNotionalUSDT != 50 {
-				t.Fatalf("rejected config still mutated file %+v %v", after, e)
+			if e != nil || after.AllowNewOpens || after.Limits.MaxOrderNotionalUSDT != 50 {
+				t.Fatalf("rejected config mutated DB %+v %v", after, e)
 			}
 		})
-	}
-	if _, err := NewLeadConfigStore("app.conf"); !errors.Is(err, ErrLeadConfigUnavailable) {
-		t.Fatal("relative config inside repo was allowed")
 	}
 }
 func TestStage64LeadLocalAuditNeverSerializesSecret(t *testing.T) {

@@ -31,7 +31,7 @@ func WithFuturesAccountMirrorLock(fn func() bool) bool {
 }
 
 // persistFuturesAccountEvent is the account-scoped state writer, independent of
-// the WebSocket connection lifecycle. Stage 5 can connect the Lead WS to it.
+// the WebSocket connection lifecycle. Main and Lead share this local writer.
 // It deliberately never adjusts ownership or claims an unmanaged position.
 func persistFuturesAccountEvent(accountID AccountID, account *AccountClient, event *futures.WsUserDataEvent) error {
 	futuresAccountMirrorMu.Lock()

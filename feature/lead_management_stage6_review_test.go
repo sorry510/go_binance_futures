@@ -33,7 +33,9 @@ func stage6AuditLeadFile(filePath, relative string) error {
 		if path != stage6LeadImport {
 			continue
 		}
-		if relative != "controllers/lead_account.go" {
+		if relative != "controllers/lead_account.go" &&
+			relative != "feature/account_trade_cycle.go" &&
+			relative != "feature/lead_trade_runtime.go" {
 			return fmt.Errorf("unreviewed production Lead import in %s", relative)
 		}
 		name := "leadaccount"
@@ -50,14 +52,28 @@ func stage6AuditLeadFile(filePath, relative string) error {
 	// supervisor constructor calls even in aliased imports.
 	allowed := map[string]bool{
 		"NewEncryptedFileStoreFromEnv": true, "NewManager": true,
-		"LeadAuditStoreFromEnv": true, "LeadConfigStoreFromEnv": true,
-		"DefaultLeadSettings": true, "ValidateLeadSettings": true,
+		"LeadAuditStoreFromEnv": true, "LeadConfigStoreFromDB": true,
+		"DefaultLeadSettings": true, "ValidateLeadSettings": true, "LeadRiskLimitsReady": true,
 		"ListLeadManaged": true, "LeadUsageSnapshot": true,
 		"Credentials": true, "LeadSettings": true,
 		"EncryptedFileStore": true, "Manager": true,
 		"MasterKeyEnv": true, "StorePathEnv": true,
 		"LatchLeadEmergencyPause": true, "LeadEmergencyPaused": true,
 		"StartConfiguredReadOnlyHost": true, "LeadReadOnlyStatus": true, "StopReadOnlyHost": true,
+		"EnsureLeadHostRunning": true, "LeadDurableOpenGate": true,
+	}
+	// Only two reviewed production feature files may reference Lead:
+	// the validator's locked gate and the inert shared-tick wiring. This
+	// is not a blanket grant for trading methods in unrelated packages.
+	switch relative {
+	case "feature/account_trade_cycle.go":
+		allowed = map[string]bool{"LeadDurableOpenGate": true}
+	case "feature/lead_trade_runtime.go":
+		allowed = map[string]bool{
+			"LeadDurableOpenGate": true, "LeadConfigStoreFromDB": true,
+			"CurrentLeadTradeSession": true, "LeadEmergencyPaused": true,
+			"LeadReadOnlyStatus": true,
+		}
 	}
 	bannedCalls := map[string]bool{
 		"NewLeadSupervisor": true, "NewLeadUserStream": true,

@@ -85,7 +85,7 @@ func TestStage61StatusShowsNoEnabledLiveTradingAndNoSecret(t *testing.T) {
 		t.Fatal("secret included in Lead status")
 	}
 	data := stage6ParseResponse(t, rec)["data"].(map[string]any)
-	if data["account_id"] != "lead" || data["enabled"] != false || data["allow_new_opens"] != false {
+	if data["account_id"] != "lead" || data["allow_new_opens"] != false {
 		t.Fatalf("Lead status allowed trading: %v", data)
 	}
 }
@@ -107,15 +107,20 @@ func TestStage63StartRejectedEvenWithAuthenticatedJWT(t *testing.T) {
 	}
 }
 func TestStage63ConfigRejectsEnableAndMainAccount(t *testing.T) {
-	for _, body := range []string{
-		`{"account_id":"lead","enabled":true,"allow_new_opens":false,"limits":{}}`,
-		`{"account_id":"main","enabled":false,"allow_new_opens":false,"limits":{}}`,
-		`{"account_id":"lead","enabled":false,"allow_new_opens":true,"limits":{}}`,
+	for _, tc := range []struct {
+		body string
+		want int
+	}{
+		{`{"account_id":"lead","enabled":true,"allow_new_opens":false,"limits":{}}`, http.StatusBadRequest},
+		{`{"account_id":"main","enabled":false,"allow_new_opens":false,"limits":{}}`, http.StatusBadRequest},
+		{`{"account_id":"lead","enabled":false,"allow_new_opens":true,"limits":{}}`, http.StatusBadRequest},
+		{`{"account_id":"main","allow_new_opens":false,"limits":{}}`, http.StatusLocked},
+		{`{"account_id":"lead","allow_new_opens":true,"limits":{}}`, http.StatusLocked},
 	} {
-		ctrl, rec := stage6Controller(t, http.MethodPut, "/futures/lead/config", body, stage6AuthToken(t))
+		ctrl, rec := stage6Controller(t, http.MethodPut, "/futures/lead/config", tc.body, stage6AuthToken(t))
 		ctrl.SaveConfig()
-		if rec.Code != http.StatusLocked {
-			t.Fatalf("unsafe config accepted: %d %s", rec.Code, rec.Body.String())
+		if rec.Code != tc.want {
+			t.Fatalf("unsafe config: got %d want %d body %s", rec.Code, tc.want, rec.Body.String())
 		}
 	}
 }

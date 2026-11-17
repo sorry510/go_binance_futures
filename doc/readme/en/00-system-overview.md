@@ -43,15 +43,15 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html` and use the left-hand menu 
 | Futures Trading → Futures Trading | Browse, add, search, batch-edit, enable, or disable symbol configurations |
 | Futures Trading → Futures Orders | Order history, including bulk hiding/restoring within filters and manual annotations |
 | Futures Trading → Futures Positions | Local position ownership, Managed orders, manual claims, reconciliation, and repair history |
-| Futures Trading → Lead Copy Trading | Dedicated Lead account read-only management: credentials and verification, risk controls, pause, managed positions/orders, local audit, and WS/API status. **Live Lead order submission is not authorized.** |
+| Futures Trading page → Copy Trading button next to Funding Rate | Dedicated Lead account read-only management: credentials and verification, risk controls, pause, managed positions/orders, local audit, and WS/API status. **Live Lead order submission is not authorized.** |
 | Futures Trading → Futures Account | Assets, local positions, and local open orders |
 | Futures Trading → Strategy Templates | Create and maintain technical-indicator and strategy-method templates |
 | Futures Trading → Test Results | Search real-time simulated trades by symbol and date |
 | Futures Trading → Historical Backtest | Replay strategies on historical 1m bars, Funding, and MarketCondition; Standard 1m and Adaptive Resolution, trades, equity curves, audit events, and drill-down statistics |
-| Spot Quant → Spot Trading | Independent Spot symbol configuration, LONG / CLOSE_LONG strategies, indicators, filtering, and enable switches |
-| Spot Quant → Local Spot Account | Locally managed positions, orders, actual exchange Fills, and PnL by quote asset; full net PnL is unavailable with stale prices or unvalued fees |
-| Spot Quant → Spot Strategy Templates | Spot-specific indicators and strategy templates, separate from Futures |
-| Spot Quant → Positions & Controlled Trading | View system-owned inventory and anomalies; manually rebuild local aggregates. Manual selling, cancellation, and exchange reconciliation UI actions are not yet available |
+| Spot Trading → Spot Trading | Independent Spot symbol configuration, LONG / CLOSE_LONG strategies, indicators, filtering, and enable switches |
+| Spot Trading → Local Spot Account | Locally managed positions, orders, actual exchange Fills, and PnL by quote asset; full net PnL is unavailable with stale prices or unvalued fees |
+| Spot Trading → Spot Strategy Templates | Spot-specific indicators and strategy templates, separate from Futures |
+| Spot Trading → Positions & Controlled Trading | View system-owned inventory and anomalies; manually rebuild local aggregates. Manual selling, cancellation, and exchange reconciliation UI actions are not yet available |
 | Coin Alerts → Spot / Futures Alerts | Target-price alerts with optional automatic trading |
 | Market Monitoring → Spot / Futures Monitoring | K-line, threshold, indicator, and custom-strategy monitoring |
 | AI → Chat | Multi-turn Agent conversations, symbol selection, model switching, and mounting multiple Skills |
