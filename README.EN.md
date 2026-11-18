@@ -26,6 +26,7 @@ For an introduction, read **[00 · System Overview](doc/readme/en/00-system-over
 | 07 | [AI and Agents](doc/readme/en/07-ai-and-agents.md) | Chat, analysis, Skills, MCP, Memory, tasks, and governance |
 | 08 | [System Configuration and Logs](doc/readme/en/08-configuration-and-logs.md) | Diagnostics, log viewing, and log cleanup |
 | 09 | [How to Develop](doc/readme/en/09-how-to-develop.md) | Go backend and Vue frontend development, testing, builds, and asset sync |
+| 10 | [COIN-M Futures Trading](doc/readme/en/10-coin-m-futures.md) | Isolated DAPI execution, inverse-contract quantities, verified Fills, PnL, entry gates and release restrictions |
 
 ## Other Technical Documentation
 

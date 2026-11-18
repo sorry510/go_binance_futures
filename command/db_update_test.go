@@ -44,7 +44,7 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 			new(models.StrategyTemplates),
 			new(models.TestStrategyResults),
 			new(models.Symbols),
-			new(models.SpotSymbols),
+			new(models.SpotSymbols), new(models.DeliverySymbols),
 			new(models.AgentConversation), new(models.AgentConversationSkill), new(models.AgentSkill),
 			new(models.AgentTask),
 			new(models.AgentTradeProposal),
@@ -916,6 +916,196 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		}
 		if err := SyncDatabase(26); err != nil {
 			t.Fatalf("repaired test fixture rejected: %v", err)
+		}
+	})
+
+	var preV27SpotFills int
+	if err := o.Raw("SELECT COUNT(*) FROM spot_trade_fills").QueryRow(&preV27SpotFills); err != nil {
+		t.Fatal(err)
+	}
+	// CM-1 v27: do not reuse legacy delivery_enable or old USDT budgets to
+	// authorize COIN-M entry. Existing per-coin "enable" data is untouched.
+	legacyCM := &models.DeliverySymbols{
+		Symbol: "S510BTCUSD_PERP", Type: "PERP", Enable: 1,
+		Usdt: "10", Leverage: 3, MarginType: "CROSSED",
+	}
+	if _, err := o.Insert(legacyCM); err != nil {
+		t.Fatalf("seed legacy COIN-M market row: %v", err)
+	}
+	// Simulate the physical v26 database: the test fixture was initialized
+	// using current Go models, but a deployed v26 DB has no v27 ORM columns.
+	// Remove them from the populated fixture before upgrading to v27.
+	for _, field := range []struct{ table, column string }{
+		{"config", "coin_m_quant_enable"},
+		{"delivery_symbols", "contract_size"},
+		{"delivery_symbols", "margin_asset"},
+		{"delivery_symbols", "contract_type"},
+	} {
+		if _, err := o.Raw("ALTER TABLE " + field.table + " DROP COLUMN " + field.column).Exec(); err != nil {
+			t.Fatalf("remove future field from v26 test fixture %s.%s: %v", field.table, field.column, err)
+		}
+	}
+	if _, err := o.Raw("UPDATE config SET delivery_enable=1 WHERE id=1").Exec(); err != nil {
+		t.Fatal(err)
+	}
+	if err := SyncDatabase(27); err != nil {
+		t.Fatalf("v27 COIN-M schema migration: %v", err)
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 27 || version.CoinMQuantEnable != 0 || version.DeliveryEnable != 1 {
+		t.Fatalf("CM global switch must be OFF regardless of legacy delivery_enable: %+v %v", version, err)
+	}
+	if err := VerifyV27CoinMSchema(o); err != nil {
+		t.Fatalf("new COIN-M schema verification: %v", err)
+	}
+	var enabledLegacy int
+	var oldUSDT, budget, marginAsset, contractType string
+	var contractSize int64
+	if err := o.Raw("SELECT enable, usdt, budget_usd, contract_size, margin_asset, contract_type FROM delivery_symbols WHERE id=?", legacyCM.ID).
+		QueryRow(&enabledLegacy, &oldUSDT, &budget, &contractSize, &marginAsset, &contractType); err != nil {
+		t.Fatal(err)
+	}
+	if enabledLegacy != 1 || oldUSDT != "10" || budget != "0" || contractSize != 0 || marginAsset != "" || contractType != "" {
+		t.Fatalf("v27 changed legacy CM enable/budget/metadata: enabled=%d usdt=%s budget=%s size=%d margin=%s type=%s",
+			enabledLegacy, oldUSDT, budget, contractSize, marginAsset, contractType)
+	}
+	for _, table := range []string{
+		"coin_m_managed_positions", "coin_m_managed_orders",
+		"coin_m_trade_fills", "coin_m_strategy_templates",
+	} {
+		var count int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", table).QueryRow(&count); err != nil || count != 1 {
+			t.Fatalf("missing v27 table %s: %d %v", table, count, err)
+		}
+		if err := o.Raw("SELECT COUNT(*) FROM " + table).QueryRow(&count); err != nil || count != 0 {
+			t.Fatalf("v27 table %s has preexisting data: %d %v", table, count, err)
+		}
+	}
+	for table, columns := range map[string][]string{
+		"delivery_symbols":         {"budget_usd"},
+		"coin_m_managed_positions": {"contract_size", "entry_price", "opened_contracts", "remaining_contracts", "realized_pnl"},
+		"coin_m_managed_orders":    {"requested_contracts", "filled_contracts"},
+		"coin_m_trade_fills":       {"contracts", "price", "realized_pnl", "commission"},
+	} {
+		for _, column := range columns {
+			typ, err := coinMDecimalType(o, table, column)
+			if err != nil || typ != "DECIMAL(36,18)" {
+				t.Fatalf("v27 %s.%s type=%s: %v", table, column, typ, err)
+			}
+		}
+	}
+	for table, indexes := range map[string][][]string{
+		"coin_m_managed_positions": {{"symbol", "position_side", "status"}},
+		"coin_m_managed_orders":    {{"client_order_id"}, {"symbol", "exchange_order_id"}, {"position_id"}},
+		"coin_m_trade_fills":       {{"symbol", "exchange_order_id", "trade_id"}, {"order_id"}, {"position_id"}},
+	} {
+		for _, columns := range indexes {
+			if !sqliteHasIndexColumns(t, o, table, columns) {
+				t.Fatalf("missing v27 index %s %v", table, columns)
+			}
+		}
+	}
+	rp, err := o.Raw("INSERT INTO coin_m_managed_positions (symbol,position_side,margin_asset,contract_size,entry_price,opened_contracts,remaining_contracts,realized_pnl,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+		"S510BTCUSD_PERP", "LONG", "BTC", "100", "50000.25", "10", "10", "0", "OPEN", 10, 10).Exec()
+	if err != nil {
+		t.Fatalf("v27 insert CM managed position: %v", err)
+	}
+	pid, err := rp.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ro, err := o.Raw("INSERT INTO coin_m_managed_orders (position_id,symbol,position_side,intent,side,order_type,client_order_id,exchange_order_id,requested_contracts,filled_contracts,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+		pid, "S510BTCUSD_PERP", "LONG", "OPEN", "BUY", "MARKET", "S510-CM-CLIENT-1", "1000", "10", "10", "FILLED", 10, 10).Exec()
+	if err != nil {
+		t.Fatalf("v27 insert CM order: %v", err)
+	}
+	oid, err := ro.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := o.Raw("INSERT INTO coin_m_managed_orders (position_id,symbol,position_side,intent,side,order_type,client_order_id,requested_contracts,filled_contracts,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+		pid, "S510BTCUSD_PERP", "LONG", "OPEN", "BUY", "MARKET", "S510-CM-CLIENT-1", "10", "0", "NEW", 11, 11).Exec(); err == nil {
+		t.Fatal("v27 accepted duplicate CM client order id")
+	}
+	fillSQL := "INSERT INTO coin_m_trade_fills (position_id,order_id,symbol,position_side,side,exchange_order_id,trade_id,contracts,price,realized_pnl,pnl_asset,commission,commission_asset,trade_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+	fillArgs := []interface{}{pid, oid, "S510BTCUSD_PERP", "LONG", "BUY", "1000", "777", "10", "50000.25", "0.001234567890123456", "BTC", "0.000012345678901234", "BTC", 10}
+	if _, err := o.Raw(fillSQL, fillArgs...).Exec(); err != nil {
+		t.Fatalf("insert CM trade Fill: %v", err)
+	}
+	if _, err := o.Raw(fillSQL, fillArgs...).Exec(); err == nil {
+		t.Fatal("v27 accepted duplicate CM trade Fill")
+	}
+	if err := SyncDatabase(27); err != nil {
+		t.Fatalf("idempotent v27 sync: %v", err)
+	}
+	var pnl, commission string
+	if err := o.Raw("SELECT realized_pnl, commission FROM coin_m_trade_fills WHERE trade_id='777'").QueryRow(&pnl, &commission); err != nil ||
+		pnl != "0.001234567890123456" || commission != "0.000012345678901234" {
+		t.Fatalf("v27 decimal precision lost: pnl=%s fee=%s error=%v", pnl, commission, err)
+	}
+	var remaining, historicalCount, countCM, countSpot int
+	if err := o.Raw("SELECT COUNT(*) FROM coin_m_managed_positions").QueryRow(&remaining); err != nil || remaining != 1 {
+		t.Fatalf("v27 repeated sync removed CM position: %d %v", remaining, err)
+	}
+	if err := o.Raw("SELECT COUNT(*) FROM futures_managed_positions WHERE symbol='S510LEGACYUSDT'").QueryRow(&historicalCount); err != nil || historicalCount != 1 {
+		t.Fatalf("v27 changed existing futures positions: %d %v", historicalCount, err)
+	}
+	if err := o.Raw("SELECT COUNT(*) FROM coin_m_trade_fills").QueryRow(&countCM); err != nil || countCM != 1 {
+		t.Fatalf("v27 repeated sync lost CM Fill: %d %v", countCM, err)
+	}
+	if err := o.Raw("SELECT COUNT(*) FROM spot_trade_fills").QueryRow(&countSpot); err != nil || countSpot != preV27SpotFills {
+		t.Fatalf("v27 changed Spot fills: %d %v", countSpot, err)
+	}
+	t.Run("V27IndexLookupRejectsWrongTable", func(t *testing.T) {
+		ok, err := coinMIndexExists(o, "coin_m_managed_orders", "uq_coin_m_order_client")
+		if err != nil || !ok {
+			t.Fatalf("expected existing index on correct table: exists=%v error=%v", ok, err)
+		}
+		ok, err = coinMIndexExists(o, "coin_m_managed_positions", "uq_coin_m_order_client")
+		if err != nil || ok {
+			t.Fatalf("index on another table must not match: exists=%v error=%v", ok, err)
+		}
+	})
+
+	t.Run("V27MissingCMFillLedgerFailsClosed", func(t *testing.T) {
+		if _, err := o.Raw("DROP TABLE coin_m_trade_fills").Exec(); err != nil {
+			t.Fatal(err)
+		}
+		if err := SyncDatabase(27); err == nil || !strings.Contains(err.Error(), "coin_m_trade_fills") {
+			t.Fatalf("v27 marked but missing CM Fill table accepted: %v", err)
+		}
+		var rows int
+		if err := o.Raw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='coin_m_trade_fills'").QueryRow(&rows); err != nil || rows != 0 {
+			t.Fatalf("v27 mismatch silently rebuilt Fill ledger: %d %v", rows, err)
+		}
+		// Repair only this throwaway in-memory test fixture.
+		if err := ensureV27CoinMSchema(o); err != nil {
+			t.Fatal(err)
+		}
+		if err := SyncDatabase(27); err != nil {
+			t.Fatalf("v27 test fixture repair: %v", err)
+		}
+	})
+
+	t.Run("V27NonUniqueFillIndexFailsClosed", func(t *testing.T) {
+		if _, err := o.Raw("DROP INDEX uq_coin_m_fill_trade").Exec(); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := o.Raw("CREATE INDEX uq_coin_m_fill_trade ON coin_m_trade_fills (symbol, exchange_order_id, trade_id)").Exec(); err != nil {
+			t.Fatal(err)
+		}
+		if err := SyncDatabase(27); err == nil || !strings.Contains(err.Error(), "not UNIQUE") {
+			t.Fatalf("v27 allowed named nonunique Fill index: %v", err)
+		}
+		// Restore the in-memory test index only.
+		if _, err := o.Raw("DROP INDEX uq_coin_m_fill_trade").Exec(); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := o.Raw("CREATE UNIQUE INDEX uq_coin_m_fill_trade ON coin_m_trade_fills (symbol, exchange_order_id, trade_id)").Exec(); err != nil {
+			t.Fatal(err)
+		}
+		if err := SyncDatabase(27); err != nil {
+			t.Fatalf("restored v27 unique key rejected: %v", err)
 		}
 	})
 

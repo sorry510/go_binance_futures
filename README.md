@@ -25,6 +25,7 @@
 | 07 | [AI 与 Agent 功能](doc/readme/zh-CN/07-AI-Agent.md) | Chat、分析、Skill、MCP、Memory、任务与治理 |
 | 08 | [系统配置与日志](doc/readme/zh-CN/08-系统配置与日志.md) | 配置中心、内置日志、诊断与清理 |
 | 09 | [如何开发](doc/readme/zh-CN/09-如何开发.md) | Go 后端与 Vue 前端开发、调试、测试、构建与部署 |
+| 10 | [币本位合约交易 COIN-M](doc/readme/zh-CN/10-币本位合约交易.md) | 独立 DAPI 交易、合约张数、真实 Fill、反向盈亏、双开关及发布前验收限制 |
 
 ## 其他技术文档
 

@@ -374,6 +374,11 @@ func UpdateDatabase(oldVersion int64, newVersion int64) error {
 			return fmt.Errorf("migrate v25 independent spot quant schema: %w", err)
 		}
 	}
+	if oldVersion < 27 && newVersion >= 27 {
+		if err := ensureV27CoinMSchema(o); err != nil {
+			return fmt.Errorf("migrate v27 independent COIN-M schema: %w", err)
+		}
+	}
 	to, err := o.Begin()
 	if err != nil {
 		logs.Error("begin transaction error:", err)
@@ -444,6 +449,11 @@ func SyncDatabase(targetVersion int64) error {
 			return fmt.Errorf("verify v25 spot quant flag columns: %w", err)
 		}
 	}
+	if targetVersion >= 27 {
+		if err := ensureV27CoinMFlagType(orm.NewOrm()); err != nil {
+			return fmt.Errorf("verify v27 COIN-M flag column: %w", err)
+		}
+	}
 
 	systemConfig, err := utils.GetSystemConfig()
 	if err != nil {
@@ -483,6 +493,11 @@ func SyncDatabase(targetVersion int64) error {
 			return fmt.Errorf("database v26 Lead settings schema mismatch: %w", err)
 		}
 	}
+	if targetVersion >= 27 && systemConfig.Version >= 27 && systemConfig.Version <= targetVersion {
+		if err := VerifyV27CoinMSchema(orm.NewOrm()); err != nil {
+			return fmt.Errorf("database v27 COIN-M schema mismatch: %w", err)
+		}
+	}
 	if systemConfig.Version < targetVersion {
 		logs.Info("update database version:", systemConfig.Version, "->", targetVersion)
 		if err := UpdateDatabase(systemConfig.Version, targetVersion); err != nil {
@@ -496,6 +511,11 @@ func SyncDatabase(targetVersion int64) error {
 		if targetVersion >= 26 {
 			if err := VerifyV26LeadSettingsSchema(orm.NewOrm()); err != nil {
 				return fmt.Errorf("verify upgraded v26 Lead settings schema: %w", err)
+			}
+		}
+		if targetVersion >= 27 {
+			if err := VerifyV27CoinMSchema(orm.NewOrm()); err != nil {
+				return fmt.Errorf("verify upgraded v27 COIN-M schema: %w", err)
 			}
 		}
 		systemConfig.Version = targetVersion
