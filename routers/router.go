@@ -121,6 +121,21 @@ func init() {
 	web.Router("/test-strategy-results/:id", &controllers.TestStrategyResultController{}, "delete:Delete;get:Show")         // 删除某个测试策略结果和获取明细
 	web.Router("/test-strategy-results/test/:symbol", &controllers.TestStrategyResultController{}, "post:TestStrategyRule") // 测试策略结果的某个平仓测试是否符合条件
 
+	// CM-3: COIN-M local ledger read-only (not live wallet/trading).
+	web.Router("/coin-m/positions", &controllers.CoinMQuantController{}, "get:ListPositions")
+	web.Router("/coin-m/positions/:id", &controllers.CoinMQuantController{}, "get:GetPositionDetail")
+	web.Router("/coin-m/orders", &controllers.CoinMQuantController{}, "get:ListOrders")
+	// CM-3: independent COIN-M configuration and templates only. No DAPI trade writes.
+	web.Router("/coin-m/symbols", &controllers.CoinMQuantController{}, "get:ListSymbols")
+	web.Router("/coin-m/symbols/batch", &controllers.CoinMQuantController{}, "put:BatchSymbols")
+	web.Router("/coin-m/symbols/enable/:flag", &controllers.CoinMQuantController{}, "put:EnableSymbols")
+	web.Router("/coin-m/symbols/:id", &controllers.CoinMQuantController{}, "get:GetSymbol;put:EditSymbol")
+	web.Router("/coin-m/symbols/:id/rule-test", &controllers.CoinMQuantController{}, "post:RuleTest")
+	web.Router("/coin-m/strategy-templates", &controllers.CoinMQuantController{}, "get:ListTemplates;post:CreateTemplate")
+	web.Router("/coin-m/strategy-templates/import", &controllers.CoinMQuantController{}, "post:ImportTemplate")
+	web.Router("/coin-m/strategy-templates/rule-test", &controllers.CoinMQuantController{}, "post:RuleTest")
+	web.Router("/coin-m/strategy-templates/:id", &controllers.CoinMQuantController{}, "get:GetTemplate;put:EditTemplate;delete:DeleteTemplate")
+
 	// 06-5: Spot-only local read models. Rebuild only recalculates cached
 	// position fields from verified fills; no Binance order mutations here.
 	web.Router("/spot-quant/positions", &controllers.SpotQuantAccountController{}, "get:Positions")
