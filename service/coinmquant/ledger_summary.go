@@ -183,7 +183,7 @@ func loadFillEvidence(o orm.Ormer, where string, args []interface{}, positions m
 				continue
 			}
 			agg.open.Add(agg.open, amount)
-		case "CLOSE":
+		case "CLOSE", "PROTECT":
 			if (pos.PositionSide == "LONG" && f.FillSide != "SELL") || (pos.PositionSide == "SHORT" && f.FillSide != "BUY") {
 				agg.bad = "Fill closing side conflicts with position"
 				continue
