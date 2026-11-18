@@ -1,6 +1,6 @@
 # 开发方案 CM · 币本位合约交易（复刻 06 现货最终精简版）
 
-> 方案日期：2026-11-17。当前状态（2026-11-18）：**CM-0～CM-5 已完成源码与离线测试**（CM-5 DAPI 执行原语、真实 Fill 归属、私有 WS 与 Algo 保护单均通过 Fake/Mock），**CM-6～CM-7 尚未实施**；实际数据库未升级，没有真实下单或自动策略运行。
+> 方案日期：2026-11-17。当前状态（2026-11-18）：**CM-0～CM-6 已完成源码与离线测试**；CM-6 已将 COIN-M Runner 接入现有 2 秒调度，支持双开关、先恢复后出场再开仓、独立 DAPI Kline、保护单及重启幂等。**CM-7 尚未实施**；实际部署数据库未升级，也未进行真实 COIN-M 签名下单或实盘验收。
 >
 > 参考：已落地的 Spot 06-0～06-7 自动交易及四页面结构；现有 U 本位合约策略、持仓、订单与成交链路。源码数据库版本已升级至 v27（CM-1）；实际部署数据库需要后续备份、维护窗口和人工执行 `sync db`，未触及生产库。
 
@@ -114,8 +114,8 @@ CM-1 已实现 **源码 Schema v27**：基于 v26，使用独立 Go 迁移方法
 | CM-2（已完成） | COIN-M 行情、合约信息与客户端：DAPI / WS / Testnet 隔离、精度过滤器、Weight | [Code Review](CODE_REVIEW_CM-2.md)：真实公开 DAPI exchangeInfo 200；定向离线测试与 12 包回归通过，签名 WS/真实订单未接入 |
 | CM-3（已完成） | 币种列表启停、独立模板 CRUD、配置中心单开关、前端四页面骨架与本地账本只读 API | [Code Review](CODE_REVIEW_CM-3.md)：前后端构建、87 个非历史研究 Go 包、CM-3 五次重复测试与 Race 检测通过；dist 已同步 static，真实交易与完整 PnL 留待 CM-4～CM-6 |
 | CM-4（已完成） | 独立持仓周期、订单/Fill 只读汇总，按币本位 mark 计算 inverse PnL，参考 USD 估值、结算资产分类汇总、DAPI 钱包只读 | [Code Review](CODE_REVIEW_CM-4.md)；[首次复审 F1](CODE_REVIEW_CM-4-rereview.md) 已在 [第二轮复审](CODE_REVIEW_CM-4-rereview-2.md) 中修复并通过 11 组证据异常探针与 87 包离线回归；Fill 实际采集、签名 WS、下单留待 CM-5，真实 MySQL 与实盘验收尚未执行 |
-| CM-5（源码/离线已完成） | 独立 COIN-M DAPI 普通订单、真实 Fill、私有 User WS、双 STOP/TP Algo 保护单、部分成交与不确定响应恢复 | [Code Review](CODE_REVIEW_CM-5.md)、[独立复审](CODE_REVIEW_CM-5-rereview.md)、[整改复审](CODE_REVIEW_CM-5-rereview-2.md)：修复 O2 满页证据状态、O3 保护单类型校验，88 包 Go 测试、4 包 5 次重复 Gate、Race Detector、Vet、构建通过；尚未连接自动调度、没有在真实 Testnet/Mainnet 发单或执行迁移 |
-| CM-6 | 接入现有每 2 秒共享调度；全局与每币开关、出场优先、API 节流与错误恢复 | 两级启停控制新开仓，关闭任一开关后已有 Managed 持仓仍按规则平仓 |
+| CM-5（源码/离线已完成） | 独立 COIN-M DAPI 普通订单、真实 Fill、私有 User WS、双 STOP/TP Algo 保护单、部分成交与不确定响应恢复 | [Code Review](CODE_REVIEW_CM-5.md)、[独立复审](CODE_REVIEW_CM-5-rereview.md)、[整改复审](CODE_REVIEW_CM-5-rereview-2.md)：修复 O2 满页证据状态、O3 保护单类型校验，88 包 Go 测试、4 包 5 次重复 Gate、Race Detector、Vet、构建通过；CM-5 当时未接入自动调度（CM-6 已完成源码接线），没有真实 Testnet/Mainnet 发单或执行迁移 |
+| CM-6（源码/离线已完成） | 复用现有 2 秒调度；独立 DAPI Kline 策略、双开关、LONG/SHORT、Managed 出场优先、STOP/TP 和不确定订单恢复 | [Code Review](CODE_REVIEW_CM-6.md)、[首次复审 F7/P1](CODE_REVIEW_CM-6-rereview.md)、[第二轮整改复审](CODE_REVIEW_CM-6-rereview-2.md)：修复 STOP/TP 配置竞态并通过 9 组注入场景、88 包离线测试、核心包 5 次重复测试、Race、Vet、Build；真实 Testnet、MySQL 8 和实盘验收仍未进行 |
 | CM-7 | 完整页面、README 中英双语、端到端测试、发布前检查 | Build→dist→static；Go 测试、离线回归；明确真实环境验收仍未执行 |
 
 验收重点：相同 signal 不重复提交；合约数量不误当币数量；不同 marginAsset 的盈亏不混加；错误价格/规则/余额时拒绝交易；数据库或签名 WS 故障时不发新开仓；已有 U 本位/Spot/Lead 行为不变；升级 Schema 不会自动开关。

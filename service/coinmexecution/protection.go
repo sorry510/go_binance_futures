@@ -218,7 +218,8 @@ func (p *Processor) CancelProtection(ctx context.Context, clientAlgoID string) (
 	verified, verifyErr := p.API.QueryAlgo(ctx, order.Symbol, order.ClientOrderID)
 	if verifyErr != nil || verified.ClientAlgoID != order.ClientOrderID ||
 		verified.Symbol != order.Symbol || verified.PositionSide != order.PositionSide ||
-		verified.Side != order.Side || verified.AlgoID <= 0 ||
+		verified.Side != order.Side || verified.OrderType != order.OrderType || verified.AlgoID <= 0 ||
+		(order.ExchangeOrderID != "" && order.ExchangeOrderID != strconv.FormatInt(verified.AlgoID, 10)) ||
 		(strings.ToUpper(verified.AlgoStatus) != "CANCELED" &&
 			strings.ToUpper(verified.AlgoStatus) != "CANCELLED") {
 		_, _ = p.DB.Raw("UPDATE coin_m_managed_orders SET status='UNKNOWN',updated_at=? WHERE id=?", time.Now().UnixMilli(), order.ID).Exec()

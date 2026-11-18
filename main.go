@@ -18,6 +18,7 @@ import (
 	agenttrade "go_binance_futures/service/agenttrade"
 	alertpipeline "go_binance_futures/service/alertpipeline"
 	"go_binance_futures/service/applog"
+	coinmexecution "go_binance_futures/service/coinmexecution"
 	futuresownership "go_binance_futures/service/futuresownership"
 	marketintelligence "go_binance_futures/service/marketintelligence"
 	opportunityservice "go_binance_futures/service/opportunity"
@@ -449,10 +450,21 @@ func main() {
 		feature.StartTrade(&SystemConfig)
 	}, time.Second*2) // 2秒间隔；REST 权重随 managed orders/WS 状态变化，不使用固定预算假设
 
+	// COIN-M shares the existing 2-second Spot scheduler tick, not a new
+	// scheduler center. Its Runner and private WS remain fully isolated from
+	// Spot/U-M; work is skipped when both entry switches are OFF and there is
+	// no Managed recovery. Never change U-M/Spot scheduler callback behavior.
 	// Spot quant uses the same 2-second cadence. The existing binance.testnet
 	// selects the Spot API environment; the two Spot Quant switches authorize
 	// trading. WS readiness, verified Fill inventory and deduplication remain required.
 	loopRun(func() {
+		// Dispatch independently so a slow Spot callback does not delay COIN-M
+		// exits. coinMRuntime.processing prevents overlapping CM DB work.
+		go coinmexecution.RunCoinMProtected(func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			coinmexecution.ReportCoinMScheduler(coinmexecution.StartCoinMTrade(ctx))
+		})
 		feature.RunSpotQuantProtected(func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
