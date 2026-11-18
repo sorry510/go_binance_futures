@@ -63,6 +63,52 @@ func (p *Processor) configForEntry(symbol, side string) (coinmquant.SymbolView, 
 	}
 	return cfg, nil
 }
+
+// Re-read all entry-critical settings after remote DAPI preflight. The
+// Runner already verifies its signal snapshot, but Spec/TradeSettings/Mark/
+// Available/Query may block long enough for a user to edit STOP/TP or budget.
+// Never submit a stale signal under a different trading configuration.
+func (p *Processor) recheckOpenConfiguration(symbol, side string, original coinmquant.SymbolView) error {
+	fresh, err := p.configForEntry(symbol, side)
+	if err != nil {
+		return fmt.Errorf("COIN-M entry gate changed during preflight: %w", err)
+	}
+	if fresh.ID != original.ID || fresh.Enable != original.Enable ||
+		fresh.ContractType != original.ContractType || fresh.ContractSize != original.ContractSize ||
+		fresh.MarginAsset != original.MarginAsset || fresh.MarginType != original.MarginType ||
+		fresh.BudgetUSD != original.BudgetUSD || fresh.Leverage != original.Leverage ||
+		fresh.TickSize != original.TickSize || fresh.Profit != original.Profit ||
+		fresh.Loss != original.Loss || fresh.Strategy != original.Strategy ||
+		fresh.Technology != original.Technology {
+		return errors.New("COIN-M entry configuration changed during signed preflight; discard old signal")
+	}
+	if err := coinMAutoProtectionReady(fresh.DeliverySymbols); err != nil {
+		return fmt.Errorf("COIN-M entry protection no longer executable: %w", err)
+	}
+	return nil
+}
+
+// This branch is used only when a local OPEN intent is already durable
+// but the exchange POST has definitely not happened. Keep the client ID
+// reserved and mark its cycle terminal so it cannot block subsequent signals.
+func (p *Processor) rejectUnsentOpen(clientID string, positionID int64) error {
+	tx, err := p.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	now := time.Now().UnixMilli()
+	if _, err = tx.Raw("UPDATE coin_m_managed_orders SET status='REJECTED',updated_at=? WHERE client_order_id=? AND position_id=? AND status='PENDING_SUBMIT'",
+		now, clientID, positionID).Exec(); err != nil {
+		return err
+	}
+	if _, err = tx.Raw("UPDATE coin_m_managed_positions SET status='CANCELED',updated_at=?,closed_at=? WHERE id=? AND status='PENDING_OPEN'",
+		now, now, positionID).Exec(); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 func (p *Processor) preflight(ctx context.Context, symbol, side, contracts, typ, price string, spec feature.CoinMPerpetualSpec) error {
 	if spec.Symbol != symbol || spec.ContractType != "PERPETUAL" {
 		return errors.New("COIN-M fresh perpetual contract metadata differs")
@@ -116,6 +162,11 @@ func (p *Processor) Open(ctx context.Context, req OpenRequest) (models.CoinMMana
 	}
 	cfg, err := p.configForEntry(req.Symbol, req.PositionSide)
 	if err != nil {
+		return models.CoinMManagedOrder{}, err
+	}
+	// Processor.Open can be used outside the automated Runner. It must
+	// enforce the same protective-order preconditions itself.
+	if err = coinMAutoProtectionReady(cfg.DeliverySymbols); err != nil {
 		return models.CoinMManagedOrder{}, err
 	}
 	spec, err := p.API.Spec(ctx, req.Symbol)
@@ -213,6 +264,12 @@ func (p *Processor) Open(ctx context.Context, req OpenRequest) (models.CoinMMana
 	if remote != nil {
 		return models.CoinMManagedOrder{}, errors.New("COIN-M client ID exists remotely but is not owned by local ledger")
 	}
+	// Final read AFTER all DAPI preflight network calls and BEFORE any new
+	// ownership records. Reject all changes, even if the new setting is
+	// still valid: the signal/preflight was calculated for the old version.
+	if err = p.recheckOpenConfiguration(req.Symbol, req.PositionSide, cfg); err != nil {
+		return models.CoinMManagedOrder{}, err
+	}
 	now := time.Now().UnixMilli()
 	tx, err := p.DB.Begin()
 	if err != nil {
@@ -248,6 +305,16 @@ func (p *Processor) Open(ctx context.Context, req OpenRequest) (models.CoinMMana
 		_ = p.updateAck(err, req.ClientOrderID, nil)
 		local, _ := loadOrder(p.DB, req.ClientOrderID)
 		return local, fmt.Errorf("%w: local COIN-M intent persisted but context cancelled: %v", ErrUncertain, err)
+	}
+	// One final check immediately before the first POST. If the config was
+	// edited during local transaction creation, this is a proven UNSENT
+	// intent: safely mark it terminal rather than leave a phantom OPEN.
+	if err = p.recheckOpenConfiguration(req.Symbol, req.PositionSide, cfg); err != nil {
+		if e := p.rejectUnsentOpen(req.ClientOrderID, posID); e != nil {
+			return models.CoinMManagedOrder{}, fmt.Errorf("COIN-M entry settings changed; failed to mark unsent order canceled: %w (original: %v)", e, err)
+		}
+		local, _ := loadOrder(p.DB, req.ClientOrderID)
+		return local, fmt.Errorf("COIN-M entry was not submitted due to configuration edit: %w", err)
 	}
 	ack, postErr := p.API.Create(ctx, sent)
 	if postErr != nil {

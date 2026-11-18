@@ -123,6 +123,7 @@ func init() {
 
 	// CM-3: COIN-M local ledger read-only (not live wallet/trading).
 	web.Router("/coin-m/wallet", &controllers.CoinMQuantController{}, "get:GetWallet")
+	web.Router("/coin-m/runtime-status", &controllers.CoinMQuantController{}, "get:GetRuntimeSummary")
 	web.Router("/coin-m/positions", &controllers.CoinMQuantController{}, "get:ListPositions")
 	web.Router("/coin-m/positions/:id", &controllers.CoinMQuantController{}, "get:GetPositionDetail")
 	web.Router("/coin-m/orders", &controllers.CoinMQuantController{}, "get:ListOrders")

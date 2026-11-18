@@ -48,6 +48,10 @@ Open `http://<server-ip>:<web.port>/zmkm/index.html` and use the left-hand menu 
 | Futures Trading → Strategy Templates | Create and maintain technical-indicator and strategy-method templates |
 | Futures Trading → Test Results | Search real-time simulated trades by symbol and date |
 | Futures Trading → Historical Backtest | Replay strategies on historical 1m bars, Funding, and MarketCondition; Standard 1m and Adaptive Resolution, trades, equity curves, audit events, and drill-down statistics |
+| COIN-M Futures → COIN-M Symbols | USD-inverse perpetual contracts, per-symbol budget/leverage/STOP/TP, LONG/SHORT/CLOSE strategy and entry switches; deploying with both gates enabled can submit live orders |
+| COIN-M Futures → Local Account | Read-only Managed cycles, real Fills, asset-separated BTC/ETH PnL and independent read-only COIN-M wallet balances |
+| COIN-M Futures → Strategy Templates | Dedicated four-direction COIN-M templates and indicators, separate from USD-M and Spot |
+| COIN-M Futures → Positions & Controlled Trading | Local runtime/Managed inventory and unsettled orders, no manual submit/cancel/close endpoints; [documentation](10-coin-m-futures.md) |
 | Spot Trading → Spot Trading | Independent Spot symbol configuration, LONG / CLOSE_LONG strategies, indicators, filtering, and enable switches |
 | Spot Trading → Local Spot Account | Locally managed positions, orders, actual exchange Fills, and PnL by quote asset; full net PnL is unavailable with stale prices or unvalued fees |
 | Spot Trading → Spot Strategy Templates | Spot-specific indicators and strategy templates, separate from Futures |

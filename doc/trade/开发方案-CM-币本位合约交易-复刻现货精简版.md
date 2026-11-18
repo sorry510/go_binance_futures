@@ -1,6 +1,6 @@
 # 开发方案 CM · 币本位合约交易（复刻 06 现货最终精简版）
 
-> 方案日期：2026-11-17。当前状态（2026-11-18）：**CM-0～CM-6 已完成源码与离线测试**；CM-6 已将 COIN-M Runner 接入现有 2 秒调度，支持双开关、先恢复后出场再开仓、独立 DAPI Kline、保护单及重启幂等。**CM-7 尚未实施**；实际部署数据库未升级，也未进行真实 COIN-M 签名下单或实盘验收。
+> 方案日期：2026-11-17。当前状态（2026-11-18）：**CM-0～CM-7 已完成源码、四页面与隔离 Fake/SQLite 测试，前后端构建及静态同步通过**；CM-7 新增运行状态只读面板、完整 LONG/SHORT Fake 生命周期和中英双语 README。**实际 MySQL 8 v27 迁移、Demo/Testnet/主网签名交易、私有 WS 和 Algo 现场验收仍未执行；页面手动受控交易未开放，不得直接认定生产可用。**
 >
 > 参考：已落地的 Spot 06-0～06-7 自动交易及四页面结构；现有 U 本位合约策略、持仓、订单与成交链路。源码数据库版本已升级至 v27（CM-1）；实际部署数据库需要后续备份、维护窗口和人工执行 `sync db`，未触及生产库。
 
@@ -116,7 +116,7 @@ CM-1 已实现 **源码 Schema v27**：基于 v26，使用独立 Go 迁移方法
 | CM-4（已完成） | 独立持仓周期、订单/Fill 只读汇总，按币本位 mark 计算 inverse PnL，参考 USD 估值、结算资产分类汇总、DAPI 钱包只读 | [Code Review](CODE_REVIEW_CM-4.md)；[首次复审 F1](CODE_REVIEW_CM-4-rereview.md) 已在 [第二轮复审](CODE_REVIEW_CM-4-rereview-2.md) 中修复并通过 11 组证据异常探针与 87 包离线回归；Fill 实际采集、签名 WS、下单留待 CM-5，真实 MySQL 与实盘验收尚未执行 |
 | CM-5（源码/离线已完成） | 独立 COIN-M DAPI 普通订单、真实 Fill、私有 User WS、双 STOP/TP Algo 保护单、部分成交与不确定响应恢复 | [Code Review](CODE_REVIEW_CM-5.md)、[独立复审](CODE_REVIEW_CM-5-rereview.md)、[整改复审](CODE_REVIEW_CM-5-rereview-2.md)：修复 O2 满页证据状态、O3 保护单类型校验，88 包 Go 测试、4 包 5 次重复 Gate、Race Detector、Vet、构建通过；CM-5 当时未接入自动调度（CM-6 已完成源码接线），没有真实 Testnet/Mainnet 发单或执行迁移 |
 | CM-6（源码/离线已完成） | 复用现有 2 秒调度；独立 DAPI Kline 策略、双开关、LONG/SHORT、Managed 出场优先、STOP/TP 和不确定订单恢复 | [Code Review](CODE_REVIEW_CM-6.md)、[首次复审 F7/P1](CODE_REVIEW_CM-6-rereview.md)、[第二轮整改复审](CODE_REVIEW_CM-6-rereview-2.md)：修复 STOP/TP 配置竞态并通过 9 组注入场景、88 包离线测试、核心包 5 次重复测试、Race、Vet、Build；真实 Testnet、MySQL 8 和实盘验收仍未进行 |
-| CM-7 | 完整页面、README 中英双语、端到端测试、发布前检查 | Build→dist→static；Go 测试、离线回归；明确真实环境验收仍未执行 |
+| CM-7（源码/离线已完成） | 完成四页面只读观察与状态面板、中文/英文 README、LONG/SHORT 完整 Fake 生命周期、上线前核查清单 | [Code Review](CODE_REVIEW_CM-7.md)、[首次复审 F8/P1](CODE_REVIEW_CM-7-rereview.md)、[整改复审](CODE_REVIEW_CM-7-rereview-2.md)：Processor 签名预检期保护配置竞态已补校验，60 组回归；88 包 Go 测试、核心包 5 次回归、Race、Vet、Build、前端 typecheck/build、dist→static 通过；真实 DAPI/WS、MySQL 8 和实盘验收未执行，页面手动受控写操作未开放 |
 
 验收重点：相同 signal 不重复提交；合约数量不误当币数量；不同 marginAsset 的盈亏不混加；错误价格/规则/余额时拒绝交易；数据库或签名 WS 故障时不发新开仓；已有 U 本位/Spot/Lead 行为不变；升级 Schema 不会自动开关。
 
