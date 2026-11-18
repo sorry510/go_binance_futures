@@ -1,1 +1,0 @@
-import{_ as o}from"./account.vue_vue_type_script_setup_true_lang-DkVJrfYq.js";import{x as e,W as r,o as n}from"./index-B0DzkH4H.js";import"./coinM-DJtjS9HK.js";const l=e({name:"CoinMControlledTrade",__name:"controlledTrade",setup(t){return(a,c)=>(n(),r(o,{controlled:""}))}});export{l as default};

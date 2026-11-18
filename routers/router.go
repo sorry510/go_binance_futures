@@ -122,6 +122,7 @@ func init() {
 	web.Router("/test-strategy-results/test/:symbol", &controllers.TestStrategyResultController{}, "post:TestStrategyRule") // 测试策略结果的某个平仓测试是否符合条件
 
 	// CM-3: COIN-M local ledger read-only (not live wallet/trading).
+	web.Router("/coin-m/wallet", &controllers.CoinMQuantController{}, "get:GetWallet")
 	web.Router("/coin-m/positions", &controllers.CoinMQuantController{}, "get:ListPositions")
 	web.Router("/coin-m/positions/:id", &controllers.CoinMQuantController{}, "get:GetPositionDetail")
 	web.Router("/coin-m/orders", &controllers.CoinMQuantController{}, "get:ListOrders")
