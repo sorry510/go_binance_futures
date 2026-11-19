@@ -20,6 +20,7 @@ type Engine struct {
 	ResolutionProviderFactory    ResolutionProviderFactory
 	ResolutionActivity           func(string)
 	disableStandardOptimizations bool
+	disableAdaptiveOptimizations bool // regression comparison against the BT-1 execution path
 }
 
 func (engine Engine) Run(ctx context.Context, dataset Dataset, strategy StrategySnapshot, config RunConfig) (Result, error) {
@@ -63,6 +64,9 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 	}
 	if mode == ResolutionModeStandard && !engine.disableStandardOptimizations {
 		environment.enableStandardOptimizations(strategy.StrategyJSON)
+	} else if mode == ResolutionModeAdaptive && !engine.disableAdaptiveOptimizations {
+		environment.enableStandardOptimizations(strategy.StrategyJSON)
+		environment.adaptiveOptimized = true
 	}
 	execution := dataset.Bars[BarSeriesKey(dataset.Symbol, dataset.ExecutionInterval)]
 	startIndex := sort.Search(len(execution), func(i int) bool { return execution[i].CloseTime >= dataset.StartTime })
@@ -76,6 +80,9 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 	}
 	result := Result{DatasetID: dataset.DatasetID, DatasetSpecHash: dataset.DatasetSpecHash, DataHash: dataset.DataHash, StrategyVersion: strategy.Version, EngineVersion: engineVersion, MarketConditionModel: MarketConditionModel, ResolutionMode: mode, ResolutionModel: resolutionModel, Trades: []Trade{}, Events: []AuditEvent{}, Equity: make([]EquityPoint, 0, len(bars))}
 	adaptiveState := adaptiveRunState{factory: engine.ResolutionProviderFactory, activity: engine.ResolutionActivity}
+	if mode == ResolutionModeAdaptive {
+		adaptiveState.prepareCloseProfiles(rules)
+	}
 	defer adaptiveState.close()
 	cash := config.InitialEquity
 	peak := cash

@@ -50,6 +50,12 @@ type historicalEnvironment struct {
 	indicatorTasksScratch    []indicatorTask
 	indicatorResultsScratch  []indicatorTaskResult
 	indicatorParallelScratch []int
+	// BT-2: cache completed-minute prefixes once per adaptive replay minute.
+	intrabarMinuteOpen int64
+	intrabarReady      bool
+	intrabarPrefixes   map[string]intrabarPrefix
+	intrabarOverlays   map[string]Bar
+	adaptiveOptimized  bool
 }
 
 func newHistoricalEnvironment(dataset Dataset, technologyJSON string) (*historicalEnvironment, error) {
@@ -124,13 +130,32 @@ func (builder *historicalEnvironment) Build(asOf int64, position *Position, cash
 // minute. Higher-interval current bars are reconstructed from completed 1m
 // bars plus this partial minute, so no future part of the current bar leaks in.
 func (builder *historicalEnvironment) BuildIntrabar(asOf int64, partialMinute Bar, position *Position, cash float64, config RunConfig) (map[string]interface{}, int, error) {
-	overlays, err := buildIntrabarOverlays(builder.dataset, partialMinute, asOf)
+	if !builder.adaptiveOptimized {
+		overlays, err := buildIntrabarOverlays(builder.dataset, partialMinute, asOf)
+		if err != nil {
+			return nil, 0, err
+		}
+		clone := *builder
+		clone.overlays = overlays
+		return clone.build(asOf, position, cash, config)
+	}
+	overlays, err := builder.cachedIntrabarOverlays(partialMinute, asOf)
 	if err != nil {
 		return nil, 0, err
 	}
-	clone := *builder
-	clone.overlays = overlays
-	return clone.build(asOf, position, cash, config)
+	// The minute-close rolling ticker cache belongs to a different partial
+	// bar and must not be used for the earlier intraminute price.
+	prevOverlays, prevTicker, prevMinuteAsOf := builder.overlays, builder.tickerStatsCache, builder.minuteCloseCurrentAsOf
+	prevConditionIndex, prevConditionAsOf, prevConditionReady := builder.marketConditionIndex, builder.marketConditionAsOf, builder.marketConditionReady
+	builder.overlays = overlays
+	builder.tickerStatsCache = nil
+	builder.minuteCloseCurrentAsOf = 0
+	env, condition, buildErr := builder.build(asOf, position, cash, config)
+	builder.overlays = prevOverlays
+	builder.tickerStatsCache = prevTicker
+	builder.minuteCloseCurrentAsOf = prevMinuteAsOf
+	builder.marketConditionIndex, builder.marketConditionAsOf, builder.marketConditionReady = prevConditionIndex, prevConditionAsOf, prevConditionReady
+	return env, condition, buildErr
 }
 
 // BuildMinuteClose mirrors the live environment at a completed replay minute without

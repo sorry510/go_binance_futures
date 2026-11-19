@@ -440,6 +440,13 @@ func (builder *historicalEnvironment) runIndicatorTasks(tasks []indicatorTask) [
 	parallel := builder.indicatorParallelScratch[:0]
 	for i := range tasks {
 		if !tasks[i].cacheable {
+			// Current-bar fast paths are validated for 1m-close replay, not
+			// arbitrary 1s/trade partial bars. Preserve the exact legacy
+			// calculation for adaptive intrabar conditions.
+			if builder.adaptiveOptimized {
+				results[i].value, results[i].err = calculateIndicatorValue(tasks[i])
+				continue
+			}
 			switch {
 			case tasks[i].group == "ema" && tasks[i].windowStart > 0:
 				results[i].value, results[i].err = builder.calculateCurrentEMAValue(tasks[i])

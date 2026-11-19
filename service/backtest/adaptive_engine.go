@@ -18,11 +18,32 @@ import (
 type ResolutionProviderFactory func() (historicalmarket.ResolutionProvider, error)
 
 type adaptiveRunState struct {
-	factory  ResolutionProviderFactory
-	provider historicalmarket.ResolutionProvider
-	evidence []historicalmarket.ResolutionEvidence
-	stats    ResolutionStats
-	activity func(string)
+	factory       ResolutionProviderFactory
+	provider      historicalmarket.ResolutionProvider
+	evidence      []historicalmarket.ResolutionEvidence
+	stats         ResolutionStats
+	activity      func(string)
+	closeProfiles [2]closeRuleROIProfile // LONG, SHORT; compiled once for each run
+	profilesReady bool
+}
+
+// prepareCloseProfiles reuses the existing conservative ROI dependency analyzer.
+// These profiles are immutable for the duration of one strategy snapshot.
+func (state *adaptiveRunState) prepareCloseProfiles(rules []Rule) {
+	state.closeProfiles[0] = analyzeCloseRuleROIProfile(rules, "LONG")
+	state.closeProfiles[1] = analyzeCloseRuleROIProfile(rules, "SHORT")
+	state.profilesReady = true
+}
+
+func (state *adaptiveRunState) closeProfile(rules []Rule, side string) closeRuleROIProfile {
+	if state.profilesReady {
+		if side == "SHORT" {
+			return state.closeProfiles[1]
+		}
+		return state.closeProfiles[0]
+	}
+	// Keep direct evaluateROIClose callers in legacy tests functional.
+	return analyzeCloseRuleROIProfile(rules, side)
 }
 
 type adaptiveCloseDecision struct {
@@ -261,7 +282,7 @@ func (state *adaptiveRunState) evaluateROIClose(
 	// the whole minute. Prove that property before doing any high-resolution I/O:
 	// if the rule cannot be true anywhere inside the 1m ROI range, there is
 	// nothing for 1s/trades to resolve.
-	profile := analyzeCloseRuleROIProfile(rules, position.Side)
+	profile := state.closeProfile(rules, position.Side)
 	var stableEnv map[string]interface{}
 	stableCondition := 0
 	if profile.Eligible && (!dataset.MarketConditionRequired || !hasMarketConditionInRange(dataset.MarketConditions, bar.OpenTime, bar.CloseTime)) {
