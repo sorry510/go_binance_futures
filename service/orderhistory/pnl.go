@@ -34,6 +34,11 @@ func (s Store) symbolPrices(ctx context.Context, positions []models.FuturesManag
 			names = append(names, p.Symbol)
 		}
 	}
+	// BNB commission estimates use the current, locally stored BNBUSDT
+	// snapshot. Fetch it in this existing SQL query (no extra round trip).
+	if !seen["BNBUSDT"] {
+		names = append(names, "BNBUSDT")
+	}
 	prices := make(map[string]symbolQuote, len(names))
 	if len(names) == 0 {
 		return prices, nil

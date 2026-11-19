@@ -235,13 +235,24 @@ func (ctrl *OrderController) Anomalies() {
 		ctrl.respondError(400, "invalid limit")
 		return
 	}
+	// Optional read-only presentation split. Legacy callers retain old semantics.
+	var excludeSettlement bool
+	switch strings.ToLower(strings.TrimSpace(ctrl.GetString("exclude_settlement_pending"))) {
+	case "", "0", "false":
+	case "1", "true":
+		excludeSettlement = true
+	default:
+		ctrl.respondError(400, "invalid exclude_settlement_pending")
+		return
+	}
 	result, err := (orderhistory.Store{}).Anomalies(ctrl.Ctx.Request.Context(), orderhistory.AnomalyFilter{
-		AccountID:    ctrl.GetString("account_id"),
-		Owner:        ctrl.GetString("owner"),
-		Symbol:       ctrl.GetString("symbol"),
-		PositionSide: ctrl.GetString("position_side"),
-		Category:     ctrl.GetString("category"),
-		Page:         page, Limit: limit,
+		AccountID:                ctrl.GetString("account_id"),
+		Owner:                    ctrl.GetString("owner"),
+		Symbol:                   ctrl.GetString("symbol"),
+		PositionSide:             ctrl.GetString("position_side"),
+		Category:                 ctrl.GetString("category"),
+		ExcludeSettlementPending: excludeSettlement,
+		Page:                     page, Limit: limit,
 	})
 	if err != nil {
 		if errors.Is(err, orderhistory.ErrInvalidQuery) {

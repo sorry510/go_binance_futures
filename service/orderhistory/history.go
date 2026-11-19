@@ -132,6 +132,12 @@ type Position struct {
 	TotalPnL                *string    `json:"total_pnl"`
 	DisplayReturnPct        *string    `json:"display_return_pct"`
 	DisplayPnLAsset         string     `json:"display_pnl_asset,omitempty"`
+	// These are indicative values only, never an exchange-certified settlement.
+	BNBFeeEstimated      bool    `json:"bnb_fee_estimated,omitempty"`
+	EstimatedFeeUSDT     *string `json:"estimated_fee_usdt,omitempty"`
+	EstimatedNetPnL      *string `json:"estimated_net_pnl,omitempty"`
+	BNBFeePriceUSDT      *string `json:"bnb_fee_price_usdt,omitempty"`
+	BNBFeePriceUpdatedAt int64   `json:"bnb_fee_price_updated_at,omitempty"`
 }
 
 // ManagedOrderView is an intentional public response allowlist. SourceRef
@@ -560,12 +566,27 @@ func (s Store) project(ctx context.Context, positions []models.FuturesManagedPos
 	result := make([]Position, 0, len(positions))
 	details := map[int64][]Order{}
 	now := s.now().UnixMilli()
+	// Reuse the same local symbols snapshot for all BNB fees in this request.
+	// This is a current-price estimate, not a historical exchange valuation.
+	bnbQuote := prices["BNBUSDT"]
 	for _, p := range positions {
 		if err := ctx.Err(); err != nil {
 			return nil, nil, err
 		}
 		summary, children := summarize(p, ordersByID[p.ID], fillsByID[p.ID], includeFills, now, t0)
 		applyPricePnL(p, &summary, prices[p.Symbol])
+		// A separate execution proof may allow indicative BNB valuation even
+		// when the formally approved history-certification T0 is absent.
+		// It never changes the official settlement/certified profit fields.
+		proof := summary
+		if p.Status == "closed" && p.SettlementStatus == "incomplete" &&
+			(summary.IncompleteReason == "history_not_activated" ||
+				summary.IncompleteReason == "pre_activation_position_cycle") {
+			proof, _ = summarize(p, ordersByID[p.ID], fillsByID[p.ID], false, now, p.CreatedAt)
+		}
+		if p.HistoryCompletenessOverride == "" {
+			applyBNBFeeEstimate(p, &summary, proof, fillsByID[p.ID], bnbQuote)
+		}
 		summary.SystemCompleteness = summary.Completeness
 		summary.SystemIncompleteReason = summary.IncompleteReason
 		summary.SystemStatus = p.Status

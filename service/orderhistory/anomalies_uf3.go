@@ -15,8 +15,11 @@ type AnomalyFilter struct {
 	Symbol       string
 	PositionSide string
 	Category     string
-	Page         int
-	Limit        int
+	// Presentation-only: exclude financially incomplete closed cycles from
+	// the default *execution anomaly* count, not from the dedicated filter.
+	ExcludeSettlementPending bool
+	Page                     int
+	Limit                    int
 }
 type AnomalyItem struct {
 	Category         string  `json:"category" orm:"column(category)"`
@@ -46,6 +49,9 @@ type AnomalyPage struct {
 	// Not the system health summary: this can include aged orders and incomplete
 	// settlements, and can be filtered by account, Owner and category.
 	Scope string `json:"scope"`
+	// Separate financial-verification facts: never convert BNB or mark settled.
+	SettlementPendingTotal int64 `json:"settlement_pending_total"`
+	WithBNBCommissionTotal int64 `json:"with_bnb_commission_total"`
 }
 
 var validAnomalyCategories = map[string]bool{
@@ -156,6 +162,46 @@ SELECT CASE WHEN a.status='execution_uncertain' THEN 'proposal_execution_uncerta
  WHERE a.status IN ('execution_uncertain','protection_failed')
 `
 
+// A financially incomplete cycle is not necessarily a failed order.
+// BNB presence is a factual fee-asset count, NOT evidence that conversion
+// alone is the reason for an otherwise incomplete settlement.
+func (s Store) anomalySettlementCounts(ctx context.Context, q AnomalyFilter) (int64, int64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, 0, err
+	}
+	where := []string{"p.account_id=?", "p.status='closed'", "p.settlement_status='incomplete'"}
+	args := []any{q.AccountID}
+	if q.Owner != "" {
+		where = append(where, "p.owner=?")
+		args = append(args, q.Owner)
+	}
+	if q.Symbol != "" {
+		where = append(where, "p.symbol=?")
+		args = append(args, q.Symbol)
+	}
+	if q.PositionSide != "" {
+		where = append(where, "p.position_side=?")
+		args = append(args, q.PositionSide)
+	}
+	type counts struct {
+		Pending int64 `orm:"column(pending)"`
+		WithBNB int64 `orm:"column(with_bnb)"`
+	}
+	var row counts
+	err := s.db().Raw(`SELECT COUNT(*) pending,
+	COALESCE(SUM(CASE WHEN EXISTS (
+		SELECT 1 FROM futures_trade_fills f WHERE f.market='USDM'
+		AND f.account_id=p.account_id AND f.position_id=p.id
+		AND f.symbol=p.symbol AND f.commission_asset='BNB'
+		AND f.commission<>0
+	) THEN 1 ELSE 0 END),0) with_bnb
+	FROM futures_managed_positions p WHERE `+strings.Join(where, " AND "), args...).QueryRow(&row)
+	if err != nil {
+		return 0, 0, fmt.Errorf("read financially incomplete cycles: %w", err)
+	}
+	return row.Pending, row.WithBNB, nil
+}
+
 func (s Store) Anomalies(ctx context.Context, q AnomalyFilter) (AnomalyPage, error) {
 	q, err := q.validate()
 	if err != nil {
@@ -179,6 +225,9 @@ func (s Store) Anomalies(ctx context.Context, q AnomalyFilter) (AnomalyPage, err
 		where = append(where, "position_side=?")
 		params = append(params, q.PositionSide)
 	}
+	if q.Category == "" && q.ExcludeSettlementPending {
+		where = append(where, "category<>'settlement_incomplete'")
+	}
 	if q.Category == "reconcile_required" {
 		where = append(where, "category IN ('managed_position_reconcile','managed_order_reconcile')")
 	} else if q.Category != "" {
@@ -188,6 +237,12 @@ func (s Store) Anomalies(ctx context.Context, q AnomalyFilter) (AnomalyPage, err
 	condition := strings.Join(where, " AND ")
 	source := "(" + uf3AnomalyUnion + ") anomalies"
 	page := AnomalyPage{Page: q.Page, Limit: q.Limit, List: []AnomalyItem{}, Scope: "local_ledger_and_agent_proposals"}
+	if q.ExcludeSettlementPending || q.Category == "settlement_incomplete" {
+		page.SettlementPendingTotal, page.WithBNBCommissionTotal, err = s.anomalySettlementCounts(ctx, q)
+		if err != nil {
+			return AnomalyPage{}, err
+		}
+	}
 	if err = s.db().Raw("SELECT COUNT(*) FROM "+source+" WHERE "+condition, params...).QueryRow(&page.Total); err != nil {
 		return AnomalyPage{}, fmt.Errorf("read anomalies count: %w", err)
 	}
