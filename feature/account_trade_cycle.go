@@ -79,10 +79,9 @@ func mainTradeRunner(cfg *models.Config) *accountTradeRunner {
 			return binance.GetDepthAvgPriceContext(ctx, symbol, limit)
 		},
 		EnsureConfig: func(ctx context.Context, coin *models.Symbols) error {
-			// Main compatibility: the legacy path deliberately ignores the Binance
-			// config RPC error; Stage 4 Lead must fail closed instead.
-			UpdateSymbolTradeInfoContext(ctx, coin)
-			return nil
+			// Only new Main entries pass this gate. Exits use the unchanged
+			// ownership-based CLOSE path, even when account config RPCs fail.
+			return ensureMainOpenConfiguration(ctx, coin, cfg)
 		},
 		SubmitOpen:   submitAutoStrategyOpen,
 		SubmitClose:  submitManagedStrategyClose,

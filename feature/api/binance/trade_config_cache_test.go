@@ -2,6 +2,7 @@ package binance
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -38,7 +39,7 @@ func TestEnsureTradeConfigCachesIdenticalConfigAndRefreshesChangedConfig(t *test
 			_, _ = w.Write([]byte(`{"code":200,"msg":"success"}`))
 		case "/fapi/v1/leverage":
 			leverageCalls.Add(1)
-			_, _ = w.Write([]byte(`{"leverage":4,"maxNotionalValue":"1000000","symbol":"BTCUSDT"}`))
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"leverage":%s,"maxNotionalValue":"1000000","symbol":"BTCUSDT"}`, r.FormValue("leverage"))))
 		default:
 			t.Fatalf("unexpected path %s", r.URL.Path)
 		}

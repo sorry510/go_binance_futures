@@ -52,8 +52,16 @@ func EnsureTradeConfigContext(ctx context.Context, symbol string, marginType fut
 		if marginErr != nil && !isMarginTypeAlreadyConfigured(marginErr) {
 			return nil, marginErr
 		}
-		if _, leverageErr := SetLeverageContext(ctx, symbol, leverage); leverageErr != nil {
+		leverageAck, leverageErr := SetLeverageContext(ctx, symbol, leverage)
+		if leverageErr != nil {
 			return nil, leverageErr
+		}
+		// A successful HTTP status alone is not proof that the requested
+		// leverage was applied to the intended contract. Never cache an
+		// empty/mismatched Binance response as safe for a new OPEN.
+		if leverageAck == nil || leverageAck.Leverage != leverage ||
+			!strings.EqualFold(leverageAck.Symbol, symbol) {
+			return nil, fmt.Errorf("futures leverage confirmation mismatch for %s", symbol)
 		}
 		runtimeTradeConfigCache.Lock()
 		runtimeTradeConfigCache.items[symbol] = runtimeTradeConfigEntry{

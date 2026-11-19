@@ -884,15 +884,33 @@ func buildBatchInsertFuturesSymbolsSQL(items []futuresSymbolInsert) (string, []i
 
 // 更新币种信息
 func UpdateSymbolTradeInfo(symbols *models.Symbols) {
-	UpdateSymbolTradeInfoContext(context.Background(), symbols)
+	if err := UpdateSymbolTradeInfoContext(context.Background(), symbols); err != nil {
+		logs.Warning("Main futures symbol trade config not confirmed: ", err)
+	}
 }
 
-func UpdateSymbolTradeInfoContext(ctx context.Context, symbols *models.Symbols) {
-	marginType := futures.MarginTypeIsolated
-	if symbols.MarginType == "CROSSED" {
-		marginType = futures.MarginTypeCrossed
+// The exchange must confirm margin mode AND leverage before a new OPEN.
+// A failed or unknown result is not evidence of correct account settings.
+func UpdateSymbolTradeInfoContext(ctx context.Context, symbols *models.Symbols) error {
+	if ctx == nil || symbols == nil {
+		return fmt.Errorf("missing Main futures trade config context or symbol")
 	}
-	_ = binance.EnsureTradeConfigContext(ctx, symbols.Symbol, marginType, int(symbols.Leverage))
+	var marginType futures.MarginType
+	switch symbols.MarginType {
+	case "ISOLATED":
+		marginType = futures.MarginTypeIsolated
+	case "CROSSED":
+		marginType = futures.MarginTypeCrossed
+	default:
+		return fmt.Errorf("invalid Main futures margin mode for %s", symbols.Symbol)
+	}
+	if symbols.Leverage <= 0 || symbols.Leverage > int64(^uint(0)>>1) {
+		return fmt.Errorf("invalid Main futures leverage for %s", symbols.Symbol)
+	}
+	if err := binance.EnsureTradeConfigContext(ctx, symbols.Symbol, marginType, int(symbols.Leverage)); err != nil {
+		return fmt.Errorf("Main futures margin/leverage not confirmed for %s: %w", symbols.Symbol, err)
+	}
+	return nil
 }
 
 // 更新所有币种的资金费率信息
