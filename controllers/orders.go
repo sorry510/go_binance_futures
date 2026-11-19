@@ -191,6 +191,42 @@ func parseHistoryMillis(s string) (int64, error) {
 	}
 	return strconv.ParseInt(strings.TrimSpace(s), 10, 64)
 }
+
+// Anomalies is an authenticated, strictly read-only locator. Filtering
+// happens in SQL by account/Owner/category; it never calls the reconciler.
+func (ctrl *OrderController) Anomalies() {
+	if !ctrl.authorized() {
+		return
+	}
+	page, err := parseHistoryInt(ctrl.GetString("page"), 1)
+	if err != nil {
+		ctrl.respondError(400, "invalid page")
+		return
+	}
+	limit, err := parseHistoryInt(ctrl.GetString("limit"), 20)
+	if err != nil {
+		ctrl.respondError(400, "invalid limit")
+		return
+	}
+	result, err := (orderhistory.Store{}).Anomalies(ctrl.Ctx.Request.Context(), orderhistory.AnomalyFilter{
+		AccountID:    ctrl.GetString("account_id"),
+		Owner:        ctrl.GetString("owner"),
+		Symbol:       ctrl.GetString("symbol"),
+		PositionSide: ctrl.GetString("position_side"),
+		Category:     ctrl.GetString("category"),
+		Page:         page, Limit: limit,
+	})
+	if err != nil {
+		if errors.Is(err, orderhistory.ErrInvalidQuery) {
+			ctrl.respondError(400, "invalid anomaly filters")
+		} else {
+			ctrl.respondError(503, "managed order anomalies unavailable")
+		}
+		return
+	}
+	ctrl.success(result)
+}
+
 func (ctrl *OrderController) Get() {
 	if !ctrl.authorized() {
 		return
