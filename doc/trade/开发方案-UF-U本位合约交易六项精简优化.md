@@ -1,6 +1,6 @@
 # UF · U 本位合约交易六项精简优化开发方案
 
-> 日期：2026-11-18；2026-11-19 更新进度。审查基线：后端 `master`。当前进度：**UF-1～UF-5 均已完成源码与隔离回归测试**；UF-6 尚未实施。UF-3、UF-4、UF-5 分别实现只读异常定位、未开仓诊断、已核实实盘策略表现；前端均已构建并同步 `dist → static`。未操作生产数据库、运行服务或真实交易账户。
+> 日期：2026-11-18；2026-11-19 更新进度。审查基线：后端 `master`。当前进度：**UF-1～UF-6 均已完成源码与隔离回归测试**，全部六个阶段进入独立整体复审前的源码验收状态。UF-3～UF-5 分别实现只读异常定位、未开仓诊断和已核实实盘策略表现；UF-6 保留旧历史 API 并拆分分页/全量估值，前端构建并同步 `dist → static`。未操作生产数据库、运行服务或真实交易账户。
 >
 > 范围只涉及 **Main U 本位合约**；保留 Lead 的账户隔离、币本位 COIN-M、现货及既有订单归属。个人自用、最少改动、分阶段实现并复审。编号统一为 **UF-1～UF-6**。
 
@@ -13,7 +13,7 @@
 | **UF-3（源码/离线已完成）** | 异常订单一键定位 | P2 | [Code Review](CODE_REVIEW_UF-3.md)：只读 Main/Lead Managed 与 Agent Proposal 异常定位、无周期 OPEN、系统看板跳转；88 包测试、5 次回归、Race、Vet、Build、前端 typecheck/build 通过；真实环境未验收 |
 | **UF-4（源码/离线已完成）** | 为什么没有开仓 | P2 | [Code Review](CODE_REVIEW_UF-4.md)：Main 内存上限 200 条最近开仓判断、JWT 只读 API、页面按需每 15 秒刷新；88 包测试、5 次回归、Race、Vet、Build、前端 typecheck/build 和静态同步 PASS，真实环境未验收 |
 | **UF-5（源码/离线已完成）** | 实盘策略效果统计 | P2 | [Code Review](CODE_REVIEW_UF-5.md)：Main / auto_strategy 已结算且 REST Fill 已核实的净收益、胜率、PF、累计已结算净收益回撤；7/30 天、规则 Hash、USDT/USDC 独立、排除证据；88 包测试、五次回归、Race、Vet、Build、前端 typecheck/build PASS，真实环境未验收 |
-| **UF-6** | 订单历史性能优化 | P2 | 先记录 UF-5 前后的真实基准，精确比对计算结果 |
+| **UF-6（源码/离线已完成）** | 订单历史性能优化 | P2 | [Code Review](CODE_REVIEW_UF-6.md) / [原始复审 F1/P1](CODE_REVIEW_UF-6-rereview.md) / [F1 修复复测](CODE_REVIEW_UF-6-rereview-2.md)：旧接口兼容，独立全筛选收益汇总 + 当前页专用 API；SQLite 100/1,000/10,000 周期基线，第 2 页 10,000 周期从约 781ms 降至 5.76ms（不同轮次单次测量），旧新金额逐项相同；原复审发现误注释 /orders/anomalies P1，现已恢复并以真实 Beego 路由表验证，88 包测试、Race、Vet、Build、前端构建 PASS；UF-ALL 和生产 MySQL 未验收 |
 
 严格按此顺序提交，每个 UF 单独做 Code Review，通过之后进入下一阶段。允许独立写测试，但不能直接把六项耦合成一次改造。
 
@@ -128,4 +128,4 @@
 
 ## 十、开始方式
 
-当前已完成 **UF-1 → UF-2 → UF-3 → UF-4 → UF-5** 的源码与离线测试。下一阶段进行 **UF-6「订单历史查询性能」**。不为诊断和统计添加额外风险开关或新顶级菜单。
+当前 **UF-1 → UF-2 → UF-3 → UF-4 → UF-5 → UF-6** 的源码与离线回归测试已完成；UF-6 原独立复审的 F1/P1 路由注册问题已修复并重跑所有 Gate，整改证据见 [UF-6 rereview-2](CODE_REVIEW_UF-6-rereview-2.md)。**这不代表 UF-ALL 已通过**：下一步必须执行整体独立复审，再经单独授权进行真实 MySQL 8、ARM 和 Binance 账户验收。未获授权前不触发部署、数据库修改和真实交易。

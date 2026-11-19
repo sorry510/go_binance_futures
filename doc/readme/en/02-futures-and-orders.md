@@ -93,3 +93,12 @@ On **Futures Trading → Futures Orders**, expand **Verified live strategy perfo
 - **Net PnL = realized exchange PnL minus actual exchange commissions**. Profit factor is positive net PnL total divided by the absolute negative net PnL total; with no losing trades it is undefined, not infinity. Break-even trades are counted separately. Commissions in unrelated assets (e.g. BNB) with no verified conversion cause exclusion.
 - **USDT and USDC amounts are not added together**. The reported *cumulative settled net PnL drawdown* is a peak-to-trough **currency amount** calculated from closed, certified net PnL only, **not an account equity maximum drawdown**. Unrealized mark-to-market gains and funding fees are not part of the metric.
 - Presentation-only manual history edits do not authenticate Fills or change the verified performance calculation. This panel is strictly read-only: it does not place orders, reconcile exchange balances, or modify settlement markers.
+
+## Faster Futures Order Pages and Full-Filter PnL (UF-6)
+
+On **Futures Trading → Futures Orders**, the first query reads the current page and the entire filtered PnL as separate requests. Page 1→2→3 and changing the number of records per page **only retrieve the requested page**, without re-scanning every matching cycle. Changing account, Owner, symbol, side, status, settlement, or opening-date filters and pressing Search recomputes the full-filter PnL.
+
+- Explicit **Refresh**, or a successful bulk history change/deletion, forces the list and the full-filter summary to recalculate. The reused aggregate is an in-page browser snapshot, **not a live exchange account balance**.
+- The UI shows when the summary was **calculated** and when the newest underlying local **price snapshot** was last updated. Additional Fills or market-price updates may be reflected only after refreshing. A failed summary is shown as an error, never a fabricated zero.
+- Existing `GET /orders` consumers keep their complete legacy response by default. The new screen opts into `GET /orders?include_summary=false` for page-only reads and `GET /orders/summary` for the complete aggregate.
+- All values preserve the previous order-history calculation: realized price-spread PnL plus unrealized estimates based on local `symbols.close`, no commissions or funding, separate USDT/USDC totals and an explicit count of unpriceable cycles. This is **not the same metric** as UF-5's formally settled REST-certified net PnL.

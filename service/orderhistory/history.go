@@ -189,6 +189,18 @@ type Page struct {
 	PageVerifiedNet map[string]string          `json:"page_verified_net"`
 	FilteredPnL     map[string]ProfitBreakdown `json:"filtered_pnl"`
 	PNLUnpriced     int                        `json:"pnl_unpriced_count"`
+	SummaryIncluded bool                       `json:"summary_included"`
+}
+
+// DisplaySummary is the complete original all-filter PnL aggregation,
+// separated from the current page. The same project and sumDisplayedPnL
+// semantics are preserved; this never represents a REST-certified net profit.
+type DisplaySummary struct {
+	FilteredPnL    map[string]ProfitBreakdown `json:"filtered_pnl"`
+	PNLUnpriced    int                        `json:"pnl_unpriced_count"`
+	CalculatedAt   int64                      `json:"calculated_at"`
+	PriceUpdatedAt int64                      `json:"price_updated_at"`
+	Total          int64                      `json:"total"`
 }
 
 type Store struct {
@@ -324,9 +336,23 @@ func realExchangeID(o models.FuturesManagedOrder) string {
 }
 func closingIntent(v string) bool { return v == "close" || v == "take_profit" || v == "stop_loss" }
 
+// List preserves the old GET /orders contract including all-filter PnL.
 func (s Store) List(ctx context.Context, q Filter) (Page, error) {
+	return s.list(ctx, q, true)
+}
+
+// ListPageOnly never evaluates the entire filtered profit. Only callers
+// explicitly requesting include_summary=0 opt out of the legacy result.
+func (s Store) ListPageOnly(ctx context.Context, q Filter) (Page, error) {
+	return s.list(ctx, q, false)
+}
+
+func (s Store) list(ctx context.Context, q Filter, includeSummary bool) (Page, error) {
 	q, err := q.validated()
 	if err != nil {
+		return Page{}, err
+	}
+	if err = ctx.Err(); err != nil {
 		return Page{}, err
 	}
 	qs := batchScope(q, s.db())
@@ -334,7 +360,11 @@ func (s Store) List(ctx context.Context, q Filter) (Page, error) {
 	if err != nil {
 		return Page{}, err
 	}
-	page := Page{Total: total, Page: q.Page, Limit: q.Limit, List: []Position{}, PageVerifiedNet: map[string]string{}, FilteredPnL: map[string]ProfitBreakdown{}}
+	page := Page{
+		Total: total, Page: q.Page, Limit: q.Limit, List: []Position{},
+		PageVerifiedNet: map[string]string{}, FilteredPnL: map[string]ProfitBreakdown{},
+		SummaryIncluded: includeSummary,
+	}
 	if total == 0 {
 		return page, nil
 	}
@@ -343,7 +373,6 @@ func (s Store) List(ctx context.Context, q Filter) (Page, error) {
 	if err != nil {
 		return Page{}, err
 	}
-	// An out-of-range page still carries the PnL of the full filter.
 	page.List, _, err = s.project(ctx, positions, false)
 	if err != nil {
 		return Page{}, err
@@ -365,41 +394,87 @@ func (s Store) List(ctx context.Context, q Filter) (Page, error) {
 	for asset, net := range sums {
 		page.PageVerifiedNet[asset] = val(net)
 	}
-	// Sum every matching cycle, not just the current page. Keep the
-	// certified page-only financial audit above unchanged for compatibility.
+	if !includeSummary {
+		return page, nil
+	}
+	summary, err := s.summaryFromValidated(ctx, q, total, page.List)
+	if err != nil {
+		return Page{}, err
+	}
+	page.FilteredPnL = summary.FilteredPnL
+	page.PNLUnpriced = summary.PNLUnpriced
+	return page, nil
+}
+
+// Summary is a separate read-only endpoint and does not project the current
+// page. It preserves the exact old all-filter PnL projection (with quotes).
+func (s Store) Summary(ctx context.Context, q Filter) (DisplaySummary, error) {
+	q.Page, q.Limit = 1, 1
+	q, err := q.validated()
+	if err != nil {
+		return DisplaySummary{}, err
+	}
+	if err = ctx.Err(); err != nil {
+		return DisplaySummary{}, err
+	}
+	total, err := batchScope(q, s.db()).Count()
+	if err != nil {
+		return DisplaySummary{}, err
+	}
+	return s.summaryFromValidated(ctx, q, total, nil)
+}
+
+func (s Store) summaryFromValidated(ctx context.Context, q Filter, total int64, pageRows []Position) (DisplaySummary, error) {
+	result := DisplaySummary{
+		Total: total, FilteredPnL: map[string]ProfitBreakdown{}, CalculatedAt: s.now().UnixMilli(),
+	}
+	if total == 0 {
+		return result, nil
+	}
 	grouped := map[string]*profitAccumulator{}
-	if q.Page == 1 && int64(len(page.List)) == total {
-		page.PNLUnpriced = sumDisplayedPnL(page.List, grouped)
+	collect := func(items []Position) {
+		result.PNLUnpriced += sumDisplayedPnL(items, grouped)
+		for _, p := range items {
+			if p.CurrentPrice != nil && p.PriceUpdatedAt > result.PriceUpdatedAt {
+				result.PriceUpdatedAt = p.PriceUpdatedAt
+			}
+		}
+	}
+	if pageRows != nil && q.Page == 1 && int64(len(pageRows)) == total {
+		collect(pageRows)
 	} else {
 		const batchSize = 100
 		for offset := int64(0); offset < total; offset += batchSize {
 			if err := ctx.Err(); err != nil {
-				return Page{}, err
+				return DisplaySummary{}, err
 			}
 			var batch []models.FuturesManagedPosition
 			_, err := batchScope(q, s.db()).OrderBy("-created_at", "-id").
 				Limit(batchSize, offset).All(&batch)
 			if err != nil {
-				return Page{}, err
+				return DisplaySummary{}, err
 			}
 			if len(batch) == 0 {
 				break
 			}
 			items, _, err := s.project(ctx, batch, false)
 			if err != nil {
-				return Page{}, err
+				return DisplaySummary{}, err
 			}
-			page.PNLUnpriced += sumDisplayedPnL(items, grouped)
+			collect(items)
 		}
 	}
 	for asset, amounts := range grouped {
-		page.FilteredPnL[asset] = ProfitBreakdown{
+		result.FilteredPnL[asset] = ProfitBreakdown{
 			Realized:   displayProfitValue(amounts.realized),
 			Unrealized: displayProfitValue(amounts.unrealized),
 			Total:      displayProfitValue(amounts.total),
 		}
 	}
-	return page, nil
+	if err := ctx.Err(); err != nil {
+		return DisplaySummary{}, err
+	}
+	return result, nil
 }
 func (s Store) Details(ctx context.Context, account string, id int64) (Detail, error) {
 	if id <= 0 {

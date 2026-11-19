@@ -254,6 +254,43 @@ func (ctrl *OrderController) Anomalies() {
 	ctrl.success(result)
 }
 
+// Summary computes all-filter displayed PnL independently from pagination.
+// This is an indicative price-based valuation, not the UF-5 certified result.
+func (ctrl *OrderController) Summary() {
+	if !ctrl.authorized() {
+		return
+	}
+	start, err := parseHistoryMillis(ctrl.GetString("start_time"))
+	if err != nil {
+		ctrl.respondError(400, "invalid start_time")
+		return
+	}
+	end, err := parseHistoryMillis(ctrl.GetString("end_time"))
+	if err != nil {
+		ctrl.respondError(400, "invalid end_time")
+		return
+	}
+	filter := orderhistory.Filter{
+		AccountID:    ctrl.GetString("account_id"),
+		Owner:        ctrl.GetString("owner"),
+		Symbol:       ctrl.GetString("symbol"),
+		PositionSide: ctrl.GetString("position_side"),
+		Status:       ctrl.GetString("status"),
+		Settlement:   ctrl.GetString("settlement"),
+		StartTime:    start, EndTime: end,
+	}
+	result, err := (orderhistory.Store{}).Summary(ctrl.Ctx.Request.Context(), filter)
+	if err != nil {
+		if errors.Is(err, orderhistory.ErrInvalidQuery) {
+			ctrl.respondError(400, "invalid summary filters")
+		} else {
+			ctrl.respondError(503, "filtered order PnL summary unavailable")
+		}
+		return
+	}
+	ctrl.success(result)
+}
+
 func (ctrl *OrderController) Get() {
 	if !ctrl.authorized() {
 		return
@@ -284,7 +321,24 @@ func (ctrl *OrderController) Get() {
 		Status: ctrl.GetString("status"), Settlement: ctrl.GetString("settlement"),
 		StartTime: start, EndTime: end, Page: page, Limit: limit,
 	}
-	result, err := (orderhistory.Store{}).List(ctrl.Ctx.Request.Context(), filters)
+	// Legacy clients receive the identical all-filter aggregate by default.
+	// include_summary=0 opts into the fast page-only query. Other values fail
+	// closed so a typo never silently changes the public API contract.
+	includeSummary := true
+	switch strings.ToLower(strings.TrimSpace(ctrl.GetString("include_summary"))) {
+	case "", "1", "true":
+	case "0", "false":
+		includeSummary = false
+	default:
+		ctrl.respondError(400, "invalid include_summary")
+		return
+	}
+	var result orderhistory.Page
+	if includeSummary {
+		result, err = (orderhistory.Store{}).List(ctrl.Ctx.Request.Context(), filters)
+	} else {
+		result, err = (orderhistory.Store{}).ListPageOnly(ctrl.Ctx.Request.Context(), filters)
+	}
 	if err != nil {
 		if errors.Is(err, orderhistory.ErrInvalidQuery) {
 			ctrl.respondError(400, err.Error())
