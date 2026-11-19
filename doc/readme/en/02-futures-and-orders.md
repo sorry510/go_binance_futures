@@ -6,6 +6,18 @@
 
 The **Futures Trading → Futures Trading** page allows per-symbol configurations for technical indicators, strategy methods and templates, margin mode, USDT collateral, leverage, take-profit and stop-loss percentages, and enabled status. Every Futures symbol uses its own custom strategy; there is no strategy-type selector.
 
+### Global Futures Switch Semantics (UF-1)
+
+The **Configuration Center → Futures Trading → Enable Futures Trading** switch controls **NEW Main auto_strategy entries only**. When OFF:
+
+- Main no longer submits new \`auto_strategy\` OPEN orders.
+- Existing Main \`auto_strategy\` Managed positions still follow their normal strategy/TP/SL exit rules.
+- Outstanding owned orders continue order-status reconciliation, expiration handling and verified-Fill recovery.
+- Turning OFF **does not force close a position or cancel all protective orders**. CLOSE orders require their original strategy exit conditions.
+- When no Main auto_strategy work is outstanding, the system avoids additional authenticated account polling from this trading loop.
+
+The Main switch does not change independently scoped Lead, COIN-M or Spot entry permissions.
+
 ### Enabling Futures Trading
 
 1. In the **Configuration Center → Futures Trading** Card, turn on **Enable Futures Trading**.
@@ -60,6 +72,6 @@ No new automatic position is opened after this limit is reached. **Automatically
 
 ### Quantitative Trading Flow
 
-1. When Futures trading is enabled, the system continuously evaluates each symbol's custom strategy to decide whether to open or close a position.
+1. With the global Futures switch ON, the Main runner evaluates new entries using each symbol's strategy. Existing Main auto_strategy Managed positions may still exit by the original rules even when the global switch is OFF.
 2. With `LIMIT` entry orders, a pending order is placed. It may not fill, and the system cancels it after the configured timeout.
 3. After an entry fills successfully, its records are available under **Futures Orders** and **Futures Positions**.

@@ -99,9 +99,13 @@ func TestLead03NoPendingWorksWithCurrentSharedRunner(t *testing.T) {
 }
 
 func TestLead03MainSharedRunnerRemainsUntouched(t *testing.T) {
-	r := mainTradeRunner(&models.Config{})
-	if r.AccountID != binance.MainAccountID || r.LeadSymbols != nil ||
-		r.leadPendingSymbols != nil || !r.AllowNewOpens {
-		t.Fatalf("Main account mutated by Lead scope: %+v", r)
+	// UF-1: Main's entry switch is now an entry-only gate. Lead isolation
+	// remains identical for both OFF and ON Main configurations.
+	for _, enabled := range []int{0, 1} {
+		r := mainTradeRunner(&models.Config{FutureEnable: enabled})
+		if r.AccountID != binance.MainAccountID || r.LeadSymbols != nil ||
+			r.leadPendingSymbols != nil || r.AllowNewOpens != (enabled == 1) {
+			t.Fatalf("Main account mutated by Lead scope: enable=%d runner=%+v", enabled, r)
+		}
 	}
 }

@@ -16,6 +16,8 @@ import (
 	"go_binance_futures/types"
 
 	"github.com/adshao/go-binance/v2/futures"
+	"github.com/beego/beego/v2/client/orm"
+	"go_binance_futures/service/futuresownership"
 )
 
 // accountTradeRunner contains account-specific IO only. The strategy, order
@@ -52,15 +54,23 @@ type accountTradeRunner struct {
 }
 
 func mainTradeRunner(cfg *models.Config) *accountTradeRunner {
+	entryEnabled := cfg != nil && cfg.FutureEnable == 1
+	syncPositions := syncStrategyExitPositions
+	if !entryEnabled {
+		// With Main entries OFF, only auto_strategy work is authorized
+		// by the local gate. Do not expand this exception to new_coin_rush
+		// or funding_rate ownership managed by other independent features.
+		syncPositions = syncAutoStrategyOwnership
+	}
 	return &accountTradeRunner{
-		AccountID: binance.MainAccountID, Config: cfg, AllowNewOpens: true,
+		AccountID: binance.MainAccountID, Config: cfg, AllowNewOpens: entryEnabled,
 		LoadSymbols: GetAllSymbols,
 		SelectCoins: func(c *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) {
 			return selectConfiguredCoins(c, coins, scanner.SmartLocalV2ModeTrade), nil
 		},
 		ReadPositions:  GetTransformPositionsContext,
 		ReadOpenOrders: getTransformOpenOrdersContext,
-		SyncPositions:  syncStrategyExitPositions,
+		SyncPositions:  syncPositions,
 		CancelExpired:  cancelTimeoutOrder,
 		EvaluateEntry: func(coin *models.Symbols, _ []types.FuturesPosition) strategy.OpenResult {
 			return (line.TradeLineCustom{}).GetCanLongOrShort(strategy.OpenParams{Symbols: coin})
@@ -122,26 +132,71 @@ func (r *accountTradeRunner) validate() error {
 	return nil
 }
 
-// StartTrade retains the only production scheduling path. No Lead client is
-// constructed, no Lead SAPI request is made and no second WS is started.
+// mainAutoStrategyWorkNeeded reads the LOCAL Main managed ledger. With the
+// global entry switch OFF, do not poll DAPI when there is no owned work.
+// Checking both positions and nonterminal orders preserves recovery of a
+// partially filled/uncertain opening without claiming external positions.
+func mainAutoStrategyWorkNeeded(o orm.Ormer) (bool, error) {
+	if o == nil {
+		return false, fmt.Errorf("Main ownership ledger is unavailable")
+	}
+	var positions int64
+	if err := o.Raw(
+		"SELECT EXISTS(SELECT 1 FROM futures_managed_positions WHERE account_id=? AND owner=? AND managed_qty>0.000000000001 AND status IN ('active','suspended','reconcile_required'))",
+		"main", futuresownership.OwnerAutoStrategy,
+	).QueryRow(&positions); err != nil {
+		return false, fmt.Errorf("read Main managed positions: %w", err)
+	}
+	if positions > 0 {
+		return true, nil
+	}
+	var orders int64
+	if err := o.Raw(
+		"SELECT EXISTS(SELECT 1 FROM futures_managed_orders WHERE account_id=? AND owner=? AND status IN ('pending','submitted','partially_filled','reconcile_required'))",
+		"main", futuresownership.OwnerAutoStrategy,
+	).QueryRow(&orders); err != nil {
+		return false, fmt.Errorf("read Main managed orders: %w", err)
+	}
+	return orders > 0, nil
+}
+
+func mainTradeCycleAllowed(enabled bool, hasManagedWork func() (bool, error)) (bool, error) {
+	if enabled {
+		return true, nil
+	}
+	return hasManagedWork()
+}
+
+// StartTrade retains the existing 2-second Main/Lead shared tick. Disabling
+// Main stops new entries, not recovery/exit of Main-owned auto_strategy.
 func StartTrade(systemConfig *models.Config) {
 	if systemConfig == nil {
 		return
 	}
-	// Main runs first and retains its existing trade ordering. A slow
-	// authorized Lead round must not delay the current Main trade round.
-	if systemConfig.FutureEnable == 1 {
+	enabled := systemConfig.FutureEnable == 1
+	runMain, err := mainTradeCycleAllowed(enabled, func() (bool, error) {
+		return mainAutoStrategyWorkNeeded(orm.NewOrm())
+	})
+	if err != nil {
+		// A missing/failed local ledger must never be interpreted as a
+		// confirmed empty account. No speculative signed DAPI requests.
+		logs.Warning("Main futures exit/recovery work gate unavailable: ", err)
+	}
+	if runMain && err == nil {
 		if flagFutures == 0 {
-			logs.Info("futures trade bot start")
+			logs.Info("Main futures trade loop active (new entries enabled: ", enabled, ")")
 			flagFutures = 1
 		}
 		runAccountTradeCycle(mainTradeRunner(systemConfig))
 	} else if flagFutures == 1 {
-		logs.Info("futures trade bot stop")
+		if err != nil {
+			logs.Warning("Main futures trade loop paused: local ownership state could not be checked")
+		} else {
+			logs.Info("Main futures trade loop idle (no eligible owned work)")
+		}
 		flagFutures = 0
 	}
-	// The same existing tick, not another scheduler. If Main is stopped,
-	// a future separately authorized Lead may still manage its own exits.
+	// Lead remains separate and is never granted Main credentials or opens.
 	runLeadOnSharedTradeTick(systemConfig)
 }
 

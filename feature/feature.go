@@ -46,26 +46,14 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	}
 	ctx := binanceapiusage.WithSource(context.Background(), source)
 
-	/************************************************寻找交易币种 start******************************************************************* */
+	// Exit evaluation requires the complete locally configured symbol set,
+	// not an entry-only candidate selection. A failed/empty entry selector
+	// must never prevent existing Managed positions from closing.
 	allCoins, err := runner.LoadSymbols()
 	if err != nil {
 		logs.Error("GetAllSymbols err:", err)
 		return
 	}
-	coins, selectionErr := runner.SelectCoins(systemConfig, allCoins)
-	if selectionErr != nil {
-		logs.Error("account-scoped selector:", selectionErr)
-		return
-	}
-	if coins == nil {
-		logs.Error("coins SelectCoins is nil")
-		return
-	}
-	if runner.AccountID == binance.MainAccountID && systemConfig.FutureStrategyCoin == "smart_local_v2" {
-		logMainEmptySmartSelection(allCoins, len(coins))
-	}
-
-	/************************************************寻找交易币种 end******************************************************************* */
 
 	/************************************************获取账户信息 start******************************************************************* */
 	positions, err := runner.ReadPositions(ctx)
@@ -351,9 +339,24 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	}
 	/*************************************************平仓 end************************************************************ */
 
-	// Exit/reconcile is always allowed even if Lead opens are paused.
+	// Exit/reconcile (and owned timeout-order cleanup) is always allowed
+	// even while Main/Lead NEW entries are paused.
 	if !runner.AllowNewOpens {
 		return
+	}
+	// Candidate selection is an OPEN-only dependency. Run it only after
+	// existing Managed positions have had their close opportunity.
+	coins, selectionErr := runner.SelectCoins(systemConfig, allCoins)
+	if selectionErr != nil {
+		logs.Error("account-scoped selector:", selectionErr)
+		return
+	}
+	if coins == nil {
+		logs.Error("coins SelectCoins is nil")
+		return
+	}
+	if runner.AccountID == binance.MainAccountID && systemConfig.FutureStrategyCoin == "smart_local_v2" {
+		logMainEmptySmartSelection(allCoins, len(coins))
 	}
 	/*************************************************检查当前仓位数量 start************************************************************ */
 	// 当前亏损的数量过多时，停止开仓
