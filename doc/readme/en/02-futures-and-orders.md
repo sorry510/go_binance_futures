@@ -84,3 +84,12 @@ No new automatic position is opened after this limit is reached. **Automatically
 1. With the global Futures switch ON, the Main runner evaluates new entries using each symbol's strategy. Existing Main auto_strategy Managed positions may still exit by the original rules even when the global switch is OFF.
 2. With `LIMIT` entry orders, a pending order is placed. It may not fill, and the system cancels it after the configured timeout.
 3. After an entry fills successfully, its records are available under **Futures Orders** and **Futures Positions**.
+
+## Verified Live Strategy Performance (UF-5)
+
+On **Futures Trading → Futures Orders**, expand **Verified live strategy performance** to inspect the previous **7 or 30 days**. Filter by exact symbol, LONG/SHORT, or original 64-character rule hash (use `unknown` for legacy records without a reliable rule version). The period is based on **`closed_at`**, not the history table's opening date or current page.
+
+- Only **Main / auto_strategy** cycles formally marked `settlement_status=settled`, with fully authenticated matching opening/closing Binance REST trade Fills, are included. Legacy, incomplete, missing-Fill, unconvertible-fee, or pre-approved-verification-cutoff (`BINANCE_ORDER_HISTORY_T0_MAIN_MS`) cycles are listed separately under exclusion reasons.
+- **Net PnL = realized exchange PnL minus actual exchange commissions**. Profit factor is positive net PnL total divided by the absolute negative net PnL total; with no losing trades it is undefined, not infinity. Break-even trades are counted separately. Commissions in unrelated assets (e.g. BNB) with no verified conversion cause exclusion.
+- **USDT and USDC amounts are not added together**. The reported *cumulative settled net PnL drawdown* is a peak-to-trough **currency amount** calculated from closed, certified net PnL only, **not an account equity maximum drawdown**. Unrealized mark-to-market gains and funding fees are not part of the metric.
+- Presentation-only manual history edits do not authenticate Fills or change the verified performance calculation. This panel is strictly read-only: it does not place orders, reconcile exchange balances, or modify settlement markers.

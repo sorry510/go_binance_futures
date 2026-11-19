@@ -194,6 +194,33 @@ func parseHistoryMillis(s string) (int64, error) {
 
 // Anomalies is an authenticated, strictly read-only locator. Filtering
 // happens in SQL by account/Owner/category; it never calls the reconciler.
+// Performance reads only Main auto_strategy's immutable, verified settled
+// cycles. Filters use closed_at, not the history list's created_at.
+func (ctrl *OrderController) Performance() {
+	if !ctrl.authorized() {
+		return
+	}
+	days, err := parseHistoryInt(ctrl.GetString("days"), 30)
+	if err != nil {
+		ctrl.respondError(400, "invalid performance days")
+		return
+	}
+	result, err := (orderhistory.Store{}).Performance(ctrl.Ctx.Request.Context(), orderhistory.PerformanceFilter{
+		Days: days, Symbol: ctrl.GetString("symbol"),
+		PositionSide: ctrl.GetString("position_side"),
+		RuleHash:     ctrl.GetString("rule_hash"),
+	})
+	if err != nil {
+		if errors.Is(err, orderhistory.ErrInvalidQuery) {
+			ctrl.respondError(400, "invalid performance filters")
+		} else {
+			ctrl.respondError(503, "verified performance unavailable")
+		}
+		return
+	}
+	ctrl.success(result)
+}
+
 func (ctrl *OrderController) Anomalies() {
 	if !ctrl.authorized() {
 		return

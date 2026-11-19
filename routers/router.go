@@ -185,6 +185,7 @@ func init() {
 	web.Router("/orders/batch/delete", &controllers.OrderController{}, "post:DeleteFiltered")
 	web.Router("/orders/batch/preview", &controllers.OrderController{}, "post:BulkPreview")
 	web.Router("/orders/batch/apply", &controllers.OrderController{}, "post:BulkApply")
+	web.Router("/orders/performance", &controllers.OrderController{}, "get:Performance")      // UF-5: REST-verified, Main-only settled strategy performance
 	web.Router("/orders/anomalies", &controllers.OrderController{}, "get:Anomalies")          // UF-3 read-only anomalous managed orders, cycles and Agent proposals
 	web.Router("/orders", &controllers.OrderController{}, "get:Get;delete:DeleteAll")         // v23 Managed position cycle history
 	web.Router("/orders/:position_id/details", &controllers.OrderController{}, "get:Details") // child orders and immutable exchange Fills
