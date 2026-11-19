@@ -173,6 +173,11 @@ func StartTrade(systemConfig *models.Config) {
 		return
 	}
 	enabled := systemConfig.FutureEnable == 1
+	if !enabled {
+		// Main loop may be completely idle while OFF, so publish the
+		// actual global gate without waking Binance or querying symbols.
+		mainEntryDiagnostics.begin(false)
+	}
 	runMain, err := mainTradeCycleAllowed(enabled, func() (bool, error) {
 		return mainAutoStrategyWorkNeeded(orm.NewOrm())
 	})

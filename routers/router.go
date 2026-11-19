@@ -11,6 +11,7 @@ func init() {
 
 	web.Router("/service/config", &controllers.IndexController{}, "get:GetServiceConfig;put:EditServiceConfig")                                 // 服务配置信息
 	web.Router("/futures/selectors/smart-local-v2", &controllers.LocalSelectorController{}, "get:SmartLocalV2")                                 // V4-3 本地确定性选币预览
+	web.Router("/futures/entry-diagnostics", &controllers.MainEntryDiagnosticsController{}, "get:Get")                                          // UF-4 Main readonly diagnostics
 	web.Router("/test-pusher", &controllers.IndexController{}, "post:TestPusher")                                                               // 测试推送
 	web.Router("/update-market-condition", &controllers.IndexController{}, "post:UpdateMarketCondition")                                        // 手动触发更新市场状态
 	web.Router("/update-market-condition/:taskId", &controllers.IndexController{}, "get:GetMarketConditionUpdateTask")                          // 查询市场状态更新进度

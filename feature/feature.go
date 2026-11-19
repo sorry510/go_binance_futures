@@ -39,6 +39,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 		logs.Error("account trade runner rejected:", err)
 		return
 	}
+	observer := beginMainEntryObservation(runner)
 	systemConfig := runner.Config
 	source := "start_trade"
 	if runner.AccountID == binance.LeadAccountID {
@@ -51,13 +52,29 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	// must never prevent existing Managed positions from closing.
 	allCoins, err := runner.LoadSymbols()
 	if err != nil {
+		observer.global("symbols_unavailable")
 		logs.Error("GetAllSymbols err:", err)
 		return
+	}
+	if observer.enabled {
+		// These are facts from already loaded local symbols. Selection is
+		// still performed by the existing runner after managed exits.
+		for _, coin := range allCoins {
+			if coin == nil {
+				continue
+			}
+			if coin.Enable != 1 {
+				observer.both(coin.Symbol, "symbol_off")
+			} else {
+				observer.both(coin.Symbol, "not_evaluated")
+			}
+		}
 	}
 
 	/************************************************获取账户信息 start******************************************************************* */
 	positions, err := runner.ReadPositions(ctx)
 	if err != nil {
+		observer.global("positions_unavailable")
 		logs.Info("Sleep 30s for limit")
 		runner.Sleep(30 * time.Second)
 		return
@@ -66,6 +83,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	allOpenOrders, err := runner.ReadOpenOrders(ctx)
 	// allOpenOrders, err := binance.GetOpenOrder()
 	if err != nil {
+		observer.global("open_orders_unavailable")
 		logs.Info("Sleep 30s for limit")
 		runner.Sleep(30 * time.Second)
 		return
@@ -73,6 +91,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	cycleAccount := newTradeCycleAccountSnapshot(positions, allOpenOrders)
 	managedPositions, err := runner.SyncPositions(positions)
 	if err != nil {
+		observer.global("ownership_sync_failed")
 		logs.Error("sync strategy-exit ownership:", err)
 		return
 	}
@@ -348,30 +367,68 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	// existing Managed positions have had their close opportunity.
 	coins, selectionErr := runner.SelectCoins(systemConfig, allCoins)
 	if selectionErr != nil {
+		observer.global("selector_unavailable")
 		logs.Error("account-scoped selector:", selectionErr)
 		return
 	}
 	if coins == nil {
+		observer.global("selector_unavailable")
 		logs.Error("coins SelectCoins is nil")
 		return
 	}
 	if runner.AccountID == binance.MainAccountID && systemConfig.FutureStrategyCoin == "smart_local_v2" {
 		logMainEmptySmartSelection(allCoins, len(coins))
 	}
+	// "no_candidate" is the only provable reason for an enabled symbol
+	// absent from the actual selector result. Do not infer volume/staleness.
+	if observer.enabled {
+		selectedSymbols := make(map[string]bool, len(coins))
+		for _, coin := range coins {
+			if coin != nil {
+				selectedSymbols[coin.Symbol] = true
+			}
+		}
+		for _, coin := range allCoins {
+			if coin != nil && coin.Enable == 1 && !selectedSymbols[coin.Symbol] {
+				observer.both(coin.Symbol, "no_candidate")
+			}
+		}
+		if len(coins) == 0 {
+			observer.global("no_candidate")
+		}
+	}
 	/*************************************************检查当前仓位数量 start************************************************************ */
 	// 当前亏损的数量过多时，停止开仓
 	if lossCount >= systemConfig.LossMaxCount {
+		for _, coin := range coins {
+			if coin != nil {
+				observer.both(coin.Symbol, "max_losing_positions")
+			}
+		}
+		observer.global("max_losing_positions")
 		logs.Info("the loss count is %d, is over max %d, stop open new order", lossCount, systemConfig.LossMaxCount)
 		return
 	}
 
 	allMyCount := cycleAccount.AccountSlotCount()
 	if allMyCount >= systemConfig.FutureMaxCount {
+		for _, coin := range coins {
+			if coin != nil {
+				observer.both(coin.Symbol, "max_positions")
+			}
+		}
+		observer.global("max_positions")
 		logs.Info("position + open order: %d, is over max %d, stop open new order", allMyCount, systemConfig.FutureMaxCount)
 		return
 	}
 
 	if systemConfig.FutureAllowLong != 1 && systemConfig.FutureAllowShort != 1 {
+		for _, coin := range coins {
+			if coin != nil {
+				observer.both(coin.Symbol, "direction_off")
+			}
+		}
+		observer.global("direction_off")
 		logs.Info("the base config don't allow long and allow short")
 		return
 	}
@@ -380,8 +437,13 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	/*************************************************开仓(根据选币策略选中的币) start************************************************************ */
 	isOpen := false
 
-	for _, coin := range coins {
+	for idx, coin := range coins {
 		if cycleAccount.AccountSlotCount() >= systemConfig.FutureMaxCount {
+			for _, remaining := range coins[idx:] {
+				if remaining != nil {
+					observer.both(remaining.Symbol, "max_positions")
+				}
+			}
 			logs.Info("position + open order reached max during current cycle: %d/%d", cycleAccount.AccountSlotCount(), systemConfig.FutureMaxCount)
 			break
 		}
@@ -389,6 +451,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 			continue
 		}
 		if _, exist := openBlockedSymbols[coin.Symbol]; exist { // 已有 managed 持仓
+			observer.both(coin.Symbol, "existing_position")
 			continue
 		}
 		symbol := coin.Symbol
@@ -396,15 +459,41 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 		stepSize := coin.StepSize                            // 交易数量精度
 		usdt_float64, _ := strconv.ParseFloat(coin.Usdt, 64) // 交易金额
 		leverage_float64 := float64(coin.Leverage)           // 合约倍数
-		openResult := runner.EvaluateEntry(coin, positions)
-		if !openResult.CanLong && !openResult.CanShort {
-			logs.Info("%s:no trading strategy conditions passed", symbol)
-			continue
-		}
+		// Reuse this cycle's account snapshot. These checks only observe
+		// already-evaluated guards; they do not change trading decisions.
 		hasBuyOrderLong := cycleAccount.HasOpeningOrder(symbol, futures.PositionSideTypeLong)
 		hasBuyOrderShort := cycleAccount.HasOpeningOrder(symbol, futures.PositionSideTypeShort)
 		hasPositionLong := cycleAccount.HasPosition(symbol, futures.PositionSideTypeLong)
 		hasPositionShort := cycleAccount.HasPosition(symbol, futures.PositionSideTypeShort)
+		openResult := runner.EvaluateEntry(coin, positions)
+		switch {
+		case systemConfig.FutureAllowLong != 1:
+			observer.record(symbol, "LONG", "direction_off")
+		case hasPositionLong:
+			observer.record(symbol, "LONG", "existing_position")
+		case hasBuyOrderLong:
+			observer.record(symbol, "LONG", "pending_order")
+		case !openResult.CanLong:
+			observer.record(symbol, "LONG", "strategy_not_matched")
+		default:
+			observer.record(symbol, "LONG", "not_evaluated")
+		}
+		switch {
+		case systemConfig.FutureAllowShort != 1:
+			observer.record(symbol, "SHORT", "direction_off")
+		case hasPositionShort:
+			observer.record(symbol, "SHORT", "existing_position")
+		case hasBuyOrderShort:
+			observer.record(symbol, "SHORT", "pending_order")
+		case !openResult.CanShort:
+			observer.record(symbol, "SHORT", "strategy_not_matched")
+		default:
+			observer.record(symbol, "SHORT", "not_evaluated")
+		}
+		if !openResult.CanLong && !openResult.CanShort {
+			logs.Info("%s:no trading strategy conditions passed", symbol)
+			continue
+		}
 
 		if systemConfig.FutureAllowLong == 1 && hasPositionLong == false && hasBuyOrderLong == false && openResult.CanLong {
 			buyPrice, _, err := runner.Depth(ctx, symbol, 5) // 平均买价
@@ -412,15 +501,24 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				buyPrice = utils.GetTradePrecision(buyPrice, tickSize)   // 合理精度的价格
 				quantity := (usdt_float64 / buyPrice) * leverage_float64 // 购买数量
 				quantity = utils.GetTradePrecision(quantity, stepSize)   // 合理精度的价格
+				if quantity <= 0 || math.IsNaN(quantity) || math.IsInf(quantity, 0) || buyPrice <= 0 {
+					observer.record(symbol, "LONG", "invalid_quantity")
+				}
 
 				if runner.riskAllowsOpen(ctx, coin, futures.PositionSideTypeLong, quantity, buyPrice) {
 					if err := runner.EnsureConfig(ctx, coin); err != nil {
+						observer.record(symbol, "LONG", "trade_config_failed")
 						logs.Error("account trade configuration rejected:", err)
 						continue
 					} // 更新倍率和仓位模式
 
 					if systemConfig.FutureOrderType == "MARKET" {
 						_, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeMarket, openResult.LongStrategyHash)
+						if err != nil {
+							observer.record(symbol, "LONG", "order_submit_failed")
+						} else {
+							observer.record(symbol, "LONG", "order_submitted")
+						}
 						if err == nil {
 							// 委托确认不等于真实成交
 							buyPrice := utils.GetTradePrecision(buyPrice*1.0012, coin.TickSize) // 价格上浮 0.1%(原因是市价买入通常会比当前价格高)
@@ -450,6 +548,11 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 						}
 					} else {
 						_, err := runner.SubmitOpen(cycleAccount, symbol, quantity, buyPrice, futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, openResult.LongStrategyHash)
+						if err != nil {
+							observer.record(symbol, "LONG", "order_submit_failed")
+						} else {
+							observer.record(symbol, "LONG", "order_submitted")
+						}
 						if err == nil {
 							// 下单确认不等于成交，真实历史由 Managed/Fill 记录
 							isOpen = true
@@ -478,7 +581,13 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 						}
 					}
 				}
+			} else {
+				observer.record(symbol, "LONG", "depth_unavailable")
 			}
+		}
+		if cycleAccount.AccountSlotCount() >= systemConfig.FutureMaxCount &&
+			systemConfig.FutureAllowShort == 1 && !hasPositionShort && !hasBuyOrderShort && openResult.CanShort {
+			observer.record(symbol, "SHORT", "max_positions")
 		}
 		if cycleAccount.AccountSlotCount() < systemConfig.FutureMaxCount && systemConfig.FutureAllowShort == 1 && hasPositionShort == false && hasBuyOrderShort == false && openResult.CanShort {
 
@@ -487,15 +596,24 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				sellPrice = utils.GetTradePrecision(sellPrice, tickSize)  // 合理精度的价格
 				quantity := (usdt_float64 / sellPrice) * leverage_float64 // 购买数量
 				quantity = utils.GetTradePrecision(quantity, stepSize)    // 合理精度的价格
+				if quantity <= 0 || math.IsNaN(quantity) || math.IsInf(quantity, 0) || sellPrice <= 0 {
+					observer.record(symbol, "SHORT", "invalid_quantity")
+				}
 
 				if runner.riskAllowsOpen(ctx, coin, futures.PositionSideTypeShort, quantity, sellPrice) {
 					if err := runner.EnsureConfig(ctx, coin); err != nil {
+						observer.record(symbol, "SHORT", "trade_config_failed")
 						logs.Error("account trade configuration rejected:", err)
 						continue
 					} // 更新倍率和仓位模式
 
 					if systemConfig.FutureOrderType == "MARKET" {
 						_, err := runner.SubmitOpen(cycleAccount, symbol, quantity, 0, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeMarket, openResult.ShortStrategyHash)
+						if err != nil {
+							observer.record(symbol, "SHORT", "order_submit_failed")
+						} else {
+							observer.record(symbol, "SHORT", "order_submitted")
+						}
 						if err == nil {
 							// 委托确认不等于真实成交
 							sellPrice := utils.GetTradePrecision(sellPrice*0.9988, coin.TickSize) // 价格下调 0.12%(原因是市价买入通常会比当前价格高)
@@ -525,6 +643,11 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 						}
 					} else {
 						_, err := runner.SubmitOpen(cycleAccount, symbol, quantity, sellPrice, futures.SideTypeSell, futures.PositionSideTypeShort, futures.OrderTypeLimit, openResult.ShortStrategyHash)
+						if err != nil {
+							observer.record(symbol, "SHORT", "order_submit_failed")
+						} else {
+							observer.record(symbol, "SHORT", "order_submitted")
+						}
 						if err == nil {
 							// 下单确认不等于成交，真实历史由 Managed/Fill 记录
 							isOpen = true
@@ -553,6 +676,8 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 						}
 					}
 				}
+			} else {
+				observer.record(symbol, "SHORT", "depth_unavailable")
 			}
 		}
 	}

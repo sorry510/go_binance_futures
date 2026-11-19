@@ -18,6 +18,15 @@ The **Configuration Center → Futures Trading → Enable Futures Trading** swit
 
 The Main switch does not change independently scoped Lead, COIN-M or Spot entry permissions.
 
+### Why Did My Strategy Not Open a Position? (UF-4)
+
+Under **Futures Trading → Futures Trading**, expand **Why no entry?** to inspect only the real decisions from the Main strategy runner's latest evaluation. Filter by symbol and LONG/SHORT. Results distinguish the global/symbol switches, selector exclusions, existing positions/orders, risk limits, unmatched signals, unavailable order-book depth, failed margin/leverage preflight and order submission errors.
+
+- The panel is collapsed by default and polls its **in-process snapshot every 15 seconds only when expanded**. It never reruns a strategy, calls Binance or writes to the database.
+- **Last accepted order submission** is an order acknowledgement, not an authenticated Fill; inspect real Futures Orders for verified execution.
+- Restarting the backend clears the snapshot. The UI shows the observation time and warns after 30 seconds; an unselected symbol is not automatically classified as low volume or stale market data.
+- This covers Main U-margined entries only. Existing Managed exits still execute when new entries are disabled.
+
 ### Enabling Futures Trading
 
 1. In the **Configuration Center → Futures Trading** Card, turn on **Enable Futures Trading**.
