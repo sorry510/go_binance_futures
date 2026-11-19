@@ -341,6 +341,12 @@ func (builder *historicalEnvironment) cachedKlinePriceSeries(interval string, as
 	entry.value.Close[0] = overlay.Close
 	entry.value.Open[0] = overlay.Open
 	entry.value.Amount[0] = overlay.QuoteVolume
+	entry.value.TakerBuyAmount[0] = overlay.TakerBuyQuoteVolume
+	if overlay.QuoteVolume > 0 {
+		entry.value.TakerBuyRatio[0] = overlay.TakerBuyQuoteVolume / overlay.QuoteVolume
+	} else {
+		entry.value.TakerBuyRatio[0] = 0
+	}
 	seconds := builder.cachedKlineQPSDurationSeconds(overlay)
 	if seconds > 0 {
 		entry.value.Qps[0] = overlay.QuoteVolume / seconds

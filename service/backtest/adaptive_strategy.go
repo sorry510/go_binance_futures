@@ -2,8 +2,10 @@ package backtest
 
 import "math"
 
-// ROICandidate describes whether the 1m price range proves that the current
-// live-equivalent ROI gate may have been crossed before the minute closed.
+// ROICandidate detects possible ROI-gate crossings from replay OHLC.
+// Its bounds must have the SAME price basis as grossROI(): currently replay
+// last/trade price, not the live loop's preferred Binance mark-price WS.
+// Never reuse these bounds to prune mark-price-based ROI without mark OHLC.
 type ROICandidate struct {
 	Required       bool    `json:"required"`
 	MinROI         float64 `json:"min_roi"`

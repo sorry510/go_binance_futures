@@ -320,11 +320,13 @@ func (state *adaptiveRunState) evaluateROIClose(
 			tradeCouldResolve = possible
 		}
 
-		// Funding inside this second must be replayed before a potentially earlier
-		// trade close. If the ROI-only proof says the rule cannot pass anywhere in
-		// this second, no trade replay is necessary and funding can safely advance
-		// to the second close below.
-		if tradeCouldResolve && fundingInsideSecond {
+		// Preserve chronological ordering when both TP and SL are reachable
+		// inside the same second: the second close alone cannot tell which came
+		// first. Funding inside the second also requires trade-time ordering.
+		// For an unambiguous second, retain the existing 1s-first fast path.
+		tradesBeforeSecondClose := tradeCouldResolve && (fundingInsideSecond ||
+			(secondCandidate.StopPossible && secondCandidate.ProfitPossible))
+		if tradesBeforeSecondClose {
 			tradeDecision, tradeErr := state.evaluateTradeROIClose(ctx, provider, dataset, environment, bar, partialBeforeSecond, second, position, cash, config, rules, compiled, advanceFunding, evidence, stableEnv, stableCondition, profile)
 			if tradeErr != nil {
 				return adaptiveCloseDecision{}, tradeErr
@@ -368,7 +370,7 @@ func (state *adaptiveRunState) evaluateROIClose(
 			}
 		}
 
-		if tradeCouldResolve && !fundingInsideSecond {
+		if tradeCouldResolve && !tradesBeforeSecondClose {
 			tradeDecision, tradeErr := state.evaluateTradeROIClose(ctx, provider, dataset, environment, bar, partialBeforeSecond, second, position, cash, config, rules, compiled, advanceFunding, evidence, stableEnv, stableCondition, profile)
 			if tradeErr != nil {
 				return adaptiveCloseDecision{}, tradeErr
@@ -419,6 +421,14 @@ func (state *adaptiveRunState) evaluateTradeROIClose(
 	trades, evidence, err := provider.Trades(ctx, dataset.Market, dataset.Symbol, second.OpenTime, second.CloseTime)
 	if err != nil {
 		return adaptiveCloseDecision{}, err
+	}
+	// A second that crosses BOTH ROI gates is chronologically ambiguous.
+	// An empty trade window cannot establish which gate happened first.
+	if len(trades) == 0 {
+		candidate := DetectROICandidate(position, Bar{Low: second.Low, High: second.High}, config)
+		if candidate.StopPossible && candidate.ProfitPossible {
+			return adaptiveCloseDecision{}, fmt.Errorf("ambiguous 1s ROI gates at %d: no chronological trades", second.OpenTime)
+		}
 	}
 	state.stats.TradeDrilldownSeconds++
 	state.evidence = append(state.evidence, evidence)

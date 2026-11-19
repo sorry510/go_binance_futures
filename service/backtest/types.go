@@ -8,14 +8,16 @@ import (
 )
 
 const (
-	StandardEngineVersion   = "backtest_engine_v7"
-	AdaptiveEngineVersion   = "backtest_engine_v10"
+	// BT-1 fixes forming-kline taker fields in standard replay and
+	// same-second TP/SL ordering in adaptive replay. Prior runs keep their versions.
+	StandardEngineVersion   = "backtest_engine_v8"
+	AdaptiveEngineVersion   = "backtest_engine_v11"
 	EngineVersion           = StandardEngineVersion
 	MarketConditionModel    = "historical_market_condition_v1"
 	ResolutionModeStandard  = "standard_1m"
 	ResolutionModeAdaptive  = "adaptive"
-	StandardResolutionModel = "standard_1m_v1"
-	AdaptiveResolutionModel = "adaptive_intrabar_v2"
+	StandardResolutionModel = "standard_1m_v2"
+	AdaptiveResolutionModel = "adaptive_intrabar_v3"
 	DefaultWarmupBars       = 200
 	ReplayInterval          = "1m"
 )

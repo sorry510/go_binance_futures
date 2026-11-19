@@ -762,6 +762,10 @@ func unrealizedPnL(p *Position, price float64) float64 {
 	}
 	return (price - p.EntryPrice) * math.Abs(p.Quantity)
 }
+
+// Replay ROI uses the observed execution-bar/trade price as a proxy for the
+// live mark price. Live can prefer Binance mark-price WS; these sources are not
+// fully equivalent until independently verified historical mark data is wired.
 func grossROI(p *Position, price float64, leverage int) float64 {
 	if p == nil || price <= 0 {
 		return 0
