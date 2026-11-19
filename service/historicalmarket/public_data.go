@@ -71,23 +71,26 @@ type PublicDataTrade struct {
 }
 
 type PublicDataClientConfig struct {
-	BaseURL      string
-	ProxyURL     string
-	CacheDir     string
-	TempRootDir  string
-	Timeout      time.Duration
-	MaxRetries   int
-	RetryBackoff time.Duration
-	HTTPClient   *http.Client
+	BaseURL       string
+	ProxyURL      string
+	CacheDir      string
+	TempRootDir   string
+	MaxCacheBytes int64 // optional byte budget for a persistent CacheDir; 0 disables cleanup
+	Timeout       time.Duration
+	MaxRetries    int
+	RetryBackoff  time.Duration
+	HTTPClient    *http.Client
 }
 
 type PublicDataClient struct {
-	baseURL      string
-	httpClient   *http.Client
-	cacheDir     string
-	ownsCacheDir bool
-	maxRetries   int
-	retryBackoff time.Duration
+	baseURL       string
+	httpClient    *http.Client
+	cacheDir      string
+	ownsCacheDir  bool
+	maxCacheBytes int64
+	heldArchives  map[string]struct{}
+	maxRetries    int
+	retryBackoff  time.Duration
 
 	mu          sync.Mutex
 	archives    map[string]PublicDataArchive
@@ -155,6 +158,7 @@ func NewPublicDataClient(config PublicDataClientConfig) (*PublicDataClient, erro
 	}
 	return &PublicDataClient{
 		baseURL: baseURL, httpClient: client, cacheDir: cacheDir, ownsCacheDir: ownsCacheDir,
+		maxCacheBytes: config.MaxCacheBytes, heldArchives: make(map[string]struct{}),
 		maxRetries: maxRetries, retryBackoff: retryBackoff, archives: map[string]PublicDataArchive{}, unavailable: map[string]struct{}{},
 	}, nil
 }
@@ -169,10 +173,11 @@ func (client *PublicDataClient) Close() error {
 	client.klineScanner = nil
 	client.tradeScanner = nil
 	client.parseMu.Unlock()
-	if !client.ownsCacheDir || client.cacheDir == "" {
-		return nil
+	client.releaseArchives()
+	if client.ownsCacheDir && client.cacheDir != "" {
+		return os.RemoveAll(client.cacheDir)
 	}
-	return os.RemoveAll(client.cacheDir)
+	return client.pruneVerifiedArchives()
 }
 
 func (client *PublicDataClient) SetActivity(activity func(string)) {
@@ -259,7 +264,7 @@ func (client *PublicDataClient) FetchArchive(ctx context.Context, spec PublicDat
 	if err != nil {
 		return PublicDataArchive{}, err
 	}
-	if archive, ok := client.cachedArchive(archiveURL); ok {
+	if archive, ok := client.cachedArchive(spec, archiveURL); ok {
 		archive.FromCache = true
 		return archive, nil
 	}
@@ -271,7 +276,7 @@ func (client *PublicDataClient) FetchArchive(ctx context.Context, spec PublicDat
 	// the same failure and may retry on their next request; partial files are
 	// removed by downloadArchive, so a cancelled leader cannot poison the cache.
 	result := client.group.DoChan(archiveURL, func() (interface{}, error) {
-		if archive, ok := client.cachedArchive(archiveURL); ok {
+		if archive, ok := client.cachedArchive(spec, archiveURL); ok {
 			archive.FromCache = true
 			return archive, nil
 		}
@@ -315,17 +320,26 @@ func (client *PublicDataClient) markArchiveUnavailable(archiveURL string) {
 	client.unavailable[archiveURL] = struct{}{}
 }
 
-func (client *PublicDataClient) cachedArchive(archiveURL string) (PublicDataArchive, bool) {
+func (client *PublicDataClient) cachedArchive(spec PublicDataArchiveSpec, archiveURL string) (PublicDataArchive, bool) {
 	client.mu.Lock()
-	defer client.mu.Unlock()
 	archive, ok := client.archives[archiveURL]
+	if ok {
+		if _, err := os.Stat(archive.Path); err == nil {
+			now := time.Now()
+			_ = os.Chtimes(archive.Path, now, now)
+			client.mu.Unlock()
+			return archive, true
+		}
+		delete(client.archives, archiveURL)
+	}
+	client.mu.Unlock()
+	archive, ok = client.loadDiskArchive(spec, archiveURL)
 	if !ok {
 		return PublicDataArchive{}, false
 	}
-	if _, err := os.Stat(archive.Path); err != nil {
-		delete(client.archives, archiveURL)
-		return PublicDataArchive{}, false
-	}
+	client.mu.Lock()
+	client.archives[archiveURL] = archive
+	client.mu.Unlock()
 	return archive, true
 }
 
@@ -334,9 +348,18 @@ func (client *PublicDataClient) downloadArchive(ctx context.Context, spec Public
 	if err != nil {
 		return PublicDataArchive{}, err
 	}
-	key := sha256.Sum256([]byte(archiveURL))
-	target := filepath.Join(client.cacheDir, hex.EncodeToString(key[:8])+"-"+filename)
-	part := target + ".part"
+	target, err := client.archiveTarget(spec, archiveURL)
+	if err != nil {
+		return PublicDataArchive{}, err
+	}
+	client.holdArchive(target)
+	file, err := os.CreateTemp(client.cacheDir, ".bt3-download-*.part")
+	if err != nil {
+		return PublicDataArchive{}, err
+	}
+	part := file.Name()
+	_ = file.Close()
+	defer os.Remove(part)
 	actual, size, err := client.downloadFile(ctx, archiveURL, part)
 	if err != nil {
 		_ = os.Remove(part)
@@ -365,8 +388,11 @@ func (client *PublicDataClient) downloadArchive(ctx context.Context, spec Public
 		return PublicDataArchive{}, fmt.Errorf("%w: expected %s got %s for %s", ErrPublicDataChecksumMismatch, expected, actual, archiveURL)
 	}
 	if err := os.Rename(part, target); err != nil {
-		_ = os.Remove(part)
 		return PublicDataArchive{}, fmt.Errorf("finalize public data archive: %w", err)
+	}
+	if err := client.saveArchiveManifest(target, actual, size); err != nil {
+		_ = os.Remove(target)
+		return PublicDataArchive{}, fmt.Errorf("persist verified archive checksum: %w", err)
 	}
 	return PublicDataArchive{Spec: spec, URL: archiveURL, ChecksumURL: checksumURL, Path: target, SHA256: actual, Size: size}, nil
 }

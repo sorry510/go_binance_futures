@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -44,10 +45,11 @@ type ResolutionProvider interface {
 }
 
 type AdaptiveResolutionProvider struct {
-	repo   *Repository
-	public *PublicDataClient
-	mu     sync.Mutex
-	stats  ResolutionStats
+	repo        *Repository
+	public      *PublicDataClient
+	mu          sync.Mutex
+	stats       ResolutionStats
+	writeSparse bool // legacy constructor keeps writes; default backtest uses verified ZIP cache
 }
 
 func DefaultAdaptiveResolutionProvider() (ResolutionProvider, error) {
@@ -56,7 +58,12 @@ func DefaultAdaptiveResolutionProvider() (ResolutionProvider, error) {
 	if strings.TrimSpace(tempRootDir) == "" {
 		tempRootDir = "./cache/tmp"
 	}
-	client, err := NewPublicDataClient(PublicDataClientConfig{ProxyURL: proxyURL, TempRootDir: tempRootDir})
+	// Dedicated, bounded persistent ZIP cache. Never clean the temp root or
+	// unrelated files, and never use UM archives for COIN-M.
+	client, err := NewPublicDataClient(PublicDataClientConfig{
+		ProxyURL: proxyURL, CacheDir: filepath.Join(tempRootDir, "adaptive-um-archives"),
+		MaxCacheBytes: 2 << 30,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +72,9 @@ func DefaultAdaptiveResolutionProvider() (ResolutionProvider, error) {
 		_ = client.Close()
 		return nil, err
 	}
+	// BT-3: read existing sparse rows but do not add newly fetched 1s/Trades
+	// to MySQL once verified daily ZIP replay is available.
+	provider.writeSparse = false
 	return provider, nil
 }
 
@@ -75,7 +85,7 @@ func NewAdaptiveResolutionProvider(repo *Repository, public *PublicDataClient) (
 	if public == nil {
 		return nil, fmt.Errorf("public data client is required")
 	}
-	return &AdaptiveResolutionProvider{repo: repo, public: public}, nil
+	return &AdaptiveResolutionProvider{repo: repo, public: public, writeSparse: true}, nil
 }
 
 func (provider *AdaptiveResolutionProvider) SetActivity(activity func(string)) {
@@ -144,6 +154,9 @@ func (provider *AdaptiveResolutionProvider) SecondBars(ctx context.Context, mark
 		return local, evidence, nil
 	}
 
+	if market != MarketFuturesUSDT {
+		return nil, ResolutionEvidence{}, fmt.Errorf("public high-resolution archive supports only USDT-M, got %q", market)
+	}
 	date, err := publicDataArchiveDate(start, end)
 	if err != nil {
 		return nil, ResolutionEvidence{}, err
@@ -157,8 +170,10 @@ func (provider *AdaptiveResolutionProvider) SecondBars(ctx context.Context, mark
 			return nil, ResolutionEvidence{}, parseErr
 		}
 		if secondRangeComplete(rows, start, end) {
-			if _, err := provider.repo.StoreSparseSecondBars(ctx, rows); err != nil {
-				return nil, ResolutionEvidence{}, err
+			if provider.writeSparse {
+				if _, err := provider.repo.StoreSparseSecondBars(ctx, rows); err != nil {
+					return nil, ResolutionEvidence{}, err
+				}
 			}
 			return rows, archiveKlineEvidence("1s", archive, start, end, rows), nil
 		}
@@ -181,8 +196,10 @@ func (provider *AdaptiveResolutionProvider) SecondBars(ctx context.Context, mark
 	for i := range bars {
 		bars[i].SourceRef = tradeEvidence.SourceRef + "&derived=trades&" + rangeTag
 	}
-	if _, err := provider.repo.StoreSparseSecondBars(ctx, bars); err != nil {
-		return nil, ResolutionEvidence{}, err
+	if provider.writeSparse {
+		if _, err := provider.repo.StoreSparseSecondBars(ctx, bars); err != nil {
+			return nil, ResolutionEvidence{}, err
+		}
 	}
 	evidence := ResolutionEvidence{
 		Resolution: "1s_from_trades", SourceRef: tradeEvidence.SourceRef, ArchiveURL: tradeEvidence.ArchiveURL,
@@ -213,6 +230,9 @@ func (provider *AdaptiveResolutionProvider) Trades(ctx context.Context, market, 
 		return local, evidence, nil
 	}
 
+	if market != MarketFuturesUSDT {
+		return nil, ResolutionEvidence{}, fmt.Errorf("public high-resolution archive supports only USDT-M, got %q", market)
+	}
 	date, err := publicDataArchiveDate(start, end)
 	if err != nil {
 		return nil, ResolutionEvidence{}, err
@@ -231,7 +251,7 @@ func (provider *AdaptiveResolutionProvider) Trades(ctx context.Context, market, 
 		rows[i].SourceRef = sourceRef
 		rows[i].ArchiveSHA256 = archive.SHA256
 	}
-	if len(rows) > 0 {
+	if provider.writeSparse && len(rows) > 0 {
 		if _, err := provider.repo.StoreSparseTrades(ctx, rows); err != nil {
 			return nil, ResolutionEvidence{}, err
 		}
