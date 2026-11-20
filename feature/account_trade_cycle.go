@@ -30,6 +30,7 @@ type accountTradeRunner struct {
 	leadMockPermit stage3LeadMockPermit
 	AllowNewOpens  bool
 	LeadSymbols    *binance.LeadSymbolCache
+	OpenCooldown   *tradeOpenCooldown // new opens only; exits never blocked
 	// Pending Lead orders only block their own symbols; Main is unchanged.
 	leadPendingSymbols map[string]bool
 
@@ -64,7 +65,8 @@ func mainTradeRunner(cfg *models.Config) *accountTradeRunner {
 	}
 	return &accountTradeRunner{
 		AccountID: binance.MainAccountID, Config: cfg, AllowNewOpens: entryEnabled,
-		LoadSymbols: GetAllSymbols,
+		OpenCooldown: &mainTradeOpenCooldown,
+		LoadSymbols:  GetAllSymbols,
 		SelectCoins: func(c *models.Config, coins []*models.Symbols) ([]*models.Symbols, error) {
 			return selectConfiguredCoins(c, coins, scanner.SmartLocalV2ModeTrade), nil
 		},
@@ -97,6 +99,17 @@ func mainTradeRunner(cfg *models.Config) *accountTradeRunner {
 // files can create the test fixture. Stage 4 must introduce a separately
 // verified account-bound execution adapter before scheduling real Lead IO.
 type stage3LeadMockPermit interface{ stage3MockOnly() }
+
+// A successful close submission starts a new-entry cooldown too. This keeps
+// close->immediate-reopen churn from happening near the end of an earlier
+// open cooldown. It NEVER delays or rejects the close itself.
+func (r *accountTradeRunner) submitCloseWithEntryCooldown(owner, sourceRef, symbol string, qty float64, side futures.PositionSideType) (*futures.CreateOrderResponse, error) {
+	response, err := r.SubmitClose(owner, sourceRef, symbol, qty, side)
+	if err == nil {
+		r.OpenCooldown.blockFrom(time.Now())
+	}
+	return response, err
+}
 
 func (r *accountTradeRunner) validate() error {
 	if r == nil || r.Config == nil {
@@ -166,7 +179,7 @@ func mainTradeCycleAllowed(enabled bool, hasManagedWork func() (bool, error)) (b
 	return hasManagedWork()
 }
 
-// StartTrade retains the existing 2-second Main/Lead shared tick. Disabling
+// StartTrade uses the shared Main/Lead scheduler tick (currently 1 second). Disabling
 // Main stops new entries, not recovery/exit of Main-owned auto_strategy.
 func StartTrade(systemConfig *models.Config) {
 	if systemConfig == nil {

@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -24,19 +25,17 @@ import (
 )
 
 var coinNoticeLastTimeMap = make(map[string]int64) // limit 通知一次
-var FuturesTestNotice = 0
+var FuturesTestNotice atomic.Int32
 var testStrategyOpenMu sync.Mutex
 
 func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 	if systemConfig.FutureTest == 1 {
-		if FuturesTestNotice == 0 {
+		if FuturesTestNotice.CompareAndSwap(0, 1) {
 			logs.Info("futures all symbol notice_strategy bot start")
-			FuturesTestNotice = 1
 		}
 	} else {
-		if FuturesTestNotice == 1 {
+		if FuturesTestNotice.CompareAndSwap(1, 0) {
 			logs.Info("futures all symbol notice_strategy bot end")
-			FuturesTestNotice = 0
 		}
 		return
 	}
@@ -159,14 +158,12 @@ func NoticeAllSymbolByStrategy(systemConfig *models.Config) {
 // 检查测试中的币当前是否应该平仓
 func CheckTestResults(systemConfig *models.Config) {
 	if systemConfig.FutureTest == 1 {
-		if FuturesTestNotice == 0 {
+		if FuturesTestNotice.CompareAndSwap(0, 1) {
 			logs.Info("futures all symbol notice_strategy bot start")
-			FuturesTestNotice = 1
 		}
 	} else {
-		if FuturesTestNotice == 1 {
+		if FuturesTestNotice.CompareAndSwap(1, 0) {
 			logs.Info("futures all symbol notice_strategy bot end")
-			FuturesTestNotice = 0
 		}
 		return
 	}
@@ -306,9 +303,11 @@ func CheckTestResults(systemConfig *models.Config) {
 						Remarks:      strategy.Code,
 					})
 					autoTestToTrade(systemConfig, profitUsdt >= 0.0)
-					// Live loss-scale adjustment is performed only after
-					// verified managed settlement, not simulated closes.
-					return
+					// Only stop evaluating rules for this already-closed position.
+					// Continue the outer results loop so all eligible simulated
+					// positions can close in the same scheduler cycle.
+					// Live loss-scale adjustment remains settlement-driven.
+					break
 				}
 			}
 		}

@@ -44,9 +44,10 @@ func runLeadOnSharedTradeTick(mainConfig *models.Config) {
 	// prevents new Lead entries, but disabling either never blocks exits.
 	cfg := *mainConfig
 	r := &accountTradeRunner{
-		AccountID:   binance.LeadAccountID,
-		Config:      &cfg,
-		LeadSymbols: symbols,
+		AccountID:    binance.LeadAccountID,
+		Config:       &cfg,
+		LeadSymbols:  symbols,
+		OpenCooldown: &leadTradeOpenCooldown,
 		AllowNewOpens: settings.AllowNewOpens && cfg.FutureEnable == 1 &&
 			cfg.FutureMaxCount > 0 && cfg.LossMaxCount > 0 &&
 			!leadaccount.LeadEmergencyPaused(),

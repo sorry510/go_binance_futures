@@ -145,7 +145,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 			// 触发策略,风向改变,强制平仓
 			logs.Info("%s:auto_stop_start", position.Symbol)
 			if position.Side == "LONG" {
-				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+				_, err := runner.submitCloseWithEntryCooldown(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
 					// 委托确认不等于真实成交
 
@@ -178,7 +178,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				}
 			}
 			if position.Side == "SHORT" {
-				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				_, err := runner.submitCloseWithEntryCooldown(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 委托确认不等于真实成交
 
@@ -216,7 +216,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 		case tradeExitLoss:
 			//
 			if position.Side == "LONG" {
-				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+				_, err := runner.submitCloseWithEntryCooldown(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
 					// 委托确认不等于真实成交
 
@@ -249,7 +249,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				}
 			}
 			if position.Side == "SHORT" {
-				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				_, err := runner.submitCloseWithEntryCooldown(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 委托确认不等于真实成交
 
@@ -286,7 +286,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 		case tradeExitProfit:
 
 			if position.Side == "LONG" {
-				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
+				_, err := runner.submitCloseWithEntryCooldown(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeLong)
 				if err == nil {
 					// 委托确认不等于真实成交
 
@@ -319,7 +319,7 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 				}
 			}
 			if position.Side == "SHORT" {
-				_, err := runner.SubmitClose(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
+				_, err := runner.submitCloseWithEntryCooldown(managedPosition.Owner, managedPosition.SourceRef, position.Symbol, positionAmtFloatAbs, futures.PositionSideTypeShort)
 				if err == nil {
 					// 委托确认不等于真实成交
 
@@ -361,6 +361,11 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	// Exit/reconcile (and owned timeout-order cleanup) is always allowed
 	// even while Main/Lead NEW entries are paused.
 	if !runner.AllowNewOpens {
+		return
+	}
+	// A recently submitted entry/exit prohibits NEW entries only. Existing
+	// managed positions have already been checked for urgent closes above.
+	if runner.OpenCooldown.blocksAt(time.Now()) {
 		return
 	}
 	// Candidate selection is an OPEN-only dependency. Run it only after
@@ -682,7 +687,9 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 		}
 	}
 	if isOpen {
-		runner.Sleep(30 * time.Second) // 对当前账户单独冷却
+		// Do not block the shared Main/Lead tick or the next exit scan.
+		// The next cycle will skip only NEW entries for 3 minutes.
+		runner.OpenCooldown.blockFrom(time.Now())
 	}
 	/*************************************************开仓 end************************************************************ */
 }

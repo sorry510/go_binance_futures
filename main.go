@@ -448,7 +448,7 @@ func main() {
 	// 自动合约交易
 	loopRun(func() {
 		feature.StartTrade(&SystemConfig)
-	}, time.Second*2) // 2秒间隔；REST 权重随 managed orders/WS 状态变化，不使用固定预算假设
+	}, time.Second) // 1秒目标轮询；上一轮未结束则跳过，REST/WS 限额保护不变
 
 	// COIN-M shares the existing 2-second Spot scheduler tick, not a new
 	// scheduler center. Its Runner and private WS remain fully isolated from
@@ -528,14 +528,14 @@ func main() {
 	}, time.Minute)
 
 	/*******************************************测试自定义策略 start**********************************************************/
-	// 轮训测试所有开启合约交易的币种策略(每轮5个)
+	// 轮询测试选币器返回的候选币种；与正式合约交易同为1秒目标周期
 	loopRun(func() {
 		feature.NoticeAllSymbolByStrategy(&SystemConfig)
-	}, time.Millisecond*1500) // 1.5秒间隔, 避免请求过快
+	}, time.Second) // 1秒目标轮询；上一轮未结束则跳过
 	// 监听测试的开仓是否需要平仓
 	loopRun(func() {
 		feature.CheckTestResults(&SystemConfig)
-	}, time.Millisecond*1500) // 1.5秒间隔
+	}, time.Second) // 1秒目标轮询；上一轮未结束则跳过
 	/*******************************************测试自定义策略 end**********************************************************/
 
 	// 新币抢购

@@ -189,6 +189,7 @@ func TestStage3MainMarketEntryGolden(t *testing.T) {
 	}
 	var sleeps []time.Duration
 	r.Sleep = func(d time.Duration) { sleeps = append(sleeps, d) }
+	r.OpenCooldown = &tradeOpenCooldown{}
 	runAccountTradeCycle(r)
 	expected := []intent{
 		{"BTCUSDT", "BUY", "LONG", "MARKET", "long-hash", 4, 0},
@@ -200,8 +201,8 @@ func TestStage3MainMarketEntryGolden(t *testing.T) {
 	if !reflect.DeepEqual(notified, []string{"LONG:100.1", "SHORT:99.9"}) {
 		t.Fatalf("market notification price drift after removing history writer: %v", notified)
 	}
-	if !reflect.DeepEqual(sleeps, []time.Duration{30 * time.Second}) {
-		t.Fatalf("cooldown=%v", sleeps)
+	if len(sleeps) != 0 || !r.OpenCooldown.blocksAt(time.Now()) {
+		t.Fatalf("successful open must start nonblocking cooldown: sleep=%v blocked=%v", sleeps, r.OpenCooldown.blocksAt(time.Now()))
 	}
 }
 func TestStage3LeadCloseDoesNotDependOnWhitelist(t *testing.T) {
@@ -259,6 +260,7 @@ func TestStage3MainLimitOrderGolden(t *testing.T) {
 	}
 	var sleep []time.Duration
 	r.Sleep = func(d time.Duration) { sleep = append(sleep, d) }
+	r.OpenCooldown = &tradeOpenCooldown{}
 	runAccountTradeCycle(r)
 	want := []intent{
 		{"BTCUSDT", futures.SideTypeBuy, futures.PositionSideTypeLong, futures.OrderTypeLimit, 4, 100, "long-hash"},
@@ -270,8 +272,8 @@ func TestStage3MainLimitOrderGolden(t *testing.T) {
 	if !reflect.DeepEqual(notified, []string{"LONG:100", "SHORT:100"}) {
 		t.Fatalf("LIMIT notification price drift after history retirement: %v", notified)
 	}
-	if !reflect.DeepEqual(sleep, []time.Duration{30 * time.Second}) {
-		t.Fatalf("LIMIT cooldown drift: %v", sleep)
+	if len(sleep) != 0 || !r.OpenCooldown.blocksAt(time.Now()) {
+		t.Fatalf("successful LIMIT open must start nonblocking cooldown: sleep=%v blocked=%v", sleep, r.OpenCooldown.blocksAt(time.Now()))
 	}
 }
 
