@@ -60,9 +60,10 @@ func DefaultAdaptiveResolutionProvider() (ResolutionProvider, error) {
 	}
 	// Dedicated, bounded persistent ZIP cache. Never clean the temp root or
 	// unrelated files, and never use UM archives for COIN-M.
+	cacheGB, _ := config.Int("binance::public_data_cache_max_gb")
 	client, err := NewPublicDataClient(PublicDataClientConfig{
 		ProxyURL: proxyURL, CacheDir: filepath.Join(tempRootDir, "adaptive-um-archives"),
-		MaxCacheBytes: 2 << 30,
+		MaxCacheBytes: adaptiveArchiveCacheMaxBytes(cacheGB),
 	})
 	if err != nil {
 		return nil, err
@@ -76,6 +77,17 @@ func DefaultAdaptiveResolutionProvider() (ResolutionProvider, error) {
 	// to MySQL once verified daily ZIP replay is available.
 	provider.writeSparse = false
 	return provider, nil
+}
+
+// adaptiveArchiveCacheMaxBytes interprets the conf limit in GiB. Missing,
+// non-positive and unrepresentable values fall back to the 10 GiB default.
+func adaptiveArchiveCacheMaxBytes(configuredGB int) int64 {
+	const defaultGB int64 = 10
+	const maxInt64 = int64(^uint64(0) >> 1)
+	if configuredGB <= 0 || int64(configuredGB) > maxInt64/(1<<30) {
+		return defaultGB << 30
+	}
+	return int64(configuredGB) << 30
 }
 
 func NewAdaptiveResolutionProvider(repo *Repository, public *PublicDataClient) (*AdaptiveResolutionProvider, error) {

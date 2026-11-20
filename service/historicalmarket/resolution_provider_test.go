@@ -11,6 +11,25 @@ import (
 	"time"
 )
 
+func TestAdaptiveArchiveCacheMaxBytes(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		gb   int
+		want int64
+	}{
+		{name: "missing", gb: 0, want: 10 << 30},
+		{name: "negative", gb: -1, want: 10 << 30},
+		{name: "custom", gb: 20, want: 20 << 30},
+		{name: "one", gb: 1, want: 1 << 30},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := adaptiveArchiveCacheMaxBytes(test.gb); got != test.want {
+				t.Fatalf("size for %d GiB = %d; want %d", test.gb, got, test.want)
+			}
+		})
+	}
+}
+
 func TestResolutionProviderSecondBarsUsesCompleteSparseCache(t *testing.T) {
 	setupRepositoryTest(t)
 	repo := NewRepository(nil)
