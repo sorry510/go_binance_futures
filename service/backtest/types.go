@@ -237,9 +237,16 @@ type ResolutionStats struct {
 	TradeDrilldownSeconds  int                  `json:"trade_drilldown_seconds"`
 	SecondCacheHits        int                  `json:"second_cache_hits"`
 	TradeCacheHits         int                  `json:"trade_cache_hits"`
+	MinuteTradeReuseHits   int                  `json:"minute_trade_reuse_hits"`
 	ArchiveCacheHits       int                  `json:"archive_cache_hits"`
 	ArchiveDownloads       int                  `json:"archive_downloads"`
 	DownloadBytes          int64                `json:"download_bytes"`
+	ArchiveFetchMs         int64                `json:"archive_fetch_ms"`
+	ArchiveDownloadMs      int64                `json:"archive_download_ms"`
+	ArchiveParseMs         int64                `json:"archive_parse_ms"`
+	SparseQueryMs          int64                `json:"sparse_query_ms"`
+	ZipScannerOpens        int                  `json:"zip_scanner_opens"`
+	ZipScannerRewinds      int                  `json:"zip_scanner_rewinds"`
 	Unresolved             int                  `json:"unresolved"`
 	Timing                 *BacktestTimingStats `json:"timing,omitempty"`
 }

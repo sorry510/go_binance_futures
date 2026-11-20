@@ -11,43 +11,22 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
-// Keep one chunk per INSERT: a worst-case base64 payload is ~2.9 MiB and must fit MySQL 5.6's default 4 MiB max_allowed_packet.
-const equityChunkInsertBatchSize = 1
-
-func buildEquityStorage(runID string, points []EquityPoint, createdAt int64) ([]models.AgentBacktestEquityChunk, *models.AgentBacktestEquityPreview, error) {
-	chunks := make([]models.AgentBacktestEquityChunk, 0, (len(points)+equityArchiveChunkPoints-1)/equityArchiveChunkPoints)
-	for start, chunkIndex := 0, 0; start < len(points); start, chunkIndex = start+equityArchiveChunkPoints, chunkIndex+1 {
-		end := start + equityArchiveChunkPoints
-		if end > len(points) {
-			end = len(points)
-		}
-		part := points[start:end]
-		encoded, err := encodeEquityPayload(part)
-		if err != nil {
-			return nil, nil, fmt.Errorf("encode equity chunk %d: %w", chunkIndex, err)
-		}
-		chunks = append(chunks, models.AgentBacktestEquityChunk{
-			RunID: runID, ChunkIndex: chunkIndex,
-			StartSequence: part[0].Sequence, EndSequence: part[len(part)-1].Sequence,
-			StartTime: part[0].BarTime, EndTime: part[len(part)-1].BarTime,
-			PointCount: len(part), Encoding: equityEncoding, Compression: equityCompression,
-			Checksum: int64(encoded.Checksum), Payload: encoded.Payload, CreatedAt: createdAt,
-		})
-	}
+// New backtests store only a bounded, information-preserving chart preview.
+// Historical full-resolution chunks remain readable through loadEquityArchiveSample.
+func buildEquityStorage(runID string, points []EquityPoint, trades []Trade, createdAt int64) (*models.AgentBacktestEquityPreview, error) {
 	if len(points) == 0 {
-		return chunks, nil, nil
+		return nil, nil
 	}
-	previewPoints := sampleEquityPoints(points, equityPreviewPoints)
-	encoded, err := encodeEquityPayload(previewPoints)
+	selected := sampleImportantEquityPoints(points, trades, equityPreviewPoints)
+	encoded, err := encodeEquityPayload(selected)
 	if err != nil {
-		return nil, nil, fmt.Errorf("encode equity preview: %w", err)
+		return nil, fmt.Errorf("encode equity preview: %w", err)
 	}
-	preview := &models.AgentBacktestEquityPreview{
-		RunID: runID, PointCount: len(previewPoints), Encoding: equityEncoding,
+	return &models.AgentBacktestEquityPreview{
+		RunID: runID, PointCount: len(selected), Encoding: equityEncoding,
 		Compression: equityCompression, Checksum: int64(encoded.Checksum),
 		Payload: encoded.Payload, CreatedAt: createdAt,
-	}
-	return chunks, preview, nil
+	}, nil
 }
 
 func decodeStoredEquity(encoding, compression, payload string, checksum int64, pointCount int) ([]EquityPoint, error) {
@@ -144,29 +123,12 @@ func loadEquityArchiveSample(runID string, limit int) ([]EquityPoint, bool, erro
 	return out, true, nil
 }
 
-func persistPreparedEquityStorage(ctx context.Context, tx orm.TxOrmer, chunks []models.AgentBacktestEquityChunk, preview *models.AgentBacktestEquityPreview, progress func(points int)) (execMs int64, err error) {
-	execStarted := time.Now()
-	for start := 0; start < len(chunks); start += equityChunkInsertBatchSize {
-		end := start + equityChunkInsertBatchSize
-		if end > len(chunks) {
-			end = len(chunks)
-		}
-		batch := chunks[start:end]
-		if _, err := tx.InsertMultiWithCtx(ctx, equityChunkInsertBatchSize, &batch); err != nil {
-			return time.Since(execStarted).Milliseconds(), err
-		}
-		if progress != nil {
-			persistedPoints := 0
-			for _, row := range batch {
-				persistedPoints += row.PointCount
-			}
-			progress(persistedPoints)
-		}
-	}
+func persistPreparedEquityStorage(ctx context.Context, tx orm.TxOrmer, preview *models.AgentBacktestEquityPreview) (execMs int64, err error) {
+	started := time.Now()
 	if preview != nil {
 		if _, err := tx.InsertWithCtx(ctx, preview); err != nil {
-			return time.Since(execStarted).Milliseconds(), err
+			return time.Since(started).Milliseconds(), err
 		}
 	}
-	return time.Since(execStarted).Milliseconds(), nil
+	return time.Since(started).Milliseconds(), nil
 }

@@ -40,6 +40,8 @@ proxy_url = ""
 public_data_cache_dir = "./cache/tmp"
 # 高精度 ZIP 缓存容量上限，单位 GiB，默认 10；运行中的回测不受配置修改影响
 public_data_cache_max_gb = 10
+# Adaptive 高精度归档单次网络请求超时（分钟），默认 10，最大 60；下载失败仍按原规则重试
+public_data_download_timeout_minutes = 10
 
 [database]
 # mysql

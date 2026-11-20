@@ -817,7 +817,7 @@ func saveResultWithProgressTimed(ctx context.Context, runID string, result Resul
 		return timing, err
 	}
 	equityBuildStarted := time.Now()
-	equityChunks, equityPreview, err := buildEquityStorage(runID, result.Equity, time.Now().UnixMilli())
+	equityPreview, err := buildEquityStorage(runID, result.Equity, result.Trades, time.Now().UnixMilli())
 	timing.EquityBuildMs = time.Since(equityBuildStarted).Milliseconds()
 	if err != nil {
 		return timing, err
@@ -903,9 +903,8 @@ func saveResultWithProgressTimed(ctx context.Context, runID string, result Resul
 	}
 	timing.EventsMs = time.Since(eventStarted).Milliseconds()
 
-	execMs, err := persistPreparedEquityStorage(ctx, tx, equityChunks, equityPreview, func(points int) {
-		completedRows += points
-	})
+	execMs, err := persistPreparedEquityStorage(ctx, tx, equityPreview)
+	completedRows += len(result.Equity)
 	timing.EquityExecMs = execMs
 	if err != nil {
 		return rollback(err)

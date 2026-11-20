@@ -253,9 +253,16 @@ func (state *adaptiveRunState) finalize(result *Result) {
 		stats := state.provider.Stats()
 		state.stats.SecondCacheHits = stats.SecondCacheHits
 		state.stats.TradeCacheHits = stats.TradeCacheHits
+		state.stats.MinuteTradeReuseHits = stats.MinuteTradeReuseHits
 		state.stats.ArchiveCacheHits = stats.ArchiveCacheHits
 		state.stats.ArchiveDownloads = stats.ArchiveDownloads
 		state.stats.DownloadBytes = stats.DownloadBytes
+		state.stats.ArchiveFetchMs = stats.ArchiveFetchMs
+		state.stats.ArchiveDownloadMs = stats.ArchiveDownloadMs
+		state.stats.ArchiveParseMs = stats.ArchiveParseMs
+		state.stats.SparseQueryMs = stats.SparseQueryMs
+		state.stats.ZipScannerOpens = stats.ZipScannerOpens
+		state.stats.ZipScannerRewinds = stats.ZipScannerRewinds
 	}
 	result.ResolutionStats = state.stats
 }

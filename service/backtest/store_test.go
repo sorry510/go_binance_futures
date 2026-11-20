@@ -281,11 +281,20 @@ func TestManagerDeleteRemovesRunChildrenAndUnusedDataset(t *testing.T) {
 	if _, err := o.Insert(&models.AgentBacktestEquityPoint{RunID: run.RunID, Sequence: 1}); err != nil {
 		t.Fatal(err)
 	}
-	chunks, preview, err := buildEquityStorage(run.RunID, []EquityPoint{{Sequence: 1, BarTime: 1, Equity: 1000, Cash: 1000}}, time.Now().UnixMilli())
+	fixture := []EquityPoint{{Sequence: 1, BarTime: 1, Equity: 1000, Cash: 1000}}
+	encoded, err := encodeEquityPayload(fixture)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := o.Insert(&chunks[0]); err != nil {
+	if _, err := o.Insert(&models.AgentBacktestEquityChunk{
+		RunID: run.RunID, ChunkIndex: 0, StartSequence: 1, EndSequence: 1,
+		StartTime: 1, EndTime: 1, PointCount: 1, Encoding: equityEncoding,
+		Compression: equityCompression, Checksum: int64(encoded.Checksum), Payload: encoded.Payload,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	preview, err := buildEquityStorage(run.RunID, fixture, nil, time.Now().UnixMilli())
+	if err != nil {
 		t.Fatal(err)
 	}
 	if _, err := o.Insert(preview); err != nil {
@@ -636,7 +645,7 @@ func TestSaveResultWithProgressPersistsAllBatches(t *testing.T) {
 	legacy, _ := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).Count()
 	chunks, _ := o.QueryTable(new(models.AgentBacktestEquityChunk)).Filter("run_id", runID).Count()
 	previews, _ := o.QueryTable(new(models.AgentBacktestEquityPreview)).Filter("run_id", runID).Count()
-	if trades != 1001 || events != 1001 || legacy != 0 || chunks != 1 || previews != 1 {
+	if trades != 1001 || events != 1001 || legacy != 0 || chunks != 0 || previews != 1 {
 		t.Fatalf("persisted rows trades=%d events=%d legacy=%d chunks=%d previews=%d", trades, events, legacy, chunks, previews)
 	}
 	points, err := NewManager(DatasetBuilder{}).Equity(runID, maxEquityChartPoints)
@@ -677,15 +686,15 @@ func TestSaveResultRejectsInvalidEquityBeforeWritingChildren(t *testing.T) {
 	}
 }
 
-func TestSaveResultTransactionRollsBackTradesAndEventsOnChunkFailure(t *testing.T) {
+func TestSaveResultTransactionRollsBackTradesAndEventsOnPreviewFailure(t *testing.T) {
 	setupBacktestStoreTest(t)
-	const runID = "bt_atomic_chunk_failure"
+	const runID = "bt_atomic_preview_failure"
 	o := orm.NewOrm()
-	existingChunks, _, err := buildEquityStorage(runID, []EquityPoint{{Sequence: 1, BarTime: 1, Equity: 1000, Cash: 1000}}, time.Now().UnixMilli())
+	existing, err := buildEquityStorage(runID, []EquityPoint{{Sequence: 1, BarTime: 1, Equity: 1000, Cash: 1000}}, nil, time.Now().UnixMilli())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := o.Insert(&existingChunks[0]); err != nil {
+	if _, err := o.Insert(existing); err != nil {
 		t.Fatal(err)
 	}
 	result := Result{
@@ -694,25 +703,25 @@ func TestSaveResultTransactionRollsBackTradesAndEventsOnChunkFailure(t *testing.
 		Equity: []EquityPoint{{Sequence: 1, BarTime: 1, Equity: 1000, Cash: 1000}},
 	}
 	if err := saveResultWithProgress(context.Background(), runID, result, nil); err == nil {
-		t.Fatal("duplicate equity chunk must fail")
+		t.Fatal("duplicate equity preview must fail")
 	}
 	for name, model := range map[string]interface{}{
-		"trade":   new(models.AgentBacktestTrade),
-		"event":   new(models.AgentBacktestEvent),
-		"preview": new(models.AgentBacktestEquityPreview),
+		"trade": new(models.AgentBacktestTrade),
+		"event": new(models.AgentBacktestEvent),
+		"chunk": new(models.AgentBacktestEquityChunk),
 	} {
 		count, err := o.QueryTable(model).Filter("run_id", runID).Count()
 		if err != nil || count != 0 {
 			t.Fatalf("%s rows survived rollback: count=%d err=%v", name, count, err)
 		}
 	}
-	chunkCount, err := o.QueryTable(new(models.AgentBacktestEquityChunk)).Filter("run_id", runID).Count()
-	if err != nil || chunkCount != 1 {
-		t.Fatalf("pre-existing chunk changed by rollback: count=%d err=%v", chunkCount, err)
+	previews, err := o.QueryTable(new(models.AgentBacktestEquityPreview)).Filter("run_id", runID).Count()
+	if err != nil || previews != 1 {
+		t.Fatalf("pre-existing preview changed by rollback: count=%d err=%v", previews, err)
 	}
 }
 
-func TestEquityStorageUsesChunksAndPreview(t *testing.T) {
+func TestEquityStorageUsesOnlyPreview(t *testing.T) {
 	setupBacktestStoreTest(t)
 	const runID = "bt_chunked_equity"
 	result := Result{Equity: make([]EquityPoint, 0, 70000)}
@@ -735,8 +744,8 @@ func TestEquityStorageUsesChunksAndPreview(t *testing.T) {
 	o := orm.NewOrm()
 	legacy, _ := o.QueryTable(new(models.AgentBacktestEquityPoint)).Filter("run_id", runID).Count()
 	chunks, _ := o.QueryTable(new(models.AgentBacktestEquityChunk)).Filter("run_id", runID).Count()
-	if legacy != 0 || chunks != 3 {
-		t.Fatalf("legacy=%d chunks=%d want legacy=0 chunks=3", legacy, chunks)
+	if legacy != 0 || chunks != 0 {
+		t.Fatalf("legacy=%d chunks=%d want both=0", legacy, chunks)
 	}
 	preview, err := NewManager(DatasetBuilder{}).Equity(runID, maxEquityChartPoints)
 	if err != nil {
@@ -749,13 +758,13 @@ func TestEquityStorageUsesChunksAndPreview(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	targets := equitySampleSequences(1, 70000, 10)
-	if len(small) != len(targets) {
-		t.Fatalf("small sample len=%d want=%d", len(small), len(targets))
+	want := sampleEquityPoints(preview, 10)
+	if len(small) != len(want) {
+		t.Fatalf("small sample len=%d want=%d", len(small), len(want))
 	}
-	for i, target := range targets {
-		if small[i] != result.Equity[target-1] {
-			t.Fatalf("sample %d differs: got=%+v want=%+v", i, small[i], result.Equity[target-1])
+	for i := range want {
+		if small[i] != want[i] {
+			t.Fatalf("sample %d differs: got=%+v want=%+v", i, small[i], want[i])
 		}
 	}
 }
@@ -793,9 +802,6 @@ func TestBacktestResultMySQLBatchTargetsStayWithinPlaceholderLimits(t *testing.T
 	}
 	if backtestTradeInsertBatchSizeMySQL != 2000 {
 		t.Fatalf("mysql trade batch=%d want=2000", backtestTradeInsertBatchSizeMySQL)
-	}
-	if equityChunkInsertBatchSize != 1 {
-		t.Fatalf("equity chunk insert batch=%d want=1", equityChunkInsertBatchSize)
 	}
 	const tradeColumns = 24
 	if backtestTradeInsertBatchSizeMySQL*tradeColumns > 65535 {

@@ -98,9 +98,11 @@ type PublicDataClient struct {
 	activity    func(string)
 	group       singleflight.Group
 
-	parseMu      sync.Mutex
-	klineScanner *publicDataCSVScanner
-	tradeScanner *publicDataCSVScanner
+	parseMu        sync.Mutex
+	klineScanner   *publicDataCSVScanner
+	tradeScanner   *publicDataCSVScanner
+	scannerOpens   int
+	scannerRewinds int
 }
 
 func NewPublicDataClient(config PublicDataClientConfig) (*PublicDataClient, error) {
@@ -729,7 +731,12 @@ func (client *PublicDataClient) readPublicDataCSVRange(ctx context.Context, arch
 		scannerSlot = &client.tradeScanner
 	}
 	scanner := *scannerSlot
-	if scanner == nil || scanner.archiveURL != archive.URL || (start > 0 && scanner.lastTime > 0 && start <= scanner.lastTime) {
+	rewind := scanner != nil && scanner.archiveURL == archive.URL && start > 0 && scanner.lastTime > 0 && start <= scanner.lastTime
+	if scanner == nil || scanner.archiveURL != archive.URL || rewind {
+		if rewind {
+			client.scannerRewinds++
+		}
+		client.scannerOpens++
 		closePublicDataCSVScanner(scanner)
 		*scannerSlot = nil
 		var err error
@@ -740,6 +747,12 @@ func (client *PublicDataClient) readPublicDataCSVRange(ctx context.Context, arch
 		*scannerSlot = scanner
 	}
 	return scanner.scanRange(ctx, start, end, timeColumn, visit)
+}
+
+func (client *PublicDataClient) scannerStats() (opens, rewinds int) {
+	client.parseMu.Lock()
+	defer client.parseMu.Unlock()
+	return client.scannerOpens, client.scannerRewinds
 }
 
 func (scanner *publicDataCSVScanner) scanRange(ctx context.Context, start, end int64, timeColumn int, visit func([]string, int) error) error {

@@ -11,6 +11,23 @@ import (
 	"time"
 )
 
+func TestAdaptiveArchiveDownloadTimeout(t *testing.T) {
+	for _, test := range []struct {
+		minutes int
+		want    time.Duration
+	}{
+		{0, 10 * time.Minute},
+		{-1, 10 * time.Minute},
+		{5, 5 * time.Minute},
+		{30, 30 * time.Minute},
+		{99, 60 * time.Minute},
+	} {
+		if got := adaptiveArchiveDownloadTimeout(test.minutes); got != test.want {
+			t.Fatalf("timeout for %d minutes = %v, want %v", test.minutes, got, test.want)
+		}
+	}
+}
+
 func TestAdaptiveArchiveCacheMaxBytes(t *testing.T) {
 	for _, test := range []struct {
 		name string

@@ -29,11 +29,18 @@ type ResolutionEvidence struct {
 }
 
 type ResolutionStats struct {
-	SecondCacheHits  int   `json:"second_cache_hits"`
-	TradeCacheHits   int   `json:"trade_cache_hits"`
-	ArchiveCacheHits int   `json:"archive_cache_hits"`
-	ArchiveDownloads int   `json:"archive_downloads"`
-	DownloadBytes    int64 `json:"download_bytes"`
+	SecondCacheHits      int   `json:"second_cache_hits"`
+	TradeCacheHits       int   `json:"trade_cache_hits"`
+	MinuteTradeReuseHits int   `json:"minute_trade_reuse_hits"`
+	ArchiveCacheHits     int   `json:"archive_cache_hits"`
+	ArchiveDownloads     int   `json:"archive_downloads"`
+	DownloadBytes        int64 `json:"download_bytes"`
+	ArchiveFetchMs       int64 `json:"archive_fetch_ms"`
+	ArchiveDownloadMs    int64 `json:"archive_download_ms"`
+	ArchiveParseMs       int64 `json:"archive_parse_ms"`
+	SparseQueryMs        int64 `json:"sparse_query_ms"`
+	ZipScannerOpens      int   `json:"zip_scanner_opens"`
+	ZipScannerRewinds    int   `json:"zip_scanner_rewinds"`
 }
 
 type ResolutionProvider interface {
@@ -45,11 +52,26 @@ type ResolutionProvider interface {
 }
 
 type AdaptiveResolutionProvider struct {
-	repo        *Repository
-	public      *PublicDataClient
-	mu          sync.Mutex
-	stats       ResolutionStats
-	writeSparse bool // legacy constructor keeps writes; default backtest uses verified ZIP cache
+	repo                    *Repository
+	public                  *PublicDataClient
+	mu                      sync.Mutex
+	stats                   ResolutionStats
+	archiveFetchDuration    time.Duration
+	archiveDownloadDuration time.Duration
+	archiveParseDuration    time.Duration
+	sparseQueryDuration     time.Duration
+	minuteTrades            *minuteTradeSnapshot
+	writeSparse             bool // legacy constructor keeps writes; default backtest uses verified ZIP cache
+}
+
+// Only one fully verified minute is retained per provider/run. The trades are
+// already sorted by (TradeTime, TradeID) and are immutable after publication.
+// This avoids reopening the daily ZIP for each child-second ROI check.
+type minuteTradeSnapshot struct {
+	market, symbol         string
+	start, end             int64
+	rows                   []PublicDataTrade
+	archiveURL, archiveSHA string
 }
 
 func DefaultAdaptiveResolutionProvider() (ResolutionProvider, error) {
@@ -61,9 +83,11 @@ func DefaultAdaptiveResolutionProvider() (ResolutionProvider, error) {
 	// Dedicated, bounded persistent ZIP cache. Never clean the temp root or
 	// unrelated files, and never use UM archives for COIN-M.
 	cacheGB, _ := config.Int("binance::public_data_cache_max_gb")
+	downloadTimeoutMinutes, _ := config.Int("binance::public_data_download_timeout_minutes")
 	client, err := NewPublicDataClient(PublicDataClientConfig{
 		ProxyURL: proxyURL, CacheDir: filepath.Join(tempRootDir, "adaptive-um-archives"),
 		MaxCacheBytes: adaptiveArchiveCacheMaxBytes(cacheGB),
+		Timeout:       adaptiveArchiveDownloadTimeout(downloadTimeoutMinutes),
 	})
 	if err != nil {
 		return nil, err
@@ -90,6 +114,19 @@ func adaptiveArchiveCacheMaxBytes(configuredGB int) int64 {
 	return int64(configuredGB) << 30
 }
 
+// A larger per-request budget prevents slow daily Trades ZIPs from failing
+// at the old five-minute HTTP client limit. Existing checksum verification
+// and bounded retry behavior remain unchanged.
+func adaptiveArchiveDownloadTimeout(minutes int) time.Duration {
+	if minutes <= 0 {
+		minutes = 10
+	}
+	if minutes > 60 {
+		minutes = 60
+	}
+	return time.Duration(minutes) * time.Minute
+}
+
 func NewAdaptiveResolutionProvider(repo *Repository, public *PublicDataClient) (*AdaptiveResolutionProvider, error) {
 	if repo == nil {
 		return nil, fmt.Errorf("historical repository is required")
@@ -111,13 +148,36 @@ func (provider *AdaptiveResolutionProvider) Close() error {
 	if provider == nil || provider.public == nil {
 		return nil
 	}
+	provider.mu.Lock()
+	provider.minuteTrades = nil
+	provider.mu.Unlock()
 	return provider.public.Close()
 }
 
 func (provider *AdaptiveResolutionProvider) Stats() ResolutionStats {
 	provider.mu.Lock()
-	defer provider.mu.Unlock()
-	return provider.stats
+	stats := provider.stats
+	stats.ArchiveFetchMs = provider.archiveFetchDuration.Milliseconds()
+	stats.ArchiveDownloadMs = provider.archiveDownloadDuration.Milliseconds()
+	stats.ArchiveParseMs = provider.archiveParseDuration.Milliseconds()
+	stats.SparseQueryMs = provider.sparseQueryDuration.Milliseconds()
+	provider.mu.Unlock()
+	if provider.public != nil {
+		stats.ZipScannerOpens, stats.ZipScannerRewinds = provider.public.scannerStats()
+	}
+	return stats
+}
+
+func (provider *AdaptiveResolutionProvider) addSparseQuery(duration time.Duration) {
+	provider.mu.Lock()
+	provider.sparseQueryDuration += duration
+	provider.mu.Unlock()
+}
+
+func (provider *AdaptiveResolutionProvider) addArchiveParse(duration time.Duration) {
+	provider.mu.Lock()
+	provider.archiveParseDuration += duration
+	provider.mu.Unlock()
 }
 
 func (provider *AdaptiveResolutionProvider) MinuteBars(ctx context.Context, market, symbol, interval string, start, end int64) ([]Kline, ResolutionEvidence, error) {
@@ -136,7 +196,13 @@ func (provider *AdaptiveResolutionProvider) SecondBars(ctx context.Context, mark
 	if err := validateRange(market, symbol, start, end); err != nil {
 		return nil, ResolutionEvidence{}, err
 	}
+	// A completed candidate minute releases its trade frame before the next one.
+	provider.mu.Lock()
+	provider.minuteTrades = nil
+	provider.mu.Unlock()
+	queryStarted := time.Now()
 	local, err := provider.repo.LoadSparseSecondBars(ctx, market, symbol, start, end)
+	provider.addSparseQuery(time.Since(queryStarted))
 	if err != nil {
 		return nil, ResolutionEvidence{}, err
 	}
@@ -174,10 +240,13 @@ func (provider *AdaptiveResolutionProvider) SecondBars(ctx context.Context, mark
 		return nil, ResolutionEvidence{}, err
 	}
 	spec := PublicDataArchiveSpec{Kind: ArchiveKindKlines, Period: ArchivePeriodDaily, Symbol: symbol, Interval: SparseSecondInterval, Date: date}
+	fetchStarted := time.Now()
 	archive, fetchErr := provider.public.FetchArchive(ctx, spec)
 	if fetchErr == nil {
-		provider.recordArchive(archive)
+		provider.recordArchive(archive, time.Since(fetchStarted))
+		parseStarted := time.Now()
 		rows, parseErr := provider.public.ParseKlines(ctx, archive, start, end)
+		provider.addArchiveParse(time.Since(parseStarted))
 		if parseErr != nil {
 			return nil, ResolutionEvidence{}, parseErr
 		}
@@ -225,7 +294,15 @@ func (provider *AdaptiveResolutionProvider) Trades(ctx context.Context, market, 
 	if err := validateRange(market, symbol, start, end); err != nil {
 		return nil, ResolutionEvidence{}, err
 	}
+	if err := ctx.Err(); err != nil {
+		return nil, ResolutionEvidence{}, err
+	}
+	if rows, evidence, hit := provider.reuseMinuteTrades(market, symbol, start, end); hit {
+		return rows, evidence, nil
+	}
+	queryStarted := time.Now()
 	local, err := provider.repo.LoadSparseTrades(ctx, market, symbol, start, end)
+	provider.addSparseQuery(time.Since(queryStarted))
 	if err != nil {
 		return nil, ResolutionEvidence{}, err
 	}
@@ -249,12 +326,15 @@ func (provider *AdaptiveResolutionProvider) Trades(ctx context.Context, market, 
 	if err != nil {
 		return nil, ResolutionEvidence{}, err
 	}
+	fetchStarted := time.Now()
 	archive, err := provider.public.FetchArchive(ctx, PublicDataArchiveSpec{Kind: ArchiveKindTrades, Period: ArchivePeriodDaily, Symbol: symbol, Date: date})
 	if err != nil {
 		return nil, ResolutionEvidence{}, err
 	}
-	provider.recordArchive(archive)
+	provider.recordArchive(archive, time.Since(fetchStarted))
+	parseStarted := time.Now()
 	rows, err := provider.public.ParseTrades(ctx, archive, start, end)
+	provider.addArchiveParse(time.Since(parseStarted))
 	if err != nil {
 		return nil, ResolutionEvidence{}, err
 	}
@@ -262,6 +342,17 @@ func (provider *AdaptiveResolutionProvider) Trades(ctx context.Context, market, 
 	for i := range rows {
 		rows[i].SourceRef = sourceRef
 		rows[i].ArchiveSHA256 = archive.SHA256
+	}
+	// No pre-existing sparse trades for this entire minute: each child-second
+	// would use the same verified archive. Reuse the exact parsed rows instead
+	// of repeating SQL, ZIP inflation and CSV decoding up to 60 times.
+	if !provider.writeSparse && len(local) == 0 && len(rows) > 0 && start%60_000 == 0 && end-start == 59_999 {
+		provider.mu.Lock()
+		provider.minuteTrades = &minuteTradeSnapshot{
+			market: market, symbol: strings.ToUpper(symbol), start: start, end: end,
+			rows: rows, archiveURL: archive.URL, archiveSHA: archive.SHA256,
+		}
+		provider.mu.Unlock()
 	}
 	if provider.writeSparse && len(rows) > 0 {
 		if _, err := provider.repo.StoreSparseTrades(ctx, rows); err != nil {
@@ -275,13 +366,47 @@ func (provider *AdaptiveResolutionProvider) Trades(ctx context.Context, market, 
 	return rows, evidence, nil
 }
 
-func (provider *AdaptiveResolutionProvider) recordArchive(archive PublicDataArchive) {
+// reuseMinuteTrades recreates the exact per-second archive evidence without
+// touching SQL or the daily ZIP. It is enabled only if the parent minute was
+// loaded from a verified archive and the SQL sparse store had no rows in it.
+// Returning a copy prevents callers from mutating the shared minute frame.
+func (provider *AdaptiveResolutionProvider) reuseMinuteTrades(market, symbol string, start, end int64) ([]PublicDataTrade, ResolutionEvidence, bool) {
+	provider.mu.Lock()
+	frame := provider.minuteTrades
+	if frame == nil || frame.market != market || frame.symbol != strings.ToUpper(symbol) ||
+		start < frame.start || end > frame.end || start > end {
+		provider.mu.Unlock()
+		return nil, ResolutionEvidence{}, false
+	}
+	provider.stats.TradeCacheHits++
+	provider.stats.MinuteTradeReuseHits++
+	provider.mu.Unlock()
+
+	first := sort.Search(len(frame.rows), func(i int) bool { return frame.rows[i].TradeTime >= start })
+	last := sort.Search(len(frame.rows), func(i int) bool { return frame.rows[i].TradeTime > end })
+	rows := make([]PublicDataTrade, last-first)
+	sourceRef := frame.archiveURL + "#sha256=" + frame.archiveSHA + "&" + resolutionRangeTag(start, end)
+	for i := range rows {
+		rows[i] = frame.rows[first+i]
+		rows[i].SourceRef = sourceRef
+	}
+	evidence := ResolutionEvidence{
+		Resolution: "trades", SourceRef: sourceRef, ArchiveURL: frame.archiveURL,
+		ArchiveSHA256: frame.archiveSHA, Rows: len(rows), CacheHit: true,
+		EvidenceHash: tradeEvidenceHash(start, end, rows),
+	}
+	return rows, evidence, true
+}
+
+func (provider *AdaptiveResolutionProvider) recordArchive(archive PublicDataArchive, elapsed time.Duration) {
 	provider.mu.Lock()
 	defer provider.mu.Unlock()
+	provider.archiveFetchDuration += elapsed
 	if archive.FromCache {
 		provider.stats.ArchiveCacheHits++
 		return
 	}
+	provider.archiveDownloadDuration += elapsed
 	provider.stats.ArchiveDownloads++
 	provider.stats.DownloadBytes += archive.Size
 }

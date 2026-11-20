@@ -129,21 +129,19 @@ func decodeEquityPayload(payload string, checksum uint32) ([]EquityPoint, error)
 	return points, nil
 }
 
+// sampleEquityPoints downsamples an already sparse preview by INDEX, rather
+// than by the original replay sequence (which now contains deliberate gaps).
 func sampleEquityPoints(points []EquityPoint, limit int) []EquityPoint {
 	if limit <= 0 || len(points) <= limit {
 		return append([]EquityPoint(nil), points...)
 	}
-	targets := equitySampleSequences(points[0].Sequence, points[len(points)-1].Sequence, limit)
-	out := make([]EquityPoint, 0, len(targets))
-	targetIndex := 0
-	for _, point := range points {
-		if targetIndex >= len(targets) {
-			break
-		}
-		if point.Sequence == targets[targetIndex] {
-			out = append(out, point)
-			targetIndex++
-		}
+	if limit == 1 {
+		return []EquityPoint{points[0]}
+	}
+	out := make([]EquityPoint, 0, limit)
+	for i := 0; i < limit; i++ {
+		index := i * (len(points) - 1) / (limit - 1)
+		out = append(out, points[index])
 	}
 	return out
 }

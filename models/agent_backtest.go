@@ -132,7 +132,8 @@ func (*AgentBacktestEquityPoint) TableIndex() [][]string {
 	return [][]string{{"RunID", "Sequence"}}
 }
 
-// AgentBacktestEquityChunk stores the complete lossless equity curve in compressed chunks.
+// AgentBacktestEquityChunk is retained to read and delete legacy lossless equity archives.
+// New backtests store only AgentBacktestEquityPreview; no new chunks are written.
 type AgentBacktestEquityChunk struct {
 	ID            int64  `orm:"column(id);auto" json:"id"`
 	RunID         string `orm:"column(run_id);size(64)" json:"run_id"`
