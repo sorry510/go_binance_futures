@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
+	backtestservice "go_binance_futures/service/backtest"
 	"strings"
+	"time"
 
 	"go_binance_futures/service/historicalmarket"
 	"go_binance_futures/utils"
@@ -36,4 +38,30 @@ func (ctrl *AgentHistoricalMarketController) Import() {
 		return
 	}
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": result, "msg": "success"})
+}
+
+// Kline1mCoverage is read-only; it never downloads missing data.
+func (ctrl *AgentHistoricalMarketController) Kline1mCoverage() {
+	result, err := historicalmarket.DefaultRepository().Kline1mCalendar(
+		ctrl.Ctx.Request.Context(), ctrl.GetString("symbol"),
+		ctrl.GetString("from"), ctrl.GetString("to"), time.Now())
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": result, "msg": "success"})
+}
+
+func (ctrl *AgentHistoricalMarketController) Kline1mRepair() {
+	var request backtestservice.Kline1mRepairRequest
+	if err := json.Unmarshal(ctrl.Ctx.Input.RequestBody, &request); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "invalid request: "+err.Error()))
+		return
+	}
+	job, err := backtestservice.DefaultManager().StartKline1mRepair(request)
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": job, "msg": "success"})
 }
