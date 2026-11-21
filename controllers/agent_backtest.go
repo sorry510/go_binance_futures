@@ -57,6 +57,17 @@ func (ctrl *AgentBacktestController) List() {
 	}
 	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": map[string]interface{}{"list": items, "total": total, "page": page, "limit": limit}, "msg": "success"})
 }
+
+// SymbolDefaults exposes a read-only snapshot of existing per-symbol live settings.
+func (ctrl *AgentBacktestController) SymbolDefaults() {
+	defaults, err := backtestservice.GetBacktestSymbolDefaults(ctrl.GetString("symbol"))
+	if err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
+	ctrl.Ctx.Resp(map[string]interface{}{"code": 200, "data": defaults, "msg": "success"})
+}
+
 func (ctrl *AgentBacktestController) Prefetch() {
 	var request backtestservice.PrefetchRequest
 	if err := json.Unmarshal(ctrl.Ctx.Input.RequestBody, &request); err != nil {

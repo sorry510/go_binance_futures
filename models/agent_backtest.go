@@ -43,6 +43,9 @@ type AgentBacktestRun struct {
 	EndTime              int64   `orm:"column(end_time);index" json:"end_time"`
 	InitialEquity        float64 `orm:"column(initial_equity);digits(30);decimals(8)" json:"initial_equity"`
 	PositionSizePct      float64 `orm:"column(position_size_pct);digits(12);decimals(6)" json:"position_size_pct"`
+	PositionMode         string  `orm:"column(position_mode);size(24);default(equity_percent)" json:"position_mode"`
+	FixedMarginUSDT      float64 `orm:"column(fixed_margin_usdt);digits(30);decimals(8);default(0)" json:"fixed_margin_usdt"`
+	QuantityStepSize     string  `orm:"column(quantity_step_size);size(32);null" json:"quantity_step_size"`
 	Leverage             int     `orm:"column(leverage)" json:"leverage"`
 	FeeRate              float64 `orm:"column(fee_rate);digits(16);decimals(10)" json:"fee_rate"`
 	SlippageBps          float64 `orm:"column(slippage_bps);digits(16);decimals(6)" json:"slippage_bps"`

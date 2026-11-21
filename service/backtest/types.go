@@ -3,6 +3,8 @@ package backtest
 import (
 	"encoding/json"
 	"fmt"
+	"math"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -10,16 +12,18 @@ import (
 const (
 	// BT-1 fixes forming-kline taker fields in standard replay and
 	// same-second TP/SL ordering in adaptive replay. Prior runs keep their versions.
-	StandardEngineVersion   = "backtest_engine_v8"
-	AdaptiveEngineVersion   = "backtest_engine_v11"
-	EngineVersion           = StandardEngineVersion
-	MarketConditionModel    = "historical_market_condition_v1"
-	ResolutionModeStandard  = "standard_1m"
-	ResolutionModeAdaptive  = "adaptive"
-	StandardResolutionModel = "standard_1m_v2"
-	AdaptiveResolutionModel = "adaptive_intrabar_v3"
-	DefaultWarmupBars       = 200
-	ReplayInterval          = "1m"
+	StandardEngineVersion     = "backtest_engine_v8"
+	AdaptiveEngineVersion     = "backtest_engine_v11"
+	EngineVersion             = StandardEngineVersion
+	MarketConditionModel      = "historical_market_condition_v1"
+	ResolutionModeStandard    = "standard_1m"
+	ResolutionModeAdaptive    = "adaptive"
+	PositionModeEquityPercent = "equity_percent"
+	PositionModeFixedMargin   = "fixed_margin"
+	StandardResolutionModel   = "standard_1m_v2"
+	AdaptiveResolutionModel   = "adaptive_intrabar_v3"
+	DefaultWarmupBars         = 200
+	ReplayInterval            = "1m"
 )
 
 type Bar struct {
@@ -99,13 +103,17 @@ type StrategySnapshot struct {
 }
 
 type RunConfig struct {
-	InitialEquity   float64 `json:"initial_equity"`
-	PositionSizePct float64 `json:"position_size_pct"`
-	Leverage        int     `json:"leverage"`
-	FeeRate         float64 `json:"fee_rate"`
-	SlippageBps     float64 `json:"slippage_bps"`
-	StopLossPct     float64 `json:"stop_loss_pct"`
-	TakeProfitPct   float64 `json:"take_profit_pct"`
+	PositionMode    string  `json:"position_mode,omitempty"`
+	FixedMarginUSDT float64 `json:"fixed_margin_usdt,omitempty"`
+	// Snapshot from symbols.stepSize for fixed-margin runs; populated by the server.
+	QuantityStepSize string  `json:"quantity_step_size,omitempty"`
+	InitialEquity    float64 `json:"initial_equity"`
+	PositionSizePct  float64 `json:"position_size_pct"`
+	Leverage         int     `json:"leverage"`
+	FeeRate          float64 `json:"fee_rate"`
+	SlippageBps      float64 `json:"slippage_bps"`
+	StopLossPct      float64 `json:"stop_loss_pct"`
+	TakeProfitPct    float64 `json:"take_profit_pct"`
 }
 
 type StartRequest struct {
@@ -347,13 +355,16 @@ func ResolutionMetadata(mode string) (engineVersion, model string) {
 }
 
 func DefaultRunConfig() RunConfig {
-	return RunConfig{InitialEquity: 1000, PositionSizePct: 1, Leverage: 1, FeeRate: 0.0005, SlippageBps: 5}
+	return RunConfig{PositionMode: PositionModeEquityPercent, InitialEquity: 1000, PositionSizePct: 1, Leverage: 1, FeeRate: 0.0005, SlippageBps: 5}
 }
 
 func NormalizeRunConfig(config RunConfig) RunConfig {
 	defaults := DefaultRunConfig()
 	if config == (RunConfig{}) {
 		return defaults
+	}
+	if config.PositionMode == "" {
+		config.PositionMode = PositionModeEquityPercent // legacy runs and API callers
 	}
 	if config.InitialEquity <= 0 {
 		config.InitialEquity = defaults.InitialEquity
@@ -383,6 +394,26 @@ func NormalizeRunConfig(config RunConfig) RunConfig {
 		config.TakeProfitPct = 0
 	}
 	return config
+}
+
+// ValidateRunConfig avoids silently converting an invalid fixed-margin
+// request into a 100% equity-position run.
+func ValidateRunConfig(config RunConfig) error {
+	switch config.PositionMode {
+	case PositionModeEquityPercent:
+		return nil
+	case PositionModeFixedMargin:
+		if config.FixedMarginUSDT <= 0 || math.IsNaN(config.FixedMarginUSDT) || math.IsInf(config.FixedMarginUSDT, 0) {
+			return fmt.Errorf("fixed_margin_usdt must be a positive finite value")
+		}
+		step, err := strconv.ParseFloat(config.QuantityStepSize, 64)
+		if err != nil || step <= 0 || math.IsNaN(step) || math.IsInf(step, 0) {
+			return fmt.Errorf("valid quantity_step_size from symbols is required")
+		}
+		return nil
+	default:
+		return fmt.Errorf("unsupported position_mode %q", config.PositionMode)
+	}
 }
 
 func intervalAnnualPeriods(interval time.Duration) float64 {

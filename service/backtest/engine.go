@@ -41,6 +41,9 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 		return Result{}, err
 	}
 	config = NormalizeRunConfig(config)
+	if err := ValidateRunConfig(config); err != nil {
+		return Result{}, err
+	}
 	if dataset.DatasetSpecHash == "" {
 		dataset.DatasetSpecHash = DatasetSpecHash(dataset)
 	}
@@ -128,14 +131,31 @@ func (engine Engine) RunWithResolution(ctx context.Context, dataset Dataset, str
 			if action.Action == "open" && position == nil {
 				fill := applySlippage(bar.Open, action.Side, true, config.SlippageBps)
 				notional := math.Max(cash, 0) * config.PositionSizePct * float64(config.Leverage)
+				if config.PositionMode == PositionModeFixedMargin {
+					notional = config.FixedMarginUSDT * float64(config.Leverage)
+				}
 				if fill > 0 && notional > 0 {
 					qty := notional / fill
+					if config.PositionMode == PositionModeFixedMargin {
+						// Reuse live's StepSize-based precision rather than changing
+						// historical fill prices or the slippage model.
+						qty = utils.GetTradePrecision(qty, config.QuantityStepSize)
+						notional = qty * fill
+					}
 					fee := notional * config.FeeRate
-					cash -= fee
-					position = &Position{Side: action.Side, EntryTime: bar.OpenTime, EntryPrice: fill, Quantity: qty, OpenFee: fee, OpenStrategyName: action.StrategyName, OpenStrategyType: action.StrategyType, OpenStrategyHash: action.StrategyHash, MarketCondition: action.MarketCondition}
-					addEvent(bar.OpenTime, "order", "open", action.Side, fill, qty, action)
-					addEvent(bar.OpenTime, "fill", "open", action.Side, fill, qty, nil)
-					addEvent(bar.OpenTime, "position", "opened", action.Side, fill, qty, nil)
+					allowed := qty > 0
+					if config.PositionMode == PositionModeFixedMargin {
+						allowed = allowed && cash+1e-9 >= notional/float64(config.Leverage)+fee
+					}
+					if allowed {
+						cash -= fee
+						position = &Position{Side: action.Side, EntryTime: bar.OpenTime, EntryPrice: fill, Quantity: qty, OpenFee: fee, OpenStrategyName: action.StrategyName, OpenStrategyType: action.StrategyType, OpenStrategyHash: action.StrategyHash, MarketCondition: action.MarketCondition}
+						addEvent(bar.OpenTime, "order", "open", action.Side, fill, qty, action)
+						addEvent(bar.OpenTime, "fill", "open", action.Side, fill, qty, nil)
+						addEvent(bar.OpenTime, "position", "opened", action.Side, fill, qty, nil)
+					} else if config.PositionMode == PositionModeFixedMargin {
+						addEvent(bar.OpenTime, "order", "skipped", action.Side, fill, qty, map[string]any{"reason": "insufficient_margin_or_quantity", "required_margin": notional / float64(config.Leverage), "cash": cash})
+					}
 				}
 			} else if action.Action == "close" && position != nil {
 				reason := action.ExitReason

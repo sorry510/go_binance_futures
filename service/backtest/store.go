@@ -55,6 +55,21 @@ func NewManager(builder DatasetBuilder) *Manager {
 func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	request.Symbol = strings.ToUpper(strings.TrimSpace(request.Symbol))
 	request.Config = NormalizeRunConfig(request.Config)
+	// The exchange StepSize is authoritative, never trust client-supplied
+	// precision for fixed-margin sizing. This is a read-only symbol lookup.
+	if request.Config.PositionMode == PositionModeFixedMargin {
+		defaults, err := GetBacktestSymbolDefaults(request.Symbol)
+		if err != nil {
+			return RunSummary{}, err
+		}
+		request.Config.QuantityStepSize = defaults.QuantityStepSize
+	} else {
+		request.Config.QuantityStepSize = ""
+		request.Config.FixedMarginUSDT = 0
+	}
+	if err := ValidateRunConfig(request.Config); err != nil {
+		return RunSummary{}, err
+	}
 	resolutionMode, err := NormalizeResolutionMode(request.ResolutionMode)
 	if err != nil {
 		return RunSummary{}, err
@@ -83,7 +98,7 @@ func (manager *Manager) Start(request StartRequest) (RunSummary, error) {
 	strategyVersion := strategyservice.StrategySnapshotHash(template.Technology, template.Strategy)
 	now := time.Now().UnixMilli()
 	runID := newRunID()
-	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: engineVersion, MarketConditionModel: MarketConditionModel, ResolutionMode: resolutionMode, ResolutionModel: resolutionModel, Symbol: request.Symbol, ExecutionInterval: ReplayInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
+	row := models.AgentBacktestRun{RunID: runID, StrategyTemplateID: template.ID, StrategyTemplateName: template.Name, StrategyVersion: strategyVersion, TechnologyJSON: template.Technology, StrategyJSON: template.Strategy, EngineVersion: engineVersion, MarketConditionModel: MarketConditionModel, ResolutionMode: resolutionMode, ResolutionModel: resolutionModel, Symbol: request.Symbol, ExecutionInterval: ReplayInterval, StartTime: request.StartTime, EndTime: request.EndTime, InitialEquity: request.Config.InitialEquity, PositionSizePct: request.Config.PositionSizePct, PositionMode: request.Config.PositionMode, FixedMarginUSDT: request.Config.FixedMarginUSDT, QuantityStepSize: request.Config.QuantityStepSize, Leverage: request.Config.Leverage, FeeRate: request.Config.FeeRate, SlippageBps: request.Config.SlippageBps, StopLossPct: request.Config.StopLossPct, TakeProfitPct: request.Config.TakeProfitPct, Status: "queued", Stage: "queued", Progress: 0, CreatedAt: now, UpdatedAt: now}
 	if _, err := o.Insert(&row); err != nil {
 		return RunSummary{}, fmt.Errorf("create backtest run: %w", err)
 	}
@@ -944,7 +959,7 @@ func summaryFromRow(row models.AgentBacktestRun) RunSummary {
 	if model == "" {
 		model = StandardResolutionModel
 	}
-	return RunSummary{RunID: row.RunID, DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, DataHash: row.DataHash, StrategyTemplateID: row.StrategyTemplateID, StrategyTemplateName: row.StrategyTemplateName, StrategyVersion: row.StrategyVersion, EngineVersion: row.EngineVersion, MarketConditionModel: row.MarketConditionModel, ResolutionMode: mode, ResolutionModel: model, ResolutionStats: resolutionStats, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, Config: RunConfig{InitialEquity: row.InitialEquity, PositionSizePct: row.PositionSizePct, Leverage: row.Leverage, FeeRate: row.FeeRate, SlippageBps: row.SlippageBps, StopLossPct: row.StopLossPct, TakeProfitPct: row.TakeProfitPct}, Status: row.Status, Stage: row.Stage, Progress: row.Progress, Metrics: metrics, Error: row.Error, CreatedAt: row.CreatedAt, StartedAt: row.StartedAt, UpdatedAt: row.UpdatedAt, CompletedAt: row.CompletedAt}
+	return RunSummary{RunID: row.RunID, DatasetID: row.DatasetID, DatasetSpecHash: row.DatasetSpecHash, DataHash: row.DataHash, StrategyTemplateID: row.StrategyTemplateID, StrategyTemplateName: row.StrategyTemplateName, StrategyVersion: row.StrategyVersion, EngineVersion: row.EngineVersion, MarketConditionModel: row.MarketConditionModel, ResolutionMode: mode, ResolutionModel: model, ResolutionStats: resolutionStats, Symbol: row.Symbol, ExecutionInterval: row.ExecutionInterval, StartTime: row.StartTime, EndTime: row.EndTime, Config: RunConfig{InitialEquity: row.InitialEquity, PositionSizePct: row.PositionSizePct, PositionMode: normalizedStoredPositionMode(row.PositionMode), FixedMarginUSDT: row.FixedMarginUSDT, QuantityStepSize: row.QuantityStepSize, Leverage: row.Leverage, FeeRate: row.FeeRate, SlippageBps: row.SlippageBps, StopLossPct: row.StopLossPct, TakeProfitPct: row.TakeProfitPct}, Status: row.Status, Stage: row.Stage, Progress: row.Progress, Metrics: metrics, Error: row.Error, CreatedAt: row.CreatedAt, StartedAt: row.StartedAt, UpdatedAt: row.UpdatedAt, CompletedAt: row.CompletedAt}
 }
 func newRunID() string {
 	b := make([]byte, 16)
@@ -952,4 +967,12 @@ func newRunID() string {
 		return "bt_" + hex.EncodeToString(b)
 	}
 	return fmt.Sprintf("bt_%d", time.Now().UnixNano())
+}
+
+// Old runs had no position_mode column: they always used equity percentage.
+func normalizedStoredPositionMode(value string) string {
+	if value == "" {
+		return PositionModeEquityPercent
+	}
+	return value
 }

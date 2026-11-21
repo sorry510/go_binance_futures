@@ -1109,6 +1109,22 @@ func TestSyncDatabaseInitializesAndIsIdempotent(t *testing.T) {
 		}
 	})
 
+	// v28: fixed-margin historical replay columns, additive ORM schema only.
+	// Prior historical rows must retain equity-percent semantics.
+	if err := SyncDatabase(28); err != nil {
+		t.Fatalf("v28 backtest margin schema migration: %v", err)
+	}
+	var columnCount int
+	if err := o.Raw("SELECT COUNT(*) FROM pragma_table_info('agent_backtest_runs') WHERE name IN ('position_mode','fixed_margin_usdt','quantity_step_size')").QueryRow(&columnCount); err != nil || columnCount != 3 {
+		t.Fatalf("missing v28 backtest run columns count=%d err=%v", columnCount, err)
+	}
+	if err := SyncDatabase(28); err != nil {
+		t.Fatalf("v28 idempotent sync: %v", err)
+	}
+	version, err = utils.GetSystemConfig()
+	if err != nil || version.Version != 28 {
+		t.Fatalf("v28 config version=%+v err=%v", version, err)
+	}
 	// Every schema bump must advance this test's highest checked version.
 	if version.Version != appversion.DatabaseSchemaVersion {
 		t.Fatalf("migration test ends at v%d, binary requires v%d", version.Version, appversion.DatabaseSchemaVersion)

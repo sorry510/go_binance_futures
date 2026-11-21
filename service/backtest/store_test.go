@@ -27,7 +27,7 @@ func setupBacktestStoreTest(t *testing.T) {
 		if backtestStoreTestErr != nil {
 			return
 		}
-		orm.RegisterModel(new(models.Config), new(models.MarketConditionHistory), new(models.StrategyTemplates), new(models.MarketKline1m), new(models.MarketKline1h), new(models.MarketFundingRate), new(models.MarketDataImportBatch), new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint), new(models.AgentBacktestEquityChunk), new(models.AgentBacktestEquityPreview))
+		orm.RegisterModel(new(models.Config), new(models.Symbols), new(models.MarketConditionHistory), new(models.StrategyTemplates), new(models.MarketKline1m), new(models.MarketKline1h), new(models.MarketFundingRate), new(models.MarketDataImportBatch), new(models.AgentBacktestDataset), new(models.AgentBacktestRun), new(models.AgentBacktestTrade), new(models.AgentBacktestEvent), new(models.AgentBacktestEquityPoint), new(models.AgentBacktestEquityChunk), new(models.AgentBacktestEquityPreview))
 		dir, err := os.MkdirTemp("", "backtest-store-test-*")
 		if err != nil {
 			backtestStoreTestErr = err
@@ -52,7 +52,7 @@ func setupBacktestStoreTest(t *testing.T) {
 		t.Fatal(backtestStoreTestErr)
 	}
 	o := orm.NewOrm()
-	for _, table := range []string{"agent_backtest_equity_preview", "agent_backtest_equity_chunks", "agent_backtest_equity_points", "agent_backtest_events", "agent_backtest_trades", "agent_backtest_runs", "agent_backtest_datasets", "market_data_import_batches", "market_funding_rates", "market_klines_1m_chunks", "market_klines_1m", "market_klines_1h", "strategy_templates", "market_condition_histories", "config"} {
+	for _, table := range []string{"agent_backtest_equity_preview", "agent_backtest_equity_chunks", "agent_backtest_equity_points", "agent_backtest_events", "agent_backtest_trades", "agent_backtest_runs", "agent_backtest_datasets", "market_data_import_batches", "market_funding_rates", "market_klines_1m_chunks", "market_klines_1m", "market_klines_1h", "strategy_templates", "symbols", "market_condition_histories", "config"} {
 		if _, err := o.Raw("DELETE FROM " + table).Exec(); err != nil {
 			t.Fatal(err)
 		}
