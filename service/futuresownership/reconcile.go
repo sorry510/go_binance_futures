@@ -102,9 +102,31 @@ func (r Reconciler) validateBoundAccount() error {
 var incompleteAlertMu sync.Mutex
 var incompleteAlertAt = map[string]int64{}
 
-// Send an operator-visible WARNING tagged 报警 when a cycle cannot complete
-// for 15 minutes. Throttle by exact account+position to avoid minute spam.
-// This must never silently switch trading modes or fabricate settlement.
+// Closed, flat, financially incomplete history is not a new order/exposure
+// incident. Missing historical side-specific ZERO proof must still block real
+// settlement; a fully proven BNB-denominated fee must still block certified
+// USDT PnL, but neither condition should trigger recurrent 报警 warnings.
+func isHistoricalSettlementBacklog(pos models.FuturesManagedPosition, reason string) bool {
+	// Scope this downgrade to the observed Main auto-strategy historical
+	// backlog. Lead and other ownership flows retain their existing alarms.
+	if pos.AccountID != "main" || pos.Owner != OwnerAutoStrategy ||
+		pos.Status != PositionClosed || pos.SettlementStatus != SettlementIncomplete ||
+		math.IsNaN(pos.ManagedQty) || math.IsInf(pos.ManagedQty, 0) ||
+		math.Abs(pos.ManagedQty) > qtyEpsilon {
+		return false
+	}
+	switch reason {
+	case "symbol-scoped fresh position snapshot missing or ambiguous",
+		"fully verified BNB commission requires FX valuation":
+		return true
+	}
+	return false
+}
+
+// Track aged incomplete cycles without certifying them. Actual execution,
+// provenance and exposure problems still emit a 15-minute throttled WARNING.
+// Normal Main auto_strategy historical BNB/snapshot backlog only increments
+// monitoring counters, never repeatedly pages the operator with 报警.
 func alarmIncompletePosition(pos models.FuturesManagedPosition, now int64, reason string, summary *ReconcileSummary) {
 	if pos.ClosedAt <= 0 || now-pos.ClosedAt < 15*60*1000 {
 		return
@@ -113,6 +135,13 @@ func alarmIncompletePosition(pos models.FuturesManagedPosition, now int64, reaso
 	summary.IncompleteAged++
 	if age > summary.OldestIncompleteAgeSec {
 		summary.OldestIncompleteAgeSec = age
+	}
+	if isHistoricalSettlementBacklog(pos, reason) {
+		// Still counted as financially pending. Do not mark as settled or
+		// fabricate a fresh zero snapshot. History already has one batched
+		// informational log in ReconcileOwner when exact proof is absent.
+		clearIncompleteAlarm(pos.AccountID, pos.ID)
+		return
 	}
 	key := pos.AccountID + "/" + strconv.FormatInt(pos.ID, 10)
 	incompleteAlertMu.Lock()

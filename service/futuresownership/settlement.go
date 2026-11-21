@@ -130,6 +130,12 @@ func verifiedSettlementFacts(o orm.QueryExecutor, pos models.FuturesManagedPosit
 	fee = new(big.Rat)
 	actualQty := make(map[string]*big.Rat)
 	opened, closed := new(big.Rat), new(big.Rat)
+	// Defer the fee FX rejection until AFTER verifying every Fill, order
+	// identity, REST provenance and exact opening/closing quantity. Only
+	// that fully validated BNB-only case is a non-alarm financial backlog.
+	requiresFX := false
+	onlyBNBFX := true
+	hasPositiveBNBFee := false
 	for _, fill := range fills {
 		if fill.RESTVerified != 1 {
 			return nil, nil, nil, "trade fee and realized PnL not confirmed by Binance REST", nil
@@ -152,10 +158,15 @@ func verifiedSettlementFacts(o orm.QueryExecutor, pos models.FuturesManagedPosit
 			return nil, nil, nil, "invalid exact commission", nil
 		}
 		if fill.CommissionAsset != asset {
-			// A REST-confirmed exact zero fee has no asset value to
-			// convert. All nonzero fees still require a proven denomination.
+			// Keep the existing fail-closed rule: even a zero fee with a
+			// different explicit denomination needs certified handling.
 			if fill.CommissionAsset != "" || cost.Sign() != 0 {
-				return nil, nil, nil, "commission in a different or unknown asset requires FX valuation", nil
+				requiresFX = true
+				if fill.CommissionAsset == "BNB" && cost.Sign() > 0 {
+					hasPositiveBNBFee = true
+				} else if fill.CommissionAsset != "BNB" || cost.Sign() < 0 {
+					onlyBNBFX = false
+				}
 			}
 		}
 		pnl, parseErr := parsedSettlementAmount(fill.RealizedPnL)
@@ -190,6 +201,15 @@ func verifiedSettlementFacts(o orm.QueryExecutor, pos models.FuturesManagedPosit
 	}
 	if opened.Sign() <= 0 {
 		return nil, nil, nil, "no positive opening volume", nil
+	}
+	if requiresFX {
+		if onlyBNBFX && hasPositiveBNBFee {
+			// All other immutable execution facts have now passed. A BNB
+			// discount is a valuation backlog, not a failed trade. Still
+			// NEVER issue settled PnL or adjust loss-streak risk here.
+			return nil, nil, nil, "fully verified BNB commission requires FX valuation", nil
+		}
+		return nil, nil, nil, "commission in a different or unknown asset requires FX valuation", nil
 	}
 	return gross, fee, new(big.Rat).Sub(gross, fee), "", nil
 }
@@ -282,8 +302,9 @@ func (s Service) settleVerifiedFlat(ctx context.Context, positionID int64, verif
 
 // applySettledRisk is the ONLY active automatic loss-scale/test-mode trigger.
 // It runs inside the once-only verified settlement transaction. Missing
-// zero-position exchange proof must remain INCOMPLETE with operator alarm,
-// never use old speculative prices as a fallback.
+// zero-position exchange proof must remain INCOMPLETE and monitored;
+// never use old speculative prices as a fallback. A historical, locally flat
+// Main auto_strategy cycle may be financial backlog rather than an incident.
 func applySettledRisk(tx orm.TxOrmer, netSign int) error {
 	db, err := orm.GetDB("default")
 	if err != nil {
