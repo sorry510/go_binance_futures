@@ -33,6 +33,9 @@ type historicalEnvironment struct {
 	intervalMillis           map[string]int64
 	standardOptimizations    bool
 	tickerStatsCache         *rollingTickerStats
+	intrabarTickerCache      intrabarTickerSnapshot
+	intrabarTickerAsOf       int64
+	intrabarTickerPartial    Bar
 	klinePriceCache          map[string]cachedKLinePrice
 	indicatorCache           map[string]cachedIndicatorValue
 	indicatorCacheable       map[string]bool
@@ -146,6 +149,8 @@ func (builder *historicalEnvironment) BuildIntrabar(asOf int64, partialMinute Ba
 	// The minute-close rolling ticker cache belongs to a different partial
 	// bar and must not be used for the earlier intraminute price.
 	prevOverlays, prevTicker, prevMinuteAsOf := builder.overlays, builder.tickerStatsCache, builder.minuteCloseCurrentAsOf
+	builder.intrabarTickerCache.prepare(builder.dataset.Bars[BarSeriesKey(builder.dataset.Symbol, builder.dataset.ExecutionInterval)], partialMinute, asOf)
+	builder.intrabarTickerAsOf, builder.intrabarTickerPartial = asOf, partialMinute
 	prevConditionIndex, prevConditionAsOf, prevConditionReady := builder.marketConditionIndex, builder.marketConditionAsOf, builder.marketConditionReady
 	builder.overlays = overlays
 	builder.tickerStatsCache = nil
@@ -154,6 +159,7 @@ func (builder *historicalEnvironment) BuildIntrabar(asOf int64, partialMinute Ba
 	builder.overlays = prevOverlays
 	builder.tickerStatsCache = prevTicker
 	builder.minuteCloseCurrentAsOf = prevMinuteAsOf
+	builder.intrabarTickerAsOf = 0 // never expose an intraminute preview to minute-close evaluation
 	builder.marketConditionIndex, builder.marketConditionAsOf, builder.marketConditionReady = prevConditionIndex, prevConditionAsOf, prevConditionReady
 	return env, condition, buildErr
 }
@@ -253,7 +259,9 @@ func (builder *historicalEnvironment) build(asOf int64, position *Position, cash
 		current = currentBars[0]
 	}
 	var targetStats map[string]interface{}
-	if builder.standardOptimizations && builder.tickerStatsCache != nil && builder.tickerStatsCache.asOf == asOf {
+	if builder.standardOptimizations && builder.adaptiveOptimized && builder.intrabarTickerAsOf == asOf {
+		targetStats = builder.intrabarTickerCache.values(builder.intrabarTickerPartial)
+	} else if builder.standardOptimizations && builder.tickerStatsCache != nil && builder.tickerStatsCache.asOf == asOf {
 		targetStats = builder.tickerStatsCache.values()
 	} else {
 		targetStats = builder.tickerStats(builder.dataset.Symbol, asOf)

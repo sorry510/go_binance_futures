@@ -243,6 +243,9 @@ type BacktestTimingStats struct {
 type ResolutionStats struct {
 	SecondDrilldownMinutes int                  `json:"second_drilldown_minutes"`
 	TradeDrilldownSeconds  int                  `json:"trade_drilldown_seconds"`
+	TradeRowsVisited       int64                `json:"trade_rows_visited"`
+	TradeGatePasses        int64                `json:"trade_gate_passes"`
+	TradeEnvBuilds         int64                `json:"trade_env_builds"`
 	SecondCacheHits        int                  `json:"second_cache_hits"`
 	TradeCacheHits         int                  `json:"trade_cache_hits"`
 	MinuteTradeReuseHits   int                  `json:"minute_trade_reuse_hits"`

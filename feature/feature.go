@@ -56,21 +56,6 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 		logs.Error("GetAllSymbols err:", err)
 		return
 	}
-	if observer.enabled {
-		// These are facts from already loaded local symbols. Selection is
-		// still performed by the existing runner after managed exits.
-		for _, coin := range allCoins {
-			if coin == nil {
-				continue
-			}
-			if coin.Enable != 1 {
-				observer.both(coin.Symbol, "symbol_off")
-			} else {
-				observer.both(coin.Symbol, "not_evaluated")
-			}
-		}
-	}
-
 	/************************************************获取账户信息 start******************************************************************* */
 	positions, err := runner.ReadPositions(ctx)
 	if err != nil {
@@ -384,22 +369,19 @@ func runAccountTradeCycle(runner *accountTradeRunner) {
 	if runner.AccountID == binance.MainAccountID && systemConfig.FutureStrategyCoin == "smart_local_v2" {
 		logMainEmptySmartSelection(allCoins, len(coins))
 	}
-	// "no_candidate" is the only provable reason for an enabled symbol
-	// absent from the actual selector result. Do not infer volume/staleness.
+	// Diagnostics describe only the ACTUAL selector batch. Neither disabled
+	// symbols nor enabled-but-unselected symbols have entered the entry
+	// evaluation path; recording all of them hid genuine decisions behind
+	// the 200-row cap. When there is no batch, report that fact globally.
 	if observer.enabled {
-		selectedSymbols := make(map[string]bool, len(coins))
-		for _, coin := range coins {
-			if coin != nil {
-				selectedSymbols[coin.Symbol] = true
-			}
-		}
-		for _, coin := range allCoins {
-			if coin != nil && coin.Enable == 1 && !selectedSymbols[coin.Symbol] {
-				observer.both(coin.Symbol, "no_candidate")
-			}
-		}
 		if len(coins) == 0 {
 			observer.global("no_candidate")
+		}
+		for _, coin := range coins {
+			if coin == nil {
+				continue
+			}
+			observer.both(coin.Symbol, "not_evaluated")
 		}
 	}
 	/*************************************************检查当前仓位数量 start************************************************************ */

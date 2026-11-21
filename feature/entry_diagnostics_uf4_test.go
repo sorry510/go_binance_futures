@@ -30,10 +30,10 @@ func TestUF4MainEntryDiagnosticActualCycleGates(t *testing.T) {
 		name, side, want string
 		arrange          func(r *accountTradeRunner)
 	}{
-		{"no_candidate", "LONG", "no_candidate", func(r *accountTradeRunner) {
+		{"no_candidate", "LONG", "", func(r *accountTradeRunner) {
 			r.SelectCoins = func(*models.Config, []*models.Symbols) ([]*models.Symbols, error) { return []*models.Symbols{}, nil }
 		}},
-		{"selector_failure", "LONG", "not_evaluated", func(r *accountTradeRunner) {
+		{"selector_failure", "LONG", "", func(r *accountTradeRunner) {
 			r.SelectCoins = func(*models.Config, []*models.Symbols) ([]*models.Symbols, error) { return nil, errors.New("down") }
 		}},
 		{"strategy_not_matched", "LONG", "strategy_not_matched", func(r *accountTradeRunner) {
@@ -75,6 +75,9 @@ func TestUF4MainEntryDiagnosticActualCycleGates(t *testing.T) {
 			}
 			if tc.name == "selector_failure" && snap.GlobalReason != "selector_unavailable" {
 				t.Fatalf("selector error wrongly labeled as strategy mismatch: %+v", snap)
+			}
+			if tc.name == "no_candidate" && (snap.GlobalReason != "no_candidate" || snap.Total != 0) {
+				t.Fatalf("no selection must be global, not a fake per-symbol decision: %+v", snap)
 			}
 		})
 	}
@@ -127,21 +130,45 @@ func TestUF4MainEntryOrderSubmitFailureAndShortConfigFailure(t *testing.T) {
 		})
 	}
 }
-func TestUF4DisabledSymbolFromActualLoadedSettings(t *testing.T) {
+
+// The display is an actual-entry-batch diagnostic, not a listing of all
+// configured/disabled symbols. Otherwise hundreds of irrelevant rows crowd
+// out the five symbols actually processed by smart_local_v2.
+func TestUF4OnlySelectedSymbolsAppearInEntryDiagnostics(t *testing.T) {
 	r, _, _, _ := uf2MainMockOpenRunner("LONG")
-	r.SelectCoins = func(*models.Config, []*models.Symbols) ([]*models.Symbols, error) { return []*models.Symbols{}, nil }
-	r.LoadSymbols = func() ([]*models.Symbols, error) {
-		return []*models.Symbols{{Symbol: "ETHUSDT", Enable: 0}, {Symbol: "BTCUSDT", Enable: 1}}, nil
+	var all []*models.Symbols
+	for i := 0; i < 320; i++ {
+		all = append(all, &models.Symbols{Symbol: fmt.Sprintf("OFF%03dUSDT", i), Enable: 0})
+	}
+	for i := 0; i < 240; i++ {
+		all = append(all, &models.Symbols{Symbol: fmt.Sprintf("SKIP%03dUSDT", i), Enable: 1})
+	}
+	var selected []*models.Symbols
+	for i := 0; i < 5; i++ {
+		coin := &models.Symbols{Symbol: fmt.Sprintf("YES%03dUSDT", i), Enable: 1}
+		all = append(all, coin)
+		selected = append(selected, coin)
+	}
+	r.LoadSymbols = func() ([]*models.Symbols, error) { return all, nil }
+	r.SelectCoins = func(*models.Config, []*models.Symbols) ([]*models.Symbols, error) {
+		return selected, nil
+	}
+	r.EvaluateEntry = func(*models.Symbols, []types.FuturesPosition) strategy.OpenResult {
+		return strategy.OpenResult{}
 	}
 	runAccountTradeCycle(r)
-	for _, side := range []string{"LONG", "SHORT"} {
-		reason, _ := uf4GetReason("ETHUSDT", side)
-		if reason != "symbol_off" {
-			t.Fatalf("%s disabled coin wrongly labeled: %s", side, reason)
+	snap := MainEntryDiagnostics("", "")
+	if snap.Total != 10 || snap.GlobalReason != "running" {
+		t.Fatalf("only the actual five selected symbols (two directions each) should appear: %+v", snap)
+	}
+	for _, row := range snap.List {
+		if !strings.HasPrefix(row.Symbol, "YES") || row.ReasonCode != "strategy_not_matched" {
+			t.Fatalf("nonselected or disabled symbol crowded out real decision: %+v", row)
 		}
-		reason, _ = uf4GetReason("BTCUSDT", side)
-		if reason != "no_candidate" {
-			t.Fatalf("%s enabled but nonselected coin wrongly labeled: %s", side, reason)
+	}
+	for _, sym := range []string{"OFF000USDT", "SKIP000USDT"} {
+		if got := MainEntryDiagnostics(sym, ""); got.Total != 0 {
+			t.Fatalf("symbol not returned by selector unexpectedly reported: %+v", got)
 		}
 	}
 }
@@ -229,8 +256,8 @@ func TestUF4ExplicitUnavailabilityIsNotStrategyNotMatched(t *testing.T) {
 	r.Sleep = func(time.Duration) {}
 	runAccountTradeCycle(r)
 	s := MainEntryDiagnostics("BTCUSDT", "LONG")
-	if s.GlobalReason != "positions_unavailable" || s.List[0].ReasonCode != "not_evaluated" {
-		t.Fatal(s)
+	if s.GlobalReason != "positions_unavailable" || s.Total != 0 {
+		t.Fatalf("no candidate batch was selected before account failure: %+v", s)
 	}
 	r.LoadSymbols = func() ([]*models.Symbols, error) { return nil, errors.New("local missing") }
 	runAccountTradeCycle(r)
@@ -244,9 +271,7 @@ func TestUF4DoesNotInferVolumeFromNoCandidate(t *testing.T) {
 	r.SelectCoins = func(*models.Config, []*models.Symbols) ([]*models.Symbols, error) { return []*models.Symbols{}, nil }
 	runAccountTradeCycle(r)
 	s := MainEntryDiagnostics("BTCUSDT", "")
-	for _, row := range s.List {
-		if strings.Contains(row.ReasonCode, "volume") || row.ReasonCode != "no_candidate" {
-			t.Fatalf("invented selector cause: %+v", row)
-		}
+	if s.Total != 0 || s.GlobalReason != "no_candidate" {
+		t.Fatalf("absent selection must not invent a per-symbol filter reason: %+v", s)
 	}
 }

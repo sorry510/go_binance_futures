@@ -411,17 +411,36 @@ func (state *adaptiveRunState) evaluateROIClose(
 	return adaptiveCloseDecision{}, nil
 }
 
-func hasFundingInRange(funding []Funding, start, end int64) bool {
-	for _, item := range funding {
-		if item.FundingTime < start {
-			continue
+// Verified public-data Trades and cached minute slices are normally already
+// sorted by time/ID. Sorting every sub-second list costs O(n log n) on the
+// same immutable data hundreds of thousands of times. Preserve the exact
+// legacy sorter when a test/alternate provider supplies out-of-order rows.
+func ensureChronologicalTrades(trades []historicalmarket.PublicDataTrade) {
+	// Direct field checks avoid reflect and struct copies from generic
+	// comparisons. Most production slices are already ordered.
+	for i := 1; i < len(trades); i++ {
+		previous, current := &trades[i-1], &trades[i]
+		if previous.TradeTime > current.TradeTime ||
+			(previous.TradeTime == current.TradeTime && previous.TradeID > current.TradeID) {
+			sort.Slice(trades, func(i, j int) bool {
+				if trades[i].TradeTime == trades[j].TradeTime {
+					return trades[i].TradeID < trades[j].TradeID
+				}
+				return trades[i].TradeTime < trades[j].TradeTime
+			})
+			return
 		}
-		if item.FundingTime > end {
-			return false
-		}
-		return true
 	}
-	return false
+}
+
+func hasFundingInRange(funding []Funding, start, end int64) bool {
+	// Funding timestamps are sorted in the historical dataset. A linear
+	// scan here used to repeat thousands of comparisons on every 1s candle
+	// during multi-year adaptive replay.
+	index := sort.Search(len(funding), func(i int) bool {
+		return funding[i].FundingTime >= start
+	})
+	return index < len(funding) && funding[index].FundingTime <= end
 }
 
 func (state *adaptiveRunState) evaluateTradeROIClose(
@@ -460,12 +479,7 @@ func (state *adaptiveRunState) evaluateTradeROIClose(
 	}
 	state.stats.TradeDrilldownSeconds++
 	state.evidence = append(state.evidence, evidence)
-	sort.Slice(trades, func(i, j int) bool {
-		if trades[i].TradeTime == trades[j].TradeTime {
-			return trades[i].TradeID < trades[j].TradeID
-		}
-		return trades[i].TradeTime < trades[j].TradeTime
-	})
+	ensureChronologicalTrades(trades)
 	partial := partialBeforeSecond
 	for _, trade := range trades {
 		if err := ctx.Err(); err != nil {
@@ -480,6 +494,7 @@ func (state *adaptiveRunState) evaluateTradeROIClose(
 		if trade.Price < second.Low || trade.Price > second.High {
 			return adaptiveCloseDecision{}, fmt.Errorf("trade price %.12f outside 1s range [%.12f, %.12f] at %d", trade.Price, second.Low, second.High, trade.TradeTime)
 		}
+		state.stats.TradeRowsVisited++
 		partial = appendTradeToPartialMinute(partial, minute, trade)
 		if advanceFunding != nil {
 			advanceFunding(trade.TradeTime, trade.Price)
@@ -492,6 +507,7 @@ func (state *adaptiveRunState) evaluateTradeROIClose(
 		if reason == "" {
 			continue
 		}
+		state.stats.TradeGatePasses++
 
 		condition := stableCondition
 		var rule Rule
@@ -500,6 +516,7 @@ func (state *adaptiveRunState) evaluateTradeROIClose(
 			stableEnv["ROI"] = roi
 			rule, ok, err = evaluateRules(rules, position.Side, stableEnv, compiled, true)
 		} else {
+			state.stats.TradeEnvBuilds++
 			env, builtCondition, buildErr := environment.BuildIntrabar(trade.TradeTime, partial, position, cash, config)
 			if buildErr != nil {
 				if errors.Is(buildErr, ErrInsufficientHistoricalBars) {
