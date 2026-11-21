@@ -89,21 +89,25 @@ type PerformanceAsset struct {
 	ByRule           []PerformanceBreakdown `json:"by_rule"`
 }
 type PerformanceReport struct {
-	AccountID       string             `json:"account_id"`
-	Owner           string             `json:"owner"`
-	Days            int                `json:"days"`
-	StartClosedAt   int64              `json:"start_closed_at"`
-	EndClosedAt     int64              `json:"end_closed_at"`
-	Symbol          string             `json:"symbol,omitempty"`
-	PositionSide    string             `json:"position_side,omitempty"`
-	RuleHash        string             `json:"rule_hash,omitempty"`
-	ObservedAt      int64              `json:"observed_at"`
-	CandidateCycles int                `json:"candidate_cycles"`
-	VerifiedCycles  int                `json:"verified_cycles"`
-	ExcludedCycles  int                `json:"excluded_cycles"`
-	ExcludedReasons map[string]int     `json:"excluded_reasons"`
-	Assets          []PerformanceAsset `json:"assets"`
-	Scope           string             `json:"scope"`
+	AccountID         string             `json:"account_id"`
+	Owner             string             `json:"owner"`
+	Days              int                `json:"days"`
+	StartClosedAt     int64              `json:"start_closed_at"`
+	EndClosedAt       int64              `json:"end_closed_at"`
+	Symbol            string             `json:"symbol,omitempty"`
+	PositionSide      string             `json:"position_side,omitempty"`
+	RuleHash          string             `json:"rule_hash,omitempty"`
+	ObservedAt        int64              `json:"observed_at"`
+	CandidateCycles   int                `json:"candidate_cycles"`
+	VerifiedCycles    int                `json:"verified_cycles"`
+	EstimatedCycles   int                `json:"estimated_cycles"`
+	ExcludedCycles    int                `json:"excluded_cycles"`
+	ExcludedReasons   map[string]int     `json:"excluded_reasons"`
+	Assets            []PerformanceAsset `json:"assets"`
+	EstimatedAssets   []PerformanceAsset `json:"estimated_assets"`
+	BNBPriceUSDT      string             `json:"bnb_price_usdt,omitempty"`
+	BNBPriceUpdatedAt int64              `json:"bnb_price_updated_at,omitempty"`
+	Scope             string             `json:"scope"`
 }
 
 type performanceEntry struct {
@@ -230,10 +234,10 @@ func performanceExcludedReason(p models.FuturesManagedPosition, problem string, 
 	}
 }
 
-// Performance uses 100-cycle batches. It replays the same strict per-cycle
-// summarize proof as real order history, before any presentation override or
-// market-price estimates can enter the result. Does not call List (which
-// unnecessarily computes full-range unrealized PnL) or external services.
+// Performance uses 100-cycle batches. Certified outcomes remain strictly
+// settled; incomplete-but-valid BNB trades go into a separate indicative
+// estimate using the locally recorded BNB current price. Neither population
+// uses presentation-only overrides or unrealized PnL. No external APIs.
 func (s Store) Performance(ctx context.Context, raw PerformanceFilter) (PerformanceReport, error) {
 	q, err := raw.validated()
 	if err != nil {
@@ -253,8 +257,8 @@ func (s Store) Performance(ctx context.Context, raw PerformanceFilter) (Performa
 		AccountID: "main", Owner: "auto_strategy", Days: q.Days,
 		StartClosedAt: start, EndClosedAt: end, ObservedAt: end,
 		Symbol: q.Symbol, PositionSide: q.PositionSide, RuleHash: q.RuleHash,
-		ExcludedReasons: map[string]int{}, Assets: []PerformanceAsset{},
-		Scope: "rest_verified_settled_main_auto_strategy_only",
+		ExcludedReasons: map[string]int{}, Assets: []PerformanceAsset{}, EstimatedAssets: []PerformanceAsset{},
+		Scope: "main_auto_strategy_verified_and_bnb_estimated_separately",
 	}
 	query := s.db().QueryTable(new(models.FuturesManagedPosition)).
 		Filter("account_id", "main").Filter("owner", "auto_strategy").
@@ -273,7 +277,18 @@ func (s Store) Performance(ctx context.Context, raw PerformanceFilter) (Performa
 	if err != nil {
 		return PerformanceReport{}, fmt.Errorf("read settlement cohort count: %w", err)
 	}
+	// Read the current local BNBUSDT price once per report. Estimated
+	// performance is never added to certified, settled PnL.
+	var bnbQuotes []symbolQuote
+	if _, err = s.db().Raw("SELECT symbol,close,updateTime,type FROM symbols WHERE symbol='BNBUSDT' AND type='USDT' ORDER BY updateTime DESC LIMIT 1").QueryRows(&bnbQuotes); err != nil {
+		return PerformanceReport{}, fmt.Errorf("read local BNB price: %w", err)
+	}
+	var bnbQuote symbolQuote
+	if len(bnbQuotes) != 0 {
+		bnbQuote = bnbQuotes[0]
+	}
 	entries := map[string][]performanceEntry{}
+	estimatedEntries := map[string][]performanceEntry{}
 	const batchSize = 100
 	for offset := int64(0); offset < count; offset += batchSize {
 		if err = ctx.Err(); err != nil {
@@ -287,7 +302,7 @@ func (s Store) Performance(ctx context.Context, raw PerformanceFilter) (Performa
 		if len(batch) == 0 {
 			break
 		}
-		rows, err := s.performanceEvidence(ctx, batch, t0)
+		rows, err := s.performanceEvidence(ctx, batch, t0, bnbQuote)
 		if err != nil {
 			return PerformanceReport{}, err
 		}
@@ -298,6 +313,25 @@ func (s Store) Performance(ctx context.Context, raw PerformanceFilter) (Performa
 			}
 			report.CandidateCycles++
 			row := rows[i]
+			// Only a fully matched closed cycle with REST verified Fills and
+			// a valid local BNB quotation may enter the separate estimate.
+			// This must never change the status of the certified bucket.
+			if row.Completeness == "estimated" && row.BNBFeeEstimated &&
+				row.EstimatedNetPnL != nil && row.EstimatedFeeUSDT != nil &&
+				p.Status == "closed" && p.SettlementStatus == "incomplete" &&
+				p.ClosedAt >= p.CreatedAt {
+				net, netErr := dec(*row.EstimatedNetPnL)
+				fee, feeErr := dec(*row.EstimatedFeeUSDT)
+				if netErr == nil && feeErr == nil {
+					gross := new(big.Rat).Add(net, fee)
+					estimatedEntries["USDT"] = append(estimatedEntries["USDT"], performanceEntry{
+						asset: "USDT", symbol: p.Symbol, side: p.PositionSide, hash: hash,
+						id: p.ID, closedAt: p.ClosedAt, net: net, gross: gross, fee: fee,
+					})
+					report.EstimatedCycles++
+					continue
+				}
+			}
 			if row.Completeness != "verified" || row.NetPnL == nil || row.GrossPnL == nil ||
 				(row.PnLAsset != "USDT" && row.PnLAsset != "USDC") ||
 				p.Status != "closed" || math.Abs(p.ManagedQty) > 1e-12 ||
@@ -327,19 +361,30 @@ func (s Store) Performance(ctx context.Context, raw PerformanceFilter) (Performa
 			report.VerifiedCycles++
 		}
 	}
+	report.Assets = performanceAssets(entries)
+	report.EstimatedAssets = performanceAssets(estimatedEntries)
+	if report.EstimatedCycles > 0 {
+		report.BNBPriceUSDT = bnbQuote.Close
+		report.BNBPriceUpdatedAt = bnbQuote.UpdateTime
+	}
+	return report, nil
+}
+
+// Keep the same PF, grouping, and cumulative closed-trade drawdown algorithms
+// for both populations, but never merge their financial evidence classes.
+func performanceAssets(entries map[string][]performanceEntry) []PerformanceAsset {
+	result := make([]PerformanceAsset, 0, len(entries))
 	for asset, items := range entries {
-		// Entry iteration follows database order, but make that ordering
-		// explicit for deterministic peak-to-trough drawdown.
 		sort.Slice(items, func(i, j int) bool {
 			if items[i].closedAt != items[j].closedAt {
 				return items[i].closedAt < items[j].closedAt
 			}
 			return items[i].id < items[j].id
 		})
-		report.Assets = append(report.Assets, performanceAssetResult(asset, items))
+		result = append(result, performanceAssetResult(asset, items))
 	}
-	sort.Slice(report.Assets, func(i, j int) bool { return report.Assets[i].Asset < report.Assets[j].Asset })
-	return report, nil
+	sort.Slice(result, func(i, j int) bool { return result[i].Asset < result[j].Asset })
+	return result
 }
 
 // Settlement's authoritative proof requires opening and closing exact REST
@@ -364,7 +409,7 @@ func performanceExactFlat(fills []fillRow) bool {
 	return opened.Sign() > 0 && opened.Cmp(closed) == 0
 }
 
-func (s Store) performanceEvidence(ctx context.Context, positions []models.FuturesManagedPosition, t0 int64) ([]Position, error) {
+func (s Store) performanceEvidence(ctx context.Context, positions []models.FuturesManagedPosition, t0 int64, bnbQuote symbolQuote) ([]Position, error) {
 	ids := make([]int64, len(positions))
 	for i, p := range positions {
 		ids[i] = p.ID
@@ -411,11 +456,20 @@ func (s Store) performanceEvidence(ctx context.Context, positions []models.Futur
 		// No project() here: it applies presentation overrides and
 		// current-price valuations; neither is valid for this report.
 		row, _ := summarize(p, byOrders[p.ID], byFills[p.ID], false, s.now().UnixMilli(), t0)
-		if row.Completeness == "verified" && !performanceExactFlat(byFills[p.ID]) {
-			row.Completeness = "incomplete"
-			row.IncompleteReason = "opening_and_closing_fills_unbalanced"
-			row.NetPnL, row.GrossPnL = nil, nil
-			row.PnLAsset = ""
+		if !performanceExactFlat(byFills[p.ID]) {
+			if row.Completeness == "verified" {
+				row.Completeness = "incomplete"
+				row.IncompleteReason = "opening_and_closing_fills_unbalanced"
+				row.NetPnL, row.GrossPnL = nil, nil
+				row.PnLAsset = ""
+			}
+		} else if p.Status == "closed" && p.SettlementStatus == "incomplete" {
+			proof := row
+			if row.IncompleteReason == "history_not_activated" ||
+				row.IncompleteReason == "pre_activation_position_cycle" {
+				proof, _ = summarize(p, byOrders[p.ID], byFills[p.ID], false, s.now().UnixMilli(), p.CreatedAt)
+			}
+			applyBNBFeeEstimate(p, &row, proof, byFills[p.ID], bnbQuote)
 		}
 		result[i] = row
 	}

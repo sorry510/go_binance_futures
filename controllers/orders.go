@@ -192,10 +192,9 @@ func parseHistoryMillis(s string) (int64, error) {
 	return strconv.ParseInt(strings.TrimSpace(s), 10, 64)
 }
 
-// Anomalies is an authenticated, strictly read-only locator. Filtering
-// happens in SQL by account/Owner/category; it never calls the reconciler.
-// Performance reads only Main auto_strategy's immutable, verified settled
-// cycles. Filters use closed_at, not the history list's created_at.
+// Performance is a read-only report for Main auto_strategy closed cycles.
+// Formally settled results and indicative BNB-fee estimates stay separate.
+// Time filtering uses closed_at; neither result can trigger live trading.
 func (ctrl *OrderController) Performance() {
 	if !ctrl.authorized() {
 		return
