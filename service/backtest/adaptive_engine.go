@@ -18,13 +18,14 @@ import (
 type ResolutionProviderFactory func() (historicalmarket.ResolutionProvider, error)
 
 type adaptiveRunState struct {
-	factory       ResolutionProviderFactory
-	provider      historicalmarket.ResolutionProvider
-	evidence      []historicalmarket.ResolutionEvidence
-	stats         ResolutionStats
-	activity      func(string)
-	closeProfiles [2]closeRuleROIProfile // LONG, SHORT; compiled once for each run
-	profilesReady bool
+	factory         ResolutionProviderFactory
+	provider        historicalmarket.ResolutionProvider
+	evidence        []historicalmarket.ResolutionEvidence
+	stats           ResolutionStats
+	activity        func(string)
+	closeProfiles   [2]closeRuleROIProfile // LONG, SHORT; compiled once for each run
+	formingProfiles [2]bool                // strict static-input dependency whitelist
+	profilesReady   bool
 }
 
 // prepareCloseProfiles reuses the existing conservative ROI dependency analyzer.
@@ -32,6 +33,8 @@ type adaptiveRunState struct {
 func (state *adaptiveRunState) prepareCloseProfiles(rules []Rule) {
 	state.closeProfiles[0] = analyzeCloseRuleROIProfile(rules, "LONG")
 	state.closeProfiles[1] = analyzeCloseRuleROIProfile(rules, "SHORT")
+	state.formingProfiles[0] = canReuseFormingCloseEnvironment(rules, "LONG")
+	state.formingProfiles[1] = canReuseFormingCloseEnvironment(rules, "SHORT")
 	state.profilesReady = true
 }
 
@@ -44,6 +47,16 @@ func (state *adaptiveRunState) closeProfile(rules []Rule, side string) closeRule
 	}
 	// Keep direct evaluateROIClose callers in legacy tests functional.
 	return analyzeCloseRuleROIProfile(rules, side)
+}
+
+func (state *adaptiveRunState) formingCloseProfile(rules []Rule, side string) bool {
+	if state.profilesReady {
+		if side == "SHORT" {
+			return state.formingProfiles[1]
+		}
+		return state.formingProfiles[0]
+	}
+	return canReuseFormingCloseEnvironment(rules, side)
 }
 
 type adaptiveCloseDecision struct {
@@ -59,8 +72,9 @@ type adaptiveCloseDecision struct {
 }
 
 type closeRuleROIProfile struct {
-	Eligible   bool
-	Thresholds []float64
+	Eligible     bool
+	Thresholds   []float64
+	FormingClose bool // separate exact-dynamic whitelist; never ROI range-prune
 }
 
 var (
@@ -290,26 +304,35 @@ func (state *adaptiveRunState) evaluateROIClose(
 	// if the rule cannot be true anywhere inside the 1m ROI range, there is
 	// nothing for 1s/trades to resolve.
 	profile := state.closeProfile(rules, position.Side)
+	if !profile.Eligible && environment.adaptiveOptimized {
+		profile.FormingClose = state.formingCloseProfile(rules, position.Side)
+	}
 	var stableEnv map[string]interface{}
 	stableCondition := 0
-	if profile.Eligible && (!dataset.MarketConditionRequired || !hasMarketConditionInRange(dataset.MarketConditions, bar.OpenTime, bar.CloseTime)) {
+	if (profile.Eligible || profile.FormingClose) &&
+		(!dataset.MarketConditionRequired || !hasMarketConditionInRange(dataset.MarketConditions, bar.OpenTime, bar.CloseTime)) {
 		env, condition, err := environment.BuildIntrabar(bar.CloseTime, bar, position, cash, config)
 		if err == nil {
-			stableEnv, stableCondition = env, condition
-			possible, evalErr := ruleCanPassForROIRange(rules, position.Side, stableEnv, compiled, profile, candidate.MinROI, candidate.MaxROI, config)
-			if evalErr != nil {
-				return adaptiveCloseDecision{}, evalErr
+			// All completed-bar indicators and immutable Position.EntryPrice
+			// are constant for this minute. Only ROI and forming 1h Close[0]
+			// may be updated for the whitelisted dynamic-close expressions.
+			if profile.FormingClose && !prepareFormingCloseEnvironment(env) {
+				profile.FormingClose = false
+			} else {
+				stableEnv, stableCondition = env, condition
 			}
-			if !possible {
-				return adaptiveCloseDecision{}, nil
+			if stableEnv != nil && profile.Eligible {
+				possible, evalErr := ruleCanPassForROIRange(rules, position.Side, stableEnv, compiled, profile, candidate.MinROI, candidate.MaxROI, config)
+				if evalErr != nil {
+					return adaptiveCloseDecision{}, evalErr
+				}
+				if !possible {
+					return adaptiveCloseDecision{}, nil
+				}
 			}
-		} else {
-			// The ROI-only proof is only a performance optimization. If the
-			// synthetic full-minute environment cannot be built (for example a
-			// malformed legacy bar), fall back to the conservative high-resolution
-			// replay path instead of turning an optimization into a new hard-fail.
-			stableEnv = nil
 		}
+		// A failed synthetic environment always falls back to the original
+		// chronological full-intrabar evaluation; it must never fail closed.
 	}
 
 	provider, err := state.ensureProvider()
@@ -374,6 +397,9 @@ func (state *adaptiveRunState) evaluateROIClose(
 			var rule Rule
 			var ok bool
 			if stableEnv != nil {
+				if profile.FormingClose {
+					updateFormingCloseEnvironment(stableEnv, second.Close)
+				}
 				stableEnv["ROI"] = closeROI
 				rule, ok, err = evaluateRules(rules, position.Side, stableEnv, compiled, true)
 			} else {
@@ -512,7 +538,10 @@ func (state *adaptiveRunState) evaluateTradeROIClose(
 		condition := stableCondition
 		var rule Rule
 		var ok bool
-		if stableEnv != nil && profile.Eligible {
+		if stableEnv != nil && (profile.Eligible || profile.FormingClose) {
+			if profile.FormingClose {
+				updateFormingCloseEnvironment(stableEnv, trade.Price)
+			}
 			stableEnv["ROI"] = roi
 			rule, ok, err = evaluateRules(rules, position.Side, stableEnv, compiled, true)
 		} else {
