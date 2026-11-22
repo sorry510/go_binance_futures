@@ -298,7 +298,7 @@ func evaluateRules(rules []Rule, side string, env map[string]interface{}, cache 
 		}
 		program := cache[index]
 		if program == nil {
-			compiled, err := expr.Compile(rule.Code, expr.Env(env))
+			compiled, err := strategyservice.CompileRule(rule.Code, env, false, false)
 			if err != nil {
 				return Rule{}, false, fmt.Errorf("compile strategy %s: %w", rule.Name, err)
 			}

@@ -7,6 +7,7 @@ import (
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 	"strconv"
@@ -61,7 +62,7 @@ func klineCustomListen(coin models.ListenSymbols) {
 	env := line.InitParseEnv(coin.Symbol, coin.Technology)
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
-			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			program, err := strategyservice.CompileRule(strategy.Code, env, false, false)
 			if err != nil {
 				logs.Error("Error Strategy Compile:", err.Error())
 				continue

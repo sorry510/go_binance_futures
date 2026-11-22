@@ -94,7 +94,7 @@ func spotRules(raw string) ([]spotquant.Rule, error) {
 }
 
 func spotRuleMatches(rule spotquant.Rule, env map[string]interface{}) (bool, error) {
-	program, err := expr.Compile(strings.TrimSpace(rule.Code), expr.Env(env), expr.AsBool())
+	program, err := strategyservice.CompileRule(strings.TrimSpace(rule.Code), env, true, false)
 	if err != nil {
 		return false, fmt.Errorf("Spot strategy rule %q compile: %w", rule.Name, err)
 	}

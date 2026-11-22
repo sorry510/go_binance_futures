@@ -8,6 +8,7 @@ import (
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/utils"
 	"strconv"
 	"time"
@@ -289,7 +290,7 @@ func GoTestParse() {
 		x + 2
 	`
 
-	program, err := expr.Compile(code, expr.Env(env))
+	program, err := strategyservice.CompileRule(code, env, false, false)
 	if err != nil {
 		logs.Error(err.Error())
 	}

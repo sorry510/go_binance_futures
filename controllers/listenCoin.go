@@ -11,6 +11,7 @@ import (
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
 	"go_binance_futures/service/binanceapiusage"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 
@@ -529,7 +530,7 @@ func (ctrl *ListenCoinController) TestStrategyRule() {
 	}
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
-			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			program, err := strategyservice.CompileRule(strategy.Code, env, false, false)
 			if err != nil {
 				logs.Error("Error Strategy Compile:", err.Error())
 				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))

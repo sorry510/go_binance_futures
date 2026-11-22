@@ -52,7 +52,7 @@ func (TradeLine TradeLineCustom) evaluateEntryWithPositionLoader(openParams stra
 	env["Positions"] = positions
 	for _, strategy := range strategyConfig {
 		if strategy.Enable && (strategy.Type == "long" || strategy.Type == "short") {
-			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			program, err := strategyservice.CompileRule(strategy.Code, env, false, false)
 			if err != nil {
 				logs.Error("Error Strategy Compile Symbol: ", coin.Symbol)
 				logs.Error("Error Strategy Compile:", err.Error())
@@ -150,7 +150,7 @@ func (TradeLine TradeLineCustom) CanOrderComplete(closeParams strategy.ClosePara
 				continue
 			}
 
-			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			program, err := strategyservice.CompileRule(strategy.Code, env, false, false)
 			if err != nil {
 				logs.Error("Error Strategy Compile Symbol: ", coin.Symbol)
 				logs.Error("Error Strategy Compile:", err.Error())

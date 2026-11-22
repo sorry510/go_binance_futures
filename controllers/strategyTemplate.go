@@ -10,6 +10,7 @@ import (
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
 	"strconv"
+	"strings"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -23,7 +24,14 @@ type StrategyTemplateController struct {
 
 func (ctrl *StrategyTemplateController) Post() {
 	templates := new(models.StrategyTemplates)
-	ctrl.BindJSON(&templates)
+	if err := ctrl.BindJSON(templates); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "策略模板 JSON 无效: "+err.Error()))
+		return
+	}
+	if err := validateEditableStrategyTemplate(*templates); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+		return
+	}
 
 	o := orm.NewOrm()
 	id, err := o.Insert(templates)
@@ -61,15 +69,52 @@ func queryStrategyTemplatePage(o orm.Ormer, name string, limit, offset int) ([]m
 
 func (ctrl *StrategyTemplateController) Edit() {
 	id := ctrl.Ctx.Input.Param(":id")
+	var patch struct {
+		Name       *string `json:"name"`
+		Technology *string `json:"technology"`
+		Strategy   *string `json:"strategy"`
+	}
+	if err := json.Unmarshal(ctrl.Ctx.Input.RequestBody, &patch); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "策略模板 JSON 无效: "+err.Error()))
+		return
+	}
+	if patch.Name == nil && patch.Technology == nil && patch.Strategy == nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "未提供要修改的策略字段"))
+		return
+	}
+
 	var templates models.StrategyTemplates
 	o := orm.NewOrm()
-	o.QueryTable("strategy_templates").Filter("Id", id).One(&templates)
+	if err := o.QueryTable("strategy_templates").Filter("Id", id).One(&templates); err != nil {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "策略模板不存在: "+err.Error()))
+		return
+	}
+	changedRules := patch.Technology != nil || patch.Strategy != nil
+	if patch.Name != nil {
+		templates.Name = strings.TrimSpace(*patch.Name)
+	}
+	if patch.Technology != nil {
+		templates.Technology = *patch.Technology
+	}
+	if patch.Strategy != nil {
+		templates.Strategy = *patch.Strategy
+	}
+	if strings.TrimSpace(templates.Name) == "" {
+		ctrl.Ctx.Resp(utils.ResJson(400, nil, "模板名称不能为空"))
+		return
+	}
+	// Name-only edits must remain possible on historical templates with
+	// invalid strategy text. New/changed indicator and rule content is checked
+	// together before either field is persisted.
+	if changedRules {
+		if err := validateEditableStrategyTemplate(templates); err != nil {
+			ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
+			return
+		}
+	}
 
-	ctrl.BindJSON(&templates)
-
-	_, err := o.Update(&templates) // _ 是受影响的条数
+	_, err := o.Update(&templates, "Name", "Technology", "Strategy")
 	if err != nil {
-		// 处理错误
 		ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))
 		return
 	}
@@ -132,7 +177,7 @@ func (ctrl *StrategyTemplateController) TestStrategyRule() {
 	env["Positions"] = positions
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
-			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			program, err := strategyservice.CompileRule(strategy.Code, env, false, false)
 			if err != nil {
 				logs.Error("Error Strategy Compile:", err.Error())
 				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))

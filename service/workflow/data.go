@@ -197,7 +197,7 @@ func testProposal(p workflowSkill.StrategyExperimentProposalV1) workflowSkill.Ex
 			continue
 		}
 		report.EnabledRuleCount++
-		program, err := expr.Compile(r.Code, expr.Env(env), expr.AsBool())
+		program, err := strategyservice.CompileRule(r.Code, env, true, false)
 		if err != nil {
 			report.Errors = append(report.Errors, fmt.Sprintf("%s compile: %v", r.Name, err))
 			continue

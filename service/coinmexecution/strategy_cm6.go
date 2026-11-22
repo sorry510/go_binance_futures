@@ -17,6 +17,7 @@ import (
 	"go_binance_futures/models"
 	"go_binance_futures/service/coinmquant"
 	"go_binance_futures/service/spotquant"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 	"go_binance_futures/utils"
 
@@ -39,7 +40,7 @@ func newCoinMStrategy() coinMStrategy {
 	return coinMStrategy{Market: coinMVerifiedRuleEnvironment, Klines: binance.CoinMKlinesContext}
 }
 func coinMRuleMatch(rule coinmquant.Rule, env map[string]interface{}) (bool, error) {
-	program, err := expr.Compile(strings.TrimSpace(rule.Code), expr.Env(env), expr.AsBool())
+	program, err := strategyservice.CompileRule(strings.TrimSpace(rule.Code), env, true, false)
 	if err != nil {
 		return false, fmt.Errorf("COIN-M strategy %q: %w", rule.Name, err)
 	}

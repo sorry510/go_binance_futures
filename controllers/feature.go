@@ -9,6 +9,7 @@ import (
 	"go_binance_futures/feature"
 	"go_binance_futures/feature/strategy/line"
 	"go_binance_futures/models"
+	strategyservice "go_binance_futures/service/strategy"
 	symbolservice "go_binance_futures/service/symbol"
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
@@ -302,7 +303,7 @@ func (ctrl *FeatureController) TestStrategyRule() {
 
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
-			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			program, err := strategyservice.CompileRule(strategy.Code, env, false, false)
 			if err != nil {
 				logs.Error("Error Strategy Compile:", err.Error())
 				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))

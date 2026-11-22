@@ -8,6 +8,7 @@ import (
 	"go_binance_futures/lang"
 	"go_binance_futures/models"
 	"go_binance_futures/notify"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -78,7 +79,7 @@ func spotKlineCustomListen(coin models.ListenSymbols) spotListenOutcome {
 		default:
 			continue
 		}
-		program, err := expr.Compile(strategy.Code, expr.Env(env))
+		program, err := strategyservice.CompileRule(strategy.Code, env, false, false)
 		if err != nil {
 			logSpotListenProblem(coin, spotListenRuleError, strategy.Name, err)
 			hadRuleError = true

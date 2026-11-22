@@ -288,7 +288,7 @@ func (ctrl *TestStrategyResultController) TestStrategyRule() {
 
 	for _, strategy := range strategyConfig {
 		if strategy.Enable {
-			program, err := expr.Compile(strategy.Code, expr.Env(env))
+			program, err := strategyservice.CompileRule(strategy.Code, env, false, false)
 			if err != nil {
 				logs.Error("Error Strategy Compile:", err.Error())
 				ctrl.Ctx.Resp(utils.ResJson(400, nil, err.Error()))

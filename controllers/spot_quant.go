@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"go_binance_futures/service/spotquant"
+	strategyservice "go_binance_futures/service/strategy"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
@@ -327,7 +328,7 @@ func (ctrl *SpotQuantController) SpotRuleTest() {
 		"NowSymbolLow": price, "NowSymbolHigh": price, "NowSymbolPercentChange": 0.0,
 		"NowTime": time.Now().UnixMilli(),
 	}
-	program, err := expr.Compile(strings.TrimSpace(rule.Code), expr.Env(env), expr.AllowUndefinedVariables(), expr.AsBool())
+	program, err := strategyservice.CompileRule(strings.TrimSpace(rule.Code), env, true, true)
 	if err != nil {
 		ctrl.respond(400, nil, fmt.Errorf("rule compilation: %w", err))
 		return

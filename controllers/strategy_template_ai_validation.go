@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"go_binance_futures/feature/strategy/line"
+	strategyservice "go_binance_futures/service/strategy"
 	"go_binance_futures/technology"
 	"go_binance_futures/types"
 	"go_binance_futures/utils"
@@ -59,7 +60,7 @@ func validateStrategyTemplateRuleExpressions(config technology.TechnologyConfig,
 				return fmt.Errorf("strategy 第 %d 项 %q 引用 %s，但 technology 中没有启用相应周期的技术指标", index+1, rule.Name, name)
 			}
 		}
-		program, err := expr.Compile(rule.Code, expr.Env(env), expr.AsBool())
+		program, err := strategyservice.CompileRule(rule.Code, env, true, false)
 		if err != nil {
 			return fmt.Errorf("strategy 第 %d 项 %q 的 expr 编译失败: %w", index+1, rule.Name, err)
 		}
